@@ -1,0 +1,135 @@
+{
+  "object": "list",
+  "url": "/v1/checkout/sessions",
+  "has_more": false,
+  "data": [
+    {
+      "id": "cs_test_a11YYufWQzNY63zpQ6QSNRQhkUpVph4WRmzW0zWJO2znZKdVujZ0N0S22u",
+      "object": "checkout.session",
+      "after_expiration": null,
+      "allow_promotion_codes": null,
+      "amount_subtotal": 4900,
+      "amount_total": 4900,
+      "automatic_tax": {
+        "enabled": false,
+        "liability": null,
+        "status": null
+      },
+      "billing_address_collection": null,
+      "cancel_url": null,
+      "client_reference_id": "v_4f2a9c1e",
+      "consent": null,
+      "consent_collection": null,
+      "created": 1690000250,
+      "currency": "usd",
+      "custom_fields": [],
+      "custom_text": {
+        "shipping_address": null,
+        "submit": null
+      },
+      "customer": "cus_NffrFeUfNV2Hib",
+      "customer_creation": "if_required",
+      "customer_details": null,
+      "customer_email": null,
+      "expires_at": 1690086650,
+      "invoice": null,
+      "livemode": false,
+      "locale": null,
+      "metadata": {},
+      "mode": "payment",
+      "payment_intent": "pi_3NcheckoutLink00000000",
+      "payment_link": "plink_1MoC3ULkdIwHu7ixZjtGpVl2",
+      "payment_method_collection": "always",
+      "payment_method_options": {},
+      "payment_method_types": [
+        "card"
+      ],
+      "payment_status": "paid",
+      "phone_number_collection": {
+        "enabled": false
+      },
+      "recovered_from": null,
+      "setup_intent": null,
+      "shipping_address_collection": null,
+      "shipping_cost": null,
+      "shipping_details": null,
+      "shipping_options": [],
+      "status": "complete",
+      "submit_type": null,
+      "subscription": null,
+      "success_url": "https://example.com/success",
+      "total_details": {
+        "amount_discount": 0,
+        "amount_shipping": 0,
+        "amount_tax": 0
+      },
+      "ui_mode": "hosted",
+      "url": null
+    },
+    {
+      "id": "cs_test_b22ZZsubscription",
+      "object": "checkout.session",
+      "after_expiration": null,
+      "allow_promotion_codes": null,
+      "amount_subtotal": 4900,
+      "amount_total": 4900,
+      "automatic_tax": {
+        "enabled": false,
+        "liability": null,
+        "status": null
+      },
+      "billing_address_collection": null,
+      "cancel_url": null,
+      "client_reference_id": "v_ignored",
+      "consent": null,
+      "consent_collection": null,
+      "created": 1690000250,
+      "currency": "usd",
+      "custom_fields": [],
+      "custom_text": {
+        "shipping_address": null,
+        "submit": null
+      },
+      "customer": "cus_NffrFeUfNV2Hib",
+      "customer_creation": "if_required",
+      "customer_details": null,
+      "customer_email": null,
+      "expires_at": 1690086650,
+      "invoice": "in_1NsubCreate00000000000",
+      "livemode": false,
+      "locale": null,
+      "metadata": {
+        "virling_vid": "v_meta_session"
+      },
+      "mode": "subscription",
+      "payment_intent": null,
+      "payment_link": null,
+      "payment_method_collection": "always",
+      "payment_method_options": {},
+      "payment_method_types": [
+        "card"
+      ],
+      "payment_status": "paid",
+      "phone_number_collection": {
+        "enabled": false
+      },
+      "recovered_from": null,
+      "setup_intent": null,
+      "shipping_address_collection": null,
+      "shipping_cost": null,
+      "shipping_details": null,
+      "shipping_options": [],
+      "status": "complete",
+      "submit_type": null,
+      "subscription": "sub_1MowQVLkdIwHu7ixeRlqHVzs",
+      "success_url": "https://example.com/success",
+      "total_details": {
+        "amount_discount": 0,
+        "amount_shipping": 0,
+        "amount_tax": 0
+      },
+      "ui_mode": "hosted",
+      "url": null
+    }
+  ]
+}
