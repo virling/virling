@@ -46,7 +46,13 @@ pub struct ConfirmEmail<'a> {
 pub fn confirm_text(copy: &Copy, leave_link: &str) -> String {
     format!(
         "{}\n\n{}\n\nWhat happens next\n01  {}\n02  {}\n03  {}\n\n{}\n\nOne question: {} Just hit reply. I read every answer.\n\nRahul\nBuilding Virling\n\nLeave the waitlist: {}\n",
-        copy.headline, copy.intro, copy.steps[0], copy.steps[1], copy.steps[2], copy.offer, copy.question, leave_link
+        copy.headline,
+        copy.intro,
+        copy.steps[0],
+        copy.steps[1],
+        copy.steps[2],
+        copy.offer,
+        copy.question,
+        leave_link
     )
 }
-

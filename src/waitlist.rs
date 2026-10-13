@@ -1,15 +1,15 @@
 use askama::Template;
+use axum::Json;
 use axum::extract::{Query, State};
 use axum::http::StatusCode;
 use axum::response::{Html, IntoResponse, Response};
-use axum::Json;
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use time::OffsetDateTime;
 
 use crate::app::AppState;
 use crate::auth::random_token;
-use crate::waitlist_copy::{confirm_text, ConfirmEmail, AGENCY, SELFHOST};
+use crate::waitlist_copy::{AGENCY, ConfirmEmail, SELFHOST, confirm_text};
 
 #[derive(Template)]
 #[template(path = "waitlist_left.html")]
@@ -26,7 +26,9 @@ pub struct Signup {
 }
 
 pub fn valid_email(email: &str) -> bool {
-    let Some((local, domain)) = email.split_once('@') else { return false };
+    let Some((local, domain)) = email.split_once('@') else {
+        return false;
+    };
     email.len() <= 254
         && !local.is_empty()
         && domain.contains('.')
@@ -35,10 +37,16 @@ pub fn valid_email(email: &str) -> bool {
         && !email.chars().any(|c| c.is_whitespace())
 }
 
-pub async fn join(State(state): State<AppState>, Json(input): Json<Signup>) -> (StatusCode, Json<Value>) {
+pub async fn join(
+    State(state): State<AppState>,
+    Json(input): Json<Signup>,
+) -> (StatusCode, Json<Value>) {
     let email = input.email.trim().to_ascii_lowercase();
     if !valid_email(&email) || !matches!(input.wedge.as_str(), "selfhost" | "agency") {
-        return (StatusCode::BAD_REQUEST, Json(json!({ "error": "Enter a valid email" })));
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({ "error": "Enter a valid email" })),
+        );
     }
     let clip = |s: Option<String>, n: usize| s.map(|s| s.chars().take(n).collect::<String>());
     let leave_token = random_token();
@@ -56,14 +64,29 @@ pub async fn join(State(state): State<AppState>, Json(input): Json<Signup>) -> (
     match result {
         Ok(done) => {
             if done.rows_affected() == 1 {
-                let copy = if input.wedge == "agency" { &AGENCY } else { &SELFHOST };
-                let leave_link = format!("{}/waitlist/leave?token={leave_token}", state.config.base_url);
-                let html = ConfirmEmail { copy, leave_link: &leave_link }.render().unwrap_or_default();
+                let copy = if input.wedge == "agency" {
+                    &AGENCY
+                } else {
+                    &SELFHOST
+                };
+                let leave_link = format!(
+                    "{}/waitlist/leave?token={leave_token}",
+                    state.config.base_url
+                );
+                let html = ConfirmEmail {
+                    copy,
+                    leave_link: &leave_link,
+                }
+                .render()
+                .unwrap_or_default();
                 let text = confirm_text(copy, &leave_link);
                 let mailer = state.mailer.clone();
                 let from = state.config.waitlist_from.clone();
                 tokio::spawn(async move {
-                    if let Err(err) = mailer.send_as(Some(&from), &email, copy.subject, text, html).await {
+                    if let Err(err) = mailer
+                        .send_as(Some(&from), &email, copy.subject, text, html)
+                        .await
+                    {
                         tracing::error!(%err, "waitlist confirmation email failed");
                     }
                 });
@@ -72,7 +95,10 @@ pub async fn join(State(state): State<AppState>, Json(input): Json<Signup>) -> (
         }
         Err(err) => {
             tracing::error!(%err, "waitlist insert failed");
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({ "error": "Something went wrong. Try again." })))
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({ "error": "Something went wrong. Try again." })),
+            )
         }
     }
 }

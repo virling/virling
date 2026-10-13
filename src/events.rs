@@ -2,7 +2,7 @@ use std::path::Path;
 use std::sync::Mutex;
 
 use duckdb::types::{TimeUnit, Value};
-use duckdb::{params, Connection};
+use duckdb::{Connection, params};
 use time::OffsetDateTime;
 
 #[derive(Debug, Clone)]
@@ -29,6 +29,7 @@ pub struct Event {
 /// Storage for events and payments. DuckDB today; ClickHouse can implement this later.
 pub trait EventStore: Send + Sync {
     fn insert_events(&self, events: &[Event]) -> anyhow::Result<()>;
+    #[cfg(test)]
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64>;
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>>;
 }
@@ -69,7 +70,9 @@ impl DuckStore {
                 browser VARCHAR NOT NULL
             );",
         )?;
-        Ok(Self { conn: Mutex::new(conn) })
+        Ok(Self {
+            conn: Mutex::new(conn),
+        })
     }
 }
 
@@ -82,7 +85,10 @@ impl EventStore for DuckStore {
             for e in events {
                 app.append_row(params![
                     e.site_id,
-                    Value::Timestamp(TimeUnit::Microsecond, (e.ts.unix_timestamp_nanos() / 1000) as i64),
+                    Value::Timestamp(
+                        TimeUnit::Microsecond,
+                        (e.ts.unix_timestamp_nanos() / 1000) as i64
+                    ),
                     e.visitor_id,
                     e.session_id,
                     e.kind,
@@ -106,9 +112,14 @@ impl EventStore for DuckStore {
         Ok(())
     }
 
+    #[cfg(test)]
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64> {
         let conn = self.conn.lock().unwrap();
-        let n: i64 = conn.query_row("SELECT count(*) FROM events WHERE site_id = ?", params![site_id], |r| r.get(0))?;
+        let n: i64 = conn.query_row(
+            "SELECT count(*) FROM events WHERE site_id = ?",
+            params![site_id],
+            |r| r.get(0),
+        )?;
         Ok(n as u64)
     }
 
@@ -118,23 +129,51 @@ impl EventStore for DuckStore {
             "SELECT path, country, device, referrer_host FROM events WHERE site_id = ? AND kind = 'pageview' ORDER BY ts DESC LIMIT 1",
         )?;
         let mut rows = stmt.query_map(params![site_id], |r| {
-            Ok(LatestPageview { path: r.get(0)?, country: r.get(1)?, device: r.get(2)?, referrer_host: r.get(3)? })
+            Ok(LatestPageview {
+                path: r.get(0)?,
+                country: r.get(1)?,
+                device: r.get(2)?,
+                referrer_host: r.get(3)?,
+            })
         })?;
         Ok(rows.next().transpose()?)
     }
 }
 
 #[cfg(test)]
+type EventRow = (
+    String,
+    String,
+    Option<String>,
+    String,
+    Option<String>,
+    Option<String>,
+    String,
+    String,
+);
+
+#[cfg(test)]
 impl DuckStore {
     /// (path, channel, referrer_host, kind, name, country, device, visitor_id) for every event, oldest first.
-    pub fn dump(&self) -> Vec<(String, String, Option<String>, String, Option<String>, Option<String>, String, String)> {
+    pub fn dump(&self) -> Vec<EventRow> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn
             .prepare("SELECT path, channel, referrer_host, kind, name, country, device, visitor_id FROM events ORDER BY ts, path")
             .unwrap();
-        stmt.query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?, r.get(4)?, r.get(5)?, r.get(6)?, r.get(7)?)))
-            .unwrap()
-            .map(Result::unwrap)
-            .collect()
+        stmt.query_map([], |r| {
+            Ok((
+                r.get(0)?,
+                r.get(1)?,
+                r.get(2)?,
+                r.get(3)?,
+                r.get(4)?,
+                r.get(5)?,
+                r.get(6)?,
+                r.get(7)?,
+            ))
+        })
+        .unwrap()
+        .map(Result::unwrap)
+        .collect()
     }
 }
