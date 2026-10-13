@@ -1,0 +1,37 @@
+{
+  "items": [
+    {
+      "amount": 2500,
+      "business_id": "bus_Kpa8zN3bW2Yq",
+      "created_at": "2026-09-10T15:00:00Z",
+      "currency": "USD",
+      "is_partial": true,
+      "payment_id": "pay_Pt5sR9vLmQ2wXy7kZ3aB4",
+      "reason": "Customer request",
+      "refund_id": "ref_Ab1Cd2Ef3Gh4",
+      "status": "succeeded"
+    },
+    {
+      "amount": 4900,
+      "business_id": "bus_Kpa8zN3bW2Yq",
+      "created_at": "2026-09-10T16:00:00Z",
+      "currency": "EUR",
+      "is_partial": false,
+      "payment_id": "pay_7Hj2KdQwXz1mNbV5cR8tY",
+      "reason": null,
+      "refund_id": "ref_Qr9St0Uv1Wx2",
+      "status": "succeeded"
+    },
+    {
+      "amount": 500,
+      "business_id": "bus_Kpa8zN3bW2Yq",
+      "created_at": "2026-09-12T10:00:00Z",
+      "currency": "USD",
+      "is_partial": true,
+      "payment_id": "pay_Pt5sR9vLmQ2wXy7kZ3aB4",
+      "reason": null,
+      "refund_id": "ref_Yz3Ab4Cd5Ef6",
+      "status": "succeeded"
+    }
+  ]
+}
