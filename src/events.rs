@@ -3,7 +3,7 @@ use std::sync::Mutex;
 
 use duckdb::types::{TimeUnit, Value};
 use duckdb::{Connection, named_params, params};
-use time::OffsetDateTime;
+use time::{OffsetDateTime, UtcOffset};
 
 use crate::stats::{
     self, BreakdownRow, DayPoint, Dimension, Journey, Overview, PaymentFilter, PaymentPage, Period,
@@ -57,10 +57,13 @@ pub trait EventStore: Send + Sync {
     fn insert_events(&self, events: &[Event]) -> anyhow::Result<()>;
     /// Inserts or replaces payments keyed by (site_id, provider, provider_payment_id).
     fn upsert_payments(&self, payments: &[Payment]) -> anyhow::Result<()>;
-    fn payments(&self, site_id: &str) -> anyhow::Result<Vec<Payment>>;
     #[cfg(test)]
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64>;
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>>;
+    /// Distinct visitors seen in the last five minutes.
+    fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64>;
+    /// Current UTC offset of IANA zone `tz`.
+    fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset>;
     /// Recomputes the credited touch of every payment of a site; unattributed payments get a row with a NULL session.
     fn rebuild_attribution(
         &self,
@@ -297,34 +300,6 @@ impl EventStore for DuckStore {
         Ok(())
     }
 
-    fn payments(&self, site_id: &str) -> anyhow::Result<Vec<Payment>> {
-        let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare(
-            "SELECT site_id, provider, provider_payment_id, epoch_us(ts), amount, currency, amount_usd, refunded, status,
-                    visitor_id, customer_id, is_renewal
-             FROM payments WHERE site_id = ? ORDER BY ts",
-        )?;
-        let rows = stmt.query_map(params![site_id], |r| {
-            let micros: i64 = r.get(3)?;
-            Ok(Payment {
-                site_id: r.get(0)?,
-                provider: r.get(1)?,
-                provider_payment_id: r.get(2)?,
-                ts: OffsetDateTime::from_unix_timestamp_nanos(micros as i128 * 1000)
-                    .unwrap_or(OffsetDateTime::UNIX_EPOCH),
-                amount: r.get(4)?,
-                currency: r.get(5)?,
-                amount_usd: r.get(6)?,
-                refunded: r.get(7)?,
-                status: r.get(8)?,
-                visitor_id: r.get(9)?,
-                customer_id: r.get(10)?,
-                is_renewal: r.get(11)?,
-            })
-        })?;
-        Ok(rows.collect::<Result<_, _>>()?)
-    }
-
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
@@ -339,6 +314,26 @@ impl EventStore for DuckStore {
             })
         })?;
         Ok(rows.next().transpose()?)
+    }
+
+    fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64> {
+        let conn = self.conn.lock().unwrap();
+        let n: i64 = conn.query_row(
+            "SELECT count(DISTINCT visitor_id) FROM events WHERE site_id = ? AND ts > now() - INTERVAL 5 MINUTE",
+            params![site_id],
+            |r| r.get(0),
+        )?;
+        Ok(n as u64)
+    }
+
+    fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset> {
+        let conn = self.conn.lock().unwrap();
+        let secs: i64 = conn.query_row(
+            "SELECT (epoch_us(timezone(?, now())) - epoch_us(timezone('UTC', now()))) // 1000000",
+            params![tz],
+            |r| r.get(0),
+        )?;
+        Ok(UtcOffset::from_whole_seconds(secs as i32)?)
     }
 
     fn rebuild_attribution(
@@ -489,13 +484,20 @@ mod payment_tests {
             .upsert_payments(&[payment("pi_1", 0), payment("pi_2", 0)])
             .unwrap();
         store.upsert_payments(&[payment("pi_1", 2900)]).unwrap();
-        let rows = store.payments("s").unwrap();
+        let period = Period {
+            from: time::macros::date!(2025 - 01 - 01),
+            to: time::macros::date!(2026 - 12 - 31),
+            tz: "UTC".into(),
+        };
+        let rows = store
+            .payment_list("s", &period, PaymentFilter::All, 10, 0)
+            .unwrap()
+            .rows;
         assert_eq!(rows.len(), 2);
-        assert_eq!(
-            rows.iter()
-                .find(|p| p.provider_payment_id == "pi_1")
-                .unwrap(),
-            &payment("pi_1", 2900)
-        );
+        let pi_1 = rows
+            .iter()
+            .find(|p| p.provider_payment_id == "pi_1")
+            .unwrap();
+        assert_eq!((pi_1.refunded, pi_1.net_usd), (2900, Some(0.0)));
     }
 }
