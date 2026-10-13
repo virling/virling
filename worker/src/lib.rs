@@ -93,7 +93,7 @@ async fn join(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
     };
     let leave_link = format!(
         "{}/waitlist/leave?token={leave_token}",
-        ctx.var("BASE_URL")?.to_string()
+        ctx.var("BASE_URL")?
     );
     let html = ConfirmEmail {
         copy,
@@ -153,12 +153,12 @@ async fn leave(req: Request, ctx: RouteContext<()>) -> Result<Response> {
         .unwrap_or_default();
     let kv = ctx.kv("WAITLIST")?;
     let mut removed = false;
-    if !token.is_empty() {
-        if let Some(key) = kv.get(&format!("leave:{token}")).text().await? {
-            kv.delete(&key).await?;
-            kv.delete(&format!("leave:{token}")).await?;
-            removed = true;
-        }
+    if !token.is_empty()
+        && let Some(key) = kv.get(&format!("leave:{token}")).text().await?
+    {
+        kv.delete(&key).await?;
+        kv.delete(&format!("leave:{token}")).await?;
+        removed = true;
     }
     let html = LeftPage { removed }
         .render()
