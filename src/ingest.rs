@@ -1,0 +1,350 @@
+use std::collections::HashMap;
+use std::hash::{BuildHasher, Hasher, RandomState};
+use std::net::{IpAddr, SocketAddr};
+use std::sync::Mutex;
+
+use axum::body::Bytes;
+use axum::extract::{ConnectInfo, State};
+use axum::http::{header, HeaderMap, StatusCode};
+use axum::response::{IntoResponse, Response};
+use serde::Deserialize;
+use time::{Date, Duration, OffsetDateTime};
+use url::Url;
+
+use crate::app::AppState;
+use crate::channel;
+use crate::events::Event;
+
+const SESSION_IDLE: Duration = Duration::minutes(30);
+const MAX_BATCH: usize = 50;
+
+#[derive(Debug, Deserialize)]
+pub struct Incoming {
+    /// "pageview" or "goal"
+    n: String,
+    /// full page URL
+    u: String,
+    /// document.referrer
+    r: Option<String>,
+    /// site domain from data-site
+    s: String,
+    /// visitor ID from the first-party cookie; absent in cookieless mode
+    v: Option<String>,
+    /// screen width in CSS px
+    w: Option<u32>,
+    /// goal name
+    g: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum Batch {
+    One(Incoming),
+    Many(Vec<Incoming>),
+}
+
+#[derive(Default)]
+pub struct Sessions {
+    map: Mutex<HashMap<(String, String), (String, OffsetDateTime)>>,
+}
+
+impl Sessions {
+    fn session_for(&self, site_id: &str, visitor_id: &str, now: OffsetDateTime) -> String {
+        let mut map = self.map.lock().unwrap();
+        if map.len() > 200_000 {
+            map.retain(|_, (_, last)| now - *last < SESSION_IDLE);
+        }
+        let key = (site_id.to_string(), visitor_id.to_string());
+        match map.get_mut(&key) {
+            Some((id, last)) if now - *last < SESSION_IDLE => {
+                *last = now;
+                id.clone()
+            }
+            _ => {
+                let id = uuid::Uuid::new_v4().to_string();
+                map.insert(key, (id.clone(), now));
+                id
+            }
+        }
+    }
+}
+
+/// Daily-rotating salt for cookieless visitor IDs; yesterday's salt is dropped, never stored.
+pub struct DailySalt {
+    inner: Mutex<(Date, RandomState)>,
+}
+
+impl Default for DailySalt {
+    fn default() -> Self {
+        Self { inner: Mutex::new((OffsetDateTime::now_utc().date(), RandomState::new())) }
+    }
+}
+
+impl DailySalt {
+    fn visitor_id(&self, site_id: &str, ip: IpAddr, user_agent: &str) -> String {
+        let mut inner = self.inner.lock().unwrap();
+        let today = OffsetDateTime::now_utc().date();
+        if inner.0 != today {
+            *inner = (today, RandomState::new());
+        }
+        let mut h = inner.1.build_hasher();
+        h.write(site_id.as_bytes());
+        h.write(ip.to_string().as_bytes());
+        h.write(user_agent.as_bytes());
+        format!("c-{:016x}", h.finish())
+    }
+}
+
+/// Per-site fixed one-second window.
+#[derive(Default)]
+pub struct RateLimiter {
+    windows: Mutex<HashMap<String, (i64, u32)>>,
+}
+
+impl RateLimiter {
+    fn allow(&self, site_id: &str, limit: u32) -> bool {
+        let second = OffsetDateTime::now_utc().unix_timestamp();
+        let mut w = self.windows.lock().unwrap();
+        let entry = w.entry(site_id.to_string()).or_insert((second, 0));
+        if entry.0 != second {
+            *entry = (second, 0);
+        }
+        entry.1 += 1;
+        entry.1 <= limit
+    }
+}
+
+pub fn is_bot(user_agent: &str) -> bool {
+    let ua = user_agent.to_ascii_lowercase();
+    ua.is_empty()
+        || ["bot", "crawl", "spider", "slurp", "headless", "lighthouse", "preview", "curl/", "wget/", "python-", "go-http", "phantomjs", "facebookexternalhit"]
+            .iter()
+            .any(|m| ua.contains(m))
+}
+
+pub fn browser(user_agent: &str) -> &'static str {
+    if user_agent.contains("Edg/") {
+        "Edge"
+    } else if user_agent.contains("OPR/") || user_agent.contains("Opera") {
+        "Opera"
+    } else if user_agent.contains("SamsungBrowser") {
+        "Samsung Internet"
+    } else if user_agent.contains("Firefox/") || user_agent.contains("FxiOS") {
+        "Firefox"
+    } else if user_agent.contains("Chrome/") || user_agent.contains("CriOS") {
+        "Chrome"
+    } else if user_agent.contains("Safari/") {
+        "Safari"
+    } else {
+        "Other"
+    }
+}
+
+pub fn device(width: Option<u32>) -> &'static str {
+    match width {
+        Some(w) if w < 768 => "Mobile",
+        Some(w) if w < 1024 => "Tablet",
+        Some(_) => "Desktop",
+        None => "Unknown",
+    }
+}
+
+fn country(headers: &HeaderMap) -> Option<String> {
+    ["cf-ipcountry", "x-vercel-ip-country", "x-country-code"].iter().find_map(|h| {
+        let v = headers.get(*h)?.to_str().ok()?.trim().to_ascii_uppercase();
+        (v.len() == 2 && v != "XX" && v != "T1").then_some(v)
+    })
+}
+
+fn client_ip(headers: &HeaderMap, peer: SocketAddr, trust_proxy: bool) -> IpAddr {
+    if trust_proxy {
+        let forwarded = headers
+            .get("x-forwarded-for")
+            .and_then(|v| v.to_str().ok())
+            .and_then(|v| v.split(',').next())
+            .and_then(|v| v.trim().parse().ok());
+        if let Some(ip) = forwarded {
+            return ip;
+        }
+    }
+    peer.ip()
+}
+
+fn host_belongs(host: &str, domain: &str) -> bool {
+    let host = host.strip_prefix("www.").unwrap_or(host);
+    host == domain || host.ends_with(&format!(".{domain}"))
+}
+
+fn valid_visitor_id(v: &str) -> bool {
+    (8..=64).contains(&v.len()) && v.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
+}
+
+fn clip(s: String, max: usize) -> String {
+    if s.len() <= max {
+        return s;
+    }
+    let mut end = max;
+    while !s.is_char_boundary(end) {
+        end -= 1;
+    }
+    s[..end].to_string()
+}
+
+pub async fn collect(
+    State(state): State<AppState>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    body: Bytes,
+) -> Response {
+    let user_agent = headers.get(header::USER_AGENT).and_then(|v| v.to_str().ok()).unwrap_or("");
+    if is_bot(user_agent) {
+        return accepted();
+    }
+    let incoming = match serde_json::from_slice::<Batch>(&body) {
+        Ok(Batch::One(e)) => vec![e],
+        Ok(Batch::Many(v)) => v.into_iter().take(MAX_BATCH).collect(),
+        Err(_) => return (StatusCode::BAD_REQUEST, "invalid event").into_response(),
+    };
+    let ip = client_ip(&headers, peer, state.config.trust_proxy);
+    let country = country(&headers);
+    let browser = browser(user_agent);
+    let now = OffsetDateTime::now_utc();
+
+    let mut events = Vec::with_capacity(incoming.len());
+    for e in incoming {
+        let Some(site) = state.sites.by_domain(&state.db, &e.s.to_ascii_lowercase()).await else { continue };
+        if !state.limiter.allow(&site.id, state.config.events_per_second) {
+            continue;
+        }
+        let Ok(page) = Url::parse(&e.u) else { continue };
+        let Some(page_host) = page.host_str() else { continue };
+        if !host_belongs(page_host, &site.domain) {
+            continue;
+        }
+        let kind = match e.n.as_str() {
+            "pageview" => "pageview",
+            "goal" => "goal",
+            _ => continue,
+        };
+        let name = if kind == "goal" {
+            match e.g.map(|g| clip(g.trim().to_string(), 64)).filter(|g| !g.is_empty()) {
+                Some(g) => Some(g),
+                None => continue,
+            }
+        } else {
+            None
+        };
+
+        let query: HashMap<String, String> = page.query_pairs().into_owned().collect();
+        let utm = |k: &str| query.get(k).map(|v| clip(v.trim().to_string(), 200)).filter(|v| !v.is_empty());
+        let referrer_host = e
+            .r
+            .as_deref()
+            .and_then(|r| Url::parse(r).ok())
+            .and_then(|r| r.host_str().map(|h| h.to_ascii_lowercase()))
+            .filter(|h| !host_belongs(h, &site.domain));
+        let (utm_source, utm_medium) = (utm("utm_source").or_else(|| utm("ref")), utm("utm_medium"));
+        let channel = channel::classify(utm_medium.as_deref(), utm_source.as_deref(), referrer_host.as_deref());
+
+        let visitor_id = match e.v.filter(|v| !site.cookieless && valid_visitor_id(v)) {
+            Some(v) => v,
+            None => state.salt.visitor_id(&site.id, ip, user_agent),
+        };
+        let session_id = state.sessions.session_for(&site.id, &visitor_id, now);
+
+        events.push(Event {
+            site_id: site.id.clone(),
+            ts: now,
+            visitor_id,
+            session_id,
+            kind: kind.to_string(),
+            name,
+            path: clip(page.path().to_string(), 500),
+            referrer_host,
+            utm_source,
+            utm_medium,
+            utm_campaign: utm("utm_campaign"),
+            utm_content: utm("utm_content"),
+            utm_term: utm("utm_term"),
+            channel: channel.as_str().to_string(),
+            country: country.clone(),
+            device: device(e.w).to_string(),
+            browser: browser.to_string(),
+        });
+    }
+
+    if !events.is_empty() {
+        let store = state.events.clone();
+        let result = tokio::task::spawn_blocking(move || store.insert_events(&events)).await;
+        if !matches!(result, Ok(Ok(()))) {
+            tracing::error!(?result, "failed to store events");
+            return (StatusCode::SERVICE_UNAVAILABLE, "try again").into_response();
+        }
+    }
+    accepted()
+}
+
+fn accepted() -> Response {
+    (StatusCode::ACCEPTED, [(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")], "").into_response()
+}
+
+pub async fn preflight() -> Response {
+    (
+        StatusCode::NO_CONTENT,
+        [
+            (header::ACCESS_CONTROL_ALLOW_ORIGIN, "*"),
+            (header::ACCESS_CONTROL_ALLOW_METHODS, "POST"),
+            (header::ACCESS_CONTROL_ALLOW_HEADERS, "content-type"),
+            (header::ACCESS_CONTROL_MAX_AGE, "86400"),
+        ],
+    )
+        .into_response()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bots_are_filtered() {
+        assert!(is_bot("Mozilla/5.0 (compatible; Googlebot/2.1)"));
+        assert!(is_bot("Mozilla/5.0 HeadlessChrome/120.0"));
+        assert!(is_bot(""));
+        assert!(!is_bot("Mozilla/5.0 (Macintosh) AppleWebKit/605 Version/17.0 Safari/605.1"));
+    }
+
+    #[test]
+    fn browsers_and_devices() {
+        assert_eq!(browser("Mozilla/5.0 Chrome/120 Safari/537 Edg/120"), "Edge");
+        assert_eq!(browser("Mozilla/5.0 Chrome/120 Safari/537"), "Chrome");
+        assert_eq!(browser("Mozilla/5.0 Version/17 Safari/605"), "Safari");
+        assert_eq!(device(Some(390)), "Mobile");
+        assert_eq!(device(Some(800)), "Tablet");
+        assert_eq!(device(Some(1440)), "Desktop");
+    }
+
+    #[test]
+    fn sessions_expire_after_idle() {
+        let s = Sessions::default();
+        let t = OffsetDateTime::now_utc();
+        let a = s.session_for("site", "v1", t);
+        assert_eq!(a, s.session_for("site", "v1", t + Duration::minutes(29)));
+        assert_ne!(a, s.session_for("site", "v1", t + Duration::minutes(60)));
+    }
+
+    #[test]
+    fn subdomains_belong_to_site() {
+        assert!(host_belongs("www.example.com", "example.com"));
+        assert!(host_belongs("app.example.com", "example.com"));
+        assert!(!host_belongs("example.com.evil.io", "example.com"));
+        assert!(!host_belongs("notexample.com", "example.com"));
+    }
+
+    #[test]
+    fn cookieless_ids_are_stable_within_a_day() {
+        let salt = DailySalt::default();
+        let ip: IpAddr = "203.0.113.7".parse().unwrap();
+        assert_eq!(salt.visitor_id("s", ip, "ua"), salt.visitor_id("s", ip, "ua"));
+        assert_ne!(salt.visitor_id("s", ip, "ua"), salt.visitor_id("s", ip, "other"));
+    }
+}

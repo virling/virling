@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virling for agencies: client revenue reports</title>
+<meta name="description" content="White-label weekly reports that show each client which channels brought paying customers. One account for every client.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="/v.js" data-site="virling.com"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/agency">
+      <svg width="28" height="28" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg>
+      <b>virling</b><span class="tag">for agencies</span>
+    </a>
+    <nav class="nav">
+      <a href="#report">Reports</a>
+      <a href="#pricing">Pricing</a>
+      <a href="/">Self-host</a>
+      <a class="cta" href="#join">Get early access</a>
+    </nav>
+  </header>
+
+  <section class="hero split" id="join">
+    <div data-wedge="agency">
+      <h1>Your clients don't pay for traffic. Show them <em>revenue</em>.</h1>
+      <p class="lead">Virling ties each client's channels to the payments that followed, then sends a report under your brand every Monday. One account for every client.</p>
+      <form class="waitlist" novalidate>
+        <label class="sr" for="email">Work email</label>
+        <input id="email" type="email" name="email" placeholder="you@agency.com" autocomplete="email" required>
+        <div class="select" data-select data-name="clients">
+          <button type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Number of clients">
+            <span>Clients</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4B515C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div role="listbox" hidden>
+            <button type="button" role="option" aria-selected="false">1 to 5 clients</button>
+            <button type="button" role="option" aria-selected="false">6 to 15 clients</button>
+            <button type="button" role="option" aria-selected="false">16 to 30 clients</button>
+            <button type="button" role="option" aria-selected="false">More than 30</button>
+          </div>
+        </div>
+        <button class="btn lg" type="submit">Join the waitlist</button>
+        <p class="form-error" role="alert"></p>
+      </form>
+      <div class="joined" role="status">
+        <span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>
+        <span><b>You're on the list.</b> <span class="muted">We'll reach out personally to set up your first client.</span></span>
+      </div>
+    </div>
+
+    <div class="report card lifted" id="report">
+      <div class="brandrow">
+        <span class="logo">B</span>
+        <span style="display:flex;flex-direction:column"><b style="font-size:15px">Brightline Studio</b><span style="font-size:13px;color:var(--ink-3)">Weekly revenue report</span></span>
+        <span class="placeholder">your logo here</span>
+      </div>
+      <div class="total">
+        <small>Kettle &amp; Co. revenue, Oct 6 to 12</small><br>
+        <strong>$4,820</strong><em>+18% vs last week</em>
+      </div>
+      <div class="rows">
+        <div class="r"><span>Google Ads</span><i style="width:100%"></i><span>$2,140</span></div>
+        <div class="r"><span>Google organic</span><i style="width:64.5%"></i><span>$1,380</span></div>
+        <div class="r"><span>Newsletter</span><i style="width:42.5%"></i><span>$910</span></div>
+        <div class="r"><span>Instagram</span><i style="width:18.2%"></i><span>$390</span></div>
+        <div class="summary">Google Ads brought 44% of revenue, up from 38% last week. Instagram sent the most visitors but only 8% of revenue.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block steps">
+    <div><span class="num">01</span><h3>Ten minutes per client</h3><p>One script tag on their site and a read-only key from Stripe, Dodo Payments, Polar or LemonSqueezy. The last 90 days load right away.</p></div>
+    <div><span class="num">02</span><h3>Reports under your name</h3><p>Your logo, your colors, sent from your address every Monday. Clients never see Virling.</p></div>
+    <div><span class="num">03</span><h3>Every client in one view</h3><p>See revenue per client side by side, and spot the account that needs attention before they do.</p></div>
+  </section>
+
+  <section class="block cols" id="pricing" style="align-items:center">
+    <div class="text">
+      <h2>One price for 25 clients.</h2>
+      <p class="body">Less than one hour of billable time a month. The first 50 agencies lock in the founding price for life.</p>
+    </div>
+    <div class="price-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px"><b style="font-size:18px">Agency</b><span class="badge">Founding price, 40% off</span></div>
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span class="amount">$47.40</span><span style="color:#a3a8b1">/month, for life</span><s>$79</s></div>
+      <ul>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6A3D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>25 client workspaces</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6A3D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>2M events a month</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6A3D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>White-label weekly reports, PDF and email</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6A3D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>14-day trial, no card</li>
+      </ul>
+      <a class="btn lg light" href="#join">Reserve founding price</a>
+    </div>
+  </section>
+
+  <footer><span>Virling is built by Stacklance Infotech LLP.</span><span>In development. Not launched yet.</span></footer>
+</div>
+<script src="/assets/site.js"></script>
+</body>
+</html>

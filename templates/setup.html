@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+{% include "_head.html" %}
+<title>Set up · Virling</title>
+</head>
+<body>
+<header class="steps-top">
+  <a class="brand" href="/app">{% include "_logo.html" %}<b>virling</b></a>
+  <ol class="stepper" aria-label="Setup progress">
+    <li class="{% if step == 1 %}on{% else %}done{% endif %}"><span>{% if step > 1 %}&#10003;{% else %}1{% endif %}</span>Site</li>
+    <li class="{% if step == 2 %}on{% else if step > 2 %}done{% endif %}"><span>2</span>Script</li>
+    <li><span>3</span>Payments</li>
+    <li><span>4</span>Checkout</li>
+  </ol>
+  <form method="post" action="/logout"><button class="btn ghost" type="submit">Sign out</button></form>
+</header>
+<main class="step-main">
+  <div class="step-box">
+  {% if step == 1 %}
+    <div>
+      <h1>Add your site</h1>
+      <p class="lead">The domain your visitors land on. Subdomains are included. You can add more sites later.</p>
+    </div>
+    {% if let Some(error) = error %}
+    <div class="alert" role="alert">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C0262D" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+      <span>{{ error }}</span>
+    </div>
+    {% endif %}
+    <form method="post" action="/app/setup" class="stack" style="gap:28px">
+      <div class="panel">
+        <label class="field">Domain
+          <div class="affix"><span>https://</span><input name="domain" value="{{ domain }}" placeholder="yourproduct.com" required autofocus autocomplete="off" spellcheck="false"></div>
+        </label>
+        <div class="field">
+          <span id="tz-label">Timezone</span>
+          <div class="select" data-select data-search>
+            <input type="hidden" name="timezone" value="{{ timezone }}">
+            <button type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="tz-label">
+              <span data-label>{{ timezone }}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4B515C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="menu" hidden>
+              <input type="search" placeholder="Search timezones" aria-label="Search timezones">
+              <div role="listbox" aria-labelledby="tz-label">
+              {% for (tz, selected) in timezones %}
+                <button type="button" role="option" data-value="{{ tz }}" aria-selected="{{ selected }}">{{ tz }}</button>
+              {% endfor %}
+              </div>
+            </div>
+          </div>
+          <span class="hint">Days in your reports start at midnight in this timezone.</span>
+        </div>
+      </div>
+      <div class="actions end"><button class="btn lg" type="submit">Continue</button></div>
+    </form>
+  {% else %}
+    <div>
+      <h1>Add the script</h1>
+      <p class="lead">Paste this before <span class="mono">&lt;/head&gt;</span> on every page of <b>{{ domain }}</b>. Under 2 KB, loads async.</p>
+    </div>
+    <div class="code" data-tabs>
+      <div class="code-head">
+        <div class="tabs" role="tablist" aria-label="Platform">
+          <button role="tab" aria-selected="true" aria-controls="p-html">HTML</button>
+          <button role="tab" aria-selected="false" aria-controls="p-next">Next.js</button>
+          <button role="tab" aria-selected="false" aria-controls="p-astro">Astro</button>
+          <button role="tab" aria-selected="false" aria-controls="p-wp">WordPress</button>
+          <button role="tab" aria-selected="false" aria-controls="p-nocode">Framer, Webflow</button>
+        </div>
+        <button class="copy" type="button" data-copy>Copy</button>
+      </div>
+      <pre id="p-html" role="tabpanel">&lt;script defer src="{{ script_host }}/v.js"
+  data-site="{{ domain }}"&gt;&lt;/script&gt;</pre>
+      <pre id="p-next" role="tabpanel" hidden>// app/layout.tsx, inside &lt;head&gt;
+import Script from "next/script";
+
+&lt;Script defer src="{{ script_host }}/v.js"
+  data-site="{{ domain }}" /&gt;</pre>
+      <pre id="p-astro" role="tabpanel" hidden>&lt;!-- src/layouts/Layout.astro, inside &lt;head&gt; --&gt;
+&lt;script is:inline defer src="{{ script_host }}/v.js"
+  data-site="{{ domain }}"&gt;&lt;/script&gt;</pre>
+      <pre id="p-wp" role="tabpanel" hidden>&lt;!-- Appearance → Theme File Editor → header.php,
+     before &lt;/head&gt;, or any "insert headers" plugin --&gt;
+&lt;script defer src="{{ script_host }}/v.js"
+  data-site="{{ domain }}"&gt;&lt;/script&gt;</pre>
+      <pre id="p-nocode" role="tabpanel" hidden>&lt;!-- Framer: Site settings → General → Custom code → End of &lt;head&gt;
+     Webflow: Site settings → Custom code → Head code --&gt;
+&lt;script defer src="{{ script_host }}/v.js"
+  data-site="{{ domain }}"&gt;&lt;/script&gt;</pre>
+    </div>
+    <div class="live" data-live="/app/sites/{{ site_id }}/latest-event" role="status">
+      <span class="pulse" data-waiting></span>
+      <span data-waiting style="flex:1"><b>Waiting for the first pageview</b><small>Open {{ domain }} in another tab. This updates on its own.</small></span>
+      <span class="tick" data-got hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>
+      <span data-got hidden style="flex:1"><b>First pageview received</b><small class="detail" data-detail></small></span>
+    </div>
+    <div class="actions">
+      <a class="btn ghost" href="/app/setup">Add a different site</a>
+    </div>
+  {% endif %}
+  </div>
+</main>
+<script src="/assets/app.js"></script>
+</body>
+</html>
