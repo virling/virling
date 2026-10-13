@@ -1,0 +1,22 @@
+name = "virling-site"
+main = "build/index.js"
+compatibility_date = "2026-10-01"
+routes = [
+  { pattern = "virling.com", custom_domain = true },
+  { pattern = "www.virling.com", custom_domain = true },
+]
+
+[build]
+command = "./build.sh"
+
+[assets]
+directory = "./public"
+html_handling = "auto-trailing-slash"
+
+[[kv_namespaces]]
+binding = "WAITLIST"
+id = "bf5404416e494ede813918d007d4bc4d"
+
+[vars]
+BASE_URL = "https://virling.com"
+WAITLIST_FROM = "Rahul at Virling <hello@virling.com>"
