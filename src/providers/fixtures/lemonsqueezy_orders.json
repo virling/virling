@@ -1,0 +1,161 @@
+{
+  "meta": {
+    "page": {
+      "currentPage": 1,
+      "from": 1,
+      "lastPage": 2,
+      "perPage": 4,
+      "to": 4,
+      "total": 5
+    }
+  },
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "links": {
+    "first": "https://api.lemonsqueezy.com/v1/orders?page%5Bnumber%5D=1&page%5Bsize%5D=4&sort=-createdAt",
+    "next": "https://api.lemonsqueezy.com/v1/orders?page%5Bnumber%5D=2&page%5Bsize%5D=4&sort=-createdAt",
+    "last": "https://api.lemonsqueezy.com/v1/orders?page%5Bnumber%5D=2&page%5Bsize%5D=4&sort=-createdAt"
+  },
+  "data": [
+    {
+      "type": "orders",
+      "id": "104",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 31,
+        "identifier": "9f0d2a6e-1b1e-4a8c-9d0a-3b8a2d7c1f04",
+        "order_number": 104,
+        "user_name": "Ana Silva",
+        "user_email": "ana@example.com",
+        "currency": "EUR",
+        "currency_rate": "1.08000000",
+        "subtotal": 2000,
+        "discount_total": 0,
+        "tax": 460,
+        "total": 2460,
+        "subtotal_usd": 2160,
+        "discount_total_usd": 0,
+        "tax_usd": 497,
+        "total_usd": 2657,
+        "tax_name": "VAT",
+        "tax_rate": "23.00",
+        "status": "paid",
+        "status_formatted": "Paid",
+        "refunded": false,
+        "refunded_at": null,
+        "refunded_amount": 0,
+        "refunded_amount_usd": 0,
+        "created_at": "2026-10-10T08:15:02.000000Z",
+        "updated_at": "2026-10-10T08:15:02.000000Z",
+        "test_mode": false
+      },
+      "meta": {
+        "custom_data": {
+          "virling_vid": "v_8c1f2e"
+        }
+      },
+      "relationships": {
+        "store": {
+          "links": {
+            "related": "https://api.lemonsqueezy.com/v1/orders/104/store",
+            "self": "https://api.lemonsqueezy.com/v1/orders/104/relationships/store"
+          }
+        },
+        "customer": {
+          "links": {
+            "related": "https://api.lemonsqueezy.com/v1/orders/104/customer",
+            "self": "https://api.lemonsqueezy.com/v1/orders/104/relationships/customer"
+          }
+        }
+      },
+      "links": {
+        "self": "https://api.lemonsqueezy.com/v1/orders/104"
+      }
+    },
+    {
+      "type": "orders",
+      "id": "103",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 30,
+        "order_number": 103,
+        "currency": "USD",
+        "currency_rate": "1.0000",
+        "subtotal": 999,
+        "discount_total": 0,
+        "tax": 200,
+        "total": 1199,
+        "total_usd": 1199,
+        "status": "refunded",
+        "status_formatted": "Refunded",
+        "refunded": true,
+        "refunded_at": "2026-10-09T12:00:00.000000Z",
+        "refunded_amount": 1199,
+        "refunded_amount_usd": 1199,
+        "created_at": "2026-10-08T17:45:53.000000Z",
+        "updated_at": "2026-10-09T12:00:00.000000Z",
+        "test_mode": false
+      },
+      "links": {
+        "self": "https://api.lemonsqueezy.com/v1/orders/103"
+      }
+    },
+    {
+      "type": "orders",
+      "id": "102",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 29,
+        "order_number": 102,
+        "currency": "GBP",
+        "currency_rate": "1.27000000",
+        "subtotal": 5000,
+        "discount_total": 0,
+        "tax": 0,
+        "total": 5000,
+        "total_usd": 6350,
+        "status": "partial_refund",
+        "status_formatted": "Partially refunded",
+        "refunded": false,
+        "refunded_at": null,
+        "refunded_amount": 1500,
+        "refunded_amount_usd": 1905,
+        "created_at": "2026-10-05T09:00:00.000000Z",
+        "updated_at": "2026-10-07T10:30:00.000000Z",
+        "test_mode": false
+      },
+      "links": {
+        "self": "https://api.lemonsqueezy.com/v1/orders/102"
+      }
+    },
+    {
+      "type": "orders",
+      "id": "101",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 28,
+        "order_number": 101,
+        "currency": "USD",
+        "currency_rate": "1.0000",
+        "subtotal": 999,
+        "discount_total": 0,
+        "tax": 0,
+        "total": 999,
+        "total_usd": 999,
+        "status": "pending",
+        "status_formatted": "Pending",
+        "refunded": false,
+        "refunded_at": null,
+        "refunded_amount": 0,
+        "refunded_amount_usd": 0,
+        "created_at": "2026-10-01T09:00:00.000000Z",
+        "updated_at": "2026-10-01T09:00:00.000000Z",
+        "test_mode": false
+      },
+      "links": {
+        "self": "https://api.lemonsqueezy.com/v1/orders/101"
+      }
+    }
+  ]
+}
