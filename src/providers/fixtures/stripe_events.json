@@ -1,0 +1,317 @@
+{
+  "object": "list",
+  "url": "/v1/events",
+  "has_more": false,
+  "data": [
+    {
+      "id": "evt_5",
+      "object": "event",
+      "api_version": "2025-02-24.acacia",
+      "created": 1690000901,
+      "data": {
+        "object": {
+          "id": "ch_3NfreshCharge000000000",
+          "object": "charge",
+          "amount": 1099,
+          "amount_captured": 1099,
+          "amount_refunded": 0,
+          "application": null,
+          "application_fee": null,
+          "application_fee_amount": null,
+          "balance_transaction": "txn_3MmlLrLkdIwHu7ix0uke3Ezy",
+          "billing_details": {
+            "address": {
+              "city": null,
+              "country": null,
+              "line1": null,
+              "line2": null,
+              "postal_code": null,
+              "state": null
+            },
+            "email": null,
+            "name": null,
+            "phone": null
+          },
+          "calculated_statement_descriptor": "Stripe",
+          "captured": true,
+          "created": 1690000900,
+          "currency": "usd",
+          "customer": null,
+          "description": null,
+          "disputed": false,
+          "failure_balance_transaction": null,
+          "failure_code": null,
+          "failure_message": null,
+          "fraud_details": {},
+          "invoice": null,
+          "livemode": false,
+          "metadata": {},
+          "on_behalf_of": null,
+          "outcome": {
+            "network_status": "approved_by_network",
+            "reason": null,
+            "risk_level": "normal",
+            "risk_score": 32,
+            "seller_message": "Payment complete.",
+            "type": "authorized"
+          },
+          "paid": true,
+          "payment_intent": null,
+          "payment_method": "card_1MmlLrLkdIwHu7ixIJwEWSNR",
+          "payment_method_details": {
+            "card": {
+              "brand": "visa",
+              "checks": {
+                "address_line1_check": null,
+                "address_postal_code_check": null,
+                "cvc_check": null
+              },
+              "country": "US",
+              "exp_month": 3,
+              "exp_year": 2024,
+              "fingerprint": "mToisGZ01V71BCos",
+              "funding": "credit",
+              "installments": null,
+              "last4": "4242",
+              "mandate": null,
+              "network": "visa",
+              "three_d_secure": null,
+              "wallet": null
+            },
+            "type": "card"
+          },
+          "receipt_email": null,
+          "receipt_number": null,
+          "receipt_url": "https://pay.stripe.com/receipts/payment/CAcaFwoVYWNjdF8xTTJKVGtMa2RJd0h1N2l4KOvG06AGMgZfBXyr1aw6LBa9vaaSRWU96d8qBwz9z2J_CObiV_H2-e8RezSK_sw0KISesp4czsOUlVKY",
+          "refunded": false,
+          "review": null,
+          "shipping": null,
+          "source_transfer": null,
+          "statement_descriptor": null,
+          "statement_descriptor_suffix": null,
+          "status": "succeeded",
+          "transfer_data": null,
+          "transfer_group": null
+        }
+      },
+      "livemode": false,
+      "pending_webhooks": 0,
+      "request": {
+        "id": null,
+        "idempotency_key": null
+      },
+      "type": "charge.succeeded"
+    },
+    {
+      "id": "evt_4",
+      "object": "event",
+      "api_version": "2025-02-24.acacia",
+      "created": 1690000800,
+      "data": {
+        "object": {
+          "id": "du_2won",
+          "object": "dispute",
+          "amount": 1000,
+          "balance_transactions": [],
+          "charge": "ch_3NwonDispute0000000000",
+          "created": 1680651737,
+          "currency": "usd",
+          "evidence_details": {
+            "due_by": 1682294399,
+            "has_evidence": false,
+            "past_due": false,
+            "submission_count": 0
+          },
+          "is_charge_refundable": false,
+          "livemode": false,
+          "metadata": {},
+          "payment_intent": null,
+          "reason": "general",
+          "status": "won"
+        }
+      },
+      "livemode": false,
+      "pending_webhooks": 0,
+      "request": {
+        "id": null,
+        "idempotency_key": null
+      },
+      "type": "charge.dispute.closed"
+    },
+    {
+      "id": "evt_3",
+      "object": "event",
+      "api_version": "2025-02-24.acacia",
+      "created": 1690000700,
+      "data": {
+        "object": {
+          "id": "re_1Nispe2eZvKYlo2Cd31jOCgZ",
+          "object": "refund",
+          "amount": 2000,
+          "balance_transaction": "txn_1Nispe2eZvKYlo2CYezqFhEx",
+          "charge": "ch_3NrefundFull0000000000",
+          "created": 1692942318,
+          "currency": "usd",
+          "destination_details": {
+            "card": {
+              "reference": "123456789012",
+              "reference_status": "available",
+              "reference_type": "acquirer_reference_number",
+              "type": "refund"
+            },
+            "type": "card"
+          },
+          "metadata": {},
+          "payment_intent": "pi_1GszsK2eZvKYlo2CfhZyoZLp",
+          "reason": null,
+          "receipt_number": null,
+          "source_transfer_reversal": null,
+          "status": "succeeded",
+          "transfer_reversal": null
+        }
+      },
+      "livemode": false,
+      "pending_webhooks": 0,
+      "request": {
+        "id": null,
+        "idempotency_key": null
+      },
+      "type": "charge.refund.updated"
+    },
+    {
+      "id": "evt_2",
+      "object": "event",
+      "api_version": "2025-02-24.acacia",
+      "created": 1690000600,
+      "data": {
+        "object": {
+          "id": "ch_3NrefundFull0000000000",
+          "object": "charge",
+          "amount": 2000,
+          "amount_captured": 2000,
+          "amount_refunded": 2000,
+          "application": null,
+          "application_fee": null,
+          "application_fee_amount": null,
+          "balance_transaction": "txn_3MmlLrLkdIwHu7ix0uke3Ezy",
+          "billing_details": {
+            "address": {
+              "city": null,
+              "country": null,
+              "line1": null,
+              "line2": null,
+              "postal_code": null,
+              "state": null
+            },
+            "email": null,
+            "name": null,
+            "phone": null
+          },
+          "calculated_statement_descriptor": "Stripe",
+          "captured": true,
+          "created": 1680000000,
+          "currency": "usd",
+          "customer": null,
+          "description": null,
+          "disputed": false,
+          "failure_balance_transaction": null,
+          "failure_code": null,
+          "failure_message": null,
+          "fraud_details": {},
+          "invoice": null,
+          "livemode": false,
+          "metadata": {},
+          "on_behalf_of": null,
+          "outcome": {
+            "network_status": "approved_by_network",
+            "reason": null,
+            "risk_level": "normal",
+            "risk_score": 32,
+            "seller_message": "Payment complete.",
+            "type": "authorized"
+          },
+          "paid": true,
+          "payment_intent": null,
+          "payment_method": "card_1MmlLrLkdIwHu7ixIJwEWSNR",
+          "payment_method_details": {
+            "card": {
+              "brand": "visa",
+              "checks": {
+                "address_line1_check": null,
+                "address_postal_code_check": null,
+                "cvc_check": null
+              },
+              "country": "US",
+              "exp_month": 3,
+              "exp_year": 2024,
+              "fingerprint": "mToisGZ01V71BCos",
+              "funding": "credit",
+              "installments": null,
+              "last4": "4242",
+              "mandate": null,
+              "network": "visa",
+              "three_d_secure": null,
+              "wallet": null
+            },
+            "type": "card"
+          },
+          "receipt_email": null,
+          "receipt_number": null,
+          "receipt_url": "https://pay.stripe.com/receipts/payment/CAcaFwoVYWNjdF8xTTJKVGtMa2RJd0h1N2l4KOvG06AGMgZfBXyr1aw6LBa9vaaSRWU96d8qBwz9z2J_CObiV_H2-e8RezSK_sw0KISesp4czsOUlVKY",
+          "refunded": true,
+          "review": null,
+          "shipping": null,
+          "source_transfer": null,
+          "statement_descriptor": null,
+          "statement_descriptor_suffix": null,
+          "status": "succeeded",
+          "transfer_data": null,
+          "transfer_group": null
+        }
+      },
+      "livemode": false,
+      "pending_webhooks": 0,
+      "request": {
+        "id": null,
+        "idempotency_key": null
+      },
+      "type": "charge.refunded"
+    },
+    {
+      "id": "evt_1",
+      "object": "event",
+      "api_version": "2025-02-24.acacia",
+      "created": 1690000500,
+      "data": {
+        "object": {
+          "id": "du_1MtJUT2eZvKYlo2CNaw2HvEv",
+          "object": "dispute",
+          "amount": 1000,
+          "balance_transactions": [],
+          "charge": "ch_1AZtxr2eZvKYlo2CJDX8whov",
+          "created": 1680651737,
+          "currency": "usd",
+          "evidence_details": {
+            "due_by": 1682294399,
+            "has_evidence": false,
+            "past_due": false,
+            "submission_count": 0
+          },
+          "is_charge_refundable": false,
+          "livemode": false,
+          "metadata": {},
+          "payment_intent": null,
+          "reason": "general",
+          "status": "lost"
+        }
+      },
+      "livemode": false,
+      "pending_webhooks": 0,
+      "request": {
+        "id": null,
+        "idempotency_key": null
+      },
+      "type": "charge.dispute.closed"
+    }
+  ]
+}
