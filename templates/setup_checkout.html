@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+{% include "_head.html" %}
+<title>Link checkout · Virling</title>
+</head>
+<body>
+{% include "_steps.html" %}
+<main class="step-main">
+  <div class="step-box">
+    <div>
+      <h1>Link checkout to visitors</h1>
+      <p class="lead">Pass the visitor ID from the <span class="mono">virling_vid</span> cookie into checkout. That is how a payment is credited to the visit that brought it. Payments without it still count, as Unattributed.</p>
+    </div>
+    <div class="code" data-tabs>
+      <div class="code-head">
+        <div class="tabs" role="tablist" aria-label="Payment provider">
+          {% for (key, name, on) in tabs %}
+          <button role="tab" aria-selected="{{ on }}" aria-controls="c-{{ key }}">{{ name }}</button>
+          {% endfor %}
+        </div>
+        <button class="copy" type="button" data-copy>Copy</button>
+      </div>
+      {% for (key, _name, on) in tabs %}
+      <pre id="c-{{ key }}" role="tabpanel"{% if !on %} hidden{% endif %}>{% if key == &"stripe" %}// Stripe Checkout: pass the visitor ID when creating the session
+const session = await stripe.checkout.sessions.create({
+  client_reference_id: req.cookies.virling_vid,
+  line_items: [{ price: "price_...", quantity: 1 }],
+  mode: "subscription",
+  success_url: "https://{{ domain }}/thanks",
+});
+// Payment Links (buy.stripe.com) need nothing:
+// the script tags them on click.{% else if key == &"dodo" %}// Dodo Payments: add the visitor ID as metadata
+const payment = await dodo.payments.create({
+  product_cart: [{ product_id: "pdt_...", quantity: 1 }],
+  customer: { email },
+  billing,
+  metadata: { virling_vid: req.cookies.virling_vid },
+});{% else if key == &"polar" %}// Polar: add the visitor ID as checkout metadata
+const checkout = await polar.checkouts.create({
+  products: ["PRODUCT_ID"],
+  metadata: { virling_vid: req.cookies.virling_vid },
+});
+// Checkout links: add a hidden custom field
+// with the slug virling_vid instead.{% else %}// LemonSqueezy: add the visitor ID to the checkout URL in the browser
+const url = new URL("https://STORE.lemonsqueezy.com/checkout/buy/VARIANT_ID");
+url.searchParams.set("checkout[custom][virling_vid]", virling.vid());
+location.href = url.href;{% endif %}</pre>
+      {% endfor %}
+    </div>
+    <p class="muted small">In the browser, <span class="mono">virling.vid()</span> returns the same ID. On your server, read the <span class="mono">virling_vid</span> cookie. New payments are matched within a minute of syncing.</p>
+    <div class="actions">
+      <a class="btn ghost" href="/app/sites/{{ site_id }}/setup/payments">Back</a>
+      <a class="btn lg" href="/app/sites/{{ site_id }}/dashboard">Open dashboard</a>
+    </div>
+  </div>
+</main>
+<script src="/assets/app.js"></script>
+</body>
+</html>

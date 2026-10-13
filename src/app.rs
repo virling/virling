@@ -12,7 +12,7 @@ use crate::fx::Rates;
 use crate::ingest::{self, DailySalt, RateLimiter, Sessions};
 use crate::mail::Mailer;
 use crate::sites::SiteCache;
-use crate::{auth, onboarding, waitlist};
+use crate::{auth, dashboard, onboarding, settings, waitlist};
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -130,6 +130,28 @@ pub fn router(state: AppState) -> Router {
             .route(
                 "/app/sites/{site_id}/latest-event",
                 get(onboarding::latest_event),
+            )
+            .route(
+                "/app/sites/{site_id}/setup/payments",
+                get(onboarding::payments_step).post(onboarding::connect_payments),
+            )
+            .route(
+                "/app/sites/{site_id}/setup/checkout",
+                get(onboarding::checkout_step),
+            )
+            .route("/app/sites/{site_id}/dashboard", get(dashboard::dashboard))
+            .route("/app/sites/{site_id}/payments", get(dashboard::payments))
+            .route(
+                "/app/sites/{site_id}/payments/{provider}/{payment_id}",
+                get(dashboard::payment),
+            )
+            .route(
+                "/app/sites/{site_id}/settings",
+                get(settings::page).post(settings::save),
+            )
+            .route(
+                "/app/sites/{site_id}/settings/disconnect",
+                post(settings::disconnect),
             );
     }
     if state.config.marketing {

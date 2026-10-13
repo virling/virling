@@ -80,3 +80,83 @@ for (const live of document.querySelectorAll("[data-live]")) {
   };
   check();
 }
+
+for (const wrap of document.querySelectorAll("[data-menu]")) {
+  const trigger = wrap.querySelector("button");
+  const menu = wrap.querySelector(".menu");
+  const open = (state) => {
+    menu.hidden = !state;
+    trigger.setAttribute("aria-expanded", String(state));
+    if (state) (menu.querySelector("[aria-current]") || menu.querySelector("a"))?.focus();
+  };
+  trigger.addEventListener("click", () => open(menu.hidden));
+  menu.addEventListener("keydown", (e) => {
+    const links = [...menu.querySelectorAll("a")];
+    const i = links.indexOf(document.activeElement);
+    if (e.key === "ArrowDown") { e.preventDefault(); links[(i + 1) % links.length].focus(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); links[(i - 1 + links.length) % links.length].focus(); }
+    else if (e.key === "Escape") { open(false); trigger.focus(); }
+  });
+  document.addEventListener("click", (e) => { if (!wrap.contains(e.target)) open(false); });
+}
+
+document.querySelector("[data-burger]")?.addEventListener("click", (e) => {
+  const side = document.getElementById("side");
+  side.classList.toggle("open");
+  e.currentTarget.setAttribute("aria-expanded", String(side.classList.contains("open")));
+});
+
+for (const form of document.querySelectorAll("[data-providers]")) {
+  form.addEventListener("change", (e) => {
+    if (e.target.name !== "provider") return;
+    for (const panel of form.querySelectorAll("[data-provider]")) {
+      const on = panel.dataset.provider === e.target.value;
+      panel.hidden = !on;
+      panel.querySelector("input").disabled = !on;
+    }
+  });
+}
+
+for (const el of document.querySelectorAll("[data-reload]")) {
+  setTimeout(() => location.reload(), Number(el.dataset.reload));
+}
+
+const drawer = document.getElementById("drawer");
+if (drawer) {
+  const back = document.querySelector(".drawer-back");
+  const body = drawer.querySelector("[data-drawer-body]");
+  const close = () => { drawer.hidden = true; back.hidden = true; };
+  const show = async (href) => {
+    const res = await fetch(href, { headers: { "x-drawer": "1" } });
+    if (!res.ok) return (location.href = href);
+    body.innerHTML = await res.text();
+    drawer.hidden = false;
+    back.hidden = false;
+    drawer.querySelector(".drawer-x").focus();
+  };
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-drawer-close]")) return close();
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    const link = e.target.closest("a[data-drawer]");
+    const row = e.target.closest("tr[data-href]");
+    if (!link && !row) return;
+    e.preventDefault();
+    show(link ? link.getAttribute("href") : row.dataset.href);
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+}
+
+const confirmBox = document.getElementById("confirm");
+if (confirmBox) {
+  let pending = null;
+  for (const form of document.querySelectorAll("form[data-confirm]")) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      pending = form;
+      confirmBox.querySelector("[data-confirm-text]").textContent = form.dataset.confirm;
+      confirmBox.showModal();
+    });
+  }
+  confirmBox.querySelector("[data-confirm-cancel]").addEventListener("click", () => confirmBox.close());
+  confirmBox.querySelector("[data-confirm-ok]").addEventListener("click", () => { confirmBox.close(); pending?.submit(); });
+}

@@ -2,12 +2,14 @@ mod app;
 mod auth;
 mod channel;
 mod crypto;
+mod dashboard;
 mod events;
 mod fx;
 mod ingest;
 mod mail;
 mod onboarding;
 mod providers;
+mod settings;
 mod sites;
 mod stats;
 mod sync;
@@ -193,7 +195,8 @@ mod tests {
     use tower::ServiceExt;
 
     use crate::app::{AppState, Config, router};
-    use crate::events::{DuckStore, EventStore};
+    use crate::events::{DuckStore, Event, EventStore, Payment};
+    use crate::stats::{PaymentFilter, Period};
 
     const UA: &str = "Mozilla/5.0 (Macintosh) AppleWebKit/605 Version/17.0 Safari/605.1";
 
@@ -554,5 +557,295 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(n, 0);
+    }
+
+    async fn sign_in(state: &AppState, email: &str) -> String {
+        call(state, form("/login", format!("email={email}"), None)).await;
+        let mails = sent(state);
+        let link = link_in(
+            &mails.last().unwrap().2,
+            "http://localhost:8080/auth/verify?token=",
+        );
+        let token = link.split("token=").nth(1).unwrap().to_string();
+        let res = call(state, form("/auth/verify", format!("token={token}"), None)).await;
+        let set_cookie = res.headers()["set-cookie"].to_str().unwrap();
+        set_cookie.split(';').next().unwrap().to_string()
+    }
+
+    async fn site_id(state: &AppState) -> String {
+        sqlx::query_scalar("SELECT id FROM sites WHERE domain = 'example.com'")
+            .fetch_one(&state.db)
+            .await
+            .unwrap()
+    }
+
+    /// Two visits by one visitor (social, then referral) and a payment a day later.
+    fn seed(store: &DuckStore, site: &str) {
+        let now = time::OffsetDateTime::now_utc();
+        let visit = |session: &str, days: i64, channel: &str, host: &str| Event {
+            site_id: site.into(),
+            ts: now - time::Duration::days(days),
+            visitor_id: "v1".into(),
+            session_id: session.into(),
+            kind: "pageview".into(),
+            name: None,
+            path: format!("/{session}"),
+            referrer_host: Some(host.into()),
+            utm_source: None,
+            utm_medium: None,
+            utm_campaign: None,
+            utm_content: None,
+            utm_term: None,
+            channel: channel.into(),
+            country: Some("DE".into()),
+            device: "Desktop".into(),
+            browser: "Firefox".into(),
+        };
+        store
+            .insert_events(&[
+                visit("first", 5, "Social", "news.ycombinator.com"),
+                visit("last", 3, "Referral", "someblog.dev"),
+            ])
+            .unwrap();
+        let pay = |id: &str, visitor: Option<&str>| Payment {
+            site_id: site.into(),
+            provider: "stripe".into(),
+            provider_payment_id: id.into(),
+            ts: now - time::Duration::days(2),
+            amount: 4900,
+            currency: "usd".into(),
+            amount_usd: Some(49.0),
+            refunded: 0,
+            status: "paid".into(),
+            visitor_id: visitor.map(Into::into),
+            customer_id: None,
+            is_renewal: false,
+        };
+        store
+            .upsert_payments(&[pay("pi_1", Some("v1")), pay("pi_2", None)])
+            .unwrap();
+    }
+
+    fn credited(store: &DuckStore, site: &str) -> Option<String> {
+        let today = time::OffsetDateTime::now_utc().date();
+        let period = Period {
+            from: today - time::Duration::days(30),
+            to: today,
+            tz: "UTC".into(),
+        };
+        store
+            .payment_list(site, &period, PaymentFilter::Attributed, 10, 0)
+            .unwrap()
+            .rows
+            .first()
+            .and_then(|p| p.touch.as_ref().map(|t| t.session_id.clone()))
+    }
+
+    #[tokio::test]
+    async fn connect_with_invalid_key_shows_error() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        let uri = format!("/app/sites/{site}/setup/payments");
+        let page = call(&state, get(&uri, Some(&cookie))).await;
+        assert_eq!(page.status(), StatusCode::OK);
+        assert!(body_text(page).await.contains("Restricted key"));
+        let res = call(
+            &state,
+            form(
+                &uri,
+                "provider=stripe&key=sk_live_abc".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(res.status(), StatusCode::OK);
+        let body = body_text(res).await;
+        assert!(
+            body.contains("Use a restricted read-only key"),
+            "check_key error is shown"
+        );
+        assert!(body.contains("sk_live_abc"), "the key stays in the field");
+        let n: i64 = sqlx::query_scalar("SELECT count(*) FROM integrations")
+            .fetch_one(&state.db)
+            .await
+            .unwrap();
+        assert_eq!(n, 0);
+    }
+
+    #[tokio::test]
+    async fn settings_change_persists_and_rebuilds() {
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        seed(&store, &site);
+        crate::sync::rebuild_attribution(&state, Some(&site)).await;
+        assert_eq!(credited(&store, &site).as_deref(), Some("last"));
+
+        let uri = format!("/app/sites/{site}/settings");
+        let res = call(
+            &state,
+            form(
+                &uri,
+                "model=first_touch&window_days=30&cookieless=on".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(res.status(), StatusCode::SEE_OTHER);
+        let row: (String, i64, bool) = sqlx::query_as(
+            "SELECT attribution_model, window_days, cookieless FROM sites WHERE id = ?",
+        )
+        .bind(&site)
+        .fetch_one(&state.db)
+        .await
+        .unwrap();
+        assert_eq!(row, ("first_touch".into(), 30, true));
+        assert_eq!(credited(&store, &site).as_deref(), Some("first"));
+
+        let page = body_text(call(&state, get(&uri, Some(&cookie))).await).await;
+        assert!(page.contains("data-cookieless") && page.contains("30 days"));
+        let bad = call(
+            &state,
+            form(&uri, "model=linear&window_days=30".into(), Some(&cookie)),
+        )
+        .await;
+        assert_eq!(bad.status(), StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn dashboard_and_payments_render() {
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        seed(&store, &site);
+        crate::sync::rebuild_attribution(&state, Some(&site)).await;
+
+        assert_eq!(
+            call(&state, get("/app", Some(&cookie))).await.headers()["location"]
+                .to_str()
+                .unwrap(),
+            format!("/app/sites/{site}/dashboard")
+        );
+        for query in [
+            "",
+            "?range=7d&by=referrer&sort=visitors",
+            "?range=12m&by=country",
+        ] {
+            let res = call(
+                &state,
+                get(
+                    &format!("/app/sites/{site}/dashboard{query}"),
+                    Some(&cookie),
+                ),
+            )
+            .await;
+            assert_eq!(res.status(), StatusCode::OK, "{query}");
+            let body = body_text(res).await;
+            assert!(
+                body.contains("$98") && body.contains("Latest payments"),
+                "{query}"
+            );
+        }
+        let res = call(
+            &state,
+            get(&format!("/app/sites/{site}/payments"), Some(&cookie)),
+        )
+        .await;
+        assert_eq!(res.status(), StatusCode::OK);
+        let body = body_text(res).await;
+        assert!(body.contains("Someblog") || body.contains("someblog.dev"));
+        assert!(body.contains("Unattributed"));
+        let unattributed = body_text(
+            call(
+                &state,
+                get(
+                    &format!("/app/sites/{site}/payments?filter=unattributed"),
+                    Some(&cookie),
+                ),
+            )
+            .await,
+        )
+        .await;
+        assert!(!unattributed.contains("/payments/stripe/pi_1\""));
+
+        let mut req = get(
+            &format!("/app/sites/{site}/payments/stripe/pi_1"),
+            Some(&cookie),
+        );
+        req.headers_mut().insert("x-drawer", "1".parse().unwrap());
+        let drawer = body_text(call(&state, req).await).await;
+        assert!(!drawer.contains("<html"), "drawer is a fragment");
+        assert!(drawer.contains("Hacker News") && drawer.contains("Paid $49"));
+        let full = call(
+            &state,
+            get(
+                &format!("/app/sites/{site}/payments/stripe/pi_2"),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(full.status(), StatusCode::OK);
+        assert!(body_text(full).await.contains("How to pass virling_vid"));
+        assert_eq!(
+            call(
+                &state,
+                get(
+                    &format!("/app/sites/{site}/payments/stripe/nope"),
+                    Some(&cookie)
+                ),
+            )
+            .await
+            .status(),
+            StatusCode::NOT_FOUND
+        );
+    }
+
+    #[tokio::test]
+    async fn other_accounts_cannot_open_a_site() {
+        let (_dir, state, _store) = setup().await;
+        let site = site_id(&state).await;
+        let cookie = sign_in(&state, "other%40example.com").await;
+        for path in [
+            "dashboard",
+            "payments",
+            "payments/stripe/pi_1",
+            "settings",
+            "setup/payments",
+            "setup/checkout",
+        ] {
+            let res = call(
+                &state,
+                get(&format!("/app/sites/{site}/{path}"), Some(&cookie)),
+            )
+            .await;
+            assert_eq!(res.status(), StatusCode::NOT_FOUND, "{path}");
+        }
+        let res = call(
+            &state,
+            form(
+                &format!("/app/sites/{site}/settings"),
+                "model=first_touch&window_days=30".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(res.status(), StatusCode::NOT_FOUND);
+        let res = call(
+            &state,
+            form(
+                &format!("/app/sites/{site}/settings/disconnect"),
+                "provider=stripe".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(res.status(), StatusCode::NOT_FOUND);
+        let model: String = sqlx::query_scalar("SELECT attribution_model FROM sites WHERE id = ?")
+            .bind(&site)
+            .fetch_one(&state.db)
+            .await
+            .unwrap();
+        assert_eq!(model, "last_non_direct");
     }
 }

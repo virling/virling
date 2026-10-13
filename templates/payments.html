@@ -1,0 +1,36 @@
+{% extends "app.html" %}
+{% block tools %}{% include "_range.html" %}{% endblock %}
+{% block content %}
+<div class="seg filters" aria-label="Filter payments">
+  {% for f in filters %}<a href="{{ f.href }}"{% if f.on %} aria-current="true"{% endif %}>{{ f.label }} <span class="count">{{ f.count }}</span></a>{% endfor %}
+</div>
+<section class="card flush">
+  <table class="pay-table">
+    <thead><tr><th>Date</th><th class="num">Amount</th><th>Source</th><th class="hide-sm">Provider</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for p in rows %}
+      <tr data-href="{{ p.href }}">
+        <td class="mono date"><a href="{{ p.href }}" data-drawer>{{ p.date }}</a></td>
+        <td class="num amt">{{ p.amount }}{% if !p.refunded.is_empty() %}<small>{{ p.refunded }}</small>{% endif %}</td>
+        <td><span class="{% if p.unattributed %}unattr{% endif %}">{{ p.source }}</span>{% if p.renewal %} <span class="tag">renewal</span>{% endif %}</td>
+        <td class="hide-sm muted">{{ p.provider }}</td>
+        <td><span class="badge {{ p.status_class }}">{{ p.status }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if rows.is_empty() %}
+  <p class="empty">No {% if filter_label != "All" %}{{ filter_label|lower }} {% endif %}payments in this range.</p>
+  {% endif %}
+</section>
+{% if !prev.is_empty() || !next.is_empty() %}
+<div class="pager">
+  <span class="muted">{{ showing }}</span>
+  <span class="actions">
+    {% if !prev.is_empty() %}<a class="btn secondary" href="{{ prev }}">Previous</a>{% endif %}
+    {% if !next.is_empty() %}<a class="btn secondary" href="{{ next }}">Next</a>{% endif %}
+  </span>
+</div>
+{% endif %}
+{% include "_drawer.html" %}
+{% endblock %}

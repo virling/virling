@@ -45,7 +45,7 @@ pub async fn add_integration(
 
 /// Polls every connected provider once a minute, forever.
 pub async fn run(state: AppState) {
-    rebuild_attribution(&state).await;
+    rebuild_attribution(&state, None).await;
     loop {
         if let Err(err) = sync_all(&state).await {
             tracing::error!(%err, "payment sync round failed");
@@ -55,9 +55,24 @@ pub async fn run(state: AppState) {
 }
 
 pub async fn sync_all(state: &AppState) -> anyhow::Result<()> {
+    sync_integrations(state, None).await?;
+    rebuild_attribution(state, None).await;
+    Ok(())
+}
+
+/// Syncs one site's integrations right away, e.g. to start the backfill after connecting.
+pub async fn sync_site(state: &AppState, site_id: &str) -> anyhow::Result<()> {
+    sync_integrations(state, Some(site_id)).await?;
+    rebuild_attribution(state, Some(site_id)).await;
+    Ok(())
+}
+
+async fn sync_integrations(state: &AppState, site_id: Option<&str>) -> anyhow::Result<()> {
     let integrations: Vec<Integration> = sqlx::query_as(
-        "SELECT id, site_id, provider, key_ciphertext, key_nonce, sync_cursor FROM integrations",
+        "SELECT id, site_id, provider, key_ciphertext, key_nonce, sync_cursor FROM integrations
+         WHERE ?1 IS NULL OR site_id = ?1",
     )
+    .bind(site_id)
     .fetch_all(&state.db)
     .await?;
     for integration in integrations {
@@ -73,23 +88,24 @@ pub async fn sync_all(state: &AppState) -> anyhow::Result<()> {
             .execute(&state.db)
             .await?;
     }
-    rebuild_attribution(state).await;
     Ok(())
 }
 
-/// Recomputes attribution for every site with its model and window from SQLite.
-pub async fn rebuild_attribution(state: &AppState) {
-    let sites: Vec<(String, String, i64)> =
-        match sqlx::query_as("SELECT id, attribution_model, window_days FROM sites")
-            .fetch_all(&state.db)
-            .await
-        {
-            Ok(sites) => sites,
-            Err(err) => {
-                tracing::error!(%err, "loading sites for attribution failed");
-                return;
-            }
-        };
+/// Recomputes attribution for one site, or every site, with its model and window from SQLite.
+pub async fn rebuild_attribution(state: &AppState, site_id: Option<&str>) {
+    let sites: Vec<(String, String, i64)> = match sqlx::query_as(
+        "SELECT id, attribution_model, window_days FROM sites WHERE ?1 IS NULL OR id = ?1",
+    )
+    .bind(site_id)
+    .fetch_all(&state.db)
+    .await
+    {
+        Ok(sites) => sites,
+        Err(err) => {
+            tracing::error!(%err, "loading sites for attribution failed");
+            return;
+        }
+    };
     for (site_id, model, window_days) in sites {
         let store = state.events.clone();
         let id = site_id.clone();

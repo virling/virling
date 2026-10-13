@@ -1,5 +1,5 @@
 use askama::Template;
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::response::{Html, IntoResponse, Redirect, Response};
 use axum::{Form, Json};
@@ -8,7 +8,11 @@ use serde_json::json;
 
 use crate::app::AppState;
 use crate::auth::Account;
+use crate::dashboard::{blocking, group, money};
+use crate::providers::Provider;
 use crate::sites::{self, Site};
+use crate::stats::{PaymentFilter, Period};
+use crate::sync;
 
 pub const TIMEZONES: &[&str] = &[
     "UTC",
@@ -55,7 +59,7 @@ fn tz_options(selected: &str) -> Vec<(&'static str, bool)> {
     TIMEZONES.iter().map(|tz| (*tz, *tz == selected)).collect()
 }
 
-fn render(t: impl Template) -> Response {
+pub fn render(t: impl Template) -> Response {
     match t.render() {
         Ok(html) => Html(html).into_response(),
         Err(err) => {
@@ -71,7 +75,25 @@ pub async fn home(State(state): State<AppState>, account: Account) -> Response {
         .ok()
         .and_then(|s| s.into_iter().next())
     {
-        Some(site) => Redirect::to(&format!("/app/sites/{}/setup/script", site.id)).into_response(),
+        Some(site) => {
+            let store = state.events.clone();
+            let id = site.id.clone();
+            let has_events = tokio::task::spawn_blocking(move || store.latest_pageview(&id))
+                .await
+                .is_ok_and(|r| r.is_ok_and(|e| e.is_some()));
+            let has_integration =
+                sqlx::query_scalar::<_, i64>("SELECT count(*) FROM integrations WHERE site_id = ?")
+                    .bind(&site.id)
+                    .fetch_one(&state.db)
+                    .await
+                    .is_ok_and(|n| n > 0);
+            let next = if has_events || has_integration {
+                "dashboard"
+            } else {
+                "setup/script"
+            };
+            Redirect::to(&format!("/app/sites/{}/{next}", site.id)).into_response()
+        }
         None => Redirect::to("/app/setup").into_response(),
     }
 }
@@ -183,4 +205,268 @@ pub async fn latest_event(
             StatusCode::SERVICE_UNAVAILABLE.into_response()
         }
     }
+}
+
+pub struct ProviderCard {
+    key: &'static str,
+    name: &'static str,
+    key_label: &'static str,
+    placeholder: &'static str,
+    help: &'static str,
+    help_url: &'static str,
+    note: &'static str,
+    selected: bool,
+}
+
+fn provider_card(p: Provider, selected: Provider) -> ProviderCard {
+    let (name, key_label, placeholder, help, help_url, note) = match p {
+        Provider::Stripe => (
+            "Stripe",
+            "Restricted key",
+            "rk_live_...",
+            "How to create a read-only key, 1 minute",
+            "https://docs.stripe.com/keys/restricted-api-keys",
+            "Create a restricted key with Read access to Charges, Checkout Sessions, Customers, Events, Invoices, Subscriptions and PaymentIntents. Leave everything else at None. Secret keys (sk_) are refused.",
+        ),
+        Provider::Dodo => (
+            "Dodo Payments",
+            "API key",
+            "Dodo Payments API key",
+            "How to create a read-only key, 1 minute",
+            "https://docs.dodopayments.com/api-reference/introduction",
+            "Virling only reads payments, refunds and subscriptions with this key. Live and test mode keys both work.",
+        ),
+        Provider::Polar => (
+            "Polar",
+            "Organization token",
+            "polar_oat_...",
+            "How to create a read-only key, 1 minute",
+            "https://docs.polar.sh/integrate/oat",
+            "Create an organization access token with the orders:read and refunds:read scopes. No other scopes are needed.",
+        ),
+        Provider::LemonSqueezy => (
+            "LemonSqueezy",
+            "API key",
+            "eyJ0eXAiOiJKV1QiLCJhbGciOi...",
+            "How to create an API key, 1 minute",
+            "https://docs.lemonsqueezy.com/guides/developer-guide/getting-started",
+            "LemonSqueezy API keys cannot be made read-only and cover every store on your account. Virling only reads orders and subscription invoices, and stores the key encrypted. Delete it in LemonSqueezy at any time to revoke access.",
+        ),
+    };
+    ProviderCard {
+        key: p.as_str(),
+        name,
+        key_label,
+        placeholder,
+        help,
+        help_url,
+        note,
+        selected: p == selected,
+    }
+}
+
+pub struct ConnectedStats {
+    providers: String,
+    payments: String,
+    revenue: String,
+    attributed: u64,
+    syncing: bool,
+}
+
+#[derive(Template)]
+#[template(path = "setup_payments.html")]
+struct PaymentsStep {
+    step: u8,
+    site_id: String,
+    domain: String,
+    cards: Vec<ProviderCard>,
+    error: Option<String>,
+    key: String,
+    connected: Option<ConnectedStats>,
+}
+
+#[derive(Deserialize)]
+pub struct ProviderQuery {
+    provider: Option<String>,
+}
+
+async fn connected_stats(
+    state: &AppState,
+    site: &Site,
+) -> Result<Option<ConnectedStats>, StatusCode> {
+    let rows: Vec<(String, Option<i64>)> = sqlx::query_as(
+        "SELECT provider, last_synced_at FROM integrations WHERE site_id = ? ORDER BY created_at",
+    )
+    .bind(&site.id)
+    .fetch_all(&state.db)
+    .await
+    .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+    if rows.is_empty() {
+        return Ok(None);
+    }
+    let store = state.events.clone();
+    let (id, tz) = (site.id.clone(), site.timezone.clone());
+    let (totals, attributed) = blocking(move || {
+        let today = time::OffsetDateTime::now_utc()
+            .to_offset(store.utc_offset(&tz)?)
+            .date();
+        let period = Period {
+            from: today - time::Duration::days(89),
+            to: today,
+            tz,
+        };
+        Ok((
+            store.overview(&id, &period)?.current,
+            store
+                .payment_list(&id, &period, PaymentFilter::Attributed, 0, 0)?
+                .total,
+        ))
+    })
+    .await?;
+    Ok(Some(ConnectedStats {
+        providers: rows
+            .iter()
+            .map(|(p, _)| crate::dashboard::provider_name(p))
+            .collect::<Vec<_>>()
+            .join(", "),
+        syncing: rows.iter().any(|(_, synced)| synced.is_none()),
+        payments: group(totals.payments),
+        revenue: money(totals.revenue_usd),
+        attributed,
+    }))
+}
+
+pub async fn payments_step(
+    State(state): State<AppState>,
+    account: Account,
+    Path(site_id): Path<String>,
+    Query(q): Query<ProviderQuery>,
+) -> Response {
+    let Some(site) = owned_site(&state, &account, &site_id).await else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    let connected = match connected_stats(&state, &site).await {
+        Ok(c) => c,
+        Err(code) => return code.into_response(),
+    };
+    let selected = q
+        .provider
+        .as_deref()
+        .and_then(Provider::parse)
+        .unwrap_or(Provider::Stripe);
+    render(PaymentsStep {
+        step: 3,
+        site_id: site.id,
+        domain: site.domain,
+        cards: Provider::ALL
+            .into_iter()
+            .map(|p| provider_card(p, selected))
+            .collect(),
+        error: None,
+        key: String::new(),
+        connected,
+    })
+}
+
+#[derive(Deserialize)]
+pub struct ConnectInput {
+    provider: String,
+    key: String,
+}
+
+pub async fn connect_payments(
+    State(state): State<AppState>,
+    account: Account,
+    Path(site_id): Path<String>,
+    Form(input): Form<ConnectInput>,
+) -> Response {
+    let Some(site) = owned_site(&state, &account, &site_id).await else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    let Some(provider) = Provider::parse(&input.provider) else {
+        return StatusCode::BAD_REQUEST.into_response();
+    };
+    let key = input.key.trim();
+    let result = if key.is_empty() {
+        Err(anyhow::anyhow!("Paste your key first."))
+    } else {
+        sync::add_integration(&state, &site.id, provider, key).await
+    };
+    if let Err(err) = result {
+        let connected = match connected_stats(&state, &site).await {
+            Ok(c) => c,
+            Err(code) => return code.into_response(),
+        };
+        return render(PaymentsStep {
+            step: 3,
+            site_id: site.id,
+            domain: site.domain,
+            cards: Provider::ALL
+                .into_iter()
+                .map(|p| provider_card(p, provider))
+                .collect(),
+            error: Some(err.to_string()),
+            key: key.to_string(),
+            connected,
+        });
+    }
+    let bg = state.clone();
+    let id = site.id.clone();
+    tokio::spawn(async move {
+        if let Err(err) = sync::sync_site(&bg, &id).await {
+            tracing::warn!(%err, site = %id, "first sync failed");
+        }
+    });
+    Redirect::to(&format!(
+        "/app/sites/{}/setup/payments?provider={}",
+        site.id,
+        provider.as_str()
+    ))
+    .into_response()
+}
+
+#[derive(Template)]
+#[template(path = "setup_checkout.html")]
+struct CheckoutStep {
+    step: u8,
+    site_id: String,
+    domain: String,
+    tabs: Vec<(&'static str, &'static str, bool)>,
+}
+
+pub async fn checkout_step(
+    State(state): State<AppState>,
+    account: Account,
+    Path(site_id): Path<String>,
+) -> Response {
+    let Some(site) = owned_site(&state, &account, &site_id).await else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    let first: Option<String> = sqlx::query_scalar(
+        "SELECT provider FROM integrations WHERE site_id = ? ORDER BY created_at",
+    )
+    .bind(&site.id)
+    .fetch_optional(&state.db)
+    .await
+    .ok()
+    .flatten();
+    let selected = first
+        .as_deref()
+        .and_then(Provider::parse)
+        .unwrap_or(Provider::Stripe);
+    render(CheckoutStep {
+        step: 4,
+        site_id: site.id,
+        domain: site.domain,
+        tabs: Provider::ALL
+            .into_iter()
+            .map(|p| {
+                (
+                    p.as_str(),
+                    crate::dashboard::provider_name(p.as_str()),
+                    p == selected,
+                )
+            })
+            .collect(),
+    })
 }

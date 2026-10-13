@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+{% include "_head.html" %}
+<title>{{ title }} · {{ shell.domain }} · Virling</title>
+</head>
+<body class="app">
+<aside class="side" id="side">
+  <a class="brand" href="/app">{% include "_logo.html" %}<b>virling</b></a>
+  <div class="menu-wrap switcher" data-menu>
+    <button type="button" aria-haspopup="true" aria-expanded="false">
+      <span class="favicon">{{ shell.initial }}</span>
+      <span class="grow">{{ shell.domain }}</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
+    </button>
+    <div class="menu" hidden>
+      {% for s in shell.sites %}
+      <a href="{{ s.href }}"{% if s.on %} aria-current="true"{% endif %}>{{ s.label }}</a>
+      {% endfor %}
+      <a class="add" href="/app/setup">+ Add a site</a>
+    </div>
+  </div>
+  <nav class="nav">
+    <a href="/app/sites/{{ shell.site_id }}/dashboard"{% if shell.nav == "dashboard" %} aria-current="page"{% endif %}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Dashboard</a>
+    <a href="/app/sites/{{ shell.site_id }}/payments"{% if shell.nav == "payments" %} aria-current="page"{% endif %}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>Payments</a>
+    <a href="/app/sites/{{ shell.site_id }}/settings"{% if shell.nav == "settings" %} aria-current="page"{% endif %}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Site settings</a>
+  </nav>
+  <div class="usage">
+    <b>{{ shell.plan }}</b>
+    <span>{{ shell.usage }}</span>
+  </div>
+  <form method="post" action="/logout"><button class="btn ghost block" type="submit">Sign out</button></form>
+</aside>
+<div class="main">
+  <header class="top">
+    <button class="burger" type="button" aria-controls="side" aria-expanded="false" aria-label="Menu" data-burger>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <h1>{{ title }}</h1>
+    <span class="live-pill" title="Visitors in the last 5 minutes"><span class="dot"></span>{{ shell.live }} live</span>
+    <span class="grow"></span>
+    {% block tools %}{% endblock %}
+  </header>
+  <main class="content">
+  {% block content %}{% endblock %}
+  </main>
+</div>
+<script src="/assets/app.js"></script>
+</body>
+</html>
