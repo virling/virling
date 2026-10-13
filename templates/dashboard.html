@@ -1,0 +1,71 @@
+{% extends "app.html" %}
+{% block tools %}{% include "_range.html" %}{% endblock %}
+{% block content %}
+{% if empty %}
+<div class="notice row">
+  <span>No visitors or payments in this range yet. Check the script is on your site, or connect a payment provider.</span>
+  <a class="btn secondary" href="/app/sites/{{ shell.site_id }}/setup/script">Setup</a>
+</div>
+{% endif %}
+<section class="kpis">
+  {% for k in kpis %}
+  <div class="kpi">
+    <small>{% if !k.swatch.is_empty() %}<i class="sw {{ k.swatch }}"></i>{% endif %}{{ k.label }}</small>
+    <b class="{{ k.swatch }}">{{ k.value }}</b>
+    {% if !k.delta.is_empty() %}<span class="delta {{ k.trend }}">{% if k.trend == "up" %}&#8599;{% else if k.trend == "down" %}&#8600;{% endif %} {{ k.delta }}</span>{% else %}<span class="delta flat">no previous data</span>{% endif %}
+  </div>
+  {% endfor %}
+</section>
+<section class="card chart-card">
+  <div class="card-head">
+    <h2>Visitors and revenue</h2>
+    <span class="legend"><span><i class="sw visitors"></i>Visitors</span><span><i class="sw revenue"></i>Revenue</span></span>
+  </div>
+  <div class="chart" role="img" aria-label="Visitors and revenue per {% if bars.len() > 120 %}month{% else %}day{% endif %}">
+    {% for b in bars %}
+    <div class="col {{ b.edge }}" tabindex="0">
+      <span class="v" style="height:{{ b.vh }}%"></span><span class="r" style="height:{{ b.rh }}%"></span>
+      <div class="tip"><b>{{ b.label }}</b><span><i class="sw visitors"></i>{{ b.visitors }} visitors</span><span><i class="sw revenue"></i>{{ b.revenue }}</span></div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="axis">{% for a in axis %}<span>{{ a }}</span>{% endfor %}</div>
+</section>
+<div class="grid-2">
+  <section class="card">
+    <div class="card-head wrap">
+      <nav class="tabs-line" aria-label="Breakdown">
+        {% for t in tabs %}<a href="{{ t.href }}"{% if t.on %} aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}
+      </nav>
+      <div class="seg small" aria-label="Sort by">
+        {% for s in sorts %}<a href="{{ s.href }}"{% if s.on %} aria-current="true"{% endif %}>{{ s.label }}</a>{% endfor %}
+      </div>
+    </div>
+    <div class="breakdown">
+      <div class="bd-row head"><span>Source</span><span class="num">Visitors</span><span>Revenue</span><span class="num">Per visitor</span></div>
+      {% for r in rows %}
+      <div class="bd-row{% if r.unattributed %} unattr{% endif %}">
+        <span class="name">{{ r.label }}</span>
+        <span class="num">{{ r.visitors }}</span>
+        <span class="rev-cell"><span class="bar"><i style="width:{{ r.width }}%"></i></span><b>{{ r.revenue }}</b></span>
+        <span class="num{% if r.dim %} dim{% endif %}">{{ r.per_visitor }}</span>
+      </div>
+      {% endfor %}
+      {% if rows.is_empty() %}<p class="empty">Nothing in this range yet.</p>{% endif %}
+    </div>
+  </section>
+  <section class="card">
+    <div class="card-head"><h2>Latest payments</h2><a class="link-quiet" href="{{ payments_href }}">View all</a></div>
+    <ul class="latest">
+      {% for p in latest %}
+      <li><a href="{{ p.href }}" data-drawer>
+        <span class="grow"><b{% if p.unattributed %} class="unattr"{% endif %}>{{ p.source }}</b><small>{{ p.ago }} · {{ p.provider }}</small></span>
+        <span class="amt">{{ p.amount }}</span>
+      </a></li>
+      {% endfor %}
+      {% if latest.is_empty() %}<li class="empty">No payments in this range. <a href="/app/sites/{{ shell.site_id }}/setup/payments">Connect a provider</a></li>{% endif %}
+    </ul>
+  </section>
+</div>
+{% include "_drawer.html" %}
+{% endblock %}

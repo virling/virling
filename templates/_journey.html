@@ -1,0 +1,35 @@
+<div class="journey">
+  <div class="j-head">
+    <small>{{ j.provider }} · <span class="mono">{{ j.payment_id }}</span></small>
+    <h2><span class="rev">{{ j.amount }}</span> <span class="badge {{ j.status_class }}">{{ j.status }}</span></h2>
+    <span class="muted">{{ j.date }}{% if !j.usd.is_empty() %} · {{ j.usd }}{% endif %}</span>
+  </div>
+  {% if j.unattributed %}
+  <div class="j-empty">
+    <b>Unattributed</b>
+    <p>This payment did not carry a visitor ID, or the visitor had no visits in the lookback window, so Virling cannot tell which visit brought it. It still counts toward revenue.</p>
+    <p>Pass the <span class="mono">virling_vid</span> cookie into checkout and new payments will show their full journey here.</p>
+    <a class="btn secondary" href="{{ j.checkout_href }}">How to pass virling_vid</a>
+  </div>
+  {% else %}
+  <div class="j-stats">
+    <div><small>Credited to</small><b>{{ j.credited }}</b></div>
+    <div><small>First touch</small><b>{{ j.first_touch }}</b></div>
+    <div><small>Time to pay</small><b>{{ j.time_to_pay }}</b></div>
+  </div>
+  <ol class="timeline">
+    {% for s in j.sessions %}
+    <li{% if s.credited %} class="credited"{% endif %}>
+      <div class="t-head"><b>{{ s.source }}</b>{% if s.credited %}<span class="tag credit">Credited</span>{% endif %}<span class="muted mono">{{ s.date }}</span></div>
+      {% if let Some(c) = s.campaign %}<small class="muted">Campaign {{ c }}</small>{% endif %}
+      <div class="chips">
+        {% for p in s.paths %}<span class="chip mono">{{ p }}</span>{% endfor %}
+        {% if s.more > 0 %}<span class="chip muted">+{{ s.more }} more</span>{% endif %}
+        {% for g in s.goals %}<span class="chip goal">{{ g }}</span>{% endfor %}
+      </div>
+    </li>
+    {% endfor %}
+    <li class="paid"><div class="t-head"><b>Paid {{ j.amount }}</b><span class="muted mono">{{ j.date }}</span></div></li>
+  </ol>
+  {% endif %}
+</div>
