@@ -27,14 +27,18 @@ pub async fn check_key(client: &reqwest::Client, key: &str) -> anyhow::Result<()
     if let Some(msg) = key_format_error(key) {
         anyhow::bail!(msg);
     }
-    let resp = request(client, key, "/charges", &[("limit", "1".into())]).await?;
+    let query = [
+        ("limit", "1".into()),
+        ("expand[]", "data.payment_intent".into()),
+    ];
+    let resp = request(client, key, "/charges", &query).await?;
     match resp.status().as_u16() {
         200..=299 => Ok(()),
         401 => anyhow::bail!(
             "Stripe rejected this key. Check it was copied in full and has not been deleted or rolled."
         ),
         403 => anyhow::bail!(
-            "This key cannot read Charges. Give it read access to Events, Checkout Sessions, Charges, Invoices, Subscriptions and Customers."
+            "This key cannot read Charges or PaymentIntents. Give it read access to Events, Checkout Sessions, Charges, PaymentIntents, Invoices, Subscriptions and Customers."
         ),
         code => anyhow::bail!("Stripe returned an unexpected error ({code}). Try again shortly."),
     }
@@ -124,6 +128,7 @@ pub async fn fetch(
             let mut query = vec![("created[gte]", cur.charges.floor.to_string())];
             query.extend(page_query(cur.charges.after.as_deref()));
             query.push(("expand[]", "data.invoice".into()));
+            query.push(("expand[]", "data.payment_intent".into()));
             let list: List<Charge> = get(client, key, "/charges", &query).await?;
             for charge in &list.data {
                 payments.extend(resolve(client, key, charge, 0).await?);
@@ -145,8 +150,11 @@ pub async fn fetch(
             let list: List<Event> = get(client, key, "/events", &query).await?;
             for (id, lost) in charges_to_refetch(&list.data, cur.charges.floor) {
                 let path = format!("/charges/{id}");
-                let charge: Charge =
-                    get(client, key, &path, &[("expand[]", "invoice".into())]).await?;
+                let expand = [
+                    ("expand[]", "invoice".into()),
+                    ("expand[]", "payment_intent".into()),
+                ];
+                let charge: Charge = get(client, key, &path, &expand).await?;
                 payments.extend(resolve(client, key, &charge, lost).await?);
             }
             let done = cur.events.advance(
@@ -203,10 +211,13 @@ async fn resolve(
     charge: &Charge,
     lost: i64,
 ) -> anyhow::Result<Option<Fetched>> {
-    let Some(mut fetched) = to_fetched(charge, None, lost) else {
+    let Some(fetched) = to_fetched(charge, None, lost) else {
         return Ok(None);
     };
-    if fetched.visitor_id.is_some() || fetched.is_renewal || fetched.status == "failed" {
+    if non_empty(charge.metadata.get(VID_KEY)).is_some()
+        || fetched.is_renewal
+        || fetched.status == "failed"
+    {
         return Ok(Some(fetched));
     }
     let filter = match &charge.invoice {
@@ -214,14 +225,17 @@ async fn resolve(
             inv.subscription.clone().map(|s| ("subscription", s))
         }
         Some(_) => None,
-        None => charge.payment_intent.clone().map(|p| ("payment_intent", p)),
+        None => charge
+            .payment_intent
+            .as_ref()
+            .map(|p| ("payment_intent", p.id())),
     };
-    if let Some(filter) = filter {
-        let query = [filter, ("limit", "1".into())];
-        let list: List<Session> = get(client, key, "/checkout/sessions", &query).await?;
-        fetched.visitor_id = list.data.first().and_then(session_visitor);
-    }
-    Ok(Some(fetched))
+    let Some(filter) = filter else {
+        return Ok(Some(fetched));
+    };
+    let query = [filter, ("limit", "1".into())];
+    let list: List<Session> = get(client, key, "/checkout/sessions", &query).await?;
+    Ok(to_fetched(charge, list.data.first(), lost))
 }
 
 /// Maps a charge to a payment; None while it is pending or uncaptured.
@@ -253,7 +267,8 @@ fn to_fetched(charge: &Charge, session: Option<&Session>, lost: i64) -> Option<F
         refunded,
         status: status.to_string(),
         visitor_id: non_empty(charge.metadata.get(VID_KEY))
-            .or_else(|| session.and_then(session_visitor)),
+            .or_else(|| session.and_then(session_visitor))
+            .or_else(|| charge.payment_intent.as_ref().and_then(intent_visitor)),
         customer_id: charge.customer.clone(),
         is_renewal: billing_reason == Some("subscription_cycle"),
     })
@@ -262,6 +277,13 @@ fn to_fetched(charge: &Charge, session: Option<&Session>, lost: i64) -> Option<F
 fn session_visitor(session: &Session) -> Option<String> {
     non_empty(session.metadata.get(VID_KEY))
         .or_else(|| non_empty(session.client_reference_id.as_ref()))
+}
+
+fn intent_visitor(intent: &IntentRef) -> Option<String> {
+    match intent {
+        IntentRef::Expanded(pi) => non_empty(pi.metadata.get(VID_KEY)),
+        IntentRef::Id(_) => None,
+    }
 }
 
 fn non_empty(s: Option<&String>) -> Option<String> {
@@ -330,8 +352,31 @@ struct Charge {
     captured: bool,
     #[serde(default)]
     metadata: HashMap<String, String>,
-    payment_intent: Option<String>,
+    payment_intent: Option<IntentRef>,
     invoice: Option<Invoice>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum IntentRef {
+    Id(String),
+    Expanded(PaymentIntent),
+}
+
+impl IntentRef {
+    fn id(&self) -> String {
+        match self {
+            IntentRef::Id(id) => id.clone(),
+            IntentRef::Expanded(pi) => pi.id.clone(),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize)]
+struct PaymentIntent {
+    id: String,
+    #[serde(default)]
+    metadata: HashMap<String, String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -427,7 +472,7 @@ mod tests {
         assert_eq!(f.visitor_id.as_deref(), Some("v_4f2a9c1e"));
         assert_eq!(f.customer_id.as_deref(), Some("cus_NffrFeUfNV2Hib"));
         assert_eq!(
-            c.payment_intent.as_deref(),
+            c.payment_intent.map(|p| p.id()).as_deref(),
             Some("pi_3NcheckoutLink00000000")
         );
     }
@@ -443,6 +488,19 @@ mod tests {
         let c = charge("ch_3NmetadataVid000000000");
         let f = to_fetched(&c, sessions().first(), 0).unwrap();
         assert_eq!(f.visitor_id.as_deref(), Some("v_from_charge_meta"));
+    }
+
+    #[test]
+    fn payment_intent_metadata_is_last_resort() {
+        let c = charge("ch_3NintentMeta0000000000");
+        assert_eq!(
+            c.payment_intent.as_ref().unwrap().id(),
+            "pi_3NintentMeta0000000000"
+        );
+        let f = to_fetched(&c, None, 0).unwrap();
+        assert_eq!(f.visitor_id.as_deref(), Some("v_from_intent_meta"));
+        let f = to_fetched(&c, sessions().first(), 0).unwrap();
+        assert_eq!(f.visitor_id.as_deref(), Some("v_4f2a9c1e"));
     }
 
     #[test]
