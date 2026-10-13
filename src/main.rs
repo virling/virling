@@ -9,6 +9,7 @@ mod mail;
 mod onboarding;
 mod providers;
 mod sites;
+mod stats;
 mod sync;
 mod waitlist;
 mod waitlist_copy;

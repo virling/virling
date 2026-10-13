@@ -5,6 +5,11 @@ use duckdb::types::{TimeUnit, Value};
 use duckdb::{Connection, named_params, params};
 use time::OffsetDateTime;
 
+use crate::stats::{
+    self, BreakdownRow, DayPoint, Dimension, Journey, Overview, PaymentFilter, PaymentPage, Period,
+    Sort,
+};
+
 #[derive(Debug, Clone)]
 pub struct Event {
     pub site_id: String,
@@ -63,6 +68,31 @@ pub trait EventStore: Send + Sync {
         model: &str,
         window_days: i64,
     ) -> anyhow::Result<()>;
+    fn overview(&self, site_id: &str, period: &Period) -> anyhow::Result<Overview>;
+    fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<DayPoint>>;
+    fn breakdown(
+        &self,
+        site_id: &str,
+        period: &Period,
+        dimension: Dimension,
+        sort: Sort,
+    ) -> anyhow::Result<Vec<BreakdownRow>>;
+    fn payment_list(
+        &self,
+        site_id: &str,
+        period: &Period,
+        filter: PaymentFilter,
+        limit: u32,
+        offset: u32,
+    ) -> anyhow::Result<PaymentPage>;
+    /// The payer's sessions in the window before the payment plus the credited one, oldest first.
+    fn journey(
+        &self,
+        site_id: &str,
+        provider: &str,
+        provider_payment_id: &str,
+        window_days: i64,
+    ) -> anyhow::Result<Option<Journey>>;
 }
 
 /// Sessions as touches (first pageview's fields), then the credited session per payment, then renewal inheritance.
@@ -332,6 +362,57 @@ impl EventStore for DuckStore {
         Ok(())
     }
 
+    fn overview(&self, site_id: &str, period: &Period) -> anyhow::Result<Overview> {
+        stats::overview(&self.conn.lock().unwrap(), site_id, period)
+    }
+
+    fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<DayPoint>> {
+        stats::timeseries(&self.conn.lock().unwrap(), site_id, period)
+    }
+
+    fn breakdown(
+        &self,
+        site_id: &str,
+        period: &Period,
+        dimension: Dimension,
+        sort: Sort,
+    ) -> anyhow::Result<Vec<BreakdownRow>> {
+        stats::breakdown(&self.conn.lock().unwrap(), site_id, period, dimension, sort)
+    }
+
+    fn payment_list(
+        &self,
+        site_id: &str,
+        period: &Period,
+        filter: PaymentFilter,
+        limit: u32,
+        offset: u32,
+    ) -> anyhow::Result<PaymentPage> {
+        stats::payment_list(
+            &self.conn.lock().unwrap(),
+            site_id,
+            period,
+            filter,
+            limit,
+            offset,
+        )
+    }
+
+    fn journey(
+        &self,
+        site_id: &str,
+        provider: &str,
+        provider_payment_id: &str,
+        window_days: i64,
+    ) -> anyhow::Result<Option<Journey>> {
+        stats::journey(
+            &self.conn.lock().unwrap(),
+            site_id,
+            provider,
+            provider_payment_id,
+            window_days,
+        )
+    }
 }
 
 #[cfg(test)]
