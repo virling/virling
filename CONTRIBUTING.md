@@ -10,7 +10,7 @@ Thanks for helping. Virling is early, so the most useful contributions right now
 
 ## Development setup
 
-You need Rust (stable, 1.85 or newer). The first build takes a while because it compiles DuckDB.
+You need Rust (stable, 1.99 or newer). The first build takes a while because it compiles DuckDB.
 
 ```sh
 git clone https://github.com/virling/virling
