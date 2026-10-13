@@ -139,6 +139,7 @@ section.block { padding: 96px 0; border-top: 1px solid var(--rule); }
 .providers div:last-child { border-right: 0; }
 .providers b { font-size: 20px; letter-spacing: -0.02em; }
 .providers span { font-size: 14px; color: var(--ink-2); }
+.providers .soon { align-self: flex-start; margin-top: 6px; height: 22px; padding: 0 8px; border-radius: 999px; background: var(--ground); border: 1px solid var(--rule); font: 600 12px var(--sans); font-style: normal; color: var(--ink-2); display: inline-flex; align-items: center; }
 .headrow { display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; }
 
 .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 40px; }
