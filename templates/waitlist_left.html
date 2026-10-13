@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+{% include "_head.html" %}
+<title>Waitlist · Virling</title>
+</head>
+<body class="auth">
+<header class="auth-top"><a class="brand" href="/">{% include "_logo.html" %}<b>virling</b></a></header>
+<main class="auth-main">
+  <div class="auth-box">
+    <div class="auth-copy">
+    {% if removed %}
+      <h1>You've left the waitlist</h1>
+      <p>We deleted your email. You won't hear from us again.</p>
+    {% else %}
+      <h1>Nothing to remove</h1>
+      <p>This link was already used, or the email isn't on the waitlist.</p>
+    {% endif %}
+    </div>
+  </div>
+</main>
+</body>
+</html>

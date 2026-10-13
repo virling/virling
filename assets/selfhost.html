@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virling: revenue analytics in one binary</title>
+<meta name="description" content="Open-source web analytics that shows which channels bring paying customers. One Rust binary, no database to run.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="/v.js" data-site="virling.com"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/">
+      <svg width="28" height="28" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg>
+      <b>virling</b>
+    </a>
+    <nav class="nav">
+      <a href="#how">How it works</a>
+      <a href="/agency">Agencies</a>
+      <a href="https://github.com/virling/virling">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.35 1.09 2.92.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>
+        GitHub
+      </a>
+      <a class="cta" href="#join">Get early access</a>
+    </nav>
+  </header>
+
+  <section class="hero" id="join" data-wedge="selfhost">
+    <a class="pill" href="https://github.com/virling/virling"><span>AGPLv3</span>Open source, written in Rust</a>
+    <h1>Your traffic came from X. Your <em>money</em> came from somewhere else.</h1>
+    <p class="lead">Virling joins every visit to the payment that followed, so you see which channels bring paying customers. One binary, no database to run.</p>
+    <form class="waitlist" novalidate>
+      <label class="sr" for="email">Email</label>
+      <input id="email" type="email" name="email" placeholder="you@company.com" autocomplete="email" required>
+      <button class="btn lg" type="submit">Join the waitlist</button>
+      <p class="form-error" role="alert"></p>
+    </form>
+    <div class="joined" role="status">
+      <span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>
+      <span><b>You're in.</b> <span class="muted">We'll email you when the first build is ready.</span></span>
+    </div>
+    <div class="perks">
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E7A4C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Self-hosting is free forever</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E7A4C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>First 50 hosted customers get 40% off for life</span>
+    </div>
+  </section>
+
+  <section aria-label="Example dashboard" style="padding-bottom: 96px">
+    <div class="card lifted">
+      <div class="card-head">
+        <b style="display:inline-flex;align-items:center;gap:10px;font-weight:600"><span class="sw" style="width:8px;height:8px;border-radius:50%;background:var(--visitors)"></span>yourproduct.com</b>
+        <div class="legend"><span><i class="sw" style="background:var(--visitors)"></i>Share of visitors</span><span><i class="sw" style="background:var(--revenue)"></i>Share of revenue</span></div>
+      </div>
+      <div class="stats">
+        <div><small>Visitors, 30 days</small><strong>19,070</strong></div>
+        <div><small>Revenue</small><strong style="color:var(--revenue-text)">$1,740</strong></div>
+        <div><small>Revenue per visitor</small><strong>$0.09</strong></div>
+        <div><small>Paying customers</small><strong>60</strong></div>
+      </div>
+      <div class="scroll">
+        <div class="share">
+          <div class="row head"><span>Channel</span><span>Visitors vs revenue</span><span>Per visitor</span></div>
+          <div class="row"><span>Hacker News</span><div class="bars"><div class="v"><i style="width:31.2%"></i>16.5%</div><div class="r"><i style="width:66.1%"></i>35.0%</div></div><span>$0.19</span></div>
+          <div class="row"><span>Google</span><div class="bars"><div class="v"><i style="width:28.7%"></i>15.2%</div><div class="r"><i style="width:44%"></i>23.3%</div></div><span>$0.14</span></div>
+          <div class="row"><span>Direct</span><div class="bars"><div class="v"><i style="width:19.5%"></i>10.3%</div><div class="r"><i style="width:28.3%"></i>15.0%</div></div><span>$0.13</span></div>
+          <div class="row"><span>ChatGPT</span><div class="bars"><div class="v"><i style="width:4%"></i>2.1%</div><div class="r"><i style="width:22.1%"></i>11.7%</div></div><span>$0.50</span></div>
+          <div class="row"><span>X</span><div class="bars"><div class="v"><i style="width:83.5%"></i>44.2%</div><div class="r"><i style="width:18.9%"></i>10.0%</div></div><span class="dim">$0.02</span></div>
+          <div class="row"><span>Reddit</span><div class="bars"><div class="v"><i style="width:22.1%"></i>11.7%</div><div class="r"><i style="width:9.4%"></i>5.0%</div></div><span class="dim">$0.04</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="caption"><b>X sent 44% of visitors and 10% of revenue.</b> A visitor from ChatGPT was worth 24 times one from X. Example data.</p>
+  </section>
+
+  <section class="block cols" id="how">
+    <div class="text">
+      <h2>Every payment has a path.</h2>
+      <p class="body">Click any payment to see the visits before it: where they first came from, what they read, and what made them buy.</p>
+      <p class="body">Credit goes to the last channel that wasn't direct, or the first touch if you prefer. Renewals keep the source of the first payment.</p>
+    </div>
+    <div class="visual card">
+      <div class="card-head"><span class="mono" style="font-size:18px;color:var(--revenue-text)">$29.00</span><span style="font-size:13px;color:var(--ink-3)">Stripe, Oct 9</span></div>
+      <ol class="journey">
+        <li><span class="dot"></span><time>Sep 21</time><div><b>Hacker News</b> <span class="note">first visit</span><div class="path">/ &rarr; /pricing</div></div></li>
+        <li><span class="dot"></span><time>Sep 28</time><div><b>Direct</b><div class="path">/docs/self-host</div></div></li>
+        <li><span class="dot"></span><time>Oct 9</time><div><b>ChatGPT</b> <span class="credited">credited</span><div class="path">/pricing &rarr; signup</div></div></li>
+        <li><span class="dot paid"></span><time style="padding-top:3px">Oct 9</time><div><span class="paid-text">Paid $29.00</span> <span class="note">18 days after first visit</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block cols">
+    <div class="text">
+      <h2>One file. No Postgres, no ClickHouse, no Redis.</h2>
+      <p class="body">Download it, start it, add the script tag. Events and settings live in embedded storage next to the binary, so a backup is a file copy.</p>
+      <dl class="specs">
+        <dt>Runs on</dt><dd>Linux x86_64 and arm64, macOS, Docker</dd>
+        <dt>Storage</dt><dd>Embedded DuckDB and SQLite</dd>
+        <dt>Script</dt><dd>Under 5 KB gzipped</dd>
+        <dt>Visitor IPs</dt><dd>Used for country lookup, never stored</dd>
+        <dt>License</dt><dd>AGPLv3</dd>
+      </dl>
+    </div>
+    <div class="visual term" data-tabs>
+      <div class="term-head">
+        <div class="tabs" role="tablist">
+          <button role="tab" aria-selected="true" aria-controls="t-install">Install</button>
+          <button role="tab" aria-selected="false" aria-controls="t-docker">Docker</button>
+        </div>
+        <button class="copy" type="button" data-copy>Copy</button>
+      </div>
+      <pre id="t-install" role="tabpanel">$ curl -fsSL https://virling.com/install | sh
+$ virling serve
+  listening on http://0.0.0.0:8080
+
+# then add one tag to your site
+&lt;script defer src="https://stats.you.com/v.js"
+        data-site="you.com"&gt;&lt;/script&gt;</pre>
+      <pre id="t-docker" role="tabpanel" hidden>$ docker run -d -p 8080:8080 \
+    -v virling:/data \
+    ghcr.io/virling/virling:latest
+
+# then add one tag to your site
+&lt;script defer src="https://stats.you.com/v.js"
+        data-site="you.com"&gt;&lt;/script&gt;</pre>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="headrow">
+      <h2 style="max-width:620px">Paste a read-only key. That's the whole integration.</h2>
+      <p class="body" style="max-width:420px">Virling pulls payments and refunds itself. No webhooks to set up, no write access to your account.</p>
+    </div>
+    <div class="providers">
+      <div><b>Stripe</b><span>Payment Links tagged automatically</span></div>
+      <div><b>Dodo Payments</b><span>Built in, not bolted on</span></div>
+      <div><b>Polar</b><span>Orders and refunds</span></div>
+      <div><b>LemonSqueezy</b><span>Orders and renewals</span></div>
+    </div>
+  </section>
+
+  <section class="block closer">
+    <h2>Stop posting where it feels busy. Post where buyers come from.</h2>
+    <a class="btn lg accent" href="#join">Join the waitlist</a>
+  </section>
+
+  <footer><span>Virling is built by Stacklance Infotech LLP.</span><span>In development. Not launched yet.</span></footer>
+</div>
+<script src="/assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+{% include "_head.html" %}
+<title>Sign in · Virling</title>
+</head>
+<body class="auth">
+<header class="auth-top">
+  <a class="brand" href="/">{% include "_logo.html" %}<b>virling</b></a>
+</header>
+<main class="auth-main">
+  <div class="auth-box">
+  {% if view == "sent" %}
+    <span class="auth-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0E1116" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>
+    <div class="auth-copy">
+      <h1>Check your email</h1>
+      <p>We sent a sign-in link to <b>{{ email }}</b>. It works once and expires in 15 minutes.</p>
+    </div>
+    <form class="notice" method="post" action="/login">
+      <span>Not there? Check spam, or</span>
+      <input type="hidden" name="email" value="{{ email }}">
+      <button class="btn secondary" type="submit">Send it again</button>
+    </form>
+    <a class="link-quiet" href="/login">Use a different email</a>
+  {% else if view == "confirm" %}
+    <div class="auth-copy">
+      <h1>Continue as {{ email }}</h1>
+      <p>One click to finish signing in. This step stops email scanners from using your link first.</p>
+    </div>
+    <form method="post" action="/auth/verify">
+      <input type="hidden" name="token" value="{{ token }}">
+      <button class="btn lg block" type="submit">Sign in</button>
+    </form>
+  {% else %}
+    <div class="auth-copy">
+      <h1>Sign in to Virling</h1>
+      <p>We'll email you a link. No password. New here? The same link creates your account.</p>
+    </div>
+    {% if let Some(error) = error %}
+    <div class="alert" role="alert">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C0262D" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+      <span>{{ error }}</span>
+    </div>
+    {% endif %}
+    <form class="stack" method="post" action="/login">
+      <label class="field">Email
+        <input type="email" name="email" value="{{ email }}" placeholder="you@company.com" autocomplete="email" required autofocus>
+      </label>
+      <button class="btn lg block" type="submit">Email me a sign-in link</button>
+    </form>
+  {% endif %}
+  </div>
+</main>
+</body>
+</html>
