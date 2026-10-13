@@ -58,14 +58,16 @@
     if (d.visibilityState == "hidden") flush();
   });
 
-  // Carry the visitor ID into Stripe Payment Links so the payment can be matched back.
+  // Carry the visitor ID into Stripe Payment Links and Polar checkout links so the payment can be matched back.
   d.addEventListener("click", function (e) {
     var a = e.target.closest && e.target.closest("a[href]");
     if (!a || !vid) return;
     try {
-      var u = new URL(a.href);
-      if (u.hostname == "buy.stripe.com" && !u.searchParams.has("client_reference_id")) {
-        u.searchParams.set("client_reference_id", vid);
+      var u = new URL(a.href), h = u.hostname, k;
+      if (h == "buy.stripe.com") k = "client_reference_id";
+      else if (h == "buy.polar.sh" || (h == "sandbox-api.polar.sh" && !u.pathname.indexOf("/v1/checkout-links/"))) k = "custom_field_data.virling_vid";
+      if (k && !u.searchParams.has(k)) {
+        u.searchParams.set(k, vid);
         a.href = u.href;
       }
     } catch (err) {}
