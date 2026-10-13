@@ -1,0 +1,102 @@
+{
+  "items": [
+    {
+      "brand_id": "bus_Kpa8zN3bW2Yq",
+      "card_last_four": "4242",
+      "card_network": "VISA",
+      "created_at": "2026-09-01T10:30:00Z",
+      "currency": "USD",
+      "customer": {
+        "customer_id": "cus_Gq9lbBQ4pZ7c",
+        "email": "ada@example.com",
+        "name": "Ada Lovelace",
+        "metadata": {},
+        "phone_number": null
+      },
+      "digital_products_delivered": true,
+      "dispute_status": null,
+      "has_license_key": false,
+      "invoice_id": "inv_8sYdK1",
+      "invoice_url": null,
+      "is_multi_subscription": false,
+      "metadata": { "virling_vid": "v_3f9a1c", "order_id": "ORD-123" },
+      "payment_id": "pay_gr4RizvMOXFJ6xca3y2tU",
+      "payment_method": "card",
+      "payment_method_type": "visa",
+      "payment_provider": "dodo",
+      "refund_status": null,
+      "status": "succeeded",
+      "subscription_id": null,
+      "subscription_ids": [],
+      "total_amount": 2999
+    },
+    {
+      "brand_id": "bus_Kpa8zN3bW2Yq",
+      "card_last_four": "1881",
+      "card_network": "MASTERCARD",
+      "created_at": "2026-09-02T08:00:00Z",
+      "currency": "EUR",
+      "customer": {
+        "customer_id": "cus_Lx2mPq8Rr4Ty",
+        "email": "grace@example.com",
+        "name": "Grace Hopper"
+      },
+      "digital_products_delivered": true,
+      "dispute_status": null,
+      "has_license_key": false,
+      "is_multi_subscription": false,
+      "metadata": {},
+      "payment_id": "pay_7Hj2KdQwXz1mNbV5cR8tY",
+      "payment_provider": "dodo",
+      "refund_status": "full",
+      "status": "succeeded",
+      "subscription_id": null,
+      "subscription_ids": [],
+      "total_amount": 4900
+    },
+    {
+      "brand_id": "bus_Kpa8zN3bW2Yq",
+      "created_at": "2026-09-03T12:15:00Z",
+      "currency": "USD",
+      "customer": {
+        "customer_id": "cus_Gq9lbBQ4pZ7c",
+        "email": "ada@example.com",
+        "name": "Ada Lovelace"
+      },
+      "digital_products_delivered": true,
+      "dispute_status": null,
+      "has_license_key": false,
+      "is_multi_subscription": false,
+      "metadata": { "virling_vid": "v_3f9a1c" },
+      "payment_id": "pay_Pt5sR9vLmQ2wXy7kZ3aB4",
+      "payment_provider": "dodo",
+      "refund_status": "partial",
+      "status": "succeeded",
+      "subscription_id": null,
+      "subscription_ids": [],
+      "total_amount": 9900
+    },
+    {
+      "brand_id": "bus_Kpa8zN3bW2Yq",
+      "created_at": "2026-10-01T09:00:05Z",
+      "currency": "USD",
+      "customer": {
+        "customer_id": "cus_Wn4cTb6Jk1Ps",
+        "email": "alan@example.com",
+        "name": "Alan Turing"
+      },
+      "digital_products_delivered": false,
+      "dispute_status": "dispute_won",
+      "has_license_key": false,
+      "is_multi_subscription": false,
+      "metadata": {},
+      "payment_id": "pay_Rn8vW2xJ5kL9mQ3pS6tU1",
+      "payment_provider": "dodo",
+      "refund_status": null,
+      "status": "succeeded",
+      "subscription_id": "sub_Hq3nK8wZ2xV5bM",
+      "subscription_ids": ["sub_Hq3nK8wZ2xV5bM"],
+      "total_amount": 1500
+    }
+  ]
+}
