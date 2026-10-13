@@ -63,12 +63,19 @@ pub async fn for_account(db: &SqlitePool, account_id: &str) -> anyhow::Result<Ve
 
 pub fn normalize_domain(input: &str) -> Option<String> {
     let s = input.trim().to_ascii_lowercase();
-    let s = s.strip_prefix("https://").or_else(|| s.strip_prefix("http://")).unwrap_or(&s);
+    let s = s
+        .strip_prefix("https://")
+        .or_else(|| s.strip_prefix("http://"))
+        .unwrap_or(&s);
     let s = s.split(['/', '?', '#']).next()?;
     let s = s.strip_prefix("www.").unwrap_or(s);
     let valid = s.contains('.')
         && s.len() <= 253
-        && s.split('.').all(|l| !l.is_empty() && l.len() <= 63 && l.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-'));
+        && s.split('.').all(|l| {
+            !l.is_empty()
+                && l.len() <= 63
+                && l.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
+        });
     valid.then(|| s.to_string())
 }
 
@@ -80,20 +87,30 @@ pub async fn find_or_create_account(db: &SqlitePool, email: &str) -> anyhow::Res
         .bind(&now)
         .execute(db)
         .await?;
-    let id: String = sqlx::query_scalar("SELECT id FROM accounts WHERE email = ?").bind(email).fetch_one(db).await?;
+    let id: String = sqlx::query_scalar("SELECT id FROM accounts WHERE email = ?")
+        .bind(email)
+        .fetch_one(db)
+        .await?;
     Ok(id)
 }
 
-pub async fn create_site(db: &SqlitePool, account_id: &str, domain: &str, timezone: &str) -> anyhow::Result<String> {
+pub async fn create_site(
+    db: &SqlitePool,
+    account_id: &str,
+    domain: &str,
+    timezone: &str,
+) -> anyhow::Result<String> {
     let id = uuid::Uuid::new_v4().to_string();
-    sqlx::query("INSERT INTO sites (id, account_id, domain, timezone, created_at) VALUES (?, ?, ?, ?, ?)")
-        .bind(&id)
-        .bind(account_id)
-        .bind(domain)
-        .bind(timezone)
-        .bind(OffsetDateTime::now_utc().unix_timestamp().to_string())
-        .execute(db)
-        .await?;
+    sqlx::query(
+        "INSERT INTO sites (id, account_id, domain, timezone, created_at) VALUES (?, ?, ?, ?, ?)",
+    )
+    .bind(&id)
+    .bind(account_id)
+    .bind(domain)
+    .bind(timezone)
+    .bind(OffsetDateTime::now_utc().unix_timestamp().to_string())
+    .execute(db)
+    .await?;
     Ok(id)
 }
 
@@ -103,8 +120,14 @@ mod tests {
 
     #[test]
     fn domains_are_normalized() {
-        assert_eq!(normalize_domain("https://www.Example.com/pricing").as_deref(), Some("example.com"));
-        assert_eq!(normalize_domain("app.example.io").as_deref(), Some("app.example.io"));
+        assert_eq!(
+            normalize_domain("https://www.Example.com/pricing").as_deref(),
+            Some("example.com")
+        );
+        assert_eq!(
+            normalize_domain("app.example.io").as_deref(),
+            Some("app.example.io")
+        );
         assert_eq!(normalize_domain("localhost"), None);
         assert_eq!(normalize_domain("bad domain.com"), None);
     }

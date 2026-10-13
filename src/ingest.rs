@@ -5,7 +5,7 @@ use std::sync::Mutex;
 
 use axum::body::Bytes;
 use axum::extract::{ConnectInfo, State};
-use axum::http::{header, HeaderMap, StatusCode};
+use axum::http::{HeaderMap, StatusCode, header};
 use axum::response::{IntoResponse, Response};
 use serde::Deserialize;
 use time::{Date, Duration, OffsetDateTime};
@@ -76,7 +76,9 @@ pub struct DailySalt {
 
 impl Default for DailySalt {
     fn default() -> Self {
-        Self { inner: Mutex::new((OffsetDateTime::now_utc().date(), RandomState::new())) }
+        Self {
+            inner: Mutex::new((OffsetDateTime::now_utc().date(), RandomState::new())),
+        }
     }
 }
 
@@ -117,9 +119,23 @@ impl RateLimiter {
 pub fn is_bot(user_agent: &str) -> bool {
     let ua = user_agent.to_ascii_lowercase();
     ua.is_empty()
-        || ["bot", "crawl", "spider", "slurp", "headless", "lighthouse", "preview", "curl/", "wget/", "python-", "go-http", "phantomjs", "facebookexternalhit"]
-            .iter()
-            .any(|m| ua.contains(m))
+        || [
+            "bot",
+            "crawl",
+            "spider",
+            "slurp",
+            "headless",
+            "lighthouse",
+            "preview",
+            "curl/",
+            "wget/",
+            "python-",
+            "go-http",
+            "phantomjs",
+            "facebookexternalhit",
+        ]
+        .iter()
+        .any(|m| ua.contains(m))
 }
 
 pub fn browser(user_agent: &str) -> &'static str {
@@ -150,10 +166,12 @@ pub fn device(width: Option<u32>) -> &'static str {
 }
 
 fn country(headers: &HeaderMap) -> Option<String> {
-    ["cf-ipcountry", "x-vercel-ip-country", "x-country-code"].iter().find_map(|h| {
-        let v = headers.get(*h)?.to_str().ok()?.trim().to_ascii_uppercase();
-        (v.len() == 2 && v != "XX" && v != "T1").then_some(v)
-    })
+    ["cf-ipcountry", "x-vercel-ip-country", "x-country-code"]
+        .iter()
+        .find_map(|h| {
+            let v = headers.get(*h)?.to_str().ok()?.trim().to_ascii_uppercase();
+            (v.len() == 2 && v != "XX" && v != "T1").then_some(v)
+        })
 }
 
 fn client_ip(headers: &HeaderMap, peer: SocketAddr, trust_proxy: bool) -> IpAddr {
@@ -196,7 +214,10 @@ pub async fn collect(
     headers: HeaderMap,
     body: Bytes,
 ) -> Response {
-    let user_agent = headers.get(header::USER_AGENT).and_then(|v| v.to_str().ok()).unwrap_or("");
+    let user_agent = headers
+        .get(header::USER_AGENT)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("");
     if is_bot(user_agent) {
         return accepted();
     }
@@ -212,12 +233,23 @@ pub async fn collect(
 
     let mut events = Vec::with_capacity(incoming.len());
     for e in incoming {
-        let Some(site) = state.sites.by_domain(&state.db, &e.s.to_ascii_lowercase()).await else { continue };
-        if !state.limiter.allow(&site.id, state.config.events_per_second) {
+        let Some(site) = state
+            .sites
+            .by_domain(&state.db, &e.s.to_ascii_lowercase())
+            .await
+        else {
+            continue;
+        };
+        if !state
+            .limiter
+            .allow(&site.id, state.config.events_per_second)
+        {
             continue;
         }
         let Ok(page) = Url::parse(&e.u) else { continue };
-        let Some(page_host) = page.host_str() else { continue };
+        let Some(page_host) = page.host_str() else {
+            continue;
+        };
         if !host_belongs(page_host, &site.domain) {
             continue;
         }
@@ -227,7 +259,11 @@ pub async fn collect(
             _ => continue,
         };
         let name = if kind == "goal" {
-            match e.g.map(|g| clip(g.trim().to_string(), 64)).filter(|g| !g.is_empty()) {
+            match e
+                .g
+                .map(|g| clip(g.trim().to_string(), 64))
+                .filter(|g| !g.is_empty())
+            {
                 Some(g) => Some(g),
                 None => continue,
             }
@@ -236,15 +272,24 @@ pub async fn collect(
         };
 
         let query: HashMap<String, String> = page.query_pairs().into_owned().collect();
-        let utm = |k: &str| query.get(k).map(|v| clip(v.trim().to_string(), 200)).filter(|v| !v.is_empty());
-        let referrer_host = e
-            .r
-            .as_deref()
-            .and_then(|r| Url::parse(r).ok())
-            .and_then(|r| r.host_str().map(|h| h.to_ascii_lowercase()))
-            .filter(|h| !host_belongs(h, &site.domain));
-        let (utm_source, utm_medium) = (utm("utm_source").or_else(|| utm("ref")), utm("utm_medium"));
-        let channel = channel::classify(utm_medium.as_deref(), utm_source.as_deref(), referrer_host.as_deref());
+        let utm = |k: &str| {
+            query
+                .get(k)
+                .map(|v| clip(v.trim().to_string(), 200))
+                .filter(|v| !v.is_empty())
+        };
+        let referrer_host =
+            e.r.as_deref()
+                .and_then(|r| Url::parse(r).ok())
+                .and_then(|r| r.host_str().map(|h| h.to_ascii_lowercase()))
+                .filter(|h| !host_belongs(h, &site.domain));
+        let (utm_source, utm_medium) =
+            (utm("utm_source").or_else(|| utm("ref")), utm("utm_medium"));
+        let channel = channel::classify(
+            utm_medium.as_deref(),
+            utm_source.as_deref(),
+            referrer_host.as_deref(),
+        );
 
         let visitor_id = match e.v.filter(|v| !site.cookieless && valid_visitor_id(v)) {
             Some(v) => v,
@@ -285,7 +330,12 @@ pub async fn collect(
 }
 
 fn accepted() -> Response {
-    (StatusCode::ACCEPTED, [(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")], "").into_response()
+    (
+        StatusCode::ACCEPTED,
+        [(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")],
+        "",
+    )
+        .into_response()
 }
 
 pub async fn preflight() -> Response {
@@ -310,7 +360,9 @@ mod tests {
         assert!(is_bot("Mozilla/5.0 (compatible; Googlebot/2.1)"));
         assert!(is_bot("Mozilla/5.0 HeadlessChrome/120.0"));
         assert!(is_bot(""));
-        assert!(!is_bot("Mozilla/5.0 (Macintosh) AppleWebKit/605 Version/17.0 Safari/605.1"));
+        assert!(!is_bot(
+            "Mozilla/5.0 (Macintosh) AppleWebKit/605 Version/17.0 Safari/605.1"
+        ));
     }
 
     #[test]
@@ -344,7 +396,13 @@ mod tests {
     fn cookieless_ids_are_stable_within_a_day() {
         let salt = DailySalt::default();
         let ip: IpAddr = "203.0.113.7".parse().unwrap();
-        assert_eq!(salt.visitor_id("s", ip, "ua"), salt.visitor_id("s", ip, "ua"));
-        assert_ne!(salt.visitor_id("s", ip, "ua"), salt.visitor_id("s", ip, "other"));
+        assert_eq!(
+            salt.visitor_id("s", ip, "ua"),
+            salt.visitor_id("s", ip, "ua")
+        );
+        assert_ne!(
+            salt.visitor_id("s", ip, "ua"),
+            salt.visitor_id("s", ip, "other")
+        );
     }
 }

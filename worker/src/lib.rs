@@ -7,7 +7,7 @@ use worker::*;
 #[path = "../../src/waitlist_copy.rs"]
 mod waitlist_copy;
 
-use waitlist_copy::{confirm_text, ConfirmEmail, AGENCY, SELFHOST};
+use waitlist_copy::{AGENCY, ConfirmEmail, SELFHOST, confirm_text};
 
 #[derive(Template)]
 #[template(path = "waitlist_left.html")]
@@ -34,7 +34,9 @@ struct Entry {
 }
 
 fn valid_email(email: &str) -> bool {
-    let Some((local, domain)) = email.split_once('@') else { return false };
+    let Some((local, domain)) = email.split_once('@') else {
+        return false;
+    };
     email.len() <= 254
         && !local.is_empty()
         && domain.contains('.')
@@ -64,7 +66,11 @@ async fn join(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
     if kv.get(&key).text().await?.is_some() {
         return json_status(json!({ "ok": true }), 200);
     }
-    let leave_token = format!("{}{}", uuid::Uuid::new_v4().simple(), uuid::Uuid::new_v4().simple());
+    let leave_token = format!(
+        "{}{}",
+        uuid::Uuid::new_v4().simple(),
+        uuid::Uuid::new_v4().simple()
+    );
     let entry = Entry {
         email: email.clone(),
         wedge: input.wedge.clone(),
@@ -73,12 +79,28 @@ async fn join(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
         created_at: Date::now().to_string(),
         leave_token: leave_token.clone(),
     };
-    kv.put(&key, serde_json::to_string(&entry)?)?.execute().await?;
-    kv.put(&format!("leave:{leave_token}"), &key)?.execute().await?;
+    kv.put(&key, serde_json::to_string(&entry)?)?
+        .execute()
+        .await?;
+    kv.put(&format!("leave:{leave_token}"), &key)?
+        .execute()
+        .await?;
 
-    let copy = if input.wedge == "agency" { &AGENCY } else { &SELFHOST };
-    let leave_link = format!("{}/waitlist/leave?token={leave_token}", ctx.var("BASE_URL")?.to_string());
-    let html = ConfirmEmail { copy, leave_link: &leave_link }.render().map_err(|e| Error::RustError(e.to_string()))?;
+    let copy = if input.wedge == "agency" {
+        &AGENCY
+    } else {
+        &SELFHOST
+    };
+    let leave_link = format!(
+        "{}/waitlist/leave?token={leave_token}",
+        ctx.var("BASE_URL")?.to_string()
+    );
+    let html = ConfirmEmail {
+        copy,
+        leave_link: &leave_link,
+    }
+    .render()
+    .map_err(|e| Error::RustError(e.to_string()))?;
     let from = ctx.var("WAITLIST_FROM")?.to_string();
     let body = json!({
         "from": from,
@@ -103,16 +125,32 @@ async fn send_email(api_key: &str, body: &serde_json::Value) -> Result<()> {
     headers.set("Authorization", &format!("Bearer {api_key}"))?;
     headers.set("Content-Type", "application/json")?;
     let mut init = RequestInit::new();
-    init.with_method(Method::Post).with_headers(headers).with_body(Some(body.to_string().into()));
-    let mut res = Fetch::Request(Request::new_with_init("https://api.resend.com/emails", &init)?).send().await?;
+    init.with_method(Method::Post)
+        .with_headers(headers)
+        .with_body(Some(body.to_string().into()));
+    let mut res = Fetch::Request(Request::new_with_init(
+        "https://api.resend.com/emails",
+        &init,
+    )?)
+    .send()
+    .await?;
     if res.status_code() >= 300 {
-        return Err(Error::RustError(format!("resend {}: {}", res.status_code(), res.text().await?)));
+        return Err(Error::RustError(format!(
+            "resend {}: {}",
+            res.status_code(),
+            res.text().await?
+        )));
     }
     Ok(())
 }
 
 async fn leave(req: Request, ctx: RouteContext<()>) -> Result<Response> {
-    let token = req.url()?.query_pairs().find(|(k, _)| k == "token").map(|(_, v)| v.into_owned()).unwrap_or_default();
+    let token = req
+        .url()?
+        .query_pairs()
+        .find(|(k, _)| k == "token")
+        .map(|(_, v)| v.into_owned())
+        .unwrap_or_default();
     let kv = ctx.kv("WAITLIST")?;
     let mut removed = false;
     if !token.is_empty() {
@@ -122,7 +160,9 @@ async fn leave(req: Request, ctx: RouteContext<()>) -> Result<Response> {
             removed = true;
         }
     }
-    let html = LeftPage { removed }.render().map_err(|e| Error::RustError(e.to_string()))?;
+    let html = LeftPage { removed }
+        .render()
+        .map_err(|e| Error::RustError(e.to_string()))?;
     Response::from_html(html)
 }
 

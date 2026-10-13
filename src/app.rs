@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
-use axum::http::{header, StatusCode};
+use axum::Router;
+use axum::http::{StatusCode, header};
 use axum::response::{Html, IntoResponse, Redirect, Response};
 use axum::routing::{get, post};
-use axum::Router;
 use sqlx::SqlitePool;
 
 use crate::events::EventStore;
@@ -40,7 +40,12 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new(config: Config, db: SqlitePool, events: Arc<dyn EventStore>, mailer: Mailer) -> Self {
+    pub fn new(
+        config: Config,
+        db: SqlitePool,
+        events: Arc<dyn EventStore>,
+        mailer: Mailer,
+    ) -> Self {
         Self {
             config: Arc::new(config),
             db,
@@ -57,30 +62,72 @@ impl AppState {
 pub fn router(state: AppState) -> Router {
     let mut app = Router::new()
         .route("/v.js", get(tracker))
-        .route("/api/event", post(ingest::collect).options(ingest::preflight))
+        .route(
+            "/api/event",
+            post(ingest::collect).options(ingest::preflight),
+        )
         .route("/health", get(|| async { "ok" }))
-        .route("/assets/site.css", get(|| asset("text/css", include_str!("../assets/site.css"))))
-        .route("/assets/site.js", get(|| asset("text/javascript", include_str!("../assets/site.js"))))
-        .route("/assets/app.css", get(|| asset("text/css", include_str!("../assets/app.css"))))
-        .route("/assets/app.js", get(|| asset("text/javascript", include_str!("../assets/app.js"))))
-        .route("/assets/email-logo.png", get(|| async {
-            ([(header::CONTENT_TYPE, "image/png"), (header::CACHE_CONTROL, "public, max-age=86400")], include_bytes!("../assets/email-logo.png").as_slice())
-        }))
-        .route("/favicon.svg", get(|| asset("image/svg+xml", include_str!("../assets/favicon.svg"))));
+        .route(
+            "/assets/site.css",
+            get(|| asset("text/css", include_str!("../assets/site.css"))),
+        )
+        .route(
+            "/assets/site.js",
+            get(|| asset("text/javascript", include_str!("../assets/site.js"))),
+        )
+        .route(
+            "/assets/app.css",
+            get(|| asset("text/css", include_str!("../assets/app.css"))),
+        )
+        .route(
+            "/assets/app.js",
+            get(|| asset("text/javascript", include_str!("../assets/app.js"))),
+        )
+        .route(
+            "/assets/email-logo.png",
+            get(|| async {
+                (
+                    [
+                        (header::CONTENT_TYPE, "image/png"),
+                        (header::CACHE_CONTROL, "public, max-age=86400"),
+                    ],
+                    include_bytes!("../assets/email-logo.png").as_slice(),
+                )
+            }),
+        )
+        .route(
+            "/favicon.svg",
+            get(|| asset("image/svg+xml", include_str!("../assets/favicon.svg"))),
+        );
     if state.config.app {
         app = app
             .route("/login", get(auth::login_form).post(auth::send_link))
             .route("/auth/verify", get(auth::confirm).post(auth::verify))
             .route("/logout", post(auth::logout))
             .route("/app", get(onboarding::home))
-            .route("/app/setup", get(onboarding::site_form).post(onboarding::create_site))
-            .route("/app/sites/{site_id}/setup/script", get(onboarding::script_step))
-            .route("/app/sites/{site_id}/latest-event", get(onboarding::latest_event));
+            .route(
+                "/app/setup",
+                get(onboarding::site_form).post(onboarding::create_site),
+            )
+            .route(
+                "/app/sites/{site_id}/setup/script",
+                get(onboarding::script_step),
+            )
+            .route(
+                "/app/sites/{site_id}/latest-event",
+                get(onboarding::latest_event),
+            );
     }
     if state.config.marketing {
         app = app
-            .route("/", get(|| async { Html(include_str!("../assets/selfhost.html")) }))
-            .route("/agency", get(|| async { Html(include_str!("../assets/agency.html")) }))
+            .route(
+                "/",
+                get(|| async { Html(include_str!("../assets/selfhost.html")) }),
+            )
+            .route(
+                "/agency",
+                get(|| async { Html(include_str!("../assets/agency.html")) }),
+            )
             .route("/api/waitlist", post(waitlist::join))
             .route("/waitlist/leave", get(waitlist::leave));
     } else if state.config.app {
@@ -102,5 +149,13 @@ async fn tracker() -> Response {
 }
 
 async fn asset(content_type: &'static str, body: &'static str) -> Response {
-    (StatusCode::OK, [(header::CONTENT_TYPE, content_type), (header::CACHE_CONTROL, "public, max-age=3600")], body).into_response()
+    (
+        StatusCode::OK,
+        [
+            (header::CONTENT_TYPE, content_type),
+            (header::CACHE_CONTROL, "public, max-age=3600"),
+        ],
+        body,
+    )
+        .into_response()
 }

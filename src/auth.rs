@@ -1,9 +1,9 @@
 use askama::Template;
+use axum::Form;
 use axum::extract::{FromRequestParts, Query, State};
 use axum::http::request::Parts;
-use axum::http::{header, HeaderMap, HeaderValue};
+use axum::http::{HeaderMap, HeaderValue, header};
 use axum::response::{Html, IntoResponse, Redirect, Response};
-use axum::Form;
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use time::OffsetDateTime;
@@ -24,7 +24,10 @@ pub fn random_token() -> String {
 }
 
 pub fn hash_token(token: &str) -> String {
-    Sha256::digest(token.as_bytes()).iter().map(|b| format!("{b:02x}")).collect()
+    Sha256::digest(token.as_bytes())
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect()
 }
 
 fn now() -> i64 {
@@ -52,13 +55,22 @@ fn page(p: LoginPage) -> Response {
         Ok(html) => Html(html).into_response(),
         Err(err) => {
             tracing::error!(%err, "template render failed");
-            (axum::http::StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong").into_response()
+            (
+                axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+                "Something went wrong",
+            )
+                .into_response()
         }
     }
 }
 
 pub async fn login_form() -> Response {
-    page(LoginPage { view: "enter", email: String::new(), token: String::new(), error: None })
+    page(LoginPage {
+        view: "enter",
+        email: String::new(),
+        token: String::new(),
+        error: None,
+    })
 }
 
 #[derive(Deserialize)]
@@ -69,14 +81,20 @@ pub struct LoginInput {
 pub async fn send_link(State(state): State<AppState>, Form(input): Form<LoginInput>) -> Response {
     let email = input.email.trim().to_ascii_lowercase();
     if !valid_email(&email) {
-        return page(LoginPage { view: "enter", email, token: String::new(), error: Some("Enter a valid email.") });
+        return page(LoginPage {
+            view: "enter",
+            email,
+            token: String::new(),
+            error: Some("Enter a valid email."),
+        });
     }
-    let recent: i64 = sqlx::query_scalar("SELECT count(*) FROM login_tokens WHERE email = ? AND created_at > ?")
-        .bind(&email)
-        .bind(now() - 3600)
-        .fetch_one(&state.db)
-        .await
-        .unwrap_or(LINKS_PER_HOUR);
+    let recent: i64 =
+        sqlx::query_scalar("SELECT count(*) FROM login_tokens WHERE email = ? AND created_at > ?")
+            .bind(&email)
+            .bind(now() - 3600)
+            .fetch_one(&state.db)
+            .await
+            .unwrap_or(LINKS_PER_HOUR);
     if recent < LINKS_PER_HOUR {
         let token = random_token();
         let inserted = sqlx::query("INSERT INTO login_tokens (token_hash, email, created_at, expires_at) VALUES (?, ?, ?, ?)")
@@ -88,21 +106,45 @@ pub async fn send_link(State(state): State<AppState>, Form(input): Form<LoginInp
             .await;
         if let Err(err) = inserted {
             tracing::error!(%err, "storing login token failed");
-            return page(LoginPage { view: "enter", email, token: String::new(), error: Some("Something went wrong. Try again.") });
+            return page(LoginPage {
+                view: "enter",
+                email,
+                token: String::new(),
+                error: Some("Something went wrong. Try again."),
+            });
         }
         let link = format!("{}/auth/verify?token={token}", state.config.base_url);
         let text = format!(
             "Sign in to Virling as {email}:\n\n{link}\n\nThe link works once and expires in 15 minutes. If you didn't ask for this, ignore this email."
         );
-        let html = LoginEmailHtml { email: &email, link: &link }.render().unwrap_or_default();
-        if let Err(err) = state.mailer.send(&email, "Your Virling sign-in link", text, html).await {
+        let html = LoginEmailHtml {
+            email: &email,
+            link: &link,
+        }
+        .render()
+        .unwrap_or_default();
+        if let Err(err) = state
+            .mailer
+            .send(&email, "Your Virling sign-in link", text, html)
+            .await
+        {
             tracing::error!(%err, "sending login email failed");
-            return page(LoginPage { view: "enter", email, token: String::new(), error: Some("We couldn't send the email. Try again in a minute.") });
+            return page(LoginPage {
+                view: "enter",
+                email,
+                token: String::new(),
+                error: Some("We couldn't send the email. Try again in a minute."),
+            });
         }
     } else {
         tracing::warn!(%email, "login link rate limit reached");
     }
-    page(LoginPage { view: "sent", email, token: String::new(), error: None })
+    page(LoginPage {
+        view: "sent",
+        email,
+        token: String::new(),
+        error: None,
+    })
 }
 
 #[derive(Deserialize)]
@@ -125,8 +167,18 @@ const EXPIRED: &str = "This link has expired or was already used. Request a new 
 /// Shows a confirm button instead of signing in, so email scanners that open links can't use them up.
 pub async fn confirm(State(state): State<AppState>, Query(input): Query<TokenInput>) -> Response {
     match pending_email(&state, &input.token).await {
-        Some(email) => page(LoginPage { view: "confirm", email, token: input.token, error: None }),
-        None => page(LoginPage { view: "enter", email: String::new(), token: String::new(), error: Some(EXPIRED) }),
+        Some(email) => page(LoginPage {
+            view: "confirm",
+            email,
+            token: input.token,
+            error: None,
+        }),
+        None => page(LoginPage {
+            view: "enter",
+            email: String::new(),
+            token: String::new(),
+            error: Some(EXPIRED),
+        }),
     }
 }
 
@@ -142,7 +194,12 @@ pub async fn verify(State(state): State<AppState>, Form(input): Form<TokenInput>
     .ok()
     .flatten();
     let Some(email) = email else {
-        return page(LoginPage { view: "enter", email: String::new(), token: String::new(), error: Some(EXPIRED) });
+        return page(LoginPage {
+            view: "enter",
+            email: String::new(),
+            token: String::new(),
+            error: Some(EXPIRED),
+        });
     };
     let session = random_token();
     let created = async {
@@ -159,18 +216,35 @@ pub async fn verify(State(state): State<AppState>, Form(input): Form<TokenInput>
     .await;
     if let Err(err) = created {
         tracing::error!(%err, "creating session failed");
-        return page(LoginPage { view: "enter", email, token: String::new(), error: Some("Something went wrong. Try again.") });
+        return page(LoginPage {
+            view: "enter",
+            email,
+            token: String::new(),
+            error: Some("Something went wrong. Try again."),
+        });
     }
-    let secure = if state.config.base_url.starts_with("https://") { "; Secure" } else { "" };
-    let cookie = format!("{SESSION_COOKIE}={session}; Path=/; HttpOnly; SameSite=Lax; Max-Age={SESSION_TTL_SECS}{secure}");
+    let secure = if state.config.base_url.starts_with("https://") {
+        "; Secure"
+    } else {
+        ""
+    };
+    let cookie = format!(
+        "{SESSION_COOKIE}={session}; Path=/; HttpOnly; SameSite=Lax; Max-Age={SESSION_TTL_SECS}{secure}"
+    );
     let mut res = Redirect::to("/app").into_response();
-    res.headers_mut().insert(header::SET_COOKIE, HeaderValue::from_str(&cookie).expect("ascii cookie"));
+    res.headers_mut().insert(
+        header::SET_COOKIE,
+        HeaderValue::from_str(&cookie).expect("ascii cookie"),
+    );
     res
 }
 
 pub async fn logout(State(state): State<AppState>, headers: HeaderMap) -> Response {
     if let Some(token) = cookie(&headers, SESSION_COOKIE) {
-        let _ = sqlx::query("DELETE FROM sessions WHERE token_hash = ?").bind(hash_token(&token)).execute(&state.db).await;
+        let _ = sqlx::query("DELETE FROM sessions WHERE token_hash = ?")
+            .bind(hash_token(&token))
+            .execute(&state.db)
+            .await;
     }
     let mut res = Redirect::to("/login").into_response();
     res.headers_mut().insert(
@@ -201,7 +275,10 @@ pub struct Account {
 impl FromRequestParts<AppState> for Account {
     type Rejection = Redirect;
 
-    async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &AppState,
+    ) -> Result<Self, Self::Rejection> {
         let token = cookie(&parts.headers, SESSION_COOKIE).ok_or(Redirect::to("/login"))?;
         let row: Option<(String, String)> = sqlx::query_as(
             "SELECT a.id, a.email FROM sessions s JOIN accounts a ON a.id = s.account_id WHERE s.token_hash = ? AND s.expires_at > ?",
@@ -212,7 +289,8 @@ impl FromRequestParts<AppState> for Account {
         .await
         .ok()
         .flatten();
-        row.map(|(id, email)| Account { id, email }).ok_or(Redirect::to("/login"))
+        row.map(|(id, email)| Account { id, email })
+            .ok_or(Redirect::to("/login"))
     }
 }
 
@@ -225,13 +303,19 @@ mod tests {
         let a = random_token();
         assert_eq!(a.len(), 64);
         assert_ne!(a, random_token());
-        assert_eq!(hash_token("abc"), "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+        assert_eq!(
+            hash_token("abc"),
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
     }
 
     #[test]
     fn reads_cookies() {
         let mut h = HeaderMap::new();
-        h.insert(header::COOKIE, HeaderValue::from_static("a=1; virling_session=xyz; b=2"));
+        h.insert(
+            header::COOKIE,
+            HeaderValue::from_static("a=1; virling_session=xyz; b=2"),
+        );
         assert_eq!(cookie(&h, SESSION_COOKIE).as_deref(), Some("xyz"));
         assert_eq!(cookie(&h, "missing"), None);
     }
