@@ -1,11 +1,15 @@
 mod app;
 mod auth;
 mod channel;
+mod crypto;
 mod events;
+mod fx;
 mod ingest;
 mod mail;
 mod onboarding;
+mod providers;
 mod sites;
+mod sync;
 mod waitlist;
 mod waitlist_copy;
 
@@ -61,6 +65,9 @@ struct ServeArgs {
     /// Serve sign-in and the app (off during the waitlist phase)
     #[arg(long, env = "VIRLING_APP")]
     app: bool,
+    /// 64 hex chars used to encrypt payment-provider keys. Unset: a key file is created in the data dir.
+    #[arg(long, env = "VIRLING_SECRET_KEY", hide_env_values = true)]
+    secret_key: Option<String>,
     /// Trust X-Forwarded-For from a reverse proxy
     #[arg(long, env = "VIRLING_TRUST_PROXY")]
     trust_proxy: bool,
@@ -119,7 +126,12 @@ async fn main() -> anyhow::Result<()> {
                 waitlist_from: args.waitlist_from,
             };
             let mailer = mail::Mailer::new(args.smtp_url.as_deref(), &args.mail_from)?;
-            let state = AppState::new(config, db, Arc::new(events), mailer);
+            let vault = crypto::Vault::load(&cli.data_dir, args.secret_key.as_deref())?;
+            let app_enabled = config.app;
+            let state = AppState::new(config, db, Arc::new(events), mailer, vault);
+            if app_enabled {
+                tokio::spawn(sync::run(state.clone()));
+            }
             let listener = tokio::net::TcpListener::bind(args.addr)
                 .await
                 .with_context(|| format!("binding {}", args.addr))?;
@@ -207,6 +219,7 @@ mod tests {
             db,
             store.clone(),
             crate::mail::Mailer::Capture(Default::default()),
+            crate::crypto::Vault::load(dir.path(), None).unwrap(),
         );
         (dir, state, store)
     }

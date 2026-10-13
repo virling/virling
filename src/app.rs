@@ -6,7 +6,9 @@ use axum::response::{Html, IntoResponse, Redirect, Response};
 use axum::routing::{get, post};
 use sqlx::SqlitePool;
 
+use crate::crypto::Vault;
 use crate::events::EventStore;
+use crate::fx::Rates;
 use crate::ingest::{self, DailySalt, RateLimiter, Sessions};
 use crate::mail::Mailer;
 use crate::sites::SiteCache;
@@ -37,6 +39,9 @@ pub struct AppState {
     pub salt: Arc<DailySalt>,
     pub limiter: Arc<RateLimiter>,
     pub mailer: Arc<Mailer>,
+    pub vault: Arc<Vault>,
+    pub http: reqwest::Client,
+    pub rates: Arc<Rates>,
 }
 
 impl AppState {
@@ -45,8 +50,17 @@ impl AppState {
         db: SqlitePool,
         events: Arc<dyn EventStore>,
         mailer: Mailer,
+        vault: Vault,
     ) -> Self {
+        let http = reqwest::Client::builder()
+            .user_agent(concat!("virling/", env!("CARGO_PKG_VERSION")))
+            .timeout(std::time::Duration::from_secs(30))
+            .build()
+            .expect("http client");
         Self {
+            vault: Arc::new(vault),
+            rates: Arc::new(Rates::new(http.clone())),
+            http,
             config: Arc::new(config),
             db,
             events,
