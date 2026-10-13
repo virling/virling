@@ -1,0 +1,4 @@
+/target
+virling-data/
+.DS_Store
+.env.local
