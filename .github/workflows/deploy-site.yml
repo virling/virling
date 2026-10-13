@@ -1,0 +1,57 @@
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "worker/**"
+      - "assets/**"
+      - "templates/**"
+      - "src/waitlist_copy.rs"
+      - ".github/workflows/deploy-site.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://virling.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: worker
+
+      # No-op when the cached binary already matches this version.
+      - name: Install worker-build
+        run: cargo install worker-build --version 0.8.7 --locked
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
+          wranglerVersion: "4.150.0"
+          command: deploy
+
+      - name: Smoke check
+        run: |
+          for url in https://virling.com/ https://virling.com/agency; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 5 "$url")
+            echo "$url -> $code"
+            [ "$code" = "200" ] || exit 1
+          done
