@@ -1,0 +1,73 @@
+name: Release PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute next version
+        id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          current=$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)
+          IFS=. read -r major minor patch <<< "$current"
+          case "$BUMP" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+          esac
+          next="$major.$minor.$patch"
+          echo "Bumping $current -> $next"
+          echo "next=$next" >> "$GITHUB_OUTPUT"
+
+      - name: Update Cargo.toml and Cargo.lock
+        env:
+          NEXT: ${{ steps.version.outputs.next }}
+        run: |
+          sed -i "0,/^version = \".*\"/s//version = \"$NEXT\"/" Cargo.toml
+          sed -i "/^name = \"virling\"$/{n;s/^version = \".*\"/version = \"$NEXT\"/}" Cargo.lock
+          git diff --stat
+          grep -q "^version = \"$NEXT\"" Cargo.toml
+          grep -A1 '^name = "virling"$' Cargo.lock | grep -q "^version = \"$NEXT\""
+
+      - name: Generate changelog
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --tag v${{ steps.version.outputs.next }}
+        env:
+          OUTPUT: CHANGELOG.md
+
+      - name: Open release PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: release/v${{ steps.version.outputs.next }}
+          title: Release v${{ steps.version.outputs.next }}
+          commit-message: Release v${{ steps.version.outputs.next }}
+          body: |
+            Bumps the version to ${{ steps.version.outputs.next }} and updates CHANGELOG.md.
+            Merging this into main tags v${{ steps.version.outputs.next }} and publishes the release.
+          add-paths: |
+            Cargo.toml
+            Cargo.lock
+            CHANGELOG.md
