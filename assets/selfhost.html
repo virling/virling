@@ -74,7 +74,7 @@
         </div>
       </div>
     </div>
-    <p class="caption"><b>X sent 44% of visitors and 10% of revenue.</b> A visitor from ChatGPT was worth 24 times one from X. Example data.</p>
+    <p class="caption"><b>X sent 44% of visitors and 10% of revenue.</b> A visitor from ChatGPT was worth about 25 times one from X. Example data.</p>
   </section>
 
   <section class="block cols" id="how">
@@ -101,7 +101,7 @@
       <dl class="specs">
         <dt>Runs on</dt><dd>Linux x86_64 and arm64, macOS, Docker</dd>
         <dt>Storage</dt><dd>Embedded DuckDB and SQLite</dd>
-        <dt>Script</dt><dd>Under 5 KB gzipped</dd>
+        <dt>Script</dt><dd>1.4 KB gzipped</dd>
         <dt>Visitor IPs</dt><dd>Used for country lookup, never stored</dd>
         <dt>License</dt><dd>AGPLv3</dd>
       </dl>
@@ -109,21 +109,22 @@
     <div class="visual term" data-tabs>
       <div class="term-head">
         <div class="tabs" role="tablist">
-          <button role="tab" aria-selected="true" aria-controls="t-install">Install</button>
-          <button role="tab" aria-selected="false" aria-controls="t-docker">Docker</button>
+          <button role="tab" aria-selected="true" aria-controls="t-docker">Docker</button>
+          <button role="tab" aria-selected="false" aria-controls="t-install">Binary</button>
         </div>
         <button class="copy" type="button" data-copy>Copy</button>
       </div>
-      <pre id="t-install" role="tabpanel">$ curl -fsSL https://virling.com/install | sh
-$ virling serve
-  listening on http://0.0.0.0:8080
+      <pre id="t-install" role="tabpanel" hidden># download for Linux or macOS from
+# github.com/virling/virling/releases
+$ tar xzf virling-v0.1.0-x86_64-unknown-linux-gnu.tar.gz
+$ ./virling serve --app
 
 # then add one tag to your site
 &lt;script defer src="https://stats.you.com/v.js"
         data-site="you.com"&gt;&lt;/script&gt;</pre>
-      <pre id="t-docker" role="tabpanel" hidden>$ docker run -d -p 8080:8080 \
+      <pre id="t-docker" role="tabpanel">$ docker run -d -p 8080:8080 \
     -v virling:/data \
-    ghcr.io/virling/virling:latest
+    ghcr.io/virling/virling:latest serve --app
 
 # then add one tag to your site
 &lt;script defer src="https://stats.you.com/v.js"
@@ -137,10 +138,10 @@ $ virling serve
       <p class="body" style="max-width:420px">Virling pulls payments and refunds itself. No webhooks to set up, no write access to your account.</p>
     </div>
     <div class="providers">
-      <div><b>Stripe</b><span>Payment Links tagged automatically</span></div>
-      <div><b>Dodo Payments</b><span>Built in, not bolted on</span></div>
-      <div><b>Polar</b><span>Orders and refunds</span></div>
-      <div><b>LemonSqueezy</b><span>Orders and renewals</span></div>
+      <div><b>Stripe</b><span>Payment Links tagged automatically</span><em class="soon">In development</em></div>
+      <div><b>Dodo Payments</b><span>Built in, not bolted on</span><em class="soon">In development</em></div>
+      <div><b>Polar</b><span>Orders and refunds</span><em class="soon">In development</em></div>
+      <div><b>LemonSqueezy</b><span>Orders and renewals</span><em class="soon">In development</em></div>
     </div>
   </section>
 
