@@ -29,6 +29,7 @@ pub struct Event {
 /// Storage for events and payments. DuckDB today; ClickHouse can implement this later.
 pub trait EventStore: Send + Sync {
     fn insert_events(&self, events: &[Event]) -> anyhow::Result<()>;
+    #[cfg(test)]
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64>;
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>>;
 }
@@ -111,6 +112,7 @@ impl EventStore for DuckStore {
         Ok(())
     }
 
+    #[cfg(test)]
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64> {
         let conn = self.conn.lock().unwrap();
         let n: i64 = conn.query_row(
@@ -139,20 +141,21 @@ impl EventStore for DuckStore {
 }
 
 #[cfg(test)]
+type EventRow = (
+    String,
+    String,
+    Option<String>,
+    String,
+    Option<String>,
+    Option<String>,
+    String,
+    String,
+);
+
+#[cfg(test)]
 impl DuckStore {
     /// (path, channel, referrer_host, kind, name, country, device, visitor_id) for every event, oldest first.
-    pub fn dump(
-        &self,
-    ) -> Vec<(
-        String,
-        String,
-        Option<String>,
-        String,
-        Option<String>,
-        Option<String>,
-        String,
-        String,
-    )> {
+    pub fn dump(&self) -> Vec<EventRow> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn
             .prepare("SELECT path, channel, referrer_host, kind, name, country, device, visitor_id FROM events ORDER BY ts, path")

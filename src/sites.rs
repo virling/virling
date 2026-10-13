@@ -10,28 +10,27 @@ const MISS_TTL: Duration = Duration::from_secs(60);
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct Site {
     pub id: String,
-    pub account_id: String,
     pub domain: String,
     pub timezone: String,
-    pub attribution_model: String,
-    pub window_days: i64,
     pub cookieless: bool,
 }
 
+type CacheEntry = (Option<Arc<Site>>, Instant);
+
 #[derive(Default)]
 pub struct SiteCache {
-    entries: RwLock<HashMap<String, (Option<Arc<Site>>, Instant)>>,
+    entries: RwLock<HashMap<String, CacheEntry>>,
 }
 
 impl SiteCache {
     pub async fn by_domain(&self, db: &SqlitePool, domain: &str) -> Option<Arc<Site>> {
-        if let Some((site, at)) = self.entries.read().unwrap().get(domain) {
-            if site.is_some() || at.elapsed() < MISS_TTL {
-                return site.clone();
-            }
+        if let Some((site, at)) = self.entries.read().unwrap().get(domain)
+            && (site.is_some() || at.elapsed() < MISS_TTL)
+        {
+            return site.clone();
         }
         let site = sqlx::query_as::<_, Site>(
-            "SELECT id, account_id, domain, timezone, attribution_model, window_days, cookieless FROM sites WHERE domain = ?",
+            "SELECT id, domain, timezone, cookieless FROM sites WHERE domain = ?",
         )
         .bind(domain)
         .fetch_optional(db)
@@ -54,7 +53,7 @@ impl SiteCache {
 
 pub async fn for_account(db: &SqlitePool, account_id: &str) -> anyhow::Result<Vec<Site>> {
     Ok(sqlx::query_as::<_, Site>(
-        "SELECT id, account_id, domain, timezone, attribution_model, window_days, cookieless FROM sites WHERE account_id = ? ORDER BY created_at",
+        "SELECT id, domain, timezone, cookieless FROM sites WHERE account_id = ? ORDER BY created_at",
     )
     .bind(account_id)
     .fetch_all(db)

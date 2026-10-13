@@ -160,42 +160,6 @@ pub fn classify(
     Channel::Direct
 }
 
-/// Human name for a referrer host, used in breakdowns ("news.ycombinator.com" -> "Hacker News").
-pub fn source_name(host: &str) -> String {
-    let h = host.strip_prefix("www.").unwrap_or(host);
-    let known = [
-        ("news.ycombinator.com", "Hacker News"),
-        ("t.co", "X"),
-        ("x.com", "X"),
-        ("twitter.com", "X"),
-        ("chatgpt.com", "ChatGPT"),
-        ("chat.openai.com", "ChatGPT"),
-        ("perplexity.ai", "Perplexity"),
-        ("claude.ai", "Claude"),
-        ("gemini.google.com", "Gemini"),
-        ("reddit.com", "Reddit"),
-        ("old.reddit.com", "Reddit"),
-        ("linkedin.com", "LinkedIn"),
-        ("lnkd.in", "LinkedIn"),
-        ("facebook.com", "Facebook"),
-        ("l.facebook.com", "Facebook"),
-        ("instagram.com", "Instagram"),
-        ("youtube.com", "YouTube"),
-        ("bing.com", "Bing"),
-        ("duckduckgo.com", "DuckDuckGo"),
-        ("producthunt.com", "Product Hunt"),
-        ("indiehackers.com", "Indie Hackers"),
-        ("github.com", "GitHub"),
-    ];
-    if let Some((_, name)) = known.iter().find(|(k, _)| *k == h) {
-        return (*name).to_string();
-    }
-    if h.starts_with("google.") || h.contains(".google.") {
-        return "Google".to_string();
-    }
-    h.to_string()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -243,12 +207,5 @@ mod tests {
             classify(None, None, Some("mychatgpt.com.evil.io")),
             Channel::Referral
         );
-    }
-
-    #[test]
-    fn source_names() {
-        assert_eq!(source_name("news.ycombinator.com"), "Hacker News");
-        assert_eq!(source_name("www.google.de"), "Google");
-        assert_eq!(source_name("someblog.dev"), "someblog.dev");
     }
 }

@@ -4,7 +4,7 @@ use lettre::{AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor};
 /// Sends mail over SMTP (Cloudflare Email Service, SES, Postmark, ...) or logs it when no SMTP URL is set.
 pub enum Mailer {
     Smtp {
-        transport: AsyncSmtpTransport<Tokio1Executor>,
+        transport: Box<AsyncSmtpTransport<Tokio1Executor>>,
         from: Mailbox,
     },
     Log,
@@ -17,7 +17,7 @@ impl Mailer {
     pub fn new(url: Option<&str>, from: &str) -> anyhow::Result<Self> {
         match url {
             Some(url) => Ok(Mailer::Smtp {
-                transport: AsyncSmtpTransport::<Tokio1Executor>::from_url(url)?.build(),
+                transport: Box::new(AsyncSmtpTransport::<Tokio1Executor>::from_url(url)?.build()),
                 from: from.parse()?,
             }),
             None => Ok(Mailer::Log),

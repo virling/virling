@@ -269,7 +269,6 @@ pub fn cookie(headers: &HeaderMap, name: &str) -> Option<String> {
 #[derive(Debug, Clone)]
 pub struct Account {
     pub id: String,
-    pub email: String,
 }
 
 impl FromRequestParts<AppState> for Account {
@@ -280,8 +279,8 @@ impl FromRequestParts<AppState> for Account {
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
         let token = cookie(&parts.headers, SESSION_COOKIE).ok_or(Redirect::to("/login"))?;
-        let row: Option<(String, String)> = sqlx::query_as(
-            "SELECT a.id, a.email FROM sessions s JOIN accounts a ON a.id = s.account_id WHERE s.token_hash = ? AND s.expires_at > ?",
+        let id: Option<String> = sqlx::query_scalar(
+            "SELECT a.id FROM sessions s JOIN accounts a ON a.id = s.account_id WHERE s.token_hash = ? AND s.expires_at > ?",
         )
         .bind(hash_token(&token))
         .bind(now())
@@ -289,8 +288,7 @@ impl FromRequestParts<AppState> for Account {
         .await
         .ok()
         .flatten();
-        row.map(|(id, email)| Account { id, email })
-            .ok_or(Redirect::to("/login"))
+        id.map(|id| Account { id }).ok_or(Redirect::to("/login"))
     }
 }
 
