@@ -1,0 +1,10 @@
+<header class="steps-top">
+  <a class="brand" href="/app">{% include "_logo.html" %}<b>virling</b></a>
+  <ol class="stepper" aria-label="Setup progress">
+    <li class="{% if step == 1 %}on{% else %}done{% endif %}"><span>{% if step > 1 %}&#10003;{% else %}1{% endif %}</span>Site</li>
+    <li class="{% if step == 2 %}on{% else if step > 2 %}done{% endif %}"><span>{% if step > 2 %}&#10003;{% else %}2{% endif %}</span>Script</li>
+    <li class="{% if step == 3 %}on{% else if step > 3 %}done{% endif %}"><span>{% if step > 3 %}&#10003;{% else %}3{% endif %}</span>Payments</li>
+    <li class="{% if step == 4 %}on{% endif %}"><span>4</span>Checkout</li>
+  </ol>
+  <form method="post" action="/logout"><button class="btn ghost" type="submit">Sign out</button></form>
+</header>
