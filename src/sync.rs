@@ -45,6 +45,7 @@ pub async fn add_integration(
 
 /// Polls every connected provider once a minute, forever.
 pub async fn run(state: AppState) {
+    rebuild_attribution(&state).await;
     loop {
         if let Err(err) = sync_all(&state).await {
             tracing::error!(%err, "payment sync round failed");
@@ -72,7 +73,34 @@ pub async fn sync_all(state: &AppState) -> anyhow::Result<()> {
             .execute(&state.db)
             .await?;
     }
+    rebuild_attribution(state).await;
     Ok(())
+}
+
+/// Recomputes attribution for every site with its model and window from SQLite.
+pub async fn rebuild_attribution(state: &AppState) {
+    let sites: Vec<(String, String, i64)> =
+        match sqlx::query_as("SELECT id, attribution_model, window_days FROM sites")
+            .fetch_all(&state.db)
+            .await
+        {
+            Ok(sites) => sites,
+            Err(err) => {
+                tracing::error!(%err, "loading sites for attribution failed");
+                return;
+            }
+        };
+    for (site_id, model, window_days) in sites {
+        let store = state.events.clone();
+        let id = site_id.clone();
+        let result = tokio::task::spawn_blocking(move || {
+            store.rebuild_attribution(&id, &model, window_days)
+        })
+        .await;
+        if !matches!(result, Ok(Ok(()))) {
+            tracing::error!(site = %site_id, ?result, "attribution rebuild failed");
+        }
+    }
 }
 
 async fn sync_one(state: &AppState, integration: &Integration) -> anyhow::Result<()> {

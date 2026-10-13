@@ -2,8 +2,13 @@ use std::path::Path;
 use std::sync::Mutex;
 
 use duckdb::types::{TimeUnit, Value};
-use duckdb::{Connection, params};
+use duckdb::{Connection, named_params, params};
 use time::OffsetDateTime;
+
+use crate::stats::{
+    self, BreakdownRow, DayPoint, Dimension, Journey, Overview, PaymentFilter, PaymentPage, Period,
+    Sort,
+};
 
 #[derive(Debug, Clone)]
 pub struct Event {
@@ -56,7 +61,88 @@ pub trait EventStore: Send + Sync {
     #[cfg(test)]
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64>;
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>>;
+    /// Recomputes the credited touch of every payment of a site; unattributed payments get a row with a NULL session.
+    fn rebuild_attribution(
+        &self,
+        site_id: &str,
+        model: &str,
+        window_days: i64,
+    ) -> anyhow::Result<()>;
+    fn overview(&self, site_id: &str, period: &Period) -> anyhow::Result<Overview>;
+    fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<DayPoint>>;
+    fn breakdown(
+        &self,
+        site_id: &str,
+        period: &Period,
+        dimension: Dimension,
+        sort: Sort,
+    ) -> anyhow::Result<Vec<BreakdownRow>>;
+    fn payment_list(
+        &self,
+        site_id: &str,
+        period: &Period,
+        filter: PaymentFilter,
+        limit: u32,
+        offset: u32,
+    ) -> anyhow::Result<PaymentPage>;
+    /// The payer's sessions in the window before the payment plus the credited one, oldest first.
+    fn journey(
+        &self,
+        site_id: &str,
+        provider: &str,
+        provider_payment_id: &str,
+        window_days: i64,
+    ) -> anyhow::Result<Option<Journey>>;
 }
+
+/// Sessions as touches (first pageview's fields), then the credited session per payment, then renewal inheritance.
+const REBUILD_ATTRIBUTION: &str = "
+INSERT INTO attribution
+WITH touches AS (
+    SELECT visitor_id, session_id, ts, channel, referrer_host, utm_campaign, path, country, device
+    FROM events
+    WHERE site_id = $site AND kind = 'pageview'
+    QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1
+),
+pays AS (
+    SELECT provider, provider_payment_id, ts, visitor_id, customer_id, is_renewal
+    FROM payments WHERE site_id = $site
+),
+own AS (
+    SELECT p.provider, p.provider_payment_id, t.*
+    FROM pays p
+    JOIN touches t ON t.visitor_id = p.visitor_id
+        AND t.ts <= p.ts
+        AND epoch_us(t.ts) >= epoch_us(p.ts) - $window_days * 86400000000
+    QUALIFY row_number() OVER (
+        PARTITION BY p.provider, p.provider_payment_id
+        ORDER BY
+            CASE WHEN $model = 'first_touch' THEN epoch_us(t.ts)
+                 ELSE (t.channel = 'Direct')::BIGINT END,
+            CASE WHEN $model = 'first_touch' THEN 0 ELSE -epoch_us(t.ts) END,
+            t.session_id
+    ) = 1
+),
+firsts AS (
+    SELECT provider, customer_id, provider_payment_id
+    FROM pays
+    WHERE customer_id IS NOT NULL
+    QUALIFY row_number() OVER (PARTITION BY provider, customer_id ORDER BY ts, provider_payment_id) = 1
+)
+SELECT $site, p.provider, p.provider_payment_id, $model,
+    coalesce(inh.session_id, o.session_id),
+    coalesce(inh.channel, o.channel),
+    CASE WHEN inh.session_id IS NOT NULL THEN inh.referrer_host ELSE o.referrer_host END,
+    CASE WHEN inh.session_id IS NOT NULL THEN inh.utm_campaign ELSE o.utm_campaign END,
+    coalesce(inh.path, o.path),
+    CASE WHEN inh.session_id IS NOT NULL THEN inh.country ELSE o.country END,
+    coalesce(inh.device, o.device),
+    coalesce(inh.ts, o.ts)
+FROM pays p
+LEFT JOIN own o USING (provider, provider_payment_id)
+LEFT JOIN firsts f ON p.is_renewal AND f.provider = p.provider AND f.customer_id = p.customer_id
+LEFT JOIN own inh ON inh.provider = f.provider AND inh.provider_payment_id = f.provider_payment_id
+";
 
 #[derive(Debug, Clone)]
 pub struct LatestPageview {
@@ -106,6 +192,21 @@ impl DuckStore {
                 visitor_id VARCHAR,
                 customer_id VARCHAR,
                 is_renewal BOOLEAN NOT NULL,
+                PRIMARY KEY (site_id, provider, provider_payment_id)
+            );
+            CREATE TABLE IF NOT EXISTS attribution (
+                site_id VARCHAR NOT NULL,
+                provider VARCHAR NOT NULL,
+                provider_payment_id VARCHAR NOT NULL,
+                model VARCHAR NOT NULL,
+                session_id VARCHAR,
+                channel VARCHAR,
+                referrer_host VARCHAR,
+                campaign VARCHAR,
+                landing_page VARCHAR,
+                country VARCHAR,
+                device VARCHAR,
+                touch_ts TIMESTAMPTZ,
                 PRIMARY KEY (site_id, provider, provider_payment_id)
             );",
         )?;
@@ -235,6 +336,82 @@ impl EventStore for DuckStore {
             })
         })?;
         Ok(rows.next().transpose()?)
+    }
+
+    fn rebuild_attribution(
+        &self,
+        site_id: &str,
+        model: &str,
+        window_days: i64,
+    ) -> anyhow::Result<()> {
+        anyhow::ensure!(
+            matches!(model, "last_non_direct" | "first_touch"),
+            "unknown attribution model {model}"
+        );
+        let mut conn = self.conn.lock().unwrap();
+        let tx = conn.transaction()?;
+        tx.execute(
+            "DELETE FROM attribution WHERE site_id = ?",
+            params![site_id],
+        )?;
+        tx.execute(
+            REBUILD_ATTRIBUTION,
+            named_params! { "site": site_id, "model": model, "window_days": window_days },
+        )?;
+        tx.commit()?;
+        Ok(())
+    }
+
+    fn overview(&self, site_id: &str, period: &Period) -> anyhow::Result<Overview> {
+        stats::overview(&self.conn.lock().unwrap(), site_id, period)
+    }
+
+    fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<DayPoint>> {
+        stats::timeseries(&self.conn.lock().unwrap(), site_id, period)
+    }
+
+    fn breakdown(
+        &self,
+        site_id: &str,
+        period: &Period,
+        dimension: Dimension,
+        sort: Sort,
+    ) -> anyhow::Result<Vec<BreakdownRow>> {
+        stats::breakdown(&self.conn.lock().unwrap(), site_id, period, dimension, sort)
+    }
+
+    fn payment_list(
+        &self,
+        site_id: &str,
+        period: &Period,
+        filter: PaymentFilter,
+        limit: u32,
+        offset: u32,
+    ) -> anyhow::Result<PaymentPage> {
+        stats::payment_list(
+            &self.conn.lock().unwrap(),
+            site_id,
+            period,
+            filter,
+            limit,
+            offset,
+        )
+    }
+
+    fn journey(
+        &self,
+        site_id: &str,
+        provider: &str,
+        provider_payment_id: &str,
+        window_days: i64,
+    ) -> anyhow::Result<Option<Journey>> {
+        stats::journey(
+            &self.conn.lock().unwrap(),
+            site_id,
+            provider,
+            provider_payment_id,
+            window_days,
+        )
     }
 }
 
