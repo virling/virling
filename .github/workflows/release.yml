@@ -102,6 +102,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: dist
+          pattern: virling-v*
           merge-multiple: true
 
       - uses: softprops/action-gh-release@v2
@@ -146,6 +147,8 @@ jobs:
       - uses: docker/setup-buildx-action@v3
 
       - uses: docker/build-push-action@v6
+        env:
+          DOCKER_BUILD_RECORD_UPLOAD: false
         with:
           context: .
           platforms: linux/amd64
