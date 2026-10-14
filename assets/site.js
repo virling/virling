@@ -95,6 +95,10 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
   let started = false;
   let timer = null;
 
+  const visitorId = async () => {
+    for (let i = 0; i < 20 && !window.virling?.vid; i++) await new Promise((r) => setTimeout(r, 100));
+    return window.virling?.vid?.() || null;
+  };
   const status = async (payment) => {
     const res = await fetch("/api/preorder/status" + (payment ? "?payment_id=" + encodeURIComponent(payment) : ""), { cache: "no-store" });
     if (!res.ok) throw new Error("status " + res.status);
@@ -152,7 +156,7 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
     try {
       const [Dodo, res] = await Promise.all([
         loadSdk(),
-        fetch("/api/preorder/session", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ visitor_id: window.virling?.vid?.() || null, code: new URLSearchParams(location.search).get("code") }) }),
+        visitorId().then((visitor_id) => fetch("/api/preorder/session", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ visitor_id, code: new URLSearchParams(location.search).get("code") }) })),
       ]);
       const body = await res.json();
       if (!res.ok || !body.checkout_url) throw new Error(body.error || "session");
