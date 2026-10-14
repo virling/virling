@@ -19,7 +19,7 @@ id = "bf5404416e494ede813918d007d4bc4d"
 
 [vars]
 BASE_URL = "https://virling.com"
-WAITLIST_FROM = "Rahul at Virling <hello@virling.com>"
+WAITLIST_FROM = "Deven and Rahul at Virling <hello@virling.com>"
 
 [[ratelimits]]
 name = "PREORDER_LIMIT"
