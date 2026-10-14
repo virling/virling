@@ -25,3 +25,15 @@ WAITLIST_FROM = "Rahul at Virling <hello@virling.com>"
 name = "PREORDER_LIMIT"
 namespace_id = "1001"
 simple = { limit = 10, period = 60 }
+
+[[ratelimits]]
+name = "EVENT_LIMIT"
+namespace_id = "1002"
+simple = { limit = 120, period = 60 }
+
+# Migrations in ./migrations are applied manually: npx wrangler d1 migrations apply virling-analytics --remote
+[[d1_databases]]
+binding = "DB"
+database_name = "virling-analytics"
+database_id = "9f0793f1-01ed-4176-828e-1aeb53d726cd"
+migrations_dir = "migrations"

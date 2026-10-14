@@ -2,11 +2,19 @@
 use askama::Template;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use worker::wasm_bindgen::JsValue;
 use worker::*;
 
+// Shared with the server, which also uses source_name.
+#[allow(dead_code)]
+#[path = "../../src/channel.rs"]
+mod channel;
+#[path = "../../src/ua.rs"]
+mod ua;
 #[path = "../../src/waitlist_copy.rs"]
 mod waitlist_copy;
 
+mod analytics;
 mod preorder;
 
 use waitlist_copy::{AGENCY, ConfirmEmail, SELFHOST, confirm_text};
@@ -29,12 +37,42 @@ struct FoundingText {
     number: u64,
 }
 
+#[derive(Serialize, Deserialize)]
+struct ConversionTotal {
+    kind: String,
+    count: i64,
+    amount_cents: i64,
+}
+
+impl ConversionTotal {
+    fn dollars(&self) -> String {
+        format!(
+            "${}.{:02}",
+            self.amount_cents / 100,
+            self.amount_cents % 100
+        )
+    }
+}
+
+#[derive(Template, Serialize)]
+#[template(path = "stats.html")]
+struct Stats {
+    days: i64,
+    visitors: i64,
+    pageviews: i64,
+    sessions: i64,
+    conversions: Vec<ConversionTotal>,
+    channels: Vec<analytics::StatsRow>,
+    landing_pages: Vec<analytics::StatsRow>,
+}
+
 #[derive(Deserialize)]
 struct Signup {
     email: String,
     wedge: String,
     clients: Option<String>,
     referrer: Option<String>,
+    visitor_id: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -45,6 +83,7 @@ struct Entry {
     referrer: Option<String>,
     created_at: String,
     leave_token: String,
+    visitor_id: Option<String>,
 }
 
 fn valid_email(email: &str) -> bool {
@@ -63,6 +102,37 @@ fn clip(s: Option<String>, n: usize) -> Option<String> {
     s.map(|s| s.chars().take(n).collect())
 }
 
+fn visitor(v: Option<String>) -> Option<String> {
+    v.filter(|v| analytics::valid_visitor_id(v))
+}
+
+async fn record_conversion(
+    ctx: &RouteContext<()>,
+    kind: &str,
+    visitor_id: Option<&str>,
+    amount_cents: Option<i64>,
+    reference: Option<&str>,
+) {
+    let opt = |s: Option<&str>| s.map_or(JsValue::NULL, JsValue::from_str);
+    let result = async {
+        ctx.d1("DB")?
+            .prepare(analytics::INSERT_CONVERSION)
+            .bind(&[
+                JsValue::from_f64(Date::now().as_millis() as f64),
+                JsValue::from_str(kind),
+                opt(visitor_id),
+                amount_cents.map_or(JsValue::NULL, |a| JsValue::from_f64(a as f64)),
+                opt(reference),
+            ])?
+            .run()
+            .await
+    }
+    .await;
+    if let Err(err) = result {
+        console_error!("conversion {kind} not recorded: {err}");
+    }
+}
+
 fn json_status(value: serde_json::Value, status: u16) -> Result<Response> {
     Ok(Response::from_json(&value)?.with_status(status))
 }
@@ -77,6 +147,7 @@ async fn join(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
     }
     let kv = ctx.kv("WAITLIST")?;
     let key = format!("signup:{}:{email}", input.wedge);
+    let visitor_id = visitor(input.visitor_id);
     if kv.get(&key).text().await?.is_some() {
         return json_status(json!({ "ok": true }), 200);
     }
@@ -92,6 +163,7 @@ async fn join(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
         referrer: clip(input.referrer, 500),
         created_at: Date::now().to_string(),
         leave_token: leave_token.clone(),
+        visitor_id: visitor_id.clone(),
     };
     kv.put(&key, serde_json::to_string(&entry)?)?
         .execute()
@@ -99,6 +171,9 @@ async fn join(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
     kv.put(&format!("leave:{leave_token}"), &key)?
         .execute()
         .await?;
+    if let Some(kind) = analytics::waitlist_kind(&input.wedge) {
+        record_conversion(&ctx, kind, visitor_id.as_deref(), None, None).await;
+    }
 
     let copy = if input.wedge == "agency" {
         &AGENCY
@@ -183,6 +258,7 @@ async fn leave(req: Request, ctx: RouteContext<()>) -> Result<Response> {
 #[derive(Deserialize, Default)]
 struct SessionInput {
     email: Option<String>,
+    visitor_id: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -236,7 +312,9 @@ async fn preorder_session(mut req: Request, ctx: RouteContext<()>) -> Result<Res
     init.with_method(Method::Post)
         .with_headers(headers)
         .with_body(Some(
-            preorder::session_body(email.as_deref()).to_string().into(),
+            preorder::session_body(email.as_deref(), visitor(input.visitor_id).as_deref())
+                .to_string()
+                .into(),
         ));
     let mut res = Fetch::Request(Request::new_with_init(
         "https://live.dodopayments.com/checkouts",
@@ -298,6 +376,14 @@ async fn dodo_webhook(mut req: Request, ctx: RouteContext<()>) -> Result<Respons
     let Some(founder) = preorder::founder_from_event(&body) else {
         return json_status(json!({ "received": true }), 200);
     };
+    record_conversion(
+        &ctx,
+        "preorder",
+        visitor(founder.visitor_id.clone()).as_deref(),
+        founder.amount_cents,
+        Some(&founder.subscription_id),
+    )
+    .await;
     let kv = ctx.kv("WAITLIST")?;
     let key = format!("founder:{}", founder.subscription_id);
     let mut record = match kv.get(&key).json::<FounderRecord>().await? {
@@ -338,9 +424,163 @@ async fn dodo_webhook(mut req: Request, ctx: RouteContext<()>) -> Result<Respons
     json_status(json!({ "received": true }), 200)
 }
 
+fn cors(mut res: Response) -> Result<Response> {
+    res.headers_mut().set("Access-Control-Allow-Origin", "*")?;
+    Ok(res)
+}
+
+async fn collect(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
+    let headers = req.headers();
+    let user_agent = headers.get("User-Agent")?.unwrap_or_default();
+    let country = analytics::country(headers.get("CF-IPCountry")?.as_deref());
+    let ip = headers.get("CF-Connecting-IP")?.unwrap_or_default();
+    if ua::is_bot(&user_agent) {
+        return cors(Response::empty()?.with_status(202));
+    }
+    if !ctx.rate_limiter("EVENT_LIMIT")?.limit(ip).await?.success {
+        return cors(Response::empty()?.with_status(429));
+    }
+    let Some(batch) = analytics::parse_batch(&req.text().await?) else {
+        return cors(Response::error("invalid event", 400)?);
+    };
+    let now = Date::now().as_millis() as i64;
+    let db = ctx.d1("DB")?;
+    let insert = db.prepare(analytics::INSERT_EVENT);
+    let text = |s: &Option<String>| s.as_deref().map_or(JsValue::NULL, JsValue::from_str);
+    let mut statements = Vec::new();
+    for e in batch {
+        let Some(row) = analytics::to_row(e, &user_agent, country.as_deref(), now) else {
+            continue;
+        };
+        statements.push(insert.clone().bind(&[
+            JsValue::from_f64(row.ts as f64),
+            JsValue::from_str(&row.visitor_id),
+            JsValue::from_str(row.kind),
+            text(&row.name),
+            JsValue::from_str(&row.path),
+            text(&row.referrer_host),
+            text(&row.utm_source),
+            text(&row.utm_medium),
+            text(&row.utm_campaign),
+            text(&row.utm_content),
+            text(&row.utm_term),
+            JsValue::from_str(row.channel),
+            text(&row.country),
+            JsValue::from_str(row.device),
+            JsValue::from_str(row.browser),
+        ])?);
+    }
+    if !statements.is_empty() {
+        db.batch(statements).await?;
+    }
+    cors(Response::empty()?.with_status(202))
+}
+
+fn event_preflight(_: Request, _: RouteContext<()>) -> Result<Response> {
+    let mut res = Response::empty()?.with_status(204);
+    let headers = res.headers_mut();
+    headers.set("Access-Control-Allow-Origin", "*")?;
+    headers.set("Access-Control-Allow-Methods", "POST")?;
+    headers.set("Access-Control-Allow-Headers", "content-type")?;
+    headers.set("Access-Control-Max-Age", "86400")?;
+    Ok(res)
+}
+
+async fn load_stats(req: &Request, ctx: &RouteContext<()>) -> Result<Option<Stats>> {
+    let token = req
+        .url()?
+        .query_pairs()
+        .find(|(k, _)| k == "token")
+        .map(|(_, v)| v.into_owned())
+        .unwrap_or_default();
+    let expected = ctx
+        .secret("STATS_TOKEN")
+        .map(|s| s.to_string())
+        .unwrap_or_default();
+    if !analytics::token_matches(&token, &expected) {
+        return Ok(None);
+    }
+    let days = 30;
+    let now = Date::now().as_millis() as i64;
+    let since = JsValue::from_f64((now - days * analytics::DAY_MS) as f64);
+    let lookback =
+        JsValue::from_f64((now - days * analytics::DAY_MS - analytics::ATTRIBUTION_MS) as f64);
+    let db = ctx.d1("DB")?;
+    let query = |sql: &str| db.prepare(sql).bind(std::slice::from_ref(&since));
+    let mut results = db
+        .batch(vec![
+            query(analytics::STATS_TOTALS)?,
+            query(analytics::STATS_SESSIONS)?,
+            query(analytics::STATS_CONVERSIONS)?,
+            query(analytics::STATS_CHANNELS)?,
+            query(analytics::STATS_CONVERSIONS_BY_CHANNEL)?,
+            query(analytics::STATS_LANDING)?,
+            db.prepare(analytics::STATS_CONVERSIONS_BY_LANDING)
+                .bind(&[since.clone(), lookback])?,
+        ])
+        .await?
+        .into_iter();
+    let mut next = || {
+        results
+            .next()
+            .ok_or_else(|| Error::RustError("missing result".into()))
+    };
+    #[derive(Deserialize)]
+    struct Totals {
+        visitors: i64,
+        pageviews: i64,
+    }
+    #[derive(Deserialize)]
+    struct Sessions {
+        sessions: i64,
+    }
+    let totals = next()?.results::<Totals>()?.into_iter().next();
+    let sessions = next()?.results::<Sessions>()?.into_iter().next();
+    let conversions = next()?.results()?;
+    let channels = analytics::pivot(next()?.results()?, next()?.results()?);
+    let landing_pages = analytics::pivot(next()?.results()?, next()?.results()?);
+    Ok(Some(Stats {
+        days,
+        visitors: totals.as_ref().map_or(0, |t| t.visitors),
+        pageviews: totals.as_ref().map_or(0, |t| t.pageviews),
+        sessions: sessions.map_or(0, |s| s.sessions),
+        conversions,
+        channels,
+        landing_pages,
+    }))
+}
+
+fn private(mut res: Response) -> Result<Response> {
+    res.headers_mut().set("Cache-Control", "no-store")?;
+    res.headers_mut().set("X-Robots-Tag", "noindex")?;
+    Ok(res)
+}
+
+async fn stats_json(req: Request, ctx: RouteContext<()>) -> Result<Response> {
+    match load_stats(&req, &ctx).await? {
+        Some(stats) => private(Response::from_json(&stats)?),
+        None => json_status(json!({ "error": "unauthorized" }), 401),
+    }
+}
+
+async fn stats_page(req: Request, ctx: RouteContext<()>) -> Result<Response> {
+    match load_stats(&req, &ctx).await? {
+        Some(stats) => private(Response::from_html(
+            stats
+                .render()
+                .map_err(|e| Error::RustError(e.to_string()))?,
+        )?),
+        None => Response::error("Not found", 404),
+    }
+}
+
 #[event(fetch)]
 async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
     Router::new()
+        .get_async("/api/stats", stats_json)
+        .get_async("/stats", stats_page)
+        .post_async("/api/event", collect)
+        .options("/api/event", event_preflight)
         .post_async("/api/waitlist", join)
         .get_async("/waitlist/leave", leave)
         .post_async("/api/preorder/session", preorder_session)

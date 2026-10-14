@@ -10,7 +10,7 @@ pub const PRODUCT_ID: &str = "pdt_0Npg3jPouv8ghbW4s5Sxd";
 pub const FOUNDING_SPOTS: u64 = 50;
 const TOLERANCE_SECS: i64 = 5 * 60;
 
-pub fn session_body(email: Option<&str>) -> Value {
+pub fn session_body(email: Option<&str>, visitor_id: Option<&str>) -> Value {
     let mut body = json!({
         "product_cart": [{ "product_id": PRODUCT_ID, "quantity": 1 }],
         "return_url": "https://virling.com/agency?preorder=done",
@@ -35,6 +35,9 @@ pub fn session_body(email: Option<&str>) -> Value {
     });
     if let Some(email) = email {
         body["customer"] = json!({ "email": email });
+    }
+    if let Some(vid) = visitor_id {
+        body["metadata"]["virling_vid"] = json!(vid);
     }
     body
 }
@@ -80,6 +83,8 @@ pub struct Founder {
     pub subscription_id: String,
     pub email: String,
     pub name: Option<String>,
+    pub visitor_id: Option<String>,
+    pub amount_cents: Option<i64>,
 }
 
 #[derive(Deserialize)]
@@ -94,6 +99,8 @@ struct Data {
     subscription_id: Option<String>,
     product_id: Option<String>,
     customer: Option<Customer>,
+    recurring_pre_tax_amount: Option<i64>,
+    metadata: Option<Value>,
 }
 
 #[derive(Deserialize)]
@@ -113,6 +120,13 @@ pub fn founder_from_event(body: &str) -> Option<Founder> {
         subscription_id: event.data.subscription_id?,
         email: customer.email,
         name: customer.name.filter(|n| !n.is_empty()),
+        visitor_id: event
+            .data
+            .metadata
+            .as_ref()
+            .and_then(|m| m["virling_vid"].as_str())
+            .map(str::to_string),
+        amount_cents: event.data.recurring_pre_tax_amount,
     })
 }
 
@@ -222,7 +236,9 @@ mod tests {
                 "product_id": product,
                 "status": "active",
                 "customer": { "customer_id": "cus_1", "email": "a@agency.com", "name": "Ann" },
-                "metadata": { "source": "virling.com/agency" }
+                "recurring_pre_tax_amount": 4700,
+                "currency": "USD",
+                "metadata": { "source": "virling.com/agency", "virling_vid": "vid-12345678" }
             }
         })
         .to_string()
@@ -236,6 +252,8 @@ mod tests {
                 subscription_id: "sub_123".into(),
                 email: "a@agency.com".into(),
                 name: Some("Ann".into()),
+                visitor_id: Some("vid-12345678".into()),
+                amount_cents: Some(4700),
             })
         );
     }
@@ -263,12 +281,15 @@ mod tests {
 
     #[test]
     fn session_body_prefills_email_only_when_given() {
-        let body = session_body(Some("a@agency.com"));
+        let body = session_body(Some("a@agency.com"), Some("vid-12345678"));
         assert_eq!(body["product_cart"][0]["product_id"], PRODUCT_ID);
         assert_eq!(body["product_cart"][0]["quantity"], 1);
         assert_eq!(body["customer"]["email"], "a@agency.com");
         assert_eq!(body["metadata"]["source"], "virling.com/agency");
-        assert!(session_body(None).get("customer").is_none());
+        assert_eq!(body["metadata"]["virling_vid"], "vid-12345678");
+        let bare = session_body(None, None);
+        assert!(bare.get("customer").is_none());
+        assert!(bare["metadata"].get("virling_vid").is_none());
     }
 
     #[test]
