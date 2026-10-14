@@ -1,0 +1,26 @@
+[book]
+title = "Virling docs"
+description = "How to run Virling, add the tracking script, connect payments and read attribution."
+language = "en"
+src = "src"
+
+[build]
+create-missing = false
+
+[output.html]
+site-url = "/"
+no-section-label = true
+git-repository-url = "https://github.com/virling/virling"
+edit-url-template = "https://github.com/virling/virling/edit/main/docs/{path}"
+additional-css = ["theme/docs.css"]
+additional-js = ["theme/docs.js"]
+
+[output.html.print]
+enable = false
+
+[output.html.search]
+limit-results = 40
+teaser-word-count = 24
+use-boolean-and = true
+boost-title = 3
+boost-hierarchy = 1
