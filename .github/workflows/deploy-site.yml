@@ -8,6 +8,8 @@ on:
       - "assets/**"
       - "templates/**"
       - "src/waitlist_copy.rs"
+      - "src/channel.rs"
+      - "src/ua.rs"
       - ".github/workflows/deploy-site.yml"
   workflow_dispatch:
 
