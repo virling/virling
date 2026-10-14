@@ -1,6 +1,6 @@
 use askama::Template;
 use axum::extract::{Path, Query, State};
-use axum::http::{HeaderMap, StatusCode};
+use axum::http::{HeaderMap, StatusCode, header};
 use axum::response::{IntoResponse, Redirect, Response};
 use serde::Deserialize;
 use time::macros::format_description;
@@ -14,7 +14,7 @@ use crate::sites::{self, Site};
 use crate::stats::{
     BreakdownRow, Journey, PaymentFilter, PaymentRow, Period, Sort, Totals, sort_rows,
 };
-use crate::{chart, icons};
+use crate::{chart, favicon, icons};
 
 const RANGES: [(&str, &str, i64); 6] = [
     ("today", "Today", 1),
@@ -36,11 +36,22 @@ const PER_PAGE: u32 = 50;
 pub struct Shell {
     pub domain: String,
     pub initial: String,
-    pub sites: Vec<Opt>,
+    /// URL of the cached favicon, empty until one is stored.
+    pub icon: String,
+    pub sites: Vec<SiteOpt>,
     pub nav: &'static str,
     pub plan: String,
     pub usage: String,
     pub live: u64,
+}
+
+/// A site in the switcher.
+pub struct SiteOpt {
+    pub label: String,
+    pub href: String,
+    pub on: bool,
+    pub initial: String,
+    pub icon: String,
 }
 
 /// A link in a custom dropdown, tab row or segmented control.
@@ -114,16 +125,35 @@ pub async fn load(
         ))
     })
     .await?;
+    let icons: Vec<(String, i64, bool)> = sqlx::query_as(
+        "SELECT i.site_id, i.fetched_at, i.body IS NOT NULL FROM site_icons i
+         JOIN sites s ON s.id = i.site_id WHERE s.account_id = ?",
+    )
+    .bind(&account.id)
+    .fetch_all(&state.db)
+    .await
+    .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+    let icon_of = |s: &Site| {
+        icons
+            .iter()
+            .find(|i| i.0 == s.id && i.2)
+            .map(|i| format!("{}?v={}", sites::app_path(&s.domain, "icon"), i.1))
+            .unwrap_or_default()
+    };
+    let fetched_at = icons.iter().find(|i| i.0 == site.id).map(|i| i.1);
+    favicon::refresh(state, &site.id, &site.domain, fetched_at);
     let shell = Shell {
         domain: site.domain.clone(),
         initial: site.domain[..1].to_ascii_uppercase(),
+        icon: icon_of(&site),
         sites: all
             .iter()
-            .map(|s| Opt {
+            .map(|s| SiteOpt {
                 label: s.domain.clone(),
                 href: sites::app_path(&s.domain, nav),
                 on: s.id == site.id,
-                count: String::new(),
+                initial: s.domain[..1].to_ascii_uppercase(),
+                icon: icon_of(s),
             })
             .collect(),
         nav,
@@ -1164,6 +1194,45 @@ struct PaymentsPage {
     never_paid: bool,
     connected: String,
     providers: Vec<(String, &'static str, bool)>,
+}
+
+/// The site's cached favicon; SVGs get a CSP that blocks scripts.
+pub async fn icon(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+) -> Response {
+    let Some(site) = sites::for_account(&state.db, &account.id)
+        .await
+        .ok()
+        .and_then(|all| all.into_iter().find(|s| s.domain == domain))
+    else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    let row: Option<(String, Vec<u8>)> = sqlx::query_as(
+        "SELECT content_type, body FROM site_icons WHERE site_id = ? AND body IS NOT NULL",
+    )
+    .bind(&site.id)
+    .fetch_optional(&state.db)
+    .await
+    .ok()
+    .flatten();
+    let Some((kind, body)) = row else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    (
+        [
+            (header::CONTENT_TYPE, kind),
+            (
+                header::CONTENT_SECURITY_POLICY,
+                "default-src 'none'; style-src 'unsafe-inline'; sandbox".into(),
+            ),
+            (header::X_CONTENT_TYPE_OPTIONS, "nosniff".into()),
+            (header::CACHE_CONTROL, "private, max-age=86400".into()),
+        ],
+        body,
+    )
+        .into_response()
 }
 
 /// Hides the first-weeks checklist for good.

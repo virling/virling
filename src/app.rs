@@ -42,6 +42,8 @@ pub struct AppState {
     pub mailer: Arc<Mailer>,
     pub vault: Arc<Vault>,
     pub http: reqwest::Client,
+    /// Fetches site favicons from public hosts only.
+    pub favicons: reqwest::Client,
     pub rates: Arc<Rates>,
 }
 
@@ -62,6 +64,7 @@ impl AppState {
             vault: Arc::new(vault),
             rates: Arc::new(Rates::new(http.clone())),
             http,
+            favicons: crate::favicon::client(),
             config: Arc::new(config),
             db,
             events,
@@ -140,6 +143,7 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/setup/checkout",
                 get(onboarding::checkout_step),
             )
+            .route("/app/{domain}/icon", get(dashboard::icon))
             .route(
                 "/app/{domain}/setup/dismiss",
                 post(dashboard::dismiss_setup),
