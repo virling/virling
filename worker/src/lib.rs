@@ -347,13 +347,13 @@ async fn preorder_session(mut req: Request, ctx: RouteContext<()>) -> Result<Res
 async fn preorder_status(req: Request, ctx: RouteContext<()>) -> Result<Response> {
     let kv = ctx.kv("WAITLIST")?;
     let founders = founder_count(&kv).await?;
-    let subscription = req
+    let payment = req
         .url()?
         .query_pairs()
-        .find(|(k, _)| k == "subscription_id")
+        .find(|(k, _)| k == "payment_id")
         .map(|(_, v)| v.into_owned())
         .filter(|s| s.len() <= 64 && s.chars().all(|c| c.is_ascii_alphanumeric() || c == '_'));
-    let number = match subscription {
+    let number = match payment {
         Some(id) => kv
             .get(&format!("founder:{id}"))
             .json::<FounderRecord>()
@@ -392,11 +392,11 @@ async fn dodo_webhook(mut req: Request, ctx: RouteContext<()>) -> Result<Respons
         "preorder",
         visitor(founder.visitor_id.clone()).as_deref(),
         founder.amount_cents,
-        Some(&founder.subscription_id),
+        Some(&founder.payment_id),
     )
     .await;
     let kv = ctx.kv("WAITLIST")?;
-    let key = format!("founder:{}", founder.subscription_id);
+    let key = format!("founder:{}", founder.payment_id);
     let mut record = match kv.get(&key).json::<FounderRecord>().await? {
         Some(record) => record,
         None => {
