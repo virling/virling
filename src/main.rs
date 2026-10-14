@@ -539,7 +539,7 @@ mod tests {
         let mails = sent(&state);
         assert_eq!(mails.len(), 1, "duplicates get no second email");
         assert_eq!(mails[0].0, "agency@shop.io");
-        assert!(mails[0].1.contains("agencies") && mails[0].2.contains("$47.40"));
+        assert!(mails[0].1.contains("agencies") && mails[0].2.contains("$47 a month"));
         let leave = link_in(&mails[0].2, "http://localhost:8080/waitlist/leave?token=")
             .replace("http://localhost:8080", "");
         assert!(
