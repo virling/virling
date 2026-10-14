@@ -69,23 +69,21 @@ for (const root of document.querySelectorAll("[data-wedge]")) {
   });
 }
 
-for (const term of document.querySelectorAll("[data-tabs]")) {
-  const tabs = [...term.querySelectorAll("[role=tab]")];
-  const copy = term.querySelector("[data-copy]");
-  tabs.forEach((tab) =>
-    tab.addEventListener("click", () => {
-      tabs.forEach((t) => {
-        t.setAttribute("aria-selected", String(t === tab));
-        document.getElementById(t.getAttribute("aria-controls")).hidden = t !== tab;
-      });
-      copy.textContent = "Copy";
-    })
-  );
-  copy.addEventListener("click", async () => {
-    const panel = term.querySelector("pre:not([hidden])");
-    const commands = panel.textContent.split("\n").filter((l) => l.startsWith("$ ") || l.startsWith("    ")).map((l) => l.replace(/^\$ /, "")).join("\n");
-    await navigator.clipboard.writeText(commands);
-    copy.textContent = "Copied";
+for (const button of document.querySelectorAll("[data-copy-snippet]")) {
+  const snippet = button.parentElement.querySelector("[data-snippet]");
+  button.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(snippet.textContent);
+    button.textContent = "Copied";
+    setTimeout(() => { button.textContent = "Copy"; }, 2000);
+  });
+}
+
+for (const mini of document.querySelectorAll("[data-mini]")) {
+  const button = mini.querySelector("button");
+  button.addEventListener("click", () => {
+    const open = mini.classList.toggle("open");
+    button.setAttribute("aria-expanded", String(open));
+    button.querySelector("span").textContent = open ? button.dataset.hide : button.dataset.show;
   });
 }
 
