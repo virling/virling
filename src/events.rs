@@ -162,9 +162,10 @@ pub struct DuckStore {
 impl DuckStore {
     pub fn open(path: &Path) -> anyhow::Result<Self> {
         let conn = Connection::open(path)?;
-        // Load ICU up front (autoloading it mid-query fails that query) and keep naive timestamps in UTC.
+        // Install and load ICU up front (autoloading it mid-query fails that query); keep naive timestamps in UTC.
         conn.execute_batch(
-            "LOAD icu;
+            "INSTALL icu;
+            LOAD icu;
             SET TimeZone = 'UTC';
             CREATE TABLE IF NOT EXISTS events (
                 site_id VARCHAR NOT NULL,
