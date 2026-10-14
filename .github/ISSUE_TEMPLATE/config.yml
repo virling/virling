@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security issue
+    url: mailto:security@virling.com
+    about: Please report security problems privately, not as a public issue.
+  - name: Hosted version and early access
+    url: https://virling.com
+    about: Join the waitlist for the hosted version.

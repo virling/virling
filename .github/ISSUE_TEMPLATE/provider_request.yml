@@ -1,0 +1,25 @@
+name: Payment provider request
+description: Ask for a new payment provider, or report a provider edge case
+labels: ["provider"]
+body:
+  - type: input
+    id: provider
+    attributes:
+      label: Provider
+      placeholder: Paddle, Razorpay, Gumroad, ...
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: For a new provider, link its API docs. For an edge case, describe the payment (refund, renewal, currency) without real customer data.
+    validations:
+      required: true
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Can you help?
+      options:
+        - label: I can test with a sandbox or test-mode account
+        - label: I'd like to build it

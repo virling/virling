@@ -35,7 +35,7 @@ Stripe, Dodo Payments, Polar and LemonSqueezy sync from a read-only key, the att
 
 ## Run it
 
-Requires Rust 1.85 or newer.
+Requires Rust 1.99 or newer.
 
 ```sh
 cargo run --release -- add-site yourdomain.com --owner you@example.com
