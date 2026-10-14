@@ -97,8 +97,8 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
   let started = false;
   let timer = null;
 
-  const status = async (subscription) => {
-    const res = await fetch("/api/preorder/status" + (subscription ? "?subscription_id=" + encodeURIComponent(subscription) : ""), { cache: "no-store" });
+  const status = async (payment) => {
+    const res = await fetch("/api/preorder/status" + (payment ? "?payment_id=" + encodeURIComponent(payment) : ""), { cache: "no-store" });
     if (!res.ok) throw new Error("status " + res.status);
     return res.json();
   };
@@ -120,15 +120,15 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
     if (card.dataset.state !== "paid") setState("error");
   };
 
-  const paid = async (subscription, email) => {
+  const paid = async (payment, email) => {
     clearTimeout(timer);
     setState("paid");
     if (email) card.querySelector("[data-paid-email]").textContent = " to " + email;
     window.virling && virling("goal", "preorder_agency");
     const until = Date.now() + 20000;
-    while (subscription && Date.now() < until) {
+    while (payment && Date.now() < until) {
       try {
-        const body = await status(subscription);
+        const body = await status(payment);
         showSpots(body);
         if (body.number) {
           card.querySelector("[data-paid-title]").textContent = "You're founding agency #" + body.number + ".";
@@ -142,7 +142,7 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
     const params = new URL(url, location.href).searchParams;
     const state = params.get("status");
     if (state && !["active", "succeeded"].includes(state)) return fail();
-    paid(params.get("subscription_id"), params.get("email"));
+    paid(params.get("payment_id"), params.get("email"));
   };
 
   const start = async () => {
@@ -182,7 +182,7 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
       Dodo.Checkout.open({
         checkoutUrl: body.checkout_url,
         elementId: "dodo-inline-checkout",
-        options: { payButtonText: "Pre-order for $29/month", fontSize: "md", fontWeight: "normal", manualRedirect: true },
+        options: { payButtonText: "Reserve your spot for $29", fontSize: "md", fontWeight: "normal", manualRedirect: true },
       });
     } catch {
       fail();
@@ -200,7 +200,7 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
   });
 
   const query = new URLSearchParams(location.search);
-  if (query.get("preorder") === "done" || query.get("subscription_id")) {
+  if (query.get("preorder") === "done" || query.get("payment_id")) {
     history.replaceState(null, "", location.pathname + "#pricing");
     section.scrollIntoView();
     handleReturn("?" + query.toString());

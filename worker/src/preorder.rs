@@ -6,7 +6,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use sha2::Sha256;
 
-pub const PRODUCT_ID: &str = "pdt_0Npg3jPouv8ghbW4s5Sxd";
+pub const PRODUCT_ID: &str = "pdt_0NpivoyuFRZUf0fvEylOg";
 pub const FOUNDING_SPOTS: u64 = 50;
 const TOLERANCE_SECS: i64 = 5 * 60;
 
@@ -90,7 +90,7 @@ pub fn verify_signature(
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Founder {
-    pub subscription_id: String,
+    pub payment_id: String,
     pub email: String,
     pub name: Option<String>,
     pub visitor_id: Option<String>,
@@ -106,11 +106,17 @@ struct Event {
 
 #[derive(Deserialize)]
 struct Data {
-    subscription_id: Option<String>,
-    product_id: Option<String>,
+    payment_id: Option<String>,
+    #[serde(default)]
+    product_cart: Vec<CartItem>,
     customer: Option<Customer>,
-    recurring_pre_tax_amount: Option<i64>,
+    total_amount: Option<i64>,
     metadata: Option<Value>,
+}
+
+#[derive(Deserialize)]
+struct CartItem {
+    product_id: String,
 }
 
 #[derive(Deserialize)]
@@ -119,15 +125,21 @@ struct Customer {
     name: Option<String>,
 }
 
-/// Returns the new founder when the event is an activated subscription to the founding product.
+/// Returns the new founder when the event is a succeeded payment for the founding spot.
 pub fn founder_from_event(body: &str) -> Option<Founder> {
     let event: Event = serde_json::from_str(body).ok()?;
-    if event.kind != "subscription.active" || event.data.product_id.as_deref() != Some(PRODUCT_ID) {
+    if event.kind != "payment.succeeded"
+        || !event
+            .data
+            .product_cart
+            .iter()
+            .any(|i| i.product_id == PRODUCT_ID)
+    {
         return None;
     }
     let customer = event.data.customer?;
     Some(Founder {
-        subscription_id: event.data.subscription_id?,
+        payment_id: event.data.payment_id?,
         email: customer.email,
         name: customer.name.filter(|n| !n.is_empty()),
         visitor_id: event
@@ -136,7 +148,7 @@ pub fn founder_from_event(body: &str) -> Option<Founder> {
             .as_ref()
             .and_then(|m| m["virling_vid"].as_str())
             .map(str::to_string),
-        amount_cents: event.data.recurring_pre_tax_amount,
+        amount_cents: event.data.total_amount,
     })
 }
 
@@ -241,12 +253,12 @@ mod tests {
             "type": kind,
             "timestamp": "2026-10-14T10:00:00Z",
             "data": {
-                "payload_type": "Subscription",
-                "subscription_id": "sub_123",
-                "product_id": product,
-                "status": "active",
+                "payload_type": "Payment",
+                "payment_id": "pay_123",
+                "product_cart": [{ "product_id": product, "quantity": 1 }],
+                "status": "succeeded",
                 "customer": { "customer_id": "cus_1", "email": "a@agency.com", "name": "Ann" },
-                "recurring_pre_tax_amount": 2900,
+                "total_amount": 2900,
                 "currency": "USD",
                 "metadata": { "source": "virling.com/agency", "virling_vid": "vid-12345678" }
             }
@@ -255,11 +267,11 @@ mod tests {
     }
 
     #[test]
-    fn picks_active_subscription_for_founding_product() {
+    fn picks_succeeded_payment_for_founding_product() {
         assert_eq!(
-            founder_from_event(&event("subscription.active", PRODUCT_ID)),
+            founder_from_event(&event("payment.succeeded", PRODUCT_ID)),
             Some(Founder {
-                subscription_id: "sub_123".into(),
+                payment_id: "pay_123".into(),
                 email: "a@agency.com".into(),
                 name: Some("Ann".into()),
                 visitor_id: Some("vid-12345678".into()),
@@ -271,15 +283,15 @@ mod tests {
     #[test]
     fn ignores_other_events_and_products() {
         assert_eq!(
-            founder_from_event(&event("subscription.renewed", PRODUCT_ID)),
+            founder_from_event(&event("payment.failed", PRODUCT_ID)),
             None
         );
         assert_eq!(
-            founder_from_event(&event("payment.succeeded", PRODUCT_ID)),
+            founder_from_event(&event("subscription.active", PRODUCT_ID)),
             None
         );
         assert_eq!(
-            founder_from_event(&event("subscription.active", "pdt_other")),
+            founder_from_event(&event("payment.succeeded", "pdt_other")),
             None
         );
         assert_eq!(
