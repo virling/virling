@@ -41,6 +41,7 @@ struct Signup {
     wedge: String,
     clients: Option<String>,
     referrer: Option<String>,
+    visitor_id: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -51,6 +52,7 @@ struct Entry {
     referrer: Option<String>,
     created_at: String,
     leave_token: String,
+    visitor_id: Option<String>,
 }
 
 fn valid_email(email: &str) -> bool {
@@ -69,6 +71,37 @@ fn clip(s: Option<String>, n: usize) -> Option<String> {
     s.map(|s| s.chars().take(n).collect())
 }
 
+fn visitor(v: Option<String>) -> Option<String> {
+    v.filter(|v| analytics::valid_visitor_id(v))
+}
+
+async fn record_conversion(
+    ctx: &RouteContext<()>,
+    kind: &str,
+    visitor_id: Option<&str>,
+    amount_cents: Option<i64>,
+    reference: Option<&str>,
+) {
+    let opt = |s: Option<&str>| s.map_or(JsValue::NULL, JsValue::from_str);
+    let result = async {
+        ctx.d1("DB")?
+            .prepare(analytics::INSERT_CONVERSION)
+            .bind(&[
+                JsValue::from_f64(Date::now().as_millis() as f64),
+                JsValue::from_str(kind),
+                opt(visitor_id),
+                amount_cents.map_or(JsValue::NULL, |a| JsValue::from_f64(a as f64)),
+                opt(reference),
+            ])?
+            .run()
+            .await
+    }
+    .await;
+    if let Err(err) = result {
+        console_error!("conversion {kind} not recorded: {err}");
+    }
+}
+
 fn json_status(value: serde_json::Value, status: u16) -> Result<Response> {
     Ok(Response::from_json(&value)?.with_status(status))
 }
@@ -83,6 +116,7 @@ async fn join(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
     }
     let kv = ctx.kv("WAITLIST")?;
     let key = format!("signup:{}:{email}", input.wedge);
+    let visitor_id = visitor(input.visitor_id);
     if kv.get(&key).text().await?.is_some() {
         return json_status(json!({ "ok": true }), 200);
     }
@@ -98,6 +132,7 @@ async fn join(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
         referrer: clip(input.referrer, 500),
         created_at: Date::now().to_string(),
         leave_token: leave_token.clone(),
+        visitor_id: visitor_id.clone(),
     };
     kv.put(&key, serde_json::to_string(&entry)?)?
         .execute()
@@ -105,6 +140,9 @@ async fn join(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
     kv.put(&format!("leave:{leave_token}"), &key)?
         .execute()
         .await?;
+    if let Some(kind) = analytics::waitlist_kind(&input.wedge) {
+        record_conversion(&ctx, kind, visitor_id.as_deref(), None, None).await;
+    }
 
     let copy = if input.wedge == "agency" {
         &AGENCY
@@ -189,6 +227,7 @@ async fn leave(req: Request, ctx: RouteContext<()>) -> Result<Response> {
 #[derive(Deserialize, Default)]
 struct SessionInput {
     email: Option<String>,
+    visitor_id: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -242,7 +281,9 @@ async fn preorder_session(mut req: Request, ctx: RouteContext<()>) -> Result<Res
     init.with_method(Method::Post)
         .with_headers(headers)
         .with_body(Some(
-            preorder::session_body(email.as_deref()).to_string().into(),
+            preorder::session_body(email.as_deref(), visitor(input.visitor_id).as_deref())
+                .to_string()
+                .into(),
         ));
     let mut res = Fetch::Request(Request::new_with_init(
         "https://live.dodopayments.com/checkouts",
@@ -304,6 +345,14 @@ async fn dodo_webhook(mut req: Request, ctx: RouteContext<()>) -> Result<Respons
     let Some(founder) = preorder::founder_from_event(&body) else {
         return json_status(json!({ "received": true }), 200);
     };
+    record_conversion(
+        &ctx,
+        "preorder",
+        visitor(founder.visitor_id.clone()).as_deref(),
+        founder.amount_cents,
+        Some(&founder.subscription_id),
+    )
+    .await;
     let kv = ctx.kv("WAITLIST")?;
     let key = format!("founder:{}", founder.subscription_id);
     let mut record = match kv.get(&key).json::<FounderRecord>().await? {

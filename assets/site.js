@@ -55,7 +55,7 @@ for (const root of document.querySelectorAll("[data-wedge]")) {
       const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, wedge: root.dataset.wedge, clients, referrer: document.referrer || null }),
+        body: JSON.stringify({ email, wedge: root.dataset.wedge, clients, referrer: document.referrer || null, visitor_id: window.virling?.vid?.() || null }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "Something went wrong. Try again.");
@@ -154,7 +154,7 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
     try {
       const [Dodo, res] = await Promise.all([
         loadSdk(),
-        fetch("/api/preorder/session", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" }),
+        fetch("/api/preorder/session", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ visitor_id: window.virling?.vid?.() || null }) }),
       ]);
       const body = await res.json();
       if (!res.ok || !body.checkout_url) throw new Error(body.error || "session");
