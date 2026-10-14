@@ -15,7 +15,14 @@ pub fn session_body(email: Option<&str>, visitor_id: Option<&str>, code: Option<
         "product_cart": [{ "product_id": PRODUCT_ID, "quantity": 1 }],
         "return_url": "https://virling.com/agency?preorder=done",
         "metadata": { "source": "virling.com/agency" },
-        "feature_flags": { "redirect_immediately": true, "allow_discount_code": true },
+        "minimal_address": true,
+        "feature_flags": {
+            "redirect_immediately": true,
+            "allow_discount_code": true,
+            "allow_phone_number_collection": false,
+            "allow_tax_id": false,
+            "single_page": true
+        },
         "customization": {
             "theme": "light",
             "theme_config": {
