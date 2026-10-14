@@ -1,6 +1,8 @@
 mod app;
 mod auth;
 mod channel;
+#[allow(dead_code)]
+mod chart;
 mod crypto;
 mod dashboard;
 mod events;
