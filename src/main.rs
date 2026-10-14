@@ -673,6 +673,98 @@ mod tests {
         assert_eq!(n, 0);
     }
 
+    async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {
+        let (ciphertext, nonce) = state.vault.encrypt(key).unwrap();
+        sqlx::query(
+            "INSERT INTO integrations (id, site_id, provider, key_ciphertext, key_nonce, last_synced_at, last_error, created_at)
+             VALUES (?, ?, ?, ?, ?, 1, 'Dodo Payments returned HTTP 400', 1)",
+        )
+        .bind(provider)
+        .bind(site)
+        .bind(provider)
+        .bind(ciphertext)
+        .bind(nonce)
+        .execute(&state.db)
+        .await
+        .unwrap();
+    }
+
+    #[tokio::test]
+    async fn connected_provider_shows_a_row_not_a_key_field() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        connect_fake(&state, &site, "dodo", "dodo_test_HIDDENhidden9xQ2").await;
+        let uri = format!("/app/sites/{site}/setup/payments");
+        let body = body_text(call(&state, get(&uri, Some(&cookie))).await).await;
+        assert!(body.contains(r#"data-connected="dodo""#));
+        assert!(body.contains(r#"Key ending <span class="mono">9xQ2</span>"#));
+        assert!(
+            !body.contains("HIDDEN"),
+            "only the last four characters are shown"
+        );
+        assert!(
+            body.contains("Dodo Payments returned HTTP 400"),
+            "last error is shown"
+        );
+        assert!(body.contains("Replace key"));
+        assert!(
+            !body.contains(r#"data-provider="dodo""#),
+            "no key form for dodo"
+        );
+        assert!(
+            body.contains(r#"data-provider="stripe""#),
+            "others can still connect"
+        );
+    }
+
+    #[tokio::test]
+    async fn replace_key_reveals_the_form() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        connect_fake(&state, &site, "dodo", "dodo_test_HIDDENhidden9xQ2").await;
+        let uri = format!("/app/sites/{site}/setup/payments");
+        let res = call(
+            &state,
+            get(&format!("{uri}?provider=dodo&replace=1"), Some(&cookie)),
+        )
+        .await;
+        let body = body_text(res).await;
+        assert!(
+            body.contains(r#"data-provider="dodo""#),
+            "replace reveals the form"
+        );
+        assert!(body.contains(r#"value="dodo" checked"#));
+        assert!(body.contains("Save new key"));
+        assert!(!body.contains("HIDDEN"));
+
+        for p in ["stripe", "polar", "lemonsqueezy"] {
+            connect_fake(&state, &site, p, "fake_test_value_1234").await;
+        }
+        let body = body_text(call(&state, get(&uri, Some(&cookie))).await).await;
+        assert!(
+            !body.contains(r#"name="key""#),
+            "no key inputs when all are connected"
+        );
+
+        let res = call(
+            &state,
+            form(
+                &format!("/app/sites/{site}/settings/disconnect"),
+                "provider=dodo&back=setup".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(res.headers()["location"], uri.as_str());
+        let body = body_text(call(&state, get(&uri, Some(&cookie))).await).await;
+        assert!(
+            body.contains(r#"data-provider="dodo""#),
+            "a disconnected provider gets its form back"
+        );
+    }
+
     #[tokio::test]
     async fn settings_change_persists_and_rebuilds() {
         let (_dir, state, store) = setup().await;
