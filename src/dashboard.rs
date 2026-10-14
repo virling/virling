@@ -262,7 +262,7 @@ fn day(d: Date) -> String {
 
 fn status(status: &str) -> (&'static str, &'static str) {
     match status {
-        "refunded" => ("Refunded", "bad"),
+        "refunded" => ("Refunded", "ref"),
         "partially_refunded" => ("Partly refunded", "warn"),
         "failed" => ("Failed", "bad"),
         _ => ("Paid", "ok"),
@@ -379,6 +379,9 @@ pub struct PayView {
     source: String,
     channel: String,
     unattributed: bool,
+    renewal: bool,
+    first_icon: String,
+    first: String,
     amount: String,
     refunded: bool,
     status: &'static str,
@@ -463,6 +466,7 @@ fn source_of(p: &PaymentRow) -> (String, String) {
 pub fn pay_view(p: &PaymentRow, site_id: &str, offset: UtcOffset) -> PayView {
     let (status, status_class) = status(&p.status);
     let (source, channel) = source_of(p);
+    let first = p.first_touch.as_ref().map(|f| f.source.clone());
     PayView {
         date: local(p.ts, offset),
         icon: icons::source(&source, 16),
@@ -472,6 +476,12 @@ pub fn pay_view(p: &PaymentRow, site_id: &str, offset: UtcOffset) -> PayView {
             channel
         },
         unattributed: p.touch.is_none(),
+        renewal: p.is_renewal,
+        first_icon: first
+            .as_deref()
+            .map(|f| icons::source(f, 16))
+            .unwrap_or_default(),
+        first: first.unwrap_or_default(),
         source,
         amount: amount(p),
         refunded: p.status == "refunded",
@@ -1081,17 +1091,10 @@ pub async fn dashboard(
     })
 }
 
-pub struct PaymentView {
-    date: String,
-    amount: String,
-    refunded: String,
-    source: String,
-    unattributed: bool,
-    renewal: bool,
-    provider: &'static str,
-    status: &'static str,
-    status_class: &'static str,
-    href: String,
+pub struct Summary {
+    name: &'static str,
+    value: String,
+    sub: String,
 }
 
 #[derive(Template)]
@@ -1101,38 +1104,18 @@ struct PaymentsPage {
     title: &'static str,
     range_label: &'static str,
     ranges: Vec<Opt>,
+    summary: Vec<Summary>,
     filters: Vec<Opt>,
-    rows: Vec<PaymentView>,
+    rows: Vec<PayView>,
     filter_label: &'static str,
     prev: String,
     next: String,
     showing: String,
-}
-
-fn payment_view(p: &PaymentRow, site_id: &str, offset: UtcOffset) -> PaymentView {
-    let (status, status_class) = status(&p.status);
-    PaymentView {
-        date: local(p.ts, offset),
-        amount: native(p.amount, &p.currency),
-        refunded: if p.refunded > 0 && p.refunded < p.amount {
-            format!("{} refunded", native(p.refunded, &p.currency))
-        } else {
-            String::new()
-        },
-        source: p
-            .touch
-            .as_ref()
-            .map_or_else(|| "Unattributed".into(), |t| t.source.clone()),
-        unattributed: p.touch.is_none(),
-        renewal: p.is_renewal,
-        provider: provider_name(&p.provider),
-        status,
-        status_class,
-        href: format!(
-            "/app/sites/{site_id}/payments/{}/{}",
-            p.provider, p.provider_payment_id
-        ),
-    }
+    total: u64,
+    offset: u64,
+    never_paid: bool,
+    connected: String,
+    providers: Vec<(String, &'static str, bool)>,
 }
 
 pub async fn payments(
@@ -1154,19 +1137,46 @@ pub async fn payments(
         })
         .unwrap_or(("all", "All", PaymentFilter::All));
     let page = q.page.unwrap_or(1).max(1);
+    let providers: Vec<String> = match sqlx::query_scalar(
+        "SELECT provider FROM integrations WHERE site_id = ? ORDER BY created_at",
+    )
+    .bind(&ctx.site.id)
+    .fetch_all(&state.db)
+    .await
+    {
+        Ok(p) => p,
+        Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
+    };
     let store = state.events.clone();
     let id = ctx.site.id.clone();
     let result = blocking(move || {
         let s = store.payment_summary(&id, &p)?;
-        let counts = [s.payments, s.attributed, s.unattributed, s.refunded];
         let list = store.payment_list(&id, &p, filter, PER_PAGE, (page - 1) * PER_PAGE)?;
-        Ok((counts, list))
+        let ever = if s.payments > 0 {
+            s.payments
+        } else {
+            store
+                .payment_list(
+                    &id,
+                    &Period {
+                        from: time::macros::date!(2000 - 01 - 01),
+                        to: p.to,
+                        tz: p.tz.clone(),
+                    },
+                    PaymentFilter::All,
+                    0,
+                    0,
+                )?
+                .total
+        };
+        Ok((s, list, ever))
     })
     .await;
-    let (counts, list) = match result {
+    let (s, list, ever) = match result {
         Ok(r) => r,
         Err(code) => return code.into_response(),
     };
+    let counts = [s.payments, s.attributed, s.unattributed, s.refunded];
     let base = format!("/app/sites/{}/payments", ctx.site.id);
     let range_param = if rkey == "30d" { "" } else { rkey };
     let filter_param = if fkey == "all" { "" } else { fkey };
@@ -1183,10 +1193,53 @@ pub async fn payments(
     };
     let shown = list.rows.len() as u64;
     let first = (page as u64 - 1) * PER_PAGE as u64;
+    let summary = vec![
+        Summary {
+            name: "Net revenue",
+            value: money(s.net_usd),
+            sub: if s.refunded_usd > 0.0 {
+                format!("After {} in refunds", money(s.refunded_usd))
+            } else {
+                "No refunds".into()
+            },
+        },
+        Summary {
+            name: "Payments",
+            value: group(s.payments),
+            sub: format!("From {}", plural(s.customers, "customer")),
+        },
+        Summary {
+            name: "Attributed",
+            value: if s.payments > 0 {
+                format!("{:.0}%", s.attributed as f64 / s.payments as f64 * 100.0)
+            } else {
+                "n/a".into()
+            },
+            sub: if s.payments > 0 {
+                format!(
+                    "{} of {} matched to a visit",
+                    group(s.attributed),
+                    group(s.payments)
+                )
+            } else {
+                "Needs a first payment".into()
+            },
+        },
+        Summary {
+            name: "Average payment",
+            value: if s.payments > 0 {
+                usd(s.net_usd / s.payments as f64)
+            } else {
+                "n/a".into()
+            },
+            sub: "All shown in USD".into(),
+        },
+    ];
     render(PaymentsPage {
         title: "Payments",
         range_label: rlabel,
         ranges: range_opts(&base, rkey, &[("filter", filter_param)]),
+        summary,
         filters: FILTERS
             .iter()
             .zip(&counts)
@@ -1206,7 +1259,7 @@ pub async fn payments(
         rows: list
             .rows
             .iter()
-            .map(|p| payment_view(p, &ctx.site.id, ctx.offset))
+            .map(|p| pay_view(p, &ctx.site.id, ctx.offset))
             .collect(),
         filter_label: flabel,
         prev: if page > 1 {
@@ -1219,9 +1272,9 @@ pub async fn payments(
         } else {
             String::new()
         },
-        showing: if list.total > shown {
+        showing: if shown > 0 {
             format!(
-                "{}–{} of {}",
+                "Showing {} to {} of {}",
                 group(first + 1),
                 group(first + shown),
                 group(list.total)
@@ -1229,13 +1282,32 @@ pub async fn payments(
         } else {
             String::new()
         },
+        total: list.total,
+        offset: first,
+        never_paid: ever == 0,
+        connected: providers
+            .first()
+            .map(|p| provider_name(p).to_string())
+            .unwrap_or_default(),
+        providers: ["dodo", "stripe", "polar", "lemonsqueezy"]
+            .into_iter()
+            .map(|pr| {
+                (
+                    icons::provider(pr, 12),
+                    provider_name(pr),
+                    providers.iter().any(|c| c == pr),
+                )
+            })
+            .collect(),
         shell: ctx.shell,
     })
 }
 
 pub struct SessionView {
     date: String,
+    icon: String,
     source: String,
+    channel: String,
     campaign: Option<String>,
     paths: Vec<String>,
     more: usize,
@@ -1245,59 +1317,116 @@ pub struct SessionView {
 
 pub struct JourneyView {
     amount: String,
-    usd: String,
+    charged: String,
     provider: &'static str,
+    provider_icon: String,
     payment_id: String,
+    customer_id: String,
+    visitor_id: String,
     date: String,
+    flag: String,
+    country: String,
+    browser: String,
     status: &'static str,
     status_class: &'static str,
     unattributed: bool,
+    credited_icon: String,
     credited: String,
+    credited_channel: String,
+    first_icon: String,
     first_touch: String,
+    first_date: String,
     time_to_pay: String,
+    visits: String,
     sessions: Vec<SessionView>,
     checkout_href: String,
 }
 
+/// "2 days 18 h", "5 h", "12 minutes"
 fn duration(d: Duration) -> String {
-    let plural = |n: i64, unit: &str| format!("{n} {unit}{}", if n == 1 { "" } else { "s" });
-    if d.whole_days() >= 1 {
-        plural(d.whole_days(), "day")
-    } else if d.whole_hours() >= 1 {
-        plural(d.whole_hours(), "hour")
-    } else {
-        plural(d.whole_minutes().max(1), "minute")
+    let (days, hours) = (d.whole_days(), d.whole_hours() % 24);
+    match days {
+        0 if d.whole_hours() >= 1 => format!("{} h", d.whole_hours()),
+        0 => plural(d.whole_minutes().max(1) as u64, "minute"),
+        _ if hours > 0 => format!("{} {hours} h", plural(days as u64, "day")),
+        _ => plural(days as u64, "day"),
     }
 }
 
 fn journey_view(j: Journey, site_id: &str, offset: UtcOffset) -> JourneyView {
     let p = &j.payment;
     let (status, status_class) = status(&p.status);
-    let first = j.sessions.first();
+    let (credited, credited_channel) = source_of(p);
+    let first_ts = p
+        .first_touch
+        .as_ref()
+        .map(|f| f.ts)
+        .or(j.sessions.first().map(|s| s.ts));
+    let first_touch = p
+        .first_touch
+        .as_ref()
+        .map(|f| f.source.clone())
+        .or(j.sessions.first().map(|s| s.source.clone()))
+        .unwrap_or_default();
     JourneyView {
-        amount: native(p.amount, &p.currency),
-        usd: match p.amount_usd {
-            Some(usd) if p.currency != "usd" => format!("about {}", money(usd)),
-            _ => String::new(),
+        amount: amount(p),
+        charged: match p.amount_usd {
+            Some(u) if p.currency != "usd" => format!(
+                "{} {}, shown as {}",
+                p.currency.to_ascii_uppercase(),
+                group_minor(p.amount, &p.currency),
+                usd(u)
+            ),
+            _ => native(p.amount, &p.currency),
         },
         provider: provider_name(&p.provider),
+        provider_icon: icons::provider(&p.provider, 14),
         payment_id: p.provider_payment_id.clone(),
-        date: local(p.ts, offset),
+        customer_id: p.customer_id.clone().unwrap_or_default(),
+        visitor_id: p.visitor_id.clone().unwrap_or_default(),
+        date: p
+            .ts
+            .to_offset(offset)
+            .format(format_description!(
+                "[month repr:short] [day padding:none], [year] at [hour]:[minute]"
+            ))
+            .unwrap_or_default(),
+        flag: j.country.as_deref().map(icons::flag).unwrap_or_default(),
+        country: j.country.as_deref().map(icons::country).unwrap_or_default(),
+        browser: match (&j.browser, &j.device) {
+            (Some(b), Some(d)) if d != "Unknown" => format!("{b} on {d}"),
+            (Some(b), _) => b.clone(),
+            _ => String::new(),
+        },
         status,
         status_class,
         unattributed: p.touch.is_none(),
-        credited: p
-            .touch
-            .as_ref()
-            .map_or_else(|| "Unattributed".into(), |t| t.source.clone()),
-        first_touch: first.map(|s| s.source.clone()).unwrap_or_default(),
-        time_to_pay: first.map(|s| duration(p.ts - s.ts)).unwrap_or_default(),
+        credited_icon: icons::source(&credited, 14),
+        credited_channel: if credited_channel == credited {
+            String::new()
+        } else {
+            credited_channel
+        },
+        credited,
+        first_icon: icons::source(&first_touch, 14),
+        first_touch,
+        first_date: first_ts
+            .map(|t| day(t.to_offset(offset).date()))
+            .unwrap_or_default(),
+        time_to_pay: first_ts.map(|t| duration(p.ts - t)).unwrap_or_default(),
+        visits: plural(j.sessions.len() as u64, "visit"),
         checkout_href: format!("/app/sites/{site_id}/setup/checkout"),
         sessions: j
             .sessions
             .iter()
             .map(|s| SessionView {
                 date: local(s.ts, offset),
+                icon: icons::source(&s.source, 14),
+                channel: if s.channel == s.source {
+                    String::new()
+                } else {
+                    s.channel.clone()
+                },
                 source: s.source.clone(),
                 campaign: s.campaign.clone(),
                 paths: s.paths.iter().take(8).cloned().collect(),
@@ -1307,6 +1436,13 @@ fn journey_view(j: Journey, site_id: &str, offset: UtcOffset) -> JourneyView {
             })
             .collect(),
     }
+}
+
+/// "4,999.00" in the currency's minor units.
+fn group_minor(minor: i64, currency: &str) -> String {
+    let v = minor_to_major(minor, currency);
+    let c = (v * 100.0).round() as u64;
+    format!("{}.{:02}", group(c / 100), c % 100)
 }
 
 #[derive(Template)]

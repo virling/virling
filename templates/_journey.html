@@ -1,35 +1,44 @@
 <div class="journey">
   <div class="j-head">
-    <small>{{ j.provider }} · <span class="mono">{{ j.payment_id }}</span></small>
-    <h2><span class="rev">{{ j.amount }}</span> <span class="badge {{ j.status_class }}">{{ j.status }}</span></h2>
-    <span class="muted">{{ j.date }}{% if !j.usd.is_empty() %} · {{ j.usd }}{% endif %}</span>
+    <div class="j-amt"><b>{{ j.amount }}</b><span class="badge {{ j.status_class }}">{{ j.status }}</span></div>
+    <span class="j-meta">{{ j.date }}{% if !j.country.is_empty() %}<i class="sep"></i>{{ j.flag|safe }}{{ j.country }}{% endif %}{% if !j.browser.is_empty() %}<i class="sep"></i>{{ j.browser }}{% endif %}</span>
   </div>
   {% if j.unattributed %}
   <div class="j-empty">
     <b>Unattributed</b>
     <p>This payment did not carry a visitor ID, or the visitor had no visits in the lookback window, so Virling cannot tell which visit brought it. It still counts toward revenue.</p>
     <p>Pass the <span class="mono">virling_vid</span> cookie into checkout and new payments will show their full journey here.</p>
-    <a class="btn secondary" href="{{ j.checkout_href }}">How to pass virling_vid</a>
+    <a class="b sec" href="{{ j.checkout_href }}">How to pass virling_vid</a>
   </div>
   {% else %}
   <div class="j-stats">
-    <div><small>Credited to</small><b>{{ j.credited }}</b></div>
-    <div><small>First touch</small><b>{{ j.first_touch }}</b></div>
-    <div><small>Time to pay</small><b>{{ j.time_to_pay }}</b></div>
+    <div><span class="k">Credited to</span><b>{{ j.credited_icon|safe }}<span class="lbl">{{ j.credited }}</span></b>{% if !j.credited_channel.is_empty() %}<span class="s">{{ j.credited_channel }}</span>{% endif %}</div>
+    <div><span class="k">First touch</span><b>{{ j.first_icon|safe }}<span class="lbl">{{ j.first_touch }}</span></b><span class="s">{{ j.first_date }}</span></div>
+    <div><span class="k">Time to pay</span><b>{{ j.time_to_pay }}</b><span class="s">{{ j.visits }}</span></div>
   </div>
-  <ol class="timeline">
-    {% for s in j.sessions %}
-    <li{% if s.credited %} class="credited"{% endif %}>
-      <div class="t-head"><b>{{ s.source }}</b>{% if s.credited %}<span class="tag credit">Credited</span>{% endif %}<span class="muted mono">{{ s.date }}</span></div>
-      {% if let Some(c) = s.campaign %}<small class="muted">Campaign {{ c }}</small>{% endif %}
-      <div class="chips">
-        {% for p in s.paths %}<span class="chip mono">{{ p }}</span>{% endfor %}
-        {% if s.more > 0 %}<span class="chip muted">+{{ s.more }} more</span>{% endif %}
-        {% for g in s.goals %}<span class="chip goal">{{ g }}</span>{% endfor %}
-      </div>
-    </li>
-    {% endfor %}
-    <li class="paid"><div class="t-head"><b>Paid {{ j.amount }}</b><span class="muted mono">{{ j.date }}</span></div></li>
-  </ol>
+  <div class="j-sec">
+    <b class="j-title">Journey</b>
+    <ol class="tl">
+      {% for s in j.sessions %}
+      <li{% if s.credited %} class="credited"{% endif %}>
+        <span class="tl-ico">{{ s.icon|safe }}</span>
+        <div class="tl-body">
+          <div class="tl-head"><b>{{ s.source }}</b>{% if !s.channel.is_empty() %}<span class="ch">{{ s.channel }}</span>{% endif %}{% if s.credited %}<span class="credit">Credited</span>{% endif %}<span class="grow"></span><span class="dim">{{ s.date }}</span></div>
+          {% if let Some(c) = s.campaign %}<span class="dim">Campaign {{ c }}</span>{% endif %}
+          <div class="chips">{% for p in s.paths %}<span class="chip mono">{{ p }}</span>{% endfor %}{% if s.more > 0 %}<span class="chip">+{{ s.more }} more</span>{% endif %}{% for g in s.goals %}<span class="chip goal">Goal: {{ g }}</span>{% endfor %}</div>
+        </div>
+      </li>
+      {% endfor %}
+      <li class="paid"><span class="tl-ico">{% include "_check.html" %}</span><div class="tl-head"><b>Paid {{ j.amount }}</b><span class="prov-inline">{{ j.provider_icon|safe }}{{ j.provider }}</span><span class="grow"></span><span class="dim">{{ j.date }}</span></div></li>
+    </ol>
+  </div>
   {% endif %}
+  <div class="j-sec">
+    <b class="j-title">Details</b>
+    <div class="det"><span>Charged</span><span>{{ j.charged }}</span></div>
+    <div class="det"><span>Provider</span><span>{{ j.provider_icon|safe }}{{ j.provider }}</span></div>
+    <div class="det"><span>Payment ID</span><span class="mono">{{ j.payment_id }}</span></div>
+    {% if !j.customer_id.is_empty() %}<div class="det"><span>Customer</span><span class="mono">{{ j.customer_id }}</span></div>{% endif %}
+    {% if !j.visitor_id.is_empty() %}<div class="det"><span>Visitor</span><span class="mono">{{ j.visitor_id }}</span></div>{% endif %}
+  </div>
 </div>

@@ -125,25 +125,54 @@ const drawer = document.getElementById("drawer");
 if (drawer) {
   const back = document.querySelector(".drawer-back");
   const body = drawer.querySelector("[data-drawer-body]");
-  const close = () => { drawer.hidden = true; back.hidden = true; };
-  const show = async (href) => {
-    const res = await fetch(href, { headers: { "x-drawer": "1" } });
-    if (!res.ok) return (location.href = href);
+  const pos = drawer.querySelector("[data-drawer-pos]");
+  const steps = drawer.querySelectorAll("[data-drawer-step]");
+  const rows = () => [...document.querySelectorAll("a[data-drawer]")];
+  let current = null;
+  const close = () => {
+    drawer.hidden = true;
+    back.hidden = true;
+    current?.classList.remove("sel");
+    current?.focus();
+    current = null;
+  };
+  const show = async (row) => {
+    const res = await fetch(row.getAttribute("href"), { headers: { "x-drawer": "1" } });
+    if (!res.ok) return (location.href = row.getAttribute("href"));
     body.innerHTML = await res.text();
+    current?.classList.remove("sel");
+    current = row;
+    row.classList.add("sel");
+    const list = rows();
+    const i = list.indexOf(row);
+    const box = row.closest("[data-rows]");
+    pos.textContent = box ? `Payment ${Number(box.dataset.offset) + i + 1} of ${box.dataset.total}` : "";
+    steps[0].disabled = i <= 0;
+    steps[1].disabled = i >= list.length - 1;
     drawer.hidden = false;
     back.hidden = false;
     drawer.querySelector(".drawer-x").focus();
   };
+  const step = (n) => {
+    const list = rows();
+    const next = list[list.indexOf(current) + n];
+    if (next) show(next);
+  };
+  steps.forEach((b) => b.addEventListener("click", () => step(Number(b.dataset.drawerStep))));
   document.addEventListener("click", (e) => {
     if (e.target.closest("[data-drawer-close]")) return close();
     if (e.metaKey || e.ctrlKey || e.shiftKey) return;
     const link = e.target.closest("a[data-drawer]");
-    const row = e.target.closest("tr[data-href]");
-    if (!link && !row) return;
+    if (!link) return;
     e.preventDefault();
-    show(link ? link.getAttribute("href") : row.dataset.href);
+    show(link);
   });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+  document.addEventListener("keydown", (e) => {
+    if (drawer.hidden) return;
+    if (e.key === "Escape") close();
+    else if (e.key === "ArrowDown" || e.key === "j") { e.preventDefault(); step(1); }
+    else if (e.key === "ArrowUp" || e.key === "k") { e.preventDefault(); step(-1); }
+  });
 }
 
 const confirmBox = document.getElementById("confirm");

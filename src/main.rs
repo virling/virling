@@ -902,6 +902,8 @@ mod tests {
         let body = body_text(res).await;
         assert!(body.contains("Someblog") || body.contains("someblog.dev"));
         assert!(body.contains("Unattributed"));
+        assert!(body.contains("Net revenue") && body.contains("1 of 2 matched to a visit"));
+        assert!(body.contains(r#"data-total="2""#), "drawer can count rows");
         let unattributed = body_text(
             call(
                 &state,
@@ -922,7 +924,9 @@ mod tests {
         req.headers_mut().insert("x-drawer", "1".parse().unwrap());
         let drawer = body_text(call(&state, req).await).await;
         assert!(!drawer.contains("<html"), "drawer is a fragment");
-        assert!(drawer.contains("Hacker News") && drawer.contains("Paid $49"));
+        assert!(drawer.contains("Hacker News") && drawer.contains("Paid $49.00"));
+        assert!(drawer.contains("Germany") && drawer.contains("Firefox on Desktop"));
+        assert!(drawer.contains("2 visits") && drawer.contains(">v1</span>"));
         let full = call(
             &state,
             get(
@@ -966,6 +970,17 @@ mod tests {
         assert!(body.contains(r#"data-site="example.com""#));
         assert!(body.contains("/assets/art/02-empty-waiting.jpg"));
         assert!(!body.contains(r#"class="chart"#));
+        let payments = body_text(
+            call(
+                &state,
+                get(&format!("/app/sites/{site}/payments"), Some(&cookie)),
+            )
+            .await,
+        )
+        .await;
+        assert!(
+            payments.contains("No payments yet") && payments.contains("Dodo Payments is connected")
+        );
     }
 
     #[tokio::test]
