@@ -19,7 +19,7 @@ pub const SELFHOST: Copy = Copy {
         "Early access to the self-host binary and the hosted beta.",
         "You pick: run it yourself for free, or let us host it.",
     ],
-    offer: "Founding offer: the first 50 hosted customers get 40% off for life.",
+    offer: "Self-hosting is free forever. Hosted is $19/month; the first 50 customers get 40% off for life ($11.40/month).",
     question: "What do you use for analytics today, and how do you figure out which channel made you money?",
 };
 
