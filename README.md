@@ -6,7 +6,7 @@
 
 <p align="center">
   Open-source revenue analytics. See which channels make you money, not just traffic.<br>
-  <a href="https://virling.com">virling.com</a> · <a href="https://virling.com/agency">For agencies</a>
+  <a href="https://virling.com">virling.com</a> · <a href="https://docs.virling.com">Docs</a> · <a href="https://virling.com/agency">For agencies</a>
 </p>
 
 ---
@@ -35,7 +35,7 @@ Stripe, Dodo Payments, Polar and LemonSqueezy sync from a read-only key, the att
 
 ## Run it
 
-Requires Rust 1.99 or newer.
+The full guide, with Docker, release binaries and payment setup, is at [docs.virling.com](https://docs.virling.com). To run from source, you need Rust 1.99 or newer.
 
 ```sh
 cargo run --release -- add-site yourdomain.com --owner you@example.com
