@@ -90,7 +90,7 @@ for (const term of document.querySelectorAll("[data-tabs]")) {
 }
 
 for (const card of document.querySelectorAll("[data-preorder]")) {
-  const SDK = "https://cdn.jsdelivr.net/npm/dodopayments-checkout@1.9.9/dist/index.js";
+  const SDK = "https://cdn.jsdelivr.net/npm/dodopayments-checkout@2.0.0/dist/index.js";
   const spots = document.querySelector("[data-spots]");
   const section = card.closest("section");
   const setState = (state) => { card.dataset.state = state; };
