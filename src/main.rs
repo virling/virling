@@ -6,7 +6,10 @@ mod chart;
 mod crypto;
 mod dashboard;
 mod events;
+mod flags;
 mod fx;
+#[allow(dead_code)]
+mod icons;
 mod ingest;
 mod mail;
 mod onboarding;
@@ -491,6 +494,28 @@ mod tests {
             call(&state, get("/app", Some(&cookie))).await.headers()["location"],
             "/login"
         );
+    }
+
+    #[tokio::test]
+    async fn flags_and_art_are_served() {
+        let (_dir, state, _store) = setup().await;
+        for (uri, status, kind) in [
+            ("/assets/flags/de.svg", StatusCode::OK, "image/svg+xml"),
+            ("/assets/flags/zz.svg", StatusCode::NOT_FOUND, ""),
+            ("/assets/flags/de", StatusCode::NOT_FOUND, ""),
+            (
+                "/assets/art/03-empty-payments.jpg",
+                StatusCode::OK,
+                "image/jpeg",
+            ),
+            ("/assets/art/nope.jpg", StatusCode::NOT_FOUND, ""),
+        ] {
+            let res = call(&state, get(uri, None)).await;
+            assert_eq!(res.status(), status, "{uri}");
+            if !kind.is_empty() {
+                assert_eq!(res.headers()["content-type"], kind);
+            }
+        }
     }
 
     #[tokio::test]

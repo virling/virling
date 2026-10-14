@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use axum::Router;
+use axum::extract::Path;
 use axum::http::{StatusCode, header};
 use axum::response::{Html, IntoResponse, Redirect, Response};
 use axum::routing::{get, post};
@@ -12,7 +13,7 @@ use crate::fx::Rates;
 use crate::ingest::{self, DailySalt, RateLimiter, Sessions};
 use crate::mail::Mailer;
 use crate::sites::SiteCache;
-use crate::{auth, dashboard, onboarding, settings, waitlist};
+use crate::{auth, dashboard, flags, onboarding, settings, waitlist};
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -109,6 +110,8 @@ pub fn router(state: AppState) -> Router {
                 )
             }),
         )
+        .route("/assets/flags/{file}", get(flag))
+        .route("/assets/art/{file}", get(art))
         .route(
             "/favicon.svg",
             get(|| asset("image/svg+xml", include_str!("../assets/favicon.svg"))),
@@ -182,6 +185,50 @@ async fn tracker() -> Response {
         include_str!("../assets/v.js"),
     )
         .into_response()
+}
+
+const ART: [(&str, &[u8]); 3] = [
+    (
+        "02-empty-waiting.jpg",
+        include_bytes!("../assets/art/02-empty-waiting.jpg"),
+    ),
+    (
+        "03-empty-payments.jpg",
+        include_bytes!("../assets/art/03-empty-payments.jpg"),
+    ),
+    (
+        "04-empty-goals.jpg",
+        include_bytes!("../assets/art/04-empty-goals.jpg"),
+    ),
+];
+
+async fn art(Path(file): Path<String>) -> Response {
+    match ART.iter().find(|(name, _)| *name == file) {
+        Some((_, bytes)) => (
+            [
+                (header::CONTENT_TYPE, "image/jpeg"),
+                (header::CACHE_CONTROL, "public, max-age=86400"),
+            ],
+            *bytes,
+        )
+            .into_response(),
+        None => StatusCode::NOT_FOUND.into_response(),
+    }
+}
+
+async fn flag(Path(file): Path<String>) -> Response {
+    let code = file.strip_suffix(".svg").unwrap_or_default();
+    match flags::lookup(&code.to_ascii_uppercase()) {
+        Some((_, svg)) => (
+            [
+                (header::CONTENT_TYPE, "image/svg+xml"),
+                (header::CACHE_CONTROL, "public, max-age=86400"),
+            ],
+            svg,
+        )
+            .into_response(),
+        None => StatusCode::NOT_FOUND.into_response(),
+    }
 }
 
 async fn asset(content_type: &'static str, body: &'static str) -> Response {
