@@ -8,7 +8,7 @@
     <span class="listening"><i></i>Listening for events</span>
     <h2>Waiting for the first visit</h2>
     <p>Open {{ e.domain }} in a new tab. It shows up here within seconds.</p>
-    <div class="eh-actions"><a class="b" href="https://{{ e.domain }}" target="_blank" rel="noopener">Open {{ e.domain }}</a><a class="b sec" href="/app/sites/{{ shell.site_id }}/setup/script">Check installation</a></div>
+    <div class="eh-actions"><a class="b" href="https://{{ e.domain }}" target="_blank" rel="noopener">Open {{ e.domain }}</a><a class="b sec" href="/app/{{ shell.domain }}/setup/script">Check installation</a></div>
     <pre class="snippet">&lt;script defer src="{{ e.script_host }}/v.js"
   data-site="{{ e.domain }}"{% if e.cookieless %} data-cookieless{% endif %}&gt;&lt;/script&gt;</pre>
   </div>
@@ -16,7 +16,7 @@
     {% for c in e.checks %}
     <div class="check">{% if c.done %}<span class="ok">{% include "_check.html" %}</span>{% else %}<span class="wait"><i></i></span>{% endif %}{{ c.icon|safe }}<b>{{ c.title }}</b><span class="dim">{{ c.sub }}</span></div>
     {% endfor %}
-    <div class="chips-p">{% for (icon, name, on) in e.providers %}<a class="prov{% if on %} on{% endif %}" href="/app/sites/{{ shell.site_id }}/setup/payments">{{ icon|safe }}{{ name }}{% if on %} connected{% endif %}</a>{% endfor %}</div>
+    <div class="chips-p">{% for (icon, name, on) in e.providers %}<a class="prov{% if on %} on{% endif %}" href="/app/{{ shell.domain }}/setup/payments">{{ icon|safe }}{{ name }}{% if on %} connected{% endif %}</a>{% endfor %}</div>
   </div>
 </section>
 <div class="ghost">
@@ -79,7 +79,7 @@
   <section class="box latest" data-rows data-total="{{ latest_total }}" data-offset="0">
     <div class="box-head"><h2>Latest payments</h2><a href="{{ payments_href }}">All payments</a></div>
     {% if latest.is_empty() %}
-    <p class="bd-empty">No payments in this range. <a href="/app/sites/{{ shell.site_id }}/setup/payments">Connect a provider</a></p>
+    <p class="bd-empty">No payments in this range. <a href="/app/{{ shell.domain }}/setup/payments">Connect a provider</a></p>
     {% else %}
     <div class="lp th"><span>Date</span><span>Credited to</span><span class="num">Amount</span><span class="lp-prov">Provider</span><span class="lp-st">Status</span><span></span></div>
     {% for p in latest %}

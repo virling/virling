@@ -30,7 +30,7 @@
       <h2>No payments yet</h2>
       <p>{% if connected.is_empty() %}Connect a payment provider and payments show up here with the visits that led to them.{% else %}{{ connected }} is connected and checked every few minutes. The first payment shows up here with the visits that led to it.{% endif %}</p>
       <div class="chips-p">{% for (icon, name, on) in providers %}<span class="prov{% if on %} on{% endif %}">{{ icon|safe }}{{ name }}{% if on %} connected{% endif %}</span>{% endfor %}</div>
-      <div class="eh-actions"><a class="b" href="/app/sites/{{ shell.site_id }}/setup/checkout">Pass virling_vid at checkout</a><a class="b sec" href="/app/sites/{{ shell.site_id }}/setup/payments">{% if connected.is_empty() %}Connect a provider{% else %}Connect another provider{% endif %}</a></div>
+      <div class="eh-actions"><a class="b" href="/app/{{ shell.domain }}/setup/checkout">Pass virling_vid at checkout</a><a class="b sec" href="/app/{{ shell.domain }}/setup/payments">{% if connected.is_empty() %}Connect a provider{% else %}Connect another provider{% endif %}</a></div>
     </div>
   </div>
   {% else if rows.is_empty() %}

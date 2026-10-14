@@ -35,8 +35,8 @@
             <span class="muted small">{{ r.synced }}</span>
             {% if !r.error.is_empty() %}<span class="err small">{{ r.error }}</span>{% endif %}
           </div>
-          <a class="btn ghost" href="/app/sites/{{ site_id }}/setup/payments?provider={{ r.key }}&amp;replace=1">Replace key</a>
-          <form method="post" action="/app/sites/{{ site_id }}/settings/disconnect" data-confirm="Disconnect {{ r.name }}? Syncing stops right away. Payments already imported stay in your reports.">
+          <a class="btn ghost" href="/app/{{ domain }}/setup/payments?provider={{ r.key }}&amp;replace=1">Replace key</a>
+          <form method="post" action="/app/{{ domain }}/settings/disconnect" data-confirm="Disconnect {{ r.name }}? Syncing stops right away. Payments already imported stay in your reports.">
             <input type="hidden" name="provider" value="{{ r.key }}">
             <input type="hidden" name="back" value="setup">
             <button class="btn ghost" type="submit">Disconnect</button>
@@ -47,7 +47,7 @@
     </div>
     {% endif %}
     {% if !cards.is_empty() %}
-    <form method="post" action="/app/sites/{{ site_id }}/setup/payments" class="stack" style="gap:20px" id="connect" data-providers>
+    <form method="post" action="/app/{{ domain }}/setup/payments" class="stack" style="gap:20px" id="connect" data-providers>
       <fieldset class="cards">
         <legend class="sr">Payment provider</legend>
         {% for c in cards %}
@@ -70,12 +70,12 @@
     </form>
     {% endif %}
     <div class="actions">
-      <a class="btn ghost" href="/app/sites/{{ site_id }}/setup/script">Back</a>
+      <a class="btn ghost" href="/app/{{ domain }}/setup/script">Back</a>
       <span class="actions">
-        {% if connected.is_none() %}<a class="btn ghost" href="/app/sites/{{ site_id }}/dashboard">Skip for now</a>{% endif %}
-        {% if replacing %}<a class="btn ghost" href="/app/sites/{{ site_id }}/setup/payments">Cancel</a>{% endif %}
+        {% if connected.is_none() %}<a class="btn ghost" href="/app/{{ domain }}">Skip for now</a>{% endif %}
+        {% if replacing %}<a class="btn ghost" href="/app/{{ domain }}/setup/payments">Cancel</a>{% endif %}
         {% if !cards.is_empty() %}<button class="btn {% if connected.is_some() %}secondary{% else %}lg{% endif %}" type="submit" form="connect">{% if replacing %}Save new key{% else %}Connect and backfill{% endif %}</button>{% endif %}
-        {% if connected.is_some() %}<a class="btn lg" href="/app/sites/{{ site_id }}/setup/checkout">Continue</a>{% endif %}
+        {% if connected.is_some() %}<a class="btn lg" href="/app/{{ domain }}/setup/checkout">Continue</a>{% endif %}
       </span>
     </div>
   </div>

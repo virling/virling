@@ -671,8 +671,7 @@ mod tests {
     async fn connect_with_invalid_key_shows_error() {
         let (_dir, state, _store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;
-        let site = site_id(&state).await;
-        let uri = format!("/app/sites/{site}/setup/payments");
+        let uri = "/app/example.com/setup/payments".to_string();
         let page = call(&state, get(&uri, Some(&cookie))).await;
         assert_eq!(page.status(), StatusCode::OK);
         assert!(body_text(page).await.contains("Restricted key"));
@@ -721,7 +720,7 @@ mod tests {
         let cookie = sign_in(&state, "me%40example.com").await;
         let site = site_id(&state).await;
         connect_fake(&state, &site, "dodo", "dodo_test_HIDDENhidden9xQ2").await;
-        let uri = format!("/app/sites/{site}/setup/payments");
+        let uri = "/app/example.com/setup/payments".to_string();
         let body = body_text(call(&state, get(&uri, Some(&cookie))).await).await;
         assert!(body.contains(r#"data-connected="dodo""#));
         assert!(body.contains(r#"Key ending <span class="mono">9xQ2</span>"#));
@@ -750,7 +749,7 @@ mod tests {
         let cookie = sign_in(&state, "me%40example.com").await;
         let site = site_id(&state).await;
         connect_fake(&state, &site, "dodo", "dodo_test_HIDDENhidden9xQ2").await;
-        let uri = format!("/app/sites/{site}/setup/payments");
+        let uri = "/app/example.com/setup/payments".to_string();
         let res = call(
             &state,
             get(&format!("{uri}?provider=dodo&replace=1"), Some(&cookie)),
@@ -777,7 +776,7 @@ mod tests {
         let res = call(
             &state,
             form(
-                &format!("/app/sites/{site}/settings/disconnect"),
+                "/app/example.com/settings/disconnect",
                 "provider=dodo&back=setup".into(),
                 Some(&cookie),
             ),
@@ -800,7 +799,7 @@ mod tests {
         crate::sync::rebuild_attribution(&state, Some(&site)).await;
         assert_eq!(credited(&store, &site).as_deref(), Some("last"));
 
-        let uri = format!("/app/sites/{site}/settings");
+        let uri = "/app/example.com/settings".to_string();
         let res = call(
             &state,
             form(
@@ -843,21 +842,19 @@ mod tests {
             call(&state, get("/app", Some(&cookie))).await.headers()["location"]
                 .to_str()
                 .unwrap(),
-            format!("/app/sites/{site}/dashboard")
+            "/app/example.com".to_string()
         );
         for query in [
             "",
             "?range=7d&chart=channel&metric=visitors",
-            "?range=12m&all=referrers&countries=visitors",
+            "?range=12m&all=referrers&sort_countries=visitors",
+            "?pages=visitors&channels=visitors",
             "?chart=area&metric=rpv",
             "?chart=line&metric=conversion",
         ] {
             let res = call(
                 &state,
-                get(
-                    &format!("/app/sites/{site}/dashboard{query}"),
-                    Some(&cookie),
-                ),
+                get(&format!("/app/example.com{query}"), Some(&cookie)),
             )
             .await;
             assert_eq!(res.status(), StatusCode::OK, "{query}");
@@ -868,36 +865,25 @@ mod tests {
             );
             assert!(body.contains(r#"class="chart"#), "{query}");
         }
-        let body = body_text(
-            call(
-                &state,
-                get(&format!("/app/sites/{site}/dashboard"), Some(&cookie)),
-            )
-            .await,
-        )
-        .await;
+        let body = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
         assert!(body.contains("New site") && body.contains("Visitors and payments per day"));
         assert!(body.contains(r#"aria-label="Hacker News""#), "source logo");
         assert!(body.contains(r#"src="/assets/flags/de.svg""#) && body.contains("Germany"));
         assert!(body.contains("Rows fill in as traffic grows"));
+        assert!(body.contains(r#"href="/app/example.com?range=7d""#));
+        assert!(body.contains(r#"href="/app/example.com/payments""#));
+        assert!(!body.contains("range=30d") && !body.contains("/app/sites/"));
         assert!(body.contains("No goals yet"));
         let area = body_text(
             call(
                 &state,
-                get(
-                    &format!("/app/sites/{site}/dashboard?chart=area&metric=visitors"),
-                    Some(&cookie),
-                ),
+                get("/app/example.com?chart=area&metric=visitors", Some(&cookie)),
             )
             .await,
         )
         .await;
         assert!(area.contains("Visitors per day") && area.contains(r#"fill-opacity="0.10""#));
-        let res = call(
-            &state,
-            get(&format!("/app/sites/{site}/payments"), Some(&cookie)),
-        )
-        .await;
+        let res = call(&state, get("/app/example.com/payments", Some(&cookie))).await;
         assert_eq!(res.status(), StatusCode::OK);
         let body = body_text(res).await;
         assert!(body.contains("Someblog") || body.contains("someblog.dev"));
@@ -908,7 +894,7 @@ mod tests {
             call(
                 &state,
                 get(
-                    &format!("/app/sites/{site}/payments?filter=unattributed"),
+                    "/app/example.com/payments?filter=unattributed",
                     Some(&cookie),
                 ),
             )
@@ -917,10 +903,7 @@ mod tests {
         .await;
         assert!(!unattributed.contains("/payments/stripe/pi_1\""));
 
-        let mut req = get(
-            &format!("/app/sites/{site}/payments/stripe/pi_1"),
-            Some(&cookie),
-        );
+        let mut req = get("/app/example.com/payments/stripe/pi_1", Some(&cookie));
         req.headers_mut().insert("x-drawer", "1".parse().unwrap());
         let drawer = body_text(call(&state, req).await).await;
         assert!(!drawer.contains("<html"), "drawer is a fragment");
@@ -929,10 +912,7 @@ mod tests {
         assert!(drawer.contains("2 visits") && drawer.contains(">v1</span>"));
         let full = call(
             &state,
-            get(
-                &format!("/app/sites/{site}/payments/stripe/pi_2"),
-                Some(&cookie),
-            ),
+            get("/app/example.com/payments/stripe/pi_2", Some(&cookie)),
         )
         .await;
         assert_eq!(full.status(), StatusCode::OK);
@@ -940,10 +920,7 @@ mod tests {
         assert_eq!(
             call(
                 &state,
-                get(
-                    &format!("/app/sites/{site}/payments/stripe/nope"),
-                    Some(&cookie)
-                ),
+                get("/app/example.com/payments/stripe/nope", Some(&cookie)),
             )
             .await
             .status(),
@@ -957,30 +934,50 @@ mod tests {
         let cookie = sign_in(&state, "me%40example.com").await;
         let site = site_id(&state).await;
         connect_fake(&state, &site, "dodo", "dodo_test_key_1234").await;
-        let body = body_text(
-            call(
-                &state,
-                get(&format!("/app/sites/{site}/dashboard"), Some(&cookie)),
-            )
-            .await,
-        )
-        .await;
+        let body = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
         assert!(body.contains("Waiting for the first visit"));
         assert!(body.contains("Not seen yet") && body.contains("Dodo Payments connected"));
         assert!(body.contains(r#"data-site="example.com""#));
         assert!(body.contains("/assets/art/02-empty-waiting.jpg"));
         assert!(!body.contains(r#"class="chart"#));
-        let payments = body_text(
-            call(
-                &state,
-                get(&format!("/app/sites/{site}/payments"), Some(&cookie)),
-            )
-            .await,
-        )
-        .await;
+        let payments =
+            body_text(call(&state, get("/app/example.com/payments", Some(&cookie))).await).await;
         assert!(
             payments.contains("No payments yet") && payments.contains("Dodo Payments is connected")
         );
+    }
+
+    #[tokio::test]
+    async fn old_site_urls_redirect_to_the_domain() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        for (old, new) in [
+            (
+                "dashboard?pages=visitors",
+                "/app/example.com?pages=visitors",
+            ),
+            (
+                "payments/stripe/pi_1",
+                "/app/example.com/payments/stripe/pi_1",
+            ),
+            ("settings", "/app/example.com/settings"),
+        ] {
+            let res = call(
+                &state,
+                get(&format!("/app/sites/{site}/{old}"), Some(&cookie)),
+            )
+            .await;
+            assert_eq!(res.status(), StatusCode::PERMANENT_REDIRECT, "{old}");
+            assert_eq!(res.headers()["location"], new, "{old}");
+        }
+        let other = sign_in(&state, "other%40example.com").await;
+        let res = call(
+            &state,
+            get(&format!("/app/sites/{site}/dashboard"), Some(&other)),
+        )
+        .await;
+        assert_eq!(res.status(), StatusCode::NOT_FOUND);
     }
 
     #[tokio::test]
@@ -995,10 +992,12 @@ mod tests {
             "settings",
             "setup/payments",
             "setup/checkout",
+            "setup/script",
+            "latest-event",
         ] {
             let res = call(
                 &state,
-                get(&format!("/app/sites/{site}/{path}"), Some(&cookie)),
+                get(&format!("/app/example.com/{path}"), Some(&cookie)),
             )
             .await;
             assert_eq!(res.status(), StatusCode::NOT_FOUND, "{path}");
@@ -1006,7 +1005,7 @@ mod tests {
         let res = call(
             &state,
             form(
-                &format!("/app/sites/{site}/settings"),
+                "/app/example.com/settings",
                 "model=first_touch&window_days=30".into(),
                 Some(&cookie),
             ),
@@ -1016,7 +1015,7 @@ mod tests {
         let res = call(
             &state,
             form(
-                &format!("/app/sites/{site}/settings/disconnect"),
+                "/app/example.com/settings/disconnect",
                 "provider=stripe".into(),
                 Some(&cookie),
             ),

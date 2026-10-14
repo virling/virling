@@ -10,6 +10,7 @@ use crate::app::AppState;
 use crate::auth::Account;
 use crate::dashboard::{Opt, Shell, ago, load, provider_name};
 use crate::onboarding::render;
+use crate::sites::app_path;
 use crate::sync;
 
 const WINDOWS: [i64; 4] = [30, 60, 90, 365];
@@ -48,10 +49,10 @@ pub struct SavedQuery {
 pub async fn page(
     State(state): State<AppState>,
     account: Account,
-    Path(site_id): Path<String>,
+    Path(domain): Path<String>,
     Query(q): Query<SavedQuery>,
 ) -> Response {
-    let ctx = match load(&state, &account, &site_id, "settings").await {
+    let ctx = match load(&state, &account, &domain, "settings").await {
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
@@ -122,10 +123,10 @@ pub struct SettingsInput {
 pub async fn save(
     State(state): State<AppState>,
     account: Account,
-    Path(site_id): Path<String>,
+    Path(domain): Path<String>,
     Form(input): Form<SettingsInput>,
 ) -> Response {
-    let ctx = match load(&state, &account, &site_id, "settings").await {
+    let ctx = match load(&state, &account, &domain, "settings").await {
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
@@ -147,7 +148,11 @@ pub async fn save(
     }
     state.sites.invalidate(&ctx.site.domain);
     sync::rebuild_attribution(&state, Some(&ctx.site.id)).await;
-    Redirect::to(&format!("/app/sites/{}/settings?saved=1", ctx.site.id)).into_response()
+    Redirect::to(&format!(
+        "{}?saved=1",
+        app_path(&ctx.site.domain, "settings")
+    ))
+    .into_response()
 }
 
 #[derive(Deserialize)]
@@ -159,10 +164,10 @@ pub struct DisconnectInput {
 pub async fn disconnect(
     State(state): State<AppState>,
     account: Account,
-    Path(site_id): Path<String>,
+    Path(domain): Path<String>,
     Form(input): Form<DisconnectInput>,
 ) -> Response {
-    let ctx = match load(&state, &account, &site_id, "settings").await {
+    let ctx = match load(&state, &account, &domain, "settings").await {
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
@@ -179,5 +184,5 @@ pub async fn disconnect(
         Some("setup") => "setup/payments",
         _ => "settings",
     };
-    Redirect::to(&format!("/app/sites/{}/{back}", ctx.site.id)).into_response()
+    Redirect::to(&app_path(&ctx.site.domain, back)).into_response()
 }
