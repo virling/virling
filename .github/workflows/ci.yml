@@ -25,6 +25,11 @@ jobs:
       - run: cargo fmt --check
       - run: cargo fmt --check
         working-directory: worker
+      - name: Tracker is built from source and under 1 KB gzipped
+        run: |
+          ./scripts/build-tracker.sh
+          git diff --exit-code assets/v.js
+          test "$(gzip -9c assets/v.js | wc -c)" -lt 1024
 
   server:
     runs-on: ubuntu-latest
