@@ -160,6 +160,26 @@ pub fn classify(
     Channel::Direct
 }
 
+/// Canonical domain for a referrer host, so aliases share one row ("t.co" -> "x.com").
+pub fn source_domain(host: &str) -> String {
+    let h = host.strip_prefix("www.").unwrap_or(host);
+    let alias = [
+        ("t.co", "x.com"),
+        ("twitter.com", "x.com"),
+        ("lnkd.in", "linkedin.com"),
+        ("old.reddit.com", "reddit.com"),
+        ("chat.openai.com", "chatgpt.com"),
+        ("l.facebook.com", "facebook.com"),
+    ];
+    if let Some((_, domain)) = alias.iter().find(|(k, _)| *k == h) {
+        return (*domain).to_string();
+    }
+    if h != "gemini.google.com" && (h.starts_with("google.") || h.contains(".google.")) {
+        return "google.com".to_string();
+    }
+    h.to_string()
+}
+
 /// Human name for a referrer host, used in breakdowns ("news.ycombinator.com" -> "Hacker News").
 pub fn source_name(host: &str) -> String {
     let h = host.strip_prefix("www.").unwrap_or(host);
@@ -250,5 +270,24 @@ mod tests {
         assert_eq!(source_name("news.ycombinator.com"), "Hacker News");
         assert_eq!(source_name("www.google.de"), "Google");
         assert_eq!(source_name("someblog.dev"), "someblog.dev");
+    }
+
+    #[test]
+    fn source_domains() {
+        assert_eq!(source_domain("t.co"), "x.com");
+        assert_eq!(source_domain("twitter.com"), "x.com");
+        assert_eq!(source_domain("www.x.com"), "x.com");
+        assert_eq!(source_domain("lnkd.in"), "linkedin.com");
+        assert_eq!(source_domain("old.reddit.com"), "reddit.com");
+        assert_eq!(source_domain("chat.openai.com"), "chatgpt.com");
+        assert_eq!(source_domain("l.facebook.com"), "facebook.com");
+        assert_eq!(source_domain("www.google.co.in"), "google.com");
+        assert_eq!(source_domain("news.google.com"), "google.com");
+        assert_eq!(source_domain("gemini.google.com"), "gemini.google.com");
+        assert_eq!(
+            source_domain("news.ycombinator.com"),
+            "news.ycombinator.com"
+        );
+        assert_eq!(source_domain("someblog.dev"), "someblog.dev");
     }
 }
