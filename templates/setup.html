@@ -81,7 +81,7 @@ import Script from "next/script";
 &lt;script defer src="{{ script_host }}/v.js"
   data-site="{{ domain }}"&gt;&lt;/script&gt;</pre>
     </div>
-    <div class="live" data-live="/app/sites/{{ site_id }}/latest-event" role="status">
+    <div class="live" data-live="/app/{{ domain }}/latest-event" role="status">
       <span class="pulse" data-waiting></span>
       <span data-waiting style="flex:1"><b>Waiting for the first pageview</b><small>Open {{ domain }} in another tab. This updates on its own.</small></span>
       <span class="tick" data-got hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>
@@ -89,7 +89,7 @@ import Script from "next/script";
     </div>
     <div class="actions">
       <a class="btn ghost" href="/app/setup">Add a different site</a>
-      <a class="btn lg" href="/app/sites/{{ site_id }}/setup/payments">Continue</a>
+      <a class="btn lg" href="/app/{{ domain }}/setup/payments">Continue</a>
     </div>
   {% endif %}
   </div>

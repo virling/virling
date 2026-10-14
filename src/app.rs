@@ -127,33 +127,31 @@ pub fn router(state: AppState) -> Router {
                 get(onboarding::site_form).post(onboarding::create_site),
             )
             .route(
-                "/app/sites/{site_id}/setup/script",
-                get(onboarding::script_step),
+                "/app/sites/{*path}",
+                get(onboarding::legacy).post(onboarding::legacy),
             )
+            .route("/app/{domain}/setup/script", get(onboarding::script_step))
+            .route("/app/{domain}/latest-event", get(onboarding::latest_event))
             .route(
-                "/app/sites/{site_id}/latest-event",
-                get(onboarding::latest_event),
-            )
-            .route(
-                "/app/sites/{site_id}/setup/payments",
+                "/app/{domain}/setup/payments",
                 get(onboarding::payments_step).post(onboarding::connect_payments),
             )
             .route(
-                "/app/sites/{site_id}/setup/checkout",
+                "/app/{domain}/setup/checkout",
                 get(onboarding::checkout_step),
             )
-            .route("/app/sites/{site_id}/dashboard", get(dashboard::dashboard))
-            .route("/app/sites/{site_id}/payments", get(dashboard::payments))
+            .route("/app/{domain}", get(dashboard::dashboard))
+            .route("/app/{domain}/payments", get(dashboard::payments))
             .route(
-                "/app/sites/{site_id}/payments/{provider}/{payment_id}",
+                "/app/{domain}/payments/{provider}/{payment_id}",
                 get(dashboard::payment),
             )
             .route(
-                "/app/sites/{site_id}/settings",
+                "/app/{domain}/settings",
                 get(settings::page).post(settings::save),
             )
             .route(
-                "/app/sites/{site_id}/settings/disconnect",
+                "/app/{domain}/settings/disconnect",
                 post(settings::disconnect),
             );
     }

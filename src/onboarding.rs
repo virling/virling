@@ -1,6 +1,6 @@
 use askama::Template;
 use axum::extract::{Path, Query, State};
-use axum::http::StatusCode;
+use axum::http::{StatusCode, Uri};
 use axum::response::{Html, IntoResponse, Redirect, Response};
 use axum::{Form, Json};
 use serde::Deserialize;
@@ -51,7 +51,6 @@ struct SetupPage {
     timezone: String,
     timezones: Vec<(&'static str, bool)>,
     error: Option<&'static str>,
-    site_id: String,
     script_host: String,
 }
 
@@ -92,7 +91,7 @@ pub async fn home(State(state): State<AppState>, account: Account) -> Response {
             } else {
                 "setup/script"
             };
-            Redirect::to(&format!("/app/sites/{}/{next}", site.id)).into_response()
+            Redirect::to(&sites::app_path(&site.domain, next)).into_response()
         }
         None => Redirect::to("/app/setup").into_response(),
     }
@@ -105,7 +104,6 @@ pub async fn site_form(_account: Account) -> Response {
         timezone: "UTC".into(),
         timezones: tz_options("UTC"),
         error: None,
-        site_id: String::new(),
         script_host: String::new(),
     })
 }
@@ -133,7 +131,6 @@ pub async fn create_site(
             timezone: timezone.clone(),
             timezones: tz_options(&timezone),
             error: Some(error),
-            site_id: String::new(),
             script_host: String::new(),
         })
     };
@@ -141,9 +138,9 @@ pub async fn create_site(
         return retry("Enter a domain like yourproduct.com.");
     };
     match sites::create_site(&state.db, &account.id, &domain, &timezone).await {
-        Ok(id) => {
+        Ok(_) => {
             state.sites.invalidate(&domain);
-            Redirect::to(&format!("/app/sites/{id}/setup/script")).into_response()
+            Redirect::to(&sites::app_path(&domain, "setup/script")).into_response()
         }
         Err(err) if err.to_string().contains("UNIQUE") => {
             retry("This domain is already on Virling. Ask its owner to invite you.")
@@ -155,20 +152,39 @@ pub async fn create_site(
     }
 }
 
-async fn owned_site(state: &AppState, account: &Account, site_id: &str) -> Option<Site> {
+async fn owned_site(state: &AppState, account: &Account, domain: &str) -> Option<Site> {
     sites::for_account(&state.db, &account.id)
         .await
         .ok()?
         .into_iter()
-        .find(|s| s.id == site_id)
+        .find(|s| s.domain == domain)
+}
+
+/// Permanently redirects an old `/app/sites/{id}/...` URL to the site's domain URL.
+pub async fn legacy(
+    State(state): State<AppState>,
+    account: Account,
+    Path(path): Path<String>,
+    uri: Uri,
+) -> Response {
+    let (id, page) = path.split_once('/').unwrap_or((&path, ""));
+    let site = sites::for_account(&state.db, &account.id)
+        .await
+        .ok()
+        .and_then(|all| all.into_iter().find(|s| s.id == id));
+    let Some(site) = site else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    let query = uri.query().map(|q| format!("?{q}")).unwrap_or_default();
+    Redirect::permanent(&format!("{}{query}", sites::app_path(&site.domain, page))).into_response()
 }
 
 pub async fn script_step(
     State(state): State<AppState>,
     account: Account,
-    Path(site_id): Path<String>,
+    Path(domain): Path<String>,
 ) -> Response {
-    let Some(site) = owned_site(&state, &account, &site_id).await else {
+    let Some(site) = owned_site(&state, &account, &domain).await else {
         return StatusCode::NOT_FOUND.into_response();
     };
     render(SetupPage {
@@ -177,7 +193,6 @@ pub async fn script_step(
         timezone: site.timezone,
         timezones: Vec::new(),
         error: None,
-        site_id: site.id,
         script_host: state.config.base_url.clone(),
     })
 }
@@ -185,13 +200,13 @@ pub async fn script_step(
 pub async fn latest_event(
     State(state): State<AppState>,
     account: Account,
-    Path(site_id): Path<String>,
+    Path(domain): Path<String>,
 ) -> Response {
-    if owned_site(&state, &account, &site_id).await.is_none() {
+    let Some(site) = owned_site(&state, &account, &domain).await else {
         return StatusCode::NOT_FOUND.into_response();
-    }
+    };
     let store = state.events.clone();
-    match tokio::task::spawn_blocking(move || store.latest_pageview(&site_id)).await {
+    match tokio::task::spawn_blocking(move || store.latest_pageview(&site.id)).await {
         Ok(Ok(Some(e))) => Json(json!({
             "path": e.path,
             "country": e.country,
@@ -285,7 +300,6 @@ pub struct ConnectedStats {
 #[template(path = "setup_payments.html")]
 struct PaymentsStep {
     step: u8,
-    site_id: String,
     domain: String,
     cards: Vec<ProviderCard>,
     error: Option<String>,
@@ -334,7 +348,6 @@ fn payments_page(
         .or(open.first().copied());
     PaymentsStep {
         step: 3,
-        site_id: site.id,
         domain: site.domain,
         cards: open
             .into_iter()
@@ -414,10 +427,10 @@ async fn connected_stats(
 pub async fn payments_step(
     State(state): State<AppState>,
     account: Account,
-    Path(site_id): Path<String>,
+    Path(domain): Path<String>,
     Query(q): Query<ProviderQuery>,
 ) -> Response {
-    let Some(site) = owned_site(&state, &account, &site_id).await else {
+    let Some(site) = owned_site(&state, &account, &domain).await else {
         return StatusCode::NOT_FOUND.into_response();
     };
     let connected = match connected_stats(&state, &site).await {
@@ -445,10 +458,10 @@ pub struct ConnectInput {
 pub async fn connect_payments(
     State(state): State<AppState>,
     account: Account,
-    Path(site_id): Path<String>,
+    Path(domain): Path<String>,
     Form(input): Form<ConnectInput>,
 ) -> Response {
-    let Some(site) = owned_site(&state, &account, &site_id).await else {
+    let Some(site) = owned_site(&state, &account, &domain).await else {
         return StatusCode::NOT_FOUND.into_response();
     };
     let Some(provider) = Provider::parse(&input.provider) else {
@@ -482,8 +495,8 @@ pub async fn connect_payments(
         }
     });
     Redirect::to(&format!(
-        "/app/sites/{}/setup/payments?provider={}",
-        site.id,
+        "{}?provider={}",
+        sites::app_path(&site.domain, "setup/payments"),
         provider.as_str()
     ))
     .into_response()
@@ -493,7 +506,6 @@ pub async fn connect_payments(
 #[template(path = "setup_checkout.html")]
 struct CheckoutStep {
     step: u8,
-    site_id: String,
     domain: String,
     tabs: Vec<(&'static str, &'static str, bool)>,
 }
@@ -501,9 +513,9 @@ struct CheckoutStep {
 pub async fn checkout_step(
     State(state): State<AppState>,
     account: Account,
-    Path(site_id): Path<String>,
+    Path(domain): Path<String>,
 ) -> Response {
-    let Some(site) = owned_site(&state, &account, &site_id).await else {
+    let Some(site) = owned_site(&state, &account, &domain).await else {
         return StatusCode::NOT_FOUND.into_response();
     };
     let first: Option<String> = sqlx::query_scalar(
@@ -520,7 +532,6 @@ pub async fn checkout_step(
         .unwrap_or(Provider::Stripe);
     render(CheckoutStep {
         step: 4,
-        site_id: site.id,
         domain: site.domain,
         tabs: Provider::ALL
             .into_iter()

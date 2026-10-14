@@ -31,7 +31,6 @@ const PER_PAGE: u32 = 50;
 
 /// Sidebar and top bar data shared by every app page.
 pub struct Shell {
-    pub site_id: String,
     pub domain: String,
     pub initial: String,
     pub sites: Vec<Opt>,
@@ -77,13 +76,13 @@ pub async fn blocking<T: Send + 'static>(
 pub async fn load(
     state: &AppState,
     account: &Account,
-    site_id: &str,
+    domain: &str,
     nav: &'static str,
 ) -> Result<Ctx, StatusCode> {
     let all = sites::for_account(&state.db, &account.id)
         .await
         .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
-    let Some(site) = all.iter().find(|s| s.id == site_id).cloned() else {
+    let Some(site) = all.iter().find(|s| s.domain == domain).cloned() else {
         return Err(StatusCode::NOT_FOUND);
     };
     let plan: String = sqlx::query_scalar("SELECT plan FROM accounts WHERE id = ?")
@@ -106,14 +105,13 @@ pub async fn load(
     })
     .await?;
     let shell = Shell {
-        site_id: site.id.clone(),
         domain: site.domain.clone(),
         initial: site.domain[..1].to_ascii_uppercase(),
         sites: all
             .iter()
             .map(|s| Opt {
                 label: s.domain.clone(),
-                href: format!("/app/sites/{}/{}", s.id, nav),
+                href: sites::app_path(&s.domain, nav),
                 on: s.id == site.id,
                 count: String::new(),
             })
@@ -163,18 +161,18 @@ fn href(base: &str, params: &[(&str, &str)]) -> String {
     }
 }
 
-fn range_opts(base: &str, current: &str, keep: &[(&str, &str)]) -> Vec<Opt> {
+fn range_opts(base: &str, current: &str, params: &[(&str, &str)]) -> Vec<Opt> {
     RANGES
         .iter()
-        .map(|(key, label, _)| {
-            let mut params = vec![("range", *key)];
-            params.extend_from_slice(keep);
-            Opt {
-                label: label.to_string(),
-                href: href(base, &params),
-                on: *key == current,
-                count: String::new(),
-            }
+        .map(|(key, label, _)| Opt {
+            label: label.to_string(),
+            href: link(
+                base,
+                params,
+                &[("range", if *key == "30d" { "" } else { key })],
+            ),
+            on: *key == current,
+            count: String::new(),
         })
         .collect()
 }
@@ -294,14 +292,16 @@ pub fn provider_short(provider: &str) -> &'static str {
     }
 }
 
-/// `base` with `params`, overridden by `set`; empty values are dropped.
+/// `base` with `params`, overridden in place by `set`; empty values are dropped.
 fn link(base: &str, params: &[(&str, &str)], set: &[(&str, &str)]) -> String {
     let mut all: Vec<(&str, &str)> = params
         .iter()
-        .filter(|(k, _)| !set.iter().any(|(s, _)| s == k))
-        .copied()
+        .map(|&(k, v)| set.iter().copied().find(|(s, _)| *s == k).unwrap_or((k, v)))
         .collect();
-    all.extend_from_slice(set);
+    all.extend(
+        set.iter()
+            .filter(|(s, _)| !params.iter().any(|(k, _)| k == s)),
+    );
     href(base, &all)
 }
 
@@ -443,10 +443,14 @@ pub struct DashboardQuery {
     metric: Option<String>,
     chart: Option<String>,
     all: Option<String>,
-    channels: Option<String>,
-    referrers: Option<String>,
-    pages: Option<String>,
-    countries: Option<String>,
+    #[serde(alias = "channels")]
+    sort_channels: Option<String>,
+    #[serde(alias = "referrers")]
+    sort_referrers: Option<String>,
+    #[serde(alias = "pages")]
+    sort_pages: Option<String>,
+    #[serde(alias = "countries")]
+    sort_countries: Option<String>,
 }
 
 const KIND_ICONS: [&str; 4] = [
@@ -463,7 +467,7 @@ fn source_of(p: &PaymentRow) -> (String, String) {
     }
 }
 
-pub fn pay_view(p: &PaymentRow, site_id: &str, offset: UtcOffset) -> PayView {
+pub fn pay_view(p: &PaymentRow, domain: &str, offset: UtcOffset) -> PayView {
     let (status, status_class) = status(&p.status);
     let (source, channel) = source_of(p);
     let first = p.first_touch.as_ref().map(|f| f.source.clone());
@@ -490,8 +494,10 @@ pub fn pay_view(p: &PaymentRow, site_id: &str, offset: UtcOffset) -> PayView {
         provider_icon: icons::provider(&p.provider, 14),
         provider: provider_short(&p.provider),
         href: format!(
-            "/app/sites/{site_id}/payments/{}/{}",
-            p.provider, p.provider_payment_id
+            "{}/{}/{}",
+            sites::app_path(domain, "payments"),
+            p.provider,
+            p.provider_payment_id
         ),
     }
 }
@@ -570,11 +576,11 @@ fn card(
     expanded: bool,
     foot: Option<String>,
 ) -> Card {
-    let (key, title, head) = match kind {
-        CardKind::Channel => ("channels", "Channels", "Channel"),
-        CardKind::Referrer => ("referrers", "Referrers", "Referrer"),
-        CardKind::Page => ("pages", "Landing pages", "Page"),
-        CardKind::Country => ("countries", "Countries", "Country"),
+    let (key, sort, title, head) = match kind {
+        CardKind::Channel => ("channels", "sort_channels", "Channels", "Channel"),
+        CardKind::Referrer => ("referrers", "sort_referrers", "Referrers", "Referrer"),
+        CardKind::Page => ("pages", "sort_pages", "Landing pages", "Page"),
+        CardKind::Country => ("countries", "sort_countries", "Countries", "Country"),
     };
     let mut shown: Vec<BreakdownRow> = rows
         .iter()
@@ -628,8 +634,8 @@ fn card(
         title,
         head,
         by_visitors,
-        revenue_href: link(base, params, &[(key, "")]),
-        visitors_href: link(base, params, &[(key, "visitors")]),
+        revenue_href: link(base, params, &[(sort, "")]),
+        visitors_href: link(base, params, &[(sort, "visitors")]),
         rows: shown
             .iter()
             .map(|r| row_view(kind, r, max, by_visitors, sources))
@@ -652,10 +658,10 @@ fn span(p: &Period) -> String {
 pub async fn dashboard(
     State(state): State<AppState>,
     account: Account,
-    Path(site_id): Path<String>,
+    Path(domain): Path<String>,
     Query(q): Query<DashboardQuery>,
 ) -> Response {
-    let ctx = match load(&state, &account, &site_id, "dashboard").await {
+    let ctx = match load(&state, &account, &domain, "dashboard").await {
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
@@ -688,8 +694,7 @@ pub async fn dashboard(
         Ok(r) => r,
         Err(code) => return code.into_response(),
     };
-    let base = format!("/app/sites/{}/dashboard", ctx.site.id);
-    let site_base = format!("/app/sites/{}", ctx.site.id);
+    let base = sites::app_path(&ctx.site.domain, "");
     let setup = &report.setup;
     let since = setup.first_event.map(|t| t.to_offset(ctx.offset).date());
     let new_site = since.is_none_or(|d| d > p.previous().from);
@@ -720,10 +725,10 @@ pub async fn dashboard(
     };
     let kind_param = if kind == default_kind { "" } else { kind.key() };
     let sorts: Vec<(&str, &str)> = [
-        ("channels", &q.channels),
-        ("referrers", &q.referrers),
-        ("pages", &q.pages),
-        ("countries", &q.countries),
+        ("sort_channels", &q.sort_channels),
+        ("sort_referrers", &q.sort_referrers),
+        ("sort_pages", &q.sort_pages),
+        ("sort_countries", &q.sort_countries),
     ]
     .into_iter()
     .filter(|(_, v)| sort_of(v))
@@ -939,7 +944,9 @@ pub async fn dashboard(
             &report.channel_sources,
             &params,
             &base,
-            sorts.iter().any(|(k, _)| *k == key),
+            sorts
+                .iter()
+                .any(|(k, _)| k.strip_prefix("sort_") == Some(key)),
             expanded == key,
             foot,
         )
@@ -1062,7 +1069,7 @@ pub async fn dashboard(
     render(DashboardPage {
         title: "Dashboard",
         range_label: rlabel,
-        ranges: range_opts(&base, rkey, &[]),
+        ranges: range_opts(&base, rkey, &params),
         empty,
         tiles,
         chart_title,
@@ -1075,10 +1082,13 @@ pub async fn dashboard(
             .rows
             .iter()
             .take(5)
-            .map(|r| pay_view(r, &ctx.site.id, ctx.offset))
+            .map(|r| pay_view(r, &ctx.site.domain, ctx.offset))
             .collect(),
         latest_total: recent.total,
-        payments_href: href(&format!("{site_base}/payments"), &[("range", range_param)]),
+        payments_href: href(
+            &sites::app_path(&ctx.site.domain, "payments"),
+            &[("range", range_param)],
+        ),
         steps_done: steps.iter().filter(|s| s.done).count(),
         steps,
         goals_card: young && !setup.has_goals,
@@ -1121,10 +1131,10 @@ struct PaymentsPage {
 pub async fn payments(
     State(state): State<AppState>,
     account: Account,
-    Path(site_id): Path<String>,
+    Path(domain): Path<String>,
     Query(q): Query<ReportQuery>,
 ) -> Response {
-    let ctx = match load(&state, &account, &site_id, "payments").await {
+    let ctx = match load(&state, &account, &domain, "payments").await {
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
@@ -1177,7 +1187,7 @@ pub async fn payments(
         Err(code) => return code.into_response(),
     };
     let counts = [s.payments, s.attributed, s.unattributed, s.refunded];
-    let base = format!("/app/sites/{}/payments", ctx.site.id);
+    let base = sites::app_path(&ctx.site.domain, "payments");
     let range_param = if rkey == "30d" { "" } else { rkey };
     let filter_param = if fkey == "all" { "" } else { fkey };
     let page_href = |n: u32| {
@@ -1259,7 +1269,7 @@ pub async fn payments(
         rows: list
             .rows
             .iter()
-            .map(|p| pay_view(p, &ctx.site.id, ctx.offset))
+            .map(|p| pay_view(p, &ctx.site.domain, ctx.offset))
             .collect(),
         filter_label: flabel,
         prev: if page > 1 {
@@ -1353,7 +1363,7 @@ fn duration(d: Duration) -> String {
     }
 }
 
-fn journey_view(j: Journey, site_id: &str, offset: UtcOffset) -> JourneyView {
+fn journey_view(j: Journey, domain: &str, offset: UtcOffset) -> JourneyView {
     let p = &j.payment;
     let (status, status_class) = status(&p.status);
     let (credited, credited_channel) = source_of(p);
@@ -1415,7 +1425,7 @@ fn journey_view(j: Journey, site_id: &str, offset: UtcOffset) -> JourneyView {
             .unwrap_or_default(),
         time_to_pay: first_ts.map(|t| duration(p.ts - t)).unwrap_or_default(),
         visits: plural(j.sessions.len() as u64, "visit"),
-        checkout_href: format!("/app/sites/{site_id}/setup/checkout"),
+        checkout_href: sites::app_path(domain, "setup/checkout"),
         sessions: j
             .sessions
             .iter()
@@ -1463,10 +1473,10 @@ struct PaymentDetailPage {
 pub async fn payment(
     State(state): State<AppState>,
     account: Account,
-    Path((site_id, provider, payment_id)): Path<(String, String, String)>,
+    Path((domain, provider, payment_id)): Path<(String, String, String)>,
     headers: HeaderMap,
 ) -> Response {
-    let ctx = match load(&state, &account, &site_id, "payments").await {
+    let ctx = match load(&state, &account, &domain, "payments").await {
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
@@ -1486,13 +1496,13 @@ pub async fn payment(
             Ok(None) => return StatusCode::NOT_FOUND.into_response(),
             Err(code) => return code.into_response(),
         };
-    let j = journey_view(journey, &ctx.site.id, ctx.offset);
+    let j = journey_view(journey, &ctx.site.domain, ctx.offset);
     if headers.contains_key("x-drawer") {
         return render(JourneyFragment { j });
     }
     render(PaymentDetailPage {
         title: "Payment",
-        back: format!("/app/sites/{}/payments", ctx.site.id),
+        back: sites::app_path(&ctx.site.domain, "payments"),
         j,
         shell: ctx.shell,
     })
@@ -1513,5 +1523,31 @@ mod tests {
         assert_eq!(native(123456, "sek"), "1,235 SEK");
         assert_eq!(money(701.52), "$702");
         assert_eq!(native(500, "jpy"), "¥500");
+    }
+
+    #[test]
+    fn links_drop_defaults_and_keep_other_params() {
+        let base = "/app/virling.com";
+        assert_eq!(link(base, &[("range", ""), ("metric", "")], &[]), base);
+        let params = [
+            ("range", "7d"),
+            ("metric", ""),
+            ("chart", ""),
+            ("sort_pages", "visitors"),
+        ];
+        assert_eq!(
+            link(base, &params, &[("metric", "visitors")]),
+            "/app/virling.com?range=7d&metric=visitors&sort_pages=visitors"
+        );
+        assert_eq!(
+            link(base, &params, &[("range", "")]),
+            "/app/virling.com?sort_pages=visitors"
+        );
+        let ranges = range_opts(base, "7d", &params);
+        assert_eq!(
+            ranges[1].href,
+            "/app/virling.com?range=7d&sort_pages=visitors"
+        );
+        assert_eq!(ranges[2].href, "/app/virling.com?sort_pages=visitors");
     }
 }

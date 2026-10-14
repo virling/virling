@@ -11,7 +11,7 @@
   data-site="{{ shell.domain }}"{% if cookieless %} data-cookieless{% endif %}&gt;&lt;/script&gt;</pre>
   </div>
 </section>
-<form class="card" method="post" action="/app/sites/{{ shell.site_id }}/settings">
+<form class="card" method="post" action="/app/{{ shell.domain }}/settings">
   <div class="card-head"><h2>Attribution</h2></div>
   <div class="setting">
     <div><b>Model</b><span class="muted">Which visit gets credit for a payment.</span></div>
@@ -42,7 +42,7 @@
   <div class="actions end"><button class="btn" type="submit">Save changes</button></div>
 </form>
 <section class="card">
-  <div class="card-head"><h2>Payment connections</h2><a class="btn secondary" href="/app/sites/{{ shell.site_id }}/setup/payments">Connect a provider</a></div>
+  <div class="card-head"><h2>Payment connections</h2><a class="btn secondary" href="/app/{{ shell.domain }}/setup/payments">Connect a provider</a></div>
   {% for c in connections %}
   <div class="conn">
     <div class="grow">
@@ -50,7 +50,7 @@
       <span class="muted small">{{ c.synced }}</span>
       {% if !c.error.is_empty() %}<span class="err small">{{ c.error }}</span>{% endif %}
     </div>
-    <form method="post" action="/app/sites/{{ shell.site_id }}/settings/disconnect" data-confirm="Disconnect {{ c.name }}? Syncing stops right away. Payments already imported stay in your reports.">
+    <form method="post" action="/app/{{ shell.domain }}/settings/disconnect" data-confirm="Disconnect {{ c.name }}? Syncing stops right away. Payments already imported stay in your reports.">
       <input type="hidden" name="provider" value="{{ c.provider }}">
       <button class="btn ghost" type="submit">Disconnect</button>
     </form>

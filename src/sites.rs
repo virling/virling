@@ -51,6 +51,14 @@ impl SiteCache {
     }
 }
 
+/// App URL of one of a site's pages; the dashboard is the site root.
+pub fn app_path(domain: &str, page: &str) -> String {
+    match page {
+        "" | "dashboard" => format!("/app/{domain}"),
+        _ => format!("/app/{domain}/{page}"),
+    }
+}
+
 pub async fn for_account(db: &SqlitePool, account_id: &str) -> anyhow::Result<Vec<Site>> {
     Ok(sqlx::query_as::<_, Site>(
         "SELECT id, domain, timezone, cookieless FROM sites WHERE account_id = ? ORDER BY created_at",
@@ -115,7 +123,17 @@ pub async fn create_site(
 
 #[cfg(test)]
 mod tests {
-    use super::normalize_domain;
+    use super::{app_path, normalize_domain};
+
+    #[test]
+    fn app_paths_use_the_domain() {
+        assert_eq!(app_path("virling.com", "dashboard"), "/app/virling.com");
+        assert_eq!(app_path("virling.com", ""), "/app/virling.com");
+        assert_eq!(
+            app_path("virling.com", "payments"),
+            "/app/virling.com/payments"
+        );
+    }
 
     #[test]
     fn domains_are_normalized() {
