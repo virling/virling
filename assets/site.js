@@ -154,7 +154,7 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
     try {
       const [Dodo, res] = await Promise.all([
         loadSdk(),
-        fetch("/api/preorder/session", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ visitor_id: window.virling?.vid?.() || null }) }),
+        fetch("/api/preorder/session", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ visitor_id: window.virling?.vid?.() || null, code: new URLSearchParams(location.search).get("code") }) }),
       ]);
       const body = await res.json();
       if (!res.ok || !body.checkout_url) throw new Error(body.error || "session");

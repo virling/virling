@@ -259,6 +259,7 @@ async fn leave(req: Request, ctx: RouteContext<()>) -> Result<Response> {
 struct SessionInput {
     email: Option<String>,
     visitor_id: Option<String>,
+    code: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -279,6 +280,12 @@ async fn founder_count(kv: &kv::KvStore) -> Result<u64> {
         .await?
         .and_then(|n| n.parse().ok())
         .unwrap_or(0))
+}
+
+fn discount_code(code: Option<String>) -> Option<String> {
+    let code = code?.trim().to_ascii_uppercase();
+    (!code.is_empty() && code.len() <= 32 && code.chars().all(|c| c.is_ascii_alphanumeric()))
+        .then_some(code)
 }
 
 async fn preorder_session(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
@@ -312,9 +319,13 @@ async fn preorder_session(mut req: Request, ctx: RouteContext<()>) -> Result<Res
     init.with_method(Method::Post)
         .with_headers(headers)
         .with_body(Some(
-            preorder::session_body(email.as_deref(), visitor(input.visitor_id).as_deref())
-                .to_string()
-                .into(),
+            preorder::session_body(
+                email.as_deref(),
+                visitor(input.visitor_id).as_deref(),
+                discount_code(input.code).as_deref(),
+            )
+            .to_string()
+            .into(),
         ));
     let mut res = Fetch::Request(Request::new_with_init(
         "https://live.dodopayments.com/checkouts",
