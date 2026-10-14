@@ -46,13 +46,8 @@ const session = await client.checkoutSessions.create({
 });
 // Send the customer to session.checkout_url
 
-// Static payment links take metadata_* query params,
-// so add the visitor ID in the browser before redirecting:
-const url = new URL("https://checkout.dodopayments.com/buy/pdt_...");
-url.searchParams.set("quantity", "1");
-url.searchParams.set("redirect_url", "https://{{ domain }}/thanks");
-url.searchParams.set("metadata_virling_vid", virling.vid());
-location.href = url.href;{% else if key == &"polar" %}// Polar (Node, @polar-sh/sdk): checkout session with metadata
+// Static payment links (checkout.dodopayments.com/buy/...) need nothing:
+// the Virling script adds metadata_virling_vid on click.{% else if key == &"polar" %}// Polar (Node, @polar-sh/sdk): checkout session with metadata
 const checkout = await polar.checkouts.create({
   products: ["PRODUCT_ID"],
   success_url: "https://{{ domain }}/thanks",
@@ -69,14 +64,15 @@ const checkout = await polar.checkouts.create({
 
 // In the browser, on a checkout URL:
 const url = new URL("https://STORE.lemonsqueezy.com/checkout/buy/VARIANT_ID");
-url.searchParams.set("checkout[custom][virling_vid]", virling.vid());
+const vid = window.virling?.vid?.();
+if (vid) url.searchParams.set("checkout[custom][virling_vid]", vid);
 location.href = url.href;
 
 // Or on your server, POST /v1/checkouts with:
 // data.attributes.checkout_data.custom = { virling_vid: req.cookies.virling_vid }{% endif %}</pre>
       {% endfor %}
     </div>
-    <p class="muted small">In the browser, <span class="mono">virling.vid()</span> returns the same ID. On your server, read the <span class="mono">virling_vid</span> cookie. New payments are matched within a minute of syncing.</p>
+    <p class="muted small">In the browser, <span class="mono">window.virling?.vid?.()</span> returns the same ID, or nothing if the script is blocked. On your server, read the <span class="mono">virling_vid</span> cookie. New payments are matched within a minute of syncing.</p>
     <div class="actions">
       <a class="btn ghost" href="/app/{{ domain }}/setup/payments">Back</a>
       <a class="btn lg" href="/app/{{ domain }}">Open dashboard</a>
