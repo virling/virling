@@ -1,6 +1,6 @@
 Thank you. You're founding agency #{{ number }}.
 
-Your pre-order went through. The Agency plan is locked at $47 a month for life, instead of $79. Dodo Payments sends your receipt separately.
+Your pre-order went through. The Agency plan is locked at $29 a month for life, instead of $79. Dodo Payments sends your receipt separately.
 
 What happens next
 01  I'll email you before the hosted version opens, with a date.

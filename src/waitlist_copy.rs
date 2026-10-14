@@ -32,7 +32,7 @@ pub const AGENCY: Copy = Copy {
         "We set up your first client together, about ten minutes.",
         "Your first branded report goes out the next Monday.",
     ],
-    offer: "Founding price: $47 a month instead of $79, for life, for the first 50 agencies.",
+    offer: "Founding price: $29 a month instead of $79, for life, for the first 50 agencies.",
     question: "How many clients do you report to, and what do those reports show today?",
 };
 

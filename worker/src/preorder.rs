@@ -236,7 +236,7 @@ mod tests {
                 "product_id": product,
                 "status": "active",
                 "customer": { "customer_id": "cus_1", "email": "a@agency.com", "name": "Ann" },
-                "recurring_pre_tax_amount": 4700,
+                "recurring_pre_tax_amount": 2900,
                 "currency": "USD",
                 "metadata": { "source": "virling.com/agency", "virling_vid": "vid-12345678" }
             }
@@ -253,7 +253,7 @@ mod tests {
                 email: "a@agency.com".into(),
                 name: Some("Ann".into()),
                 visitor_id: Some("vid-12345678".into()),
-                amount_cents: Some(4700),
+                amount_cents: Some(2900),
             })
         );
     }

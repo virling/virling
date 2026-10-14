@@ -182,7 +182,7 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
       Dodo.Checkout.open({
         checkoutUrl: body.checkout_url,
         elementId: "dodo-inline-checkout",
-        options: { payButtonText: "Pre-order for $47/month", fontSize: "md", fontWeight: "normal", manualRedirect: true },
+        options: { payButtonText: "Pre-order for $29/month", fontSize: "md", fontWeight: "normal", manualRedirect: true },
       });
     } catch {
       fail();
