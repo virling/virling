@@ -1,4 +1,4 @@
-//! Pure first-party analytics for virling.com: event validation for the D1 events table.
+//! Pure first-party analytics for virling.com: event validation and conversion kinds.
 use serde::Deserialize;
 use worker::Url;
 
@@ -53,6 +53,8 @@ pub struct Row {
 }
 
 pub const INSERT_EVENT: &str = "INSERT INTO events (ts, visitor_id, kind, name, path, referrer_host, utm_source, utm_medium, utm_campaign, utm_content, utm_term, channel, country, device, browser) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)";
+
+pub const INSERT_CONVERSION: &str = "INSERT OR IGNORE INTO conversions (ts, kind, visitor_id, amount_cents, ref) VALUES (?1, ?2, ?3, ?4, ?5)";
 
 fn own_host(host: &str) -> bool {
     host == SITE || host == "www.virling.com"
@@ -120,6 +122,14 @@ pub fn to_row(e: Incoming, user_agent: &str, country: Option<&str>, now_ms: i64)
         device: device(e.w),
         browser: browser(user_agent),
     })
+}
+
+pub fn waitlist_kind(wedge: &str) -> Option<&'static str> {
+    match wedge {
+        "selfhost" => Some("waitlist_selfhost"),
+        "agency" => Some("waitlist_agency"),
+        _ => None,
+    }
 }
 
 #[cfg(test)]
@@ -229,5 +239,12 @@ mod tests {
         assert_eq!(country(Some("XX")), None);
         assert_eq!(country(Some("T1")), None);
         assert_eq!(country(None), None);
+    }
+
+    #[test]
+    fn waitlist_kinds() {
+        assert_eq!(waitlist_kind("selfhost"), Some("waitlist_selfhost"));
+        assert_eq!(waitlist_kind("agency"), Some("waitlist_agency"));
+        assert_eq!(waitlist_kind("other"), None);
     }
 }
