@@ -22,7 +22,7 @@ cargo run -- serve --app
 
 Sign-in links are printed to the terminal when no SMTP server is configured.
 
-The tracking script is `assets/v.js`. Keep it under 5 KB gzipped.
+The tracking script source is `assets/v.src.js`. Run `scripts/build-tracker.sh` after editing it; it writes the minified `assets/v.js`, which must stay under 1 KB gzipped (CI checks).
 
 `worker/` holds the Cloudflare Worker that serves virling.com during the waitlist phase.
 
