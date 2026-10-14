@@ -268,21 +268,38 @@ fn totals(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<T
              WHERE site_id = $site AND ts >= lo AND ts < hi),
             count(*),
             count(DISTINCT {CUSTOMER}),
-            coalesce(sum({NET_USD}), 0)
+            coalesce(sum({NET_USD}), 0),
+            count(DISTINCT {CUSTOMER}) FILTER (WHERE p.visitor_id IN (
+                SELECT visitor_id FROM events, bounds WHERE site_id = $site AND ts >= lo AND ts < hi))
         FROM payments p, bounds
         WHERE p.site_id = $site AND p.ts >= lo AND p.ts < hi AND p.status <> 'failed'"
     );
-    let (visitors, sessions, payments, customers, revenue_usd): (i64, i64, i64, i64, f64) = conn
-        .query_row(
-            &sql,
-            named_params! {
-                "site": site_id,
-                "tz": period.tz,
-                "from": period.from.to_string(),
-                "to": period.to.to_string(),
-            },
-            |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?, r.get(4)?)),
-        )?;
+    let (visitors, sessions, payments, customers, revenue_usd, converted): (
+        i64,
+        i64,
+        i64,
+        i64,
+        f64,
+        i64,
+    ) = conn.query_row(
+        &sql,
+        named_params! {
+            "site": site_id,
+            "tz": period.tz,
+            "from": period.from.to_string(),
+            "to": period.to.to_string(),
+        },
+        |r| {
+            Ok((
+                r.get(0)?,
+                r.get(1)?,
+                r.get(2)?,
+                r.get(3)?,
+                r.get(4)?,
+                r.get(5)?,
+            ))
+        },
+    )?;
     let visitors = visitors as u64;
     Ok(Totals {
         visitors,
@@ -291,7 +308,7 @@ fn totals(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<T
         customers: customers as u64,
         revenue_usd,
         revenue_per_visitor: ratio(revenue_usd, visitors),
-        conversion: ratio(customers as f64, visitors),
+        conversion: ratio(converted as f64, visitors),
     })
 }
 
@@ -323,12 +340,15 @@ pub(crate) fn timeseries(
         ),
         r AS (
             SELECT CAST(timezone($tz, p.ts) AS DATE) AS day, count(*) AS n,
-                count(DISTINCT {CUSTOMER}) AS customers, coalesce(sum({NET_USD}), 0) AS rev
+                count(DISTINCT {CUSTOMER}) AS customers, coalesce(sum({NET_USD}), 0) AS rev,
+                count(DISTINCT {CUSTOMER}) FILTER (WHERE EXISTS (
+                    SELECT 1 FROM events e WHERE e.site_id = $site AND e.visitor_id = p.visitor_id
+                    AND CAST(timezone($tz, e.ts) AS DATE) = CAST(timezone($tz, p.ts) AS DATE))) AS converted
             FROM payments p, bounds
             WHERE p.site_id = $site AND p.ts >= lo AND p.ts < hi AND p.status <> 'failed' GROUP BY 1
         )
         SELECT strftime(d.day, '%Y-%m-%d'), coalesce(v.n, 0), coalesce(r.n, 0),
-            coalesce(r.customers, 0), coalesce(r.rev, 0)
+            coalesce(r.customers, 0), coalesce(r.rev, 0), coalesce(r.converted, 0)
         FROM days d LEFT JOIN v USING (day) LEFT JOIN r USING (day)
         ORDER BY d.day"
     );
@@ -346,12 +366,13 @@ pub(crate) fn timeseries(
             r.get::<_, i64>(2)?,
             r.get::<_, i64>(3)?,
             r.get::<_, f64>(4)?,
+            r.get::<_, i64>(5)?,
         ))
     })?;
     let ymd = format_description!("[year]-[month]-[day]");
     let mut out = Vec::new();
     for row in rows {
-        let (day, visitors, payments, customers, revenue_usd) = row?;
+        let (day, visitors, payments, customers, revenue_usd, converted) = row?;
         let visitors = visitors as u64;
         out.push(DayPoint {
             date: Date::parse(&day, ymd)?,
@@ -359,7 +380,7 @@ pub(crate) fn timeseries(
             payments: payments as u64,
             customers: customers as u64,
             revenue_usd,
-            conversion: ratio(customers as f64, visitors),
+            conversion: ratio(converted as f64, visitors),
             revenue_per_visitor: ratio(revenue_usd, visitors),
             by_channel: Vec::new(),
         });
@@ -1213,6 +1234,7 @@ mod tests {
             .unwrap();
         let r = store.report("s", &period()).unwrap();
         assert_eq!(r.overview.current.sessions, 4);
+        assert_eq!(r.overview.current.conversion, Some(1.0 / 3.0));
         assert_eq!(r.days.len(), 61);
         assert_eq!(r.previous_days.len(), 61);
         assert_eq!(r.previous_days[0].date, date!(2026 - 07 - 02));
@@ -1224,7 +1246,7 @@ mod tests {
         let split: f64 = day.by_channel.iter().map(|c| c.1).sum();
         assert_eq!(split, day.revenue_usd);
         assert_eq!((day.visitors, day.customers), (2, 2));
-        assert_eq!(day.conversion, Some(1.0));
+        assert_eq!(day.conversion, Some(0.5));
         assert_eq!(day.revenue_per_visitor, Some(100.0));
         assert_eq!(r.channels[0].label, "Social");
         assert_eq!(r.referrers[0].label, "Hacker News");
