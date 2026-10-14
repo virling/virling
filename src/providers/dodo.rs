@@ -304,6 +304,34 @@ fn rfc3339(unix: i64) -> anyhow::Result<String> {
     Ok(OffsetDateTime::from_unix_timestamp(unix)?.format(&Rfc3339)?)
 }
 
+fn list_query(w: Window) -> anyhow::Result<[(&'static str, String); 5]> {
+    Ok([
+        ("status", "succeeded".to_string()),
+        ("created_at_gte", rfc3339(w.gte)?),
+        ("created_at_lte", rfc3339(w.lte)?),
+        ("page_size", PAGE_SIZE.to_string()),
+        ("page_number", w.page.to_string()),
+    ])
+}
+
+/// Any non-2xx or non-JSON body is an error, so sync records it instead of seeing no payments.
+fn parse<T: DeserializeOwned>(path: &str, status: StatusCode, body: &str) -> anyhow::Result<T> {
+    if !status.is_success() {
+        let detail = body.trim();
+        if detail.is_empty() || matches!(status.as_u16(), 401 | 403 | 429) {
+            bail!("{}", error_message(status));
+        }
+        let detail: String = detail.chars().take(200).collect();
+        bail!("{} on {path}: {detail}", error_message(status));
+    }
+    serde_json::from_str(body).map_err(|e| {
+        anyhow!(
+            "Dodo Payments returned HTTP {} with an unreadable response on {path}: {e}",
+            status.as_u16()
+        )
+    })
+}
+
 fn error_message(status: StatusCode) -> String {
     match status {
         StatusCode::UNAUTHORIZED => "Dodo Payments rejected this API key. Copy a fresh key from Developer > API Keys in your Dodo dashboard.".into(),
@@ -344,27 +372,16 @@ impl Api<'_> {
         query: &[(&str, String)],
     ) -> anyhow::Result<T> {
         let res = request(self.client, self.key, self.base, path, query).await?;
-        if !res.status().is_success() {
-            bail!("{}", error_message(res.status()));
-        }
-        res.json()
+        let status = res.status();
+        let body = res
+            .text()
             .await
-            .with_context(|| format!("unexpected Dodo Payments response from {path}"))
+            .context("could not read Dodo Payments response")?;
+        parse(path, status, &body)
     }
 
     async fn list<T: DeserializeOwned>(&self, path: &str, w: Window) -> anyhow::Result<Vec<T>> {
-        let list: List<T> = self
-            .get(
-                path,
-                &[
-                    ("status", "succeeded".to_string()),
-                    ("created_at_gte", rfc3339(w.gte)?),
-                    ("created_at_lte", rfc3339(w.lte)?),
-                    ("page_size", PAGE_SIZE.to_string()),
-                    ("page_number", w.page.to_string()),
-                ],
-            )
-            .await?;
+        let list: List<T> = self.get(path, &list_query(w)?).await?;
         Ok(list.items)
     }
 
@@ -601,6 +618,45 @@ mod tests {
         assert!(!c.advance(false, now));
         assert_eq!(c.phase, Phase::Payments);
         assert_eq!(c.refunds.gte, ts - 1800);
+    }
+
+    #[test]
+    fn list_query_sends_rfc3339_dates() {
+        let w = Window {
+            gte: 1_785_062_742,
+            lte: 1_785_149_142,
+            page: 2,
+        };
+        let q = list_query(w).unwrap();
+        assert!(q.contains(&("created_at_gte", "2026-07-26T10:45:42Z".to_string())));
+        assert!(q.contains(&("created_at_lte", "2026-07-27T10:45:42Z".to_string())));
+        assert!(q.contains(&("page_number", "2".to_string())));
+    }
+
+    #[test]
+    fn old_epoch_cursor_still_decodes() {
+        let c = Cursor::decode("v1:live:r:1791972942,0,0:1785062742,0,0").unwrap();
+        assert_eq!(c.phase, Phase::Refunds);
+        assert_eq!(rfc3339(c.refunds.gte).unwrap(), "2026-07-26T10:45:42Z");
+    }
+
+    #[test]
+    fn bad_responses_are_errors() {
+        let err = parse::<List<DodoPayment>>(
+            "/payments",
+            StatusCode::BAD_REQUEST,
+            "Failed to deserialize query string: created_at_gte: input contains invalid characters",
+        )
+        .unwrap_err()
+        .to_string();
+        assert!(err.contains("HTTP 400"), "{err}");
+        assert!(err.contains("created_at_gte"), "{err}");
+        let err = parse::<List<DodoPayment>>("/payments", StatusCode::OK, "<html>oops</html>")
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("HTTP 200"), "{err}");
+        let ok: List<DodoRefund> = parse("/refunds", StatusCode::OK, r#"{"items":[]}"#).unwrap();
+        assert!(ok.items.is_empty());
     }
 
     #[test]

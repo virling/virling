@@ -218,7 +218,7 @@ pub struct ProviderCard {
     selected: bool,
 }
 
-fn provider_card(p: Provider, selected: Provider) -> ProviderCard {
+fn provider_card(p: Provider, selected: bool) -> ProviderCard {
     let (name, key_label, placeholder, help, help_url, note) = match p {
         Provider::Stripe => (
             "Stripe",
@@ -261,12 +261,20 @@ fn provider_card(p: Provider, selected: Provider) -> ProviderCard {
         help,
         help_url,
         note,
-        selected: p == selected,
+        selected,
     }
 }
 
+pub struct ConnectedRow {
+    key: &'static str,
+    name: &'static str,
+    hint: String,
+    synced: String,
+    error: String,
+}
+
 pub struct ConnectedStats {
-    providers: String,
+    rows: Vec<ConnectedRow>,
     payments: String,
     revenue: String,
     attributed: u64,
@@ -283,19 +291,69 @@ struct PaymentsStep {
     error: Option<String>,
     key: String,
     connected: Option<ConnectedStats>,
+    replacing: bool,
 }
 
 #[derive(Deserialize)]
 pub struct ProviderQuery {
     provider: Option<String>,
+    replace: Option<String>,
+}
+
+type ConnectedDbRow = (String, Option<i64>, Option<String>, Vec<u8>, Vec<u8>);
+
+/// The last four characters of a key, never more.
+fn key_hint(key: &str) -> String {
+    let chars: Vec<char> = key.trim().chars().collect();
+    if chars.len() < 8 {
+        return String::new();
+    }
+    chars[chars.len() - 4..].iter().collect()
+}
+
+/// Shows a key form for every provider not yet connected, plus the one whose key is being replaced.
+fn payments_page(
+    site: Site,
+    connected: Option<ConnectedStats>,
+    want: Option<Provider>,
+    replace: Option<Provider>,
+    error: Option<String>,
+    key: String,
+) -> PaymentsStep {
+    let linked: Vec<&str> = connected
+        .as_ref()
+        .map(|c| c.rows.iter().map(|r| r.key).collect())
+        .unwrap_or_default();
+    let replace = replace.filter(|p| linked.contains(&p.as_str()));
+    let open: Vec<Provider> = Provider::ALL
+        .into_iter()
+        .filter(|p| Some(*p) == replace || !linked.contains(&p.as_str()))
+        .collect();
+    let selected = replace
+        .or(want.filter(|p| open.contains(p)))
+        .or(open.first().copied());
+    PaymentsStep {
+        step: 3,
+        site_id: site.id,
+        domain: site.domain,
+        cards: open
+            .into_iter()
+            .map(|p| provider_card(p, selected == Some(p)))
+            .collect(),
+        error,
+        key,
+        connected,
+        replacing: replace.is_some(),
+    }
 }
 
 async fn connected_stats(
     state: &AppState,
     site: &Site,
 ) -> Result<Option<ConnectedStats>, StatusCode> {
-    let rows: Vec<(String, Option<i64>)> = sqlx::query_as(
-        "SELECT provider, last_synced_at FROM integrations WHERE site_id = ? ORDER BY created_at",
+    let rows: Vec<ConnectedDbRow> = sqlx::query_as(
+        "SELECT provider, last_synced_at, last_error, key_ciphertext, key_nonce FROM integrations
+         WHERE site_id = ? ORDER BY created_at",
     )
     .bind(&site.id)
     .fetch_all(&state.db)
@@ -323,13 +381,30 @@ async fn connected_stats(
         ))
     })
     .await?;
+    let now = time::OffsetDateTime::now_utc();
     Ok(Some(ConnectedStats {
-        providers: rows
-            .iter()
-            .map(|(p, _)| crate::dashboard::provider_name(p))
-            .collect::<Vec<_>>()
-            .join(", "),
-        syncing: rows.iter().any(|(_, synced)| synced.is_none()),
+        syncing: rows.iter().any(|r| r.1.is_none()),
+        rows: rows
+            .into_iter()
+            .filter_map(|(provider, synced, error, ciphertext, nonce)| {
+                let p = Provider::parse(&provider)?;
+                let synced = synced.and_then(|t| time::OffsetDateTime::from_unix_timestamp(t).ok());
+                Some(ConnectedRow {
+                    key: p.as_str(),
+                    name: crate::dashboard::provider_name(p.as_str()),
+                    hint: state
+                        .vault
+                        .decrypt(&ciphertext, &nonce)
+                        .map(|k| key_hint(&k))
+                        .unwrap_or_default(),
+                    synced: synced.map_or_else(
+                        || "Importing the last 90 days".into(),
+                        |t| format!("Last synced {}", crate::dashboard::ago(t, now)),
+                    ),
+                    error: error.unwrap_or_default(),
+                })
+            })
+            .collect(),
         payments: group(totals.payments),
         revenue: money(totals.revenue_usd),
         attributed,
@@ -349,23 +424,16 @@ pub async fn payments_step(
         Ok(c) => c,
         Err(code) => return code.into_response(),
     };
-    let selected = q
-        .provider
-        .as_deref()
-        .and_then(Provider::parse)
-        .unwrap_or(Provider::Stripe);
-    render(PaymentsStep {
-        step: 3,
-        site_id: site.id,
-        domain: site.domain,
-        cards: Provider::ALL
-            .into_iter()
-            .map(|p| provider_card(p, selected))
-            .collect(),
-        error: None,
-        key: String::new(),
+    let want = q.provider.as_deref().and_then(Provider::parse);
+    let replace = want.filter(|_| q.replace.is_some());
+    render(payments_page(
+        site,
         connected,
-    })
+        want,
+        replace,
+        None,
+        String::new(),
+    ))
 }
 
 #[derive(Deserialize)]
@@ -397,18 +465,14 @@ pub async fn connect_payments(
             Ok(c) => c,
             Err(code) => return code.into_response(),
         };
-        return render(PaymentsStep {
-            step: 3,
-            site_id: site.id,
-            domain: site.domain,
-            cards: Provider::ALL
-                .into_iter()
-                .map(|p| provider_card(p, provider))
-                .collect(),
-            error: Some(err.to_string()),
-            key: key.to_string(),
+        return render(payments_page(
+            site,
             connected,
-        });
+            Some(provider),
+            Some(provider),
+            Some(err.to_string()),
+            key.to_string(),
+        ));
     }
     let bg = state.clone();
     let id = site.id.clone();

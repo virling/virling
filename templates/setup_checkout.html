@@ -22,30 +22,58 @@
         <button class="copy" type="button" data-copy>Copy</button>
       </div>
       {% for (key, _name, on) in tabs %}
-      <pre id="c-{{ key }}" role="tabpanel"{% if !on %} hidden{% endif %}>{% if key == &"stripe" %}// Stripe Checkout: pass the visitor ID when creating the session
+      <pre id="c-{{ key }}" role="tabpanel"{% if !on %} hidden{% endif %}>{% if key == &"stripe" %}// Stripe Checkout (Node, stripe): pass the visitor ID on the session
 const session = await stripe.checkout.sessions.create({
   client_reference_id: req.cookies.virling_vid,
   line_items: [{ price: "price_...", quantity: 1 }],
   mode: "subscription",
   success_url: "https://{{ domain }}/thanks",
 });
-// Payment Links (buy.stripe.com) need nothing:
-// the script tags them on click.{% else if key == &"dodo" %}// Dodo Payments: add the visitor ID as metadata
-const payment = await dodo.payments.create({
-  product_cart: [{ product_id: "pdt_...", quantity: 1 }],
-  customer: { email },
-  billing,
-  metadata: { virling_vid: req.cookies.virling_vid },
-});{% else if key == &"polar" %}// Polar: add the visitor ID as checkout metadata
-const checkout = await polar.checkouts.create({
-  products: ["PRODUCT_ID"],
+
+// Your own PaymentIntent (Elements): put it in metadata
+const intent = await stripe.paymentIntents.create({
+  amount: 4900,
+  currency: "usd",
   metadata: { virling_vid: req.cookies.virling_vid },
 });
-// Checkout links: add a hidden custom field
-// with the slug virling_vid instead.{% else %}// LemonSqueezy: add the visitor ID to the checkout URL in the browser
+
+// Payment Links (buy.stripe.com) need nothing:
+// the Virling script adds client_reference_id on click.{% else if key == &"dodo" %}// Dodo Payments (Node, dodopayments): checkout session with metadata
+const session = await client.checkoutSessions.create({
+  product_cart: [{ product_id: "pdt_...", quantity: 1 }],
+  return_url: "https://{{ domain }}/thanks",
+  metadata: { virling_vid: req.cookies.virling_vid },
+});
+// Send the customer to session.checkout_url
+
+// Static payment links take metadata_* query params,
+// so add the visitor ID in the browser before redirecting:
+const url = new URL("https://checkout.dodopayments.com/buy/pdt_...");
+url.searchParams.set("quantity", "1");
+url.searchParams.set("redirect_url", "https://{{ domain }}/thanks");
+url.searchParams.set("metadata_virling_vid", virling.vid());
+location.href = url.href;{% else if key == &"polar" %}// Polar (Node, @polar-sh/sdk): checkout session with metadata
+const checkout = await polar.checkouts.create({
+  products: ["PRODUCT_ID"],
+  success_url: "https://{{ domain }}/thanks",
+  metadata: { virling_vid: req.cookies.virling_vid },
+});
+// Send the customer to checkout.url
+
+// Checkout links: add a custom field with the slug virling_vid
+// to the link. The Virling script fills it on click
+// (custom_field_data.virling_vid), so nothing else is needed.{% else %}// LemonSqueezy: add the visitor ID as checkout custom data.
+// Not attributed yet: LemonSqueezy only returns custom data in
+// webhooks, which Virling does not receive yet (issue #15).
+// Tag checkouts now and they will match once that ships.
+
+// In the browser, on a checkout URL:
 const url = new URL("https://STORE.lemonsqueezy.com/checkout/buy/VARIANT_ID");
 url.searchParams.set("checkout[custom][virling_vid]", virling.vid());
-location.href = url.href;{% endif %}</pre>
+location.href = url.href;
+
+// Or on your server, POST /v1/checkouts with:
+// data.attributes.checkout_data.custom = { virling_vid: req.cookies.virling_vid }{% endif %}</pre>
       {% endfor %}
     </div>
     <p class="muted small">In the browser, <span class="mono">virling.vid()</span> returns the same ID. On your server, read the <span class="mono">virling_vid</span> cookie. New payments are matched within a minute of syncing.</p>

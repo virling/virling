@@ -20,18 +20,34 @@
     {% endif %}
     {% if let Some(c) = connected %}
     <div class="panel"{% if c.syncing %} data-reload="4000"{% endif %}>
-      <div class="connected-head">
-        <span class="badge ok">Connected</span><b>{{ c.providers }}</b>
-        {% if c.syncing %}<span class="muted small">Importing the last 90 days. This page updates on its own.</span>{% endif %}
-      </div>
+      {% if c.syncing %}<span class="muted small">Importing the last 90 days. This page updates on its own.</span>{% endif %}
       <div class="stat-row">
         <div><small>Payments found</small><b>{{ c.payments }}</b><span>last 90 days</span></div>
         <div><small>Net revenue</small><b class="rev">{{ c.revenue }}</b><span>after refunds, in USD</span></div>
         <div><small>Attributed</small><b>{{ c.attributed }}</b><span>{% if c.attributed == 0 %}0 until tagged checkouts arrive{% else %}matched to a visit{% endif %}</span></div>
       </div>
+      <div>
+        {% for r in c.rows %}
+        <div class="conn" data-connected="{{ r.key }}">
+          <div class="grow">
+            <b>{{ r.name }}</b> <span class="badge ok">Connected</span>
+            {% if !r.hint.is_empty() %}<span class="muted small">Key ending <span class="mono">{{ r.hint }}</span></span>{% endif %}
+            <span class="muted small">{{ r.synced }}</span>
+            {% if !r.error.is_empty() %}<span class="err small">{{ r.error }}</span>{% endif %}
+          </div>
+          <a class="btn ghost" href="/app/sites/{{ site_id }}/setup/payments?provider={{ r.key }}&amp;replace=1">Replace key</a>
+          <form method="post" action="/app/sites/{{ site_id }}/settings/disconnect" data-confirm="Disconnect {{ r.name }}? Syncing stops right away. Payments already imported stay in your reports.">
+            <input type="hidden" name="provider" value="{{ r.key }}">
+            <input type="hidden" name="back" value="setup">
+            <button class="btn ghost" type="submit">Disconnect</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
     </div>
     {% endif %}
-    <form method="post" action="/app/sites/{{ site_id }}/setup/payments" class="stack" style="gap:20px" data-providers>
+    {% if !cards.is_empty() %}
+    <form method="post" action="/app/sites/{{ site_id }}/setup/payments" class="stack" style="gap:20px" id="connect" data-providers>
       <fieldset class="cards">
         <legend class="sr">Payment provider</legend>
         {% for c in cards %}
@@ -44,24 +60,33 @@
       </fieldset>
       {% for c in cards %}
       <div class="panel" data-provider="{{ c.key }}"{% if !c.selected %} hidden{% endif %}>
-        <label class="field">{{ c.name }} {{ c.key_label|lower }}
+        <label class="field">{% if replacing && c.selected %}New {{ c.name }} {{ c.key_label|lower }}{% else %}{{ c.name }} {{ c.key_label|lower }}{% endif %}
           <input class="mono" name="key" value="{% if c.selected %}{{ key }}{% endif %}" placeholder="{{ c.placeholder }}" autocomplete="off" spellcheck="false"{% if !c.selected %} disabled{% endif %}>
         </label>
         <p class="note">{{ c.note }}</p>
         <a class="help" href="{{ c.help_url }}" target="_blank" rel="noopener">{{ c.help }} &#8599;</a>
       </div>
       {% endfor %}
-      <div class="actions">
-        <a class="btn ghost" href="/app/sites/{{ site_id }}/setup/script">Back</a>
-        <span class="actions">
-          {% if connected.is_none() %}<a class="btn ghost" href="/app/sites/{{ site_id }}/dashboard">Skip for now</a>{% endif %}
-          <button class="btn {% if connected.is_some() %}secondary{% else %}lg{% endif %}" type="submit">Connect and backfill</button>
-          {% if connected.is_some() %}<a class="btn lg" href="/app/sites/{{ site_id }}/setup/checkout">Continue</a>{% endif %}
-        </span>
-      </div>
     </form>
+    {% endif %}
+    <div class="actions">
+      <a class="btn ghost" href="/app/sites/{{ site_id }}/setup/script">Back</a>
+      <span class="actions">
+        {% if connected.is_none() %}<a class="btn ghost" href="/app/sites/{{ site_id }}/dashboard">Skip for now</a>{% endif %}
+        {% if replacing %}<a class="btn ghost" href="/app/sites/{{ site_id }}/setup/payments">Cancel</a>{% endif %}
+        {% if !cards.is_empty() %}<button class="btn {% if connected.is_some() %}secondary{% else %}lg{% endif %}" type="submit" form="connect">{% if replacing %}Save new key{% else %}Connect and backfill{% endif %}</button>{% endif %}
+        {% if connected.is_some() %}<a class="btn lg" href="/app/sites/{{ site_id }}/setup/checkout">Continue</a>{% endif %}
+      </span>
+    </div>
   </div>
 </main>
+<dialog class="confirm" id="confirm">
+  <p data-confirm-text></p>
+  <div class="actions end">
+    <button class="btn ghost" type="button" value="cancel" data-confirm-cancel>Cancel</button>
+    <button class="btn danger" type="button" data-confirm-ok>Disconnect</button>
+  </div>
+</dialog>
 <script src="/assets/app.js"></script>
 </body>
 </html>

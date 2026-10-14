@@ -153,6 +153,7 @@ pub async fn save(
 #[derive(Deserialize)]
 pub struct DisconnectInput {
     provider: String,
+    back: Option<String>,
 }
 
 pub async fn disconnect(
@@ -174,5 +175,9 @@ pub async fn disconnect(
         tracing::error!(%err, "disconnecting integration failed");
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     }
-    Redirect::to(&format!("/app/sites/{}/settings", ctx.site.id)).into_response()
+    let back = match input.back.as_deref() {
+        Some("setup") => "setup/payments",
+        _ => "settings",
+    };
+    Redirect::to(&format!("/app/sites/{}/{back}", ctx.site.id)).into_response()
 }
