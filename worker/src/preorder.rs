@@ -10,12 +10,12 @@ pub const PRODUCT_ID: &str = "pdt_0Npg3jPouv8ghbW4s5Sxd";
 pub const FOUNDING_SPOTS: u64 = 50;
 const TOLERANCE_SECS: i64 = 5 * 60;
 
-pub fn session_body(email: Option<&str>, visitor_id: Option<&str>) -> Value {
+pub fn session_body(email: Option<&str>, visitor_id: Option<&str>, code: Option<&str>) -> Value {
     let mut body = json!({
         "product_cart": [{ "product_id": PRODUCT_ID, "quantity": 1 }],
         "return_url": "https://virling.com/agency?preorder=done",
         "metadata": { "source": "virling.com/agency" },
-        "feature_flags": { "redirect_immediately": true },
+        "feature_flags": { "redirect_immediately": true, "allow_discount_code": true },
         "customization": {
             "theme": "light",
             "theme_config": {
@@ -38,6 +38,9 @@ pub fn session_body(email: Option<&str>, visitor_id: Option<&str>) -> Value {
     }
     if let Some(vid) = visitor_id {
         body["metadata"]["virling_vid"] = json!(vid);
+    }
+    if let Some(code) = code {
+        body["discount_codes"] = json!([code]);
     }
     body
 }
@@ -281,15 +284,22 @@ mod tests {
 
     #[test]
     fn session_body_prefills_email_only_when_given() {
-        let body = session_body(Some("a@agency.com"), Some("vid-12345678"));
+        let body = session_body(
+            Some("a@agency.com"),
+            Some("vid-12345678"),
+            Some("VIRLINGTEST96"),
+        );
         assert_eq!(body["product_cart"][0]["product_id"], PRODUCT_ID);
         assert_eq!(body["product_cart"][0]["quantity"], 1);
         assert_eq!(body["customer"]["email"], "a@agency.com");
         assert_eq!(body["metadata"]["source"], "virling.com/agency");
         assert_eq!(body["metadata"]["virling_vid"], "vid-12345678");
-        let bare = session_body(None, None);
+        assert_eq!(body["discount_codes"][0], "VIRLINGTEST96");
+        assert_eq!(body["feature_flags"]["allow_discount_code"], true);
+        let bare = session_body(None, None, None);
         assert!(bare.get("customer").is_none());
         assert!(bare["metadata"].get("virling_vid").is_none());
+        assert!(bare.get("discount_codes").is_none());
     }
 
     #[test]
