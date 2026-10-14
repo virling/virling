@@ -866,13 +866,39 @@ mod tests {
             assert!(body.contains(r#"class="chart"#), "{query}");
         }
         let body = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
-        assert!(body.contains("New site") && body.contains("Visitors and payments per day"));
+        assert!(!body.contains("New site") && body.contains("Visitors and revenue per day"));
+        assert!(
+            body.contains("<span>Since tracking started</span>"),
+            "new sites default"
+        );
+        assert!(body.contains("1 of 1 visitor converted. 1 payment not matched to a visit"));
+        assert!(body.contains(r#"class="step todo-step" href="/app/example.com/setup/payments""#));
+        assert!(body.contains(r#"action="/app/example.com/setup/dismiss""#));
+        let res = call(
+            &state,
+            form(
+                "/app/example.com/setup/dismiss",
+                String::new(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(res.headers()["location"], "/app/example.com");
+        let hidden = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
+        assert!(!hidden.contains("setup-strip"), "dismissed for good");
+        let week =
+            body_text(call(&state, get("/app/example.com?range=7d", Some(&cookie))).await).await;
+        assert!(
+            week.contains("<span>Last 7 days</span>"),
+            "label follows the range"
+        );
         assert!(body.contains(r#"aria-label="Hacker News""#), "source logo");
         assert!(body.contains(r#"src="/assets/flags/de.svg""#) && body.contains("Germany"));
         assert!(body.contains("Rows fill in as traffic grows"));
         assert!(body.contains(r#"href="/app/example.com?range=7d""#));
         assert!(body.contains(r#"href="/app/example.com/payments""#));
-        assert!(!body.contains("range=30d") && !body.contains("/app/sites/"));
+        assert!(body.contains(r#"href="/app/example.com?range=30d""#));
+        assert!(!body.contains("range=all") && !body.contains("/app/sites/"));
         assert!(body.contains("No goals yet"));
         let area = body_text(
             call(
@@ -1017,6 +1043,16 @@ mod tests {
             form(
                 "/app/example.com/settings/disconnect",
                 "provider=stripe".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(res.status(), StatusCode::NOT_FOUND);
+        let res = call(
+            &state,
+            form(
+                "/app/example.com/setup/dismiss",
+                String::new(),
                 Some(&cookie),
             ),
         )

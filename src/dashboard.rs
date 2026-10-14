@@ -1,7 +1,7 @@
 use askama::Template;
 use axum::extract::{Path, Query, State};
 use axum::http::{HeaderMap, StatusCode};
-use axum::response::{IntoResponse, Response};
+use axum::response::{IntoResponse, Redirect, Response};
 use serde::Deserialize;
 use time::macros::format_description;
 use time::{Date, Duration, OffsetDateTime, UtcOffset};
@@ -11,15 +11,18 @@ use crate::auth::Account;
 use crate::fx::minor_to_major;
 use crate::onboarding::render;
 use crate::sites::{self, Site};
-use crate::stats::{BreakdownRow, Journey, PaymentFilter, PaymentRow, Period, Sort, sort_rows};
+use crate::stats::{
+    BreakdownRow, Journey, PaymentFilter, PaymentRow, Period, Sort, Totals, sort_rows,
+};
 use crate::{chart, icons};
 
-const RANGES: [(&str, &str, i64); 5] = [
+const RANGES: [(&str, &str, i64); 6] = [
     ("today", "Today", 1),
     ("7d", "Last 7 days", 7),
     ("30d", "Last 30 days", 30),
     ("90d", "Last 90 days", 90),
     ("12m", "Last 12 months", 365),
+    ("all", "Since tracking started", 0),
 ];
 const FILTERS: [(&str, &str); 4] = [
     ("all", "All"),
@@ -53,6 +56,8 @@ pub struct Ctx {
     pub shell: Shell,
     pub offset: UtcOffset,
     pub today: Date,
+    /// Local date of the site's first event.
+    pub first_day: Option<Date>,
 }
 
 /// Runs event store work off the async runtime; failures become a 503.
@@ -92,7 +97,7 @@ pub async fn load(
         .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
     let store = state.events.clone();
     let (id, tz) = (site.id.clone(), site.timezone.clone());
-    let (offset, live, visitors) = blocking(move || {
+    let (offset, live, visitors, first) = blocking(move || {
         let offset = store.utc_offset(&tz)?;
         let today = OffsetDateTime::now_utc().to_offset(offset).date();
         let period = Period {
@@ -101,7 +106,12 @@ pub async fn load(
             tz,
         };
         let visitors = store.overview(&id, &period)?.current.visitors;
-        Ok((offset, store.live_visitors(&id)?, visitors))
+        Ok((
+            offset,
+            store.live_visitors(&id)?,
+            visitors,
+            store.first_event(&id)?,
+        ))
     })
     .await?;
     let shell = Shell {
@@ -121,22 +131,38 @@ pub async fn load(
             "self_hosted" => "Self-hosted".into(),
             other => other.replace('_', " "),
         },
-        usage: format!("{} visitors in the last 30 days", group(visitors)),
+        usage: format!("{} in the last 30 days", plural(visitors, "visitor")),
         live,
     };
     Ok(Ctx {
         site,
         shell,
         today: OffsetDateTime::now_utc().to_offset(offset).date(),
+        first_day: first.map(|t| t.to_offset(offset).date()),
         offset,
     })
 }
 
-fn range(key: Option<&str>) -> (&'static str, &'static str, i64) {
-    RANGES
-        .into_iter()
-        .find(|r| Some(r.0) == key)
-        .unwrap_or(RANGES[2])
+/// The active range as (key, label, days, default key); sites under 30 days old default to "all".
+fn range(ctx: &Ctx, key: Option<&str>) -> (&'static str, &'static str, i64, &'static str) {
+    let tracked = ctx.first_day.map(|d| (ctx.today - d).whole_days() + 1);
+    let default = if tracked.is_some_and(|n| n <= 30) {
+        "all"
+    } else {
+        "30d"
+    };
+    let find = |k: &str| RANGES.into_iter().find(|r| r.0 == k);
+    let (k, label, days) = key
+        .and_then(find)
+        .filter(|r| r.0 != "all" || tracked.is_some())
+        .or_else(|| find(default))
+        .unwrap_or(RANGES[2]);
+    let days = if k == "all" {
+        tracked.unwrap_or(30)
+    } else {
+        days
+    };
+    (k, label, days, default)
 }
 
 fn period(ctx: &Ctx, days: i64) -> Period {
@@ -161,7 +187,7 @@ fn href(base: &str, params: &[(&str, &str)]) -> String {
     }
 }
 
-fn range_opts(base: &str, current: &str, params: &[(&str, &str)]) -> Vec<Opt> {
+fn range_opts(base: &str, current: &str, default: &str, params: &[(&str, &str)]) -> Vec<Opt> {
     RANGES
         .iter()
         .map(|(key, label, _)| Opt {
@@ -169,12 +195,29 @@ fn range_opts(base: &str, current: &str, params: &[(&str, &str)]) -> Vec<Opt> {
             href: link(
                 base,
                 params,
-                &[("range", if *key == "30d" { "" } else { key })],
+                &[("range", if *key == default { "" } else { key })],
             ),
             on: *key == current,
             count: String::new(),
         })
         .collect()
+}
+
+/// "0 of 12 visitors converted. 2 payments not matched to a visit."
+fn conversion_sub(t: &Totals) -> String {
+    let mut sub = format!(
+        "{} of {} converted",
+        group(t.converted),
+        plural(t.visitors, "visitor")
+    );
+    let unmatched = t.payments.saturating_sub(t.matched_payments);
+    if unmatched > 0 {
+        sub.push_str(&format!(
+            ". {} not matched to a visit",
+            plural(unmatched, "payment")
+        ));
+    }
+    sub
 }
 
 pub fn group(n: u64) -> String {
@@ -351,7 +394,6 @@ pub struct RowView {
     icon: String,
     label: String,
     mono: bool,
-    logos: String,
     visitors: String,
     revenue: String,
     zero: bool,
@@ -396,6 +438,8 @@ pub struct Step {
     icon: String,
     title: String,
     sub: String,
+    /// Where an unfinished step is completed.
+    href: String,
 }
 
 pub struct EmptyView {
@@ -426,6 +470,7 @@ struct DashboardPage {
     payments_href: String,
     steps: Vec<Step>,
     steps_done: usize,
+    dismiss_href: String,
     steps_title: &'static str,
     goals_card: bool,
 }
@@ -516,7 +561,7 @@ fn row_view(
     r: &BreakdownRow,
     max: f64,
     by_visitors: bool,
-    sources: &[(String, Vec<String>)],
+    matched: bool,
 ) -> RowView {
     let value = if by_visitors {
         r.visitors as f64
@@ -526,9 +571,10 @@ fn row_view(
     let key = r.key.as_deref().unwrap_or_default();
     let (icon, label) = match kind {
         CardKind::Channel => (
-            format!(
-                r#"<i class="dot" style="background:{}"></i>"#,
-                chart::channel_color(r.key.as_deref())
+            icons::glyph(
+                icons::channel_glyph(key).unwrap_or("link"),
+                16,
+                chart::channel_color(r.key.as_deref()),
             ),
             r.label.clone(),
         ),
@@ -537,30 +583,18 @@ fn row_view(
         CardKind::Country if r.key.is_some() => (icons::flag(key), icons::country(key)),
         CardKind::Country => (String::new(), "Unknown".into()),
     };
-    let logos = if kind == CardKind::Channel {
-        sources
-            .iter()
-            .find(|(c, _)| c == key)
-            .map(|(_, names)| {
-                names
-                    .iter()
-                    .filter_map(|n| icons::brand_slug(n))
-                    .map(|s| icons::brand(s, 12))
-                    .collect()
-            })
-            .unwrap_or_default()
-    } else {
-        String::new()
-    };
     RowView {
         icon,
         label,
         mono: kind == CardKind::Page,
-        logos,
         visitors: group(r.visitors),
         revenue: money(r.revenue_usd),
         zero: r.revenue_usd <= 0.0,
-        per_visitor: usd(r.revenue_per_visitor.unwrap_or(0.0)),
+        per_visitor: if matched {
+            usd(r.revenue_per_visitor.unwrap_or(0.0))
+        } else {
+            "n/a".into()
+        },
         width: if max > 0.0 { value / max * 100.0 } else { 0.0 },
     }
 }
@@ -569,7 +603,6 @@ fn row_view(
 fn card(
     kind: CardKind,
     rows: &[BreakdownRow],
-    sources: &[(String, Vec<String>)],
     params: &[(&str, &str)],
     base: &str,
     by_visitors: bool,
@@ -596,6 +629,7 @@ fn card(
         },
     );
     let total = shown.len();
+    let matched = rows.iter().any(|r| !r.unattributed && r.payments > 0);
     shown.truncate(if expanded { 50 } else { 6 });
     let unattributed = rows
         .iter()
@@ -638,12 +672,13 @@ fn card(
         visitors_href: link(base, params, &[(sort, "visitors")]),
         rows: shown
             .iter()
-            .map(|r| row_view(kind, r, max, by_visitors, sources))
+            .map(|r| row_view(kind, r, max, by_visitors, matched))
             .collect(),
         unattributed: unattributed.map(|r| RowView {
+            icon: icons::glyph("unattributed", 16, "#B9BCC2"),
             visitors: "n/a".into(),
             per_visitor: "n/a".into(),
-            ..row_view(kind, r, max, by_visitors, sources)
+            ..row_view(kind, r, max, by_visitors, matched)
         }),
         foot,
         foot_href,
@@ -665,20 +700,21 @@ pub async fn dashboard(
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
-    let (rkey, rlabel, days) = range(q.range.as_deref());
+    let (rkey, rlabel, days, rdefault) = range(&ctx, q.range.as_deref());
     let p = period(&ctx, days);
-    let settings: Result<(String, i64), _> =
-        sqlx::query_as("SELECT attribution_model, window_days FROM sites WHERE id = ?")
-            .bind(&ctx.site.id)
-            .fetch_one(&state.db)
-            .await;
+    let settings: Result<(String, i64, bool), _> = sqlx::query_as(
+        "SELECT attribution_model, window_days, setup_dismissed FROM sites WHERE id = ?",
+    )
+    .bind(&ctx.site.id)
+    .fetch_one(&state.db)
+    .await;
     let providers: Result<Vec<String>, _> = sqlx::query_scalar(
         "SELECT provider FROM integrations WHERE site_id = ? ORDER BY created_at",
     )
     .bind(&ctx.site.id)
     .fetch_all(&state.db)
     .await;
-    let (Ok((model, window_days)), Ok(providers)) = (settings, providers) else {
+    let (Ok((model, window_days, dismissed)), Ok(providers)) = (settings, providers) else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
     let store = state.events.clone();
@@ -717,7 +753,7 @@ pub async fn dashboard(
         .unwrap_or(default_kind);
     let sort_of = |v: &Option<String>| v.as_deref() == Some("visitors");
     let expanded = q.all.clone().unwrap_or_default();
-    let range_param = if rkey == "30d" { "" } else { rkey };
+    let range_param = if rkey == rdefault { "" } else { rkey };
     let metric_param = if metric == chart::Metric::Revenue {
         ""
     } else {
@@ -778,28 +814,24 @@ pub async fn dashboard(
                     },
                 ),
                 chart::Metric::Conversion => (
-                    format!("{:.2}%", cur.conversion.unwrap_or(0.0) * 100.0),
+                    cur.conversion
+                        .map_or_else(|| "n/a".into(), |c| format!("{:.2}%", c * 100.0)),
                     delta(cur.conversion, prev.conversion),
-                    if cur.visitors > 0 && cur.visitors < 100 {
-                        format!(
-                            "{} of {} visitors. Small sample.",
-                            group(cur.customers),
-                            group(cur.visitors)
-                        )
-                    } else {
-                        "Visitors who paid".into()
-                    },
+                    conversion_sub(cur),
                 ),
                 chart::Metric::PerVisitor => (
-                    usd(cur.revenue_per_visitor.unwrap_or(0.0)),
+                    cur.revenue_per_visitor.map_or_else(|| "n/a".into(), usd),
                     delta(cur.revenue_per_visitor, prev.revenue_per_visitor),
-                    "Revenue divided by visitors".into(),
+                    if cur.matched_payments > 0 {
+                        "Matched revenue divided by visitors".into()
+                    } else {
+                        "Needs a payment matched to a visit".into()
+                    },
                 ),
             };
             let (trend, delta) = if new_site {
-                if m == chart::Metric::Revenue {
-                    let label = if young { "New site" } else { "No earlier data" };
-                    ("flat", label.to_string())
+                if m == chart::Metric::Revenue && !young {
+                    ("flat", "No earlier data".to_string())
                 } else {
                     ("", String::new())
                 }
@@ -824,11 +856,7 @@ pub async fn dashboard(
                 sub,
                 href: link(&base, &params, &[("metric", m_param), ("chart", tile_kind)]),
                 on: lit(m),
-                color: match m {
-                    chart::Metric::Revenue => "#E8471C",
-                    chart::Metric::Visitors => "#2F5BEA",
-                    _ => "#0E1116",
-                },
+                color: m.color(),
                 big: m == chart::Metric::Revenue,
             }
         })
@@ -901,7 +929,7 @@ pub async fn dashboard(
                 pills.push((d, text));
             }
             (
-                format!("Visitors and payments per {unit}"),
+                format!("Visitors and revenue per {unit}"),
                 "Comparisons start once there is a full previous period".into(),
                 chart::sparse(&current, since, ctx.today, &pills),
             )
@@ -941,7 +969,6 @@ pub async fn dashboard(
         card(
             kind,
             rows,
-            &report.channel_sources,
             &params,
             &base,
             sorts
@@ -979,6 +1006,7 @@ pub async fn dashboard(
                 icon: icons::glyph("direct", 14, "#0E1116"),
                 title: "Script tag".into(),
                 sub: "Not seen yet".into(),
+                href: String::new(),
             },
             match providers.first() {
                 Some(pr) => Step {
@@ -986,12 +1014,14 @@ pub async fn dashboard(
                     icon: icons::provider(pr, 14),
                     title: provider_label(pr),
                     sub: "Connected".into(),
+                    href: String::new(),
                 },
                 None => Step {
                     done: false,
                     icon: icons::glyph("card", 14, "#0E1116"),
                     title: "Payments".into(),
                     sub: "Not connected".into(),
+                    href: String::new(),
                 },
             },
             Step {
@@ -999,6 +1029,7 @@ pub async fn dashboard(
                 icon: icons::glyph("link", 14, "#0E1116"),
                 title: "Checkout link".into(),
                 sub: "Passes virling_vid".into(),
+                href: String::new(),
             },
         ],
         providers: ["dodo", "stripe", "polar", "lemonsqueezy"]
@@ -1012,7 +1043,8 @@ pub async fn dashboard(
             })
             .collect(),
     });
-    let steps = if young && age <= 14 && empty.is_none() {
+    let site_url = |page: &str| sites::app_path(&ctx.site.domain, page);
+    let mut steps = if young && age <= 14 && empty.is_none() && !dismissed {
         let matched = setup.first_match.as_ref();
         vec![
             Step {
@@ -1020,23 +1052,22 @@ pub async fn dashboard(
                 icon: icons::glyph("direct", 14, "#0E1116"),
                 title: "Script installed".into(),
                 sub: since.map(day).unwrap_or_else(|| "Not seen yet".into()),
+                href: site_url("setup/script"),
             },
             match providers.first() {
                 Some(pr) => Step {
                     done: true,
                     icon: icons::provider(pr, 14),
                     title: format!("{} connected", provider_short(pr)),
-                    sub: format!(
-                        "{} payment{}",
-                        group(setup.payments),
-                        if setup.payments == 1 { "" } else { "s" }
-                    ),
+                    sub: format!("{} total", plural(setup.payments, "payment")),
+                    href: String::new(),
                 },
                 None => Step {
                     done: false,
                     icon: icons::glyph("card", 14, "#8A909A"),
                     title: "Connect payments".into(),
                     sub: "Stripe, Polar, Dodo, Lemon Squeezy".into(),
+                    href: site_url("setup/payments"),
                 },
             },
             match matched {
@@ -1047,6 +1078,7 @@ pub async fn dashboard(
                         icon: icons::source(&source, 14),
                         title: "Payment matched".into(),
                         sub: format!("{} from {}", amount(m), source),
+                        href: String::new(),
                     }
                 }
                 None => Step {
@@ -1054,6 +1086,7 @@ pub async fn dashboard(
                     icon: icons::glyph("link", 14, "#8A909A"),
                     title: "Payment matched".into(),
                     sub: "Pass virling_vid at checkout".into(),
+                    href: site_url("setup/checkout"),
                 },
             },
             Step {
@@ -1061,15 +1094,19 @@ pub async fn dashboard(
                 icon: icons::glyph("unattributed", 14, "#8A909A"),
                 title: "Track a goal".into(),
                 sub: "Signups, trials".into(),
+                href: "#goals".into(),
             },
         ]
     } else {
         Vec::new()
     };
+    if steps.iter().all(|s| s.done) {
+        steps.clear();
+    }
     render(DashboardPage {
         title: "Dashboard",
         range_label: rlabel,
-        ranges: range_opts(&base, rkey, &params),
+        ranges: range_opts(&base, rkey, rdefault, &params),
         empty,
         tiles,
         chart_title,
@@ -1090,6 +1127,7 @@ pub async fn dashboard(
             &[("range", range_param)],
         ),
         steps_done: steps.iter().filter(|s| s.done).count(),
+        dismiss_href: site_url("setup/dismiss"),
         steps,
         goals_card: young && !setup.has_goals,
         steps_title: if age <= 7 {
@@ -1128,6 +1166,27 @@ struct PaymentsPage {
     providers: Vec<(String, &'static str, bool)>,
 }
 
+/// Hides the first-weeks checklist for good.
+pub async fn dismiss_setup(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "dashboard").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    if let Err(err) = sqlx::query("UPDATE sites SET setup_dismissed = 1 WHERE id = ?")
+        .bind(&ctx.site.id)
+        .execute(&state.db)
+        .await
+    {
+        tracing::error!(%err, "dismissing the checklist failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    Redirect::to(&sites::app_path(&ctx.site.domain, "")).into_response()
+}
+
 pub async fn payments(
     State(state): State<AppState>,
     account: Account,
@@ -1138,7 +1197,7 @@ pub async fn payments(
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
-    let (rkey, rlabel, days) = range(q.range.as_deref());
+    let (rkey, rlabel, days, rdefault) = range(&ctx, q.range.as_deref());
     let p = period(&ctx, days);
     let (fkey, flabel, filter) = FILTERS
         .into_iter()
@@ -1188,7 +1247,7 @@ pub async fn payments(
     };
     let counts = [s.payments, s.attributed, s.unattributed, s.refunded];
     let base = sites::app_path(&ctx.site.domain, "payments");
-    let range_param = if rkey == "30d" { "" } else { rkey };
+    let range_param = if rkey == rdefault { "" } else { rkey };
     let filter_param = if fkey == "all" { "" } else { fkey };
     let page_href = |n: u32| {
         let n = n.to_string();
@@ -1248,7 +1307,7 @@ pub async fn payments(
     render(PaymentsPage {
         title: "Payments",
         range_label: rlabel,
-        ranges: range_opts(&base, rkey, &[("filter", filter_param)]),
+        ranges: range_opts(&base, rkey, rdefault, &[("filter", filter_param)]),
         summary,
         filters: FILTERS
             .iter()
@@ -1526,6 +1585,27 @@ mod tests {
     }
 
     #[test]
+    fn conversion_sub_uses_the_same_numbers() {
+        let t = Totals {
+            visitors: 1,
+            payments: 2,
+            ..Totals::default()
+        };
+        assert_eq!(
+            conversion_sub(&t),
+            "0 of 1 visitor converted. 2 payments not matched to a visit"
+        );
+        let t = Totals {
+            visitors: 12,
+            payments: 1,
+            converted: 1,
+            matched_payments: 1,
+            ..Totals::default()
+        };
+        assert_eq!(conversion_sub(&t), "1 of 12 visitors converted");
+    }
+
+    #[test]
     fn links_drop_defaults_and_keep_other_params() {
         let base = "/app/virling.com";
         assert_eq!(link(base, &[("range", ""), ("metric", "")], &[]), base);
@@ -1543,7 +1623,7 @@ mod tests {
             link(base, &params, &[("range", "")]),
             "/app/virling.com?sort_pages=visitors"
         );
-        let ranges = range_opts(base, "7d", &params);
+        let ranges = range_opts(base, "7d", "30d", &params);
         assert_eq!(
             ranges[1].href,
             "/app/virling.com?range=7d&sort_pages=visitors"

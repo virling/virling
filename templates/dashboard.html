@@ -31,13 +31,14 @@
 {% if !steps.is_empty() %}
 <section class="box setup-strip">
   <b>{{ steps_title }}</b><span class="meter"><i style="width:{{ steps_done * 25 }}%"></i></span>
-  <div class="steps-row">{% for s in steps %}<span class="step">{% if s.done %}<span class="ok">{% include "_check.html" %}</span>{% else %}<span class="todo"></span>{% endif %}{{ s.icon|safe }}<b>{{ s.title }}</b><span class="dim">{{ s.sub }}</span></span>{% endfor %}</div>
+  <div class="steps-row">{% for s in steps %}{% if s.done %}<span class="step" title="{{ s.title }}: {{ s.sub }}"><span class="ok">{% include "_check.html" %}</span>{{ s.icon|safe }}<b>{{ s.title }}</b><span class="dim">{{ s.sub }}</span></span>{% else %}<a class="step todo-step" href="{{ s.href }}"><span class="todo"></span>{{ s.icon|safe }}<b>{{ s.title }}</b><span class="dim">{{ s.sub }}</span><svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>{% endif %}{% endfor %}</div>
+  <form method="post" action="{{ dismiss_href }}"><button class="ctl sq strip-x" type="submit" aria-label="Hide this checklist"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
 </section>
 {% endif %}
 <section class="box">
   <nav class="tiles" aria-label="Metric">
     {% for t in tiles %}<a class="tile{% if t.on %} on{% endif %}{% if t.big %} big{% endif %}" href="{{ t.href }}" style="--c:{{ t.color }}"{% if t.on %} aria-current="true"{% endif %}>
-      <span class="tn"><i class="dot" style="background:{{ t.color }}"></i><span class="full">{{ t.name }}</span><span class="short">{{ t.short }}</span></span>
+      <span class="tn"><i class="dot" style="background:{% if t.on %}{{ t.color }}{% else %}#B9BCC2{% endif %}"></i><span class="full">{{ t.name }}</span><span class="short">{{ t.short }}</span></span>
       <span class="tv"><b>{{ t.value }}</b>{% if !t.delta.is_empty() %}<span class="pill {{ t.trend }}">{{ t.delta }}</span>{% endif %}</span>
       <span class="ts">{{ t.sub }}</span>
     </a>{% endfor %}
@@ -60,15 +61,13 @@
 <div class="grid-bd">
   {% for c in cards %}
   <section class="box bd" data-card="{{ c.key }}">
-    <div class="bd-head"><h2>{{ c.title }}</h2>
-      <nav class="sg" aria-label="Sort {{ c.title|lower }}"><a href="{{ c.revenue_href }}"{% if !c.by_visitors %} class="on" aria-current="true"{% endif %}>Revenue</a><a href="{{ c.visitors_href }}"{% if c.by_visitors %} class="on" aria-current="true"{% endif %}>Visitors</a></nav>
-    </div>
-    <div class="bd-row th"><span class="first">{{ c.head }}</span><span class="num{% if c.by_visitors %} sorted{% endif %}">Visitors</span><span class="num{% if !c.by_visitors %} sorted{% endif %}">Revenue</span><span class="num">Per visitor</span></div>
+    <div class="bd-head"><h2>{{ c.title }}</h2></div>
+    <div class="bd-row th"><span class="first">{{ c.head }}</span><a class="num sort{% if c.by_visitors %} sorted{% endif %}" href="{{ c.visitors_href }}" title="Sort by visitors"{% if c.by_visitors %} aria-current="true"{% endif %}>Visitors<svg class="arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a><a class="num sort{% if !c.by_visitors %} sorted{% endif %}" href="{{ c.revenue_href }}" title="Sort by revenue"{% if !c.by_visitors %} aria-current="true"{% endif %}>Revenue<svg class="arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a><span class="num">Per visitor</span></div>
     {% for r in c.rows %}
-    <div class="bd-row"><div class="bd-name"><span class="bar" style="width:{{ "{:.1}"|format(r.width) }}%"></span><span class="t">{{ r.icon|safe }}{% if r.mono %}<span class="mono">{{ r.label }}</span>{% else %}<span class="lbl">{{ r.label }}</span>{% endif %}{% if !r.logos.is_empty() %}<span class="logos">{{ r.logos|safe }}</span>{% endif %}</span></div><span class="num v">{{ r.visitors }}</span><span class="num r{% if r.zero %} zero{% endif %}">{{ r.revenue }}</span><span class="num p{% if r.zero %} zero{% endif %}">{{ r.per_visitor }}</span></div>
+    <div class="bd-row"><div class="bd-name"><span class="bar" style="width:{{ "{:.1}"|format(r.width) }}%"></span><span class="t">{{ r.icon|safe }}{% if r.mono %}<span class="mono">{{ r.label }}</span>{% else %}<span class="lbl">{{ r.label }}</span>{% endif %}</span></div><span class="num v">{{ r.visitors }}</span><span class="num r{% if r.zero %} zero{% endif %}">{{ r.revenue }}</span><span class="num p{% if r.zero %} zero{% endif %}">{{ r.per_visitor }}</span></div>
     {% endfor %}
     {% if let Some(u) = c.unattributed %}
-    <div class="bd-row unattr"><div class="bd-name"><span class="bar" style="width:{{ "{:.1}"|format(u.width) }}%"></span><span class="t"><i class="dot" style="background:#B9BCC2"></i>Unattributed</span></div><span class="num v zero">n/a</span><span class="num r">{{ u.revenue }}</span><span class="num p zero">n/a</span></div>
+    <div class="bd-row unattr"><div class="bd-name"><span class="bar" style="width:{{ "{:.1}"|format(u.width) }}%"></span><span class="t">{{ u.icon|safe }}<span class="lbl">Unattributed</span></span></div><span class="num v zero">n/a</span><span class="num r">{{ u.revenue }}</span><span class="num p zero">n/a</span></div>
     {% endif %}
     {% if c.rows.is_empty() && c.unattributed.is_none() %}<p class="bd-empty">Nothing in this range yet.</p>{% endif %}
     <div class="bd-foot"><span>{{ c.foot }}</span>{% if !c.foot_href.is_empty() %}<a href="{{ c.foot_href }}">{{ c.foot_link }}</a>{% endif %}</div>
@@ -95,7 +94,7 @@
     {% endif %}
   </section>
   {% if goals_card %}
-  <section class="box goals-card">
+  <section class="box goals-card" id="goals">
     <img src="/assets/art/04-empty-goals.jpg" width="1024" height="687" alt="Pencil drawing: a hill with an orange flag at the top of a winding path">
     <div>
       <h2>No goals yet</h2>
