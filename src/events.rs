@@ -6,9 +6,10 @@ use duckdb::{Connection, named_params, params};
 use time::{OffsetDateTime, UtcOffset};
 
 use crate::stats::{
-    self, BreakdownRow, Dimension, Journey, Overview, PaymentFilter, PaymentPage, PaymentSummary,
-    Period, Report, Sort,
+    self, Journey, Overview, PaymentFilter, PaymentPage, PaymentSummary, Period, Report,
 };
+#[cfg(test)]
+use crate::stats::{BreakdownRow, Dimension, Sort};
 
 #[derive(Debug, Clone)]
 pub struct Event {
@@ -74,6 +75,7 @@ pub trait EventStore: Send + Sync {
     fn overview(&self, site_id: &str, period: &Period) -> anyhow::Result<Overview>;
     #[cfg(test)]
     fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<stats::DayPoint>>;
+    #[cfg(test)]
     fn breakdown(
         &self,
         site_id: &str,
@@ -374,6 +376,7 @@ impl EventStore for DuckStore {
         stats::timeseries(&self.conn.lock().unwrap(), site_id, period)
     }
 
+    #[cfg(test)]
     fn breakdown(
         &self,
         site_id: &str,

@@ -1,14 +1,12 @@
 mod app;
 mod auth;
 mod channel;
-#[allow(dead_code)]
 mod chart;
 mod crypto;
 mod dashboard;
 mod events;
 mod flags;
 mod fx;
-#[allow(dead_code)]
 mod icons;
 mod ingest;
 mod mail;
@@ -849,8 +847,10 @@ mod tests {
         );
         for query in [
             "",
-            "?range=7d&by=referrer&sort=visitors",
-            "?range=12m&by=country",
+            "?range=7d&chart=channel&metric=visitors",
+            "?range=12m&all=referrers&countries=visitors",
+            "?chart=area&metric=rpv",
+            "?chart=line&metric=conversion",
         ] {
             let res = call(
                 &state,
@@ -866,7 +866,33 @@ mod tests {
                 body.contains("$98") && body.contains("Latest payments"),
                 "{query}"
             );
+            assert!(body.contains(r#"class="chart"#), "{query}");
         }
+        let body = body_text(
+            call(
+                &state,
+                get(&format!("/app/sites/{site}/dashboard"), Some(&cookie)),
+            )
+            .await,
+        )
+        .await;
+        assert!(body.contains("New site") && body.contains("Visitors and payments per day"));
+        assert!(body.contains(r#"aria-label="Hacker News""#), "source logo");
+        assert!(body.contains(r#"src="/assets/flags/de.svg""#) && body.contains("Germany"));
+        assert!(body.contains("Rows fill in as traffic grows"));
+        assert!(body.contains("No goals yet"));
+        let area = body_text(
+            call(
+                &state,
+                get(
+                    &format!("/app/sites/{site}/dashboard?chart=area&metric=visitors"),
+                    Some(&cookie),
+                ),
+            )
+            .await,
+        )
+        .await;
+        assert!(area.contains("Visitors per day") && area.contains(r#"fill-opacity="0.10""#));
         let res = call(
             &state,
             get(&format!("/app/sites/{site}/payments"), Some(&cookie)),
@@ -919,6 +945,27 @@ mod tests {
             .status(),
             StatusCode::NOT_FOUND
         );
+    }
+
+    #[tokio::test]
+    async fn empty_dashboard_waits_for_the_first_visit() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        connect_fake(&state, &site, "dodo", "dodo_test_key_1234").await;
+        let body = body_text(
+            call(
+                &state,
+                get(&format!("/app/sites/{site}/dashboard"), Some(&cookie)),
+            )
+            .await,
+        )
+        .await;
+        assert!(body.contains("Waiting for the first visit"));
+        assert!(body.contains("Not seen yet") && body.contains("Dodo Payments connected"));
+        assert!(body.contains(r#"data-site="example.com""#));
+        assert!(body.contains("/assets/art/02-empty-waiting.jpg"));
+        assert!(!body.contains(r#"class="chart"#));
     }
 
     #[tokio::test]

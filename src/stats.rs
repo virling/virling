@@ -73,34 +73,18 @@ pub struct DayPoint {
 pub enum Dimension {
     Channel,
     Referrer,
-    Campaign,
     LandingPage,
     Country,
-    Device,
 }
 
 impl Dimension {
-    pub fn parse(s: &str) -> Option<Self> {
-        Some(match s {
-            "channel" => Dimension::Channel,
-            "referrer" => Dimension::Referrer,
-            "campaign" => Dimension::Campaign,
-            "landing_page" => Dimension::LandingPage,
-            "country" => Dimension::Country,
-            "device" => Dimension::Device,
-            _ => return None,
-        })
-    }
-
     /// (events column, attribution column)
     fn columns(self) -> (&'static str, &'static str) {
         match self {
             Dimension::Channel => ("channel", "channel"),
             Dimension::Referrer => ("referrer_host", "referrer_host"),
-            Dimension::Campaign => ("utm_campaign", "campaign"),
             Dimension::LandingPage => ("path", "landing_page"),
             Dimension::Country => ("country", "country"),
-            Dimension::Device => ("device", "device"),
         }
     }
 }
