@@ -6,6 +6,7 @@ mod ingest;
 mod mail;
 mod onboarding;
 mod sites;
+mod ua;
 mod waitlist;
 mod waitlist_copy;
 

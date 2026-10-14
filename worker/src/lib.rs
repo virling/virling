@@ -2,11 +2,17 @@
 use askama::Template;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use worker::wasm_bindgen::JsValue;
 use worker::*;
 
+#[path = "../../src/channel.rs"]
+mod channel;
+#[path = "../../src/ua.rs"]
+mod ua;
 #[path = "../../src/waitlist_copy.rs"]
 mod waitlist_copy;
 
+mod analytics;
 mod preorder;
 
 use waitlist_copy::{AGENCY, ConfirmEmail, SELFHOST, confirm_text};
@@ -338,9 +344,73 @@ async fn dodo_webhook(mut req: Request, ctx: RouteContext<()>) -> Result<Respons
     json_status(json!({ "received": true }), 200)
 }
 
+fn cors(mut res: Response) -> Result<Response> {
+    res.headers_mut().set("Access-Control-Allow-Origin", "*")?;
+    Ok(res)
+}
+
+async fn collect(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
+    let headers = req.headers();
+    let user_agent = headers.get("User-Agent")?.unwrap_or_default();
+    let country = analytics::country(headers.get("CF-IPCountry")?.as_deref());
+    let ip = headers.get("CF-Connecting-IP")?.unwrap_or_default();
+    if ua::is_bot(&user_agent) {
+        return cors(Response::empty()?.with_status(202));
+    }
+    if !ctx.rate_limiter("EVENT_LIMIT")?.limit(ip).await?.success {
+        return cors(Response::empty()?.with_status(429));
+    }
+    let Some(batch) = analytics::parse_batch(&req.text().await?) else {
+        return cors(Response::error("invalid event", 400)?);
+    };
+    let now = Date::now().as_millis() as i64;
+    let db = ctx.d1("DB")?;
+    let insert = db.prepare(analytics::INSERT_EVENT);
+    let text = |s: &Option<String>| s.as_deref().map_or(JsValue::NULL, JsValue::from_str);
+    let mut statements = Vec::new();
+    for e in batch {
+        let Some(row) = analytics::to_row(e, &user_agent, country.as_deref(), now) else {
+            continue;
+        };
+        statements.push(insert.clone().bind(&[
+            JsValue::from_f64(row.ts as f64),
+            JsValue::from_str(&row.visitor_id),
+            JsValue::from_str(row.kind),
+            text(&row.name),
+            JsValue::from_str(&row.path),
+            text(&row.referrer_host),
+            text(&row.utm_source),
+            text(&row.utm_medium),
+            text(&row.utm_campaign),
+            text(&row.utm_content),
+            text(&row.utm_term),
+            JsValue::from_str(row.channel),
+            text(&row.country),
+            JsValue::from_str(row.device),
+            JsValue::from_str(row.browser),
+        ])?);
+    }
+    if !statements.is_empty() {
+        db.batch(statements).await?;
+    }
+    cors(Response::empty()?.with_status(202))
+}
+
+fn event_preflight(_: Request, _: RouteContext<()>) -> Result<Response> {
+    let mut res = Response::empty()?.with_status(204);
+    let headers = res.headers_mut();
+    headers.set("Access-Control-Allow-Origin", "*")?;
+    headers.set("Access-Control-Allow-Methods", "POST")?;
+    headers.set("Access-Control-Allow-Headers", "content-type")?;
+    headers.set("Access-Control-Max-Age", "86400")?;
+    Ok(res)
+}
+
 #[event(fetch)]
 async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
     Router::new()
+        .post_async("/api/event", collect)
+        .options("/api/event", event_preflight)
         .post_async("/api/waitlist", join)
         .get_async("/waitlist/leave", leave)
         .post_async("/api/preorder/session", preorder_session)
