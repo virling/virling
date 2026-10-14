@@ -1,34 +1,48 @@
 {% extends "app.html" %}
 {% block tools %}{% include "_range.html" %}{% endblock %}
 {% block content %}
-<div class="seg filters" aria-label="Filter payments">
-  {% for f in filters %}<a href="{{ f.href }}"{% if f.on %} aria-current="true"{% endif %}>{{ f.label }} <span class="count">{{ f.count }}</span></a>{% endfor %}
+<section class="box summary{% if never_paid %} muted-sum{% endif %}">
+  {% for s in summary %}<div><span class="sn">{{ s.name }}</span><b>{{ s.value }}</b><span class="dim">{{ s.sub }}</span></div>{% endfor %}
+</section>
+{% if !never_paid %}
+<div class="list-bar">
+  <nav class="sg" aria-label="Filter payments">{% for f in filters %}<a href="{{ f.href }}"{% if f.on %} class="on" aria-current="true"{% endif %}>{{ f.label }} <span class="count">{{ f.count }}</span></a>{% endfor %}</nav>
+  <span class="dim">{{ showing }}</span>
 </div>
-<section class="card flush">
-  <table class="pay-table">
-    <thead><tr><th>Date</th><th class="num">Amount</th><th>Source</th><th class="hide-sm">Provider</th><th>Status</th></tr></thead>
-    <tbody>
-      {% for p in rows %}
-      <tr data-href="{{ p.href }}">
-        <td class="mono date"><a href="{{ p.href }}" data-drawer>{{ p.date }}</a></td>
-        <td class="num amt">{{ p.amount }}{% if !p.refunded.is_empty() %}<small>{{ p.refunded }}</small>{% endif %}</td>
-        <td><span class="{% if p.unattributed %}unattr{% endif %}">{{ p.source }}</span>{% if p.renewal %} <span class="tag">renewal</span>{% endif %}</td>
-        <td class="hide-sm muted">{{ p.provider }}</td>
-        <td><span class="badge {{ p.status_class }}">{{ p.status }}</span></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% if rows.is_empty() %}
-  <p class="empty">No {% if filter_label != "All" %}{{ filter_label|lower }} {% endif %}payments in this range.</p>
+{% endif %}
+<section class="box pay-list" data-rows data-total="{{ total }}" data-offset="{{ offset }}">
+  <div class="pr th"><span>Date</span><span>Credited to</span><span class="pr-first">First touch</span><span class="num">Amount</span><span>Status</span><span class="pr-prov">Provider</span><span></span></div>
+  {% for p in rows %}
+  <a class="pr prow" href="{{ p.href }}" data-drawer>
+    <span class="dim">{{ p.date }}</span>
+    <span class="src{% if p.unattributed %} unattr{% endif %}">{{ p.icon|safe }}<span class="lbl">{{ p.source }}</span>{% if !p.channel.is_empty() %}<span class="ch">{{ p.channel }}</span>{% endif %}{% if p.renewal %}<span class="renewal">renewal</span>{% endif %}</span>
+    <span class="pr-first src">{% if p.unattributed || p.first.is_empty() %}<span class="na">n/a</span>{% else %}{{ p.first_icon|safe }}<span class="lbl">{{ p.first }}</span>{% endif %}</span>
+    <span class="num amt{% if p.refunded %} struck{% endif %}">{{ p.amount }}</span>
+    <span><span class="badge {{ p.status_class }}">{{ p.status }}</span></span>
+    <span class="pr-prov dim">{{ p.provider_icon|safe }}{{ p.provider }}</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  {% endfor %}
+  {% if never_paid %}
+  <div class="pay-empty">
+    <img src="/assets/art/03-empty-payments.jpg" width="1024" height="687" alt="Pencil drawing: an empty jar on a desk next to a laptop, with one orange coin">
+    <div>
+      <h2>No payments yet</h2>
+      <p>{% if connected.is_empty() %}Connect a payment provider and payments show up here with the visits that led to them.{% else %}{{ connected }} is connected and checked every few minutes. The first payment shows up here with the visits that led to it.{% endif %}</p>
+      <div class="chips-p">{% for (icon, name, on) in providers %}<span class="prov{% if on %} on{% endif %}">{{ icon|safe }}{{ name }}{% if on %} connected{% endif %}</span>{% endfor %}</div>
+      <div class="eh-actions"><a class="b" href="/app/sites/{{ shell.site_id }}/setup/checkout">Pass virling_vid at checkout</a><a class="b sec" href="/app/sites/{{ shell.site_id }}/setup/payments">{% if connected.is_empty() %}Connect a provider{% else %}Connect another provider{% endif %}</a></div>
+    </div>
+  </div>
+  {% else if rows.is_empty() %}
+  <p class="bd-empty pad">No {% if filter_label != "All" %}{{ filter_label|lower }} {% endif %}payments in this range.</p>
   {% endif %}
 </section>
 {% if !prev.is_empty() || !next.is_empty() %}
 <div class="pager">
-  <span class="muted">{{ showing }}</span>
-  <span class="actions">
-    {% if !prev.is_empty() %}<a class="btn secondary" href="{{ prev }}">Previous</a>{% endif %}
-    {% if !next.is_empty() %}<a class="btn secondary" href="{{ next }}">Next</a>{% endif %}
+  <span class="dim">{{ showing }}</span>
+  <span class="eh-actions">
+    {% if !prev.is_empty() %}<a class="b sec" href="{{ prev }}">Previous</a>{% endif %}
+    {% if !next.is_empty() %}<a class="b sec" href="{{ next }}">Next</a>{% endif %}
   </span>
 </div>
 {% endif %}

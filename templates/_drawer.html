@@ -1,7 +1,12 @@
 <div class="drawer-back" data-drawer-close hidden></div>
 <aside class="drawer" id="drawer" aria-label="Payment journey" hidden>
-  <button class="drawer-x" type="button" aria-label="Close" data-drawer-close>
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
-  </button>
+  <div class="dr-bar">
+    <span class="dim" data-drawer-pos></span>
+    <span class="dr-nav">
+      <button class="ctl sq" type="button" aria-label="Previous payment" data-drawer-step="-1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 15l-6-6-6 6"/></svg></button>
+      <button class="ctl sq" type="button" aria-label="Next payment" data-drawer-step="1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <button class="ctl sq drawer-x" type="button" aria-label="Close" data-drawer-close><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </span>
+  </div>
   <div data-drawer-body></div>
 </aside>
