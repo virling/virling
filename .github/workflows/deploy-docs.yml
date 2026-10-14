@@ -1,0 +1,85 @@
+name: Docs
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - ".github/workflows/deploy-docs.yml"
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/deploy-docs.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  MDBOOK_VERSION: "0.5.4"
+  MDBOOK_SHA256: "3f28de05dafca9d0f2eab99c662116b0e37b89b1d96a08f8f430b9eeae958cd7"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install mdBook
+        run: |
+          curl -sSfL -o mdbook.tar.gz "https://github.com/rust-lang/mdBook/releases/download/v${MDBOOK_VERSION}/mdbook-v${MDBOOK_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          echo "${MDBOOK_SHA256}  mdbook.tar.gz" | sha256sum -c
+          mkdir -p "$HOME/.local/bin"
+          tar xzf mdbook.tar.gz -C "$HOME/.local/bin" mdbook
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Build
+        working-directory: docs
+        run: mdbook build
+
+      - name: Check internal links
+        working-directory: docs
+        run: python3 check-links.py book
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          name: book
+          path: docs/book
+          retention-days: 3
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://docs.virling.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: book
+          path: docs/book
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: docs
+          wranglerVersion: "4.150.0"
+          command: deploy
+
+      - name: Smoke check
+        run: |
+          for url in https://docs.virling.com/ https://docs.virling.com/quickstart; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' -L --retry 3 --retry-delay 5 "$url")
+            echo "$url -> $code"
+            [ "$code" = "200" ] || exit 1
+          done
