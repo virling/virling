@@ -8,9 +8,9 @@ use crate::dashboard::{group, money};
 use crate::stats::DayPoint;
 
 const BLUE: &str = "#2F5BEA";
-const BLUE_TINT: &str = "#C9D6FA";
 const ORANGE: &str = "#E8471C";
 const GREY: &str = "#B9BCC2";
+const INK: &str = "#0E1116";
 const NS: &str = r#" vector-effect="non-scaling-stroke""#;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -87,8 +87,9 @@ impl Metric {
 
     pub fn color(self) -> &'static str {
         match self {
+            Metric::Revenue => ORANGE,
             Metric::Visitors => BLUE,
-            _ => ORANGE,
+            _ => INK,
         }
     }
 
@@ -147,6 +148,8 @@ pub fn series(days: &[DayPoint]) -> Series {
                 p.payments += d.payments;
                 p.customers += d.customers;
                 p.revenue_usd += d.revenue_usd;
+                p.converted += d.converted;
+                p.matched_revenue_usd += d.matched_revenue_usd;
                 for (channel, revenue) in &d.by_channel {
                     match p.by_channel.iter_mut().find(|c| c.0 == *channel) {
                         Some(c) => c.1 += revenue,
@@ -157,8 +160,8 @@ pub fn series(days: &[DayPoint]) -> Series {
             p.by_channel
                 .sort_by(|a, b| b.1.total_cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
             let visitors = (p.visitors > 0).then_some(p.visitors as f64);
-            p.conversion = visitors.map(|v| p.customers as f64 / v);
-            p.revenue_per_visitor = visitors.map(|v| p.revenue_usd / v);
+            p.conversion = visitors.map(|v| p.converted as f64 / v);
+            p.revenue_per_visitor = visitors.map(|v| p.matched_revenue_usd / v);
             p
         })
         .collect();
@@ -602,7 +605,7 @@ pub fn dual(cur: &Series) -> String {
         let h = p.visitors as f64 / vtop * 1000.0;
         let _ = write!(
             svg,
-            r#"<rect x="{:.1}" y="{:.1}" width="{bw:.1}" height="{h:.1}" fill="{BLUE_TINT}"/>"#,
+            r#"<rect x="{:.1}" y="{:.1}" width="{bw:.1}" height="{h:.1}" fill="{BLUE}"/>"#,
             w * i as f64 + (w - bw) / 2.0,
             1000.0 - h
         );
@@ -629,7 +632,7 @@ pub fn dual(cur: &Series) -> String {
         let xf = (i as f64 + 0.5) / n as f64;
         let rows = [
             Row {
-                swatch: swatch(BLUE_TINT, ""),
+                swatch: swatch(BLUE, ""),
                 name: "Visitors".into(),
                 value: group(p.visitors),
             },
@@ -659,20 +662,23 @@ pub fn dual(cur: &Series) -> String {
     );
     format!(
         r#"{chart}<div class="legend"><span>{}Visitors, left axis</span><span>{}Revenue, right axis</span></div>"#,
-        swatch(BLUE_TINT, ""),
+        swatch(BLUE, ""),
         swatch(ORANGE, "ln")
     )
 }
 
-/// Visitor bars for a new site, with days before tracking started shaded and payment pills above their day.
+/// Visitor and revenue bars for a new site, with days before tracking started shaded and payment pills above their day.
 pub fn sparse(cur: &Series, since: Option<Date>, today: Date, pills: &[(Date, String)]) -> String {
     let pts = &cur.points;
     let n = pts.len().max(1);
     let few = pts.len() <= 14;
     let vmax = pts.iter().map(|p| p.visitors as f64).fold(0.0, f64::max);
+    let rmax = pts.iter().map(|p| p.revenue_usd).fold(0.0, f64::max);
     let (step, top) = nice_ticks(vmax * 1.05, true);
+    let (rstep, rtop) = nice_ticks(rmax * 1.05, true);
     let w = 1000.0 / n as f64;
-    let bw = w * 0.42;
+    let bw = (w * 0.3).min(32.0);
+    let gap = (w * 0.04).min(6.0);
     let before = since.map_or(pts.len(), |s| pts.iter().filter(|p| p.date < s).count());
     let mut svg = String::new();
     let mut over = String::new();
@@ -703,7 +709,8 @@ pub fn sparse(cur: &Series, since: Option<Date>, today: Date, pills: &[(Date, St
         );
         let _ = write!(
             over,
-            r#"<div class="before" style="width:{:.2}%"><b>Not tracking yet</b><span>{note}</span></div>"#,
+            r#"<div class="before{}" style="width:{:.2}%"><b>Not tracking yet</b><span>{note}</span></div>"#,
+            if before == pts.len() { " all" } else { "" },
             before as f64 / n as f64 * 100.0
         );
     }
@@ -712,23 +719,28 @@ pub fn sparse(cur: &Series, since: Option<Date>, today: Date, pills: &[(Date, St
         let xf = (i as f64 + 0.5) / n as f64;
         if i >= before {
             let h = p.visitors as f64 / top * 1000.0;
+            let rh = p.revenue_usd / rtop * 1000.0;
             let fade = if p.date == today {
                 r#" fill-opacity="0.6""#
             } else {
                 ""
             };
+            let mid = w * (i as f64 + 0.5);
             let _ = write!(
                 svg,
-                r#"<rect x="{:.1}" y="{:.1}" width="{bw:.1}" height="{h:.1}" fill="{BLUE_TINT}"{fade}/>"#,
-                w * i as f64 + (w - bw) / 2.0,
-                1000.0 - h
+                r#"<rect x="{:.1}" y="{:.1}" width="{bw:.1}" height="{h:.1}" fill="{BLUE}"{fade}/><rect x="{:.1}" y="{:.1}" width="{bw:.1}" height="{rh:.1}" fill="{ORANGE}"{fade}/>"#,
+                mid - gap / 2.0 - bw,
+                1000.0 - h,
+                mid + gap / 2.0,
+                1000.0 - rh
             );
-            let yf = p.visitors as f64 / top * 100.0;
+            let yf = (p.visitors as f64 / top).max(p.revenue_usd / rtop) * 100.0;
             if few {
                 let _ = write!(
                     over,
-                    r#"<span class="val" style="left:{:.2}%;bottom:calc({yf:.2}% + 6px)">{}</span>"#,
-                    xf * 100.0,
+                    r#"<span class="val" style="left:{:.2}%;bottom:calc({:.2}% + 6px)">{}</span>"#,
+                    (mid - gap / 2.0 - bw / 2.0) / 10.0,
+                    p.visitors as f64 / top * 100.0,
                     group(p.visitors)
                 );
                 if let Some((_, pill)) = pills.iter().find(|(d, _)| *d == p.date) {
@@ -741,7 +753,7 @@ pub fn sparse(cur: &Series, since: Option<Date>, today: Date, pills: &[(Date, St
             }
             let rows = [
                 Row {
-                    swatch: swatch(BLUE_TINT, ""),
+                    swatch: swatch(BLUE, ""),
                     name: "Visitors".into(),
                     value: group(p.visitors),
                 },
@@ -775,16 +787,16 @@ pub fn sparse(cur: &Series, since: Option<Date>, today: Date, pills: &[(Date, St
     };
     let chart = frame(
         "sparse",
-        &format!("Visitors and payments per {}", unit(cur)),
+        &format!("Visitors and revenue per {}", unit(cur)),
         &axis(top, step, |t| group(t.round() as u64)),
-        "",
+        &axis(rtop, rstep, |t| Metric::Revenue.tick(t, rstep)),
         &svg,
         &(over + &cols),
         &xa,
     );
     let mut legend = format!(
-        r#"<div class="legend"><span>{}Visitors</span><span>{}Payment</span>"#,
-        swatch(BLUE_TINT, ""),
+        r#"<div class="legend"><span>{}Visitors, left axis</span><span>{}Revenue, right axis</span>"#,
+        swatch(BLUE, ""),
         swatch(ORANGE, "")
     );
     if pts.last().is_some_and(|p| p.date == today) {
@@ -807,6 +819,8 @@ mod tests {
             payments: (revenue > 0.0) as u64,
             customers: (revenue > 0.0) as u64,
             revenue_usd: revenue,
+            converted: (revenue > 0.0) as u64,
+            matched_revenue_usd: revenue,
             conversion: (visitors > 0).then(|| (revenue > 0.0) as u64 as f64 / visitors as f64),
             revenue_per_visitor: (visitors > 0).then(|| revenue / visitors as f64),
             by_channel: if revenue > 0.0 {
@@ -896,7 +910,7 @@ mod tests {
         let html = dual(&series(&days(7)));
         assert!(html.contains(r#"class="chart dual""#));
         assert!(html.contains(r#"<div class="ya r">"#));
-        assert_eq!(count(&html, BLUE_TINT), 7 + 7 + 1);
+        assert_eq!(count(&html, BLUE), 7 + 7 + 1, "bars, tooltips, legend");
     }
 
     #[test]
@@ -909,7 +923,14 @@ mod tests {
         let html = sparse(&series(&d), Some(d[2].date), today, &pills);
         assert!(html.contains("Not tracking yet") && html.contains("Script added Sep 17"));
         assert!(html.contains("First visit"));
-        assert_eq!(count(&html, &format!(r#"fill="{BLUE_TINT}""#)), 5);
+        assert_eq!(count(&html, &format!(r#"fill="{BLUE}""#)), 5);
+        assert_eq!(
+            count(&html, &format!(r#"fill="{ORANGE}""#)),
+            5,
+            "revenue bars"
+        );
+        assert!(html.contains(r#"<div class="ya r">"#), "revenue axis");
+        assert!(html.contains("Revenue, right axis") && !html.contains("Payment<"));
         assert!(html.contains(">Today<") && html.contains("Today is still counting"));
         assert_eq!(count(&html, r#"class="pay""#), 1);
     }

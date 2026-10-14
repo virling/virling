@@ -46,7 +46,14 @@ pub struct Totals {
     /// Distinct customer_id, else visitor_id, else payment, among non-failed payments.
     pub customers: u64,
     pub revenue_usd: f64,
+    /// Customers whose payment matches a visitor tracked in the period.
+    pub converted: u64,
+    /// Payments, and their net USD, whose visitor was tracked in the period.
+    pub matched_payments: u64,
+    pub matched_revenue_usd: f64,
+    /// Matched revenue per visitor; None until a payment is matched.
     pub revenue_per_visitor: Option<f64>,
+    /// Converted customers per visitor; None until a payment is matched.
     pub conversion: Option<f64>,
 }
 
@@ -63,6 +70,8 @@ pub struct DayPoint {
     pub payments: u64,
     pub customers: u64,
     pub revenue_usd: f64,
+    pub converted: u64,
+    pub matched_revenue_usd: f64,
     pub conversion: Option<f64>,
     pub revenue_per_visitor: Option<f64>,
     /// Revenue by credited channel, largest first; None is Unattributed.
@@ -260,27 +269,34 @@ fn ratio(n: f64, d: u64) -> Option<f64> {
 
 fn totals(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<Totals> {
     let sql = format!(
-        "WITH {BOUNDS}
+        "WITH {BOUNDS},
+        tracked AS (
+            SELECT DISTINCT visitor_id FROM events, bounds
+            WHERE site_id = $site AND ts >= lo AND ts < hi
+        )
         SELECT
-            (SELECT count(DISTINCT visitor_id) FROM events, bounds
-             WHERE site_id = $site AND ts >= lo AND ts < hi),
+            (SELECT count(*) FROM tracked),
             (SELECT count(DISTINCT session_id) FROM events, bounds
              WHERE site_id = $site AND ts >= lo AND ts < hi),
             count(*),
             count(DISTINCT {CUSTOMER}),
             coalesce(sum({NET_USD}), 0),
-            count(DISTINCT {CUSTOMER}) FILTER (WHERE p.visitor_id IN (
-                SELECT visitor_id FROM events, bounds WHERE site_id = $site AND ts >= lo AND ts < hi))
+            count(DISTINCT {CUSTOMER}) FILTER (WHERE p.visitor_id IN (SELECT visitor_id FROM tracked)),
+            count(*) FILTER (WHERE p.visitor_id IN (SELECT visitor_id FROM tracked)),
+            coalesce(sum({NET_USD}) FILTER (WHERE p.visitor_id IN (SELECT visitor_id FROM tracked)), 0)
         FROM payments p, bounds
         WHERE p.site_id = $site AND p.ts >= lo AND p.ts < hi AND p.status <> 'failed'"
     );
-    let (visitors, sessions, payments, customers, revenue_usd, converted): (
+    #[allow(clippy::type_complexity)]
+    let (visitors, sessions, payments, customers, revenue_usd, converted, matched, matched_usd): (
         i64,
         i64,
         i64,
         i64,
         f64,
         i64,
+        i64,
+        f64,
     ) = conn.query_row(
         &sql,
         named_params! {
@@ -297,18 +313,24 @@ fn totals(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<T
                 r.get(3)?,
                 r.get(4)?,
                 r.get(5)?,
+                r.get(6)?,
+                r.get(7)?,
             ))
         },
     )?;
     let visitors = visitors as u64;
+    let some = matched > 0;
     Ok(Totals {
         visitors,
         sessions: sessions as u64,
         payments: payments as u64,
         customers: customers as u64,
         revenue_usd,
-        revenue_per_visitor: ratio(revenue_usd, visitors),
-        conversion: ratio(converted as f64, visitors),
+        converted: converted as u64,
+        matched_payments: matched as u64,
+        matched_revenue_usd: matched_usd,
+        revenue_per_visitor: ratio(matched_usd, visitors).filter(|_| some),
+        conversion: ratio(converted as f64, visitors).filter(|_| some),
     })
 }
 
@@ -341,14 +363,19 @@ pub(crate) fn timeseries(
         r AS (
             SELECT CAST(timezone($tz, p.ts) AS DATE) AS day, count(*) AS n,
                 count(DISTINCT {CUSTOMER}) AS customers, coalesce(sum({NET_USD}), 0) AS rev,
-                count(DISTINCT {CUSTOMER}) FILTER (WHERE EXISTS (
+                count(DISTINCT {CUSTOMER}) FILTER (WHERE matched) AS converted,
+                coalesce(sum({NET_USD}) FILTER (WHERE matched), 0) AS matched_rev
+            FROM (
+                SELECT p.*, EXISTS (
                     SELECT 1 FROM events e WHERE e.site_id = $site AND e.visitor_id = p.visitor_id
-                    AND CAST(timezone($tz, e.ts) AS DATE) = CAST(timezone($tz, p.ts) AS DATE))) AS converted
-            FROM payments p, bounds
+                    AND CAST(timezone($tz, e.ts) AS DATE) = CAST(timezone($tz, p.ts) AS DATE)) AS matched
+                FROM payments p WHERE p.site_id = $site
+            ) p, bounds
             WHERE p.site_id = $site AND p.ts >= lo AND p.ts < hi AND p.status <> 'failed' GROUP BY 1
         )
         SELECT strftime(d.day, '%Y-%m-%d'), coalesce(v.n, 0), coalesce(r.n, 0),
-            coalesce(r.customers, 0), coalesce(r.rev, 0), coalesce(r.converted, 0)
+            coalesce(r.customers, 0), coalesce(r.rev, 0), coalesce(r.converted, 0),
+            coalesce(r.matched_rev, 0)
         FROM days d LEFT JOIN v USING (day) LEFT JOIN r USING (day)
         ORDER BY d.day"
     );
@@ -367,12 +394,13 @@ pub(crate) fn timeseries(
             r.get::<_, i64>(3)?,
             r.get::<_, f64>(4)?,
             r.get::<_, i64>(5)?,
+            r.get::<_, f64>(6)?,
         ))
     })?;
     let ymd = format_description!("[year]-[month]-[day]");
     let mut out = Vec::new();
     for row in rows {
-        let (day, visitors, payments, customers, revenue_usd, converted) = row?;
+        let (day, visitors, payments, customers, revenue_usd, converted, matched_usd) = row?;
         let visitors = visitors as u64;
         out.push(DayPoint {
             date: Date::parse(&day, ymd)?,
@@ -380,8 +408,10 @@ pub(crate) fn timeseries(
             payments: payments as u64,
             customers: customers as u64,
             revenue_usd,
+            converted: converted as u64,
+            matched_revenue_usd: matched_usd,
             conversion: ratio(converted as f64, visitors),
-            revenue_per_visitor: ratio(revenue_usd, visitors),
+            revenue_per_visitor: ratio(matched_usd, visitors),
             by_channel: Vec::new(),
         });
     }
@@ -1265,7 +1295,10 @@ mod tests {
         assert_eq!(split, day.revenue_usd);
         assert_eq!((day.visitors, day.customers), (2, 2));
         assert_eq!(day.conversion, Some(0.5));
-        assert_eq!(day.revenue_per_visitor, Some(100.0));
+        assert_eq!(day.revenue_per_visitor, Some(50.0), "matched revenue only");
+        let cur = &r.overview.current;
+        assert_eq!((cur.converted, cur.matched_payments), (1, 1));
+        assert_eq!(cur.revenue_per_visitor, Some(100.0 / 3.0));
         assert_eq!(r.channels[0].label, "Social");
         assert_eq!(r.referrers[0].label, "news.ycombinator.com");
         assert!(r.landing_pages.iter().any(|p| p.label == "/a"));

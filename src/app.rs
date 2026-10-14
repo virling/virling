@@ -140,6 +140,10 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/setup/checkout",
                 get(onboarding::checkout_step),
             )
+            .route(
+                "/app/{domain}/setup/dismiss",
+                post(dashboard::dismiss_setup),
+            )
             .route("/app/{domain}", get(dashboard::dashboard))
             .route("/app/{domain}/payments", get(dashboard::payments))
             .route(

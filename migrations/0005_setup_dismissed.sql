@@ -1,0 +1,1 @@
+ALTER TABLE sites ADD COLUMN setup_dismissed INTEGER NOT NULL DEFAULT 0;

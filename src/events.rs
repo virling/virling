@@ -61,6 +61,8 @@ pub trait EventStore: Send + Sync {
     #[cfg(test)]
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64>;
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>>;
+    /// When the site's first event arrived.
+    fn first_event(&self, site_id: &str) -> anyhow::Result<Option<OffsetDateTime>>;
     /// Distinct visitors seen in the last five minutes.
     fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64>;
     /// Current UTC offset of IANA zone `tz`.
@@ -321,6 +323,16 @@ impl EventStore for DuckStore {
             })
         })?;
         Ok(rows.next().transpose()?)
+    }
+
+    fn first_event(&self, site_id: &str) -> anyhow::Result<Option<OffsetDateTime>> {
+        let conn = self.conn.lock().unwrap();
+        let us: Option<i64> = conn.query_row(
+            "SELECT epoch_us(min(ts)) FROM events WHERE site_id = ?",
+            params![site_id],
+            |r| r.get(0),
+        )?;
+        Ok(us.map(stats::from_micros))
     }
 
     fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64> {
