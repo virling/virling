@@ -1,0 +1,54 @@
+# Add the script
+
+One tag, under 1 KB gzipped. It records pageviews, referrers, UTM tags, route changes in single-page apps and the goals you send.
+
+```html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+Replace `stats.example.com` with the public address of your Virling server, the same value as `VIRLING_BASE_URL`. Replace `yourdomain.com` with the domain you added with `add-site` or in the app. The app's setup screen and site settings show the exact tag for each site.
+
+## Where it goes
+
+Put it in the `<head>` of every page, before `</head>`. With `defer` it downloads in parallel and runs after the page is parsed, so it never blocks rendering. See [Framework guides](frameworks.md) for Next.js, Astro, WordPress, Framer and Webflow.
+
+`data-site` must match the domain exactly as it was added, without `www.` and without a path. Events from a page are kept when the page's host is that domain or one of its subdomains: with `data-site="example.com"`, pages on `www.example.com` and `app.example.com` count too.
+
+## What it sends
+
+On load, and on each route change, the script sends one pageview to `/api/event` on the host it was loaded from:
+
+| Field | Value |
+| --- | --- |
+| Page URL | `location.href`. UTM tags are read from its query string. The stored path drops the query. |
+| Referrer | `document.referrer` on the first event of the page load. Later route changes send none. |
+| Site | The `data-site` value. |
+| Visitor ID | The `virling_vid` first-party cookie, unless cookieless. |
+| Screen width | `screen.width` in CSS pixels, used for Desktop, Tablet or Mobile. |
+
+Each event is sent immediately, with `navigator.sendBeacon` when the browser has it and `fetch` with `keepalive` otherwise. Nothing is batched or held back, so an event still arrives when the visitor leaves right after.
+
+The server adds the country from a proxy header and the browser name from the user agent. See [Event API](../reference/event-api.md) for the full format.
+
+## UTM tags and ref
+
+These query parameters on the landing URL are stored with the pageview: `utm_source`, `utm_medium`, `utm_campaign`, `utm_content` and `utm_term`. When `utm_source` is missing, `ref` is used instead, so `?ref=producthunt` works. Each value is trimmed and cut to 200 characters. They feed the [channel rules](../attribution/channels.md).
+
+## Visitor ID
+
+On the first visit the script creates a random ID such as `vlx3k2a9b7f1c0d4e8` and stores it in the `virling_vid` cookie for one year, with `SameSite=Lax`, and `Secure` on HTTPS. It is first-party: it is set on your domain, not on the Virling server's. This ID is what links a payment back to the visit. See [Link checkout to visits](../payments/checkout.md).
+
+With [cookieless mode](cookieless.md) no cookie is set.
+
+## When it does not track
+
+- On `localhost`, `127.*` and `[::1]`, unless the tag has `data-dev`.
+- When the tag has `data-respect-gpc` and the browser sends Global Privacy Control.
+- When `data-site` is missing.
+
+On the server, events from bots, from pages on another host and for sites that do not exist are dropped. See [Privacy and consent](privacy.md).
+
+## Check that it works
+
+Open your site in another tab. The setup screen in the app updates on its own when the first pageview arrives. You can also watch the browser's network panel for a `POST` to `/api/event` that returns `202`.

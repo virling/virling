@@ -1,0 +1,21 @@
+# Outbound connections
+
+Every host a Virling server connects to. Your visitors' browsers only connect to your Virling server.
+
+| Host | When | Why |
+| --- | --- | --- |
+| `api.stripe.com` | With Stripe connected, every minute | Read charges, events and Checkout Sessions |
+| `live.dodopayments.com`, `test.dodopayments.com` | With Dodo Payments connected, every minute | Read payments, refunds and subscriptions. Both are tried when connecting to detect the key's mode. |
+| `api.polar.sh`, `sandbox-api.polar.sh` | With Polar connected, every minute | Read orders and refunds. Both are tried when connecting. |
+| `api.lemonsqueezy.com` | With LemonSqueezy connected, every minute | Read orders and subscription invoices |
+| `api.frankfurter.dev` | When converting a non-USD payment, at most every 12 hours | ECB exchange rates. See [Currencies](../attribution/currencies.md). |
+| Your SMTP server | When someone requests a sign-in link | Send the email, if `VIRLING_SMTP_URL` is set |
+| `extensions.duckdb.org` | First start | DuckDB downloads its ICU extension into `~/.duckdb/extensions`. Later starts use the cached copy. |
+
+Payment sync only runs with `--app`. A server started without it only makes the first-start DuckDB download.
+
+Requests use the user agent `virling/<version>` and a 30-second timeout. There is no telemetry, no update check and no license check.
+
+## Firewalls
+
+To run with egress filtering, allow HTTPS to the hosts of the providers you connect, `api.frankfurter.dev`, your SMTP host and port, and `extensions.duckdb.org` for the first start.
