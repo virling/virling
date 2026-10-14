@@ -1,5 +1,5 @@
-//! Pure first-party analytics for virling.com: event validation and conversion kinds.
-use serde::Deserialize;
+//! Pure first-party analytics for virling.com: event validation, conversion kinds and stats SQL.
+use serde::{Deserialize, Serialize};
 use worker::Url;
 
 use crate::channel;
@@ -7,6 +7,8 @@ use crate::ua::{browser, device};
 
 pub const SITE: &str = "virling.com";
 pub const MAX_BATCH: usize = 50;
+pub const DAY_MS: i64 = 24 * 60 * 60 * 1000;
+pub const ATTRIBUTION_MS: i64 = 90 * DAY_MS;
 
 #[derive(Debug, Deserialize)]
 pub struct Incoming {
@@ -132,6 +134,85 @@ pub fn waitlist_kind(wedge: &str) -> Option<&'static str> {
     }
 }
 
+/// Stats queries. ?1 is the window start, ?2 the attribution lookback start, both unix ms.
+pub const STATS_TOTALS: &str = "SELECT COUNT(DISTINCT visitor_id) AS visitors, COUNT(*) AS pageviews FROM events WHERE kind = 'pageview' AND ts >= ?1";
+
+pub const STATS_SESSIONS: &str = "WITH e AS (SELECT ts, LAG(ts) OVER (PARTITION BY visitor_id ORDER BY ts, id) AS prev FROM events WHERE ts >= ?1) SELECT COUNT(*) AS sessions FROM e WHERE prev IS NULL OR ts - prev > 1800000";
+
+pub const STATS_CHANNELS: &str = "WITH first AS (SELECT channel, ROW_NUMBER() OVER (PARTITION BY visitor_id ORDER BY ts, id) AS rn FROM events WHERE ts >= ?1) SELECT channel AS label, COUNT(*) AS visitors FROM first WHERE rn = 1 GROUP BY channel ORDER BY visitors DESC, label";
+
+pub const STATS_CONVERSIONS: &str = "SELECT kind, COUNT(*) AS count, COALESCE(SUM(amount_cents), 0) AS amount_cents FROM conversions WHERE ts >= ?1 GROUP BY kind ORDER BY kind";
+
+pub const STATS_CONVERSIONS_BY_CHANNEL: &str = "SELECT COALESCE((SELECT e.channel FROM events e WHERE e.visitor_id = c.visitor_id AND e.channel <> 'Direct' AND e.ts <= c.ts AND e.ts >= c.ts - 7776000000 ORDER BY e.ts DESC, e.id DESC LIMIT 1), 'Direct') AS label, c.kind, COUNT(*) AS count FROM conversions c WHERE c.ts >= ?1 GROUP BY label, c.kind ORDER BY label, c.kind";
+
+pub const STATS_LANDING: &str = "WITH first AS (SELECT path, ROW_NUMBER() OVER (PARTITION BY visitor_id ORDER BY ts, id) AS rn FROM events WHERE kind = 'pageview' AND ts >= ?1) SELECT path AS label, COUNT(*) AS visitors FROM first WHERE rn = 1 GROUP BY path ORDER BY visitors DESC, label";
+
+pub const STATS_CONVERSIONS_BY_LANDING: &str = "WITH first AS (SELECT visitor_id, path, ROW_NUMBER() OVER (PARTITION BY visitor_id ORDER BY ts, id) AS rn FROM events WHERE kind = 'pageview' AND ts >= ?2) SELECT COALESCE(f.path, '(unknown)') AS label, c.kind, COUNT(*) AS count FROM conversions c LEFT JOIN first f ON f.visitor_id = c.visitor_id AND f.rn = 1 WHERE c.ts >= ?1 GROUP BY label, c.kind ORDER BY label, c.kind";
+
+#[derive(Deserialize)]
+pub struct LabelCount {
+    pub label: String,
+    pub visitors: i64,
+}
+
+#[derive(Deserialize)]
+pub struct LabelConversion {
+    pub label: String,
+    pub kind: String,
+    pub count: i64,
+}
+
+#[derive(Debug, Default, PartialEq, Eq, Serialize)]
+pub struct StatsRow {
+    pub label: String,
+    pub visitors: i64,
+    pub waitlist_selfhost: i64,
+    pub waitlist_agency: i64,
+    pub preorder: i64,
+}
+
+/// Joins visitor counts and conversion counts on label; labels with only conversions are kept.
+pub fn pivot(visitors: Vec<LabelCount>, conversions: Vec<LabelConversion>) -> Vec<StatsRow> {
+    let mut rows: Vec<StatsRow> = visitors
+        .into_iter()
+        .map(|v| StatsRow {
+            label: v.label,
+            visitors: v.visitors,
+            ..StatsRow::default()
+        })
+        .collect();
+    for c in conversions {
+        let i = match rows.iter().position(|r| r.label == c.label) {
+            Some(i) => i,
+            None => {
+                rows.push(StatsRow {
+                    label: c.label,
+                    ..StatsRow::default()
+                });
+                rows.len() - 1
+            }
+        };
+        match c.kind.as_str() {
+            "waitlist_selfhost" => rows[i].waitlist_selfhost += c.count,
+            "waitlist_agency" => rows[i].waitlist_agency += c.count,
+            "preorder" => rows[i].preorder += c.count,
+            _ => {}
+        }
+    }
+    rows
+}
+
+/// Constant-time token comparison for the stats endpoint.
+pub fn token_matches(given: &str, expected: &str) -> bool {
+    !expected.is_empty()
+        && given.len() == expected.len()
+        && given
+            .bytes()
+            .zip(expected.bytes())
+            .fold(0u8, |acc, (a, b)| acc | (a ^ b))
+            == 0
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -246,5 +327,71 @@ mod tests {
         assert_eq!(waitlist_kind("selfhost"), Some("waitlist_selfhost"));
         assert_eq!(waitlist_kind("agency"), Some("waitlist_agency"));
         assert_eq!(waitlist_kind("other"), None);
+    }
+
+    #[test]
+    fn attribution_window_constants_match_sql() {
+        assert!(STATS_SESSIONS.contains(&(30 * 60 * 1000).to_string()));
+        assert!(STATS_CONVERSIONS_BY_CHANNEL.contains(&ATTRIBUTION_MS.to_string()));
+    }
+
+    #[test]
+    fn pivot_merges_visitors_and_conversions() {
+        let visitors = vec![
+            LabelCount {
+                label: "Social".into(),
+                visitors: 10,
+            },
+            LabelCount {
+                label: "Direct".into(),
+                visitors: 4,
+            },
+        ];
+        let conversions = vec![
+            LabelConversion {
+                label: "Social".into(),
+                kind: "waitlist_agency".into(),
+                count: 2,
+            },
+            LabelConversion {
+                label: "Social".into(),
+                kind: "preorder".into(),
+                count: 1,
+            },
+            LabelConversion {
+                label: "Email".into(),
+                kind: "waitlist_selfhost".into(),
+                count: 3,
+            },
+        ];
+        let rows = pivot(visitors, conversions);
+        assert_eq!(rows.len(), 3);
+        assert_eq!(
+            rows[0],
+            StatsRow {
+                label: "Social".into(),
+                visitors: 10,
+                waitlist_selfhost: 0,
+                waitlist_agency: 2,
+                preorder: 1
+            }
+        );
+        assert_eq!(rows[1].visitors, 4);
+        assert_eq!(
+            (
+                rows[2].label.as_str(),
+                rows[2].visitors,
+                rows[2].waitlist_selfhost
+            ),
+            ("Email", 0, 3)
+        );
+    }
+
+    #[test]
+    fn token_check() {
+        assert!(token_matches("abc123", "abc123"));
+        assert!(!token_matches("abc124", "abc123"));
+        assert!(!token_matches("abc", "abc123"));
+        assert!(!token_matches("", ""));
     }
 }

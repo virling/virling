@@ -1,0 +1,61 @@
+{% macro table(title, note, rows) %}
+  <section class="panel">
+    <h2>{{ title }}</h2>
+    <p>{{ note }}</p>
+    <table>
+      <thead><tr><th></th><th>Visitors</th><th>Self-host waitlist</th><th>Agency waitlist</th><th>Pre-orders</th></tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr><td>{{ r.label }}</td><td>{{ r.visitors }}</td><td>{{ r.waitlist_selfhost }}</td><td>{{ r.waitlist_agency }}</td><td>{{ r.preorder }}</td></tr>
+      {% else %}
+        <tr><td colspan="5" class="muted">No data yet</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endmacro -%}
+<!doctype html>
+<html lang="en">
+<head>
+{% include "_head.html" %}
+<meta name="robots" content="noindex">
+<title>Stats · Virling</title>
+<style>
+.stats { max-width: 880px; margin: 0 auto; padding: 28px 16px 64px; display: flex; flex-direction: column; gap: 20px; }
+.stats header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.kpi { background: var(--paper); border: 1px solid var(--rule); border-radius: 14px; padding: 16px; }
+.kpi span { font-size: 13px; color: var(--ink-3); }
+.kpi b { display: block; font: 600 28px/1.2 var(--mono); letter-spacing: -0.02em; }
+.kpi.revenue b { color: var(--revenue-text); }
+.panel { overflow-x: auto; }
+.panel h2 { font-size: 17px; }
+.panel p { margin: -10px 0 0; font-size: 13px; color: var(--ink-3); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 9px 10px; border-bottom: 1px solid var(--rule-2); text-align: right; white-space: nowrap; }
+th { font-size: 12px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
+th:first-child, td:first-child { text-align: left; }
+td { font-family: var(--mono); }
+td:first-child { font-family: var(--sans); font-weight: 500; }
+tr:last-child td { border-bottom: 0; }
+</style>
+</head>
+<body>
+<main class="stats">
+  <header>
+    <a class="brand" href="/">{% include "_logo.html" %}<b>virling</b></a>
+    <span class="muted mono">virling.com · last {{ days }} days</span>
+  </header>
+  <section class="kpis">
+    <div class="kpi"><span>Visitors</span><b>{{ visitors }}</b></div>
+    <div class="kpi"><span>Sessions</span><b>{{ sessions }}</b></div>
+    <div class="kpi"><span>Pageviews</span><b>{{ pageviews }}</b></div>
+    {% for c in conversions %}
+    <div class="kpi{% if c.amount_cents > 0 %} revenue{% endif %}"><span>{{ c.kind }}</span><b>{{ c.count }}{% if c.amount_cents > 0 %} · {{ c.dollars() }}{% endif %}</b></div>
+    {% endfor %}
+  </section>
+  {% call table("Channels", "Visitors by first-touch channel. Conversions by last non-direct channel within 90 days.", channels) %}{% endcall %}
+  {% call table("Landing pages", "First page each visitor saw.", landing_pages) %}{% endcall %}
+</main>
+</body>
+</html>
