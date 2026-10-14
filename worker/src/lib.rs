@@ -5,6 +5,8 @@ use serde_json::json;
 use worker::wasm_bindgen::JsValue;
 use worker::*;
 
+// Shared with the server, which also uses source_name.
+#[allow(dead_code)]
 #[path = "../../src/channel.rs"]
 mod channel;
 #[path = "../../src/ua.rs"]
