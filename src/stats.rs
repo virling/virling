@@ -3,7 +3,7 @@ use serde::Serialize;
 use time::macros::format_description;
 use time::{Date, Duration, OffsetDateTime};
 
-use crate::channel::source_name;
+use crate::channel::{source_domain, source_name};
 
 /// Net USD of a payment `p`; NULL when it has no USD conversion, so it counts as a payment but not revenue.
 const NET_USD: &str = "p.amount_usd * (p.amount - p.refunded) / nullif(p.amount, 0)";
@@ -471,7 +471,7 @@ pub(crate) fn breakdown(
     for row in rows {
         let (unattributed, mut key, visitors, payments, revenue_usd) = row?;
         if dimension == Dimension::Referrer {
-            key = key.as_deref().map(source_name);
+            key = key.as_deref().map(source_domain);
         }
         let label = match (&key, unattributed) {
             (_, true) => "Unattributed".to_string(),
@@ -1165,7 +1165,25 @@ mod tests {
         let referrers = store
             .breakdown("s", &period(), Dimension::Referrer, Sort::Visitors)
             .unwrap();
-        assert_eq!(referrers[0].label, "Hacker News");
+        assert_eq!(referrers[0].label, "news.ycombinator.com");
+    }
+
+    #[test]
+    fn referrer_aliases_share_one_domain_row() {
+        let (_dir, store) = store();
+        let mut events = Vec::new();
+        for (i, host) in ["t.co", "twitter.com", "www.x.com"].iter().enumerate() {
+            let mut e = visit(&format!("v{i}"), &format!("s{i}"), T, "Social");
+            e.referrer_host = Some((*host).to_string());
+            events.push(e);
+        }
+        store.insert_events(&events).unwrap();
+        let referrers = store
+            .breakdown("s", &period(), Dimension::Referrer, Sort::Visitors)
+            .unwrap();
+        assert_eq!(referrers.len(), 1);
+        assert_eq!(referrers[0].label, "x.com");
+        assert_eq!(referrers[0].visitors, 3);
     }
 
     #[test]
@@ -1249,7 +1267,7 @@ mod tests {
         assert_eq!(day.conversion, Some(0.5));
         assert_eq!(day.revenue_per_visitor, Some(100.0));
         assert_eq!(r.channels[0].label, "Social");
-        assert_eq!(r.referrers[0].label, "Hacker News");
+        assert_eq!(r.referrers[0].label, "news.ycombinator.com");
         assert!(r.landing_pages.iter().any(|p| p.label == "/a"));
         assert_eq!(r.countries[0].key.as_deref(), Some("DE"));
         assert!(
