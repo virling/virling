@@ -3,8 +3,8 @@
 set -e
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 rm -rf public && mkdir -p public/assets
-sed '/src="\/v.js"/d' ../assets/selfhost.html > public/index.html
-sed '/src="\/v.js"/d' ../assets/agency.html > public/agency.html
+cp ../assets/selfhost.html public/index.html
+cp ../assets/agency.html public/agency.html
 cp ../assets/site.css ../assets/site.js ../assets/app.css ../assets/email-logo.png public/assets/
-cp ../assets/favicon.svg public/
+cp ../assets/favicon.svg ../assets/v.js public/
 worker-build --release
