@@ -1,0 +1,45 @@
+name: Uptime
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+concurrency:
+  group: uptime
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check virling.com
+        id: check
+        run: |
+          failed=""
+          for url in https://virling.com/ https://virling.com/agency https://virling.com/api/preorder/status; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 --retry 2 --retry-delay 5 "$url" || echo 000)
+            echo "$url $code"
+            if [ "$code" != "200" ]; then failed="$failed\n- $url returned $code"; fi
+          done
+          echo "failed<<EOF" >> "$GITHUB_OUTPUT"
+          printf "%b\n" "$failed" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Open or close the downtime issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FAILED: ${{ steps.check.outputs.failed }}
+        run: |
+          open=$(gh issue list -R "$GITHUB_REPOSITORY" --label downtime --state open --json number --jq '.[0].number')
+          if [ -n "$(echo "$FAILED" | tr -d '[:space:]')" ]; then
+            if [ -z "$open" ]; then
+              gh issue create -R "$GITHUB_REPOSITORY" --label downtime --title "virling.com is down" \
+                --body "$(printf 'Uptime check failed at %s UTC:\n%s\n\nRun: %s/%s/actions/runs/%s' "$(date -u '+%Y-%m-%d %H:%M')" "$FAILED" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")"
+            fi
+            exit 1
+          elif [ -n "$open" ]; then
+            gh issue close "$open" -R "$GITHUB_REPOSITORY" --comment "Back up at $(date -u '+%Y-%m-%d %H:%M') UTC."
+          fi
