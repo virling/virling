@@ -53,6 +53,7 @@
         <span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>
         <span><b>You're on the list.</b> <span class="muted">We'll reach out personally to set up your first client.</span></span>
       </div>
+      <a class="sublink" href="#pricing">Or pre-order at the founding price, $47/month</a>
     </div>
 
     <div class="report card lifted" id="report">
@@ -81,22 +82,55 @@
     <div><span class="num">03</span><h3>Every client in one view</h3><p>See revenue per client side by side, and spot the account that needs attention before they do.</p></div>
   </section>
 
-  <section class="block cols" id="pricing" style="align-items:center">
-    <div class="text">
-      <h2>One price for 25 clients.</h2>
-      <p class="body">Less than one hour of billable time a month. The first 50 agencies lock in the founding price for life.</p>
+  <section class="block" id="pricing">
+    <div class="text preorder-head">
+      <h2>Lock in the founding price.</h2>
+      <p class="body">The first 50 agencies get the Agency plan for $47 a month, for life. Regular price $79.</p>
     </div>
-    <div class="price-card">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px"><b style="font-size:18px">Agency</b><span class="badge">Founding price, 40% off</span></div>
-      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span class="amount">$47</span><span style="color:#a3a8b1">/month, for life</span><s>$79</s></div>
-      <ul>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6A3D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>25 client workspaces</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6A3D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>2M events a month</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6A3D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>White-label weekly reports, PDF and email</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6A3D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>14-day trial, no card</li>
-      </ul>
-      <a class="btn lg light" href="https://checkout.dodopayments.com/buy/pdt_0Npg3jPouv8ghbW4s5Sxd?quantity=1&amp;redirect_url=https%3A%2F%2Fvirling.com%2Fagency">Pre-order for $47/month</a>
-      <p style="margin:0;font-size:13px;color:#a3a8b1">Billed monthly from today. Access as soon as the hosted version opens; cancel or get a refund any time before then.</p>
+    <div class="preorder">
+      <div class="card plan">
+        <div class="plan-top">
+          <div class="plan-name"><b>Agency, founding price</b><span>25 client workspaces &middot; 2M events &middot; white-label reports</span></div>
+          <div class="plan-price"><span class="amount">$47</span><span class="per">/mo</span><s>$79</s></div>
+        </div>
+        <div class="plan-steps">
+          <p class="eyebrow">What happens when you pre-order</p>
+          <ol>
+            <li><span class="num">01</span><span>You're charged $47 today, then monthly.</span></li>
+            <li><span class="num">02</span><span>We set up your first client with you when the hosted version opens.</span></li>
+            <li><span class="num">03</span><span>Cancel, or get a full refund, any time before launch. One email does it.</span></li>
+          </ol>
+        </div>
+        <div class="plan-foot" data-spots hidden><span class="dot"></span><span><b></b> of 50 founding spots left</span></div>
+      </div>
+
+      <div class="card lifted checkout" data-preorder data-state="idle">
+        <div class="card-head">
+          <b>Pre-order</b>
+          <span class="secure"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Secure payment by Dodo Payments</span>
+        </div>
+        <div class="checkout-body">
+          <div class="co-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading secure checkout</div>
+          <div id="dodo-inline-checkout"></div>
+          <div class="co-paid" tabindex="-1">
+            <span class="check"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>
+            <h3 data-paid-title>You're a founding agency.</h3>
+            <p>$47 a month is locked in for life. A welcome email from Rahul is on its way<span data-paid-email></span>, with what happens next.</p>
+            <div class="co-next">
+              <p><b>Next:</b> reply to that email with the clients you want to set up first.</p>
+              <p>Changed your mind? Reply "refund" any time before launch.</p>
+            </div>
+            <a class="btn" href="#join" data-back>Back to the page</a>
+          </div>
+          <div class="co-error">
+            <div class="alert" role="alert"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>Checkout couldn't load. Nothing was charged.</div>
+            <div class="co-actions">
+              <button class="btn" type="button" data-retry>Try again</button>
+              <a href="https://checkout.dodopayments.com/buy/pdt_0Npg3jPouv8ghbW4s5Sxd?quantity=1&amp;redirect_url=https%3A%2F%2Fvirling.com%2Fagency" target="_blank" rel="noopener">Open checkout in a new tab</a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 

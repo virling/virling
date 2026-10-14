@@ -88,3 +88,129 @@ for (const term of document.querySelectorAll("[data-tabs]")) {
     copy.textContent = "Copied";
   });
 }
+
+for (const card of document.querySelectorAll("[data-preorder]")) {
+  const SDK = "https://cdn.jsdelivr.net/npm/dodopayments-checkout@1.9.9/dist/index.js";
+  const spots = document.querySelector("[data-spots]");
+  const section = card.closest("section");
+  const setState = (state) => { card.dataset.state = state; };
+  let started = false;
+  let timer = null;
+
+  const status = async (subscription) => {
+    const res = await fetch("/api/preorder/status" + (subscription ? "?subscription_id=" + encodeURIComponent(subscription) : ""), { cache: "no-store" });
+    if (!res.ok) throw new Error("status " + res.status);
+    return res.json();
+  };
+  const showSpots = (body) => {
+    if (!spots || typeof body.spots_left !== "number") return;
+    spots.querySelector("b").textContent = body.spots_left;
+    spots.hidden = false;
+  };
+  const loadSdk = () => new Promise((resolve, reject) => {
+    if (window.DodoPaymentsCheckout) return resolve(window.DodoPaymentsCheckout.DodoPayments);
+    const s = document.createElement("script");
+    s.src = SDK;
+    s.onload = () => window.DodoPaymentsCheckout ? resolve(window.DodoPaymentsCheckout.DodoPayments) : reject(new Error("sdk"));
+    s.onerror = () => reject(new Error("sdk"));
+    document.head.appendChild(s);
+  });
+  const fail = () => {
+    clearTimeout(timer);
+    if (card.dataset.state !== "paid") setState("error");
+  };
+
+  const paid = async (subscription, email) => {
+    clearTimeout(timer);
+    setState("paid");
+    if (email) card.querySelector("[data-paid-email]").textContent = " to " + email;
+    window.virling && virling("goal", "preorder_agency");
+    const until = Date.now() + 20000;
+    while (subscription && Date.now() < until) {
+      try {
+        const body = await status(subscription);
+        showSpots(body);
+        if (body.number) {
+          card.querySelector("[data-paid-title]").textContent = "You're founding agency #" + body.number + ".";
+          return;
+        }
+      } catch {}
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  };
+  const handleReturn = (url) => {
+    const params = new URL(url, location.href).searchParams;
+    const state = params.get("status");
+    if (state && !["active", "succeeded"].includes(state)) return fail();
+    paid(params.get("subscription_id"), params.get("email"));
+  };
+
+  const start = async () => {
+    if (started) return;
+    started = true;
+    setState("loading");
+    timer = setTimeout(fail, 20000);
+    status().then(showSpots).catch(() => {});
+    try {
+      const [Dodo, res] = await Promise.all([
+        loadSdk(),
+        fetch("/api/preorder/session", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" }),
+      ]);
+      const body = await res.json();
+      if (!res.ok || !body.checkout_url) throw new Error(body.error || "session");
+      Dodo.Initialize({
+        mode: "live",
+        displayType: "inline",
+        onEvent: (event) => {
+          const type = event.event_type;
+          if (type === "checkout.form_ready" || type === "checkout.opened") {
+            clearTimeout(timer);
+            if (card.dataset.state === "loading") setState("checkout");
+          } else if (type === "checkout.error") {
+            if (card.dataset.state === "loading") fail();
+          } else if (type === "checkout.redirect_requested") {
+            const url = event.data?.message?.redirect_to || event.data?.redirect_to || event.data?.url || event.data?.message?.url;
+            if (!url) return;
+            if (new URL(url, location.href).origin === location.origin) handleReturn(url);
+            else location.href = url;
+          } else if (type === "checkout.status") {
+            const state = event.data?.message?.status || event.data?.status;
+            if (["succeeded", "active"].includes(state)) setTimeout(() => card.dataset.state === "paid" || paid(null, null), 4000);
+          }
+        },
+      });
+      Dodo.Checkout.open({
+        checkoutUrl: body.checkout_url,
+        elementId: "dodo-inline-checkout",
+        options: { payButtonText: "Pre-order for $47/month", fontSize: "md", fontWeight: "normal", manualRedirect: true },
+      });
+    } catch {
+      fail();
+    }
+  };
+
+  card.querySelector("[data-retry]").addEventListener("click", () => {
+    window.DodoPaymentsCheckout?.DodoPayments.Checkout.close();
+    started = false;
+    start();
+  });
+  card.querySelector("[data-back]").addEventListener("click", (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  const query = new URLSearchParams(location.search);
+  if (query.get("preorder") === "done" || query.get("subscription_id")) {
+    history.replaceState(null, "", location.pathname + "#pricing");
+    section.scrollIntoView();
+    handleReturn("?" + query.toString());
+  } else if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { observer.disconnect(); start(); }
+    }, { rootMargin: "600px 0px" });
+    observer.observe(section);
+    for (const link of document.querySelectorAll('a[href="#pricing"]')) link.addEventListener("click", start);
+  } else {
+    start();
+  }
+}

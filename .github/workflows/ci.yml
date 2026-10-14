@@ -50,3 +50,5 @@ jobs:
           workspaces: worker
       - run: cargo clippy --target wasm32-unknown-unknown -- -D warnings
         working-directory: worker
+      - run: cargo test
+        working-directory: worker
