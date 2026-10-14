@@ -143,8 +143,8 @@ a.more:hover svg { transform: translateX(2px); }
 .dg path { stroke-linecap: round; stroke-linejoin: round; }
 
 .note { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
-.sign { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 4px; }
-.sign .hand { font: 500 34px/1 var(--hand); color: var(--revenue); }
+.sign { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+.sign .hand { font: 500 34px/1 var(--hand); color: var(--revenue); margin-right: 4px; }
 .closer { padding: 72px 0; }
 .closer .wrap { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; }
 

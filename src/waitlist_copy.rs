@@ -28,7 +28,7 @@ pub const AGENCY: Copy = Copy {
     headline: "You\u{2019}re on the list. Let\u{2019}s set up your first client.",
     intro: "Thanks for joining. Virling sends each of your clients a weekly report, under your brand, showing which channels brought paying customers.",
     steps: [
-        "I\u{2019}ll reach out personally within a few days.",
+        "We\u{2019}ll reach out personally within a few days.",
         "We set up your first client together, about ten minutes.",
         "Your first branded report goes out the next Monday.",
     ],
@@ -45,7 +45,7 @@ pub struct ConfirmEmail<'a> {
 
 pub fn confirm_text(copy: &Copy, leave_link: &str) -> String {
     format!(
-        "{}\n\n{}\n\nWhat happens next\n01  {}\n02  {}\n03  {}\n\n{}\n\nOne question: {} Just hit reply. I read every answer.\n\nRahul\nBuilding Virling\n\nLeave the waitlist: {}\n",
+        "{}\n\n{}\n\nWhat happens next\n01  {}\n02  {}\n03  {}\n\n{}\n\nOne question: {} Just hit reply. We read every answer.\n\nDeven and Rahul\nBuilding Virling\n\nLeave the waitlist: {}\n",
         copy.headline,
         copy.intro,
         copy.steps[0],
