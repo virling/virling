@@ -2,8 +2,13 @@ use std::path::Path;
 use std::sync::Mutex;
 
 use duckdb::types::{TimeUnit, Value};
-use duckdb::{Connection, params};
-use time::OffsetDateTime;
+use duckdb::{Connection, named_params, params};
+use time::{OffsetDateTime, UtcOffset};
+
+use crate::stats::{
+    self, BreakdownRow, DayPoint, Dimension, Journey, Overview, PaymentFilter, PaymentPage, Period,
+    Sort,
+};
 
 #[derive(Debug, Clone)]
 pub struct Event {
@@ -26,13 +31,121 @@ pub struct Event {
     pub browser: String,
 }
 
+/// A payment as stored, one row per provider payment ID so re-syncs never double count.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Payment {
+    pub site_id: String,
+    pub provider: String,
+    pub provider_payment_id: String,
+    pub ts: OffsetDateTime,
+    /// Amount in the currency's minor unit (cents).
+    pub amount: i64,
+    pub currency: String,
+    pub amount_usd: Option<f64>,
+    /// Refunded and charged-back amount in minor units; net revenue is amount minus this.
+    pub refunded: i64,
+    /// paid, refunded, partially_refunded, failed
+    pub status: String,
+    pub visitor_id: Option<String>,
+    /// Provider's opaque customer ID, used so renewals inherit the first payment's source.
+    pub customer_id: Option<String>,
+    pub is_renewal: bool,
+}
+
 /// Storage for events and payments. DuckDB today; ClickHouse can implement this later.
 pub trait EventStore: Send + Sync {
     fn insert_events(&self, events: &[Event]) -> anyhow::Result<()>;
+    /// Inserts or replaces payments keyed by (site_id, provider, provider_payment_id).
+    fn upsert_payments(&self, payments: &[Payment]) -> anyhow::Result<()>;
     #[cfg(test)]
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64>;
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>>;
+    /// Distinct visitors seen in the last five minutes.
+    fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64>;
+    /// Current UTC offset of IANA zone `tz`.
+    fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset>;
+    /// Recomputes the credited touch of every payment of a site; unattributed payments get a row with a NULL session.
+    fn rebuild_attribution(
+        &self,
+        site_id: &str,
+        model: &str,
+        window_days: i64,
+    ) -> anyhow::Result<()>;
+    fn overview(&self, site_id: &str, period: &Period) -> anyhow::Result<Overview>;
+    fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<DayPoint>>;
+    fn breakdown(
+        &self,
+        site_id: &str,
+        period: &Period,
+        dimension: Dimension,
+        sort: Sort,
+    ) -> anyhow::Result<Vec<BreakdownRow>>;
+    fn payment_list(
+        &self,
+        site_id: &str,
+        period: &Period,
+        filter: PaymentFilter,
+        limit: u32,
+        offset: u32,
+    ) -> anyhow::Result<PaymentPage>;
+    /// The payer's sessions in the window before the payment plus the credited one, oldest first.
+    fn journey(
+        &self,
+        site_id: &str,
+        provider: &str,
+        provider_payment_id: &str,
+        window_days: i64,
+    ) -> anyhow::Result<Option<Journey>>;
 }
+
+/// Sessions as touches (first pageview's fields), then the credited session per payment, then renewal inheritance.
+const REBUILD_ATTRIBUTION: &str = "
+INSERT INTO attribution
+WITH touches AS (
+    SELECT visitor_id, session_id, ts, channel, referrer_host, utm_campaign, path, country, device
+    FROM events
+    WHERE site_id = $site AND kind = 'pageview'
+    QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1
+),
+pays AS (
+    SELECT provider, provider_payment_id, ts, visitor_id, customer_id, is_renewal
+    FROM payments WHERE site_id = $site
+),
+own AS (
+    SELECT p.provider, p.provider_payment_id, t.*
+    FROM pays p
+    JOIN touches t ON t.visitor_id = p.visitor_id
+        AND t.ts <= p.ts
+        AND epoch_us(t.ts) >= epoch_us(p.ts) - $window_days * 86400000000
+    QUALIFY row_number() OVER (
+        PARTITION BY p.provider, p.provider_payment_id
+        ORDER BY
+            CASE WHEN $model = 'first_touch' THEN epoch_us(t.ts)
+                 ELSE (t.channel = 'Direct')::BIGINT END,
+            CASE WHEN $model = 'first_touch' THEN 0 ELSE -epoch_us(t.ts) END,
+            t.session_id
+    ) = 1
+),
+firsts AS (
+    SELECT provider, customer_id, provider_payment_id
+    FROM pays
+    WHERE customer_id IS NOT NULL
+    QUALIFY row_number() OVER (PARTITION BY provider, customer_id ORDER BY ts, provider_payment_id) = 1
+)
+SELECT $site, p.provider, p.provider_payment_id, $model,
+    coalesce(inh.session_id, o.session_id),
+    coalesce(inh.channel, o.channel),
+    CASE WHEN inh.session_id IS NOT NULL THEN inh.referrer_host ELSE o.referrer_host END,
+    CASE WHEN inh.session_id IS NOT NULL THEN inh.utm_campaign ELSE o.utm_campaign END,
+    coalesce(inh.path, o.path),
+    CASE WHEN inh.session_id IS NOT NULL THEN inh.country ELSE o.country END,
+    coalesce(inh.device, o.device),
+    coalesce(inh.ts, o.ts)
+FROM pays p
+LEFT JOIN own o USING (provider, provider_payment_id)
+LEFT JOIN firsts f ON p.is_renewal AND f.provider = p.provider AND f.customer_id = p.customer_id
+LEFT JOIN own inh ON inh.provider = f.provider AND inh.provider_payment_id = f.provider_payment_id
+";
 
 #[derive(Debug, Clone)]
 pub struct LatestPageview {
@@ -49,8 +162,12 @@ pub struct DuckStore {
 impl DuckStore {
     pub fn open(path: &Path) -> anyhow::Result<Self> {
         let conn = Connection::open(path)?;
+        // Install and load ICU up front (autoloading it mid-query fails that query); keep naive timestamps in UTC.
         conn.execute_batch(
-            "CREATE TABLE IF NOT EXISTS events (
+            "INSTALL icu;
+            LOAD icu;
+            SET TimeZone = 'UTC';
+            CREATE TABLE IF NOT EXISTS events (
                 site_id VARCHAR NOT NULL,
                 ts TIMESTAMPTZ NOT NULL,
                 visitor_id VARCHAR NOT NULL,
@@ -68,6 +185,36 @@ impl DuckStore {
                 country VARCHAR,
                 device VARCHAR NOT NULL,
                 browser VARCHAR NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS payments (
+                site_id VARCHAR NOT NULL,
+                provider VARCHAR NOT NULL,
+                provider_payment_id VARCHAR NOT NULL,
+                ts TIMESTAMPTZ NOT NULL,
+                amount BIGINT NOT NULL,
+                currency VARCHAR NOT NULL,
+                amount_usd DOUBLE,
+                refunded BIGINT NOT NULL,
+                status VARCHAR NOT NULL,
+                visitor_id VARCHAR,
+                customer_id VARCHAR,
+                is_renewal BOOLEAN NOT NULL,
+                PRIMARY KEY (site_id, provider, provider_payment_id)
+            );
+            CREATE TABLE IF NOT EXISTS attribution (
+                site_id VARCHAR NOT NULL,
+                provider VARCHAR NOT NULL,
+                provider_payment_id VARCHAR NOT NULL,
+                model VARCHAR NOT NULL,
+                session_id VARCHAR,
+                channel VARCHAR,
+                referrer_host VARCHAR,
+                campaign VARCHAR,
+                landing_page VARCHAR,
+                country VARCHAR,
+                device VARCHAR,
+                touch_ts TIMESTAMPTZ,
+                PRIMARY KEY (site_id, provider, provider_payment_id)
             );",
         )?;
         Ok(Self {
@@ -123,6 +270,37 @@ impl EventStore for DuckStore {
         Ok(n as u64)
     }
 
+    fn upsert_payments(&self, payments: &[Payment]) -> anyhow::Result<()> {
+        let mut conn = self.conn.lock().unwrap();
+        let tx = conn.transaction()?;
+        {
+            let mut stmt = tx.prepare(
+                "INSERT OR REPLACE INTO payments VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            )?;
+            for p in payments {
+                stmt.execute(params![
+                    p.site_id,
+                    p.provider,
+                    p.provider_payment_id,
+                    Value::Timestamp(
+                        TimeUnit::Microsecond,
+                        (p.ts.unix_timestamp_nanos() / 1000) as i64
+                    ),
+                    p.amount,
+                    p.currency,
+                    p.amount_usd,
+                    p.refunded,
+                    p.status,
+                    p.visitor_id,
+                    p.customer_id,
+                    p.is_renewal,
+                ])?;
+            }
+        }
+        tx.commit()?;
+        Ok(())
+    }
+
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
@@ -137,6 +315,102 @@ impl EventStore for DuckStore {
             })
         })?;
         Ok(rows.next().transpose()?)
+    }
+
+    fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64> {
+        let conn = self.conn.lock().unwrap();
+        let n: i64 = conn.query_row(
+            "SELECT count(DISTINCT visitor_id) FROM events WHERE site_id = ? AND ts > now() - INTERVAL 5 MINUTE",
+            params![site_id],
+            |r| r.get(0),
+        )?;
+        Ok(n as u64)
+    }
+
+    fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset> {
+        let conn = self.conn.lock().unwrap();
+        let secs: i64 = conn.query_row(
+            "SELECT (epoch_us(timezone(?, now())) - epoch_us(timezone('UTC', now()))) // 1000000",
+            params![tz],
+            |r| r.get(0),
+        )?;
+        Ok(UtcOffset::from_whole_seconds(secs as i32)?)
+    }
+
+    fn rebuild_attribution(
+        &self,
+        site_id: &str,
+        model: &str,
+        window_days: i64,
+    ) -> anyhow::Result<()> {
+        anyhow::ensure!(
+            matches!(model, "last_non_direct" | "first_touch"),
+            "unknown attribution model {model}"
+        );
+        let mut conn = self.conn.lock().unwrap();
+        let tx = conn.transaction()?;
+        tx.execute(
+            "DELETE FROM attribution WHERE site_id = ?",
+            params![site_id],
+        )?;
+        tx.execute(
+            REBUILD_ATTRIBUTION,
+            named_params! { "site": site_id, "model": model, "window_days": window_days },
+        )?;
+        tx.commit()?;
+        Ok(())
+    }
+
+    fn overview(&self, site_id: &str, period: &Period) -> anyhow::Result<Overview> {
+        stats::overview(&self.conn.lock().unwrap(), site_id, period)
+    }
+
+    fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<DayPoint>> {
+        stats::timeseries(&self.conn.lock().unwrap(), site_id, period)
+    }
+
+    fn breakdown(
+        &self,
+        site_id: &str,
+        period: &Period,
+        dimension: Dimension,
+        sort: Sort,
+    ) -> anyhow::Result<Vec<BreakdownRow>> {
+        stats::breakdown(&self.conn.lock().unwrap(), site_id, period, dimension, sort)
+    }
+
+    fn payment_list(
+        &self,
+        site_id: &str,
+        period: &Period,
+        filter: PaymentFilter,
+        limit: u32,
+        offset: u32,
+    ) -> anyhow::Result<PaymentPage> {
+        stats::payment_list(
+            &self.conn.lock().unwrap(),
+            site_id,
+            period,
+            filter,
+            limit,
+            offset,
+        )
+    }
+
+    fn journey(
+        &self,
+        site_id: &str,
+        provider: &str,
+        provider_payment_id: &str,
+        window_days: i64,
+    ) -> anyhow::Result<Option<Journey>> {
+        stats::journey(
+            &self.conn.lock().unwrap(),
+            site_id,
+            provider,
+            provider_payment_id,
+            window_days,
+        )
     }
 }
 
@@ -175,5 +449,56 @@ impl DuckStore {
         .unwrap()
         .map(Result::unwrap)
         .collect()
+    }
+}
+
+#[cfg(test)]
+mod payment_tests {
+    use super::*;
+
+    fn payment(id: &str, refunded: i64) -> Payment {
+        Payment {
+            site_id: "s".into(),
+            provider: "stripe".into(),
+            provider_payment_id: id.into(),
+            ts: OffsetDateTime::from_unix_timestamp(1_760_000_000).unwrap(),
+            amount: 2900,
+            currency: "usd".into(),
+            amount_usd: Some(29.0),
+            refunded,
+            status: if refunded > 0 {
+                "refunded".into()
+            } else {
+                "paid".into()
+            },
+            visitor_id: Some("v1".into()),
+            customer_id: Some("cus_1".into()),
+            is_renewal: false,
+        }
+    }
+
+    #[test]
+    fn upserts_are_idempotent() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = DuckStore::open(&dir.path().join("e.duckdb")).unwrap();
+        store
+            .upsert_payments(&[payment("pi_1", 0), payment("pi_2", 0)])
+            .unwrap();
+        store.upsert_payments(&[payment("pi_1", 2900)]).unwrap();
+        let period = Period {
+            from: time::macros::date!(2025 - 01 - 01),
+            to: time::macros::date!(2026 - 12 - 31),
+            tz: "UTC".into(),
+        };
+        let rows = store
+            .payment_list("s", &period, PaymentFilter::All, 10, 0)
+            .unwrap()
+            .rows;
+        assert_eq!(rows.len(), 2);
+        let pi_1 = rows
+            .iter()
+            .find(|p| p.provider_payment_id == "pi_1")
+            .unwrap();
+        assert_eq!((pi_1.refunded, pi_1.net_usd), (2900, Some(0.0)));
     }
 }

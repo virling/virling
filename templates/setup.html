@@ -5,16 +5,7 @@
 <title>Set up · Virling</title>
 </head>
 <body>
-<header class="steps-top">
-  <a class="brand" href="/app">{% include "_logo.html" %}<b>virling</b></a>
-  <ol class="stepper" aria-label="Setup progress">
-    <li class="{% if step == 1 %}on{% else %}done{% endif %}"><span>{% if step > 1 %}&#10003;{% else %}1{% endif %}</span>Site</li>
-    <li class="{% if step == 2 %}on{% else if step > 2 %}done{% endif %}"><span>2</span>Script</li>
-    <li><span>3</span>Payments</li>
-    <li><span>4</span>Checkout</li>
-  </ol>
-  <form method="post" action="/logout"><button class="btn ghost" type="submit">Sign out</button></form>
-</header>
+{% include "_steps.html" %}
 <main class="step-main">
   <div class="step-box">
   {% if step == 1 %}
@@ -98,6 +89,7 @@ import Script from "next/script";
     </div>
     <div class="actions">
       <a class="btn ghost" href="/app/setup">Add a different site</a>
+      <a class="btn lg" href="/app/sites/{{ site_id }}/setup/payments">Continue</a>
     </div>
   {% endif %}
   </div>

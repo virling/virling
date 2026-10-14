@@ -6,11 +6,13 @@ use axum::response::{Html, IntoResponse, Redirect, Response};
 use axum::routing::{get, post};
 use sqlx::SqlitePool;
 
+use crate::crypto::Vault;
 use crate::events::EventStore;
+use crate::fx::Rates;
 use crate::ingest::{self, DailySalt, RateLimiter, Sessions};
 use crate::mail::Mailer;
 use crate::sites::SiteCache;
-use crate::{auth, onboarding, waitlist};
+use crate::{auth, dashboard, onboarding, settings, waitlist};
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -37,6 +39,9 @@ pub struct AppState {
     pub salt: Arc<DailySalt>,
     pub limiter: Arc<RateLimiter>,
     pub mailer: Arc<Mailer>,
+    pub vault: Arc<Vault>,
+    pub http: reqwest::Client,
+    pub rates: Arc<Rates>,
 }
 
 impl AppState {
@@ -45,8 +50,17 @@ impl AppState {
         db: SqlitePool,
         events: Arc<dyn EventStore>,
         mailer: Mailer,
+        vault: Vault,
     ) -> Self {
+        let http = reqwest::Client::builder()
+            .user_agent(concat!("virling/", env!("CARGO_PKG_VERSION")))
+            .timeout(std::time::Duration::from_secs(30))
+            .build()
+            .expect("http client");
         Self {
+            vault: Arc::new(vault),
+            rates: Arc::new(Rates::new(http.clone())),
+            http,
             config: Arc::new(config),
             db,
             events,
@@ -116,6 +130,28 @@ pub fn router(state: AppState) -> Router {
             .route(
                 "/app/sites/{site_id}/latest-event",
                 get(onboarding::latest_event),
+            )
+            .route(
+                "/app/sites/{site_id}/setup/payments",
+                get(onboarding::payments_step).post(onboarding::connect_payments),
+            )
+            .route(
+                "/app/sites/{site_id}/setup/checkout",
+                get(onboarding::checkout_step),
+            )
+            .route("/app/sites/{site_id}/dashboard", get(dashboard::dashboard))
+            .route("/app/sites/{site_id}/payments", get(dashboard::payments))
+            .route(
+                "/app/sites/{site_id}/payments/{provider}/{payment_id}",
+                get(dashboard::payment),
+            )
+            .route(
+                "/app/sites/{site_id}/settings",
+                get(settings::page).post(settings::save),
+            )
+            .route(
+                "/app/sites/{site_id}/settings/disconnect",
+                post(settings::disconnect),
             );
     }
     if state.config.marketing {
