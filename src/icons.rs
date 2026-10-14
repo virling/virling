@@ -1,8 +1,15 @@
 //! Source logos, channel and provider glyphs, and flags, all shipped in the binary.
+use std::sync::atomic::{AtomicUsize, Ordering};
+
 use crate::chart::esc;
 use crate::flags;
 
 const BRANDS: &[(&str, &str, &str)] = &[
+    (
+        "dodo",
+        "Dodo Payments",
+        include_str!("../assets/icons/dodo.svg"),
+    ),
     (
         "duckduckgo",
         "DuckDuckGo",
@@ -38,6 +45,7 @@ const BRANDS: &[(&str, &str, &str)] = &[
         "LinkedIn",
         include_str!("../assets/icons/linkedin.svg"),
     ),
+    ("polar", "Polar", include_str!("../assets/icons/polar.svg")),
     (
         "producthunt",
         "Product Hunt",
@@ -91,6 +99,13 @@ pub fn brand_slug(source: &str) -> Option<&'static str> {
 pub fn brand(slug: &str, size: u32) -> String {
     let Some((_, name, svg)) = BRANDS.iter().find(|b| b.0 == slug) else {
         return String::new();
+    };
+    static IDS: AtomicUsize = AtomicUsize::new(0);
+    let svg = if svg.contains("mask0_") {
+        let n = IDS.fetch_add(1, Ordering::Relaxed);
+        svg.replace("mask0_", &format!("{slug}{n}_"))
+    } else {
+        svg.to_string()
     };
     svg.trim_end().replacen(
         "<svg ",
@@ -172,7 +187,7 @@ pub fn source(name: &str, size: u32) -> String {
 
 pub fn provider(provider: &str, size: u32) -> String {
     match provider {
-        "stripe" | "lemonsqueezy" => brand(provider, size),
+        "stripe" | "lemonsqueezy" | "dodo" | "polar" => brand(provider, size),
         _ => glyph("card", size, "#0E1116"),
     }
 }
@@ -220,6 +235,24 @@ mod tests {
     }
 
     #[test]
+    fn provider_logos_get_unique_mask_ids() {
+        let (a, b) = (provider("dodo", 14), provider("dodo", 14));
+        assert!(a.contains(r#"aria-label="Dodo Payments""#));
+        assert!(provider("polar", 14).contains(r#"aria-label="Polar""#));
+        let id = |s: &str| {
+            s.split("mask id=\"")
+                .nth(1)
+                .unwrap()
+                .split('"')
+                .next()
+                .unwrap()
+                .to_string()
+        };
+        assert_ne!(id(&a), id(&b));
+        assert!(a.contains(&format!("url(#{})", id(&a))));
+    }
+
+    #[test]
     fn sources_fall_back_to_glyphs_and_letters() {
         assert!(source("Hacker News", 14).contains(r#"aria-label="Hacker News""#));
         assert!(source("Direct", 14).contains("M5 3l14 8"));
@@ -227,7 +260,7 @@ mod tests {
         assert!(source("<b>log", 14).contains(">&lt;</span>"));
         assert!(source("someblog.dev", 14).contains(">S</span>"));
         assert!(provider("stripe", 14).contains("Stripe"));
-        assert!(provider("dodo", 14).contains("M2 10h20"));
+        assert!(provider("other", 14).contains("M2 10h20"));
     }
 
     #[test]
