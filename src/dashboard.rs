@@ -490,17 +490,17 @@ pub async fn dashboard(
     let id = ctx.site.id.clone();
     let result = blocking(move || {
         Ok((
-            store.overview(&id, &p)?,
-            store.timeseries(&id, &p)?,
+            store.report(&id, &p)?,
             store.breakdown(&id, &p, dimension, sort)?,
             store.payment_list(&id, &p, PaymentFilter::All, 6, 0)?,
         ))
     })
     .await;
-    let (overview, points, rows, latest) = match result {
+    let (report, rows, latest) = match result {
         Ok(r) => r,
         Err(code) => return code.into_response(),
     };
+    let (overview, points) = (report.overview, report.days);
     let base = format!("/app/sites/{}/dashboard", ctx.site.id);
     let range_param = if rkey == "30d" { "" } else { rkey };
     let by_param = if by == "channel" { "" } else { by };
@@ -678,10 +678,8 @@ pub async fn payments(
     let store = state.events.clone();
     let id = ctx.site.id.clone();
     let result = blocking(move || {
-        let mut counts = Vec::new();
-        for f in FILTERS.iter().filter_map(|(k, _)| PaymentFilter::parse(k)) {
-            counts.push(store.payment_list(&id, &p, f, 0, 0)?.total);
-        }
+        let s = store.payment_summary(&id, &p)?;
+        let counts = [s.payments, s.attributed, s.unattributed, s.refunded];
         let list = store.payment_list(&id, &p, filter, PER_PAGE, (page - 1) * PER_PAGE)?;
         Ok((counts, list))
     })

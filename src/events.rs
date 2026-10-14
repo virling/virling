@@ -6,8 +6,8 @@ use duckdb::{Connection, named_params, params};
 use time::{OffsetDateTime, UtcOffset};
 
 use crate::stats::{
-    self, BreakdownRow, DayPoint, Dimension, Journey, Overview, PaymentFilter, PaymentPage, Period,
-    Sort,
+    self, BreakdownRow, Dimension, Journey, Overview, PaymentFilter, PaymentPage, PaymentSummary,
+    Period, Report, Sort,
 };
 
 #[derive(Debug, Clone)]
@@ -72,7 +72,8 @@ pub trait EventStore: Send + Sync {
         window_days: i64,
     ) -> anyhow::Result<()>;
     fn overview(&self, site_id: &str, period: &Period) -> anyhow::Result<Overview>;
-    fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<DayPoint>>;
+    #[cfg(test)]
+    fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<stats::DayPoint>>;
     fn breakdown(
         &self,
         site_id: &str,
@@ -96,6 +97,9 @@ pub trait EventStore: Send + Sync {
         provider_payment_id: &str,
         window_days: i64,
     ) -> anyhow::Result<Option<Journey>>;
+    /// Totals, current and previous daily series, the four breakdowns and setup facts.
+    fn report(&self, site_id: &str, period: &Period) -> anyhow::Result<Report>;
+    fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary>;
 }
 
 /// Sessions as touches (first pageview's fields), then the credited session per payment, then renewal inheritance.
@@ -365,7 +369,8 @@ impl EventStore for DuckStore {
         stats::overview(&self.conn.lock().unwrap(), site_id, period)
     }
 
-    fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<DayPoint>> {
+    #[cfg(test)]
+    fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<stats::DayPoint>> {
         stats::timeseries(&self.conn.lock().unwrap(), site_id, period)
     }
 
@@ -411,6 +416,14 @@ impl EventStore for DuckStore {
             provider_payment_id,
             window_days,
         )
+    }
+
+    fn report(&self, site_id: &str, period: &Period) -> anyhow::Result<Report> {
+        stats::report(&self.conn.lock().unwrap(), site_id, period)
+    }
+
+    fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary> {
+        stats::payment_summary(&self.conn.lock().unwrap(), site_id, period)
     }
 }
 

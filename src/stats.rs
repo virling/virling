@@ -8,6 +8,9 @@ use crate::channel::source_name;
 /// Net USD of a payment `p`; NULL when it has no USD conversion, so it counts as a payment but not revenue.
 const NET_USD: &str = "p.amount_usd * (p.amount - p.refunded) / nullif(p.amount, 0)";
 
+/// Who paid: customer_id, else visitor_id, else the payment itself.
+const CUSTOMER: &str = "coalesce('c:' || p.customer_id, 'v:' || p.visitor_id, 'p:' || p.provider || ':' || p.provider_payment_id)";
+
 /// Local dates `$from..=$to` in IANA zone `$tz` as a half-open UTC range [lo, hi).
 const BOUNDS: &str = "bounds AS (
     SELECT timezone($tz, CAST($from AS DATE)::TIMESTAMP) AS lo,
@@ -37,6 +40,7 @@ impl Period {
 #[derive(Debug, Clone, Default, PartialEq, Serialize)]
 pub struct Totals {
     pub visitors: u64,
+    pub sessions: u64,
     /// Non-failed payments, including those without a USD amount.
     pub payments: u64,
     /// Distinct customer_id, else visitor_id, else payment, among non-failed payments.
@@ -57,7 +61,12 @@ pub struct DayPoint {
     pub date: Date,
     pub visitors: u64,
     pub payments: u64,
+    pub customers: u64,
     pub revenue_usd: f64,
+    pub conversion: Option<f64>,
+    pub revenue_per_visitor: Option<f64>,
+    /// Revenue by credited channel, largest first; None is Unattributed.
+    pub by_channel: Vec<(Option<String>, f64)>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -143,6 +152,15 @@ impl PaymentFilter {
     }
 }
 
+/// The payer's earliest visit at or before the payment.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct FirstTouch {
+    pub ts: OffsetDateTime,
+    pub channel: String,
+    pub referrer_host: Option<String>,
+    pub source: String,
+}
+
 /// The session credited for a payment.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Touch {
@@ -174,6 +192,7 @@ pub struct PaymentRow {
     pub is_renewal: bool,
     /// None means Unattributed.
     pub touch: Option<Touch>,
+    pub first_touch: Option<FirstTouch>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -200,6 +219,46 @@ pub struct Journey {
     pub payment: PaymentRow,
     /// Oldest first.
     pub sessions: Vec<JourneySession>,
+    /// From the payer's last pageview at or before the payment.
+    pub country: Option<String>,
+    pub browser: Option<String>,
+    pub device: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Serialize)]
+pub struct PaymentSummary {
+    pub payments: u64,
+    pub attributed: u64,
+    pub unattributed: u64,
+    pub refunded: u64,
+    pub customers: u64,
+    pub net_usd: f64,
+    pub refunded_usd: f64,
+}
+
+/// Site-wide facts for the empty and new-site states, regardless of range.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct Setup {
+    pub first_event: Option<OffsetDateTime>,
+    pub has_goals: bool,
+    pub payments: u64,
+    /// Earliest payment credited to a visit.
+    pub first_match: Option<PaymentRow>,
+}
+
+/// Everything the dashboard shows for a range, read in one go.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct Report {
+    pub overview: Overview,
+    pub days: Vec<DayPoint>,
+    pub previous_days: Vec<DayPoint>,
+    pub channels: Vec<BreakdownRow>,
+    pub referrers: Vec<BreakdownRow>,
+    pub landing_pages: Vec<BreakdownRow>,
+    pub countries: Vec<BreakdownRow>,
+    /// Up to three referrer source names per channel, most visitors first.
+    pub channel_sources: Vec<(String, Vec<String>)>,
+    pub setup: Setup,
 }
 
 pub(crate) fn from_micros(us: i64) -> OffsetDateTime {
@@ -221,25 +280,29 @@ fn totals(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<T
         SELECT
             (SELECT count(DISTINCT visitor_id) FROM events, bounds
              WHERE site_id = $site AND ts >= lo AND ts < hi),
+            (SELECT count(DISTINCT session_id) FROM events, bounds
+             WHERE site_id = $site AND ts >= lo AND ts < hi),
             count(*),
-            count(DISTINCT coalesce('c:' || p.customer_id, 'v:' || p.visitor_id, 'p:' || p.provider || ':' || p.provider_payment_id)),
+            count(DISTINCT {CUSTOMER}),
             coalesce(sum({NET_USD}), 0)
         FROM payments p, bounds
         WHERE p.site_id = $site AND p.ts >= lo AND p.ts < hi AND p.status <> 'failed'"
     );
-    let (visitors, payments, customers, revenue_usd): (i64, i64, i64, f64) = conn.query_row(
-        &sql,
-        named_params! {
-            "site": site_id,
-            "tz": period.tz,
-            "from": period.from.to_string(),
-            "to": period.to.to_string(),
-        },
-        |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?)),
-    )?;
+    let (visitors, sessions, payments, customers, revenue_usd): (i64, i64, i64, i64, f64) = conn
+        .query_row(
+            &sql,
+            named_params! {
+                "site": site_id,
+                "tz": period.tz,
+                "from": period.from.to_string(),
+                "to": period.to.to_string(),
+            },
+            |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?, r.get(4)?)),
+        )?;
     let visitors = visitors as u64;
     Ok(Totals {
         visitors,
+        sessions: sessions as u64,
         payments: payments as u64,
         customers: customers as u64,
         revenue_usd,
@@ -275,40 +338,75 @@ pub(crate) fn timeseries(
             FROM events, bounds WHERE site_id = $site AND ts >= lo AND ts < hi GROUP BY 1
         ),
         r AS (
-            SELECT CAST(timezone($tz, p.ts) AS DATE) AS day, count(*) AS n, coalesce(sum({NET_USD}), 0) AS rev
+            SELECT CAST(timezone($tz, p.ts) AS DATE) AS day, count(*) AS n,
+                count(DISTINCT {CUSTOMER}) AS customers, coalesce(sum({NET_USD}), 0) AS rev
             FROM payments p, bounds
             WHERE p.site_id = $site AND p.ts >= lo AND p.ts < hi AND p.status <> 'failed' GROUP BY 1
         )
-        SELECT strftime(d.day, '%Y-%m-%d'), coalesce(v.n, 0), coalesce(r.n, 0), coalesce(r.rev, 0)
+        SELECT strftime(d.day, '%Y-%m-%d'), coalesce(v.n, 0), coalesce(r.n, 0),
+            coalesce(r.customers, 0), coalesce(r.rev, 0)
         FROM days d LEFT JOIN v USING (day) LEFT JOIN r USING (day)
         ORDER BY d.day"
     );
+    let params = named_params! {
+        "site": site_id,
+        "tz": period.tz,
+        "from": period.from.to_string(),
+        "to": period.to.to_string(),
+    };
     let mut stmt = conn.prepare(&sql)?;
-    let rows = stmt.query_map(
-        named_params! {
-            "site": site_id,
-            "tz": period.tz,
-            "from": period.from.to_string(),
-            "to": period.to.to_string(),
-        },
-        |r| {
-            Ok((
-                r.get::<_, String>(0)?,
-                r.get::<_, i64>(1)?,
-                r.get::<_, i64>(2)?,
-                r.get::<_, f64>(3)?,
-            ))
-        },
-    )?;
+    let rows = stmt.query_map(params, |r| {
+        Ok((
+            r.get::<_, String>(0)?,
+            r.get::<_, i64>(1)?,
+            r.get::<_, i64>(2)?,
+            r.get::<_, i64>(3)?,
+            r.get::<_, f64>(4)?,
+        ))
+    })?;
+    let ymd = format_description!("[year]-[month]-[day]");
     let mut out = Vec::new();
     for row in rows {
-        let (day, visitors, payments, revenue_usd) = row?;
+        let (day, visitors, payments, customers, revenue_usd) = row?;
+        let visitors = visitors as u64;
         out.push(DayPoint {
-            date: Date::parse(&day, format_description!("[year]-[month]-[day]"))?,
-            visitors: visitors as u64,
+            date: Date::parse(&day, ymd)?,
+            visitors,
             payments: payments as u64,
+            customers: customers as u64,
             revenue_usd,
+            conversion: ratio(customers as f64, visitors),
+            revenue_per_visitor: ratio(revenue_usd, visitors),
+            by_channel: Vec::new(),
         });
+    }
+    let mut stmt = conn.prepare(&format!(
+        "WITH {BOUNDS}
+        SELECT strftime(CAST(timezone($tz, p.ts) AS DATE), '%Y-%m-%d'),
+            CASE WHEN a.session_id IS NOT NULL THEN a.channel END, coalesce(sum({NET_USD}), 0)
+        FROM payments p
+        JOIN bounds ON p.ts >= lo AND p.ts < hi
+        {ATTRIBUTION_JOIN}
+        WHERE p.site_id = $site AND p.status <> 'failed'
+        GROUP BY ALL"
+    ))?;
+    let rows = stmt.query_map(params, |r| {
+        Ok((
+            r.get::<_, String>(0)?,
+            r.get::<_, Option<String>>(1)?,
+            r.get::<_, f64>(2)?,
+        ))
+    })?;
+    for row in rows {
+        let (day, channel, revenue) = row?;
+        let date = Date::parse(&day, ymd)?;
+        if let Some(p) = out.iter_mut().find(|p| p.date == date) {
+            p.by_channel.push((channel, revenue));
+        }
+    }
+    for p in &mut out {
+        p.by_channel
+            .sort_by(|a, b| b.1.total_cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
     }
     Ok(out)
 }
@@ -397,7 +495,12 @@ pub(crate) fn breakdown(
     for r in &mut out {
         r.revenue_per_visitor = ratio(r.revenue_usd, r.visitors);
     }
-    out.sort_by(|a, b| {
+    sort_rows(&mut out, sort);
+    Ok(out)
+}
+
+pub fn sort_rows(rows: &mut [BreakdownRow], sort: Sort) {
+    rows.sort_by(|a, b| {
         let by_revenue = b.revenue_usd.total_cmp(&a.revenue_usd);
         let by_visitors = b.visitors.cmp(&a.visitors);
         match sort {
@@ -406,17 +509,26 @@ pub(crate) fn breakdown(
         }
         .then_with(|| a.label.cmp(&b.label))
     });
-    Ok(out)
 }
 
 const PAYMENT_COLUMNS: &str =
     "p.provider, p.provider_payment_id, epoch_us(p.ts), p.amount, p.currency,
     p.amount_usd, p.refunded, p.status, p.visitor_id, p.customer_id, p.is_renewal,
     a.session_id, epoch_us(a.touch_ts), a.channel, a.referrer_host, a.campaign, a.landing_page,
-    a.country, a.device";
+    a.country, a.device, epoch_us(f.ts), f.channel, f.referrer_host";
 
 const ATTRIBUTION_JOIN: &str = "LEFT JOIN attribution a ON a.site_id = p.site_id
     AND a.provider = p.provider AND a.provider_payment_id = p.provider_payment_id";
+
+/// The first pageview of the payer, or of the credited visitor when the payment has no visitor ID.
+const FIRST_TOUCH_JOIN: &str = "LEFT JOIN LATERAL (
+        SELECT e.ts, e.channel, e.referrer_host FROM events e
+        WHERE e.site_id = p.site_id AND e.kind = 'pageview' AND e.ts <= p.ts
+            AND e.visitor_id = coalesce(p.visitor_id,
+                (SELECT c.visitor_id FROM events c WHERE c.site_id = p.site_id AND c.session_id = a.session_id LIMIT 1))
+        ORDER BY e.ts, e.path
+        LIMIT 1
+    ) f ON true";
 
 fn payment_row(r: &duckdb::Row) -> duckdb::Result<PaymentRow> {
     let amount: i64 = r.get(3)?;
@@ -441,6 +553,19 @@ fn payment_row(r: &duckdb::Row) -> duckdb::Result<PaymentRow> {
         }
         None => None,
     };
+    let first_touch = match r.get::<_, Option<i64>>(19)? {
+        Some(us) => {
+            let channel: String = r.get(20)?;
+            let referrer_host: Option<String> = r.get(21)?;
+            Some(FirstTouch {
+                ts: from_micros(us),
+                source: source(referrer_host.as_deref(), &channel),
+                channel,
+                referrer_host,
+            })
+        }
+        None => None,
+    };
     Ok(PaymentRow {
         provider: r.get(0)?,
         provider_payment_id: r.get(1)?,
@@ -457,6 +582,7 @@ fn payment_row(r: &duckdb::Row) -> duckdb::Result<PaymentRow> {
         customer_id: r.get(9)?,
         is_renewal: r.get(10)?,
         touch,
+        first_touch,
     })
 }
 
@@ -475,6 +601,11 @@ pub(crate) fn payment_list(
         WHERE p.site_id = $site AND p.status <> 'failed' AND {}",
         filter.sql()
     );
+    let from_first = from.replacen(
+        ATTRIBUTION_JOIN,
+        &format!("{ATTRIBUTION_JOIN} {FIRST_TOUCH_JOIN}"),
+        1,
+    );
     let total: i64 = conn.query_row(
         &format!("WITH {BOUNDS} SELECT count(*) {from}"),
         named_params! {
@@ -486,7 +617,7 @@ pub(crate) fn payment_list(
         |r| r.get(0),
     )?;
     let sql = format!(
-        "WITH {BOUNDS} SELECT {PAYMENT_COLUMNS} {from}
+        "WITH {BOUNDS} SELECT {PAYMENT_COLUMNS} {from_first}
         ORDER BY p.ts DESC, p.provider, p.provider_payment_id
         LIMIT $limit OFFSET $offset"
     );
@@ -516,7 +647,7 @@ pub(crate) fn journey(
     window_days: i64,
 ) -> anyhow::Result<Option<Journey>> {
     let mut stmt = conn.prepare(&format!(
-        "SELECT {PAYMENT_COLUMNS} FROM payments p {ATTRIBUTION_JOIN}
+        "SELECT {PAYMENT_COLUMNS} FROM payments p {ATTRIBUTION_JOIN} {FIRST_TOUCH_JOIN}
         WHERE p.site_id = $site AND p.provider = $provider AND p.provider_payment_id = $id"
     ))?;
     let params = named_params! { "site": site_id, "provider": provider, "id": provider_payment_id };
@@ -589,7 +720,164 @@ pub(crate) fn journey(
             goals: list(goals)?,
         });
     }
-    Ok(Some(Journey { payment, sessions }))
+    let mut stmt = conn.prepare(
+        "SELECT country, browser, device FROM events
+        WHERE site_id = $site AND kind = 'pageview' AND ts <= $ts
+            AND (visitor_id = $visitor OR session_id = $credited)
+        ORDER BY ts DESC LIMIT 1",
+    )?;
+    let last = stmt
+        .query_map(
+            named_params! {
+                "site": site_id,
+                "visitor": payment.visitor_id,
+                "credited": credited,
+                "ts": ts,
+            },
+            |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
+        )?
+        .next()
+        .transpose()?;
+    let (country, browser, device) = last.unwrap_or((None, None, None));
+    Ok(Some(Journey {
+        payment,
+        sessions,
+        country,
+        browser,
+        device,
+    }))
+}
+
+pub(crate) fn payment_summary(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+) -> anyhow::Result<PaymentSummary> {
+    let sql = format!(
+        "WITH {BOUNDS}
+        SELECT count(*), count(a.session_id), count(*) FILTER (WHERE a.session_id IS NULL),
+            count(*) FILTER (WHERE p.refunded > 0), count(DISTINCT {CUSTOMER}),
+            coalesce(sum({NET_USD}), 0),
+            coalesce(sum(p.amount_usd * p.refunded / nullif(p.amount, 0)), 0)
+        FROM payments p
+        JOIN bounds ON p.ts >= lo AND p.ts < hi
+        {ATTRIBUTION_JOIN}
+        WHERE p.site_id = $site AND p.status <> 'failed'"
+    );
+    let row: (i64, i64, i64, i64, i64, f64, f64) = conn.query_row(
+        &sql,
+        named_params! {
+            "site": site_id,
+            "tz": period.tz,
+            "from": period.from.to_string(),
+            "to": period.to.to_string(),
+        },
+        |r| {
+            Ok((
+                r.get(0)?,
+                r.get(1)?,
+                r.get(2)?,
+                r.get(3)?,
+                r.get(4)?,
+                r.get(5)?,
+                r.get(6)?,
+            ))
+        },
+    )?;
+    Ok(PaymentSummary {
+        payments: row.0 as u64,
+        attributed: row.1 as u64,
+        unattributed: row.2 as u64,
+        refunded: row.3 as u64,
+        customers: row.4 as u64,
+        net_usd: row.5,
+        refunded_usd: row.6,
+    })
+}
+
+fn channel_sources(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+) -> anyhow::Result<Vec<(String, Vec<String>)>> {
+    let sql = format!(
+        "WITH {BOUNDS},
+        touches AS (
+            SELECT visitor_id, channel, referrer_host
+            FROM events, bounds
+            WHERE site_id = $site AND kind = 'pageview' AND ts >= lo AND ts < hi
+            QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1
+        )
+        SELECT channel, referrer_host, count(DISTINCT visitor_id) AS n
+        FROM touches WHERE referrer_host IS NOT NULL
+        GROUP BY ALL
+        ORDER BY channel, n DESC, referrer_host"
+    );
+    let mut stmt = conn.prepare(&sql)?;
+    let rows = stmt.query_map(
+        named_params! {
+            "site": site_id,
+            "tz": period.tz,
+            "from": period.from.to_string(),
+            "to": period.to.to_string(),
+        },
+        |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)),
+    )?;
+    let mut out: Vec<(String, Vec<String>)> = Vec::new();
+    for row in rows {
+        let (channel, host) = row?;
+        if out.last().is_none_or(|(c, _)| *c != channel) {
+            out.push((channel, Vec::new()));
+        }
+        let names = &mut out.last_mut().unwrap().1;
+        let name = source_name(&host);
+        if names.len() < 3 && !names.contains(&name) {
+            names.push(name);
+        }
+    }
+    Ok(out)
+}
+
+fn setup(conn: &Connection, site_id: &str) -> anyhow::Result<Setup> {
+    let (first, has_goals, payments): (Option<i64>, bool, i64) = conn.query_row(
+        "SELECT
+            (SELECT epoch_us(min(ts)) FROM events WHERE site_id = $site),
+            EXISTS (SELECT 1 FROM events WHERE site_id = $site AND kind = 'goal'),
+            (SELECT count(*) FROM payments WHERE site_id = $site AND status <> 'failed')",
+        named_params! { "site": site_id },
+        |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
+    )?;
+    let mut stmt = conn.prepare(&format!(
+        "SELECT {PAYMENT_COLUMNS} FROM payments p {ATTRIBUTION_JOIN} {FIRST_TOUCH_JOIN}
+        WHERE p.site_id = $site AND p.status <> 'failed' AND a.session_id IS NOT NULL
+        ORDER BY p.ts, p.provider, p.provider_payment_id
+        LIMIT 1"
+    ))?;
+    let first_match = stmt
+        .query_map(named_params! { "site": site_id }, payment_row)?
+        .next()
+        .transpose()?;
+    Ok(Setup {
+        first_event: first.map(from_micros),
+        has_goals,
+        payments: payments as u64,
+        first_match,
+    })
+}
+
+pub(crate) fn report(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<Report> {
+    let dims = |d| breakdown(conn, site_id, period, d, Sort::Revenue);
+    Ok(Report {
+        overview: overview(conn, site_id, period)?,
+        days: timeseries(conn, site_id, period)?,
+        previous_days: timeseries(conn, site_id, &period.previous())?,
+        channels: dims(Dimension::Channel)?,
+        referrers: dims(Dimension::Referrer)?,
+        landing_pages: dims(Dimension::LandingPage)?,
+        countries: dims(Dimension::Country)?,
+        channel_sources: channel_sources(conn, site_id, period)?,
+        setup: setup(conn, site_id)?,
+    })
 }
 
 #[cfg(test)]
@@ -916,6 +1204,152 @@ mod tests {
         assert_eq!(j.sessions[1].paths, ["/s2", "/pricing"]);
         assert_eq!(j.sessions[1].goals, ["signup"]);
         assert!(store.journey("s", "stripe", "nope", 90).unwrap().is_none());
+    }
+
+    #[test]
+    fn report_loads_everything_for_a_range() {
+        let (_dir, store) = store();
+        let mut goal = visit("v3", "c", T, "Direct");
+        goal.kind = "goal".into();
+        goal.name = Some("signup".into());
+        store
+            .insert_events(&[
+                visit("v1", "a", T - Duration::days(2), "Social"),
+                visit("v1", "a2", T - Duration::hours(1), "Direct"),
+                visit("v2", "b", T - Duration::days(2), "Paid"),
+                visit("v3", "c", T, "Direct"),
+                goal,
+            ])
+            .unwrap();
+        store
+            .upsert_payments(&[pay("p1", T, Some("v1"), None), pay("p2", T, None, None)])
+            .unwrap();
+        store
+            .rebuild_attribution("s", "last_non_direct", 90)
+            .unwrap();
+        let r = store.report("s", &period()).unwrap();
+        assert_eq!(r.overview.current.sessions, 4);
+        assert_eq!(r.days.len(), 61);
+        assert_eq!(r.previous_days.len(), 61);
+        assert_eq!(r.previous_days[0].date, date!(2026 - 07 - 02));
+        let day = r.days.iter().find(|d| d.date == T.date()).unwrap();
+        assert_eq!(
+            day.by_channel,
+            vec![(None, 100.0), (Some("Social".to_string()), 100.0)]
+        );
+        let split: f64 = day.by_channel.iter().map(|c| c.1).sum();
+        assert_eq!(split, day.revenue_usd);
+        assert_eq!((day.visitors, day.customers), (2, 2));
+        assert_eq!(day.conversion, Some(1.0));
+        assert_eq!(day.revenue_per_visitor, Some(100.0));
+        assert_eq!(r.channels[0].label, "Social");
+        assert_eq!(r.referrers[0].label, "Hacker News");
+        assert!(r.landing_pages.iter().any(|p| p.label == "/a"));
+        assert_eq!(r.countries[0].key.as_deref(), Some("DE"));
+        assert!(
+            r.channel_sources
+                .contains(&("Social".into(), vec!["Hacker News".into()]))
+        );
+        assert_eq!(r.setup.first_event, Some(T - Duration::days(2)));
+        assert!(r.setup.has_goals);
+        assert_eq!(r.setup.payments, 2);
+        assert_eq!(
+            r.setup
+                .first_match
+                .map(|p| p.provider_payment_id)
+                .as_deref(),
+            Some("p1")
+        );
+    }
+
+    #[test]
+    fn empty_site_has_no_setup_facts() {
+        let (_dir, store) = store();
+        let r = store.report("s", &period()).unwrap();
+        assert_eq!(r.setup.first_event, None);
+        assert!(!r.setup.has_goals && r.setup.first_match.is_none());
+        assert!(r.days.iter().all(|d| d.conversion.is_none()));
+    }
+
+    #[test]
+    fn payments_carry_first_touch_and_journey_device() {
+        let (_dir, store) = store();
+        let mut later = visit("v1", "s2", T - Duration::days(1), "Referral");
+        later.browser = "Chrome".into();
+        later.country = Some("IN".into());
+        store
+            .insert_events(&[visit("v1", "s1", T - Duration::days(6), "Social"), later])
+            .unwrap();
+        let mut renewal = pay("p2", T + Duration::days(30), None, Some("cus_1"));
+        renewal.is_renewal = true;
+        store
+            .upsert_payments(&[
+                pay("p1", T, Some("v1"), Some("cus_1")),
+                renewal,
+                pay("p3", T, None, None),
+            ])
+            .unwrap();
+        store
+            .rebuild_attribution("s", "last_non_direct", 90)
+            .unwrap();
+        let rows = store
+            .payment_list("s", &period(), PaymentFilter::All, 10, 0)
+            .unwrap()
+            .rows;
+        let first = |id: &str| {
+            rows.iter()
+                .find(|p| p.provider_payment_id == id)
+                .unwrap()
+                .first_touch
+                .as_ref()
+                .map(|f| f.source.clone())
+        };
+        assert_eq!(first("p1").as_deref(), Some("Hacker News"));
+        assert_eq!(first("p2").as_deref(), Some("Hacker News"));
+        assert_eq!(first("p3"), None);
+        let j = store.journey("s", "stripe", "p1", 90).unwrap().unwrap();
+        assert_eq!(j.country.as_deref(), Some("IN"));
+        assert_eq!(j.browser.as_deref(), Some("Chrome"));
+        assert_eq!(j.device.as_deref(), Some("Desktop"));
+        assert_eq!(j.sessions.len(), 2);
+    }
+
+    #[test]
+    fn payment_summary_matches_filters() {
+        let (_dir, store) = store();
+        store
+            .insert_events(&[visit("v1", "s1", T - Duration::days(1), "Social")])
+            .unwrap();
+        let mut partial = pay("p2", T, None, Some("cus_1"));
+        partial.refunded = 2500;
+        let mut full = pay("p3", T, None, Some("cus_1"));
+        full.refunded = 10000;
+        store
+            .upsert_payments(&[pay("p1", T, Some("v1"), None), partial, full])
+            .unwrap();
+        store
+            .rebuild_attribution("s", "last_non_direct", 90)
+            .unwrap();
+        let s = store.payment_summary("s", &period()).unwrap();
+        assert_eq!(
+            (s.payments, s.attributed, s.unattributed, s.refunded),
+            (3, 1, 2, 2)
+        );
+        assert_eq!(s.customers, 2);
+        assert_eq!((s.net_usd, s.refunded_usd), (175.0, 125.0));
+        for (filter, n) in [
+            (PaymentFilter::Attributed, s.attributed),
+            (PaymentFilter::Unattributed, s.unattributed),
+            (PaymentFilter::Refunded, s.refunded),
+        ] {
+            assert_eq!(
+                store
+                    .payment_list("s", &period(), filter, 0, 0)
+                    .unwrap()
+                    .total,
+                n
+            );
+        }
     }
 
     #[test]
