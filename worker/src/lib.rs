@@ -35,6 +35,35 @@ struct FoundingText {
     number: u64,
 }
 
+#[derive(Serialize, Deserialize)]
+struct ConversionTotal {
+    kind: String,
+    count: i64,
+    amount_cents: i64,
+}
+
+impl ConversionTotal {
+    fn dollars(&self) -> String {
+        format!(
+            "${}.{:02}",
+            self.amount_cents / 100,
+            self.amount_cents % 100
+        )
+    }
+}
+
+#[derive(Template, Serialize)]
+#[template(path = "stats.html")]
+struct Stats {
+    days: i64,
+    visitors: i64,
+    pageviews: i64,
+    sessions: i64,
+    conversions: Vec<ConversionTotal>,
+    channels: Vec<analytics::StatsRow>,
+    landing_pages: Vec<analytics::StatsRow>,
+}
+
 #[derive(Deserialize)]
 struct Signup {
     email: String,
@@ -455,9 +484,99 @@ fn event_preflight(_: Request, _: RouteContext<()>) -> Result<Response> {
     Ok(res)
 }
 
+async fn load_stats(req: &Request, ctx: &RouteContext<()>) -> Result<Option<Stats>> {
+    let token = req
+        .url()?
+        .query_pairs()
+        .find(|(k, _)| k == "token")
+        .map(|(_, v)| v.into_owned())
+        .unwrap_or_default();
+    let expected = ctx
+        .secret("STATS_TOKEN")
+        .map(|s| s.to_string())
+        .unwrap_or_default();
+    if !analytics::token_matches(&token, &expected) {
+        return Ok(None);
+    }
+    let days = 30;
+    let now = Date::now().as_millis() as i64;
+    let since = JsValue::from_f64((now - days * analytics::DAY_MS) as f64);
+    let lookback =
+        JsValue::from_f64((now - days * analytics::DAY_MS - analytics::ATTRIBUTION_MS) as f64);
+    let db = ctx.d1("DB")?;
+    let query = |sql: &str| db.prepare(sql).bind(std::slice::from_ref(&since));
+    let mut results = db
+        .batch(vec![
+            query(analytics::STATS_TOTALS)?,
+            query(analytics::STATS_SESSIONS)?,
+            query(analytics::STATS_CONVERSIONS)?,
+            query(analytics::STATS_CHANNELS)?,
+            query(analytics::STATS_CONVERSIONS_BY_CHANNEL)?,
+            query(analytics::STATS_LANDING)?,
+            db.prepare(analytics::STATS_CONVERSIONS_BY_LANDING)
+                .bind(&[since.clone(), lookback])?,
+        ])
+        .await?
+        .into_iter();
+    let mut next = || {
+        results
+            .next()
+            .ok_or_else(|| Error::RustError("missing result".into()))
+    };
+    #[derive(Deserialize)]
+    struct Totals {
+        visitors: i64,
+        pageviews: i64,
+    }
+    #[derive(Deserialize)]
+    struct Sessions {
+        sessions: i64,
+    }
+    let totals = next()?.results::<Totals>()?.into_iter().next();
+    let sessions = next()?.results::<Sessions>()?.into_iter().next();
+    let conversions = next()?.results()?;
+    let channels = analytics::pivot(next()?.results()?, next()?.results()?);
+    let landing_pages = analytics::pivot(next()?.results()?, next()?.results()?);
+    Ok(Some(Stats {
+        days,
+        visitors: totals.as_ref().map_or(0, |t| t.visitors),
+        pageviews: totals.as_ref().map_or(0, |t| t.pageviews),
+        sessions: sessions.map_or(0, |s| s.sessions),
+        conversions,
+        channels,
+        landing_pages,
+    }))
+}
+
+fn private(mut res: Response) -> Result<Response> {
+    res.headers_mut().set("Cache-Control", "no-store")?;
+    res.headers_mut().set("X-Robots-Tag", "noindex")?;
+    Ok(res)
+}
+
+async fn stats_json(req: Request, ctx: RouteContext<()>) -> Result<Response> {
+    match load_stats(&req, &ctx).await? {
+        Some(stats) => private(Response::from_json(&stats)?),
+        None => json_status(json!({ "error": "unauthorized" }), 401),
+    }
+}
+
+async fn stats_page(req: Request, ctx: RouteContext<()>) -> Result<Response> {
+    match load_stats(&req, &ctx).await? {
+        Some(stats) => private(Response::from_html(
+            stats
+                .render()
+                .map_err(|e| Error::RustError(e.to_string()))?,
+        )?),
+        None => Response::error("Not found", 404),
+    }
+}
+
 #[event(fetch)]
 async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
     Router::new()
+        .get_async("/api/stats", stats_json)
+        .get_async("/stats", stats_page)
         .post_async("/api/event", collect)
         .options("/api/event", event_preflight)
         .post_async("/api/waitlist", join)
