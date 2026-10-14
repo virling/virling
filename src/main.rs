@@ -13,6 +13,7 @@ mod settings;
 mod sites;
 mod stats;
 mod sync;
+mod ua;
 mod waitlist;
 mod waitlist_copy;
 
