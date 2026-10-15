@@ -115,6 +115,7 @@ pub fn router(state: AppState) -> Router {
         )
         .route("/assets/flags/{file}", get(flag))
         .route("/assets/art/{file}", get(art))
+        .route("/assets/fonts/{file}", get(font))
         .route("/assets/icons/{file}", get(ua_icon))
         .route(
             "/favicon.svg",
@@ -214,6 +215,26 @@ const ART: [(&str, &[u8]); 3] = [
         include_bytes!("../assets/art/04-empty-goals.jpg"),
     ),
 ];
+
+const FONTS: &[(&str, &[u8])] = &[
+    ("schibsted-grotesk.woff2", include_bytes!("../assets/fonts/schibsted-grotesk.woff2")),
+    ("geist-mono.woff2", include_bytes!("../assets/fonts/geist-mono.woff2")),
+    ("caveat.woff2", include_bytes!("../assets/fonts/caveat.woff2")),
+];
+
+async fn font(Path(file): Path<String>) -> Response {
+    match FONTS.iter().find(|(name, _)| *name == file) {
+        Some((_, bytes)) => (
+            [
+                (header::CONTENT_TYPE, "font/woff2"),
+                (header::CACHE_CONTROL, "public, max-age=31536000, immutable"),
+            ],
+            *bytes,
+        )
+            .into_response(),
+        None => StatusCode::NOT_FOUND.into_response(),
+    }
+}
 
 async fn art(Path(file): Path<String>) -> Response {
     match ART.iter().find(|(name, _)| *name == file) {
