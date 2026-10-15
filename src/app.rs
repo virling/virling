@@ -150,6 +150,7 @@ pub fn router(state: AppState) -> Router {
             )
             .route("/app/{domain}", get(dashboard::dashboard))
             .route("/app/{domain}/payments", get(dashboard::payments))
+            .route("/app/{domain}/report", get(dashboard::report))
             .route(
                 "/app/{domain}/payments/{provider}/{payment_id}",
                 get(dashboard::payment),
@@ -158,6 +159,10 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/settings",
                 get(settings::page).post(settings::save),
             )
+            .route("/app/{domain}/settings/report", post(settings::save_brand))
+            .route("/app/{domain}/settings/share", post(settings::share))
+            .route("/app/{domain}/settings/unshare", post(settings::revoke))
+            .route("/r/{token}", get(dashboard::shared))
             .route(
                 "/app/{domain}/settings/disconnect",
                 post(settings::disconnect),

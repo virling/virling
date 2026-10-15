@@ -1,0 +1,33 @@
+<article class="report"{% if !brand.accent.is_empty() %} style="--accent:{{ brand.accent }}"{% endif %}>
+  <header class="box rp-head">
+    {% if !brand.logo_url.is_empty() || !brand.agency_name.is_empty() %}<div class="rp-brand">{% if !brand.logo_url.is_empty() %}<img class="rp-logo" src="{{ brand.logo_url }}" alt="">{% endif %}{% if !brand.agency_name.is_empty() %}<b>{{ brand.agency_name }}</b>{% endif %}</div>{% endif %}
+    <div class="rp-title"><h2>{{ report.site }}</h2><span class="sub">Revenue report, {{ report.span }}</span></div>
+  </header>
+  <section class="box">
+    <div class="tiles">
+      {% for t in report.tiles %}<div class="tile{% if t.on %} on{% endif %}{% if t.big %} big{% endif %}" style="--c:{{ t.color }}">
+        <span class="tn"><i class="dot" style="background:{% if t.on %}{{ t.color }}{% else %}#B9BCC2{% endif %}"></i><span class="full">{{ t.name }}</span><span class="short">{{ t.short }}</span></span>
+        <span class="tv"><b>{{ t.value }}</b>{% if !t.delta.is_empty() %}<span class="pill {{ t.trend }}">{{ t.delta }}</span>{% endif %}</span>
+        <span class="ts">{{ t.sub }}</span>
+      </div>{% endfor %}
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-head"><div><h2>{{ report.chart_title }}</h2><span class="sub">{{ report.chart_sub }}</span></div></div>
+      {{ report.chart|safe }}
+    </div>
+  </section>
+  <div class="rp-grid">
+    {% for (title, c) in report.cards %}
+    <section class="box bd">
+      <div class="bd-head"><h2>{{ title }}</h2></div>
+      <div class="bd-row th"><span class="first">{{ c.head }}</span><span class="num">Visitors</span><span class="num sorted">Revenue</span><span class="num">Per visitor</span></div>
+      {% for r in c.rows %}
+      <div class="bd-row"><div class="bd-name"><span class="bar" style="width:{{ "{:.1}"|format(r.width) }}%"></span><span class="t">{{ r.icon|safe }}{% if r.mono %}<span class="mono">{{ r.label }}</span>{% else %}<span class="lbl">{{ r.label }}</span>{% endif %}</span></div><span class="num v">{{ r.visitors }}</span><span class="num r{% if r.zero %} zero{% endif %}">{{ r.revenue }}</span><span class="num p{% if r.zero %} zero{% endif %}">{{ r.per_visitor }}</span></div>
+      {% endfor %}
+      {% if c.rows.is_empty() %}<p class="bd-empty">Nothing in this range yet.</p>{% endif %}
+      <div class="bd-foot"><span>{{ c.foot }}</span></div>
+    </section>
+    {% endfor %}
+  </div>
+  {% if !brand.footer.is_empty() %}<footer class="rp-foot">{{ brand.footer }}</footer>{% endif %}
+</article>
