@@ -216,3 +216,20 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
     start();
   }
 }
+
+// Diagrams load just before they scroll into view, keeping the first HTML small.
+const loadDiagrams = (box) => {
+  for (const el of box.querySelectorAll("[data-dg]:not([data-loaded])")) {
+    el.dataset.loaded = "1";
+    fetch(el.dataset.dg).then((r) => r.text()).then((svg) => { el.innerHTML = svg; el.style.aspectRatio = ""; }).catch(() => {});
+  }
+};
+const boxes = new Set([...document.querySelectorAll("[data-dg]")].map((el) => el.parentElement));
+if ("IntersectionObserver" in window) {
+  const seen = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { seen.unobserve(e.target); loadDiagrams(e.target); }
+  }, { rootMargin: "800px 0px" });
+  boxes.forEach((box) => seen.observe(box));
+} else {
+  boxes.forEach(loadDiagrams);
+}
