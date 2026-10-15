@@ -139,6 +139,17 @@ fn exit_link(raw: &str, domain: &str) -> Option<String> {
     ))
 }
 
+/// Region and city appear only when the proxy sends them (Cloudflare visitor location headers, Vercel).
+fn place(headers: &HeaderMap, names: &[&str]) -> Option<String> {
+    names.iter().find_map(|h| {
+        let raw = headers.get(*h)?.to_str().ok()?;
+        // Vercel percent-encodes these; a bare value parses as one form key.
+        let (v, _) = url::form_urlencoded::parse(raw.trim().as_bytes()).next()?;
+        let v = clip(v.trim().to_string(), 80);
+        (!v.is_empty()).then_some(v)
+    })
+}
+
 fn country(headers: &HeaderMap) -> Option<String> {
     ["cf-ipcountry", "x-vercel-ip-country", "x-country-code"]
         .iter()
@@ -224,6 +235,8 @@ pub async fn collect(
     };
     let ip = client_ip(&headers, peer, state.config.trust_proxy);
     let country = country(&headers);
+    let region = place(&headers, &["cf-region", "x-vercel-ip-country-region"]);
+    let city = place(&headers, &["cf-ipcity", "x-vercel-ip-city"]);
     let browser = browser(user_agent);
     let os = os(user_agent);
     let now = OffsetDateTime::now_utc();
@@ -324,9 +337,12 @@ pub async fn collect(
             utm_term: utm("utm_term"),
             channel: channel.as_str().to_string(),
             country: country.clone(),
+            region: region.clone(),
+            city: city.clone(),
             device: device(e.w).to_string(),
             browser: browser.to_string(),
             os: os.to_string(),
+            host: Some(page_host.to_ascii_lowercase()),
         });
     }
 
@@ -366,6 +382,25 @@ pub async fn preflight() -> Response {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn reads_region_and_city_from_proxy_headers() {
+        let mut h = HeaderMap::new();
+        assert_eq!(
+            place(&h, &["cf-region", "x-vercel-ip-country-region"]),
+            None
+        );
+        h.insert("x-vercel-ip-city", "S%C3%A3o%20Paulo".parse().unwrap());
+        h.insert("cf-region", "Bavaria".parse().unwrap());
+        assert_eq!(
+            place(&h, &["cf-ipcity", "x-vercel-ip-city"]).as_deref(),
+            Some("São Paulo")
+        );
+        assert_eq!(
+            place(&h, &["cf-region", "x-vercel-ip-country-region"]).as_deref(),
+            Some("Bavaria")
+        );
+    }
 
     #[test]
     fn reads_the_operating_system() {
