@@ -20,8 +20,7 @@ pub fn session_body(email: Option<&str>, visitor_id: Option<&str>, code: Option<
             "redirect_immediately": true,
             "allow_discount_code": true,
             "allow_phone_number_collection": false,
-            "allow_tax_id": false,
-            "single_page": true
+            "allow_tax_id": false
         },
         "customization": {
             "theme": "light",
