@@ -1608,6 +1608,15 @@ struct ReportPage {
     brand: Brand,
 }
 
+#[derive(Template)]
+#[template(path = "report_shared.html")]
+struct SharedReportPage {
+    range_label: &'static str,
+    ranges: Vec<Opt>,
+    report: ReportView,
+    brand: Brand,
+}
+
 /// The client report for a range, with range links pointing at `base`.
 async fn client_report(
     state: &AppState,
@@ -1723,6 +1732,62 @@ pub async fn report(
         report,
         brand,
         shell: ctx.shell,
+    })
+}
+
+/// The client report behind a read-only link, without sign-in or Virling branding.
+pub async fn shared(
+    State(state): State<AppState>,
+    Path(token): Path<String>,
+    Query(q): Query<ReportQuery>,
+) -> Response {
+    let site: Result<Option<Site>, _> = sqlx::query_as(
+        "SELECT s.id, s.domain, s.timezone, s.cookieless FROM report_brands b JOIN sites s ON s.id = b.site_id WHERE b.share_token = ?",
+    )
+    .bind(&token)
+    .fetch_optional(&state.db)
+    .await;
+    let site = match site {
+        Ok(Some(site)) => site,
+        Ok(None) => return StatusCode::NOT_FOUND.into_response(),
+        Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
+    };
+    let store = state.events.clone();
+    let (id, tz) = (site.id.clone(), site.timezone.clone());
+    let (offset, first) =
+        match blocking(move || Ok((store.utc_offset(&tz)?, store.first_event(&id)?))).await {
+            Ok(r) => r,
+            Err(code) => return code.into_response(),
+        };
+    let ctx = Ctx {
+        shell: Shell {
+            domain: site.domain.clone(),
+            initial: String::new(),
+            sites: Vec::new(),
+            nav: "report",
+            plan: String::new(),
+            usage: String::new(),
+            live: 0,
+        },
+        site,
+        today: OffsetDateTime::now_utc().to_offset(offset).date(),
+        first_day: first.map(|t| t.to_offset(offset).date()),
+        offset,
+    };
+    let base = format!("/r/{token}");
+    let (report, range_label, ranges) =
+        match client_report(&state, &ctx, q.range.as_deref(), &base).await {
+            Ok(r) => r,
+            Err(code) => return code.into_response(),
+        };
+    let Ok(brand) = settings::brand(&state.db, &ctx.site.id).await else {
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    };
+    render(SharedReportPage {
+        range_label,
+        ranges,
+        report,
+        brand,
     })
 }
 
