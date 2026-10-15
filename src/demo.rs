@@ -200,7 +200,59 @@ struct Visitor {
     device: &'static str,
     browser: &'static str,
     os: &'static str,
+    place: Option<(&'static str, &'static str)>,
 }
+
+/// Region and city per country, as a proxy with location headers would report them.
+const PLACES: &[(&str, &[(&str, &str)])] = &[
+    (
+        "US",
+        &[
+            ("California", "San Francisco"),
+            ("New York", "New York"),
+            ("Texas", "Austin"),
+            ("Washington", "Seattle"),
+        ],
+    ),
+    (
+        "GB",
+        &[
+            ("England", "London"),
+            ("England", "Manchester"),
+            ("Scotland", "Edinburgh"),
+        ],
+    ),
+    (
+        "DE",
+        &[
+            ("Berlin", "Berlin"),
+            ("Bavaria", "Munich"),
+            ("Hamburg", "Hamburg"),
+        ],
+    ),
+    (
+        "IN",
+        &[("Karnataka", "Bengaluru"), ("Maharashtra", "Mumbai")],
+    ),
+    (
+        "CA",
+        &[("Ontario", "Toronto"), ("British Columbia", "Vancouver")],
+    ),
+    ("FR", &[("Ile-de-France", "Paris")]),
+    ("NL", &[("North Holland", "Amsterdam")]),
+    (
+        "AU",
+        &[("New South Wales", "Sydney"), ("Victoria", "Melbourne")],
+    ),
+    ("BR", &[("Sao Paulo", "Sao Paulo")]),
+    ("ES", &[("Madrid", "Madrid"), ("Catalonia", "Barcelona")]),
+];
+const EXITS: &[&str] = &[
+    "github.com/tallybird/tallybird-js",
+    "docs.stripe.com/invoicing",
+    "x.com/tallybird",
+    "www.youtube.com/watch",
+];
 
 fn visitor(rng: &mut Rng) -> Visitor {
     let device = rng.pick(DEVICES);
@@ -212,12 +264,18 @@ fn visitor(rng: &mut Rng) -> Visitor {
         (_, "Safari") => "iOS",
         _ => rng.pick(&[("Android", 70.0), ("iOS", 30.0)]),
     };
+    let country = rng.pick(COUNTRIES);
+    let place = PLACES
+        .iter()
+        .find(|p| p.0 == country)
+        .map(|p| p.1[rng.below(p.1.len())]);
     Visitor {
         id: rng.id("v"),
-        country: rng.pick(COUNTRIES),
+        country,
         device,
         browser,
         os,
+        place,
     }
 }
 
@@ -242,6 +300,7 @@ fn session(
         channel::classify(utm_medium.as_deref(), utm_source.as_deref(), src.host).as_str();
     let pages = 1 + (rng.f() * rng.f() * 5.0) as usize;
     let mut path = src.paths[rng.below(src.paths.len())];
+    let mut last = path;
     for n in 0..pages {
         out.push(Event {
             site_id: site.into(),
@@ -266,13 +325,33 @@ fn session(
             device: v.device.into(),
             browser: v.browser.into(),
             os: v.os.into(),
+            region: v.place.map(|p| p.0.into()),
+            city: v.place.map(|p| p.1.into()),
+            host: Some(
+                if path.starts_with("/docs") {
+                    "docs.tallybird.app"
+                } else {
+                    DOMAIN
+                }
+                .into(),
+            ),
         });
+        last = path;
         path = [
             "/pricing",
             "/features/recurring-invoices",
             "/docs/getting-started",
             "/",
         ][rng.below(4)];
+    }
+    if rng.f() < 0.15 {
+        let mut exit = out[out.len() - 1].clone();
+        exit.ts += Duration::seconds(30);
+        exit.kind = "exit".into();
+        exit.name = Some(EXITS[rng.below(EXITS.len())].into());
+        exit.path = last.into();
+        exit.referrer_host = None;
+        out.push(exit);
     }
 }
 
@@ -349,6 +428,9 @@ fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>) {
                 device: v.device.into(),
                 browser: v.browser.into(),
                 os: v.os.into(),
+                region: v.place.map(|p| p.0.into()),
+                city: v.place.map(|p| p.1.into()),
+                host: Some(DOMAIN.into()),
             });
             let plan = rng.pick(PLANS);
             let (currency, rate) = rng.pick(CURRENCIES);
@@ -524,6 +606,7 @@ fn links(html: &str) -> Vec<String> {
 
 /// Static path for an app URL the demo prebuilds, or None for pages it leaves out.
 fn target(url: &str) -> Option<String> {
+    let url = url.split('#').next().unwrap_or_default();
     let rest = url.strip_prefix("/app/")?.strip_prefix(DOMAIN)?;
     let (path, query) = rest.split_once('?').unwrap_or((rest, ""));
     let params: Vec<(&str, &str)> = query
@@ -532,7 +615,13 @@ fn target(url: &str) -> Option<String> {
         .map(|kv| kv.split_once('=').unwrap_or((kv, "")))
         .collect();
     let (page, keys): (&str, &[&str]) = match path {
-        "" => ("", &["range", "metric", "chart"]),
+        "" => (
+            "",
+            &[
+                "range", "metric", "chart", "acq", "acq_by", "loc", "loc_by", "pg", "pg_by", "dev",
+                "dev_by", "all",
+            ],
+        ),
         "/payments" => ("payments/", &["range", "filter"]),
         "/report" => ("report/", &["range"]),
         p => {
@@ -551,9 +640,21 @@ fn target(url: &str) -> Option<String> {
     if !ranges_ok || params.iter().any(|(k, _)| !keys.contains(k)) {
         return None;
     }
-    let slug: Vec<&str> = keys
+    let extra = params.iter().filter(|(k, _)| *k != "range").count();
+    if extra > 1
+        && params
+            .iter()
+            .any(|(k, _)| !matches!(*k, "range" | "metric" | "chart"))
+    {
+        return None;
+    }
+    let slug: Vec<String> = keys
         .iter()
-        .filter_map(|k| params.iter().find(|p| p.0 == *k).map(|p| p.1))
+        .filter_map(|k| params.iter().find(|p| p.0 == *k))
+        .map(|(k, v)| match *k {
+            "range" | "metric" | "chart" | "filter" => v.to_string(),
+            _ => format!("{k}-{v}"),
+        })
         .collect();
     Some(if slug.is_empty() {
         format!("/demo/{page}")
@@ -589,7 +690,12 @@ fn rewrite(html: &str) -> String {
         } else if !href.starts_with("/app/") {
             out.push_str(tag);
         } else if let Some(t) = target(&href.replace("&#38;", "&")) {
-            let tag = tag.replacen(&format!("href=\"{href}\""), &format!("href=\"{t}\""), 1);
+            let frag = href.find('#').map_or("", |i| &href[i..]);
+            let tag = tag.replacen(
+                &format!("href=\"{href}\""),
+                &format!("href=\"{t}{frag}\""),
+                1,
+            );
             out.push_str(&tag.replace(
                 " data-drawer>",
                 &format!(" data-drawer=\"{t}drawer.html\">"),
