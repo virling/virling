@@ -258,6 +258,49 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn records_exits_and_leaves_inside_a_session() {
+        let (_dir, state, store) = setup().await;
+        let vid = "0b7c2d1e-aaaa-bbbb-cccc-1234567890ab";
+        let ev = |n: &str, g: &str| {
+            format!(
+                r#"{{"n":"{n}","u":"https://example.com/docs","s":"example.com","v":"{vid}","w":1440,"g":"{g}"}}"#
+            )
+        };
+        // Without a live session, exits and leaves are dropped.
+        assert_eq!(
+            post(&state, &ev("leave", ""), UA).await,
+            StatusCode::ACCEPTED
+        );
+        assert_eq!(
+            post(&state, &ev("pageview", ""), UA).await,
+            StatusCode::ACCEPTED
+        );
+        for (n, g) in [
+            ("exit", "https://github.com/virling/virling?tab=readme#top"),
+            ("exit", "https://www.example.com/pricing"),
+            ("exit", "mailto:hi@example.com"),
+            ("exit", ""),
+            ("leave", ""),
+        ] {
+            assert_eq!(post(&state, &ev(n, g), UA).await, StatusCode::ACCEPTED);
+        }
+        let rows = store.dump();
+        let kinds: Vec<(&str, Option<&str>)> = rows
+            .iter()
+            .map(|r| (r.3.as_str(), r.4.as_deref()))
+            .collect();
+        assert_eq!(
+            kinds,
+            [
+                ("pageview", None),
+                ("exit", Some("github.com/virling/virling")),
+                ("leave", None)
+            ],
+            "same-site, non-web and empty exits are dropped: {rows:?}"
+        );
+    }
+
+    #[tokio::test]
     async fn ingests_and_classifies_events() {
         let (_dir, state, store) = setup().await;
         let vid = "0b7c2d1e-aaaa-bbbb-cccc-1234567890ab";

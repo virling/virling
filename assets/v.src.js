@@ -31,16 +31,19 @@
   };
   w.addEventListener("popstate", pageview);
 
-  // Carry the visitor ID into Stripe, Polar and Dodo payment links so the payment can be matched back.
+  // Record outbound clicks as exits, and carry the visitor ID into Stripe, Polar and Dodo payment links.
   d.addEventListener("click", function (e) {
     var a = e.target.closest && e.target.closest("a[href]"), u, k;
-    if (!a || !vid) return;
+    if (!a) return;
     try {
       u = new URL(a.href);
-      k = u.hostname == "buy.stripe.com" ? "client_reference_id" : u.hostname == "buy.polar.sh" ? "custom_field_data.virling_vid" : u.hostname == "checkout.dodopayments.com" ? "metadata_virling_vid" : 0;
+      if (/^http/.test(u.protocol) && u.hostname != location.hostname) send("exit", u.origin + u.pathname);
+      k = vid && (u.hostname == "buy.stripe.com" ? "client_reference_id" : u.hostname == "buy.polar.sh" ? "custom_field_data.virling_vid" : u.hostname == "checkout.dodopayments.com" ? "metadata_virling_vid" : 0);
       if (k && !u.searchParams.has(k)) u.searchParams.set(k, vid), a.href = u.href;
     } catch (_) {}
   }, true);
+  // Mark when the page is left so time on page and the exit page are known.
+  d.addEventListener("visibilitychange", function () { d.visibilityState == "hidden" && send("leave"); });
 
   var q = (w.virling && w.virling.q) || [];
   w.virling = function (cmd, arg) {

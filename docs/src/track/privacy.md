@@ -2,7 +2,7 @@
 
 ## What is stored
 
-For each event Virling stores: the time, the path without its query string, the referrer host, UTM tags, the channel, the country, the device type, the browser name, a visitor ID and a session ID. For goals, the goal name.
+For each event Virling stores: the time, the path without its query string, the referrer host, UTM tags, the channel, the country, the device type, the browser name, a visitor ID and a session ID. For goals, the goal name. For outbound link clicks, the destination host and path without its query string. When the page is hidden or closed, a leave event with no extra data, used for time on page and the exit page.
 
 It does not store IP addresses, full user agents, full referrer URLs, or anything a visitor types.
 

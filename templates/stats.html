@@ -14,6 +14,22 @@
     </table>
   </section>
 {% endmacro -%}
+{% macro list(title, note, rows) %}
+  <section class="panel">
+    <h2>{{ title }}</h2>
+    <p>{{ note }}</p>
+    <table>
+      <thead><tr><th></th><th>Visitors</th></tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr><td>{{ r.label }}</td><td>{{ r.visitors }}</td></tr>
+      {% else %}
+        <tr><td colspan="2" class="muted">No data yet</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endmacro -%}
 <!doctype html>
 <html lang="en">
 <head>
@@ -56,6 +72,8 @@ tr:last-child td { border-bottom: 0; }
   </section>
   {% call table("Channels", "Visitors by first-touch channel. Conversions by last non-direct channel within 90 days.", channels) %}{% endcall %}
   {% call table("Landing pages", "First page each visitor saw.", landing_pages) %}{% endcall %}
+  {% call list("Exit pages", "Last page each visitor saw.", exit_pages) %}{% endcall %}
+  {% call list("Exit links", "Links to other sites that visitors clicked.", exit_links) %}{% endcall %}
 </main>
 </body>
 </html>

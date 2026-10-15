@@ -71,6 +71,16 @@ fn clip(s: &str, max: usize) -> Option<String> {
     (!s.is_empty()).then_some(s)
 }
 
+/// Destination of an outbound click as host and path; None for our own pages or non-web links.
+fn exit_link(raw: &str) -> Option<String> {
+    let url = Url::parse(raw).ok()?;
+    let host = url.host_str()?.to_ascii_lowercase();
+    if !matches!(url.scheme(), "http" | "https") || own_host(&host) {
+        return None;
+    }
+    clip(&format!("{host}{}", url.path()), 300)
+}
+
 pub fn country(header: Option<&str>) -> Option<String> {
     let v = header?.trim().to_ascii_uppercase();
     (v.len() == 2 && v != "XX" && v != "T1").then_some(v)
@@ -88,6 +98,8 @@ pub fn to_row(e: Incoming, user_agent: &str, country: Option<&str>, now_ms: i64)
     let (kind, name) = match e.n.as_str() {
         "pageview" => ("pageview", None),
         "goal" => ("goal", Some(clip(e.g.as_deref()?, 64)?)),
+        "exit" => ("exit", Some(exit_link(e.g.as_deref()?)?)),
+        "leave" => ("leave", None),
         _ => return None,
     };
     let visitor_id = e.v.filter(|v| valid_visitor_id(v))?;
@@ -137,9 +149,9 @@ pub fn waitlist_kind(wedge: &str) -> Option<&'static str> {
 /// Stats queries. ?1 is the window start, ?2 the attribution lookback start, both unix ms.
 pub const STATS_TOTALS: &str = "SELECT COUNT(DISTINCT visitor_id) AS visitors, COUNT(*) AS pageviews FROM events WHERE kind = 'pageview' AND ts >= ?1";
 
-pub const STATS_SESSIONS: &str = "WITH e AS (SELECT ts, LAG(ts) OVER (PARTITION BY visitor_id ORDER BY ts, id) AS prev FROM events WHERE ts >= ?1) SELECT COUNT(*) AS sessions FROM e WHERE prev IS NULL OR ts - prev > 1800000";
+pub const STATS_SESSIONS: &str = "WITH e AS (SELECT ts, LAG(ts) OVER (PARTITION BY visitor_id ORDER BY ts, id) AS prev FROM events WHERE kind IN ('pageview', 'goal') AND ts >= ?1) SELECT COUNT(*) AS sessions FROM e WHERE prev IS NULL OR ts - prev > 1800000";
 
-pub const STATS_CHANNELS: &str = "WITH first AS (SELECT channel, ROW_NUMBER() OVER (PARTITION BY visitor_id ORDER BY ts, id) AS rn FROM events WHERE ts >= ?1) SELECT channel AS label, COUNT(*) AS visitors FROM first WHERE rn = 1 GROUP BY channel ORDER BY visitors DESC, label";
+pub const STATS_CHANNELS: &str = "WITH first AS (SELECT channel, ROW_NUMBER() OVER (PARTITION BY visitor_id ORDER BY ts, id) AS rn FROM events WHERE kind IN ('pageview', 'goal') AND ts >= ?1) SELECT channel AS label, COUNT(*) AS visitors FROM first WHERE rn = 1 GROUP BY channel ORDER BY visitors DESC, label";
 
 pub const STATS_CONVERSIONS: &str = "SELECT kind, COUNT(*) AS count, COALESCE(SUM(amount_cents), 0) AS amount_cents FROM conversions WHERE ts >= ?1 GROUP BY kind ORDER BY kind";
 
@@ -147,9 +159,13 @@ pub const STATS_CONVERSIONS_BY_CHANNEL: &str = "SELECT COALESCE((SELECT e.channe
 
 pub const STATS_LANDING: &str = "WITH first AS (SELECT path, ROW_NUMBER() OVER (PARTITION BY visitor_id ORDER BY ts, id) AS rn FROM events WHERE kind = 'pageview' AND ts >= ?1) SELECT path AS label, COUNT(*) AS visitors FROM first WHERE rn = 1 GROUP BY path ORDER BY visitors DESC, label";
 
+pub const STATS_EXIT_PAGES: &str = "WITH last AS (SELECT path, ROW_NUMBER() OVER (PARTITION BY visitor_id ORDER BY ts DESC, id DESC) AS rn FROM events WHERE kind = 'pageview' AND ts >= ?1) SELECT path AS label, COUNT(*) AS visitors FROM last WHERE rn = 1 GROUP BY path ORDER BY visitors DESC, label LIMIT 20";
+
+pub const STATS_EXIT_LINKS: &str = "SELECT name AS label, COUNT(DISTINCT visitor_id) AS visitors FROM events WHERE kind = 'exit' AND ts >= ?1 GROUP BY name ORDER BY visitors DESC, label LIMIT 20";
+
 pub const STATS_CONVERSIONS_BY_LANDING: &str = "WITH first AS (SELECT visitor_id, path, ROW_NUMBER() OVER (PARTITION BY visitor_id ORDER BY ts, id) AS rn FROM events WHERE kind = 'pageview' AND ts >= ?2) SELECT COALESCE(f.path, '(unknown)') AS label, c.kind, COUNT(*) AS count FROM conversions c LEFT JOIN first f ON f.visitor_id = c.visitor_id AND f.rn = 1 WHERE c.ts >= ?1 GROUP BY label, c.kind ORDER BY label, c.kind";
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct LabelCount {
     pub label: String,
     pub visitors: i64,
@@ -297,6 +313,28 @@ mod tests {
         let mut e = pageview("https://virling.com/", None);
         e["n"] = "click".into();
         assert!(one(e).is_none());
+    }
+
+    #[test]
+    fn exits_keep_host_and_path_of_outside_links() {
+        let mut e = pageview("https://virling.com/", None);
+        e["n"] = "exit".into();
+        e["g"] = "https://github.com/virling/virling?tab=readme#top".into();
+        let row = one(e.clone()).unwrap();
+        assert_eq!(
+            (row.kind, row.name.as_deref()),
+            ("exit", Some("github.com/virling/virling"))
+        );
+        for g in [
+            "https://www.virling.com/agency",
+            "mailto:hi@virling.com",
+            "",
+        ] {
+            e["g"] = g.into();
+            assert!(one(e.clone()).is_none(), "{g}");
+        }
+        e["n"] = "leave".into();
+        assert_eq!(one(e).unwrap().kind, "leave");
     }
 
     #[test]
