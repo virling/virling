@@ -20,6 +20,8 @@ mod sites;
 mod stats;
 mod sync;
 mod ua;
+mod visitor_pages;
+mod visitors;
 mod waitlist;
 mod waitlist_copy;
 mod world;
@@ -1118,6 +1120,110 @@ mod tests {
         assert!(tabs.contains("No outbound link clicks in this range."));
         assert!(tabs.contains("macOS"));
         assert!(tabs.contains(r#"href="/app/example.com?acq=referrer&#38;acq_by=visitors&#38;loc=city&#38;pg=exit#card-dev""#));
+    }
+
+    #[tokio::test]
+    async fn visitors_and_timeline_render() {
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        seed(&store, &site);
+        let exit = Event {
+            kind: "exit".into(),
+            name: Some("github.com/virling/virling".into()),
+            path: "/last".into(),
+            referrer_host: None,
+            utm_source: None,
+            utm_medium: None,
+            utm_campaign: None,
+            utm_content: None,
+            utm_term: None,
+            channel: "Direct".into(),
+            country: None,
+            device: "Desktop".into(),
+            browser: "Firefox".into(),
+            os: "macOS".into(),
+            region: None,
+            city: None,
+            host: None,
+            site_id: site.clone(),
+            ts: time::OffsetDateTime::now_utc() - time::Duration::days(3)
+                + time::Duration::minutes(2),
+            visitor_id: "v1".into(),
+            session_id: "last".into(),
+        };
+        store.insert_events(&[exit]).unwrap();
+        crate::sync::rebuild_attribution(&state, Some(&site)).await;
+        let label = crate::alias::alias("v:v1").name;
+
+        let body =
+            body_text(call(&state, get("/app/example.com/visitors", Some(&cookie))).await).await;
+        assert!(body.contains(&label) && body.contains(r#"href="/app/example.com/visitors/v1""#));
+        assert!(body.contains("github.com/virling/virling") && body.contains("/last"));
+        assert!(
+            body.contains(r#"aria-label="Hacker News""#),
+            "first source logo"
+        );
+        assert!(body.contains("$49"));
+        for query in [
+            "?exit=page",
+            "?paid=no",
+            "?channel=Direct",
+            "?source=nope.dev&range=7d",
+        ] {
+            let res = call(
+                &state,
+                get(&format!("/app/example.com/visitors{query}"), Some(&cookie)),
+            )
+            .await;
+            assert_eq!(res.status(), StatusCode::OK, "{query}");
+            assert!(
+                body_text(res).await.contains("No visitors match"),
+                "{query}"
+            );
+        }
+        let hn = body_text(
+            call(
+                &state,
+                get(
+                    "/app/example.com/visitors?source=news.ycombinator.com&exit=link&paid=yes",
+                    Some(&cookie),
+                ),
+            )
+            .await,
+        )
+        .await;
+        assert!(hn.contains(&label) && hn.contains("Clear filters"));
+
+        let res = call(&state, get("/app/example.com/visitors/v1", Some(&cookie))).await;
+        assert_eq!(res.status(), StatusCode::OK);
+        let t = body_text(res).await;
+        assert!(t.contains("Visit 1") && t.contains("Visit 2"));
+        assert!(t.contains("Clicked out to") && t.contains("github.com/virling/virling"));
+        assert!(t.contains("Left from") && t.contains("/first"));
+        assert!(t.contains("Paid $49.00") && t.contains("/payments/stripe/pi_1"));
+        assert!(t.contains("2m 00s"), "time on page from the exit click");
+        assert_eq!(
+            call(
+                &state,
+                get("/app/example.com/visitors/nobody", Some(&cookie))
+            )
+            .await
+            .status(),
+            StatusCode::NOT_FOUND
+        );
+
+        let pays =
+            body_text(call(&state, get("/app/example.com/payments", Some(&cookie))).await).await;
+        assert!(pays.contains(&format!(
+            r#"<a class="vis-link" href="/app/example.com/visitors/v1" title="Visitor timeline"><b>{label}</b></a>"#
+        )));
+        let dash = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
+        assert!(dash.contains(r#"href="/app/example.com/visitors/v1""#));
+        let mut req = get("/app/example.com/payments/stripe/pi_1", Some(&cookie));
+        req.headers_mut().insert("x-drawer", "1".parse().unwrap());
+        let drawer = body_text(call(&state, req).await).await;
+        assert!(drawer.contains(r#"class="j-visitor" href="/app/example.com/visitors/v1""#));
     }
 
     #[tokio::test]
