@@ -121,6 +121,7 @@ h3 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.025em; }
 .spec-list dd { margin: 0; font-size: 15px; line-height: 1.55; color: var(--ink); }
 .spec-list dd span { color: var(--ink-3); }
 .spec-code { display: flex; flex-direction: column; gap: 10px; margin-top: 40px; }
+.spec-code .code { max-width: none; }
 .soon { margin: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px; color: var(--ink-3); }
 .soon .chip { height: 24px; font-size: 12px; }
 a.more { color: var(--ink); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
