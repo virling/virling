@@ -217,9 +217,18 @@ const ART: [(&str, &[u8]); 3] = [
 ];
 
 const FONTS: &[(&str, &[u8])] = &[
-    ("schibsted-grotesk.woff2", include_bytes!("../assets/fonts/schibsted-grotesk.woff2")),
-    ("geist-mono.woff2", include_bytes!("../assets/fonts/geist-mono.woff2")),
-    ("caveat.woff2", include_bytes!("../assets/fonts/caveat.woff2")),
+    (
+        "schibsted-grotesk.woff2",
+        include_bytes!("../assets/fonts/schibsted-grotesk.woff2"),
+    ),
+    (
+        "geist-mono.woff2",
+        include_bytes!("../assets/fonts/geist-mono.woff2"),
+    ),
+    (
+        "caveat.woff2",
+        include_bytes!("../assets/fonts/caveat.woff2"),
+    ),
 ];
 
 async fn font(Path(file): Path<String>) -> Response {
