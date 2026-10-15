@@ -530,6 +530,22 @@ mod tests {
     }
 
     #[test]
+    fn failed_first_attempt_is_not_the_first_payment() {
+        let mut failed = charge("ch_3NsubCreate00000000000");
+        failed.id = "ch_3NsubCreateFailed00000".into();
+        failed.status = "failed".into();
+        failed.created -= 3600;
+        let payments = vec![
+            to_fetched(&failed, None, 0).unwrap(),
+            to_fetched(&charge("ch_3NsubCreate00000000000"), sessions().first(), 0).unwrap(),
+            to_fetched(&charge("ch_3NrenewalCycle00000000"), None, 0).unwrap(),
+        ];
+        let site = e2e::site(Provider::Stripe, payments, "v_4f2a9c1e");
+        let renewal = site.touch("ch_3NrenewalCycle00000000");
+        assert_eq!(renewal.map(|t| t.session_id).as_deref(), Some("reddit"));
+    }
+
+    #[test]
     fn renewal_without_attributed_first_or_customer_is_unattributed() {
         let first = charge("ch_3NsubCreate00000000000");
         let renewal = charge("ch_3NrenewalCycle00000000");

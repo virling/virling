@@ -116,7 +116,7 @@ WITH touches AS (
     QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1
 ),
 pays AS (
-    SELECT provider, provider_payment_id, ts, visitor_id, customer_id, is_renewal
+    SELECT provider, provider_payment_id, ts, visitor_id, customer_id, is_renewal, status
     FROM payments WHERE site_id = $site
 ),
 own AS (
@@ -137,7 +137,7 @@ own AS (
 firsts AS (
     SELECT provider, customer_id, provider_payment_id
     FROM pays
-    WHERE customer_id IS NOT NULL
+    WHERE customer_id IS NOT NULL AND status <> 'failed'
     QUALIFY row_number() OVER (PARTITION BY provider, customer_id ORDER BY ts, provider_payment_id) = 1
 )
 SELECT $site, p.provider, p.provider_payment_id, $model,
