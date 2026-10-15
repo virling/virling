@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /waitlist/
+
+Sitemap: https://virling.com/sitemap.xml
