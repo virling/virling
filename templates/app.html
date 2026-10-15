@@ -9,13 +9,13 @@
   <a class="brand" href="/app">{% include "_logo.html" %}<b>virling</b></a>
   <div class="menu-wrap switcher" data-menu>
     <button type="button" aria-haspopup="true" aria-expanded="false">
-      <span class="favicon">{{ shell.initial }}</span>
+      {% if shell.icon.is_empty() %}<span class="favicon">{{ shell.initial }}</span>{% else %}<img class="favicon" src="{{ shell.icon }}" width="22" height="22" alt="">{% endif %}
       <span class="grow">{{ shell.domain }}</span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
     </button>
     <div class="menu" hidden>
       {% for s in shell.sites %}
-      <a href="{{ s.href }}"{% if s.on %} aria-current="true"{% endif %}>{{ s.label }}</a>
+      <a href="{{ s.href }}"{% if s.on %} aria-current="true"{% endif %}>{% if s.icon.is_empty() %}<span class="favicon sm">{{ s.initial }}</span>{% else %}<img class="favicon sm" src="{{ s.icon }}" width="16" height="16" alt="">{% endif %}{{ s.label }}</a>
       {% endfor %}
       <a class="add" href="/app/setup">+ Add a site</a>
     </div>

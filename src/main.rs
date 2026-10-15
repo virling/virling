@@ -5,6 +5,7 @@ mod chart;
 mod crypto;
 mod dashboard;
 mod events;
+mod favicon;
 mod flags;
 mod fx;
 mod icons;
@@ -1015,6 +1016,52 @@ mod tests {
             get(&format!("/app/sites/{site}/dashboard"), Some(&other)),
         )
         .await;
+        assert_eq!(res.status(), StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
+    async fn favicon_replaces_the_letter_once_cached() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        let page = || async {
+            body_text(call(&state, get("/app/example.com/settings", Some(&cookie))).await).await
+        };
+        assert!(page().await.contains(r#"<span class="favicon">E</span>"#));
+        let failed = "INSERT INTO site_icons (site_id, content_type, body, fetched_at) VALUES (?, NULL, NULL, 5)";
+        sqlx::query(failed)
+            .bind(&site)
+            .execute(&state.db)
+            .await
+            .unwrap();
+        assert!(
+            page().await.contains(r#"<span class="favicon">E</span>"#),
+            "failed fetch keeps the letter"
+        );
+        sqlx::query(
+            "UPDATE site_icons SET content_type = 'image/svg+xml', body = ? WHERE site_id = ?",
+        )
+        .bind(b"<svg xmlns='http://www.w3.org/2000/svg'/>".to_vec())
+        .bind(&site)
+        .execute(&state.db)
+        .await
+        .unwrap();
+        assert!(
+            page()
+                .await
+                .contains(r#"<img class="favicon" src="/app/example.com/icon?v=5""#)
+        );
+        let res = call(&state, get("/app/example.com/icon", Some(&cookie))).await;
+        assert_eq!(res.status(), StatusCode::OK);
+        assert_eq!(res.headers()["content-type"], "image/svg+xml");
+        assert!(
+            res.headers()["content-security-policy"]
+                .to_str()
+                .unwrap()
+                .contains("sandbox")
+        );
+        let other = sign_in(&state, "other%40example.com").await;
+        let res = call(&state, get("/app/example.com/icon", Some(&other))).await;
         assert_eq!(res.status(), StatusCode::NOT_FOUND);
     }
 

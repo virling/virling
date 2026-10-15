@@ -138,8 +138,9 @@ pub async fn create_site(
         return retry("Enter a domain like yourproduct.com.");
     };
     match sites::create_site(&state.db, &account.id, &domain, &timezone).await {
-        Ok(_) => {
+        Ok(id) => {
             state.sites.invalidate(&domain);
+            crate::favicon::refresh(&state, &id, &domain, None);
             Redirect::to(&sites::app_path(&domain, "setup/script")).into_response()
         }
         Err(err) if err.to_string().contains("UNIQUE") => {
