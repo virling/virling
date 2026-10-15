@@ -11,9 +11,11 @@ A subscription renewal takes the attribution of the customer's first payment. If
 | Polar | The order's billing reason is `subscription_cycle`. |
 | LemonSqueezy | It is a subscription invoice with billing reason `renewal`. |
 
+Upgrades and other plan changes count as renewals too, so they keep the first payment's channel: Stripe and Polar `subscription_update`, LemonSqueezy `updated`, and any later Dodo subscription payment.
+
 ## Which payment is the first
 
-The customer's first payment is their earliest payment from the same provider, matched by the provider's customer ID. If that first payment was attributed, the renewal copies its channel, referrer, campaign, landing page, country and device. If it was not, the renewal falls back to its own visitor ID, which renewals rarely carry, so it is usually Unattributed too.
+The customer's first payment is their earliest payment that did not fail, from the same provider, matched by the provider's customer ID. If that first payment was attributed, the renewal copies its channel, referrer, campaign, landing page, country and device. If it was not, the renewal falls back to its own visitor ID, which renewals rarely carry, so it is usually Unattributed too.
 
 Payments without a customer ID cannot be linked to a first payment.
 

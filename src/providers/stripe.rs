@@ -270,7 +270,10 @@ fn to_fetched(charge: &Charge, session: Option<&Session>, lost: i64) -> Option<F
             .or_else(|| session.and_then(session_visitor))
             .or_else(|| charge.payment_intent.as_ref().and_then(intent_visitor)),
         customer_id: charge.customer.clone(),
-        is_renewal: billing_reason == Some("subscription_cycle"),
+        is_renewal: matches!(
+            billing_reason,
+            Some("subscription_cycle" | "subscription_update")
+        ),
     })
 }
 
@@ -419,6 +422,7 @@ struct EventObject {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::providers::{Provider, e2e};
 
     fn charge(id: &str) -> Charge {
         let list: List<Charge> =
@@ -514,6 +518,66 @@ mod tests {
             first.invoice.unwrap().subscription.as_deref(),
             Some("sub_1MowQVLkdIwHu7ixeRlqHVzs")
         );
+    }
+
+    fn upgrade() -> Charge {
+        let mut c = charge("ch_3NrenewalCycle00000000");
+        c.id = "ch_3NsubUpdate00000000000".into();
+        c.created -= 30 * 86_400;
+        c.invoice.as_mut().unwrap().billing_reason = Some("subscription_update".into());
+        c
+    }
+
+    #[test]
+    fn renewals_and_upgrades_keep_the_first_channel() {
+        let first = charge("ch_3NsubCreate00000000000");
+        let payments = vec![
+            to_fetched(&first, sessions().first(), 0).unwrap(),
+            to_fetched(&upgrade(), None, 0).unwrap(),
+            to_fetched(&charge("ch_3NrenewalCycle00000000"), None, 0).unwrap(),
+        ];
+        assert_eq!(payments[0].visitor_id.as_deref(), Some("v_4f2a9c1e"));
+        assert!(payments[1..].iter().all(|p| p.visitor_id.is_none()));
+        e2e::site(Provider::Stripe, payments, "v_4f2a9c1e").assert_all_reddit();
+    }
+
+    #[test]
+    fn failed_first_attempt_is_not_the_first_payment() {
+        let mut failed = charge("ch_3NsubCreate00000000000");
+        failed.id = "ch_3NsubCreateFailed00000".into();
+        failed.status = "failed".into();
+        failed.created -= 3600;
+        let payments = vec![
+            to_fetched(&failed, None, 0).unwrap(),
+            to_fetched(&charge("ch_3NsubCreate00000000000"), sessions().first(), 0).unwrap(),
+            to_fetched(&charge("ch_3NrenewalCycle00000000"), None, 0).unwrap(),
+        ];
+        let site = e2e::site(Provider::Stripe, payments, "v_4f2a9c1e");
+        let renewal = site.touch("ch_3NrenewalCycle00000000");
+        assert_eq!(renewal.map(|t| t.session_id).as_deref(), Some("reddit"));
+    }
+
+    #[test]
+    fn renewal_without_attributed_first_or_customer_is_unattributed() {
+        let first = charge("ch_3NsubCreate00000000000");
+        let renewal = charge("ch_3NrenewalCycle00000000");
+        let payments = vec![
+            to_fetched(&first, None, 0).unwrap(),
+            to_fetched(&renewal, None, 0).unwrap(),
+        ];
+        let site = e2e::site(Provider::Stripe, payments, "v_4f2a9c1e");
+        assert_eq!(site.touch("ch_3NsubCreate00000000000"), None);
+        assert_eq!(site.touch("ch_3NrenewalCycle00000000"), None);
+
+        let mut orphan = charge("ch_3NrenewalCycle00000000");
+        orphan.customer = None;
+        let payments = vec![
+            to_fetched(&first, sessions().first(), 0).unwrap(),
+            to_fetched(&orphan, None, 0).unwrap(),
+        ];
+        let site = e2e::site(Provider::Stripe, payments, "v_4f2a9c1e");
+        assert!(site.touch("ch_3NsubCreate00000000000").is_some());
+        assert_eq!(site.touch("ch_3NrenewalCycle00000000"), None);
     }
 
     #[test]

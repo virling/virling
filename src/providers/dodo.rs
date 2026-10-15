@@ -499,6 +499,7 @@ pub async fn fetch(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::providers::{Provider, e2e};
     use time::macros::datetime;
 
     fn payments() -> Vec<DodoPayment> {
@@ -574,6 +575,27 @@ mod tests {
         let f = p.to_fetched(0, true);
         assert!(f.is_renewal);
         assert_eq!(f.customer_id.as_deref(), Some("cus_Wn4cTb6Jk1Ps"));
+    }
+
+    #[test]
+    fn renewals_and_plan_changes_keep_the_first_channel() {
+        let sub: DodoSubscription =
+            serde_json::from_str(include_str!("fixtures/dodo_subscription.json")).unwrap();
+        let mut first = payments().remove(3);
+        first.payment_id = "pay_first".into();
+        first.created_at = sub.created_at + Duration::minutes(2);
+        first.metadata.insert("virling_vid".into(), "v_sub".into());
+        let mut upgrade = payments().remove(3);
+        upgrade.payment_id = "pay_upgrade".into();
+        upgrade.created_at = datetime!(2026-09-15 14:00 UTC);
+        let fetched: Vec<Fetched> = [first, upgrade, payments().remove(3)]
+            .iter()
+            .map(|p| p.to_fetched(0, is_renewal(p.created_at, sub.created_at)))
+            .collect();
+        let flags: Vec<_> = fetched.iter().map(|f| f.is_renewal).collect();
+        assert_eq!(flags, [false, true, true]);
+        assert!(fetched[1..].iter().all(|f| f.visitor_id.is_none()));
+        e2e::site(Provider::Dodo, fetched, "v_sub").assert_all_reddit();
     }
 
     #[test]

@@ -182,7 +182,7 @@ fn to_fetched(r: Resource, invoice: bool) -> Option<Fetched> {
         status: status.to_string(),
         visitor_id,
         customer_id: a.customer_id.map(|id| id.to_string()),
-        is_renewal: invoice && a.billing_reason.as_deref() == Some("renewal"),
+        is_renewal: invoice && matches!(a.billing_reason.as_deref(), Some("renewal" | "updated")),
     })
 }
 
@@ -227,6 +227,7 @@ struct Attributes {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::providers::{Provider, e2e};
     use time::macros::datetime;
 
     const ORDERS: &str = include_str!("fixtures/lemonsqueezy_orders.json");
@@ -294,6 +295,44 @@ mod tests {
         assert!(page.more);
         assert_eq!(decode(&page).stage, Stage::Orders);
         assert_eq!(decode(&page).page, 2);
+    }
+
+    fn resource(json: &str, id: &str) -> Resource {
+        let list: List = serde_json::from_str(json).unwrap();
+        list.data.into_iter().find(|r| r.id == id).unwrap()
+    }
+
+    #[test]
+    fn renewals_and_upgrades_keep_the_first_channel() {
+        let mut upgrade = resource(INVOICES, "77");
+        upgrade.id = "78".into();
+        upgrade.attributes.billing_reason = Some("updated".into());
+        upgrade.attributes.created_at = datetime!(2026-10-11 09:00 UTC);
+        let payments = vec![
+            to_fetched(resource(ORDERS, "104"), false).unwrap(),
+            to_fetched(upgrade, true).unwrap(),
+            to_fetched(resource(INVOICES, "77"), true).unwrap(),
+        ];
+        assert_eq!(payments[0].visitor_id.as_deref(), Some("v_8c1f2e"));
+        assert!(
+            payments[1..]
+                .iter()
+                .all(|p| p.is_renewal && p.visitor_id.is_none())
+        );
+        e2e::site(Provider::LemonSqueezy, payments, "v_8c1f2e").assert_all_reddit();
+    }
+
+    #[test]
+    fn renewal_without_customer_is_unattributed() {
+        let mut orphan = resource(INVOICES, "77");
+        orphan.attributes.customer_id = None;
+        let payments = vec![
+            to_fetched(resource(ORDERS, "104"), false).unwrap(),
+            to_fetched(orphan, true).unwrap(),
+        ];
+        let site = e2e::site(Provider::LemonSqueezy, payments, "v_8c1f2e");
+        assert!(site.touch("order_104").is_some());
+        assert_eq!(site.touch("invoice_77"), None);
     }
 
     #[test]

@@ -333,7 +333,10 @@ fn map_order(order: Order) -> Mapped {
         status,
         visitor_id,
         customer_id: Some(order.customer_id),
-        is_renewal: order.billing_reason == "subscription_cycle",
+        is_renewal: matches!(
+            order.billing_reason.as_str(),
+            "subscription_cycle" | "subscription_update"
+        ),
     })
 }
 
@@ -431,6 +434,7 @@ fn api_error(status: StatusCode, scope: &str) -> anyhow::Error {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::providers::{Provider, e2e};
     use time::macros::datetime;
 
     const ORDERS: &str = include_str!("fixtures/polar_orders.json");
@@ -521,6 +525,38 @@ mod tests {
     fn orders_json_items() -> Vec<Value> {
         let v: Value = serde_json::from_str(ORDERS).unwrap();
         v["items"].as_array().unwrap().clone()
+    }
+
+    /// The fixture's trial order as a paid one; other reasons get `id`, `created_at` and no visitor ID.
+    fn subscription_order(id: &str, created_at: &str, reason: &str) -> Fetched {
+        let mut v = orders_json_items()[5].clone();
+        v["net_amount"] = 2000.into();
+        if reason != "subscription_create" {
+            v["id"] = id.into();
+            v["created_at"] = created_at.into();
+            v["billing_reason"] = reason.into();
+            v["metadata"] = Value::Object(Map::new());
+        }
+        match map_order(serde_json::from_value(v).unwrap()) {
+            Mapped::Payment(f) => f,
+            _ => panic!("{id} is not a payment"),
+        }
+    }
+
+    #[test]
+    fn renewals_and_upgrades_keep_the_first_channel() {
+        let payments = vec![
+            subscription_order("first", "", "subscription_create"),
+            subscription_order("upgrade", "2026-09-20T00:00:00Z", "subscription_update"),
+            subscription_order("renewal", "2026-12-07T00:00:00Z", "subscription_cycle"),
+        ];
+        assert_eq!(payments[0].visitor_id.as_deref(), Some("vid_trial"));
+        assert!(
+            payments[1..]
+                .iter()
+                .all(|p| p.is_renewal && p.visitor_id.is_none())
+        );
+        e2e::site(Provider::Polar, payments, "vid_trial").assert_all_reddit();
     }
 
     #[test]
