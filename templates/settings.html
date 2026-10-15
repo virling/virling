@@ -64,6 +64,29 @@
   {% if connections.is_empty() %}<p class="empty">No payment provider connected yet.</p>{% endif %}
 </div>
 </section>
+<form class="card" method="post" action="/app/{{ shell.domain }}/settings/report" id="report">
+  <div class="card-head"><h2>Client report</h2><a class="btn secondary" href="/app/{{ shell.domain }}/report">Open report</a></div>
+  <p class="muted">Your branding on the report for this client. Virling is not shown on it.</p>
+  {% if brand_saved %}<div class="notice ok-note" role="status">Saved. The report uses your branding now.</div>{% endif %}
+  {% if !brand_error.is_empty() %}<div class="alert" role="alert">{{ brand_error }}</div>{% endif %}
+  <div class="setting">
+    <div><b><label for="agency_name">Agency name</label></b><span class="muted">Shown at the top of the report when there is no logo.</span></div>
+    <input class="input" id="agency_name" name="agency_name" value="{{ brand.agency_name }}" maxlength="80" autocomplete="organization">
+  </div>
+  <div class="setting">
+    <div><b><label for="logo_url">Logo URL</label></b><span class="muted">An https link to a PNG or SVG. It is shown up to 40px tall.</span></div>
+    <input class="input" id="logo_url" name="logo_url" value="{{ brand.logo_url }}" placeholder="https://" spellcheck="false">
+  </div>
+  <div class="setting">
+    <div><b><label for="accent">Accent color</label></b><span class="muted">A hex color for the top of the report.</span></div>
+    <div class="affix compact"><span><i class="swatch" id="accent-swatch"{% if !brand.accent.is_empty() %} style="background:{{ brand.accent }}"{% endif %}></i></span><input id="accent" name="accent" value="{{ brand.accent }}" placeholder="#0E1116" maxlength="7" spellcheck="false" data-swatch="accent-swatch"></div>
+  </div>
+  <div class="setting">
+    <div><b><label for="footer">Footer</label></b><span class="muted">One line at the bottom, like your contact details.</span></div>
+    <input class="input" id="footer" name="footer" value="{{ brand.footer }}" maxlength="200">
+  </div>
+  <div class="actions end"><button class="btn" type="submit">Save branding</button></div>
+</form>
 </div>
 <dialog class="confirm" id="confirm">
   <p data-confirm-text></p>

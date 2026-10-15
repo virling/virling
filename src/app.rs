@@ -159,6 +159,7 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/settings",
                 get(settings::page).post(settings::save),
             )
+            .route("/app/{domain}/settings/report", post(settings::save_brand))
             .route(
                 "/app/{domain}/settings/disconnect",
                 post(settings::disconnect),

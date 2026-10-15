@@ -235,6 +235,10 @@ img.favicon { background: none; object-fit: contain; }
 .conn { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--rule-2); }
 .conn .grow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 .conn .err { flex-basis: 100%; color: var(--error-text); }
+.setting > .input { flex: none; width: 280px; height: 40px; font-size: 14px; }
+.affix.compact { flex: none; width: 160px; height: 40px; }
+.affix.compact input { font-size: 14px; }
+.swatch { display: block; width: 16px; height: 16px; border-radius: 4px; background: var(--ink); box-shadow: inset 0 0 0 1px rgba(14,17,22,.15); }
 .confirm { border: 0; border-radius: 16px; padding: 22px; width: min(420px, calc(100vw - 32px)); box-shadow: var(--shadow-pop); }
 .confirm::backdrop { background: rgba(14,17,22,.35); }
 .confirm p { margin: 0 0 18px; font-size: 15px; }
@@ -513,7 +517,12 @@ img.favicon { background: none; object-fit: contain; }
 
 .report { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 1040px; }
 .rp-head { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.rp-head { box-shadow: inset 0 4px 0 var(--accent, var(--ink)); padding-top: 18px; }
 .rp-head h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.03em; }
+.rp-logo { display: block; max-width: 220px; max-height: 40px; }
+.rp-agency { font-size: 18px; font-weight: 700; letter-spacing: -0.03em; color: var(--accent, var(--ink)); }
+.rp-title { text-align: right; }
+.rp-foot { padding: 4px 0; text-align: center; font-size: 12px; color: var(--ink-3); }
 .rp-kpis .sn { display: flex; align-items: center; gap: 6px; }
 .rp-kpis .tv { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .rp-kpis > div:first-child b { color: var(--revenue-text); }
@@ -605,6 +614,7 @@ img.favicon { background: none; object-fit: contain; }
   .report { max-width: none; gap: 12px; }
   .report .box { break-inside: avoid; }
   .rp-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .rp-hint { display: none; }
   .hov { display: none; }
 }
 @media (max-width: 480px) {

@@ -191,3 +191,10 @@ if (confirmBox) {
 }
 
 document.querySelector("[data-print]")?.addEventListener("click", () => window.print());
+
+for (const input of document.querySelectorAll("input[data-swatch]")) {
+  const swatch = document.getElementById(input.dataset.swatch);
+  input.addEventListener("input", () => {
+    if (/^#[0-9a-f]{6}$/i.test(input.value.trim())) swatch.style.background = input.value.trim();
+  });
+}

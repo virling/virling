@@ -1,6 +1,7 @@
-<article class="report">
+<article class="report"{% if !brand.accent.is_empty() %} style="--accent:{{ brand.accent }}"{% endif %}>
   <header class="box rp-head">
-    <div><h2>{{ report.site }}</h2><span class="sub">Revenue report, {{ report.span }}</span></div>
+    {% if !brand.logo_url.is_empty() %}<img class="rp-logo" src="{{ brand.logo_url }}" alt="{{ brand.agency_name }}">{% else if !brand.agency_name.is_empty() %}<b class="rp-agency">{{ brand.agency_name }}</b>{% endif %}
+    <div class="rp-title"><h2>{{ report.site }}</h2><span class="sub">Revenue report, {{ report.span }}</span></div>
   </header>
   <section class="box summary rp-kpis">
     {% for k in report.kpis %}<div>
@@ -29,4 +30,5 @@
     </section>
     {% endfor %}
   </div>
+  {% if !brand.footer.is_empty() %}<footer class="rp-foot">{{ brand.footer }}</footer>{% endif %}
 </article>

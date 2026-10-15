@@ -10,6 +10,7 @@ use crate::app::AppState;
 use crate::auth::Account;
 use crate::fx::minor_to_major;
 use crate::onboarding::render;
+use crate::settings::{self, Brand};
 use crate::sites::{self, Site};
 use crate::stats::{
     BreakdownRow, Journey, PaymentFilter, PaymentRow, Period, Sort, Totals, sort_rows,
@@ -1673,6 +1674,7 @@ struct ReportPage {
     range_label: &'static str,
     ranges: Vec<Opt>,
     report: ReportView,
+    brand: Brand,
 }
 
 /// The client report for a range, with range links pointing at `base`.
@@ -1780,11 +1782,15 @@ pub async fn report(
             Ok(r) => r,
             Err(code) => return code.into_response(),
         };
+    let Ok(brand) = settings::brand(&state.db, &ctx.site.id).await else {
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    };
     render(ReportPage {
         title: "Client report",
         range_label,
         ranges,
         report,
+        brand,
         shell: ctx.shell,
     })
 }

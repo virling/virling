@@ -981,7 +981,46 @@ mod tests {
         assert!(body.contains("Revenue per day") && body.contains(r#"class="chart"#));
         assert!(body.contains("Referrers") && body.contains("Landing pages"));
         assert!(body.contains(r#"href="/app/example.com/report?range=30d""#));
-        assert!(body.contains("data-print"));
+        assert!(body.contains("data-print") && body.contains("Set up branding"));
+
+        let uri = "/app/example.com/settings/report";
+        let bad = call(
+            &state,
+            form(
+                uri,
+                "agency_name=Kettle&logo_url=&accent=red&footer=".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            bad.headers()["location"],
+            "/app/example.com/settings?error=accent#report"
+        );
+        let res = call(
+            &state,
+            form(
+                uri,
+                "agency_name=Kettle+and+Co.&logo_url=https%3A%2F%2Fkettle.co%2Flogo.png&accent=%23123ABC&footer=hello%40kettle.co".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(res.status(), StatusCode::SEE_OTHER);
+        let page = body_text(
+            call(
+                &state,
+                get("/app/example.com/settings?saved=report", Some(&cookie)),
+            )
+            .await,
+        )
+        .await;
+        assert!(page.contains(r#"value="Kettle and Co.""#) && page.contains("Saved. The report"));
+        let body =
+            body_text(call(&state, get("/app/example.com/report", Some(&cookie))).await).await;
+        assert!(body.contains(r#"style="--accent:#123abc""#));
+        assert!(body.contains(r#"src="https://kettle.co/logo.png""#));
+        assert!(body.contains("hello@kettle.co") && !body.contains("Set up branding"));
         let other = sign_in(&state, "other%40example.com").await;
         assert_eq!(
             call(&state, get("/app/example.com/report", Some(&other)))
