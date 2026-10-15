@@ -6,13 +6,13 @@ use time::{Date, Duration, OffsetDateTime};
 use crate::channel::{source_domain, source_name};
 
 /// Net USD of a payment `p`; NULL when it has no USD conversion, so it counts as a payment but not revenue.
-const NET_USD: &str = "p.amount_usd * (p.amount - p.refunded) / nullif(p.amount, 0)";
+pub(crate) const NET_USD: &str = "p.amount_usd * (p.amount - p.refunded) / nullif(p.amount, 0)";
 
 /// Who paid: provider and customer_id, else visitor_id, else the payment itself.
 const CUSTOMER: &str = "coalesce('c:' || p.provider || ':' || p.customer_id, 'v:' || p.visitor_id, 'p:' || p.provider || ':' || p.provider_payment_id)";
 
 /// Local dates `$from..=$to` in IANA zone `$tz` as a half-open UTC range [lo, hi).
-const BOUNDS: &str = "bounds AS (
+pub(crate) const BOUNDS: &str = "bounds AS (
     SELECT timezone($tz, CAST($from AS DATE)::TIMESTAMP) AS lo,
            timezone($tz, (CAST($to AS DATE) + 1)::TIMESTAMP) AS hi
 )";
@@ -211,6 +211,8 @@ pub struct PaymentRow {
     pub visitor_id: Option<String>,
     pub customer_id: Option<String>,
     pub is_renewal: bool,
+    /// Whose timeline shows this payment: its visitor, else the credited visit's, else the customer's.
+    pub visitor: Option<String>,
     /// None means Unattributed.
     pub touch: Option<Touch>,
     pub first_touch: Option<FirstTouch>,
@@ -287,7 +289,7 @@ pub(crate) fn from_micros(us: i64) -> OffsetDateTime {
         .unwrap_or(OffsetDateTime::UNIX_EPOCH)
 }
 
-fn source(referrer_host: Option<&str>, channel: &str) -> String {
+pub(crate) fn source(referrer_host: Option<&str>, channel: &str) -> String {
     referrer_host.map_or_else(|| channel.to_string(), source_name)
 }
 
@@ -589,17 +591,21 @@ pub fn sort_rows(rows: &mut [BreakdownRow]) {
     });
 }
 
-const PAYMENT_COLUMNS: &str =
+pub(crate) const PAYMENT_COLUMNS: &str =
     "p.provider, p.provider_payment_id, epoch_us(p.ts), p.amount, p.currency,
     p.amount_usd, p.refunded, p.status, p.visitor_id, p.customer_id, p.is_renewal,
     a.session_id, epoch_us(a.touch_ts), a.channel, a.referrer_host, a.campaign, a.landing_page,
-    a.country, a.device, epoch_us(f.ts), f.channel, f.referrer_host";
+    a.country, a.device, epoch_us(f.ts), f.channel, f.referrer_host,
+    coalesce(p.visitor_id,
+        (SELECT c.visitor_id FROM events c WHERE c.site_id = p.site_id AND c.session_id = a.session_id LIMIT 1),
+        (SELECT q.visitor_id FROM payments q WHERE q.site_id = p.site_id AND q.provider = p.provider
+            AND q.customer_id = p.customer_id AND q.visitor_id IS NOT NULL ORDER BY q.ts LIMIT 1))";
 
-const ATTRIBUTION_JOIN: &str = "LEFT JOIN attribution a ON a.site_id = p.site_id
+pub(crate) const ATTRIBUTION_JOIN: &str = "LEFT JOIN attribution a ON a.site_id = p.site_id
     AND a.provider = p.provider AND a.provider_payment_id = p.provider_payment_id";
 
 /// The first pageview of the payer, or of the credited visitor when the payment has no visitor ID.
-const FIRST_TOUCH_JOIN: &str = "LEFT JOIN LATERAL (
+pub(crate) const FIRST_TOUCH_JOIN: &str = "LEFT JOIN LATERAL (
         SELECT e.ts, e.channel, e.referrer_host FROM events e
         WHERE e.site_id = p.site_id AND e.kind = 'pageview' AND e.ts <= p.ts
             AND e.visitor_id = coalesce(p.visitor_id,
@@ -608,7 +614,7 @@ const FIRST_TOUCH_JOIN: &str = "LEFT JOIN LATERAL (
         LIMIT 1
     ) f ON true";
 
-fn payment_row(r: &duckdb::Row) -> duckdb::Result<PaymentRow> {
+pub(crate) fn payment_row(r: &duckdb::Row) -> duckdb::Result<PaymentRow> {
     let amount: i64 = r.get(3)?;
     let amount_usd: Option<f64> = r.get(5)?;
     let refunded: i64 = r.get(6)?;
@@ -659,6 +665,7 @@ fn payment_row(r: &duckdb::Row) -> duckdb::Result<PaymentRow> {
         visitor_id: r.get(8)?,
         customer_id: r.get(9)?,
         is_renewal: r.get(10)?,
+        visitor: r.get(22)?,
         touch,
         first_touch,
     })
