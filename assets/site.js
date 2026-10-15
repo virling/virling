@@ -88,7 +88,6 @@ for (const mini of document.querySelectorAll("[data-mini]")) {
 }
 
 for (const card of document.querySelectorAll("[data-preorder]")) {
-  const SDK = "https://cdn.jsdelivr.net/npm/dodopayments-checkout@2.0.0/dist/index.js";
   const spots = document.querySelector("[data-spots]");
   const section = card.closest("section");
   const setState = (state) => { card.dataset.state = state; };
@@ -109,14 +108,6 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
     spots.querySelector("b").textContent = body.spots_left;
     spots.hidden = false;
   };
-  const loadSdk = () => new Promise((resolve, reject) => {
-    if (window.DodoPaymentsCheckout) return resolve(window.DodoPaymentsCheckout.DodoPayments);
-    const s = document.createElement("script");
-    s.src = SDK;
-    s.onload = () => window.DodoPaymentsCheckout ? resolve(window.DodoPaymentsCheckout.DodoPayments) : reject(new Error("sdk"));
-    s.onerror = () => reject(new Error("sdk"));
-    document.head.appendChild(s);
-  });
   const fail = () => {
     clearTimeout(timer);
     if (card.dataset.state !== "paid") setState("error");
@@ -152,47 +143,19 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
     started = true;
     setState("loading");
     timer = setTimeout(fail, 20000);
-    status().then(showSpots).catch(() => {});
     try {
-      const [Dodo, res] = await Promise.all([
-        loadSdk(),
-        visitorId().then((visitor_id) => fetch("/api/preorder/session", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ visitor_id, code: new URLSearchParams(location.search).get("code") }) })),
-      ]);
+      const visitor_id = await visitorId();
+      const res = await fetch("/api/preorder/session", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ visitor_id, code: new URLSearchParams(location.search).get("code") }) });
       const body = await res.json();
       if (!res.ok || !body.checkout_url) throw new Error(body.error || "session");
-      Dodo.Initialize({
-        mode: "live",
-        displayType: "inline",
-        onEvent: (event) => {
-          const type = event.event_type;
-          if (type === "checkout.form_ready" || type === "checkout.opened") {
-            clearTimeout(timer);
-            if (card.dataset.state === "loading") setState("checkout");
-          } else if (type === "checkout.error") {
-            if (card.dataset.state === "loading") fail();
-          } else if (type === "checkout.redirect_requested") {
-            const url = event.data?.message?.redirect_to || event.data?.redirect_to || event.data?.url || event.data?.message?.url;
-            if (!url) return;
-            if (new URL(url, location.href).origin === location.origin) handleReturn(url);
-            else location.href = url;
-          } else if (type === "checkout.status") {
-            const state = event.data?.message?.status || event.data?.status;
-            if (["succeeded", "active"].includes(state)) setTimeout(() => card.dataset.state === "paid" || paid(null, null), 4000);
-          }
-        },
-      });
-      Dodo.Checkout.open({
-        checkoutUrl: body.checkout_url,
-        elementId: "dodo-inline-checkout",
-        options: { payButtonText: "Reserve your spot for $29", fontSize: "md", fontWeight: "normal", manualRedirect: true },
-      });
+      location.href = body.checkout_url;
     } catch {
       fail();
     }
   };
 
+  card.querySelector("[data-start]").addEventListener("click", start);
   card.querySelector("[data-retry]").addEventListener("click", () => {
-    window.DodoPaymentsCheckout?.DodoPayments.Checkout.close();
     started = false;
     start();
   });
@@ -202,17 +165,10 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
   });
 
   const query = new URLSearchParams(location.search);
+  status().then(showSpots).catch(() => {});
   if (query.get("preorder") === "done" || query.get("payment_id")) {
     history.replaceState(null, "", location.pathname + "#pricing");
     section.scrollIntoView();
     handleReturn("?" + query.toString());
-  } else if ("IntersectionObserver" in window) {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((e) => e.isIntersecting)) { observer.disconnect(); start(); }
-    }, { rootMargin: "600px 0px" });
-    observer.observe(section);
-    for (const link of document.querySelectorAll('a[href="#pricing"]')) link.addEventListener("click", start);
-  } else {
-    start();
   }
 }
