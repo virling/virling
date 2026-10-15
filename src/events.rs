@@ -6,7 +6,8 @@ use duckdb::{Connection, named_params, params};
 use time::{OffsetDateTime, UtcOffset};
 
 use crate::stats::{
-    self, Journey, Overview, PaymentFilter, PaymentPage, PaymentSummary, Period, Report,
+    self, Activity, GoalCount, GoalRow, Journey, Overview, PaymentFilter, PaymentPage,
+    PaymentSummary, Period, Report, Who,
 };
 #[cfg(test)]
 use crate::stats::{BreakdownRow, Dimension, Sort};
@@ -30,6 +31,7 @@ pub struct Event {
     pub country: Option<String>,
     pub device: String,
     pub browser: String,
+    pub os: String,
 }
 
 /// A payment as stored, one row per provider payment ID so re-syncs never double count.
@@ -104,6 +106,18 @@ pub trait EventStore: Send + Sync {
     /// Totals, current and previous daily series, the four breakdowns and setup facts.
     fn report(&self, site_id: &str, period: &Period) -> anyhow::Result<Report>;
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary>;
+    /// Last seen device and sessions per day before each moment, in zone `tz`.
+    fn activity(&self, site_id: &str, tz: &str, who: &[Who]) -> anyhow::Result<Vec<Activity>>;
+    fn goal_counts(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<GoalCount>>;
+    /// Completions of goal `goal`, newest first, and their total.
+    fn goal_list(
+        &self,
+        site_id: &str,
+        period: &Period,
+        goal: &str,
+        limit: u32,
+        offset: u32,
+    ) -> anyhow::Result<(u64, Vec<GoalRow>)>;
 }
 
 /// Sessions as touches (first pageview's fields), then the credited session per payment, then renewal inheritance.
@@ -192,8 +206,10 @@ impl DuckStore {
                 channel VARCHAR NOT NULL,
                 country VARCHAR,
                 device VARCHAR NOT NULL,
-                browser VARCHAR NOT NULL
+                browser VARCHAR NOT NULL,
+                os VARCHAR
             );
+            ALTER TABLE events ADD COLUMN IF NOT EXISTS os VARCHAR;
             CREATE TABLE IF NOT EXISTS payments (
                 site_id VARCHAR NOT NULL,
                 provider VARCHAR NOT NULL,
@@ -259,6 +275,7 @@ impl EventStore for DuckStore {
                     e.country,
                     e.device,
                     e.browser,
+                    e.os,
                 ])?;
             }
             app.flush()?;
@@ -439,6 +456,32 @@ impl EventStore for DuckStore {
 
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary> {
         stats::payment_summary(&self.conn.lock().unwrap(), site_id, period)
+    }
+
+    fn activity(&self, site_id: &str, tz: &str, who: &[Who]) -> anyhow::Result<Vec<Activity>> {
+        stats::activity(&self.conn.lock().unwrap(), site_id, tz, who)
+    }
+
+    fn goal_counts(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<GoalCount>> {
+        stats::goal_counts(&self.conn.lock().unwrap(), site_id, period)
+    }
+
+    fn goal_list(
+        &self,
+        site_id: &str,
+        period: &Period,
+        goal: &str,
+        limit: u32,
+        offset: u32,
+    ) -> anyhow::Result<(u64, Vec<GoalRow>)> {
+        stats::goal_list(
+            &self.conn.lock().unwrap(),
+            site_id,
+            period,
+            goal,
+            limit,
+            offset,
+        )
     }
 }
 

@@ -284,11 +284,20 @@ fn glyph_path(name: &str) -> &'static str {
         "paid" => r#"<path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/>"#,
         "ai" => r#"<path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/>"#,
         "card" => r#"<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>"#,
+        "desktop" => {
+            r#"<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>"#
+        }
+        "mobile" => r#"<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>"#,
+        "tablet" => r#"<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M11 18h2"/>"#,
+        "windows" => r#"<path d="M3 5l8-1v7H3zM13 4l8-1v8h-8zM3 13h8v7l-8-1zM13 13h8v8l-8-1z"/>"#,
+        "globe" => {
+            r#"<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>"#
+        }
         _ => "",
     }
 }
 
-/// A stroked 24x24 glyph: direct, email, unattributed, search, link, social, paid, ai or card.
+/// A stroked 24x24 glyph: direct, email, unattributed, search, link, social, paid, ai, card, desktop, mobile, tablet, windows or globe.
 pub fn glyph(name: &str, size: u32, color: &str) -> String {
     format!(
         r#"<svg class="ico" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{}</svg>"#,
@@ -342,6 +351,47 @@ pub fn source(name: &str, size: u32) -> String {
         size.saturating_sub(6).max(9),
         esc(&letter)
     )
+}
+
+/// Browser and OS logos, served as files since a list repeats them on every row.
+pub const UA_ICONS: [(&str, &str); 7] = [
+    (
+        "googlechrome",
+        include_str!("../assets/icons/googlechrome.svg"),
+    ),
+    ("safari", include_str!("../assets/icons/safari.svg")),
+    (
+        "firefoxbrowser",
+        include_str!("../assets/icons/firefoxbrowser.svg"),
+    ),
+    ("opera", include_str!("../assets/icons/opera.svg")),
+    ("apple", include_str!("../assets/icons/apple.svg")),
+    ("android", include_str!("../assets/icons/android.svg")),
+    ("linux", include_str!("../assets/icons/linux.svg")),
+];
+
+/// Logo for a browser or operating system name; a plain glyph for the rest.
+pub fn ua(name: &str) -> String {
+    let slug = match name {
+        "Chrome" | "ChromeOS" => "googlechrome",
+        "Safari" => "safari",
+        "Firefox" => "firefoxbrowser",
+        "Opera" => "opera",
+        "macOS" | "iOS" => "apple",
+        "Android" => "android",
+        "Linux" => "linux",
+        "Windows" => return glyph("windows", 12, "#6B717C"),
+        _ => return glyph("globe", 12, "#6B717C"),
+    };
+    format!(r#"<img class="ico" src="/assets/icons/{slug}.svg" width="12" height="12" alt="">"#)
+}
+
+/// Glyph for Desktop, Mobile or Tablet; nothing when unknown.
+pub fn device(name: &str) -> String {
+    match name {
+        "Desktop" | "Mobile" | "Tablet" => glyph(&name.to_ascii_lowercase(), 12, "#6B717C"),
+        _ => String::new(),
+    }
 }
 
 pub fn provider(provider: &str, size: u32) -> String {
