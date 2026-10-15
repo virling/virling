@@ -189,3 +189,5 @@ if (confirmBox) {
   confirmBox.querySelector("[data-confirm-cancel]").addEventListener("click", () => confirmBox.close());
   confirmBox.querySelector("[data-confirm-ok]").addEventListener("click", () => { confirmBox.close(); pending?.submit(); });
 }
+
+document.querySelector("[data-print]")?.addEventListener("click", () => window.print());

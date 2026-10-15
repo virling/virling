@@ -150,6 +150,7 @@ pub fn router(state: AppState) -> Router {
             )
             .route("/app/{domain}", get(dashboard::dashboard))
             .route("/app/{domain}/payments", get(dashboard::payments))
+            .route("/app/{domain}/report", get(dashboard::report))
             .route(
                 "/app/{domain}/payments/{provider}/{payment_id}",
                 get(dashboard::payment),
