@@ -65,12 +65,29 @@ const SOCIAL: &[&str] = &[
     "youtube.com",
     "youtu.be",
     "threads.net",
+    "threads.com",
     "bsky.app",
     "mastodon.social",
+    "mastodon.online",
+    "mstdn.social",
     "pinterest.com",
+    "pin.it",
     "tiktok.com",
     "producthunt.com",
     "indiehackers.com",
+    "discord.com",
+    "discordapp.com",
+    "discord.gg",
+    "slack.com",
+    "t.me",
+    "telegram.org",
+    "whatsapp.com",
+    "wa.me",
+    "substack.com",
+    "medium.com",
+    "dev.to",
+    "hashnode.com",
+    "hashnode.dev",
 ];
 
 const SOCIAL_SOURCES: &[&str] = &[
@@ -87,11 +104,31 @@ const SOCIAL_SOURCES: &[&str] = &[
     "youtube",
     "threads",
     "bluesky",
+    "mastodon",
     "tiktok",
+    "pinterest",
     "producthunt",
+    "discord",
+    "slack",
+    "telegram",
+    "whatsapp",
+    "substack",
+    "medium",
+    "devto",
+    "hashnode",
+    "indiehackers",
 ];
 
-const SEARCH_SOURCES: &[&str] = &["google", "bing", "duckduckgo", "yahoo", "ecosia", "brave"];
+const SEARCH_SOURCES: &[&str] = &[
+    "google",
+    "bing",
+    "duckduckgo",
+    "yahoo",
+    "ecosia",
+    "brave",
+    "yandex",
+    "baidu",
+];
 const AI_SOURCES: &[&str] = &[
     "chatgpt",
     "openai",
@@ -143,13 +180,14 @@ pub fn classify(
         return Channel::Referral;
     }
     if let Some(source) = utm_source.map(str::to_ascii_lowercase) {
-        if AI_SOURCES.contains(&source.as_str()) {
+        let s = source.as_str();
+        if AI_SOURCES.contains(&s) || host_matches(s, AI) {
             return Channel::Ai;
         }
-        if SEARCH_SOURCES.contains(&source.as_str()) {
+        if SEARCH_SOURCES.contains(&s) || host_matches(s, SEARCH) {
             return Channel::OrganicSearch;
         }
-        if SOCIAL_SOURCES.contains(&source.as_str()) {
+        if SOCIAL_SOURCES.contains(&s) || host_matches(s, SOCIAL) {
             return Channel::Social;
         }
         return Channel::Referral;
@@ -170,6 +208,16 @@ pub fn source_domain(host: &str) -> String {
         ("old.reddit.com", "reddit.com"),
         ("chat.openai.com", "chatgpt.com"),
         ("l.facebook.com", "facebook.com"),
+        ("threads.net", "threads.com"),
+        ("l.threads.com", "threads.com"),
+        ("go.bsky.app", "bsky.app"),
+        ("pin.it", "pinterest.com"),
+        ("discordapp.com", "discord.com"),
+        ("discord.gg", "discord.com"),
+        ("app.slack.com", "slack.com"),
+        ("web.telegram.org", "t.me"),
+        ("web.whatsapp.com", "whatsapp.com"),
+        ("wa.me", "whatsapp.com"),
     ];
     if let Some((_, domain)) = alias.iter().find(|(k, _)| *k == h) {
         return (*domain).to_string();
@@ -193,6 +241,8 @@ pub fn source_name(host: &str) -> String {
         ("perplexity.ai", "Perplexity"),
         ("claude.ai", "Claude"),
         ("gemini.google.com", "Gemini"),
+        ("copilot.microsoft.com", "Copilot"),
+        ("chat.deepseek.com", "DeepSeek"),
         ("reddit.com", "Reddit"),
         ("old.reddit.com", "Reddit"),
         ("linkedin.com", "LinkedIn"),
@@ -206,12 +256,36 @@ pub fn source_name(host: &str) -> String {
         ("producthunt.com", "Product Hunt"),
         ("indiehackers.com", "Indie Hackers"),
         ("github.com", "GitHub"),
+        ("bsky.app", "Bluesky"),
+        ("go.bsky.app", "Bluesky"),
+        ("threads.com", "Threads"),
+        ("threads.net", "Threads"),
+        ("mastodon.social", "Mastodon"),
+        ("tiktok.com", "TikTok"),
+        ("pinterest.com", "Pinterest"),
+        ("discord.com", "Discord"),
+        ("slack.com", "Slack"),
+        ("app.slack.com", "Slack"),
+        ("t.me", "Telegram"),
+        ("web.telegram.org", "Telegram"),
+        ("whatsapp.com", "WhatsApp"),
+        ("web.whatsapp.com", "WhatsApp"),
+        ("substack.com", "Substack"),
+        ("medium.com", "Medium"),
+        ("dev.to", "DEV"),
+        ("hashnode.com", "Hashnode"),
+        ("search.brave.com", "Brave"),
+        ("ecosia.org", "Ecosia"),
+        ("baidu.com", "Baidu"),
     ];
     if let Some((_, name)) = known.iter().find(|(k, _)| *k == h) {
         return (*name).to_string();
     }
     if h.starts_with("google.") || h.contains(".google.") {
         return "Google".to_string();
+    }
+    if h.starts_with("yandex.") {
+        return "Yandex".to_string();
     }
     h.to_string()
 }
@@ -257,6 +331,76 @@ mod tests {
     }
 
     #[test]
+    fn ai_sources_get_their_own_channel() {
+        for host in [
+            "chatgpt.com",
+            "chat.openai.com",
+            "www.perplexity.ai",
+            "claude.ai",
+            "gemini.google.com",
+            "copilot.microsoft.com",
+        ] {
+            assert_eq!(classify(None, None, Some(host)), Channel::Ai, "{host}");
+        }
+        for source in ["chatgpt.com", "ChatGPT", "perplexity", "claude.ai"] {
+            assert_eq!(classify(None, Some(source), None), Channel::Ai, "{source}");
+        }
+        assert_eq!(
+            classify(Some("cpc"), Some("chatgpt.com"), None),
+            Channel::Paid
+        );
+    }
+
+    #[test]
+    fn social_chat_and_writing_hosts_are_social() {
+        for host in [
+            "bsky.app",
+            "go.bsky.app",
+            "www.threads.com",
+            "threads.net",
+            "mastodon.social",
+            "www.tiktok.com",
+            "pinterest.com",
+            "discord.com",
+            "app.slack.com",
+            "t.me",
+            "web.telegram.org",
+            "web.whatsapp.com",
+            "someone.substack.com",
+            "medium.com",
+            "dev.to",
+            "blog.hashnode.dev",
+            "www.indiehackers.com",
+        ] {
+            assert_eq!(classify(None, None, Some(host)), Channel::Social, "{host}");
+        }
+        for source in ["bluesky", "discord", "substack", "dev.to"] {
+            assert_eq!(
+                classify(None, Some(source), None),
+                Channel::Social,
+                "{source}"
+            );
+        }
+    }
+
+    #[test]
+    fn more_search_engines() {
+        for host in [
+            "search.brave.com",
+            "yandex.ru",
+            "www.ecosia.org",
+            "www.baidu.com",
+        ] {
+            assert_eq!(
+                classify(None, None, Some(host)),
+                Channel::OrganicSearch,
+                "{host}"
+            );
+        }
+        assert_eq!(classify(None, Some("yandex"), None), Channel::OrganicSearch);
+    }
+
+    #[test]
     fn hosts_do_not_match_by_substring() {
         assert_eq!(classify(None, None, Some("notx.com")), Channel::Referral);
         assert_eq!(
@@ -270,6 +414,10 @@ mod tests {
         assert_eq!(source_name("news.ycombinator.com"), "Hacker News");
         assert_eq!(source_name("www.google.de"), "Google");
         assert_eq!(source_name("someblog.dev"), "someblog.dev");
+        assert_eq!(source_name("copilot.microsoft.com"), "Copilot");
+        assert_eq!(source_name("bsky.app"), "Bluesky");
+        assert_eq!(source_name("yandex.ru"), "Yandex");
+        assert_eq!(source_name("dev.to"), "DEV");
     }
 
     #[test]
@@ -281,6 +429,9 @@ mod tests {
         assert_eq!(source_domain("old.reddit.com"), "reddit.com");
         assert_eq!(source_domain("chat.openai.com"), "chatgpt.com");
         assert_eq!(source_domain("l.facebook.com"), "facebook.com");
+        assert_eq!(source_domain("threads.net"), "threads.com");
+        assert_eq!(source_domain("discord.gg"), "discord.com");
+        assert_eq!(source_domain("wa.me"), "whatsapp.com");
         assert_eq!(source_domain("www.google.co.in"), "google.com");
         assert_eq!(source_domain("news.google.com"), "google.com");
         assert_eq!(source_domain("gemini.google.com"), "gemini.google.com");
