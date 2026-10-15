@@ -1,0 +1,10 @@
+.hljs{display:block;overflow-x:auto;background:none;color:#E6E8EB}
+.hljs-comment,.hljs-quote,.hljs-meta,.t-c{color:#7D838D}
+.hljs-string,.hljs-regexp,.hljs-addition,.t-s{color:#A8D8B0}
+.hljs-attr,.hljs-attribute,.hljs-property,.hljs-params,.hljs-title,.t-f{color:#9DB7FF}
+.hljs-keyword,.hljs-selector-tag,.hljs-tag,.hljs-name,.hljs-section,.hljs-built_in,.t-k{color:#F4B39C}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-template-variable,.hljs-symbol,.hljs-type,.t-v{color:#E6C07B}
+.hljs-deletion{color:#F28B82}
+.hljs-emphasis{font-style:italic}
+.hljs-strong{font-weight:600}
+.t-o{color:#A9AFB8}

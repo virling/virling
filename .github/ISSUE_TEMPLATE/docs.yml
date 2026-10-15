@@ -1,0 +1,19 @@
+name: Docs feedback
+description: Something on docs.virling.com is wrong, unclear or missing
+labels: ["documentation"]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page
+      description: The docs page this is about.
+      placeholder: https://docs.virling.com/quickstart
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What was wrong or missing
+      description: What you were trying to do, and what the page should have said.
+    validations:
+      required: true
