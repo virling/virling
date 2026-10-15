@@ -116,6 +116,7 @@ pub fn router(state: AppState) -> Router {
         .route("/assets/flags/{file}", get(flag))
         .route("/assets/art/{file}", get(art))
         .route("/assets/fonts/{file}", get(font))
+        .route("/assets/dia/{file}", get(diagram))
         .route("/assets/icons/{file}", get(ua_icon))
         .route(
             "/favicon.svg",
@@ -235,6 +236,33 @@ const FONTS: &[(&str, &[u8])] = &[
         include_bytes!("../assets/fonts/caveat.woff2"),
     ),
 ];
+
+const DIAGRAMS: &[(&str, &str)] = &[
+    ("journey-d.svg", include_str!("../assets/dia/journey-d.svg")),
+    ("journey-m.svg", include_str!("../assets/dia/journey-m.svg")),
+    (
+        "channels-d.svg",
+        include_str!("../assets/dia/channels-d.svg"),
+    ),
+    (
+        "channels-m.svg",
+        include_str!("../assets/dia/channels-m.svg"),
+    ),
+];
+
+async fn diagram(Path(file): Path<String>) -> Response {
+    match DIAGRAMS.iter().find(|(name, _)| *name == file) {
+        Some((_, svg)) => (
+            [
+                (header::CONTENT_TYPE, "image/svg+xml"),
+                (header::CACHE_CONTROL, "public, max-age=604800"),
+            ],
+            *svg,
+        )
+            .into_response(),
+        None => StatusCode::NOT_FOUND.into_response(),
+    }
+}
 
 async fn font(Path(file): Path<String>) -> Response {
     match FONTS.iter().find(|(name, _)| *name == file) {

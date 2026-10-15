@@ -10,6 +10,7 @@ cp ../assets/site.css ../assets/site.js ../assets/app.css ../assets/app.js ../as
 cp ../assets/favicon.svg ../assets/v.js ../assets/robots.txt ../assets/sitemap.xml ../scripts/install.sh public/
 cp -R ../assets/art public/assets/art
 cp -R ../assets/fonts public/assets/fonts
+cp -R ../assets/dia public/assets/dia
 cp -R demo public/demo
 # Inline the landing stylesheet so the first paint needs no extra request.
 perl -0pi -e 'BEGIN { local $/; open F, "<", "public/assets/site.css"; $css = <F>; close F } s#<link rel="stylesheet" href="/assets/site.css">#<style>$css</style>#' public/index.html public/agency.html
