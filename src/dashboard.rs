@@ -1230,6 +1230,22 @@ pub async fn icon(
     let Some((kind, body)) = row else {
         return StatusCode::NOT_FOUND.into_response();
     };
+    image(kind, body, "private, max-age=86400")
+}
+
+/// A referrer's cached favicon, served by us so no page loads images from third parties.
+pub async fn source_icon(State(state): State<AppState>, Path(host): Path<String>) -> Response {
+    let row = match favicon::source_host(&host) {
+        Some(host) => favicon::source_body(&state.db, &host).await,
+        None => None,
+    };
+    let Some((kind, body)) = row else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    image(kind, body, "public, max-age=604800")
+}
+
+fn image(kind: String, body: Vec<u8>, cache: &'static str) -> Response {
     (
         [
             (header::CONTENT_TYPE, kind),
@@ -1238,7 +1254,7 @@ pub async fn icon(
                 "default-src 'none'; style-src 'unsafe-inline'; sandbox".into(),
             ),
             (header::X_CONTENT_TYPE_OPTIONS, "nosniff".into()),
-            (header::CACHE_CONTROL, "private, max-age=86400".into()),
+            (header::CACHE_CONTROL, cache.into()),
         ],
         body,
     )

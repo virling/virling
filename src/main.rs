@@ -139,6 +139,7 @@ async fn main() -> anyhow::Result<()> {
             let state = AppState::new(config, db, Arc::new(events), mailer, vault);
             if app_enabled {
                 tokio::spawn(sync::run(state.clone()));
+                favicon::spawn_sources(state.clone());
             }
             let listener = tokio::net::TcpListener::bind(args.addr)
                 .await
@@ -1223,6 +1224,33 @@ mod tests {
         let other = sign_in(&state, "other%40example.com").await;
         let res = call(&state, get("/app/example.com/icon", Some(&other))).await;
         assert_eq!(res.status(), StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
+    async fn source_icons_are_served_without_sign_in() {
+        let (_dir, state, _store) = setup().await;
+        sqlx::query("INSERT INTO source_icons VALUES ('someblog.dev', 'image/png', ?, 5)")
+            .bind(b"PNG".to_vec())
+            .execute(&state.db)
+            .await
+            .unwrap();
+        let res = call(&state, get("/source-icons/someblog.dev?v=5", None)).await;
+        assert_eq!(res.status(), StatusCode::OK);
+        assert_eq!(res.headers()["content-type"], "image/png");
+        assert_eq!(res.headers()["x-content-type-options"], "nosniff");
+        assert!(
+            res.headers()["content-security-policy"]
+                .to_str()
+                .unwrap()
+                .contains("sandbox")
+        );
+        assert_eq!(body_text(res).await, "PNG");
+        for path in ["/source-icons/other.dev", "/source-icons/127.0.0.1"] {
+            assert_eq!(
+                call(&state, get(path, None)).await.status(),
+                StatusCode::NOT_FOUND
+            );
+        }
     }
 
     #[tokio::test]

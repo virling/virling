@@ -310,7 +310,7 @@ pub fn channel_glyph(channel: &str) -> Option<&'static str> {
     })
 }
 
-/// Logo for a source name, referrer host or channel; a letter tile when there is none.
+/// Logo for a source name, referrer host or channel, else the host's cached favicon, else a letter tile.
 pub fn source(name: &str, size: u32) -> String {
     if let Some(slug) = brand_slug(name) {
         return brand(slug, size);
@@ -322,6 +322,14 @@ pub fn source(name: &str, size: u32) -> String {
     }
     if let Some(g) = channel_glyph(name) {
         return glyph(g, size, "#6B717C");
+    }
+    if let Some(host) = crate::favicon::source_host(name)
+        && let Some(v) = crate::favicon::source_icon(&host)
+    {
+        return format!(
+            r#"<img class="ico" src="/source-icons/{}?v={v}" width="{size}" height="{size}" alt="">"#,
+            esc(&host)
+        );
     }
     let letter = name
         .trim_start_matches("www.")

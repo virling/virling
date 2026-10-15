@@ -144,6 +144,7 @@ pub fn router(state: AppState) -> Router {
                 get(onboarding::checkout_step),
             )
             .route("/app/{domain}/icon", get(dashboard::icon))
+            .route("/source-icons/{host}", get(dashboard::source_icon))
             .route(
                 "/app/{domain}/setup/dismiss",
                 post(dashboard::dismiss_setup),
