@@ -227,6 +227,7 @@ struct Attributes {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::providers::{Provider, e2e};
     use time::macros::datetime;
 
     const ORDERS: &str = include_str!("fixtures/lemonsqueezy_orders.json");
@@ -294,6 +295,35 @@ mod tests {
         assert!(page.more);
         assert_eq!(decode(&page).stage, Stage::Orders);
         assert_eq!(decode(&page).page, 2);
+    }
+
+    fn resource(json: &str, id: &str) -> Resource {
+        let list: List = serde_json::from_str(json).unwrap();
+        list.data.into_iter().find(|r| r.id == id).unwrap()
+    }
+
+    #[test]
+    fn renewals_keep_the_first_channel() {
+        let payments = vec![
+            to_fetched(resource(ORDERS, "104"), false).unwrap(),
+            to_fetched(resource(INVOICES, "77"), true).unwrap(),
+        ];
+        assert_eq!(payments[0].visitor_id.as_deref(), Some("v_8c1f2e"));
+        assert!(payments[1].is_renewal && payments[1].visitor_id.is_none());
+        e2e::site(Provider::LemonSqueezy, payments, "v_8c1f2e").assert_all_reddit();
+    }
+
+    #[test]
+    fn renewal_without_customer_is_unattributed() {
+        let mut orphan = resource(INVOICES, "77");
+        orphan.attributes.customer_id = None;
+        let payments = vec![
+            to_fetched(resource(ORDERS, "104"), false).unwrap(),
+            to_fetched(orphan, true).unwrap(),
+        ];
+        let site = e2e::site(Provider::LemonSqueezy, payments, "v_8c1f2e");
+        assert!(site.touch("order_104").is_some());
+        assert_eq!(site.touch("invoice_77"), None);
     }
 
     #[test]

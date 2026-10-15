@@ -419,6 +419,7 @@ struct EventObject {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::providers::{Provider, e2e};
 
     fn charge(id: &str) -> Charge {
         let list: List<Charge> =
@@ -514,6 +515,41 @@ mod tests {
             first.invoice.unwrap().subscription.as_deref(),
             Some("sub_1MowQVLkdIwHu7ixeRlqHVzs")
         );
+    }
+
+    #[test]
+    fn renewals_keep_the_first_channel() {
+        let first = charge("ch_3NsubCreate00000000000");
+        let payments = vec![
+            to_fetched(&first, sessions().first(), 0).unwrap(),
+            to_fetched(&charge("ch_3NrenewalCycle00000000"), None, 0).unwrap(),
+        ];
+        assert_eq!(payments[0].visitor_id.as_deref(), Some("v_4f2a9c1e"));
+        assert!(payments[1..].iter().all(|p| p.visitor_id.is_none()));
+        e2e::site(Provider::Stripe, payments, "v_4f2a9c1e").assert_all_reddit();
+    }
+
+    #[test]
+    fn renewal_without_attributed_first_or_customer_is_unattributed() {
+        let first = charge("ch_3NsubCreate00000000000");
+        let renewal = charge("ch_3NrenewalCycle00000000");
+        let payments = vec![
+            to_fetched(&first, None, 0).unwrap(),
+            to_fetched(&renewal, None, 0).unwrap(),
+        ];
+        let site = e2e::site(Provider::Stripe, payments, "v_4f2a9c1e");
+        assert_eq!(site.touch("ch_3NsubCreate00000000000"), None);
+        assert_eq!(site.touch("ch_3NrenewalCycle00000000"), None);
+
+        let mut orphan = charge("ch_3NrenewalCycle00000000");
+        orphan.customer = None;
+        let payments = vec![
+            to_fetched(&first, sessions().first(), 0).unwrap(),
+            to_fetched(&orphan, None, 0).unwrap(),
+        ];
+        let site = e2e::site(Provider::Stripe, payments, "v_4f2a9c1e");
+        assert!(site.touch("ch_3NsubCreate00000000000").is_some());
+        assert_eq!(site.touch("ch_3NrenewalCycle00000000"), None);
     }
 
     #[test]
