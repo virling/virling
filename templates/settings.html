@@ -87,6 +87,22 @@
   </div>
   <div class="actions end"><button class="btn" type="submit">Save branding</button></div>
 </form>
+<section class="card" id="share">
+  <div class="card-head"><h2>Client link</h2></div>
+  <p class="muted">Anyone with this link can view the report without signing in. Revoke it to turn it off right away.</p>
+  {% if let Some(link) = share_link %}
+  <div class="code" data-tabs>
+    <div class="code-head"><span class="code-title">Read-only link</span><button class="copy" type="button" data-copy>Copy</button></div>
+    <pre>{{ link }}</pre>
+  </div>
+  <div class="actions end">
+    <form method="post" action="/app/{{ shell.domain }}/settings/share" data-confirm="Make a new link? The current link stops working right away." data-confirm-ok="Make a new link"><button class="btn ghost" type="submit">New link</button></form>
+    <form method="post" action="/app/{{ shell.domain }}/settings/unshare" data-confirm="Revoke this link? Your client can no longer open the report." data-confirm-ok="Revoke link"><button class="btn secondary" type="submit">Revoke link</button></form>
+  </div>
+  {% else %}
+  <form class="actions end" method="post" action="/app/{{ shell.domain }}/settings/share"><button class="btn" type="submit">Create link</button></form>
+  {% endif %}
+</section>
 </div>
 <dialog class="confirm" id="confirm">
   <p data-confirm-text></p>

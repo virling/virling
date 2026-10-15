@@ -178,16 +178,19 @@ if (drawer) {
 const confirmBox = document.getElementById("confirm");
 if (confirmBox) {
   let pending = null;
+  const ok = confirmBox.querySelector("[data-confirm-ok]");
+  const okLabel = ok.textContent;
   for (const form of document.querySelectorAll("form[data-confirm]")) {
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       pending = form;
       confirmBox.querySelector("[data-confirm-text]").textContent = form.dataset.confirm;
+      ok.textContent = form.dataset.confirmOk || okLabel;
       confirmBox.showModal();
     });
   }
   confirmBox.querySelector("[data-confirm-cancel]").addEventListener("click", () => confirmBox.close());
-  confirmBox.querySelector("[data-confirm-ok]").addEventListener("click", () => { confirmBox.close(); pending?.submit(); });
+  ok.addEventListener("click", () => { confirmBox.close(); pending?.submit(); });
 }
 
 document.querySelector("[data-print]")?.addEventListener("click", () => window.print());

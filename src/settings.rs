@@ -8,7 +8,7 @@ use sqlx::SqlitePool;
 use time::OffsetDateTime;
 
 use crate::app::AppState;
-use crate::auth::Account;
+use crate::auth::{Account, random_token};
 use crate::dashboard::{Opt, Shell, ago, load, provider_name};
 use crate::onboarding::render;
 use crate::sites::app_path;
@@ -43,6 +43,7 @@ struct SettingsPage {
     brand: Brand,
     brand_saved: bool,
     brand_error: &'static str,
+    share_link: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -92,7 +93,14 @@ pub async fn page(
     .fetch_all(&state.db)
     .await;
     let brand = brand(&state.db, &ctx.site.id).await;
-    let (Ok((model, window_days)), Ok(integrations), Ok(brand)) = (row, integrations, brand) else {
+    let token: Result<Option<Option<String>>, _> =
+        sqlx::query_scalar("SELECT share_token FROM report_brands WHERE site_id = ?")
+            .bind(&ctx.site.id)
+            .fetch_optional(&state.db)
+            .await;
+    let (Ok((model, window_days)), Ok(integrations), Ok(brand), Ok(token)) =
+        (row, integrations, brand, token)
+    else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
     let now = OffsetDateTime::now_utc();
@@ -135,6 +143,9 @@ pub async fn page(
             .collect(),
         saved: q.saved.as_deref() == Some("1"),
         brand,
+        share_link: token
+            .flatten()
+            .map(|t| format!("{}/r/{t}", state.config.base_url)),
         brand_saved: q.saved.as_deref() == Some("report"),
         brand_error: match q.error.as_deref() {
             Some("logo") => "The logo URL must start with https://.",
@@ -286,6 +297,51 @@ pub async fn save_brand(
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     }
     Redirect::to(&format!("{settings}?saved=report#report")).into_response()
+}
+
+/// Creates or replaces the read-only client link; the old link stops working.
+pub async fn share(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "settings").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    let saved = sqlx::query(
+        "INSERT INTO report_brands (site_id, share_token) VALUES (?, ?)
+         ON CONFLICT(site_id) DO UPDATE SET share_token = excluded.share_token",
+    )
+    .bind(&ctx.site.id)
+    .bind(random_token())
+    .execute(&state.db)
+    .await;
+    if let Err(err) = saved {
+        tracing::error!(%err, "creating the client link failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    Redirect::to(&format!("{}#share", app_path(&ctx.site.domain, "settings"))).into_response()
+}
+
+pub async fn revoke(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "settings").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    if let Err(err) = sqlx::query("UPDATE report_brands SET share_token = NULL WHERE site_id = ?")
+        .bind(&ctx.site.id)
+        .execute(&state.db)
+        .await
+    {
+        tracing::error!(%err, "revoking the client link failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    Redirect::to(&format!("{}#share", app_path(&ctx.site.domain, "settings"))).into_response()
 }
 
 #[cfg(test)]

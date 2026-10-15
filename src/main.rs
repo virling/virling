@@ -543,6 +543,10 @@ mod tests {
             call(&state, get("/app", None)).await.status(),
             StatusCode::NOT_FOUND
         );
+        assert_eq!(
+            call(&state, get("/r/abc", None)).await.status(),
+            StatusCode::NOT_FOUND
+        );
         assert_eq!(call(&state, get("/", None)).await.status(), StatusCode::OK);
     }
 
@@ -1021,7 +1025,55 @@ mod tests {
         assert!(body.contains(r#"style="--accent:#123abc""#));
         assert!(body.contains(r#"src="https://kettle.co/logo.png""#));
         assert!(body.contains("hello@kettle.co") && !body.contains("Set up branding"));
+
         let other = sign_in(&state, "other%40example.com").await;
+        let link = || async {
+            let page =
+                body_text(call(&state, get("/app/example.com/settings", Some(&cookie))).await)
+                    .await;
+            page.find("http://localhost:8080/r/")
+                .map(|i| page[i + 21..i + 21 + 67].to_string())
+        };
+        assert_eq!(link().await, None);
+        let share = "/app/example.com/settings/share";
+        call(&state, form(share, String::new(), Some(&cookie))).await;
+        let first = link().await.unwrap();
+        let res = call(&state, get(&first, None)).await;
+        assert_eq!(res.status(), StatusCode::OK);
+        let public = body_text(res).await;
+        assert!(public.contains("Kettle and Co.") && public.contains("$98"));
+        assert!(
+            !public.to_lowercase().contains("virling"),
+            "no Virling branding"
+        );
+        assert!(public.contains(&format!(r#"href="{first}?range=30d""#)));
+        assert_eq!(
+            call(&state, form(share, String::new(), Some(&other)))
+                .await
+                .status(),
+            StatusCode::NOT_FOUND
+        );
+        call(&state, form(share, String::new(), Some(&cookie))).await;
+        let second = link().await.unwrap();
+        assert_ne!(first, second);
+        assert_eq!(
+            call(&state, get(&first, None)).await.status(),
+            StatusCode::NOT_FOUND
+        );
+        call(
+            &state,
+            form(
+                "/app/example.com/settings/unshare",
+                String::new(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(link().await, None);
+        assert_eq!(
+            call(&state, get(&second, None)).await.status(),
+            StatusCode::NOT_FOUND
+        );
         assert_eq!(
             call(&state, get("/app/example.com/report", Some(&other)))
                 .await
