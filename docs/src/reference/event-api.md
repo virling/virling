@@ -16,13 +16,13 @@ User-Agent: Mozilla/5.0 ...
 
 | Field | Type | | Meaning |
 | --- | --- | --- | --- |
-| `n` | string | Required | `"pageview"` or `"goal"`. Other values are dropped. |
+| `n` | string | Required | `"pageview"`, `"goal"`, `"exit"` or `"leave"`. Other values are dropped. |
 | `u` | string | Required | Full page URL. Its host must be the site's domain or a subdomain. |
 | `s` | string | Required | The site's domain, as in `data-site`. |
 | `r` | string or null | Optional | Referrer URL. Only its host is kept, and only when it is another site. |
 | `v` | string or null | Optional | Visitor ID, 8 to 64 letters, digits or dashes. Missing or invalid: a daily hash is used. |
 | `w` | number | Optional | Screen width in CSS pixels. Below 768 is Mobile, below 1024 Tablet, else Desktop. Missing: Unknown. |
-| `g` | string | For goals | Goal name, trimmed and cut to 64 bytes. Goals without one are dropped. |
+| `g` | string | For goals and exits | Goal name, trimmed and cut to 64 bytes, or the link URL for an exit. Goals without one are dropped. |
 
 The server adds the time, the channel, the session, the country from `cf-ipcountry`, `x-vercel-ip-country` or `x-country-code`, and the browser from `User-Agent`.
 
@@ -41,6 +41,7 @@ These are dropped silently, still with `202`:
 - Events whose page host is not the site's domain or a subdomain.
 - Events over the site's rate limit.
 - Goals without a name.
+- Exits to the same site or to a non-web link, and exits or leaves with no visit in the last 30 minutes.
 
 CORS is open: responses carry `Access-Control-Allow-Origin: *`, and `OPTIONS /api/event` answers preflight requests.
 
