@@ -182,7 +182,7 @@ fn to_fetched(r: Resource, invoice: bool) -> Option<Fetched> {
         status: status.to_string(),
         visitor_id,
         customer_id: a.customer_id.map(|id| id.to_string()),
-        is_renewal: invoice && a.billing_reason.as_deref() == Some("renewal"),
+        is_renewal: invoice && matches!(a.billing_reason.as_deref(), Some("renewal" | "updated")),
     })
 }
 
@@ -303,13 +303,22 @@ mod tests {
     }
 
     #[test]
-    fn renewals_keep_the_first_channel() {
+    fn renewals_and_upgrades_keep_the_first_channel() {
+        let mut upgrade = resource(INVOICES, "77");
+        upgrade.id = "78".into();
+        upgrade.attributes.billing_reason = Some("updated".into());
+        upgrade.attributes.created_at = datetime!(2026-10-11 09:00 UTC);
         let payments = vec![
             to_fetched(resource(ORDERS, "104"), false).unwrap(),
+            to_fetched(upgrade, true).unwrap(),
             to_fetched(resource(INVOICES, "77"), true).unwrap(),
         ];
         assert_eq!(payments[0].visitor_id.as_deref(), Some("v_8c1f2e"));
-        assert!(payments[1].is_renewal && payments[1].visitor_id.is_none());
+        assert!(
+            payments[1..]
+                .iter()
+                .all(|p| p.is_renewal && p.visitor_id.is_none())
+        );
         e2e::site(Provider::LemonSqueezy, payments, "v_8c1f2e").assert_all_reddit();
     }
 

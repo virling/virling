@@ -333,7 +333,10 @@ fn map_order(order: Order) -> Mapped {
         status,
         visitor_id,
         customer_id: Some(order.customer_id),
-        is_renewal: order.billing_reason == "subscription_cycle",
+        is_renewal: matches!(
+            order.billing_reason.as_str(),
+            "subscription_cycle" | "subscription_update"
+        ),
     })
 }
 
@@ -541,13 +544,18 @@ mod tests {
     }
 
     #[test]
-    fn renewals_keep_the_first_channel() {
+    fn renewals_and_upgrades_keep_the_first_channel() {
         let payments = vec![
             subscription_order("first", "", "subscription_create"),
+            subscription_order("upgrade", "2026-09-20T00:00:00Z", "subscription_update"),
             subscription_order("renewal", "2026-12-07T00:00:00Z", "subscription_cycle"),
         ];
         assert_eq!(payments[0].visitor_id.as_deref(), Some("vid_trial"));
-        assert_eq!(payments[1].visitor_id, None);
+        assert!(
+            payments[1..]
+                .iter()
+                .all(|p| p.is_renewal && p.visitor_id.is_none())
+        );
         e2e::site(Provider::Polar, payments, "vid_trial").assert_all_reddit();
     }
 

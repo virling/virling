@@ -270,7 +270,10 @@ fn to_fetched(charge: &Charge, session: Option<&Session>, lost: i64) -> Option<F
             .or_else(|| session.and_then(session_visitor))
             .or_else(|| charge.payment_intent.as_ref().and_then(intent_visitor)),
         customer_id: charge.customer.clone(),
-        is_renewal: billing_reason == Some("subscription_cycle"),
+        is_renewal: matches!(
+            billing_reason,
+            Some("subscription_cycle" | "subscription_update")
+        ),
     })
 }
 
@@ -517,11 +520,20 @@ mod tests {
         );
     }
 
+    fn upgrade() -> Charge {
+        let mut c = charge("ch_3NrenewalCycle00000000");
+        c.id = "ch_3NsubUpdate00000000000".into();
+        c.created -= 30 * 86_400;
+        c.invoice.as_mut().unwrap().billing_reason = Some("subscription_update".into());
+        c
+    }
+
     #[test]
-    fn renewals_keep_the_first_channel() {
+    fn renewals_and_upgrades_keep_the_first_channel() {
         let first = charge("ch_3NsubCreate00000000000");
         let payments = vec![
             to_fetched(&first, sessions().first(), 0).unwrap(),
+            to_fetched(&upgrade(), None, 0).unwrap(),
             to_fetched(&charge("ch_3NrenewalCycle00000000"), None, 0).unwrap(),
         ];
         assert_eq!(payments[0].visitor_id.as_deref(), Some("v_4f2a9c1e"));
