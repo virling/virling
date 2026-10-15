@@ -2,17 +2,19 @@
 {% block content %}
 <div class="settings">
 {% if saved %}<div class="notice ok-note" role="status">Saved. Attribution was recalculated with the new settings.</div>{% endif %}
-<section class="card">
-  <div class="card-head"><h2>Tracking script</h2></div>
-  <p class="muted">Paste this before <span class="mono">&lt;/head&gt;</span> on every page of {{ shell.domain }}.</p>
+<section class="set-sec">
+<div class="set-intro"><h2>Tracking script</h2><p class="muted">Paste this before <span class="mono">&lt;/head&gt;</span> on every page of {{ shell.domain }}.</p></div>
+<div class="card">
   <div class="code" data-tabs>
     <div class="code-head"><span class="code-title">HTML</span><button class="copy" type="button" data-copy>Copy</button></div>
     <pre>&lt;script defer src="{{ script_host }}/v.js"
   data-site="{{ shell.domain }}"{% if cookieless %} data-cookieless{% endif %}&gt;&lt;/script&gt;</pre>
   </div>
+</div>
 </section>
+<section class="set-sec">
+<div class="set-intro"><h2>Attribution</h2><p class="muted">How a payment is credited to the visit that brought it, and what Virling stores about visitors.</p></div>
 <form class="card" method="post" action="/app/{{ shell.domain }}/settings">
-  <div class="card-head"><h2>Attribution</h2></div>
   <div class="setting">
     <div><b>Model</b><span class="muted">Which visit gets credit for a payment.</span></div>
     <div class="seg">
@@ -41,8 +43,11 @@
   </div>
   <div class="actions end"><button class="btn" type="submit">Save changes</button></div>
 </form>
-<section class="card">
-  <div class="card-head"><h2>Payment connections</h2><a class="btn secondary" href="/app/{{ shell.domain }}/setup/payments">Connect a provider</a></div>
+</section>
+<section class="set-sec">
+<div class="set-intro"><h2>Payment connections</h2><p class="muted">Providers Virling syncs payments from with a read-only key.</p></div>
+<div class="card">
+  <div class="card-head"><span class="muted">{% if connections.is_empty() %}Nothing connected{% else %}{{ connections.len() }} connected{% endif %}</span><a class="btn secondary" href="/app/{{ shell.domain }}/setup/payments">Connect a provider</a></div>
   {% for c in connections %}
   <div class="conn">
     <div class="grow">
@@ -57,6 +62,7 @@
   </div>
   {% endfor %}
   {% if connections.is_empty() %}<p class="empty">No payment provider connected yet.</p>{% endif %}
+</div>
 </section>
 </div>
 <dialog class="confirm" id="confirm">
