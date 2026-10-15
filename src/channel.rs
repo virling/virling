@@ -442,6 +442,23 @@ mod tests {
     }
 
     #[test]
+    fn every_known_source_has_a_bundled_logo() {
+        let hosts = [AI, SEARCH, SOCIAL].concat();
+        let hosts = hosts.iter().map(|h| match h.strip_suffix('.') {
+            Some(prefix) => format!("{prefix}.com"),
+            None => h.to_string(),
+        });
+        let names = [SOCIAL_SOURCES, SEARCH_SOURCES, AI_SOURCES].concat();
+        for s in hosts
+            .chain(names.iter().map(|s| s.to_string()))
+            .flat_map(|h| [source_name(&h), source_domain(&h), h])
+        {
+            let icon = crate::icons::source(&s, 16);
+            assert!(icon.contains(r#"role="img""#), "{s}: {icon}");
+        }
+    }
+
+    #[test]
     fn source_domains() {
         assert_eq!(source_domain("t.co"), "x.com");
         assert_eq!(source_domain("twitter.com"), "x.com");
