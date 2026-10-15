@@ -6,7 +6,7 @@ Some block requests to hosts or paths they know as analytics. Serving the script
 
 ## Does it run on an Intel Mac or Windows?
 
-Not from a release build. Releases cover Linux x86_64, Linux arm64 and macOS on Apple silicon, and the Docker image is linux/amd64. Intel macOS and Windows builds are <span class="na">Not available yet</span>. You can try [building from source](install/source.md).
+Intel Macs, yes: releases cover Linux x86_64 and arm64 and macOS on Intel and Apple silicon, and the Docker image is linux/amd64 and linux/arm64. Windows builds are <span class="na">Not available yet</span>. On Windows, use Docker or try [building from source](install/source.md).
 
 ## Can I track several sites?
 

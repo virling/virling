@@ -2,13 +2,10 @@
 
 Run Virling on your own server, add the tracking script to your site and connect a payment provider. From then on, every new payment shows the visit that brought it.
 
-<div class="meta"><span class="chip"><i></i>Self-host</span><span class="chip">6 steps</span><span class="chip mono" style="font-size:12px">v0.1.0</span></div>
+<div class="meta"><span class="chip"><i></i>Self-host</span><span class="chip">6 steps</span><span class="chip mono" style="font-size:12px">v0.1.1</span></div>
 
 > [!NOTE]
 > **Hosted plan coming soon.** app.virling.com is not open yet, so this guide covers self-hosting. Steps 4 to 6 will be the same on the hosted plan.
-
-> [!WARNING]
-> **Payments need the next release.** v0.1.0, the current release, has tracking, sign-in and onboarding. Payment sync, attribution, the dashboard, `VIRLING_BASE_URL` and `VIRLING_SECRET_KEY` ship in the next release. Until it is out, [build from source](install/source.md) from `main` to use them.
 
 You need a Linux or macOS server with Docker or one of the release binaries, and a domain pointing at it. Virling listens on port `8080` and keeps everything in one data folder: SQLite for settings, DuckDB for events.
 
@@ -29,13 +26,11 @@ docker run -d --name virling \
 ```
 
 ```sh
-curl -LO https://github.com/virling/virling/releases/download/v0.1.0/virling-v0.1.0-x86_64-unknown-linux-gnu.tar.gz
-tar xzf virling-v0.1.0-x86_64-unknown-linux-gnu.tar.gz
-cd virling-v0.1.0-x86_64-unknown-linux-gnu
-VIRLING_BASE_URL=https://stats.example.com ./virling serve --app
+curl -fsSL https://virling.com/install.sh | sh
+VIRLING_BASE_URL=https://stats.example.com virling serve --app
 ```
 
-<div class="cb-foot">Also built for Linux arm64 and macOS on Apple silicon.</div>
+<div class="cb-foot">The script picks the build for Linux x86_64 or arm64, or macOS on Intel or Apple silicon, and checks its checksum.</div>
 
 ```ini
 [Unit]
