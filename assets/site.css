@@ -26,7 +26,7 @@
   --ink: #0e1116;
   --ink-2: #4b515c;
   --ink-3: #6b717c;
-  --ink-4: #8a909a;
+  --ink-4: #6b717c;
   --ground: #f6f6f3;
   --paper: #ffffff;
   --rule: #e4e4df;
@@ -78,7 +78,7 @@ h2 { margin: 0; font-size: 40px; line-height: 1.08; font-weight: 700; letter-spa
 h3 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.025em; }
 .p { margin: 0; font-size: 17px; line-height: 1.6; color: var(--ink-2); }
 .p a { font-weight: 600; }
-.kicker { display: inline-flex; align-items: center; gap: 10px; font: 500 13px var(--mono); color: var(--revenue); letter-spacing: 0.02em; }
+.kicker { display: inline-flex; align-items: center; gap: 10px; font: 500 13px var(--mono); color: var(--revenue-text); letter-spacing: 0.02em; }
 .kicker span { color: var(--ink-4); }
 
 .band { padding: 96px 0; }
