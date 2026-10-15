@@ -955,6 +955,30 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn client_report_renders() {
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        seed(&store, &site);
+        crate::sync::rebuild_attribution(&state, Some(&site)).await;
+        let res = call(&state, get("/app/example.com/report", Some(&cookie))).await;
+        assert_eq!(res.status(), StatusCode::OK);
+        let body = body_text(res).await;
+        assert!(body.contains("<span>Last 7 days</span>") && body.contains("$98"));
+        assert!(body.contains("Revenue per day") && body.contains(r#"class="chart"#));
+        assert!(body.contains("Referrers") && body.contains("Landing pages"));
+        assert!(body.contains(r#"href="/app/example.com/report?range=30d""#));
+        assert!(body.contains("data-print"));
+        let other = sign_in(&state, "other%40example.com").await;
+        assert_eq!(
+            call(&state, get("/app/example.com/report", Some(&other)))
+                .await
+                .status(),
+            StatusCode::NOT_FOUND
+        );
+    }
+
+    #[tokio::test]
     async fn empty_dashboard_waits_for_the_first_visit() {
         let (_dir, state, _store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;

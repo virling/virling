@@ -690,6 +690,49 @@ fn span(p: &Period) -> String {
     format!("{} to {}", day(p.from), day(p.to))
 }
 
+/// A metric's value, change against the previous period and subtitle; `since` notes when tracking started.
+fn metric_tile(
+    m: chart::Metric,
+    cur: &Totals,
+    prev: &Totals,
+    since: Option<Date>,
+) -> (String, (&'static str, String), String) {
+    match m {
+        chart::Metric::Revenue => (
+            money(cur.revenue_usd),
+            delta(Some(cur.revenue_usd), Some(prev.revenue_usd)),
+            format!(
+                "{} from {}",
+                plural(cur.payments, "payment"),
+                plural(cur.customers, "customer")
+            ),
+        ),
+        chart::Metric::Visitors => (
+            group(cur.visitors),
+            delta(Some(cur.visitors as f64), Some(prev.visitors as f64)),
+            match since {
+                Some(s) => format!("{} since {}", plural(cur.sessions, "session"), day(s)),
+                None => plural(cur.sessions, "session"),
+            },
+        ),
+        chart::Metric::Conversion => (
+            cur.conversion
+                .map_or_else(|| "n/a".into(), |c| format!("{:.2}%", c * 100.0)),
+            delta(cur.conversion, prev.conversion),
+            conversion_sub(cur),
+        ),
+        chart::Metric::PerVisitor => (
+            cur.revenue_per_visitor.map_or_else(|| "n/a".into(), usd),
+            delta(cur.revenue_per_visitor, prev.revenue_per_visitor),
+            if cur.matched_payments > 0 {
+                "Matched revenue divided by visitors".into()
+            } else {
+                "Needs a payment matched to a visit".into()
+            },
+        ),
+    }
+}
+
 pub async fn dashboard(
     State(state): State<AppState>,
     account: Account,
@@ -793,42 +836,8 @@ pub async fn dashboard(
     let tiles = chart::Metric::ALL
         .into_iter()
         .map(|m| {
-            let (value, (trend, delta), sub) = match m {
-                chart::Metric::Revenue => (
-                    money(cur.revenue_usd),
-                    delta(Some(cur.revenue_usd), Some(prev.revenue_usd)),
-                    format!(
-                        "{} from {}",
-                        plural(cur.payments, "payment"),
-                        plural(cur.customers, "customer")
-                    ),
-                ),
-                chart::Metric::Visitors => (
-                    group(cur.visitors),
-                    delta(Some(cur.visitors as f64), Some(prev.visitors as f64)),
-                    match since {
-                        Some(s) if new_site && s >= p.from => {
-                            format!("{} since {}", plural(cur.sessions, "session"), day(s))
-                        }
-                        _ => plural(cur.sessions, "session"),
-                    },
-                ),
-                chart::Metric::Conversion => (
-                    cur.conversion
-                        .map_or_else(|| "n/a".into(), |c| format!("{:.2}%", c * 100.0)),
-                    delta(cur.conversion, prev.conversion),
-                    conversion_sub(cur),
-                ),
-                chart::Metric::PerVisitor => (
-                    cur.revenue_per_visitor.map_or_else(|| "n/a".into(), usd),
-                    delta(cur.revenue_per_visitor, prev.revenue_per_visitor),
-                    if cur.matched_payments > 0 {
-                        "Matched revenue divided by visitors".into()
-                    } else {
-                        "Needs a payment matched to a visit".into()
-                    },
-                ),
-            };
+            let (value, (trend, delta), sub) =
+                metric_tile(m, cur, prev, since.filter(|s| new_site && *s >= p.from));
             let (trend, delta) = if new_site {
                 if m == chart::Metric::Revenue && !young {
                     ("flat", "No earlier data".to_string())
@@ -1563,6 +1572,150 @@ pub async fn payment(
         title: "Payment",
         back: sites::app_path(&ctx.site.domain, "payments"),
         j,
+        shell: ctx.shell,
+    })
+}
+
+pub struct Kpi {
+    name: &'static str,
+    value: String,
+    trend: &'static str,
+    delta: String,
+    sub: String,
+    color: &'static str,
+}
+
+/// The client report body, shared by the app page and the public link.
+pub struct ReportView {
+    site: String,
+    span: String,
+    kpis: Vec<Kpi>,
+    chart_title: String,
+    chart_sub: String,
+    chart: String,
+    cards: Vec<Card>,
+}
+
+#[derive(Template)]
+#[template(path = "report.html")]
+struct ReportPage {
+    shell: Shell,
+    title: &'static str,
+    range_label: &'static str,
+    ranges: Vec<Opt>,
+    report: ReportView,
+}
+
+/// The client report for a range, with range links pointing at `base`.
+async fn client_report(
+    state: &AppState,
+    ctx: &Ctx,
+    key: Option<&str>,
+    base: &str,
+) -> Result<(ReportView, &'static str, Vec<Opt>), StatusCode> {
+    let (rkey, rlabel, days, _) = range(ctx, Some(key.unwrap_or("7d")));
+    let p = period(ctx, days);
+    let (model, window_days): (String, i64) =
+        sqlx::query_as("SELECT attribution_model, window_days FROM sites WHERE id = ?")
+            .bind(&ctx.site.id)
+            .fetch_one(&state.db)
+            .await
+            .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+    let store = state.events.clone();
+    let (id, period_q) = (ctx.site.id.clone(), p.clone());
+    let report = blocking(move || store.report(&id, &period_q)).await?;
+    let since = report
+        .setup
+        .first_event
+        .map(|t| t.to_offset(ctx.offset).date());
+    let new_site = since.is_none_or(|d| d > p.previous().from);
+    let (cur, prev) = (&report.overview.current, &report.overview.previous);
+    let kpis = chart::Metric::ALL
+        .into_iter()
+        .map(|m| {
+            let (value, (trend, delta), sub) =
+                metric_tile(m, cur, prev, since.filter(|s| new_site && *s >= p.from));
+            let (trend, delta) = if new_site {
+                ("", String::new())
+            } else {
+                (trend, delta)
+            };
+            Kpi {
+                name: m.name(),
+                value,
+                trend,
+                delta,
+                sub,
+                color: m.color(),
+            }
+        })
+        .collect();
+    let current = chart::series(&report.days);
+    let previous = chart::series(&report.previous_days);
+    let unit = if current.weekly { "week" } else { "day" };
+    let credit = format!(
+        "Credited to the {} within {} days",
+        if model == "first_touch" {
+            "first visit"
+        } else {
+            "last non-direct visit"
+        },
+        window_days
+    );
+    let card_for = |kind: CardKind, rows: &[BreakdownRow], foot: String| {
+        card(kind, rows, &[], base, false, false, Some(foot))
+    };
+    let view = ReportView {
+        site: ctx.site.domain.clone(),
+        span: format!("{}, {}", span(&p), p.to.year()),
+        kpis,
+        chart_title: format!("Revenue per {unit}"),
+        chart_sub: if new_site {
+            span(&p)
+        } else {
+            format!(
+                "{}, compared with the previous {} days",
+                span(&p),
+                days.min(365)
+            )
+        },
+        chart: chart::line(
+            &current,
+            (!new_site).then_some(&previous),
+            chart::Metric::Revenue,
+            false,
+            &span(&p),
+        ),
+        cards: vec![
+            card_for(CardKind::Channel, &report.channels, credit),
+            card_for(CardKind::Referrer, &report.referrers, String::new()),
+            card_for(CardKind::Page, &report.landing_pages, String::new()),
+        ],
+    };
+    Ok((view, rlabel, range_opts(base, rkey, "7d", &[])))
+}
+
+pub async fn report(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Query(q): Query<ReportQuery>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "report").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    let base = sites::app_path(&ctx.site.domain, "report");
+    let (report, range_label, ranges) =
+        match client_report(&state, &ctx, q.range.as_deref(), &base).await {
+            Ok(r) => r,
+            Err(code) => return code.into_response(),
+        };
+    render(ReportPage {
+        title: "Client report",
+        range_label,
+        ranges,
+        report,
         shell: ctx.shell,
     })
 }
