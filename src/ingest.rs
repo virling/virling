@@ -230,13 +230,14 @@ pub async fn collect(
                 .map(|v| clip(v.trim().to_string(), 200))
                 .filter(|v| !v.is_empty())
         };
+        let (utm_source, utm_medium) =
+            (utm("utm_source").or_else(|| utm("ref")), utm("utm_medium"));
         let referrer_host =
             e.r.as_deref()
                 .and_then(|r| Url::parse(r).ok())
                 .and_then(|r| r.host_str().map(|h| h.to_ascii_lowercase()))
-                .filter(|h| !host_belongs(h, &site.domain));
-        let (utm_source, utm_medium) =
-            (utm("utm_source").or_else(|| utm("ref")), utm("utm_medium"));
+                .filter(|h| !host_belongs(h, &site.domain))
+                .or_else(|| utm_source.as_deref().and_then(channel::source_host));
         let channel = channel::classify(
             utm_medium.as_deref(),
             utm_source.as_deref(),

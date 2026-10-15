@@ -1217,6 +1217,38 @@ mod tests {
     }
 
     #[test]
+    fn ai_referrers_carry_revenue() {
+        let (_dir, store) = store();
+        let mut events = Vec::new();
+        for (i, host) in ["chatgpt.com", "chat.openai.com", "claude.ai"]
+            .iter()
+            .enumerate()
+        {
+            let mut e = visit(&format!("v{i}"), &format!("s{i}"), T, "AI");
+            e.referrer_host = Some((*host).to_string());
+            events.push(e);
+        }
+        store.insert_events(&events).unwrap();
+        store
+            .upsert_payments(&[
+                pay("p1", T, Some("v0"), None),
+                pay("p2", T, Some("v1"), None),
+                pay("p3", T, Some("v2"), None),
+            ])
+            .unwrap();
+        store.rebuild_attribution("s", "first_touch", 90).unwrap();
+        let referrers = store
+            .breakdown("s", &period(), Dimension::Referrer, Sort::Revenue)
+            .unwrap();
+        let row = |label: &str| referrers.iter().find(|r| r.label == label).unwrap();
+        assert_eq!(
+            (row("chatgpt.com").visitors, row("chatgpt.com").revenue_usd),
+            (2, 200.0)
+        );
+        assert_eq!(row("claude.ai").revenue_usd, 100.0);
+    }
+
+    #[test]
     fn journey_lists_sessions_in_order() {
         let (_dir, store) = store();
         let mut goal = visit(
