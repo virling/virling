@@ -1,5 +1,6 @@
 <div class="journey">
   <div class="j-head">
+    <div class="j-who"><span class="av" style="background:{{ j.color }}">{{ j.initials }}</span><b>{{ j.name }}</b></div>
     <div class="j-amt"><b>{{ j.amount }}</b><span class="badge {{ j.status_class }}">{{ j.status }}</span></div>
     <span class="j-meta">{{ j.date }}{% if !j.country.is_empty() %}<i class="sep"></i>{{ j.flag|safe }}{{ j.country }}{% endif %}{% if !j.browser.is_empty() %}<i class="sep"></i>{{ j.browser }}{% endif %}</span>
   </div>

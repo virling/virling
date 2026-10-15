@@ -1,3 +1,4 @@
+mod alias;
 mod app;
 mod auth;
 mod channel;
@@ -643,6 +644,7 @@ mod tests {
             country: Some("DE".into()),
             device: "Desktop".into(),
             browser: "Firefox".into(),
+            os: "macOS".into(),
         };
         store
             .insert_events(&[
@@ -933,6 +935,51 @@ mod tests {
         assert!(body.contains("Unattributed"));
         assert!(body.contains("Net revenue") && body.contains("1 of 2 matched to a visit"));
         assert!(body.contains(r#"data-total="2""#), "drawer can count rows");
+        let payer = crate::alias::alias("v:v1").name;
+        assert!(body.contains(&payer) && body.contains(r#"class="heat""#));
+        assert!(body.contains("Customer") && body.contains("Payment 2"));
+        let q = payer.split(' ').next().unwrap().to_lowercase();
+        let found = body_text(
+            call(
+                &state,
+                get(&format!("/app/example.com/payments?q={q}"), Some(&cookie)),
+            )
+            .await,
+        )
+        .await;
+        assert!(found.contains(&payer) && found.contains("Showing 1 to 1 of 1"));
+        store
+            .insert_events(&[Event {
+                site_id: site.clone(),
+                ts: time::OffsetDateTime::now_utc() - time::Duration::days(3),
+                visitor_id: "v1".into(),
+                session_id: "last".into(),
+                kind: "goal".into(),
+                name: Some("trial start".into()),
+                path: "/signup".into(),
+                referrer_host: None,
+                utm_source: None,
+                utm_medium: None,
+                utm_campaign: None,
+                utm_content: None,
+                utm_term: None,
+                channel: "Direct".into(),
+                country: Some("DE".into()),
+                device: "Desktop".into(),
+                browser: "Firefox".into(),
+                os: "macOS".into(),
+            }])
+            .unwrap();
+        let goals = body_text(
+            call(
+                &state,
+                get("/app/example.com/payments?goal=trial+start", Some(&cookie)),
+            )
+            .await,
+        )
+        .await;
+        assert!(goals.contains("trial start 1") && goals.contains(&payer));
+        assert!(goals.contains("Someblog") || goals.contains("someblog.dev"));
         let unattributed = body_text(
             call(
                 &state,

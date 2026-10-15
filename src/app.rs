@@ -115,6 +115,7 @@ pub fn router(state: AppState) -> Router {
         )
         .route("/assets/flags/{file}", get(flag))
         .route("/assets/art/{file}", get(art))
+        .route("/assets/icons/{file}", get(ua_icon))
         .route(
             "/favicon.svg",
             get(|| asset("image/svg+xml", include_str!("../assets/favicon.svg"))),
@@ -221,6 +222,21 @@ async fn art(Path(file): Path<String>) -> Response {
                 (header::CACHE_CONTROL, "public, max-age=86400"),
             ],
             *bytes,
+        )
+            .into_response(),
+        None => StatusCode::NOT_FOUND.into_response(),
+    }
+}
+
+async fn ua_icon(Path(file): Path<String>) -> Response {
+    let slug = file.strip_suffix(".svg").unwrap_or_default();
+    match crate::icons::UA_ICONS.iter().find(|(s, _)| *s == slug) {
+        Some((_, svg)) => (
+            [
+                (header::CONTENT_TYPE, "image/svg+xml"),
+                (header::CACHE_CONTROL, "public, max-age=86400"),
+            ],
+            *svg,
         )
             .into_response(),
         None => StatusCode::NOT_FOUND.into_response(),

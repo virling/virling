@@ -6,23 +6,17 @@
 </section>
 {% if !never_paid %}
 <div class="list-bar">
-  <nav class="sg" aria-label="Filter payments">{% for f in filters %}<a href="{{ f.href }}"{% if f.on %} class="on" aria-current="true"{% endif %}>{{ f.label }} <span class="count">{{ f.count }}</span></a>{% endfor %}</nav>
+  <div class="menu-wrap goal-pick" data-menu>
+    <button type="button" class="ctl" aria-haspopup="true" aria-expanded="false"><span class="dim">Goal</span>{{ goal_label }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="menu" hidden>{% for g in goals %}<a href="{{ g.href }}"{% if g.on %} aria-current="true"{% endif %}>{{ g.label }} <span class="count">{{ g.count }}</span></a>{% endfor %}</div>
+  </div>
+  {% if !is_goal %}<nav class="sg" aria-label="Filter payments">{% for f in filters %}<a href="{{ f.href }}"{% if f.on %} class="on" aria-current="true"{% endif %}>{{ f.label }} <span class="count">{{ f.count }}</span></a>{% endfor %}</nav>{% endif %}
+  <form class="search" method="get" role="search">{% for (k, v) in hidden %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}<input type="search" name="q" value="{{ search }}" placeholder="Search names, sources, countries" aria-label="Search"></form>
   <span class="dim">{{ showing }}</span>
 </div>
 {% endif %}
 <section class="box pay-list" data-rows data-total="{{ total }}" data-offset="{{ offset }}">
-  <div class="pr th"><span>Date</span><span>Credited to</span><span class="pr-first">First touch</span><span class="num">Amount</span><span>Status</span><span class="pr-prov">Provider</span><span></span></div>
-  {% for p in rows %}
-  <a class="pr prow" href="{{ p.href }}" data-drawer>
-    <span class="dim">{{ p.date }}</span>
-    <span class="src{% if p.unattributed %} unattr{% endif %}">{{ p.icon|safe }}<span class="lbl">{{ p.source }}</span>{% if !p.channel.is_empty() %}<span class="ch">{{ p.channel }}</span>{% endif %}{% if p.renewal %}<span class="renewal">renewal</span>{% endif %}</span>
-    <span class="pr-first src">{% if p.unattributed || p.first.is_empty() %}<span class="na">n/a</span>{% else %}{{ p.first_icon|safe }}<span class="lbl">{{ p.first }}</span>{% endif %}</span>
-    <span class="num amt{% if p.refunded %} struck{% endif %}">{{ p.amount }}</span>
-    <span><span class="badge {{ p.status_class }}">{{ p.status }}</span></span>
-    <span class="pr-prov dim">{{ p.provider_icon|safe }}{{ p.provider }}</span>
-    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
-  </a>
-  {% endfor %}
+  {% if !customers.is_empty() %}{% include "_customers.html" %}{% endif %}
   {% if never_paid %}
   <div class="pay-empty">
     <img src="/assets/art/03-empty-payments.jpg" width="1024" height="687" alt="Pencil drawing: an empty jar on a desk next to a laptop, with one orange coin">
@@ -33,8 +27,8 @@
       <div class="eh-actions"><a class="b" href="/app/{{ shell.domain }}/setup/checkout">Pass virling_vid at checkout</a><a class="b sec" href="/app/{{ shell.domain }}/setup/payments">{% if connected.is_empty() %}Connect a provider{% else %}Connect another provider{% endif %}</a></div>
     </div>
   </div>
-  {% else if rows.is_empty() %}
-  <p class="bd-empty pad">No {% if filter_label != "All" %}{{ filter_label|lower }} {% endif %}payments in this range.</p>
+  {% else if customers.is_empty() %}
+  <p class="bd-empty pad">{% if !search.is_empty() %}Nothing matches {{ search }}.{% else if is_goal %}No completions in this range.{% else %}No {% if filter_label != "All" %}{{ filter_label|lower }} {% endif %}payments in this range.{% endif %}</p>
   {% endif %}
 </section>
 {% if !prev.is_empty() || !next.is_empty() %}
