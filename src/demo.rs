@@ -199,6 +199,26 @@ struct Visitor {
     country: &'static str,
     device: &'static str,
     browser: &'static str,
+    os: &'static str,
+}
+
+fn visitor(rng: &mut Rng) -> Visitor {
+    let device = rng.pick(DEVICES);
+    let browser = rng.pick(BROWSERS);
+    let os = match (device, browser) {
+        ("Desktop", "Safari") => "macOS",
+        ("Desktop", "Edge") => "Windows",
+        ("Desktop", _) => rng.pick(&[("Windows", 55.0), ("macOS", 38.0), ("Linux", 7.0)]),
+        (_, "Safari") => "iOS",
+        _ => rng.pick(&[("Android", 70.0), ("iOS", 30.0)]),
+    };
+    Visitor {
+        id: rng.id("v"),
+        country: rng.pick(COUNTRIES),
+        device,
+        browser,
+        os,
+    }
 }
 
 fn session(
@@ -245,6 +265,7 @@ fn session(
             country: Some(v.country.into()),
             device: v.device.into(),
             browser: v.browser.into(),
+            os: v.os.into(),
         });
         path = [
             "/pricing",
@@ -291,12 +312,7 @@ fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>) {
             if ts > now {
                 continue;
             }
-            let v = Visitor {
-                id: rng.id("v"),
-                country: rng.pick(COUNTRIES),
-                device: rng.pick(DEVICES),
-                browser: rng.pick(BROWSERS),
-            };
+            let v = visitor(&mut rng);
             session(&mut rng, site, &v, src, ts, &mut events);
             let mut last = ts;
             if rng.f() < 0.28 {
@@ -332,6 +348,7 @@ fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>) {
                 country: Some(v.country.into()),
                 device: v.device.into(),
                 browser: v.browser.into(),
+                os: v.os.into(),
             });
             let plan = rng.pick(PLANS);
             let (currency, rate) = rng.pick(CURRENCIES);
@@ -364,12 +381,7 @@ fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>) {
         }
     }
     for n in 0..4 {
-        let v = Visitor {
-            id: rng.id("v"),
-            country: rng.pick(COUNTRIES),
-            device: rng.pick(DEVICES),
-            browser: rng.pick(BROWSERS),
-        };
+        let v = visitor(&mut rng);
         let ts = now - Duration::seconds(30 + n * 50);
         session(&mut rng, site, &v, &SOURCES[n as usize], ts, &mut events);
     }
