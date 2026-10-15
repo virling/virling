@@ -149,6 +149,15 @@ fn host_matches(host: &str, list: &[&str]) -> bool {
     })
 }
 
+/// A utm_source that names a known source host ("chatgpt.com"), to stand in for a missing referrer.
+pub fn source_host(utm_source: &str) -> Option<String> {
+    let s = utm_source.to_ascii_lowercase();
+    [AI, SEARCH, SOCIAL]
+        .iter()
+        .any(|list| host_matches(&s, list))
+        .then_some(s)
+}
+
 /// Applies the PRD channel rules in order. `referrer_host` must already exclude self-referrals.
 pub fn classify(
     utm_medium: Option<&str>,
@@ -398,6 +407,18 @@ mod tests {
             );
         }
         assert_eq!(classify(None, Some("yandex"), None), Channel::OrganicSearch);
+    }
+
+    #[test]
+    fn utm_sources_naming_known_hosts() {
+        assert_eq!(source_host("ChatGPT.com").as_deref(), Some("chatgpt.com"));
+        assert_eq!(
+            source_host("perplexity.ai").as_deref(),
+            Some("perplexity.ai")
+        );
+        assert_eq!(source_host("chatgpt"), None);
+        assert_eq!(source_host("newsletter"), None);
+        assert_eq!(source_host("partner.io"), None);
     }
 
     #[test]

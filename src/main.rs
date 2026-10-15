@@ -244,6 +244,18 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn tagged_ai_source_stands_in_for_missing_referrer() {
+        let (_dir, state, store) = setup().await;
+        let body = r#"{"n":"pageview","u":"https://example.com/?utm_source=chatgpt.com","s":"example.com","w":800}"#;
+        assert_eq!(post(&state, body, UA).await, StatusCode::ACCEPTED);
+        let rows = store.dump();
+        assert_eq!(
+            (rows[0].1.as_str(), rows[0].2.as_deref()),
+            ("AI", Some("chatgpt.com"))
+        );
+    }
+
+    #[tokio::test]
     async fn ingests_and_classifies_events() {
         let (_dir, state, store) = setup().await;
         let vid = "0b7c2d1e-aaaa-bbbb-cccc-1234567890ab";
