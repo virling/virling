@@ -982,8 +982,10 @@ mod tests {
         assert_eq!(res.status(), StatusCode::OK);
         let body = body_text(res).await;
         assert!(body.contains("<span>Last 7 days</span>") && body.contains("$98"));
-        assert!(body.contains("Revenue per day") && body.contains(r#"class="chart"#));
-        assert!(body.contains("Referrers") && body.contains("Landing pages"));
+        assert!(
+            body.contains("Visitors and revenue per day") && body.contains(r#"class="chart dual"#)
+        );
+        assert!(body.contains("Top sources") && body.contains("Top pages"));
         assert!(body.contains(r#"href="/app/example.com/report?range=30d""#));
         assert!(body.contains("data-print") && body.contains("Set up branding"));
 

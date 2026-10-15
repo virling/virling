@@ -1646,24 +1646,15 @@ pub async fn payment(
     })
 }
 
-pub struct Kpi {
-    name: &'static str,
-    value: String,
-    trend: &'static str,
-    delta: String,
-    sub: String,
-    color: &'static str,
-}
-
 /// The client report body, shared by the app page and the public link.
 pub struct ReportView {
     site: String,
     span: String,
-    kpis: Vec<Kpi>,
+    tiles: Vec<Tile>,
     chart_title: String,
     chart_sub: String,
     chart: String,
-    cards: Vec<Card>,
+    cards: Vec<(&'static str, Card)>,
 }
 
 #[derive(Template)]
@@ -1710,7 +1701,7 @@ async fn client_report(
         .map(|t| t.to_offset(ctx.offset).date());
     let new_site = since.is_none_or(|d| d > p.previous().from);
     let (cur, prev) = (&report.overview.current, &report.overview.previous);
-    let kpis = chart::Metric::ALL
+    let tiles = chart::Metric::ALL
         .into_iter()
         .map(|m| {
             let (value, (trend, delta), sub) =
@@ -1720,18 +1711,25 @@ async fn client_report(
             } else {
                 (trend, delta)
             };
-            Kpi {
+            Tile {
                 name: m.name(),
+                short: match m {
+                    chart::Metric::Conversion => "Conversion",
+                    chart::Metric::PerVisitor => "Per visitor",
+                    _ => m.name(),
+                },
                 value,
                 trend,
                 delta,
                 sub,
+                href: String::new(),
+                on: matches!(m, chart::Metric::Revenue | chart::Metric::Visitors),
                 color: m.color(),
+                big: m == chart::Metric::Revenue,
             }
         })
         .collect();
     let current = chart::series(&report.days);
-    let previous = chart::series(&report.previous_days);
     let unit = if current.weekly { "week" } else { "day" };
     let credit = format!(
         "Credited to the {} within {} days",
@@ -1748,28 +1746,27 @@ async fn client_report(
     let view = ReportView {
         site: ctx.site.domain.clone(),
         span: format!("{}, {}", span(&p), p.to.year()),
-        kpis,
-        chart_title: format!("Revenue per {unit}"),
+        tiles,
+        chart_title: format!("Visitors and revenue per {unit}"),
         chart_sub: if new_site {
             span(&p)
         } else {
             format!(
-                "{}, compared with the previous {} days",
+                "{}. Changes are against the previous {} days",
                 span(&p),
                 days.min(365)
             )
         },
-        chart: chart::line(
-            &current,
-            (!new_site).then_some(&previous),
-            chart::Metric::Revenue,
-            false,
-            &span(&p),
-        ),
+        chart: chart::dual(&current),
         cards: vec![
-            card_for(CardKind::Channel, &report.channels, credit),
-            card_for(CardKind::Referrer, &report.referrers, String::new()),
-            card_for(CardKind::Page, &report.landing_pages, String::new()),
+            (
+                "Top sources",
+                card_for(CardKind::Referrer, &report.referrers, credit),
+            ),
+            (
+                "Top pages",
+                card_for(CardKind::Page, &report.landing_pages, String::new()),
+            ),
         ],
     };
     Ok((view, rlabel, range_opts(base, rkey, "7d", &[])))

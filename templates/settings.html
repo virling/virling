@@ -70,7 +70,7 @@
   {% if brand_saved %}<div class="notice ok-note" role="status">Saved. The report uses your branding now.</div>{% endif %}
   {% if !brand_error.is_empty() %}<div class="alert" role="alert">{{ brand_error }}</div>{% endif %}
   <div class="setting">
-    <div><b><label for="agency_name">Agency name</label></b><span class="muted">Shown at the top of the report when there is no logo.</span></div>
+    <div><b><label for="agency_name">Agency name</label></b><span class="muted">Shown at the top of the report, next to your logo.</span></div>
     <input class="input" id="agency_name" name="agency_name" value="{{ brand.agency_name }}" maxlength="80" autocomplete="organization">
   </div>
   <div class="setting">
@@ -93,7 +93,7 @@
   {% if let Some(link) = share_link %}
   <div class="code" data-tabs>
     <div class="code-head"><span class="code-title">Read-only link</span><button class="copy" type="button" data-copy>Copy</button></div>
-    <pre>{{ link }}</pre>
+    <pre class="wrap">{{ link }}</pre>
   </div>
   <div class="actions end">
     <form method="post" action="/app/{{ shell.domain }}/settings/share" data-confirm="Make a new link? The current link stops working right away." data-confirm-ok="Make a new link"><button class="btn ghost" type="submit">New link</button></form>
