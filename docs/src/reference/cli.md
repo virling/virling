@@ -31,7 +31,7 @@ virling serve [OPTIONS]
 | `--smtp-url <URL>`<br>`VIRLING_SMTP_URL` | unset | SMTP server for sign-in emails. Unset: emails are logged. |
 | `--mail-from <ADDR>`<br>`VIRLING_MAIL_FROM` | `Virling <login@virling.com>` | Sender for sign-in emails. |
 | `--marketing`<br>`VIRLING_MARKETING` | off | Serve the virling.com landing pages and waitlist. Not needed when self-hosting. |
-| `--waitlist-from <ADDR>`<br>`VIRLING_WAITLIST_FROM` | `Deven and Rahul at Virling <hello@virling.com>` | Sender for waitlist emails. Only used with `--marketing`. |
+| `--waitlist-from <ADDR>`<br>`VIRLING_WAITLIST_FROM` | `Rahul at Virling <hello@virling.com>` | Sender for waitlist emails. Only used with `--marketing`. |
 
 A flag on the command line wins over its environment variable. Boolean variables take `true` or `false`.
 

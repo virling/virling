@@ -101,7 +101,7 @@ struct ServeArgs {
     #[arg(
         long,
         env = "VIRLING_WAITLIST_FROM",
-        default_value = "Deven and Rahul at Virling <hello@virling.com>"
+        default_value = "Rahul at Virling <hello@virling.com>"
     )]
     waitlist_from: String,
 }
@@ -221,7 +221,7 @@ mod tests {
             trust_proxy: false,
             events_per_second: 200,
             base_url: "http://localhost:8080".into(),
-            waitlist_from: "Deven and Rahul at Virling <hello@virling.com>".into(),
+            waitlist_from: "Rahul at Virling <hello@virling.com>".into(),
         };
         let state = AppState::new(
             config,
