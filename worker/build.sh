@@ -11,6 +11,8 @@ cp ../assets/favicon.svg ../assets/v.js ../assets/robots.txt ../assets/sitemap.x
 cp -R ../assets/art public/assets/art
 cp -R ../assets/fonts public/assets/fonts
 cp -R demo public/demo
+# Inline the landing stylesheet so the first paint needs no extra request.
+perl -0pi -e 'BEGIN { local $/; open F, "<", "public/assets/site.css"; $css = <F>; close F } s#<link rel="stylesheet" href="/assets/site.css">#<style>$css</style>#' public/index.html public/agency.html
 # Stamp CSS and JS links with a content hash so they can be cached for a year.
 for f in site.css site.js app.css app.js; do
   v=$(cksum "public/assets/$f" | cut -d' ' -f1)
