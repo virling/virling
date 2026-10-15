@@ -1829,6 +1829,7 @@ pub async fn shared(
         shell: Shell {
             domain: site.domain.clone(),
             initial: String::new(),
+            icon: String::new(),
             sites: Vec::new(),
             nav: "report",
             plan: String::new(),
