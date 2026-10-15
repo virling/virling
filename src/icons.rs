@@ -5,6 +5,28 @@ use crate::chart::esc;
 use crate::flags;
 
 const BRANDS: &[(&str, &str, &str)] = &[
+    ("baidu", "Baidu", include_str!("../assets/icons/baidu.svg")),
+    (
+        "bluesky",
+        "Bluesky",
+        include_str!("../assets/icons/bluesky.svg"),
+    ),
+    ("brave", "Brave", include_str!("../assets/icons/brave.svg")),
+    (
+        "claude",
+        "Claude",
+        include_str!("../assets/icons/claude.svg"),
+    ),
+    (
+        "devdotto",
+        "DEV",
+        include_str!("../assets/icons/devdotto.svg"),
+    ),
+    (
+        "discord",
+        "Discord",
+        include_str!("../assets/icons/discord.svg"),
+    ),
     (
         "dodo",
         "Dodo Payments",
@@ -14,6 +36,11 @@ const BRANDS: &[(&str, &str, &str)] = &[
         "duckduckgo",
         "DuckDuckGo",
         include_str!("../assets/icons/duckduckgo.svg"),
+    ),
+    (
+        "ecosia",
+        "Ecosia",
+        include_str!("../assets/icons/ecosia.svg"),
     ),
     (
         "facebook",
@@ -31,6 +58,21 @@ const BRANDS: &[(&str, &str, &str)] = &[
         include_str!("../assets/icons/google.svg"),
     ),
     (
+        "googlegemini",
+        "Gemini",
+        include_str!("../assets/icons/googlegemini.svg"),
+    ),
+    (
+        "hashnode",
+        "Hashnode",
+        include_str!("../assets/icons/hashnode.svg"),
+    ),
+    (
+        "indiehackers",
+        "Indie Hackers",
+        include_str!("../assets/icons/indiehackers.svg"),
+    ),
+    (
         "instagram",
         "Instagram",
         include_str!("../assets/icons/instagram.svg"),
@@ -44,6 +86,26 @@ const BRANDS: &[(&str, &str, &str)] = &[
         "linkedin",
         "LinkedIn",
         include_str!("../assets/icons/linkedin.svg"),
+    ),
+    (
+        "mastodon",
+        "Mastodon",
+        include_str!("../assets/icons/mastodon.svg"),
+    ),
+    (
+        "medium",
+        "Medium",
+        include_str!("../assets/icons/medium.svg"),
+    ),
+    (
+        "perplexity",
+        "Perplexity",
+        include_str!("../assets/icons/perplexity.svg"),
+    ),
+    (
+        "pinterest",
+        "Pinterest",
+        include_str!("../assets/icons/pinterest.svg"),
     ),
     ("polar", "Polar", include_str!("../assets/icons/polar.svg")),
     (
@@ -60,6 +122,31 @@ const BRANDS: &[(&str, &str, &str)] = &[
         "stripe",
         "Stripe",
         include_str!("../assets/icons/stripe.svg"),
+    ),
+    (
+        "substack",
+        "Substack",
+        include_str!("../assets/icons/substack.svg"),
+    ),
+    (
+        "telegram",
+        "Telegram",
+        include_str!("../assets/icons/telegram.svg"),
+    ),
+    (
+        "threads",
+        "Threads",
+        include_str!("../assets/icons/threads.svg"),
+    ),
+    (
+        "tiktok",
+        "TikTok",
+        include_str!("../assets/icons/tiktok.svg"),
+    ),
+    (
+        "whatsapp",
+        "WhatsApp",
+        include_str!("../assets/icons/whatsapp.svg"),
     ),
     ("x", "X", include_str!("../assets/icons/x.svg")),
     (
@@ -92,6 +179,27 @@ pub fn brand_slug(source: &str) -> Option<&'static str> {
         "facebook" | "facebook.com" | "l.facebook.com" => "facebook",
         "instagram" | "instagram.com" | "l.instagram.com" => "instagram",
         "duckduckgo" | "duckduckgo.com" => "duckduckgo",
+        "claude" | "claude.ai" => "claude",
+        "perplexity" | "perplexity.ai" => "perplexity",
+        "gemini" | "gemini.google.com" => "googlegemini",
+        "bluesky" | "bsky.app" | "go.bsky.app" => "bluesky",
+        "threads" | "threads.com" | "threads.net" | "l.threads.com" => "threads",
+        "mastodon" | "mastodon.social" => "mastodon",
+        "tiktok" | "tiktok.com" => "tiktok",
+        "pinterest" | "pinterest.com" | "pin.it" => "pinterest",
+        "discord" | "discord.com" | "discordapp.com" | "discord.gg" => "discord",
+        "telegram" | "t.me" | "telegram.org" | "web.telegram.org" => "telegram",
+        "whatsapp" | "whatsapp.com" | "web.whatsapp.com" | "wa.me" => "whatsapp",
+        "substack" | "substack.com" => "substack",
+        _ if h.ends_with(".substack.com") => "substack",
+        "medium" | "medium.com" => "medium",
+        "dev" | "dev.to" => "devdotto",
+        "hashnode" | "hashnode.com" => "hashnode",
+        _ if h.ends_with(".hashnode.dev") => "hashnode",
+        "indie hackers" | "indiehackers.com" => "indiehackers",
+        "brave" | "search.brave.com" => "brave",
+        "ecosia" | "ecosia.org" => "ecosia",
+        "baidu" | "baidu.com" => "baidu",
         _ => return None,
     })
 }
@@ -225,6 +333,12 @@ mod tests {
             ("m.facebook.com", "facebook"),
             ("lnkd.in", "linkedin"),
             ("Product Hunt", "producthunt"),
+            ("claude.ai", "claude"),
+            ("Gemini", "googlegemini"),
+            ("go.bsky.app", "bluesky"),
+            ("someone.substack.com", "substack"),
+            ("dev.to", "devdotto"),
+            ("search.brave.com", "brave"),
         ] {
             assert_eq!(brand_slug(input), Some(slug), "{input}");
         }
