@@ -137,7 +137,7 @@ if (drawer) {
     current = null;
   };
   const show = async (row) => {
-    const res = await fetch(row.getAttribute("href"), { headers: { "x-drawer": "1" } });
+    const res = await fetch(row.dataset.drawer || row.getAttribute("href"), { headers: { "x-drawer": "1" } });
     if (!res.ok) return (location.href = row.getAttribute("href"));
     body.innerHTML = await res.text();
     current?.classList.remove("sel");
