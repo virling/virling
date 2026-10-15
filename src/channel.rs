@@ -299,6 +299,22 @@ pub fn source_name(host: &str) -> String {
     h.to_string()
 }
 
+/// Every known host and source name with its display name and domain, for logo coverage tests.
+#[cfg(test)]
+#[allow(dead_code)]
+pub(crate) fn known_sources() -> Vec<String> {
+    let hosts = [AI, SEARCH, SOCIAL].concat();
+    let hosts = hosts.iter().map(|h| match h.strip_suffix('.') {
+        Some(prefix) => format!("{prefix}.com"),
+        None => h.to_string(),
+    });
+    let names = [SOCIAL_SOURCES, SEARCH_SOURCES, AI_SOURCES].concat();
+    hosts
+        .chain(names.iter().map(|s| s.to_string()))
+        .flat_map(|h| [source_name(&h), source_domain(&h), h])
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -439,23 +455,6 @@ mod tests {
         assert_eq!(source_name("bsky.app"), "Bluesky");
         assert_eq!(source_name("yandex.ru"), "Yandex");
         assert_eq!(source_name("dev.to"), "DEV");
-    }
-
-    #[test]
-    fn every_known_source_has_a_bundled_logo() {
-        let hosts = [AI, SEARCH, SOCIAL].concat();
-        let hosts = hosts.iter().map(|h| match h.strip_suffix('.') {
-            Some(prefix) => format!("{prefix}.com"),
-            None => h.to_string(),
-        });
-        let names = [SOCIAL_SOURCES, SEARCH_SOURCES, AI_SOURCES].concat();
-        for s in hosts
-            .chain(names.iter().map(|s| s.to_string()))
-            .flat_map(|h| [source_name(&h), source_domain(&h), h])
-        {
-            let icon = crate::icons::source(&s, 16);
-            assert!(icon.contains(r#"role="img""#), "{s}: {icon}");
-        }
     }
 
     #[test]

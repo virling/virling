@@ -373,6 +373,14 @@ mod tests {
     use super::*;
 
     #[test]
+    fn every_known_source_has_a_bundled_logo() {
+        for s in crate::channel::known_sources() {
+            let icon = source(&s, 16);
+            assert!(icon.contains(r#"role="img""#), "{s}: {icon}");
+        }
+    }
+
+    #[test]
     fn hosts_and_names_map_to_logos() {
         for (input, slug) in [
             ("news.ycombinator.com", "ycombinator"),
