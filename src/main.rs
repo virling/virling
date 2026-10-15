@@ -4,6 +4,7 @@ mod channel;
 mod chart;
 mod crypto;
 mod dashboard;
+mod demo;
 mod events;
 mod favicon;
 mod flags;
@@ -61,6 +62,9 @@ enum Command {
         #[arg(long, default_value = "UTC")]
         timezone: String,
     },
+    /// Render the sample-data demo to static HTML
+    #[command(hide = true)]
+    Demo { out: PathBuf },
 }
 
 #[derive(Parser)]
@@ -114,6 +118,9 @@ async fn main() -> anyhow::Result<()> {
         )
         .init();
     let cli = Cli::parse();
+    if let Some(Command::Demo { out }) = &cli.command {
+        return demo::export(out).await;
+    }
     std::fs::create_dir_all(&cli.data_dir)
         .with_context(|| format!("creating {}", cli.data_dir.display()))?;
     let db = open_sqlite(&cli.data_dir).await?;
@@ -171,6 +178,7 @@ async fn main() -> anyhow::Result<()> {
                 "Added {domain}. Script tag:\n<script defer src=\"https://YOUR-VIRLING-HOST/v.js\" data-site=\"{domain}\"></script>"
             );
         }
+        Command::Demo { .. } => unreachable!("handled before the data dir is opened"),
     }
     Ok(())
 }

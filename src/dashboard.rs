@@ -43,6 +43,8 @@ pub struct Shell {
     pub nav: &'static str,
     pub plan: String,
     pub usage: String,
+    pub email: String,
+    pub avatar: String,
     pub live: u64,
 }
 
@@ -102,11 +104,12 @@ pub async fn load(
     let Some(site) = all.iter().find(|s| s.domain == domain).cloned() else {
         return Err(StatusCode::NOT_FOUND);
     };
-    let plan: String = sqlx::query_scalar("SELECT plan FROM accounts WHERE id = ?")
-        .bind(&account.id)
-        .fetch_one(&state.db)
-        .await
-        .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+    let (plan, email): (String, String) =
+        sqlx::query_as("SELECT plan, email FROM accounts WHERE id = ?")
+            .bind(&account.id)
+            .fetch_one(&state.db)
+            .await
+            .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
     let store = state.events.clone();
     let (id, tz) = (site.id.clone(), site.timezone.clone());
     let (offset, live, visitors, first) = blocking(move || {
@@ -163,6 +166,8 @@ pub async fn load(
             other => other.replace('_', " "),
         },
         usage: format!("{} in the last 30 days", plural(visitors, "visitor")),
+        avatar: initials(&email),
+        email,
         live,
     };
     Ok(Ctx {
@@ -172,6 +177,19 @@ pub async fn load(
         first_day: first.map(|t| t.to_offset(offset).date()),
         offset,
     })
+}
+
+/// Up to two initials from the local part of an email ("maya.chen@x.com" -> "MC").
+fn initials(email: &str) -> String {
+    email
+        .split('@')
+        .next()
+        .unwrap_or_default()
+        .split(['.', '_', '-', '+'])
+        .filter_map(|p| p.chars().next())
+        .take(2)
+        .collect::<String>()
+        .to_uppercase()
 }
 
 /// The active range as (key, label, days, default key); sites under 30 days old default to "all".
@@ -1834,6 +1852,8 @@ pub async fn shared(
             nav: "report",
             plan: String::new(),
             usage: String::new(),
+            email: String::new(),
+            avatar: String::new(),
             live: 0,
         },
         site,
