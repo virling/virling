@@ -13,9 +13,10 @@ use crate::onboarding::render;
 use crate::settings::{self, Brand};
 use crate::sites::{self, Site};
 use crate::stats::{
-    BreakdownRow, Journey, PaymentFilter, PaymentRow, Period, Sort, Totals, sort_rows,
+    Activity, BreakdownRow, GoalRow, Journey, PaymentFilter, PaymentRow, Period, Sort, Totals, Who,
+    sort_rows,
 };
-use crate::{chart, favicon, icons};
+use crate::{alias, chart, favicon, icons};
 
 const RANGES: [(&str, &str, i64); 6] = [
     ("today", "Today", 1),
@@ -32,6 +33,8 @@ const FILTERS: [(&str, &str); 4] = [
     ("refunded", "Refunded"),
 ];
 const PER_PAGE: u32 = 50;
+/// Rows read when searching, since names are generated outside the database.
+const SEARCH_LIMIT: u32 = 5000;
 
 /// Sidebar and top bar data shared by every app page.
 pub struct Shell {
@@ -464,21 +467,29 @@ pub struct Card {
     foot_link: &'static str,
 }
 
-pub struct PayView {
-    date: String,
+/// A payment or goal completion shown as the person behind it.
+pub struct CustomerView {
+    name: String,
+    initials: String,
+    color: &'static str,
+    /// Customer, Renewal, or empty for a goal completion.
+    badge: &'static str,
+    /// Icon HTML and label for country, device, OS and browser.
+    chips: Vec<(String, String)>,
     icon: String,
     source: String,
     channel: String,
-    unattributed: bool,
-    renewal: bool,
-    first_icon: String,
-    first: String,
-    amount: String,
+    spent: String,
     refunded: bool,
     status: &'static str,
     status_class: &'static str,
     provider_icon: String,
-    provider: &'static str,
+    /// From the first visit to the payment or goal.
+    wait: String,
+    date: String,
+    /// One CSS class per day of the activity strip; the last one marks the payment or goal day.
+    days: Vec<&'static str>,
+    /// Journey link; empty for goal completions.
     href: String,
 }
 
@@ -514,7 +525,7 @@ struct DashboardPage {
     kind_label: &'static str,
     chart: String,
     cards: Vec<Card>,
-    latest: Vec<PayView>,
+    customers: Vec<CustomerView>,
     latest_total: u64,
     payments_href: String,
     steps: Vec<Step>,
@@ -529,6 +540,10 @@ pub struct ReportQuery {
     range: Option<String>,
     filter: Option<String>,
     page: Option<u32>,
+    /// A goal name; payments when empty.
+    goal: Option<String>,
+    /// Search over names, sources and countries.
+    q: Option<String>,
 }
 
 #[derive(Deserialize, Default)]
@@ -561,38 +576,150 @@ fn source_of(p: &PaymentRow) -> (String, String) {
     }
 }
 
-pub fn pay_view(p: &PaymentRow, domain: &str, offset: UtcOffset) -> PayView {
+/// Stable key for the person behind a payment, so renewals and goals share one generated name.
+fn payer_key(p: &PaymentRow) -> String {
+    match (&p.customer_id, &p.visitor_id) {
+        (Some(c), _) => format!("c:{}:{c}", p.provider),
+        (None, Some(v)) => format!("v:{v}"),
+        (None, None) => format!("p:{}:{}", p.provider, p.provider_payment_id),
+    }
+}
+
+fn encode(v: &str) -> String {
+    url::form_urlencoded::byte_serialize(v.as_bytes()).collect()
+}
+
+impl CustomerView {
+    /// Case-insensitive match on name, source, channel or chip labels; `q` is lowercase.
+    fn matches(&self, q: &str) -> bool {
+        [&self.name, &self.source, &self.channel]
+            .into_iter()
+            .chain(self.chips.iter().map(|c| &c.1))
+            .any(|s| s.to_lowercase().contains(q))
+    }
+}
+
+/// "a few seconds", "5 minutes", "an hour", "2 days", "a month"
+fn since(d: Duration) -> String {
+    let count = |n: i64, one: &str, unit: &str| {
+        if n == 1 {
+            one.to_string()
+        } else {
+            format!("{n} {unit}s")
+        }
+    };
+    let days = d.whole_days();
+    match d.whole_seconds() {
+        ..60 => "a few seconds".into(),
+        60..3600 => count(d.whole_minutes(), "a minute", "minute"),
+        3600..86400 => count(d.whole_hours(), "an hour", "hour"),
+        _ if days < 30 => count(days, "a day", "day"),
+        _ if days < 365 => count(days / 30, "a month", "month"),
+        _ => count(days / 365, "a year", "year"),
+    }
+}
+
+fn chips(a: &Activity) -> Vec<(String, String)> {
+    let mut out = Vec::new();
+    if let Some(c) = &a.country {
+        out.push((icons::flag(c), icons::country(c)));
+    }
+    if let Some(d) = a.device.as_deref().filter(|d| *d != "Unknown") {
+        out.push((icons::device(d), d.to_string()));
+    }
+    for name in [&a.os, &a.browser].into_iter().flatten() {
+        if name != "Other" {
+            out.push((icons::ua(name), name.clone()));
+        }
+    }
+    out
+}
+
+/// Tint classes for sessions per day; the last day is the payment or goal day.
+fn heat(days: &[u32]) -> Vec<&'static str> {
+    let mut out: Vec<&'static str> = days
+        .iter()
+        .map(|n| match n {
+            0 => "h0",
+            1 => "h1",
+            2 => "h2",
+            _ => "h3",
+        })
+        .collect();
+    if let Some(last) = out.last_mut() {
+        *last = "pay";
+    }
+    out
+}
+
+pub fn payment_customer(
+    p: &PaymentRow,
+    a: &Activity,
+    domain: &str,
+    offset: UtcOffset,
+) -> CustomerView {
+    let alias = alias::alias(&payer_key(p));
     let (status, status_class) = status(&p.status);
     let (source, channel) = source_of(p);
-    let first = p.first_touch.as_ref().map(|f| f.source.clone());
-    PayView {
-        date: local(p.ts, offset),
+    let first = p.first_touch.as_ref().map(|f| f.ts);
+    CustomerView {
+        name: alias.name,
+        initials: alias.initials,
+        color: alias.color,
+        badge: if p.is_renewal { "Renewal" } else { "Customer" },
+        chips: chips(a),
         icon: icons::source(&source, 16),
         channel: if channel == source {
             String::new()
         } else {
             channel
         },
-        unattributed: p.touch.is_none(),
-        renewal: p.is_renewal,
-        first_icon: first
-            .as_deref()
-            .map(|f| icons::source(f, 16))
-            .unwrap_or_default(),
-        first: first.unwrap_or_default(),
         source,
-        amount: amount(p),
+        spent: amount(p),
         refunded: p.status == "refunded",
         status,
         status_class,
-        provider_icon: icons::provider(&p.provider, 14),
-        provider: provider_short(&p.provider),
+        provider_icon: icons::provider(&p.provider, 12),
+        wait: first.map(|f| since(p.ts - f)).unwrap_or_default(),
+        date: local(p.ts, offset),
+        days: heat(&a.days),
         href: format!(
             "{}/{}/{}",
             sites::app_path(domain, "payments"),
             p.provider,
             p.provider_payment_id
         ),
+    }
+}
+
+fn goal_customer(g: &GoalRow, a: &Activity, offset: UtcOffset) -> CustomerView {
+    let key = match &g.customer {
+        Some(c) => format!("c:{c}"),
+        None => format!("v:{}", g.visitor_id),
+    };
+    let alias = alias::alias(&key);
+    CustomerView {
+        name: alias.name,
+        initials: alias.initials,
+        color: alias.color,
+        badge: if g.spent_usd > 0.0 { "Customer" } else { "" },
+        chips: chips(a),
+        icon: icons::source(&g.source, 16),
+        channel: if g.channel == g.source {
+            String::new()
+        } else {
+            g.channel.clone()
+        },
+        source: g.source.clone(),
+        spent: usd(g.spent_usd),
+        refunded: false,
+        status: "",
+        status_class: "",
+        provider_icon: String::new(),
+        wait: g.first_ts.map(|f| since(g.ts - f)).unwrap_or_default(),
+        date: local(g.ts, offset),
+        days: heat(&a.days),
+        href: String::new(),
     }
 }
 
@@ -812,13 +939,13 @@ pub async fn dashboard(
     let store = state.events.clone();
     let (id, period_q) = (ctx.site.id.clone(), p.clone());
     let result = blocking(move || {
-        Ok((
-            store.report(&id, &period_q)?,
-            store.payment_list(&id, &period_q, PaymentFilter::All, 50, 0)?,
-        ))
+        let recent = store.payment_list(&id, &period_q, PaymentFilter::All, 50, 0)?;
+        let who: Vec<Who> = recent.rows.iter().take(5).map(Who::of).collect();
+        let activity = store.activity(&id, &period_q.tz, &who)?;
+        Ok((store.report(&id, &period_q)?, recent, activity))
     })
     .await;
-    let (report, recent) = match result {
+    let (report, recent, activity) = match result {
         Ok(r) => r,
         Err(code) => return code.into_response(),
     };
@@ -1173,11 +1300,11 @@ pub async fn dashboard(
         kind_label: kind.label(),
         chart: chart_html,
         cards,
-        latest: recent
+        customers: recent
             .rows
             .iter()
-            .take(5)
-            .map(|r| pay_view(r, &ctx.site.domain, ctx.offset))
+            .zip(&activity)
+            .map(|(r, a)| payment_customer(r, a, &ctx.site.domain, ctx.offset))
             .collect(),
         latest_total: recent.total,
         payments_href: href(
@@ -1212,7 +1339,14 @@ struct PaymentsPage {
     ranges: Vec<Opt>,
     summary: Vec<Summary>,
     filters: Vec<Opt>,
-    rows: Vec<PayView>,
+    /// Payment plus each goal completed in the range.
+    goals: Vec<Opt>,
+    goal_label: String,
+    is_goal: bool,
+    /// Query params the search form keeps.
+    hidden: Vec<(&'static str, String)>,
+    search: String,
+    customers: Vec<CustomerView>,
     filter_label: &'static str,
     prev: String,
     next: String,
@@ -1329,11 +1463,70 @@ pub async fn payments(
         Ok(p) => p,
         Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
     };
+    let search =
+        q.q.as_deref()
+            .map(str::trim)
+            .unwrap_or_default()
+            .to_lowercase();
+    let wanted_goal = q.goal.clone().unwrap_or_default();
     let store = state.events.clone();
     let id = ctx.site.id.clone();
+    let (domain, offset) = (ctx.site.domain.clone(), ctx.offset);
+    let query = search.clone();
     let result = blocking(move || {
         let s = store.payment_summary(&id, &p)?;
-        let list = store.payment_list(&id, &p, filter, PER_PAGE, (page - 1) * PER_PAGE)?;
+        let goals = store.goal_counts(&id, &p)?;
+        let goal = goals
+            .iter()
+            .find(|g| g.name == wanted_goal)
+            .map(|g| g.name.clone());
+        let (limit, skip) = if query.is_empty() {
+            (PER_PAGE, (page - 1) * PER_PAGE)
+        } else {
+            (SEARCH_LIMIT, 0)
+        };
+        let (total, mut customers) = match &goal {
+            Some(g) => {
+                let (total, rows) = store.goal_list(&id, &p, g, limit, skip)?;
+                let who: Vec<Who> = rows
+                    .iter()
+                    .map(|r| Who {
+                        visitor_id: Some(r.visitor_id.clone()),
+                        session_id: Some(r.session_id.clone()),
+                        ts: r.ts,
+                    })
+                    .collect();
+                let activity = store.activity(&id, &p.tz, &who)?;
+                let views = rows
+                    .iter()
+                    .zip(&activity)
+                    .map(|(r, a)| goal_customer(r, a, offset));
+                (total, views.collect::<Vec<_>>())
+            }
+            None => {
+                let list = store.payment_list(&id, &p, filter, limit, skip)?;
+                let who: Vec<Who> = list.rows.iter().map(Who::of).collect();
+                let activity = store.activity(&id, &p.tz, &who)?;
+                let views = list
+                    .rows
+                    .iter()
+                    .zip(&activity)
+                    .map(|(r, a)| payment_customer(r, a, &domain, offset));
+                (list.total, views.collect::<Vec<_>>())
+            }
+        };
+        let total = if query.is_empty() {
+            total
+        } else {
+            customers.retain(|c| c.matches(&query));
+            let n = customers.len() as u64;
+            customers = customers
+                .into_iter()
+                .skip(((page - 1) * PER_PAGE) as usize)
+                .take(PER_PAGE as usize)
+                .collect();
+            n
+        };
         let ever = if s.payments > 0 {
             s.payments
         } else {
@@ -1351,17 +1544,23 @@ pub async fn payments(
                 )?
                 .total
         };
-        Ok((s, list, ever))
+        Ok((s, goals, goal, total, customers, ever))
     })
     .await;
-    let (s, list, ever) = match result {
+    let (s, goals, goal, total, customers, ever) = match result {
         Ok(r) => r,
         Err(code) => return code.into_response(),
     };
     let counts = [s.payments, s.attributed, s.unattributed, s.refunded];
     let base = sites::app_path(&ctx.site.domain, "payments");
     let range_param = if rkey == rdefault { "" } else { rkey };
-    let filter_param = if fkey == "all" { "" } else { fkey };
+    let filter_param = if fkey == "all" || goal.is_some() {
+        ""
+    } else {
+        fkey
+    };
+    let goal_param = goal.as_deref().map(encode).unwrap_or_default();
+    let q_param = encode(&search);
     let page_href = |n: u32| {
         let n = n.to_string();
         href(
@@ -1369,11 +1568,13 @@ pub async fn payments(
             &[
                 ("range", range_param),
                 ("filter", filter_param),
+                ("goal", &goal_param),
+                ("q", &q_param),
                 ("page", if n == "1" { "" } else { &n }),
             ],
         )
     };
-    let shown = list.rows.len() as u64;
+    let shown = customers.len() as u64;
     let first = (page as u64 - 1) * PER_PAGE as u64;
     let summary = vec![
         Summary {
@@ -1420,7 +1621,49 @@ pub async fn payments(
     render(PaymentsPage {
         title: "Payments",
         range_label: rlabel,
-        ranges: range_opts(&base, rkey, rdefault, &[("filter", filter_param)]),
+        ranges: range_opts(
+            &base,
+            rkey,
+            rdefault,
+            &[
+                ("filter", filter_param),
+                ("goal", &goal_param),
+                ("q", &q_param),
+            ],
+        ),
+        goal_label: match &goal {
+            Some(g) => format!(
+                "{g} {}",
+                group(
+                    goals
+                        .iter()
+                        .find(|c| &c.name == g)
+                        .map_or(0, |c| c.completions)
+                )
+            ),
+            None => format!("Payment {}", group(s.payments)),
+        },
+        goals: std::iter::once(Opt {
+            label: "Payment".into(),
+            href: href(&base, &[("range", range_param)]),
+            on: goal.is_none(),
+            count: group(s.payments),
+        })
+        .chain(goals.iter().map(|g| Opt {
+            label: g.name.clone(),
+            href: href(&base, &[("range", range_param), ("goal", &encode(&g.name))]),
+            on: goal.as_deref() == Some(g.name.as_str()),
+            count: group(g.completions),
+        }))
+        .collect(),
+        is_goal: goal.is_some(),
+        hidden: [("range", range_param), ("filter", filter_param)]
+            .into_iter()
+            .chain(goal.as_deref().map(|g| ("goal", g)))
+            .filter(|(_, v)| !v.is_empty())
+            .map(|(k, v)| (k, v.to_string()))
+            .collect(),
+        search: search.clone(),
         summary,
         filters: FILTERS
             .iter()
@@ -1438,18 +1681,14 @@ pub async fn payments(
                 count: group(*n),
             })
             .collect(),
-        rows: list
-            .rows
-            .iter()
-            .map(|p| pay_view(p, &ctx.site.domain, ctx.offset))
-            .collect(),
+        customers,
         filter_label: flabel,
         prev: if page > 1 {
             page_href(page - 1)
         } else {
             String::new()
         },
-        next: if first + shown < list.total {
+        next: if first + shown < total {
             page_href(page + 1)
         } else {
             String::new()
@@ -1459,12 +1698,12 @@ pub async fn payments(
                 "Showing {} to {} of {}",
                 group(first + 1),
                 group(first + shown),
-                group(list.total)
+                group(total)
             )
         } else {
             String::new()
         },
-        total: list.total,
+        total,
         offset: first,
         never_paid: ever == 0,
         connected: providers
@@ -1498,6 +1737,9 @@ pub struct SessionView {
 }
 
 pub struct JourneyView {
+    name: String,
+    initials: String,
+    color: &'static str,
     amount: String,
     charged: String,
     provider: &'static str,
@@ -1550,7 +1792,11 @@ fn journey_view(j: Journey, domain: &str, offset: UtcOffset) -> JourneyView {
         .map(|f| f.source.clone())
         .or(j.sessions.first().map(|s| s.source.clone()))
         .unwrap_or_default();
+    let alias = alias::alias(&payer_key(p));
     JourneyView {
+        name: alias.name,
+        initials: alias.initials,
+        color: alias.color,
         amount: amount(p),
         charged: match p.amount_usd {
             Some(u) if p.currency != "usd" => format!(

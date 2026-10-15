@@ -710,10 +710,7 @@ pub(crate) fn journey(
         GROUP BY ALL
         ORDER BY epoch_us(k.ts), k.session_id",
     )?;
-    let ts = duckdb::types::Value::Timestamp(
-        duckdb::types::TimeUnit::Microsecond,
-        (payment.ts.unix_timestamp_nanos() / 1000) as i64,
-    );
+    let ts = micros(payment.ts);
     let rows = stmt.query_map(
         named_params! {
             "site": site_id,
@@ -755,32 +752,257 @@ pub(crate) fn journey(
             goals: list(goals)?,
         });
     }
-    let mut stmt = conn.prepare(
-        "SELECT country, browser, device FROM events
-        WHERE site_id = $site AND kind = 'pageview' AND ts <= $ts
-            AND (visitor_id = $visitor OR session_id = $credited)
-        ORDER BY ts DESC LIMIT 1",
+    let seen = last_seen(
+        conn,
+        site_id,
+        &Who {
+            visitor_id: payment.visitor_id.clone(),
+            session_id: credited,
+            ts: payment.ts,
+        },
     )?;
-    let last = stmt
-        .query_map(
-            named_params! {
-                "site": site_id,
-                "visitor": payment.visitor_id,
-                "credited": credited,
-                "ts": ts,
-            },
-            |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
-        )?
-        .next()
-        .transpose()?;
-    let (country, browser, device) = last.unwrap_or((None, None, None));
     Ok(Some(Journey {
         payment,
         sessions,
-        country,
-        browser,
-        device,
+        country: seen.country,
+        browser: seen.browser,
+        device: seen.device,
     }))
+}
+
+/// A visitor, or the session credited to them, at the moment they paid or completed a goal.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Who {
+    pub visitor_id: Option<String>,
+    pub session_id: Option<String>,
+    pub ts: OffsetDateTime,
+}
+
+impl Who {
+    pub fn of(p: &PaymentRow) -> Self {
+        Who {
+            visitor_id: p.visitor_id.clone(),
+            session_id: p.touch.as_ref().map(|t| t.session_id.clone()),
+            ts: p.ts,
+        }
+    }
+}
+
+/// Days in an activity strip, ending on the day of the payment or goal.
+pub const ACTIVITY_DAYS: usize = 14;
+
+/// Where someone was and how often they came back before a payment or goal.
+#[derive(Debug, Clone, Default, PartialEq, Serialize)]
+pub struct Activity {
+    pub country: Option<String>,
+    pub device: Option<String>,
+    pub os: Option<String>,
+    pub browser: Option<String>,
+    /// Sessions per local day, oldest first; the last entry is the day of the payment or goal.
+    pub days: Vec<u32>,
+}
+
+fn micros(ts: OffsetDateTime) -> duckdb::types::Value {
+    duckdb::types::Value::Timestamp(
+        duckdb::types::TimeUnit::Microsecond,
+        (ts.unix_timestamp_nanos() / 1000) as i64,
+    )
+}
+
+/// Country, device, OS and browser of the last pageview at or before `who.ts`.
+fn last_seen(conn: &Connection, site_id: &str, who: &Who) -> anyhow::Result<Activity> {
+    let mut stmt = conn.prepare(
+        "SELECT country, device, os, browser FROM events
+        WHERE site_id = $site AND kind = 'pageview' AND ts <= $ts
+            AND (visitor_id = $visitor OR session_id = $session)
+        ORDER BY ts DESC LIMIT 1",
+    )?;
+    let row = stmt
+        .query_map(
+            named_params! {
+                "site": site_id,
+                "visitor": who.visitor_id,
+                "session": who.session_id,
+                "ts": micros(who.ts),
+            },
+            |r| {
+                Ok(Activity {
+                    country: r.get(0)?,
+                    device: r.get(1)?,
+                    os: r.get(2)?,
+                    browser: r.get(3)?,
+                    days: Vec::new(),
+                })
+            },
+        )?
+        .next()
+        .transpose()?;
+    Ok(row.unwrap_or_default())
+}
+
+pub(crate) fn activity(
+    conn: &Connection,
+    site_id: &str,
+    tz: &str,
+    who: &[Who],
+) -> anyhow::Result<Vec<Activity>> {
+    let mut stmt = conn.prepare(
+        "SELECT CAST(timezone($tz, $ts) AS DATE) - CAST(timezone($tz, ts) AS DATE) AS ago,
+            count(DISTINCT session_id)
+        FROM events
+        WHERE site_id = $site AND kind = 'pageview' AND ts <= $ts
+            AND (visitor_id = $visitor OR session_id = $session)
+            AND epoch_us(ts) > epoch_us($ts) - 15 * 86400000000
+        GROUP BY ago",
+    )?;
+    let mut out = Vec::with_capacity(who.len());
+    for w in who {
+        let mut a = last_seen(conn, site_id, w)?;
+        a.days = vec![0; ACTIVITY_DAYS];
+        let rows = stmt.query_map(
+            named_params! {
+                "site": site_id,
+                "tz": tz,
+                "visitor": w.visitor_id,
+                "session": w.session_id,
+                "ts": micros(w.ts),
+            },
+            |r| Ok((r.get::<_, i64>(0)?, r.get::<_, i64>(1)?)),
+        )?;
+        for row in rows {
+            let (ago, n) = row?;
+            if (0..ACTIVITY_DAYS as i64).contains(&ago) {
+                a.days[ACTIVITY_DAYS - 1 - ago as usize] = n as u32;
+            }
+        }
+        out.push(a);
+    }
+    Ok(out)
+}
+
+/// A goal and how often it was completed in a range.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct GoalCount {
+    pub name: String,
+    pub completions: u64,
+}
+
+pub(crate) fn goal_counts(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+) -> anyhow::Result<Vec<GoalCount>> {
+    let mut stmt = conn.prepare(&format!(
+        "WITH {BOUNDS}
+        SELECT name, count(*) FROM events, bounds
+        WHERE site_id = $site AND kind = 'goal' AND ts >= lo AND ts < hi
+        GROUP BY name ORDER BY count(*) DESC, name"
+    ))?;
+    let rows = stmt.query_map(
+        named_params! {
+            "site": site_id,
+            "tz": period.tz,
+            "from": period.from.to_string(),
+            "to": period.to.to_string(),
+        },
+        |r| {
+            Ok(GoalCount {
+                name: r.get(0)?,
+                completions: r.get::<_, i64>(1)? as u64,
+            })
+        },
+    )?;
+    Ok(rows.collect::<Result<_, _>>()?)
+}
+
+/// One completion of a goal, with the session it happened in and what the visitor has spent.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct GoalRow {
+    pub visitor_id: String,
+    pub session_id: String,
+    pub ts: OffsetDateTime,
+    pub channel: String,
+    pub referrer_host: Option<String>,
+    pub source: String,
+    /// The visitor's first pageview.
+    pub first_ts: Option<OffsetDateTime>,
+    /// Net USD the visitor has paid so far.
+    pub spent_usd: f64,
+    /// "provider:customer_id" of the visitor's first payment, if any.
+    pub customer: Option<String>,
+}
+
+pub(crate) fn goal_list(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+    goal: &str,
+    limit: u32,
+    offset: u32,
+) -> anyhow::Result<(u64, Vec<GoalRow>)> {
+    let total: i64 = conn.query_row(
+        &format!(
+            "WITH {BOUNDS} SELECT count(*) FROM events, bounds
+            WHERE site_id = $site AND kind = 'goal' AND name = $goal AND ts >= lo AND ts < hi"
+        ),
+        named_params! {
+            "site": site_id,
+            "tz": period.tz,
+            "from": period.from.to_string(),
+            "to": period.to.to_string(),
+            "goal": goal,
+        },
+        |r| r.get(0),
+    )?;
+    let params = named_params! {
+        "site": site_id,
+        "tz": period.tz,
+        "from": period.from.to_string(),
+        "to": period.to.to_string(),
+        "goal": goal,
+        "limit": limit as i64,
+        "offset": offset as i64,
+    };
+    let mut stmt = conn.prepare(&format!(
+        "WITH {BOUNDS},
+        done AS (
+            SELECT visitor_id, session_id, ts, channel, referrer_host FROM events, bounds
+            WHERE site_id = $site AND kind = 'goal' AND name = $goal AND ts >= lo AND ts < hi
+            ORDER BY ts DESC, session_id LIMIT $limit OFFSET $offset
+        )
+        SELECT d.visitor_id, d.session_id, epoch_us(d.ts),
+            coalesce(l.channel, d.channel), CASE WHEN l.session_id IS NULL THEN d.referrer_host ELSE l.referrer_host END,
+            (SELECT epoch_us(min(e.ts)) FROM events e
+                WHERE e.site_id = $site AND e.kind = 'pageview' AND e.visitor_id = d.visitor_id),
+            (SELECT coalesce(sum({NET_USD}), 0) FROM payments p
+                WHERE p.site_id = $site AND p.visitor_id = d.visitor_id AND p.status <> 'failed'),
+            (SELECT p.provider || ':' || p.customer_id FROM payments p
+                WHERE p.site_id = $site AND p.visitor_id = d.visitor_id AND p.customer_id IS NOT NULL
+                ORDER BY p.ts LIMIT 1)
+        FROM done d
+        LEFT JOIN LATERAL (
+            SELECT session_id, channel, referrer_host FROM events e
+            WHERE e.site_id = $site AND e.session_id = d.session_id AND e.kind = 'pageview'
+            ORDER BY e.ts, e.path LIMIT 1
+        ) l ON true
+        ORDER BY d.ts DESC, d.session_id"
+    ))?;
+    let rows = stmt.query_map(params, |r| {
+        let channel: String = r.get(3)?;
+        let referrer_host: Option<String> = r.get(4)?;
+        Ok(GoalRow {
+            visitor_id: r.get(0)?,
+            session_id: r.get(1)?,
+            ts: from_micros(r.get(2)?),
+            source: source(referrer_host.as_deref(), &channel),
+            channel,
+            referrer_host,
+            first_ts: r.get::<_, Option<i64>>(5)?.map(from_micros),
+            spent_usd: r.get(6)?,
+            customer: r.get(7)?,
+        })
+    })?;
+    Ok((total as u64, rows.collect::<Result<_, _>>()?))
 }
 
 pub(crate) fn payment_summary(
@@ -955,6 +1177,7 @@ mod tests {
             country: Some("DE".into()),
             device: "Desktop".into(),
             browser: "Firefox".into(),
+            os: "macOS".into(),
         }
     }
 
@@ -1540,5 +1763,83 @@ mod tests {
             (date!(2026 - 10 - 02), 1, 100.0)
         );
         assert_eq!(p.previous().from, date!(2026 - 09 - 29));
+    }
+
+    #[test]
+    fn activity_counts_sessions_per_day_before_the_payment() {
+        let (_dir, store) = store();
+        let mut late = visit("v1", "c", T - Duration::hours(1), "Direct");
+        late.os = "iOS".into();
+        late.device = "Mobile".into();
+        store
+            .insert_events(&[
+                visit("v1", "a", T - Duration::days(20), "Social"),
+                visit("v1", "b", T - Duration::days(3), "Referral"),
+                late,
+                visit("v1", "d", T + Duration::hours(1), "Direct"),
+            ])
+            .unwrap();
+        let who = Who {
+            visitor_id: Some("v1".into()),
+            session_id: None,
+            ts: T,
+        };
+        let nobody = Who {
+            visitor_id: None,
+            session_id: None,
+            ts: T,
+        };
+        let got = store.activity("s", "UTC", &[who, nobody]).unwrap();
+        let mut want = vec![0; ACTIVITY_DAYS];
+        want[ACTIVITY_DAYS - 4] = 1;
+        want[ACTIVITY_DAYS - 1] = 1;
+        assert_eq!(got[0].days, want, "older and later visits are left out");
+        assert_eq!(got[0].os.as_deref(), Some("iOS"));
+        assert_eq!(got[0].device.as_deref(), Some("Mobile"));
+        assert_eq!(got[0].country.as_deref(), Some("DE"));
+        assert_eq!(got[1].days, vec![0; ACTIVITY_DAYS]);
+        assert_eq!(got[1].os, None);
+    }
+
+    #[test]
+    fn goal_completions_list_source_and_spend() {
+        let (_dir, store) = store();
+        let mut goal = visit("v1", "b", T + Duration::minutes(5), "Direct");
+        goal.kind = "goal".into();
+        goal.name = Some("signup".into());
+        goal.referrer_host = None;
+        store
+            .insert_events(&[
+                visit("v1", "a", T - Duration::days(2), "Direct"),
+                visit("v1", "b", T, "Social"),
+                goal,
+            ])
+            .unwrap();
+        store
+            .upsert_payments(&[pay("p1", T + Duration::hours(1), Some("v1"), None)])
+            .unwrap();
+        let counts = store.goal_counts("s", &period()).unwrap();
+        assert_eq!(
+            counts,
+            vec![GoalCount {
+                name: "signup".into(),
+                completions: 1
+            }]
+        );
+        let (total, rows) = store.goal_list("s", &period(), "signup", 10, 0).unwrap();
+        assert_eq!(total, 1);
+        assert_eq!(
+            rows[0].source, "Hacker News",
+            "the session's landing source"
+        );
+        assert_eq!(rows[0].first_ts, Some(T - Duration::days(2)));
+        assert_eq!(rows[0].spent_usd, 100.0);
+        assert!(
+            store
+                .goal_list("s", &period(), "nope", 10, 0)
+                .unwrap()
+                .1
+                .is_empty()
+        );
     }
 }

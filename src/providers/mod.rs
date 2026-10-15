@@ -122,6 +122,7 @@ pub(crate) mod e2e {
                 country: Some("CA".into()),
                 device: "Mobile".into(),
                 browser: "Safari".into(),
+                os: "iOS".into(),
             }])
             .unwrap();
         let rows: Vec<Payment> = payments
