@@ -8,8 +8,8 @@ use crate::channel::{source_domain, source_name};
 /// Net USD of a payment `p`; NULL when it has no USD conversion, so it counts as a payment but not revenue.
 const NET_USD: &str = "p.amount_usd * (p.amount - p.refunded) / nullif(p.amount, 0)";
 
-/// Who paid: customer_id, else visitor_id, else the payment itself.
-const CUSTOMER: &str = "coalesce('c:' || p.customer_id, 'v:' || p.visitor_id, 'p:' || p.provider || ':' || p.provider_payment_id)";
+/// Who paid: provider and customer_id, else visitor_id, else the payment itself.
+const CUSTOMER: &str = "coalesce('c:' || p.provider || ':' || p.customer_id, 'v:' || p.visitor_id, 'p:' || p.provider || ':' || p.provider_payment_id)";
 
 /// Local dates `$from..=$to` in IANA zone `$tz` as a half-open UTC range [lo, hi).
 const BOUNDS: &str = "bounds AS (
@@ -1150,6 +1150,31 @@ mod tests {
             (2, 200.0)
         );
         assert!(r.channels.iter().all(|c| c.unattributed || c.payments == 0));
+    }
+
+    #[test]
+    fn same_customer_on_two_providers_is_two_customers() {
+        let (_dir, store) = store();
+        store
+            .insert_events(&[visit("v1", "s1", T - Duration::days(1), "Social")])
+            .unwrap();
+        let mut moved = pay("p2", T + Duration::days(29), None, Some("cus_1"));
+        moved.provider = "polar".into();
+        moved.is_renewal = true;
+        store
+            .upsert_payments(&[pay("p1", T, Some("v1"), Some("cus_1")), moved])
+            .unwrap();
+        store
+            .rebuild_attribution("s", "last_non_direct", 90)
+            .unwrap();
+        let mut got = touches(&store);
+        got.sort();
+        assert_eq!(
+            got,
+            vec![("p1".into(), Some("s1".into())), ("p2".into(), None)]
+        );
+        assert_eq!(store.overview("s", &period()).unwrap().current.customers, 2);
+        assert_eq!(store.payment_summary("s", &period()).unwrap().customers, 2);
     }
 
     #[test]
