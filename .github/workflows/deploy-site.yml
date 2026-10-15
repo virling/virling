@@ -10,6 +10,7 @@ on:
       - "src/waitlist_copy.rs"
       - "src/channel.rs"
       - "src/ua.rs"
+      - "scripts/install.sh"
       - ".github/workflows/deploy-site.yml"
   workflow_dispatch:
 
@@ -52,7 +53,7 @@ jobs:
 
       - name: Smoke check
         run: |
-          for url in https://virling.com/ https://virling.com/agency; do
+          for url in https://virling.com/ https://virling.com/agency https://virling.com/install.sh; do
             code=$(curl -sS -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 5 "$url")
             echo "$url -> $code"
             [ "$code" = "200" ] || exit 1

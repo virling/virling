@@ -6,7 +6,7 @@ rm -rf public && mkdir -p public/assets
 cp ../assets/selfhost.html public/index.html
 cp ../assets/agency.html public/agency.html
 cp ../assets/site.css ../assets/site.js ../assets/app.css ../assets/email-logo.png public/assets/
-cp ../assets/favicon.svg ../assets/v.js public/
+cp ../assets/favicon.svg ../assets/v.js ../scripts/install.sh public/
 cp -R ../assets/art public/assets/art
 cp _headers public/
 worker-build --release
