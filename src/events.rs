@@ -9,8 +9,7 @@ use crate::stats::{
     self, Activity, GoalCount, GoalRow, Journey, Overview, PaymentFilter, PaymentPage,
     PaymentSummary, Period, Report, Who,
 };
-#[cfg(test)]
-use crate::stats::{BreakdownRow, Dimension, Sort};
+use crate::stats::{BreakdownRow, Dimension};
 
 #[derive(Debug, Clone)]
 pub struct Event {
@@ -32,6 +31,10 @@ pub struct Event {
     pub device: String,
     pub browser: String,
     pub os: String,
+    pub region: Option<String>,
+    pub city: Option<String>,
+    /// Page hostname, lowercase.
+    pub host: Option<String>,
 }
 
 /// A payment as stored, one row per provider payment ID so re-syncs never double count.
@@ -79,13 +82,11 @@ pub trait EventStore: Send + Sync {
     fn overview(&self, site_id: &str, period: &Period) -> anyhow::Result<Overview>;
     #[cfg(test)]
     fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<stats::DayPoint>>;
-    #[cfg(test)]
     fn breakdown(
         &self,
         site_id: &str,
         period: &Period,
         dimension: Dimension,
-        sort: Sort,
     ) -> anyhow::Result<Vec<BreakdownRow>>;
     fn payment_list(
         &self,
@@ -207,9 +208,15 @@ impl DuckStore {
                 country VARCHAR,
                 device VARCHAR NOT NULL,
                 browser VARCHAR NOT NULL,
-                os VARCHAR
+                os VARCHAR,
+                region VARCHAR,
+                city VARCHAR,
+                host VARCHAR
             );
             ALTER TABLE events ADD COLUMN IF NOT EXISTS os VARCHAR;
+            ALTER TABLE events ADD COLUMN IF NOT EXISTS region VARCHAR;
+            ALTER TABLE events ADD COLUMN IF NOT EXISTS city VARCHAR;
+            ALTER TABLE events ADD COLUMN IF NOT EXISTS host VARCHAR;
             CREATE TABLE IF NOT EXISTS payments (
                 site_id VARCHAR NOT NULL,
                 provider VARCHAR NOT NULL,
@@ -276,6 +283,9 @@ impl EventStore for DuckStore {
                     e.device,
                     e.browser,
                     e.os,
+                    e.region,
+                    e.city,
+                    e.host,
                 ])?;
             }
             app.flush()?;
@@ -405,15 +415,13 @@ impl EventStore for DuckStore {
         stats::timeseries(&self.conn.lock().unwrap(), site_id, period)
     }
 
-    #[cfg(test)]
     fn breakdown(
         &self,
         site_id: &str,
         period: &Period,
         dimension: Dimension,
-        sort: Sort,
     ) -> anyhow::Result<Vec<BreakdownRow>> {
-        stats::breakdown(&self.conn.lock().unwrap(), site_id, period, dimension, sort)
+        stats::breakdown(&self.conn.lock().unwrap(), site_id, period, dimension)
     }
 
     fn payment_list(
