@@ -10,13 +10,13 @@ docker pull ghcr.io/virling/virling:latest
 
 | Tag | Example | Points to |
 | --- | --- | --- |
-| `X.Y.Z` | `0.1.0` | One exact release |
+| `X.Y.Z` | `0.1.1` | One exact release |
 | `X.Y` | `0.1` | The newest patch release of that minor version |
 | `latest` | `latest` | The newest release |
 
 Pin `X.Y.Z` in production so an upgrade only happens when you change the tag. Read the [changelog](https://github.com/virling/virling/blob/main/CHANGELOG.md) first: Virling is in early development and releases can include breaking changes.
 
-The image is built for `linux/amd64` only. An arm64 image is <span class="na">Not available yet</span>. On arm64 Linux, use the [release binary](binary.md).
+The image is built for `linux/amd64` and `linux/arm64`. Docker pulls the right one for your server.
 
 ## What is in the image
 
@@ -36,7 +36,7 @@ docker run -d --name virling \
   -p 8080:8080 \
   -v virling-data:/data \
   -e VIRLING_BASE_URL=https://stats.example.com \
-  ghcr.io/virling/virling:0.1.0 serve --app
+  ghcr.io/virling/virling:0.1.1 serve --app
 ```
 
 > [!WARNING]
@@ -47,7 +47,7 @@ If you bind-mount a host folder instead of a named volume, make it writable by u
 ```sh
 sudo mkdir -p /srv/virling && sudo chown 10001 /srv/virling
 docker run -d --name virling -p 8080:8080 -v /srv/virling:/data \
-  ghcr.io/virling/virling:0.1.0 serve --app
+  ghcr.io/virling/virling:0.1.1 serve --app
 ```
 
 ## Run CLI commands
