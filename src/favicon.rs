@@ -1,17 +1,21 @@
-//! Fetches a site's own favicon from its public homepage and caches it in SQLite.
-use std::collections::HashSet;
+//! Fetches site and referrer favicons from public homepages and caches them in SQLite.
+use std::collections::{HashMap, HashSet};
 use std::net::{IpAddr, SocketAddr};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
 use std::time::Duration;
 
 use reqwest::dns::{Addrs, Name, Resolve, Resolving};
 use reqwest::{Client, Url, redirect};
+use sqlx::SqlitePool;
 use time::OffsetDateTime;
+use tokio::sync::mpsc;
 
 use crate::app::AppState;
 
 const MAX_BYTES: usize = 256 * 1024;
 const REFRESH_SECS: i64 = 86_400;
+const SOURCE_REFRESH_SECS: i64 = 30 * 86_400;
+const MAX_QUEUED: usize = 1000;
 const TYPES: [&str; 5] = [
     "image/svg+xml",
     "image/png",
@@ -116,7 +120,7 @@ pub fn candidates(html: &str, base: &Url) -> Vec<Url> {
         if is_icon
             && let Some(href) = attr(tag, "href")
             && let Ok(url) = base.join(href.trim())
-            && url.scheme() == "https"
+            && url.scheme() == base.scheme()
             && !out.contains(&url)
         {
             out.push(url);
@@ -172,7 +176,10 @@ async fn body(mut res: reqwest::Response) -> anyhow::Result<Vec<u8>> {
 
 /// The icon of `domain` as (content type, bytes).
 pub async fn fetch(client: &Client, domain: &str) -> anyhow::Result<(String, Vec<u8>)> {
-    let base = Url::parse(&format!("https://{domain}/"))?;
+    fetch_from(client, Url::parse(&format!("https://{domain}/"))?).await
+}
+
+async fn fetch_from(client: &Client, base: Url) -> anyhow::Result<(String, Vec<u8>)> {
     if !literal_ip_is_public(&base) {
         anyhow::bail!("not a public host");
     }
@@ -254,6 +261,125 @@ pub fn refresh(state: &AppState, site_id: &str, domain: &str, fetched_at: Option
     });
 }
 
+fn now() -> i64 {
+    OffsetDateTime::now_utc().unix_timestamp()
+}
+
+/// Referrer hosts by (last fetch, has an icon), and hosts waiting for the worker.
+#[derive(Default)]
+struct Sources {
+    known: HashMap<String, (i64, bool)>,
+    queued: HashSet<String>,
+}
+
+static SOURCES: Mutex<Option<Sources>> = Mutex::new(None);
+static QUEUE: OnceLock<mpsc::UnboundedSender<String>> = OnceLock::new();
+
+/// `name` as a referrer host worth an icon: a plain domain name, not an address or a label.
+pub fn source_host(name: &str) -> Option<String> {
+    let host = crate::sites::normalize_domain(name)?;
+    let plain = name
+        .trim()
+        .trim_start_matches("www.")
+        .eq_ignore_ascii_case(&host);
+    let tld = host.rsplit('.').next().unwrap_or_default();
+    (plain && tld.bytes().all(|b| b.is_ascii_alphabetic())).then_some(host)
+}
+
+/// Version of the cached icon of `host`; queues a fetch when it is missing or 30 days old.
+pub fn source_icon(host: &str) -> Option<i64> {
+    let mut guard = SOURCES.lock().unwrap();
+    let sources = guard.get_or_insert_default();
+    let known = sources.known.get(host).copied();
+    if known.is_none_or(|(t, _)| now() - t >= SOURCE_REFRESH_SECS)
+        && sources.queued.len() < MAX_QUEUED
+        && let Some(queue) = QUEUE.get()
+        && sources.queued.insert(host.to_string())
+    {
+        queue.send(host.to_string()).ok();
+    }
+    known.filter(|k| k.1).map(|k| k.0)
+}
+
+fn remember(host: &str, fetched_at: i64, has_icon: bool) {
+    let mut guard = SOURCES.lock().unwrap();
+    let sources = guard.get_or_insert_default();
+    sources
+        .known
+        .insert(host.to_string(), (fetched_at, has_icon));
+    sources.queued.remove(host);
+}
+
+/// Starts the worker that fetches referrer icons one at a time.
+pub fn spawn_sources(state: AppState) {
+    let (tx, mut rx) = mpsc::unbounded_channel::<String>();
+    if QUEUE.set(tx).is_err() {
+        return;
+    }
+    tokio::spawn(async move {
+        let rows: Vec<(String, i64, bool)> =
+            sqlx::query_as("SELECT host, fetched_at, body IS NOT NULL FROM source_icons")
+                .fetch_all(&state.db)
+                .await
+                .unwrap_or_default();
+        for (host, fetched_at, has_icon) in rows {
+            remember(&host, fetched_at, has_icon);
+        }
+        while let Some(host) = rx.recv().await {
+            let known = SOURCES
+                .lock()
+                .unwrap()
+                .as_ref()
+                .and_then(|s| s.known.get(&host).copied());
+            match (known, Url::parse(&format!("https://{host}/"))) {
+                (Some((t, has)), _) if now() - t < SOURCE_REFRESH_SECS => remember(&host, t, has),
+                (_, Ok(base)) => save_source(&state.db, &state.favicons, &host, base).await,
+                (_, Err(_)) => remember(&host, now(), false),
+            }
+        }
+    });
+}
+
+/// Fetches the icon of `host` from `base` and caches it, keeping an older icon when that fails.
+async fn save_source(db: &SqlitePool, client: &Client, host: &str, base: Url) {
+    let fetched = fetch_from(client, base).await;
+    if let Err(err) = &fetched {
+        tracing::debug!(%err, %host, "source icon fetch failed");
+    }
+    let (kind, bytes) = fetched.map_or((None, None), |(k, b)| (Some(k), Some(b)));
+    let at = now();
+    let saved: Result<bool, _> = sqlx::query_scalar(
+        "INSERT INTO source_icons (host, content_type, body, fetched_at) VALUES (?, ?, ?, ?)
+         ON CONFLICT (host) DO UPDATE SET
+            content_type = coalesce(excluded.content_type, source_icons.content_type),
+            body = coalesce(excluded.body, source_icons.body),
+            fetched_at = excluded.fetched_at
+         RETURNING body IS NOT NULL",
+    )
+    .bind(host)
+    .bind(kind)
+    .bind(bytes)
+    .bind(at)
+    .fetch_one(db)
+    .await;
+    if let Err(err) = &saved {
+        tracing::error!(%err, "saving source icon failed");
+    }
+    remember(host, at, saved.unwrap_or(false));
+}
+
+/// The cached icon of a referrer host as (content type, bytes).
+pub async fn source_body(db: &SqlitePool, host: &str) -> Option<(String, Vec<u8>)> {
+    sqlx::query_as(
+        "SELECT content_type, body FROM source_icons WHERE host = ? AND body IS NOT NULL",
+    )
+    .bind(host)
+    .fetch_optional(db)
+    .await
+    .ok()
+    .flatten()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -304,6 +430,83 @@ mod tests {
         for ip in ["93.184.216.34", "2606:4700::6810:85e5"] {
             assert!(is_public(ip.parse().unwrap()), "{ip}");
         }
+    }
+
+    #[test]
+    fn only_plain_domains_get_icons() {
+        assert_eq!(source_host("someblog.dev").as_deref(), Some("someblog.dev"));
+        assert_eq!(source_host("www.Blog.io").as_deref(), Some("blog.io"));
+        for name in [
+            "Hacker News",
+            "partner-site",
+            "93.184.216.34",
+            "https://blog.io/a",
+            "blog.io/a",
+            "",
+        ] {
+            assert_eq!(source_host(name), None, "{name}");
+        }
+    }
+
+    #[tokio::test]
+    async fn source_icons_are_fetched_and_cached() {
+        use axum::http::{StatusCode, header};
+        use axum::routing::get;
+        let fail = Arc::new(std::sync::atomic::AtomicBool::new(false));
+        let flag = fail.clone();
+        let stub = axum::Router::new()
+            .route(
+                "/",
+                get(|| async { r#"<html><head><link rel="icon" href="/i.png"></head></html>"# }),
+            )
+            .route(
+                "/i.png",
+                get(move || async move {
+                    if flag.load(std::sync::atomic::Ordering::Relaxed) {
+                        return Err(StatusCode::NOT_FOUND);
+                    }
+                    Ok(([(header::CONTENT_TYPE, "image/png")], b"PNG".to_vec()))
+                }),
+            );
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        tokio::spawn(async move { axum::serve(listener, stub).await.unwrap() });
+        let client = Client::builder()
+            .resolve("stub.example", addr)
+            .resolve("gone.example", "127.0.0.1:1".parse().unwrap())
+            .build()
+            .unwrap();
+        let dir = tempfile::tempdir().unwrap();
+        let db = crate::open_sqlite(dir.path()).await.unwrap();
+        let base = Url::parse(&format!("http://stub.example:{}/", addr.port())).unwrap();
+        assert!(crate::icons::source("stub.example", 14).contains(">S</span>"));
+
+        save_source(&db, &client, "stub.example", base.clone()).await;
+        let body = source_body(&db, "stub.example").await;
+        assert_eq!(body, Some(("image/png".into(), b"PNG".to_vec())));
+        let v = source_icon("stub.example").expect("cached");
+        assert!(crate::icons::source("stub.example", 14).contains(&format!(
+            r#"<img class="ico" src="/source-icons/stub.example?v={v}""#
+        )));
+
+        fail.store(true, std::sync::atomic::Ordering::Relaxed);
+        save_source(&db, &client, "stub.example", base).await;
+        assert_eq!(source_body(&db, "stub.example").await.unwrap().1, b"PNG");
+        assert!(
+            source_icon("stub.example").is_some(),
+            "a failed refresh keeps the icon"
+        );
+
+        save_source(
+            &db,
+            &client,
+            "gone.example",
+            "http://gone.example:1/".parse().unwrap(),
+        )
+        .await;
+        assert_eq!(source_body(&db, "gone.example").await, None);
+        assert_eq!(source_icon("gone.example"), None);
+        assert!(crate::icons::source("gone.example", 14).contains(">G</span>"));
     }
 
     #[tokio::test]

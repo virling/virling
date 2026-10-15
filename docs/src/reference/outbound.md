@@ -10,6 +10,7 @@ Every host a Virling server connects to. Your visitors' browsers only connect to
 | `api.lemonsqueezy.com` | With LemonSqueezy connected, every minute | Read orders and subscription invoices |
 | `api.frankfurter.dev` | When converting a non-USD payment, at most every 12 hours | ECB exchange rates. See [Currencies](../attribution/currencies.md). |
 | Your SMTP server | When someone requests a sign-in link | Send the email, if `VIRLING_SMTP_URL` is set |
+| Your sites and their referrers, `https://<host>/` | When the app shows a site, or a referrer without a bundled logo. Site icons at most daily, referrer icons at most every 30 days. | Fetch the homepage's favicon, from public addresses only. Nothing about visitors is sent, and pages, including shared reports, load the cached copy from Virling. |
 | `extensions.duckdb.org` | First start | DuckDB downloads its ICU extension into `~/.duckdb/extensions`. Later starts use the cached copy. |
 
 Payment sync only runs with `--app`. A server started without it only makes the first-start DuckDB download.
@@ -18,4 +19,4 @@ Requests use the user agent `virling/<version>` and a 30-second timeout. There i
 
 ## Firewalls
 
-To run with egress filtering, allow HTTPS to the hosts of the providers you connect, `api.frankfurter.dev`, your SMTP host and port, and `extensions.duckdb.org` for the first start.
+To run with egress filtering, allow HTTPS to the hosts of the providers you connect, `api.frankfurter.dev`, your SMTP host and port, and `extensions.duckdb.org` for the first start. Blocked favicon fetches only mean letters instead of icons.

@@ -6,6 +6,7 @@ use crate::flags;
 
 const BRANDS: &[(&str, &str, &str)] = &[
     ("baidu", "Baidu", include_str!("../assets/icons/baidu.svg")),
+    ("bing", "Bing", include_str!("../assets/icons/bing.svg")),
     (
         "bluesky",
         "Bluesky",
@@ -13,9 +14,24 @@ const BRANDS: &[(&str, &str, &str)] = &[
     ),
     ("brave", "Brave", include_str!("../assets/icons/brave.svg")),
     (
+        "chatgpt",
+        "ChatGPT",
+        include_str!("../assets/icons/chatgpt.svg"),
+    ),
+    (
         "claude",
         "Claude",
         include_str!("../assets/icons/claude.svg"),
+    ),
+    (
+        "copilot",
+        "Copilot",
+        include_str!("../assets/icons/copilot.svg"),
+    ),
+    (
+        "deepseek",
+        "DeepSeek",
+        include_str!("../assets/icons/deepseek.svg"),
     ),
     (
         "devdotto",
@@ -77,6 +93,7 @@ const BRANDS: &[(&str, &str, &str)] = &[
         "Instagram",
         include_str!("../assets/icons/instagram.svg"),
     ),
+    ("kagi", "Kagi", include_str!("../assets/icons/kagi.svg")),
     (
         "lemonsqueezy",
         "Lemon Squeezy",
@@ -113,10 +130,17 @@ const BRANDS: &[(&str, &str, &str)] = &[
         "Product Hunt",
         include_str!("../assets/icons/producthunt.svg"),
     ),
+    ("qwant", "Qwant", include_str!("../assets/icons/qwant.svg")),
     (
         "reddit",
         "Reddit",
         include_str!("../assets/icons/reddit.svg"),
+    ),
+    ("slack", "Slack", include_str!("../assets/icons/slack.svg")),
+    (
+        "startpage",
+        "Startpage",
+        include_str!("../assets/icons/startpage.svg"),
     ),
     (
         "stripe",
@@ -149,6 +173,12 @@ const BRANDS: &[(&str, &str, &str)] = &[
         include_str!("../assets/icons/whatsapp.svg"),
     ),
     ("x", "X", include_str!("../assets/icons/x.svg")),
+    ("yahoo", "Yahoo", include_str!("../assets/icons/yahoo.svg")),
+    (
+        "yandex",
+        "Yandex",
+        include_str!("../assets/icons/yandex.svg"),
+    ),
     (
         "ycombinator",
         "Hacker News",
@@ -169,37 +199,50 @@ pub fn brand_slug(source: &str) -> Option<&'static str> {
     Some(match h {
         "google" => "google",
         _ if h.starts_with("google.") || h.contains(".google.") => "google",
-        "x" | "x.com" | "t.co" | "twitter.com" => "x",
+        "x" | "twitter" | "x.com" | "t.co" | "twitter.com" => "x",
         "reddit" | "reddit.com" | "old.reddit.com" => "reddit",
-        "hacker news" | "news.ycombinator.com" => "ycombinator",
+        "hacker news" | "hackernews" | "hn" | "news.ycombinator.com" => "ycombinator",
         "linkedin" | "linkedin.com" | "lnkd.in" => "linkedin",
         "youtube" | "youtube.com" | "youtu.be" => "youtube",
         "github" | "github.com" => "github",
-        "product hunt" | "producthunt.com" => "producthunt",
-        "facebook" | "facebook.com" | "l.facebook.com" => "facebook",
-        "instagram" | "instagram.com" | "l.instagram.com" => "instagram",
+        "product hunt" | "producthunt" | "producthunt.com" => "producthunt",
+        "facebook" | "fb" | "facebook.com" | "l.facebook.com" => "facebook",
+        "instagram" | "ig" | "instagram.com" | "l.instagram.com" => "instagram",
         "duckduckgo" | "duckduckgo.com" => "duckduckgo",
         "claude" | "claude.ai" => "claude",
+        "chatgpt" | "openai" | "chatgpt.com" | "chat.openai.com" | "openai.com" => "chatgpt",
+        "copilot" | "copilot.microsoft.com" => "copilot",
+        "deepseek" | "deepseek.com" | "chat.deepseek.com" => "deepseek",
         "perplexity" | "perplexity.ai" => "perplexity",
         "gemini" | "gemini.google.com" => "googlegemini",
         "bluesky" | "bsky.app" | "go.bsky.app" => "bluesky",
         "threads" | "threads.com" | "threads.net" | "l.threads.com" => "threads",
-        "mastodon" | "mastodon.social" => "mastodon",
+        "mastodon" | "mastodon.social" | "mastodon.online" | "mstdn.social" => "mastodon",
         "tiktok" | "tiktok.com" => "tiktok",
         "pinterest" | "pinterest.com" | "pin.it" => "pinterest",
         "discord" | "discord.com" | "discordapp.com" | "discord.gg" => "discord",
+        "slack" | "slack.com" | "app.slack.com" => "slack",
         "telegram" | "t.me" | "telegram.org" | "web.telegram.org" => "telegram",
         "whatsapp" | "whatsapp.com" | "web.whatsapp.com" | "wa.me" => "whatsapp",
         "substack" | "substack.com" => "substack",
         _ if h.ends_with(".substack.com") => "substack",
         "medium" | "medium.com" => "medium",
-        "dev" | "dev.to" => "devdotto",
-        "hashnode" | "hashnode.com" => "hashnode",
+        "dev" | "devto" | "dev.to" => "devdotto",
+        "hashnode" | "hashnode.com" | "hashnode.dev" => "hashnode",
         _ if h.ends_with(".hashnode.dev") => "hashnode",
-        "indie hackers" | "indiehackers.com" => "indiehackers",
+        "indie hackers" | "indiehackers" | "indiehackers.com" => "indiehackers",
         "brave" | "search.brave.com" => "brave",
         "ecosia" | "ecosia.org" => "ecosia",
         "baidu" | "baidu.com" => "baidu",
+        "bing" | "bing.com" => "bing",
+        _ if h.ends_with(".bing.com") => "bing",
+        "yahoo" => "yahoo",
+        _ if h.starts_with("yahoo.") || h.contains(".yahoo.") => "yahoo",
+        "yandex" => "yandex",
+        _ if h.starts_with("yandex.") || h.contains(".yandex.") => "yandex",
+        "kagi" | "kagi.com" => "kagi",
+        "qwant" | "qwant.com" => "qwant",
+        "startpage" | "startpage.com" => "startpage",
         _ => return None,
     })
 }
@@ -267,7 +310,7 @@ pub fn channel_glyph(channel: &str) -> Option<&'static str> {
     })
 }
 
-/// Logo for a source name, referrer host or channel; a letter tile when there is none.
+/// Logo for a source name, referrer host or channel, else the host's cached favicon, else a letter tile.
 pub fn source(name: &str, size: u32) -> String {
     if let Some(slug) = brand_slug(name) {
         return brand(slug, size);
@@ -279,6 +322,14 @@ pub fn source(name: &str, size: u32) -> String {
     }
     if let Some(g) = channel_glyph(name) {
         return glyph(g, size, "#6B717C");
+    }
+    if let Some(host) = crate::favicon::source_host(name)
+        && let Some(v) = crate::favicon::source_icon(&host)
+    {
+        return format!(
+            r#"<img class="ico" src="/source-icons/{}?v={v}" width="{size}" height="{size}" alt="">"#,
+            esc(&host)
+        );
     }
     let letter = name
         .trim_start_matches("www.")
@@ -320,6 +371,14 @@ pub fn country(code: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn every_known_source_has_a_bundled_logo() {
+        for s in crate::channel::known_sources() {
+            let icon = source(&s, 16);
+            assert!(icon.contains(r#"role="img""#), "{s}: {icon}");
+        }
+    }
 
     #[test]
     fn hosts_and_names_map_to_logos() {
