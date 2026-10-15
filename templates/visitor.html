@@ -1,0 +1,64 @@
+{% extends "app.html" %}
+{% block content %}
+<a class="link-quiet" href="{{ back }}">&#8592; All visitors</a>
+<section class="box vt-head">
+  <div class="vt-id">
+    <span class="vav lg{% if paid %} paid{% endif %}" aria-hidden="true"></span>
+    <div class="vt-name">
+      <h2>{{ label }}</h2>
+      <span class="j-meta">{% if !country.is_empty() %}{{ flag|safe }}{{ country }}<i class="sep"></i>{% endif %}{% if !browser.is_empty() %}{{ browser }}<i class="sep"></i>{% endif %}First seen {{ first_seen }}<i class="sep"></i>Last seen {{ last_seen }}</span>
+    </div>
+    {% if paid %}<span class="badge paid-b">Paid</span>{% else %}<span class="badge ref">Not paid</span>{% endif %}
+  </div>
+  <div class="vt-stats">
+    <div><span class="k">First source</span><b>{{ first_icon|safe }}<span class="lbl">{{ first_source }}</span></b><span class="s">{% if first_channel.is_empty() %}&nbsp;{% else %}{{ first_channel }}{% endif %}</span></div>
+    <div><span class="k">Visits</span><b>{{ visits }}</b><span class="s">{{ pageviews }} pageviews</span></div>
+    <div><span class="k">Goals</span><b>{{ goals }}</b><span class="s">reached</span></div>
+    <div class="vt-rev"><span class="k">Lifetime revenue</span><b>{% if paid %}{{ revenue }}{% else %}$0{% endif %}</b><span class="s">{{ payments }}</span></div>
+    <div class="vt-exit"><span class="k">Last exit</span><b><span class="lbl">{% if exit.is_empty() %}n/a{% else %}{{ exit }}{% endif %}</span></b><span class="s">&nbsp;</span></div>
+  </div>
+</section>
+<section class="box vt">
+  <ol class="vtl">
+    {% for e in entries %}
+    {% match e %}
+    {% when EntryView::Visit(v) %}
+    <li class="vt-visit">
+      <span class="tl-ico">{{ v.icon|safe }}</span>
+      <div class="tl-body">
+        <div class="vt-vh">
+          <b>{{ v.source }}</b>{% if !v.channel.is_empty() %}<span class="ch">{{ v.channel }}</span>{% endif %}{% if !v.campaign.is_empty() %}<span class="ch">Campaign {{ v.campaign }}</span>{% endif %}{% if v.after_paid %}<span class="after">After paying</span>{% endif %}
+          <span class="grow"></span>
+          <span class="dim">Visit {{ v.n }}<i class="sep"></i>{{ v.date }}<i class="sep"></i>{{ v.pages }}, {{ v.length }}</span>
+        </div>
+        <ol class="vt-steps">
+          {% for s in v.steps %}
+          {% match s %}
+          {% when StepView::Page { time, path, stay } %}
+          <li class="st-page"><span class="t">{{ time }}</span><span class="p mono">{{ path }}</span><span class="d">{% if stay.is_empty() %}<span class="na" title="No later page or leave event">n/a</span>{% else %}{{ stay }}{% endif %}</span></li>
+          {% when StepView::Goal { time, name } %}
+          <li class="st-goal"><span class="t">{{ time }}</span><span class="p"><span class="chip goal">Goal: {{ name }}</span></span><span class="d"></span></li>
+          {% when StepView::Exit { time, page, icon, link } %}
+          {% if link.is_empty() %}
+          <li class="st-exit"><span class="t">{{ time }}</span><span class="p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M9 16l-4-4 4-4M5 12h11"/></svg>Left from <span class="mono">{{ page }}</span></span><span class="d"></span></li>
+          {% else %}
+          <li class="st-exit out"><span class="t">{{ time }}</span><span class="p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>Clicked out to {{ icon|safe }}<span class="mono lbl">{{ link }}</span><span class="from">from <span class="mono">{{ page }}</span></span></span><span class="d"></span></li>
+          {% endif %}
+          {% when StepView::Pay(p) %}
+          <li class="st-pay"><span class="t">{{ p.time }}</span><a class="p" href="{{ p.href }}" data-drawer>{% include "_check.html" %}<b>Paid {{ p.amount }}</b>{% if p.renewal %}<span class="renewal">renewal</span>{% endif %}{% if p.status_class != "ok" %}<span class="badge {{ p.status_class }}">{{ p.status }}</span>{% endif %}{% if !p.refunded.is_empty() %}<span class="dim">{{ p.refunded }} refunded</span>{% endif %}<span class="prov-inline">{{ p.provider_icon|safe }}{{ p.provider }}</span></a><span class="d"></span></li>
+          {% endmatch %}
+          {% endfor %}
+        </ol>
+      </div>
+    </li>
+    {% when EntryView::Pay(p) %}
+    <li class="vt-pay">
+      <span class="tl-ico">{% include "_check.html" %}</span>
+      <a class="vt-ph" href="{{ p.href }}" data-drawer><b>Paid {{ p.amount }}</b>{% if p.renewal %}<span class="renewal">renewal</span>{% endif %}{% if p.status_class != "ok" %}<span class="badge {{ p.status_class }}">{{ p.status }}</span>{% endif %}{% if !p.refunded.is_empty() %}<span class="dim">{{ p.refunded }} refunded</span>{% endif %}<span class="prov-inline">{{ p.provider_icon|safe }}{{ p.provider }}</span><span class="grow"></span><span class="dim">{{ p.time }}</span></a>
+    </li>
+    {% endmatch %}
+    {% endfor %}
+  </ol>
+</section>
+{% include "_drawer.html" %}
+{% endblock %}

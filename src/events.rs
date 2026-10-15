@@ -10,6 +10,7 @@ use crate::stats::{
 };
 #[cfg(test)]
 use crate::stats::{BreakdownRow, Dimension, Sort};
+use crate::visitors::{self, Facets, Timeline, VisitorFilter, VisitorPage};
 
 #[derive(Debug, Clone)]
 pub struct Event {
@@ -104,6 +105,18 @@ pub trait EventStore: Send + Sync {
     /// Totals, current and previous daily series, the four breakdowns and setup facts.
     fn report(&self, site_id: &str, period: &Period) -> anyhow::Result<Report>;
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary>;
+    /// Visitors seen in the range, last seen first.
+    fn visitor_list(
+        &self,
+        site_id: &str,
+        period: &Period,
+        filter: &VisitorFilter,
+        limit: u32,
+        offset: u32,
+    ) -> anyhow::Result<VisitorPage>;
+    fn visitor_facets(&self, site_id: &str, period: &Period) -> anyhow::Result<Facets>;
+    /// Every visit, pageview, goal, exit and payment of one visitor, oldest first.
+    fn timeline(&self, site_id: &str, visitor_id: &str) -> anyhow::Result<Option<Timeline>>;
 }
 
 /// Sessions as touches (first pageview's fields), then the credited session per payment, then renewal inheritance.
@@ -439,6 +452,32 @@ impl EventStore for DuckStore {
 
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary> {
         stats::payment_summary(&self.conn.lock().unwrap(), site_id, period)
+    }
+
+    fn visitor_list(
+        &self,
+        site_id: &str,
+        period: &Period,
+        filter: &VisitorFilter,
+        limit: u32,
+        offset: u32,
+    ) -> anyhow::Result<VisitorPage> {
+        visitors::visitor_list(
+            &self.conn.lock().unwrap(),
+            site_id,
+            period,
+            filter,
+            limit,
+            offset,
+        )
+    }
+
+    fn visitor_facets(&self, site_id: &str, period: &Period) -> anyhow::Result<Facets> {
+        visitors::facets(&self.conn.lock().unwrap(), site_id, period)
+    }
+
+    fn timeline(&self, site_id: &str, visitor_id: &str) -> anyhow::Result<Option<Timeline>> {
+        visitors::timeline(&self.conn.lock().unwrap(), site_id, visitor_id)
     }
 }
 

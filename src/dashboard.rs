@@ -15,7 +15,7 @@ use crate::sites::{self, Site};
 use crate::stats::{
     BreakdownRow, Journey, PaymentFilter, PaymentRow, Period, Sort, Totals, sort_rows,
 };
-use crate::{chart, favicon, icons};
+use crate::{chart, favicon, icons, visitor_pages, visitors};
 
 const RANGES: [(&str, &str, i64); 6] = [
     ("today", "Today", 1),
@@ -31,7 +31,7 @@ const FILTERS: [(&str, &str); 4] = [
     ("unattributed", "Unattributed"),
     ("refunded", "Refunded"),
 ];
-const PER_PAGE: u32 = 50;
+pub(crate) const PER_PAGE: u32 = 50;
 
 /// Sidebar and top bar data shared by every app page.
 pub struct Shell {
@@ -193,7 +193,10 @@ fn initials(email: &str) -> String {
 }
 
 /// The active range as (key, label, days, default key); sites under 30 days old default to "all".
-fn range(ctx: &Ctx, key: Option<&str>) -> (&'static str, &'static str, i64, &'static str) {
+pub(crate) fn range(
+    ctx: &Ctx,
+    key: Option<&str>,
+) -> (&'static str, &'static str, i64, &'static str) {
     let tracked = ctx.first_day.map(|d| (ctx.today - d).whole_days() + 1);
     let default = if tracked.is_some_and(|n| n <= 30) {
         "all"
@@ -214,7 +217,7 @@ fn range(ctx: &Ctx, key: Option<&str>) -> (&'static str, &'static str, i64, &'st
     (k, label, days, default)
 }
 
-fn period(ctx: &Ctx, days: i64) -> Period {
+pub(crate) fn period(ctx: &Ctx, days: i64) -> Period {
     Period {
         from: ctx.today - Duration::days(days - 1),
         to: ctx.today,
@@ -223,7 +226,7 @@ fn period(ctx: &Ctx, days: i64) -> Period {
 }
 
 /// `base` plus the non-empty query params.
-fn href(base: &str, params: &[(&str, &str)]) -> String {
+pub(crate) fn href(base: &str, params: &[(&str, &str)]) -> String {
     let q: Vec<String> = params
         .iter()
         .filter(|(_, v)| !v.is_empty())
@@ -236,7 +239,12 @@ fn href(base: &str, params: &[(&str, &str)]) -> String {
     }
 }
 
-fn range_opts(base: &str, current: &str, default: &str, params: &[(&str, &str)]) -> Vec<Opt> {
+pub(crate) fn range_opts(
+    base: &str,
+    current: &str,
+    default: &str,
+    params: &[(&str, &str)],
+) -> Vec<Opt> {
     RANGES
         .iter()
         .map(|(key, label, _)| Opt {
@@ -337,7 +345,7 @@ pub fn ago(ts: OffsetDateTime, now: OffsetDateTime) -> String {
     }
 }
 
-fn local(ts: OffsetDateTime, offset: UtcOffset) -> String {
+pub(crate) fn local(ts: OffsetDateTime, offset: UtcOffset) -> String {
     ts.to_offset(offset)
         .format(format_description!(
             "[month repr:short] [day padding:none], [hour]:[minute]"
@@ -345,12 +353,12 @@ fn local(ts: OffsetDateTime, offset: UtcOffset) -> String {
         .unwrap_or_default()
 }
 
-fn day(d: Date) -> String {
+pub(crate) fn day(d: Date) -> String {
     d.format(format_description!("[month repr:short] [day padding:none]"))
         .unwrap_or_default()
 }
 
-fn status(status: &str) -> (&'static str, &'static str) {
+pub(crate) fn status(status: &str) -> (&'static str, &'static str) {
     match status {
         "refunded" => ("Refunded", "ref"),
         "partially_refunded" => ("Partly refunded", "warn"),
@@ -360,7 +368,7 @@ fn status(status: &str) -> (&'static str, &'static str) {
 }
 
 /// "1 payment", "1,204 payments"
-fn plural(n: u64, unit: &str) -> String {
+pub(crate) fn plural(n: u64, unit: &str) -> String {
     format!("{} {unit}{}", group(n), if n == 1 { "" } else { "s" })
 }
 
@@ -372,7 +380,7 @@ pub fn usd(v: f64) -> String {
 }
 
 /// A payment's USD amount, or its own currency when it has no conversion.
-fn amount(p: &PaymentRow) -> String {
+pub(crate) fn amount(p: &PaymentRow) -> String {
     p.amount_usd
         .map_or_else(|| native(p.amount, &p.currency), usd)
 }
@@ -385,7 +393,7 @@ pub fn provider_short(provider: &str) -> &'static str {
 }
 
 /// `base` with `params`, overridden in place by `set`; empty values are dropped.
-fn link(base: &str, params: &[(&str, &str)], set: &[(&str, &str)]) -> String {
+pub(crate) fn link(base: &str, params: &[(&str, &str)], set: &[(&str, &str)]) -> String {
     let mut all: Vec<(&str, &str)> = params
         .iter()
         .map(|&(k, v)| set.iter().copied().find(|(s, _)| *s == k).unwrap_or((k, v)))
@@ -480,6 +488,8 @@ pub struct PayView {
     provider_icon: String,
     provider: &'static str,
     href: String,
+    visitor: String,
+    visitor_href: String,
 }
 
 pub struct Step {
@@ -593,6 +603,16 @@ pub fn pay_view(p: &PaymentRow, domain: &str, offset: UtcOffset) -> PayView {
             p.provider,
             p.provider_payment_id
         ),
+        visitor: p
+            .visitor
+            .as_deref()
+            .map(visitors::label)
+            .unwrap_or_default(),
+        visitor_href: p
+            .visitor
+            .as_deref()
+            .map(|v| visitor_pages::visitor_href(domain, v))
+            .unwrap_or_default(),
     }
 }
 
@@ -1505,6 +1525,8 @@ pub struct JourneyView {
     payment_id: String,
     customer_id: String,
     visitor_id: String,
+    visitor: String,
+    visitor_href: String,
     date: String,
     flag: String,
     country: String,
@@ -1525,7 +1547,7 @@ pub struct JourneyView {
 }
 
 /// "2 days 18 h", "5 h", "12 minutes"
-fn duration(d: Duration) -> String {
+pub(crate) fn duration(d: Duration) -> String {
     let (days, hours) = (d.whole_days(), d.whole_hours() % 24);
     match days {
         0 if d.whole_hours() >= 1 => format!("{} h", d.whole_hours()),
@@ -1566,6 +1588,16 @@ fn journey_view(j: Journey, domain: &str, offset: UtcOffset) -> JourneyView {
         payment_id: p.provider_payment_id.clone(),
         customer_id: p.customer_id.clone().unwrap_or_default(),
         visitor_id: p.visitor_id.clone().unwrap_or_default(),
+        visitor: p
+            .visitor
+            .as_deref()
+            .map(visitors::label)
+            .unwrap_or_default(),
+        visitor_href: p
+            .visitor
+            .as_deref()
+            .map(|v| visitor_pages::visitor_href(domain, v))
+            .unwrap_or_default(),
         date: p
             .ts
             .to_offset(offset)
