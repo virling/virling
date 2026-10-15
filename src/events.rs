@@ -338,7 +338,7 @@ impl EventStore for DuckStore {
     fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64> {
         let conn = self.conn.lock().unwrap();
         let n: i64 = conn.query_row(
-            "SELECT count(DISTINCT visitor_id) FROM events WHERE site_id = ? AND ts > now() - INTERVAL 5 MINUTE",
+            "SELECT count(DISTINCT visitor_id) FROM events WHERE site_id = ? AND kind <> 'leave' AND ts > now() - INTERVAL 5 MINUTE",
             params![site_id],
             |r| r.get(0),
         )?;

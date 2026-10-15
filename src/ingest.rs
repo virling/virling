@@ -50,6 +50,15 @@ pub struct Sessions {
 }
 
 impl Sessions {
+    fn active(&self, site_id: &str, visitor_id: &str, now: OffsetDateTime) -> Option<String> {
+        let mut map = self.map.lock().unwrap();
+        let (id, last) = map.get_mut(&(site_id.to_string(), visitor_id.to_string()))?;
+        (now - *last < SESSION_IDLE).then(|| {
+            *last = now;
+            id.clone()
+        })
+    }
+
     fn session_for(&self, site_id: &str, visitor_id: &str, now: OffsetDateTime) -> String {
         let mut map = self.map.lock().unwrap();
         if map.len() > 200_000 {
@@ -115,6 +124,19 @@ impl RateLimiter {
         entry.1 += 1;
         entry.1 <= limit
     }
+}
+
+/// Destination of an outbound click as origin and path, without query or fragment; None for same-site or non-web links.
+fn exit_link(raw: &str, domain: &str) -> Option<String> {
+    let url = Url::parse(raw).ok()?;
+    let host = url.host_str()?;
+    if !matches!(url.scheme(), "http" | "https") || host_belongs(host, domain) {
+        return None;
+    }
+    Some(clip(
+        format!("{}{}", host.to_ascii_lowercase(), url.path()),
+        300,
+    ))
 }
 
 fn country(headers: &HeaderMap) -> Option<String> {
@@ -208,19 +230,24 @@ pub async fn collect(
         let kind = match e.n.as_str() {
             "pageview" => "pageview",
             "goal" => "goal",
+            "exit" => "exit",
+            "leave" => "leave",
             _ => continue,
         };
-        let name = if kind == "goal" {
-            match e
+        let name = match kind {
+            "goal" => match e
                 .g
                 .map(|g| clip(g.trim().to_string(), 64))
                 .filter(|g| !g.is_empty())
             {
                 Some(g) => Some(g),
                 None => continue,
-            }
-        } else {
-            None
+            },
+            "exit" => match e.g.as_deref().and_then(|g| exit_link(g, &site.domain)) {
+                Some(link) => Some(link),
+                None => continue,
+            },
+            _ => None,
         };
 
         let query: HashMap<String, String> = page.query_pairs().into_owned().collect();
@@ -248,7 +275,15 @@ pub async fn collect(
             Some(v) => v,
             None => state.salt.visitor_id(&site.id, ip, user_agent),
         };
-        let session_id = state.sessions.session_for(&site.id, &visitor_id, now);
+        let session_id = if matches!(kind, "exit" | "leave") {
+            // Exits only extend a live session; a late one never starts a new visit.
+            match state.sessions.active(&site.id, &visitor_id, now) {
+                Some(id) => id,
+                None => continue,
+            }
+        } else {
+            state.sessions.session_for(&site.id, &visitor_id, now)
+        };
 
         events.push(Event {
             site_id: site.id.clone(),
