@@ -13,6 +13,7 @@
       <h1>Add your site</h1>
       <p class="lead">The domain your visitors land on. Subdomains are included. You can add more sites later.</p>
     </div>
+    <div class="step-body">
     {% if let Some(error) = error %}
     <div class="alert" role="alert">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C0262D" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
@@ -46,11 +47,13 @@
       </div>
       <div class="actions end"><button class="btn lg" type="submit">Continue</button></div>
     </form>
+    </div>
   {% else %}
     <div>
       <h1>Add the script</h1>
       <p class="lead">Paste this before <span class="mono">&lt;/head&gt;</span> on every page of <b>{{ domain }}</b>. Under 2 KB, loads async.</p>
     </div>
+    <div class="step-body">
     <div class="code" data-tabs>
       <div class="code-head">
         <div class="tabs" role="tablist" aria-label="Platform">
@@ -90,6 +93,7 @@ import Script from "next/script";
     <div class="actions">
       <a class="btn ghost" href="/app/setup">Add a different site</a>
       <a class="btn lg" href="/app/{{ domain }}/setup/payments">Continue</a>
+    </div>
     </div>
   {% endif %}
   </div>

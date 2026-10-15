@@ -75,8 +75,14 @@ h1, h2, h3 { margin: 0; letter-spacing: -0.03em; }
 .stepper li.done span { background: var(--revenue); color: #fff; }
 .stepper li.on { background: var(--hover); color: var(--ink); }
 .stepper li.on span { background: var(--ink); color: #fff; }
-.step-main { display: flex; justify-content: center; padding: 56px 24px; }
-.step-box { width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 28px; }
+.step-main { display: flex; padding: 40px 32px; }
+.step-box { width: 100%; display: flex; flex-direction: column; gap: 28px; }
+.step-body { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+@media (min-width: 1100px) {
+  .step-box { display: grid; grid-template-columns: 320px minmax(0, 1fr); column-gap: 48px; align-items: start; }
+  .step-box > :first-child { position: sticky; top: 24px; }
+}
+.step-body .field { max-width: 560px; }
 .step-box h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.035em; }
 .step-box .lead { margin: 6px 0 0; font-size: 17px; color: var(--ink-2); }
 .panel { background: #fff; border: 1px solid var(--rule); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
@@ -108,7 +114,7 @@ h1, h2, h3 { margin: 0; letter-spacing: -0.03em; }
 
 .small { font-size: 13px; }
 .grow { flex: 1; min-width: 0; }
-.badge { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.badge { display: inline-flex; flex: none; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
 .badge.ok { background: var(--up-soft); color: var(--up); }
 .badge.warn { background: #fdf3e1; color: #8a5a00; }
 .badge.bad { background: var(--error-soft); color: var(--error-text); }
@@ -199,11 +205,21 @@ body.app { display: flex; min-height: 100vh; font-size: 14px; line-height: 1.4; 
 .num { text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; }
 
 
-.settings { display: flex; flex-direction: column; gap: 20px; max-width: 760px; }
+.settings { display: flex; flex-direction: column; gap: 20px; }
+.set-sec { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.set-intro h2 { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
+.set-intro p { margin: 4px 0 0; font-size: 14px; }
+@media (min-width: 1100px) {
+  .settings { gap: 32px; }
+  .set-sec { grid-template-columns: 300px minmax(0, 1fr); column-gap: 48px; align-items: start; }
+  .set-sec + .set-sec { padding-top: 32px; border-top: 1px solid var(--rule); }
+  .set-intro { padding-top: 4px; }
+}
 .settings .card > p { margin: 0; font-size: 14px; }
 .code-title { color: var(--ink-4); font-size: 13px; font-weight: 600; padding-left: 4px; }
 .setting { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 14px 0; border-top: 1px solid var(--rule-2); }
 .setting > div:first-child { display: flex; flex-direction: column; gap: 2px; font-size: 14px; max-width: 460px; }
+.card > .setting:first-child { border-top: 0; padding-top: 0; }
 .setting .muted { font-size: 13px; }
 .select.compact { width: 160px; flex: none; }
 .select.compact > button { height: 40px; }
@@ -491,7 +507,7 @@ body.app { display: flex; min-height: 100vh; font-size: 14px; line-height: 1.4; 
 .det > span:first-child { color: var(--ink-3); }
 .det > span:last-child { display: flex; align-items: center; gap: 6px; text-align: right; overflow-wrap: anywhere; }
 .det .mono { font-size: 12px; }
-.journey-page { max-width: 640px; padding: 0 0 16px; }
+.journey-page { padding: 0 0 16px; }
 
 @media (max-width: 1080px) {
   .kpis { grid-template-columns: repeat(2, 1fr); }

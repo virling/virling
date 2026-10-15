@@ -12,6 +12,7 @@
       <h1>Connect payments</h1>
       <p class="lead">Virling imports the last 90 days of payments for <b>{{ domain }}</b> and keeps them in sync. Keys are stored encrypted.</p>
     </div>
+    <div class="step-body">
     {% if let Some(error) = error %}
     <div class="alert" role="alert">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C0262D" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
@@ -77,6 +78,7 @@
         {% if !cards.is_empty() %}<button class="btn {% if connected.is_some() %}secondary{% else %}lg{% endif %}" type="submit" form="connect">{% if replacing %}Save new key{% else %}Connect and backfill{% endif %}</button>{% endif %}
         {% if connected.is_some() %}<a class="btn lg" href="/app/{{ domain }}/setup/checkout">Continue</a>{% endif %}
       </span>
+    </div>
     </div>
   </div>
 </main>

@@ -12,6 +12,7 @@
       <h1>Link checkout to visitors</h1>
       <p class="lead">Pass the visitor ID from the <span class="mono">virling_vid</span> cookie into checkout. That is how a payment is credited to the visit that brought it. Payments without it still count, as Unattributed.</p>
     </div>
+    <div class="step-body">
     <div class="code" data-tabs>
       <div class="code-head">
         <div class="tabs" role="tablist" aria-label="Payment provider">
@@ -76,6 +77,7 @@ location.href = url.href;
     <div class="actions">
       <a class="btn ghost" href="/app/{{ domain }}/setup/payments">Back</a>
       <a class="btn lg" href="/app/{{ domain }}">Open dashboard</a>
+    </div>
     </div>
   </div>
 </main>
