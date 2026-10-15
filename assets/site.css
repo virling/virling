@@ -145,7 +145,7 @@ a.more:hover svg { transform: translateX(2px); }
 
 .note { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 .sign { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
-.sign .hand { font: 500 34px/1 var(--hand); color: var(--revenue); margin-right: 4px; }
+.sign .hand { flex-basis: 100%; margin-bottom: 4px; font: 500 34px/1 var(--hand); color: var(--revenue); }
 .closer { padding: 72px 0; }
 .closer .wrap { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; }
 
