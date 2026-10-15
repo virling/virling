@@ -14,7 +14,7 @@ Every setting can be given as a flag or an environment variable. See [CLI](cli.m
 | `VIRLING_SMTP_URL` | unset | SMTP URL for sign-in emails, such as `smtps://user:pass@smtp.example.com:465`. Unset: emails are logged. |
 | `VIRLING_MAIL_FROM` | `Virling <login@virling.com>` | Sender for sign-in emails. |
 | `VIRLING_MARKETING` | `false` | Serve the virling.com landing pages and waitlist. |
-| `VIRLING_WAITLIST_FROM` | `Deven and Rahul at Virling <hello@virling.com>` | Sender for waitlist emails. |
+| `VIRLING_WAITLIST_FROM` | `Rahul at Virling <hello@virling.com>` | Sender for waitlist emails. |
 | `RUST_LOG` | `info` | Log level and filter, such as `debug` or `virling=debug`. |
 
 `VIRLING_MARKETING` and `VIRLING_WAITLIST_FROM` exist for virling.com itself. A self-hosted server does not need them.
