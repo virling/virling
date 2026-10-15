@@ -22,6 +22,7 @@ mod sync;
 mod ua;
 mod waitlist;
 mod waitlist_copy;
+mod world;
 
 use std::net::SocketAddr;
 use std::path::PathBuf;
@@ -697,6 +698,9 @@ mod tests {
             device: "Desktop".into(),
             browser: "Firefox".into(),
             os: "macOS".into(),
+            region: None,
+            city: None,
+            host: None,
         };
         store
             .insert_events(&[
@@ -1020,6 +1024,9 @@ mod tests {
                 device: "Desktop".into(),
                 browser: "Firefox".into(),
                 os: "macOS".into(),
+                region: None,
+                city: None,
+                host: None,
             }])
             .unwrap();
         let goals = body_text(
@@ -1068,6 +1075,49 @@ mod tests {
             .status(),
             StatusCode::NOT_FOUND
         );
+    }
+
+    #[tokio::test]
+    async fn dashboard_cards_switch_tabs_and_metrics() {
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        seed(&store, &site);
+        crate::sync::rebuild_attribution(&state, Some(&site)).await;
+        let page = |q: &'static str| {
+            let (state, cookie) = (state.clone(), cookie.clone());
+            async move {
+                let res = call(&state, get(&format!("/app/example.com{q}"), Some(&cookie))).await;
+                assert_eq!(res.status(), StatusCode::OK, "{q}");
+                body_text(res).await
+            }
+        };
+        let home = page("").await;
+        for title in [
+            "Acquisition",
+            "Location",
+            "Pages",
+            "Devices",
+            "Visitors now",
+        ] {
+            assert!(home.contains(title), "{title}");
+        }
+        assert!(
+            home.contains(r#"class="world""#),
+            "map is the default location tab"
+        );
+        assert!(
+            home.contains(r#"<details class="tc-open">"#),
+            "channels open into sources"
+        );
+        assert!(home.contains(r#"href="/app/example.com?acq=referrer#card-acq""#));
+        assert!(home.contains(r#"href="/app/example.com?acq_by=visitors#card-acq""#));
+        let tabs = page("?acq=referrer&acq_by=visitors&loc=city&pg=exit&dev=os").await;
+        assert!(tabs.contains("someblog.dev"));
+        assert!(tabs.contains("visitor location headers"));
+        assert!(tabs.contains("No outbound link clicks in this range."));
+        assert!(tabs.contains("macOS"));
+        assert!(tabs.contains(r#"href="/app/example.com?acq=referrer&#38;acq_by=visitors&#38;loc=city&#38;pg=exit#card-dev""#));
     }
 
     #[tokio::test]

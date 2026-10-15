@@ -84,24 +84,50 @@ pub enum Dimension {
     Referrer,
     LandingPage,
     Country,
+    Campaign,
+    Keyword,
+    /// "channel|referrer_host", to list each channel's sources.
+    ChannelSource,
+    /// "country|region"
+    Region,
+    /// "country|city"
+    City,
+    Hostname,
+    /// Every page viewed, not only the first of a session.
+    Page,
+    /// Outbound links clicked.
+    ExitLink,
+    Browser,
+    Os,
+    Device,
 }
 
 impl Dimension {
-    /// (events column, attribution column)
-    fn columns(self) -> (&'static str, &'static str) {
+    /// (event kind, key expression, whether only the session's first such event counts)
+    fn source(self) -> (&'static str, &'static str, bool) {
+        let first = |key| ("pageview", key, true);
         match self {
-            Dimension::Channel => ("channel", "channel"),
-            Dimension::Referrer => ("referrer_host", "referrer_host"),
-            Dimension::LandingPage => ("path", "landing_page"),
-            Dimension::Country => ("country", "country"),
+            Dimension::Channel => first("channel"),
+            Dimension::Referrer => first("referrer_host"),
+            Dimension::LandingPage => first("path"),
+            Dimension::Country => first("country"),
+            Dimension::Campaign => first("utm_campaign"),
+            Dimension::Keyword => first("utm_term"),
+            Dimension::ChannelSource => first("channel || '|' || coalesce(referrer_host, '')"),
+            Dimension::Region => first(
+                "CASE WHEN region IS NOT NULL THEN coalesce(country, '') || '|' || region END",
+            ),
+            Dimension::City => {
+                first("CASE WHEN city IS NOT NULL THEN coalesce(country, '') || '|' || city END")
+            }
+            Dimension::Browser => first("browser"),
+            Dimension::Os => first("os"),
+            Dimension::Device => first("device"),
+            Dimension::Hostname => ("pageview", "host", false),
+            Dimension::Page => ("pageview", "path", false),
+            Dimension::ExitLink => ("exit", "name", false),
         }
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Sort {
-    Revenue,
-    Visitors,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -112,6 +138,8 @@ pub struct BreakdownRow {
     pub unattributed: bool,
     pub visitors: u64,
     pub payments: u64,
+    /// Distinct paying customers credited to this row.
+    pub customers: u64,
     pub revenue_usd: f64,
     pub revenue_per_visitor: Option<f64>,
 }
@@ -451,29 +479,36 @@ pub(crate) fn breakdown(
     site_id: &str,
     period: &Period,
     dimension: Dimension,
-    sort: Sort,
 ) -> anyhow::Result<Vec<BreakdownRow>> {
-    let (ecol, acol) = dimension.columns();
+    let (kind, key, first) = dimension.source();
+    let only_first = if first {
+        "QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1"
+    } else {
+        ""
+    };
+    // Visitors count sessions in range; payments follow their credited session, wherever it falls.
     let sql = format!(
         "WITH {BOUNDS},
-        touches AS (
-            SELECT visitor_id, {ecol} AS key
-            FROM events, bounds
-            WHERE site_id = $site AND kind = 'pageview' AND ts >= lo AND ts < hi
-            QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1
+        keyed AS (
+            SELECT session_id, visitor_id, ts, {key} AS key
+            FROM events
+            WHERE site_id = $site AND kind = '{kind}'
+            {only_first}
         )
-        SELECT unattributed, key, sum(visitors)::BIGINT, sum(payments)::BIGINT, sum(revenue)
+        SELECT unattributed, key, sum(visitors)::BIGINT, sum(payments)::BIGINT, sum(revenue),
+            sum(customers)::BIGINT
         FROM (
             SELECT false AS unattributed, key, count(DISTINCT visitor_id) AS visitors,
-                   0 AS payments, 0.0 AS revenue
-            FROM touches GROUP BY key
+                   0 AS payments, 0.0 AS revenue, 0 AS customers
+            FROM keyed, bounds WHERE ts >= lo AND ts < hi GROUP BY key
             UNION ALL
-            SELECT a.session_id IS NULL, CASE WHEN a.session_id IS NOT NULL THEN a.{acol} END,
-                   0, count(*), coalesce(sum({NET_USD}), 0)
+            SELECT a.session_id IS NULL, k.key, 0, count(*), coalesce(sum({NET_USD}), 0),
+                   count(DISTINCT {CUSTOMER})
             FROM payments p
             JOIN bounds ON p.ts >= lo AND p.ts < hi
             LEFT JOIN attribution a ON a.site_id = p.site_id AND a.provider = p.provider
                 AND a.provider_payment_id = p.provider_payment_id
+            LEFT JOIN (SELECT DISTINCT session_id, key FROM keyed) k ON k.session_id = a.session_id
             WHERE p.site_id = $site AND p.status <> 'failed'
             GROUP BY ALL
         )
@@ -494,14 +529,22 @@ pub(crate) fn breakdown(
                 r.get::<_, i64>(2)?,
                 r.get::<_, i64>(3)?,
                 r.get::<_, f64>(4)?,
+                r.get::<_, i64>(5)?,
             ))
         },
     )?;
     let mut out: Vec<BreakdownRow> = Vec::new();
     for row in rows {
-        let (unattributed, mut key, visitors, payments, revenue_usd) = row?;
-        if dimension == Dimension::Referrer {
-            key = key.as_deref().map(source_domain);
+        let (unattributed, mut key, visitors, payments, revenue_usd, customers) = row?;
+        match dimension {
+            Dimension::Referrer => key = key.as_deref().map(source_domain),
+            Dimension::ChannelSource => {
+                key = key.map(|k| match k.split_once('|') {
+                    Some((c, h)) if !h.is_empty() => format!("{c}|{}", source_domain(h)),
+                    _ => k,
+                })
+            }
+            _ => {}
         }
         let label = match (&key, unattributed) {
             (_, true) => "Unattributed".to_string(),
@@ -514,6 +557,7 @@ pub(crate) fn breakdown(
         {
             existing.visitors += visitors as u64;
             existing.payments += payments as u64;
+            existing.customers += customers as u64;
             existing.revenue_usd += revenue_usd;
         } else {
             out.push(BreakdownRow {
@@ -522,6 +566,7 @@ pub(crate) fn breakdown(
                 unattributed,
                 visitors: visitors as u64,
                 payments: payments as u64,
+                customers: customers as u64,
                 revenue_usd,
                 revenue_per_visitor: None,
             });
@@ -530,19 +575,17 @@ pub(crate) fn breakdown(
     for r in &mut out {
         r.revenue_per_visitor = ratio(r.revenue_usd, r.visitors);
     }
-    sort_rows(&mut out, sort);
+    sort_rows(&mut out);
     Ok(out)
 }
 
-pub fn sort_rows(rows: &mut [BreakdownRow], sort: Sort) {
+/// Most revenue first, then most visitors, then by label.
+pub fn sort_rows(rows: &mut [BreakdownRow]) {
     rows.sort_by(|a, b| {
-        let by_revenue = b.revenue_usd.total_cmp(&a.revenue_usd);
-        let by_visitors = b.visitors.cmp(&a.visitors);
-        match sort {
-            Sort::Revenue => by_revenue.then(by_visitors),
-            Sort::Visitors => by_visitors.then(by_revenue),
-        }
-        .then_with(|| a.label.cmp(&b.label))
+        b.revenue_usd
+            .total_cmp(&a.revenue_usd)
+            .then(b.visitors.cmp(&a.visitors))
+            .then_with(|| a.label.cmp(&b.label))
     });
 }
 
@@ -1123,7 +1166,7 @@ fn setup(conn: &Connection, site_id: &str) -> anyhow::Result<Setup> {
 }
 
 pub(crate) fn report(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<Report> {
-    let dims = |d| breakdown(conn, site_id, period, d, Sort::Revenue);
+    let dims = |d| breakdown(conn, site_id, period, d);
     Ok(Report {
         overview: overview(conn, site_id, period)?,
         days: timeseries(conn, site_id, period)?,
@@ -1178,6 +1221,9 @@ mod tests {
             device: "Desktop".into(),
             browser: "Firefox".into(),
             os: "macOS".into(),
+            region: None,
+            city: None,
+            host: None,
         }
     }
 
@@ -1478,9 +1524,7 @@ mod tests {
             .rebuild_attribution("s", "last_non_direct", 90)
             .unwrap();
         let o = store.overview("s", &period()).unwrap();
-        let rows = store
-            .breakdown("s", &period(), Dimension::Channel, Sort::Revenue)
-            .unwrap();
+        let rows = store.breakdown("s", &period(), Dimension::Channel).unwrap();
         let revenue: f64 = rows.iter().map(|r| r.revenue_usd).sum();
         let payments: u64 = rows.iter().map(|r| r.payments).sum();
         assert_eq!(revenue, o.current.revenue_usd);
@@ -1493,8 +1537,10 @@ mod tests {
                 .any(|r| r.unattributed && r.revenue_usd == 100.0)
         );
         let referrers = store
-            .breakdown("s", &period(), Dimension::Referrer, Sort::Visitors)
+            .breakdown("s", &period(), Dimension::Referrer)
             .unwrap();
+        let mut referrers = referrers;
+        referrers.sort_by_key(|r| std::cmp::Reverse(r.visitors));
         assert_eq!(referrers[0].label, "news.ycombinator.com");
     }
 
@@ -1509,8 +1555,10 @@ mod tests {
         }
         store.insert_events(&events).unwrap();
         let referrers = store
-            .breakdown("s", &period(), Dimension::Referrer, Sort::Visitors)
+            .breakdown("s", &period(), Dimension::Referrer)
             .unwrap();
+        let mut referrers = referrers;
+        referrers.sort_by_key(|r| std::cmp::Reverse(r.visitors));
         assert_eq!(referrers.len(), 1);
         assert_eq!(referrers[0].label, "x.com");
         assert_eq!(referrers[0].visitors, 3);
@@ -1538,7 +1586,7 @@ mod tests {
             .unwrap();
         store.rebuild_attribution("s", "first_touch", 90).unwrap();
         let referrers = store
-            .breakdown("s", &period(), Dimension::Referrer, Sort::Revenue)
+            .breakdown("s", &period(), Dimension::Referrer)
             .unwrap();
         let row = |label: &str| referrers.iter().find(|r| r.label == label).unwrap();
         assert_eq!(
@@ -1841,5 +1889,62 @@ mod tests {
                 .1
                 .is_empty()
         );
+    }
+
+    #[test]
+    fn breakdowns_cover_every_card_tab() {
+        let (_dir, store) = store();
+        let mut a = visit("v1", "a", T, "Social");
+        a.utm_campaign = Some("launch".into());
+        a.utm_term = Some("invoices".into());
+        a.region = Some("Bavaria".into());
+        a.city = Some("Munich".into());
+        a.host = Some("docs.example.com".into());
+        a.os = "iOS".into();
+        let mut second = visit("v1", "a", T + Duration::minutes(1), "Social");
+        second.path = "/pricing".into();
+        let mut exit = visit("v1", "a", T + Duration::minutes(2), "Social");
+        exit.kind = "exit".into();
+        exit.name = Some("github.com/acme".into());
+        let b = visit("v2", "b", T, "Direct");
+        store.insert_events(&[a, second, exit, b]).unwrap();
+        store
+            .upsert_payments(&[pay("p1", T + Duration::hours(1), Some("v1"), Some("c1"))])
+            .unwrap();
+        store
+            .rebuild_attribution("s", "last_non_direct", 30)
+            .unwrap();
+        let rows = |d| store.breakdown("s", &period(), d).unwrap();
+        let find = |d, key: &str| {
+            rows(d)
+                .into_iter()
+                .find(|r| r.key.as_deref() == Some(key))
+                .unwrap_or_else(|| panic!("{d:?} {key}"))
+        };
+        let campaign = find(Dimension::Campaign, "launch");
+        assert_eq!((campaign.visitors, campaign.customers), (1, 1));
+        assert_eq!(campaign.revenue_usd, 100.0);
+        assert_eq!(find(Dimension::Keyword, "invoices").visitors, 1);
+        assert_eq!(find(Dimension::Region, "DE|Bavaria").revenue_usd, 100.0);
+        assert_eq!(find(Dimension::City, "DE|Munich").visitors, 1);
+        assert_eq!(find(Dimension::Hostname, "docs.example.com").visitors, 1);
+        assert_eq!(find(Dimension::Page, "/pricing").revenue_usd, 100.0);
+        assert_eq!(find(Dimension::LandingPage, "/a").revenue_usd, 100.0);
+        assert!(
+            rows(Dimension::LandingPage)
+                .iter()
+                .all(|r| r.key.as_deref() != Some("/pricing"))
+        );
+        assert_eq!(
+            find(Dimension::ExitLink, "github.com/acme").revenue_usd,
+            100.0
+        );
+        assert_eq!(find(Dimension::Os, "iOS").visitors, 1);
+        assert_eq!(find(Dimension::Os, "macOS").revenue_usd, 0.0);
+        assert_eq!(
+            find(Dimension::ChannelSource, "Social|news.ycombinator.com").revenue_usd,
+            100.0
+        );
+        assert_eq!(find(Dimension::ChannelSource, "Direct|").visitors, 1);
     }
 }

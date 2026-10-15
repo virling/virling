@@ -13,10 +13,12 @@ use crate::onboarding::render;
 use crate::settings::{self, Brand};
 use crate::sites::{self, Site};
 use crate::stats::{
-    Activity, BreakdownRow, GoalRow, Journey, PaymentFilter, PaymentRow, Period, Sort, Totals, Who,
-    sort_rows,
+    Activity, BreakdownRow, Dimension, GoalRow, Journey, PaymentFilter, PaymentRow, Period, Totals,
+    Who, sort_rows,
 };
 use crate::{alias, chart, favicon, icons};
+
+mod cards;
 
 const RANGES: [(&str, &str, i64); 6] = [
     ("today", "Today", 1),
@@ -453,18 +455,11 @@ pub struct RowView {
     width: f64,
 }
 
+/// A breakdown card in the client report.
 pub struct Card {
-    key: &'static str,
-    title: &'static str,
     head: &'static str,
-    by_visitors: bool,
-    revenue_href: String,
-    visitors_href: String,
     rows: Vec<RowView>,
-    unattributed: Option<RowView>,
     foot: String,
-    foot_href: String,
-    foot_link: &'static str,
 }
 
 /// A payment or goal completion shown as the person behind it.
@@ -524,7 +519,7 @@ struct DashboardPage {
     kinds: Vec<KindView>,
     kind_label: &'static str,
     chart: String,
-    cards: Vec<Card>,
+    cards: Vec<cards::TabCard>,
     customers: Vec<CustomerView>,
     latest_total: u64,
     payments_href: String,
@@ -551,15 +546,9 @@ pub struct DashboardQuery {
     range: Option<String>,
     metric: Option<String>,
     chart: Option<String>,
-    all: Option<String>,
-    #[serde(alias = "channels")]
-    sort_channels: Option<String>,
-    #[serde(alias = "referrers")]
-    sort_referrers: Option<String>,
-    #[serde(alias = "pages")]
-    sort_pages: Option<String>,
-    #[serde(alias = "countries")]
-    sort_countries: Option<String>,
+    /// Card tabs and metrics, read by `cards::picks`.
+    #[serde(flatten)]
+    cards: std::collections::HashMap<String, String>,
 }
 
 const KIND_ICONS: [&str; 4] = [
@@ -723,45 +712,20 @@ fn goal_customer(g: &GoalRow, a: &Activity, offset: UtcOffset) -> CustomerView {
     }
 }
 
-/// Which breakdown a card shows and how its rows are labelled.
+/// Which breakdown a client report card shows.
 #[derive(Clone, Copy, PartialEq)]
 enum CardKind {
-    Channel,
     Referrer,
     Page,
-    Country,
 }
 
-fn row_view(
-    kind: CardKind,
-    r: &BreakdownRow,
-    max: f64,
-    by_visitors: bool,
-    matched: bool,
-) -> RowView {
-    let value = if by_visitors {
-        r.visitors as f64
-    } else {
-        r.revenue_usd
-    };
-    let key = r.key.as_deref().unwrap_or_default();
-    let (icon, label) = match kind {
-        CardKind::Channel => (
-            icons::glyph(
-                icons::channel_glyph(key).unwrap_or("link"),
-                16,
-                chart::channel_color(r.key.as_deref()),
-            ),
-            r.label.clone(),
-        ),
-        CardKind::Referrer => (icons::source(&r.label, 16), r.label.clone()),
-        CardKind::Page => (String::new(), r.label.clone()),
-        CardKind::Country if r.key.is_some() => (icons::flag(key), icons::country(key)),
-        CardKind::Country => (String::new(), "Unknown".into()),
-    };
+fn row_view(kind: CardKind, r: &BreakdownRow, max: f64, matched: bool) -> RowView {
     RowView {
-        icon,
-        label,
+        icon: match kind {
+            CardKind::Referrer => icons::source(&r.label, 16),
+            CardKind::Page => String::new(),
+        },
+        label: r.label.clone(),
         mono: kind == CardKind::Page,
         visitors: group(r.visitors),
         revenue: money(r.revenue_usd),
@@ -771,94 +735,35 @@ fn row_view(
         } else {
             "n/a".into()
         },
-        width: if max > 0.0 { value / max * 100.0 } else { 0.0 },
+        width: if max > 0.0 {
+            r.revenue_usd / max * 100.0
+        } else {
+            0.0
+        },
     }
 }
 
 #[allow(clippy::too_many_arguments)]
-fn card(
-    kind: CardKind,
-    rows: &[BreakdownRow],
-    params: &[(&str, &str)],
-    base: &str,
-    by_visitors: bool,
-    expanded: bool,
-    foot: Option<String>,
-) -> Card {
-    let (key, sort, title, head) = match kind {
-        CardKind::Channel => ("channels", "sort_channels", "Channels", "Channel"),
-        CardKind::Referrer => ("referrers", "sort_referrers", "Referrers", "Referrer"),
-        CardKind::Page => ("pages", "sort_pages", "Landing pages", "Page"),
-        CardKind::Country => ("countries", "sort_countries", "Countries", "Country"),
-    };
+fn card(kind: CardKind, rows: &[BreakdownRow], foot: String) -> Card {
     let mut shown: Vec<BreakdownRow> = rows
         .iter()
         .filter(|r| !r.unattributed && !(kind == CardKind::Referrer && r.key.is_none()))
         .cloned()
         .collect();
-    sort_rows(
-        &mut shown,
-        if by_visitors {
-            Sort::Visitors
-        } else {
-            Sort::Revenue
-        },
-    );
-    let total = shown.len();
+    sort_rows(&mut shown);
     let matched = rows.iter().any(|r| !r.unattributed && r.payments > 0);
-    shown.truncate(if expanded { 50 } else { 6 });
-    let unattributed = rows
-        .iter()
-        .find(|r| r.unattributed && kind == CardKind::Channel);
-    let max = shown
-        .iter()
-        .chain(unattributed)
-        .map(|r| {
-            if by_visitors {
-                r.visitors as f64
-            } else {
-                r.revenue_usd
-            }
-        })
-        .fold(0.0, f64::max);
-    let (foot, foot_href, foot_link) = match foot {
-        Some(f) => (f, String::new(), ""),
-        None if expanded => (
-            format!("All {total}"),
-            link(base, params, &[("all", "")]),
-            "Show fewer",
-        ),
-        None if total > shown.len() => (
-            format!("Top {} of {}", shown.len(), group(total as u64)),
-            link(base, params, &[("all", key)]),
-            "View all",
-        ),
-        None => (
-            format!("{total} {}", if total == 1 { "row" } else { "rows" }),
-            String::new(),
-            "",
-        ),
-    };
+    shown.truncate(6);
+    let max = shown.iter().map(|r| r.revenue_usd).fold(0.0, f64::max);
     Card {
-        key,
-        title,
-        head,
-        by_visitors,
-        revenue_href: link(base, params, &[(sort, "")]),
-        visitors_href: link(base, params, &[(sort, "visitors")]),
+        head: match kind {
+            CardKind::Referrer => "Referrer",
+            CardKind::Page => "Page",
+        },
         rows: shown
             .iter()
-            .map(|r| row_view(kind, r, max, by_visitors, matched))
+            .map(|r| row_view(kind, r, max, matched))
             .collect(),
-        unattributed: unattributed.map(|r| RowView {
-            icon: icons::glyph("unattributed", 16, "#B9BCC2"),
-            visitors: "n/a".into(),
-            per_visitor: "n/a".into(),
-            ..row_view(kind, r, max, by_visitors, matched)
-        }),
         foot,
-        foot_href,
-        foot_link,
     }
 }
 
@@ -936,16 +841,34 @@ pub async fn dashboard(
     let (Ok((model, window_days, dismissed)), Ok(providers)) = (settings, providers) else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
+    let picks = cards::picks(&q.cards);
+    let dims: Vec<Dimension> = picks.iter().map(|c| c.dimension()).collect();
+    let with_sources = picks.iter().any(|c| c.needs_sources());
     let store = state.events.clone();
     let (id, period_q) = (ctx.site.id.clone(), p.clone());
     let result = blocking(move || {
         let recent = store.payment_list(&id, &period_q, PaymentFilter::All, 50, 0)?;
         let who: Vec<Who> = recent.rows.iter().take(5).map(Who::of).collect();
         let activity = store.activity(&id, &period_q.tz, &who)?;
-        Ok((store.report(&id, &period_q)?, recent, activity))
+        let breakdowns = dims
+            .iter()
+            .map(|d| store.breakdown(&id, &period_q, *d))
+            .collect::<anyhow::Result<Vec<_>>>()?;
+        let sources = if with_sources {
+            store.breakdown(&id, &period_q, Dimension::ChannelSource)?
+        } else {
+            Vec::new()
+        };
+        Ok((
+            store.report(&id, &period_q)?,
+            recent,
+            activity,
+            breakdowns,
+            sources,
+        ))
     })
     .await;
-    let (report, recent, activity) = match result {
+    let (report, recent, activity, breakdowns, sources) = match result {
         Ok(r) => r,
         Err(code) => return code.into_response(),
     };
@@ -970,8 +893,6 @@ pub async fn dashboard(
         .as_deref()
         .and_then(chart::Kind::parse)
         .unwrap_or(default_kind);
-    let sort_of = |v: &Option<String>| v.as_deref() == Some("visitors");
-    let expanded = q.all.clone().unwrap_or_default();
     let range_param = if rkey == rdefault { "" } else { rkey };
     let metric_param = if metric == chart::Metric::Revenue {
         ""
@@ -979,23 +900,12 @@ pub async fn dashboard(
         metric.key()
     };
     let kind_param = if kind == default_kind { "" } else { kind.key() };
-    let sorts: Vec<(&str, &str)> = [
-        ("sort_channels", &q.sort_channels),
-        ("sort_referrers", &q.sort_referrers),
-        ("sort_pages", &q.sort_pages),
-        ("sort_countries", &q.sort_countries),
-    ]
-    .into_iter()
-    .filter(|(_, v)| sort_of(v))
-    .map(|(k, _)| (k, "visitors"))
-    .collect();
     let mut params: Vec<(&str, &str)> = vec![
         ("range", range_param),
         ("metric", metric_param),
         ("chart", kind_param),
-        ("all", &expanded),
     ];
-    params.extend(&sorts);
+    params.extend(cards::params(&picks));
 
     let cur = &report.overview.current;
     let prev = &report.overview.previous;
@@ -1150,35 +1060,19 @@ pub async fn dashboard(
         },
         window_days
     );
-    let card_for = |kind: CardKind, rows: &[BreakdownRow], key: &str, foot: Option<String>| {
-        card(
-            kind,
-            rows,
-            &params,
-            &base,
-            sorts
-                .iter()
-                .any(|(k, _)| k.strip_prefix("sort_") == Some(key)),
-            expanded == key,
-            foot,
-        )
-    };
-    let cards = vec![
-        card_for(
-            CardKind::Channel,
-            &report.channels,
-            "channels",
-            Some(soon.clone().unwrap_or(credit)),
-        ),
-        card_for(
-            CardKind::Referrer,
-            &report.referrers,
-            "referrers",
-            soon.clone(),
-        ),
-        card_for(CardKind::Page, &report.landing_pages, "pages", soon.clone()),
-        card_for(CardKind::Country, &report.countries, "countries", soon),
-    ];
+    let cards: Vec<cards::TabCard> = picks
+        .iter()
+        .zip(&breakdowns)
+        .enumerate()
+        .map(|(i, (pick, rows))| {
+            let foot = if i == 0 {
+                Some(soon.clone().unwrap_or_else(|| credit.clone()))
+            } else {
+                soon.clone()
+            };
+            cards::card(pick, rows, &sources, &base, &params, foot)
+        })
+        .collect();
 
     let provider_label = |p: &str| provider_name(p).to_string();
     let empty = (setup.first_event.is_none() && setup.payments == 0).then(|| EmptyView {
@@ -2020,9 +1914,6 @@ async fn client_report(
         },
         window_days
     );
-    let card_for = |kind: CardKind, rows: &[BreakdownRow], foot: String| {
-        card(kind, rows, &[], base, false, false, Some(foot))
-    };
     let view = ReportView {
         site: ctx.site.domain.clone(),
         span: format!("{}, {}", span(&p), p.to.year()),
@@ -2041,11 +1932,11 @@ async fn client_report(
         cards: vec![
             (
                 "Top sources",
-                card_for(CardKind::Referrer, &report.referrers, credit),
+                card(CardKind::Referrer, &report.referrers, credit),
             ),
             (
                 "Top pages",
-                card_for(CardKind::Page, &report.landing_pages, String::new()),
+                card(CardKind::Page, &report.landing_pages, String::new()),
             ),
         ],
     };

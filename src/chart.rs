@@ -461,11 +461,17 @@ pub fn line(cur: &Series, prev: Option<&Series>, metric: Metric, area: bool, spa
             });
         }
         inner.push_str(&marker(vals[i] / top, color, false));
-        let foot = if metric == Metric::Revenue {
-            top_channel(p)
-        } else {
-            String::new()
-        };
+        if p.payments > 0 {
+            inner.push_str(r#"<span class="pd"></span>"#);
+            if metric != Metric::Revenue {
+                rows.push(Row {
+                    swatch: swatch(ORANGE, "ln"),
+                    name: "Revenue".into(),
+                    value: Metric::Revenue.format(p.revenue_usd),
+                });
+            }
+        }
+        let foot = top_channel(p);
         inner.push_str(&tip(x, &tip_date(p.date, cur.weekly), &rows, &foot));
         cols.push_str(&column(x - width / 2.0, width, false, &inner));
     }
@@ -888,6 +894,8 @@ mod tests {
         let area = line(&cur, Some(&prev), Metric::Visitors, true, "x");
         assert_eq!(count(&area, "stroke-dasharray"), 0);
         assert!(area.contains(r#"fill-opacity="0.10""#));
+        assert_eq!(count(&html, r#"class="pd""#), 29, "day 0 has no payment");
+        assert!(area.contains("1 payment from Referral") && area.contains(">Revenue<"));
         let conv = line(&cur, None, Metric::Conversion, false, "x");
         assert!(conv.contains("0.97%") && conv.contains('%'));
     }
