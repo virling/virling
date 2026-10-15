@@ -64,6 +64,8 @@ struct Stats {
     conversions: Vec<ConversionTotal>,
     channels: Vec<analytics::StatsRow>,
     landing_pages: Vec<analytics::StatsRow>,
+    exit_pages: Vec<analytics::LabelCount>,
+    exit_links: Vec<analytics::LabelCount>,
 }
 
 #[derive(Deserialize)]
@@ -528,6 +530,8 @@ async fn load_stats(req: &Request, ctx: &RouteContext<()>) -> Result<Option<Stat
             query(analytics::STATS_LANDING)?,
             db.prepare(analytics::STATS_CONVERSIONS_BY_LANDING)
                 .bind(&[since.clone(), lookback])?,
+            query(analytics::STATS_EXIT_PAGES)?,
+            query(analytics::STATS_EXIT_LINKS)?,
         ])
         .await?
         .into_iter();
@@ -550,6 +554,8 @@ async fn load_stats(req: &Request, ctx: &RouteContext<()>) -> Result<Option<Stat
     let conversions = next()?.results()?;
     let channels = analytics::pivot(next()?.results()?, next()?.results()?);
     let landing_pages = analytics::pivot(next()?.results()?, next()?.results()?);
+    let exit_pages = next()?.results()?;
+    let exit_links = next()?.results()?;
     Ok(Some(Stats {
         days,
         visitors: totals.as_ref().map_or(0, |t| t.visitors),
@@ -558,6 +564,8 @@ async fn load_stats(req: &Request, ctx: &RouteContext<()>) -> Result<Option<Stat
         conversions,
         channels,
         landing_pages,
+        exit_pages,
+        exit_links,
     }))
 }
 
