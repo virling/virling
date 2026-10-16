@@ -172,6 +172,7 @@ async fn main() -> anyhow::Result<()> {
             if app_enabled {
                 tokio::spawn(sync::run(state.clone()));
                 favicon::spawn_sources(state.clone());
+                tokio::spawn(dashboard::schedule::run(state.clone()));
             }
             let listener = tokio::net::TcpListener::bind(args.addr)
                 .await
@@ -1329,23 +1330,109 @@ mod tests {
         assert!(drawer.contains(r#"class="j-visitor" href="/app/example.com/visitors/v1""#));
     }
 
+    /// Two visits and a matched payment on the Wednesday of last full week, plus one unmatched payment.
+    fn seed_last_week(store: &DuckStore, site: &str) -> time::Date {
+        let today = time::OffsetDateTime::now_utc().date();
+        let monday = crate::dashboard::report::last_week(today);
+        let at = time::PrimitiveDateTime::new(
+            monday + time::Duration::days(2),
+            time::macros::time!(12:00),
+        )
+        .assume_utc();
+        let visit = |session: &str, visitor: &str, channel: &str, host: &str| Event {
+            site_id: site.into(),
+            ts: at,
+            visitor_id: visitor.into(),
+            session_id: session.into(),
+            kind: "pageview".into(),
+            name: None,
+            path: "/pricing".into(),
+            referrer_host: Some(host.into()),
+            utm_source: None,
+            utm_medium: None,
+            utm_campaign: None,
+            utm_content: None,
+            utm_term: None,
+            channel: channel.into(),
+            country: Some("DE".into()),
+            device: "Desktop".into(),
+            browser: "Firefox".into(),
+            os: "macOS".into(),
+            region: None,
+            city: None,
+            host: None,
+        };
+        store
+            .insert_events(&[
+                visit("s1", "v1", "AI", "chatgpt.com"),
+                visit("s2", "v2", "Organic search", "google.com"),
+            ])
+            .unwrap();
+        let pay = |id: &str, visitor: Option<&str>| Payment {
+            site_id: site.into(),
+            provider: "stripe".into(),
+            provider_payment_id: id.into(),
+            ts: at + time::Duration::hours(1),
+            amount: 4900,
+            currency: "usd".into(),
+            amount_usd: Some(49.0),
+            refunded: 0,
+            status: "paid".into(),
+            visitor_id: visitor.map(Into::into),
+            customer_id: None,
+            is_renewal: false,
+        };
+        store
+            .upsert_payments(&[pay("pi_1", Some("v1")), pay("pi_2", None)])
+            .unwrap();
+        monday
+    }
+
     #[tokio::test]
     async fn client_report_renders() {
         let (_dir, state, store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;
         let site = site_id(&state).await;
-        seed(&store, &site);
+        let monday = seed_last_week(&store, &site);
         crate::sync::rebuild_attribution(&state, Some(&site)).await;
         let res = call(&state, get("/app/example.com/report", Some(&cookie))).await;
         assert_eq!(res.status(), StatusCode::OK);
         let body = body_text(res).await;
-        assert!(body.contains("<span>Last 7 days</span>") && body.contains("$98"));
+        let week = crate::dashboard::report::week_label(monday);
+        assert!(body.contains(&week) && body.contains("Weekly revenue report"));
         assert!(
-            body.contains("Visitors and revenue per day") && body.contains(r#"class="chart dual"#)
+            body.contains("The week in one line") && body.contains("Revenue was $98 this week.")
         );
-        assert!(body.contains("Top sources") && body.contains("Top pages"));
-        assert!(body.contains(r#"href="/app/example.com/report?range=30d""#));
-        assert!(body.contains("data-print") && body.contains("Set up branding"));
+        assert!(body.contains("New customers") && body.contains("Revenue per visitor"));
+        assert!(body.contains("Revenue by day") && body.contains(r#"class="r2-chart""#));
+        assert!(body.contains("Where the money came from") && body.contains("chatgpt.com"));
+        assert!(body.contains("Pages that sold") && body.contains("/pricing"));
+        assert!(body.contains("$49 from 1 payment had no matched visit"));
+        assert!(
+            body.contains("[Your note to the client."),
+            "placeholder in the app"
+        );
+        assert!(
+            body.contains("Edit note")
+                && body.contains("Download PDF")
+                && body.contains("Send to client")
+        );
+        assert!(body.contains("The weekly email is off") && body.contains("Set up branding"));
+        assert!(body.contains("Powered by <b>virling</b>"), "on by default");
+        let older = monday - time::Duration::days(7);
+        assert!(body.contains(&format!(r#"href="/app/example.com/report?week={older}""#)));
+        let empty = body_text(
+            call(
+                &state,
+                get(
+                    &format!("/app/example.com/report?week={older}"),
+                    Some(&cookie),
+                ),
+            )
+            .await,
+        )
+        .await;
+        assert!(empty.contains("No visits or payments this week."));
 
         let uri = "/app/example.com/settings/report";
         let bad = call(
@@ -1365,7 +1452,7 @@ mod tests {
             &state,
             form(
                 uri,
-                "agency_name=Kettle+and+Co.&logo_url=https%3A%2F%2Fkettle.co%2Flogo.png&accent=%23123ABC&footer=hello%40kettle.co".into(),
+                "agency_name=Kettle+and+Co.&logo_url=https%3A%2F%2Fkettle.co%2Flogo.png&accent=%23123ABC&footer=hello%40kettle.co&powered_by=on".into(),
                 Some(&cookie),
             ),
         )
@@ -1380,11 +1467,38 @@ mod tests {
         )
         .await;
         assert!(page.contains(r#"value="Kettle and Co.""#) && page.contains("Saved. The report"));
+        assert!(page.contains("Show Powered by Virling on reports"));
+        let note = call(
+            &state,
+            form(
+                "/app/example.com/report/note",
+                "note=Shipped+the+pricing+page.&week=".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            note.headers()["location"],
+            "/app/example.com/report?saved=note"
+        );
         let body =
             body_text(call(&state, get("/app/example.com/report", Some(&cookie))).await).await;
-        assert!(body.contains(r#"style="--accent:#123abc""#));
+        assert!(body.contains(r#"style="--accent:#123ABC""#));
         assert!(body.contains(r#"src="https://kettle.co/logo.png""#));
         assert!(body.contains("hello@kettle.co") && !body.contains("Set up branding"));
+        assert!(
+            body.contains("A note from Kettle and Co.")
+                && body.contains("Shipped the pricing page.")
+        );
+        let saved = body_text(
+            call(
+                &state,
+                get("/app/example.com/report?saved=note", Some(&cookie)),
+            )
+            .await,
+        )
+        .await;
+        assert!(saved.contains("Saved your note."));
 
         let other = sign_in(&state, "other%40example.com").await;
         let link = || async {
@@ -1402,11 +1516,28 @@ mod tests {
         assert_eq!(res.status(), StatusCode::OK);
         let public = body_text(res).await;
         assert!(public.contains("Kettle and Co.") && public.contains("$98"));
+        assert!(public.contains("Shipped the pricing page.") && !public.contains("Edit note"));
+        assert_eq!(
+            public.to_lowercase().matches("virling").count(),
+            1,
+            "only the Powered by line"
+        );
+        assert!(public.contains("Powered by <b>virling</b>"));
+        assert!(public.contains(&format!(r#"href="{first}?week={older}""#)));
+        call(
+            &state,
+            form(
+                uri,
+                "agency_name=Kettle+and+Co.&logo_url=&accent=&footer=".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        let public = body_text(call(&state, get(&first, None)).await).await;
         assert!(
             !public.to_lowercase().contains("virling"),
-            "no Virling branding"
+            "no Virling branding with the line off"
         );
-        assert!(public.contains(&format!(r#"href="{first}?range=30d""#)));
         assert_eq!(
             call(&state, form(share, String::new(), Some(&other)))
                 .await
@@ -1440,6 +1571,151 @@ mod tests {
                 .status(),
             StatusCode::NOT_FOUND
         );
+    }
+
+    #[tokio::test]
+    async fn weekly_report_goes_out_once_per_week() {
+        use crate::dashboard::schedule;
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        let monday = seed_last_week(&store, &site);
+        crate::sync::rebuild_attribution(&state, Some(&site)).await;
+        let before = sent(&state).len();
+        let send = "/app/example.com/report/send";
+        let res = call(&state, form(send, "week=".into(), Some(&cookie))).await;
+        assert_eq!(
+            res.headers()["location"],
+            "/app/example.com/report?error=none"
+        );
+        let path = "/app/example.com/report/schedule";
+        let bad = call(
+            &state,
+            form(
+                path,
+                "on=on&weekday=0&minute=540&recipients=nope&week=".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            bad.headers()["location"],
+            "/app/example.com/report?error=recipients"
+        );
+        let ok = call(
+            &state,
+            form(
+                path,
+                "on=on&weekday=0&minute=540&recipients=client%40kettle.co%0Aops%40kettle.co&week="
+                    .into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            ok.headers()["location"],
+            "/app/example.com/report?saved=schedule"
+        );
+        let page =
+            body_text(call(&state, get("/app/example.com/report", Some(&cookie))).await).await;
+        assert!(page.contains("Sent every Monday at 9:00 to <b>client@kettle.co</b> and 1 more."));
+
+        // Saved just now, so this week's send time is still ahead or already skipped.
+        let (s, _) = schedule::load(&state.db, &site).await.unwrap();
+        assert_eq!(s.recipients, ["client@kettle.co", "ops@kettle.co"]);
+        sqlx::query("UPDATE report_brands SET send_from = 0 WHERE site_id = ?")
+            .bind(&site)
+            .execute(&state.db)
+            .await
+            .unwrap();
+        let now = time::OffsetDateTime::now_utc();
+        let due_at = time::PrimitiveDateTime::new(
+            monday + time::Duration::days(7),
+            time::macros::time!(9:00),
+        )
+        .assume_utc();
+        let at = if now > due_at {
+            now
+        } else {
+            due_at + time::Duration::minutes(1)
+        };
+        assert_eq!(schedule::tick(&state, at).await.unwrap(), 1);
+        assert_eq!(
+            schedule::tick(&state, at).await.unwrap(),
+            0,
+            "never twice for a week"
+        );
+        assert_eq!(
+            schedule::tick(&state, at + time::Duration::hours(30))
+                .await
+                .unwrap(),
+            0
+        );
+        let mails = sent(&state);
+        assert_eq!(mails.len(), before + 2);
+        let (to, subject, text) = &mails[before];
+        assert_eq!(to, "client@kettle.co");
+        assert!(subject.starts_with("Weekly revenue report for example.com"));
+        assert!(
+            text.contains("Revenue was $98 this week.")
+                && text.contains("http://localhost:8080/r/")
+        );
+        let sent_at: Option<i64> =
+            sqlx::query_scalar("SELECT sent_at FROM report_sends WHERE site_id = ? AND week = ?")
+                .bind(&site)
+                .bind(monday.to_string())
+                .fetch_one(&state.db)
+                .await
+                .unwrap();
+        assert!(sent_at.is_some());
+
+        let res = call(&state, form(send, "week=".into(), Some(&cookie))).await;
+        assert_eq!(res.headers()["location"], "/app/example.com/report?sent=2");
+        assert_eq!(
+            sent(&state).len(),
+            before + 4,
+            "sending by hand always goes out"
+        );
+        let page =
+            body_text(call(&state, get("/app/example.com/report?sent=2", Some(&cookie))).await)
+                .await;
+        assert!(page.contains("Sent the report to 2 people."));
+    }
+
+    #[tokio::test]
+    async fn report_email_renders_with_our_icons() {
+        let (_dir, state, store) = setup().await;
+        let site = site_id(&state).await;
+        let monday = seed_last_week(&store, &site);
+        crate::sync::rebuild_attribution(&state, Some(&site)).await;
+        let s: crate::sites::Site =
+            sqlx::query_as("SELECT id, domain, timezone, cookieless FROM sites WHERE id = ?")
+                .bind(&site)
+                .fetch_one(&state.db)
+                .await
+                .unwrap();
+        let r = crate::dashboard::report::view(&state, &s, monday, false)
+            .await
+            .unwrap();
+        let (subject, text, html) =
+            crate::dashboard::schedule::email(&r, "https://app.example", "https://app.example/r/t")
+                .unwrap();
+        assert!(subject.contains("example.com"));
+        assert!(html.contains(r#"src="https://app.example/assets/icons/chatgpt.svg""#));
+        assert!(
+            html.contains("Open the full report")
+                && html.contains(r#"href="https://app.example/r/t""#)
+        );
+        assert!(html.contains("Revenue was $98 this week.") && html.contains("Powered by"));
+        assert!(
+            !html.contains("<svg") && !html.contains("<script"),
+            "no inline SVG or scripts in email"
+        );
+        assert!(text.contains("Where the money came from"));
+        let icon = call(&state, get("/assets/icons/chatgpt.svg", None)).await;
+        assert_eq!(icon.status(), StatusCode::OK);
+        let glyph = call(&state, get("/assets/icons/glyph-direct.svg", None)).await;
+        assert_eq!(glyph.status(), StatusCode::OK);
     }
 
     #[tokio::test]

@@ -10,16 +10,14 @@ use crate::app::AppState;
 use crate::auth::Account;
 use crate::fx::minor_to_major;
 use crate::onboarding::render;
-use crate::settings::{self, Brand};
 use crate::sites::{self, Site};
-use crate::stats::{
-    Activity, BreakdownRow, Dimension, GoalRow, Journey, PaymentFilter, PaymentRow, Period, Totals,
-    Who, sort_rows,
-};
-use crate::{alias, chart, favicon, icons, visitor_pages};
+use crate::stats::{Activity, Dimension, GoalRow, Journey, PaymentFilter, PaymentRow, Period, Who};
+use crate::{alias, favicon, icons, visitor_pages};
 
 mod cards;
 mod insight;
+pub mod report;
+pub mod schedule;
 
 pub(crate) const RANGES: [(&str, &str, i64); 6] = [
     ("today", "Today", 1),
@@ -275,23 +273,6 @@ pub(crate) fn range_opts(
         .collect()
 }
 
-/// "0 of 12 visitors converted. 2 payments not matched to a visit."
-fn conversion_sub(t: &Totals) -> String {
-    let mut sub = format!(
-        "{} of {} converted",
-        group(t.converted),
-        plural(t.visitors, "visitor")
-    );
-    let unmatched = t.payments.saturating_sub(t.matched_payments);
-    if unmatched > 0 {
-        sub.push_str(&format!(
-            ". {} not matched to a visit",
-            plural(unmatched, "payment")
-        ));
-    }
-    sub
-}
-
 pub fn group(n: u64) -> String {
     let s = n.to_string();
     let mut out = String::new();
@@ -442,18 +423,6 @@ fn delta(cur: Option<f64>, prev: Option<f64>) -> (&'static str, String) {
     }
 }
 
-pub struct Tile {
-    name: &'static str,
-    short: &'static str,
-    value: String,
-    trend: &'static str,
-    delta: String,
-    sub: String,
-    on: bool,
-    color: &'static str,
-    big: bool,
-}
-
 pub struct Kpi {
     label: &'static str,
     value: String,
@@ -578,24 +547,6 @@ fn path_row(p: &PaymentRow, j: Option<&Journey>, domain: &str, offset: UtcOffset
             .map(|v| visitor_pages::visitor_href(domain, v))
             .unwrap_or_default(),
     }
-}
-
-pub struct RowView {
-    icon: String,
-    label: String,
-    mono: bool,
-    visitors: String,
-    revenue: String,
-    zero: bool,
-    per_visitor: String,
-    width: f64,
-}
-
-/// A breakdown card in the client report.
-pub struct Card {
-    head: &'static str,
-    rows: Vec<RowView>,
-    foot: String,
 }
 
 /// A payment or goal completion shown as the person behind it.
@@ -845,108 +796,6 @@ fn goal_customer(g: &GoalRow, a: &Activity, domain: &str, offset: UtcOffset) -> 
         days: heat(&a.days),
         href: String::new(),
         visitor_href: visitor_pages::visitor_href(domain, &g.visitor_id),
-    }
-}
-
-/// Which breakdown a client report card shows.
-#[derive(Clone, Copy, PartialEq)]
-enum CardKind {
-    Referrer,
-    Page,
-}
-
-fn row_view(kind: CardKind, r: &BreakdownRow, max: f64, matched: bool) -> RowView {
-    RowView {
-        icon: match kind {
-            CardKind::Referrer => icons::source(&r.label, 16),
-            CardKind::Page => String::new(),
-        },
-        label: r.label.clone(),
-        mono: kind == CardKind::Page,
-        visitors: group(r.visitors),
-        revenue: money(r.revenue_usd),
-        zero: r.revenue_usd <= 0.0,
-        per_visitor: if matched {
-            usd(r.revenue_per_visitor.unwrap_or(0.0))
-        } else {
-            "n/a".into()
-        },
-        width: if max > 0.0 {
-            r.revenue_usd / max * 100.0
-        } else {
-            0.0
-        },
-    }
-}
-
-#[allow(clippy::too_many_arguments)]
-fn card(kind: CardKind, rows: &[BreakdownRow], foot: String) -> Card {
-    let mut shown: Vec<BreakdownRow> = rows
-        .iter()
-        .filter(|r| !r.unattributed && !(kind == CardKind::Referrer && r.key.is_none()))
-        .cloned()
-        .collect();
-    sort_rows(&mut shown);
-    let matched = rows.iter().any(|r| !r.unattributed && r.payments > 0);
-    shown.truncate(6);
-    let max = shown.iter().map(|r| r.revenue_usd).fold(0.0, f64::max);
-    Card {
-        head: match kind {
-            CardKind::Referrer => "Referrer",
-            CardKind::Page => "Page",
-        },
-        rows: shown
-            .iter()
-            .map(|r| row_view(kind, r, max, matched))
-            .collect(),
-        foot,
-    }
-}
-
-fn span(p: &Period) -> String {
-    format!("{} to {}", day(p.from), day(p.to))
-}
-
-/// A metric's value, change against the previous period and subtitle; `since` notes when tracking started.
-fn metric_tile(
-    m: chart::Metric,
-    cur: &Totals,
-    prev: &Totals,
-    since: Option<Date>,
-) -> (String, (&'static str, String), String) {
-    match m {
-        chart::Metric::Revenue => (
-            money(cur.revenue_usd),
-            delta(Some(cur.revenue_usd), Some(prev.revenue_usd)),
-            format!(
-                "{} from {}",
-                plural(cur.payments, "payment"),
-                plural(cur.customers, "customer")
-            ),
-        ),
-        chart::Metric::Visitors => (
-            group(cur.visitors),
-            delta(Some(cur.visitors as f64), Some(prev.visitors as f64)),
-            match since {
-                Some(s) => format!("{} since {}", plural(cur.sessions, "session"), day(s)),
-                None => plural(cur.sessions, "session"),
-            },
-        ),
-        chart::Metric::Conversion => (
-            cur.conversion
-                .map_or_else(|| "n/a".into(), |c| format!("{:.2}%", c * 100.0)),
-            delta(cur.conversion, prev.conversion),
-            conversion_sub(cur),
-        ),
-        chart::Metric::PerVisitor => (
-            cur.revenue_per_visitor.map_or_else(|| "n/a".into(), usd),
-            delta(cur.revenue_per_visitor, prev.revenue_per_visitor),
-            if cur.matched_payments > 0 {
-                "Matched revenue divided by visitors".into()
-            } else {
-                "Needs a payment matched to a visit".into()
-            },
-        ),
     }
 }
 
@@ -1865,216 +1714,6 @@ pub async fn payment(
     })
 }
 
-/// The client report body, shared by the app page and the public link.
-pub struct ReportView {
-    site: String,
-    span: String,
-    tiles: Vec<Tile>,
-    chart_title: String,
-    chart_sub: String,
-    chart: String,
-    cards: Vec<(&'static str, Card)>,
-}
-
-#[derive(Template)]
-#[template(path = "report.html")]
-struct ReportPage {
-    shell: Shell,
-    title: &'static str,
-    range_label: &'static str,
-    ranges: Vec<Opt>,
-    report: ReportView,
-    brand: Brand,
-}
-
-#[derive(Template)]
-#[template(path = "report_shared.html")]
-struct SharedReportPage {
-    range_label: &'static str,
-    ranges: Vec<Opt>,
-    report: ReportView,
-    brand: Brand,
-}
-
-/// The client report for a range, with range links pointing at `base`.
-async fn client_report(
-    state: &AppState,
-    ctx: &Ctx,
-    key: Option<&str>,
-    base: &str,
-) -> Result<(ReportView, &'static str, Vec<Opt>), StatusCode> {
-    let (rkey, rlabel, days, _) = range(ctx, Some(key.unwrap_or("7d")));
-    let p = period(ctx, days);
-    let (model, window_days): (String, i64) =
-        sqlx::query_as("SELECT attribution_model, window_days FROM sites WHERE id = ?")
-            .bind(&ctx.site.id)
-            .fetch_one(&state.db)
-            .await
-            .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
-    let store = state.events.clone();
-    let (id, period_q) = (ctx.site.id.clone(), p.clone());
-    let report = blocking(move || store.report(&id, &period_q)).await?;
-    let since = report
-        .setup
-        .first_event
-        .map(|t| t.to_offset(ctx.offset).date());
-    let new_site = since.is_none_or(|d| d > p.previous().from);
-    let (cur, prev) = (&report.overview.current, &report.overview.previous);
-    let tiles = chart::Metric::ALL
-        .into_iter()
-        .map(|m| {
-            let (value, (trend, delta), sub) =
-                metric_tile(m, cur, prev, since.filter(|s| new_site && *s >= p.from));
-            let (trend, delta) = if new_site {
-                ("", String::new())
-            } else {
-                (trend, delta)
-            };
-            Tile {
-                name: m.name(),
-                short: match m {
-                    chart::Metric::Conversion => "Conversion",
-                    chart::Metric::PerVisitor => "Per visitor",
-                    _ => m.name(),
-                },
-                value,
-                trend,
-                delta,
-                sub,
-                on: matches!(m, chart::Metric::Revenue | chart::Metric::Visitors),
-                color: m.color(),
-                big: m == chart::Metric::Revenue,
-            }
-        })
-        .collect();
-    let current = chart::series(&report.days);
-    let unit = if current.weekly { "week" } else { "day" };
-    let credit = format!(
-        "Credited to the {} within {} days",
-        if model == "first_touch" {
-            "first visit"
-        } else {
-            "last non-direct visit"
-        },
-        window_days
-    );
-    let view = ReportView {
-        site: ctx.site.domain.clone(),
-        span: format!("{}, {}", span(&p), p.to.year()),
-        tiles,
-        chart_title: format!("Visitors and revenue per {unit}"),
-        chart_sub: if new_site {
-            span(&p)
-        } else {
-            format!(
-                "{}. Changes are against the previous {} days",
-                span(&p),
-                days.min(365)
-            )
-        },
-        chart: chart::dual(&current),
-        cards: vec![
-            (
-                "Top sources",
-                card(CardKind::Referrer, &report.referrers, credit),
-            ),
-            (
-                "Top pages",
-                card(CardKind::Page, &report.landing_pages, String::new()),
-            ),
-        ],
-    };
-    Ok((view, rlabel, range_opts(base, rkey, "7d", &[])))
-}
-
-pub async fn report(
-    State(state): State<AppState>,
-    account: Account,
-    Path(domain): Path<String>,
-    Query(q): Query<ReportQuery>,
-) -> Response {
-    let ctx = match load(&state, &account, &domain, "report").await {
-        Ok(ctx) => ctx,
-        Err(code) => return code.into_response(),
-    };
-    let base = sites::app_path(&ctx.site.domain, "report");
-    let (report, range_label, ranges) =
-        match client_report(&state, &ctx, q.range.as_deref(), &base).await {
-            Ok(r) => r,
-            Err(code) => return code.into_response(),
-        };
-    let Ok(brand) = settings::brand(&state.db, &ctx.site.id).await else {
-        return StatusCode::SERVICE_UNAVAILABLE.into_response();
-    };
-    render(ReportPage {
-        title: "Client report",
-        range_label,
-        ranges,
-        report,
-        brand,
-        shell: ctx.shell,
-    })
-}
-
-/// The client report behind a read-only link, without sign-in or Virling branding.
-pub async fn shared(
-    State(state): State<AppState>,
-    Path(token): Path<String>,
-    Query(q): Query<ReportQuery>,
-) -> Response {
-    let site: Result<Option<Site>, _> = sqlx::query_as(
-        "SELECT s.id, s.domain, s.timezone, s.cookieless FROM report_brands b JOIN sites s ON s.id = b.site_id WHERE b.share_token = ?",
-    )
-    .bind(&token)
-    .fetch_optional(&state.db)
-    .await;
-    let site = match site {
-        Ok(Some(site)) => site,
-        Ok(None) => return StatusCode::NOT_FOUND.into_response(),
-        Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
-    };
-    let store = state.events.clone();
-    let (id, tz) = (site.id.clone(), site.timezone.clone());
-    let (offset, first) =
-        match blocking(move || Ok((store.utc_offset(&tz)?, store.first_event(&id)?))).await {
-            Ok(r) => r,
-            Err(code) => return code.into_response(),
-        };
-    let ctx = Ctx {
-        shell: Shell {
-            domain: site.domain.clone(),
-            initial: String::new(),
-            icon: String::new(),
-            sites: Vec::new(),
-            nav: "report",
-            plan: String::new(),
-            usage: String::new(),
-            email: String::new(),
-            avatar: String::new(),
-            live: 0,
-        },
-        site,
-        today: OffsetDateTime::now_utc().to_offset(offset).date(),
-        first_day: first.map(|t| t.to_offset(offset).date()),
-        offset,
-    };
-    let base = format!("/r/{token}");
-    let (report, range_label, ranges) =
-        match client_report(&state, &ctx, q.range.as_deref(), &base).await {
-            Ok(r) => r,
-            Err(code) => return code.into_response(),
-        };
-    let Ok(brand) = settings::brand(&state.db, &ctx.site.id).await else {
-        return StatusCode::SERVICE_UNAVAILABLE.into_response();
-    };
-    render(SharedReportPage {
-        range_label,
-        ranges,
-        report,
-        brand,
-    })
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2090,27 +1729,6 @@ mod tests {
         assert_eq!(native(123456, "sek"), "1,235 SEK");
         assert_eq!(money(701.52), "$702");
         assert_eq!(native(500, "jpy"), "¥500");
-    }
-
-    #[test]
-    fn conversion_sub_uses_the_same_numbers() {
-        let t = Totals {
-            visitors: 1,
-            payments: 2,
-            ..Totals::default()
-        };
-        assert_eq!(
-            conversion_sub(&t),
-            "0 of 1 visitor converted. 2 payments not matched to a visit"
-        );
-        let t = Totals {
-            visitors: 12,
-            payments: 1,
-            converted: 1,
-            matched_payments: 1,
-            ..Totals::default()
-        };
-        assert_eq!(conversion_sub(&t), "1 of 12 visitors converted");
     }
 
     #[test]

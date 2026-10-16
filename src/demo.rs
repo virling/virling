@@ -617,7 +617,7 @@ fn target(url: &str) -> Option<String> {
     let (page, keys): (&str, &[&str]) = match path {
         "" => ("", &["range", "sources", "location", "pages"]),
         "/payments" => ("payments/", &["range", "filter"]),
-        "/report" => ("report/", &["range"]),
+        "/report" => ("report/", &[]),
         p => {
             let id = p.strip_prefix("/payments/")?;
             let ok = query.is_empty()

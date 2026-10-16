@@ -58,7 +58,7 @@ fn pct(n: f64, d: f64) -> String {
     }
 }
 
-fn times(x: f64) -> String {
+pub(super) fn times(x: f64) -> String {
     if (1.95..2.05).contains(&x) {
         "twice".into()
     } else if (2.95..3.05).contains(&x) {

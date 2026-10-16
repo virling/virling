@@ -178,7 +178,19 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/visitors/{visitor_id}",
                 get(visitor_pages::timeline),
             )
-            .route("/app/{domain}/report", get(dashboard::report))
+            .route("/app/{domain}/report", get(dashboard::report::page))
+            .route(
+                "/app/{domain}/report/note",
+                post(dashboard::report::save_note),
+            )
+            .route(
+                "/app/{domain}/report/schedule",
+                post(dashboard::report::save_schedule),
+            )
+            .route(
+                "/app/{domain}/report/send",
+                post(dashboard::report::send_now),
+            )
             .route(
                 "/app/{domain}/payments/{provider}/{payment_id}",
                 get(dashboard::payment),
@@ -211,7 +223,7 @@ pub fn router(state: AppState) -> Router {
                 get(api::visitor),
             )
             .route("/mcp", post(mcp::post))
-            .route("/r/{token}", get(dashboard::shared))
+            .route("/r/{token}", get(dashboard::report::shared))
             .route(
                 "/app/{domain}/settings/disconnect",
                 post(settings::disconnect),

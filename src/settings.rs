@@ -65,17 +65,31 @@ pub struct SavedQuery {
 }
 
 /// Agency branding on a site's client report; empty fields are left off.
-#[derive(Default, sqlx::FromRow)]
+#[derive(sqlx::FromRow)]
 pub struct Brand {
     pub agency_name: String,
     pub logo_url: String,
     pub accent: String,
     pub footer: String,
+    /// Shows the small "Powered by virling" line.
+    pub powered_by: bool,
+}
+
+impl Default for Brand {
+    fn default() -> Self {
+        Brand {
+            agency_name: String::new(),
+            logo_url: String::new(),
+            accent: String::new(),
+            footer: String::new(),
+            powered_by: true,
+        }
+    }
 }
 
 pub async fn brand(db: &SqlitePool, site_id: &str) -> sqlx::Result<Brand> {
     Ok(sqlx::query_as(
-        "SELECT agency_name, logo_url, accent, footer FROM report_brands WHERE site_id = ?",
+        "SELECT agency_name, logo_url, accent, footer, powered_by FROM report_brands WHERE site_id = ?",
     )
     .bind(site_id)
     .fetch_optional(db)
@@ -276,6 +290,7 @@ pub struct BrandInput {
     logo_url: String,
     accent: String,
     footer: String,
+    powered_by: Option<String>,
 }
 
 /// Checks and tidies branding input; the error names the bad field.
@@ -301,6 +316,7 @@ fn clean_brand(input: BrandInput) -> Result<Brand, &'static str> {
         logo_url,
         accent,
         footer: cut(&input.footer, 200),
+        powered_by: input.powered_by.is_some(),
     })
 }
 
@@ -322,14 +338,15 @@ pub async fn save_brand(
         }
     };
     let saved = sqlx::query(
-        "INSERT INTO report_brands (site_id, agency_name, logo_url, accent, footer) VALUES (?, ?, ?, ?, ?)
-         ON CONFLICT(site_id) DO UPDATE SET agency_name = excluded.agency_name, logo_url = excluded.logo_url, accent = excluded.accent, footer = excluded.footer",
+        "INSERT INTO report_brands (site_id, agency_name, logo_url, accent, footer, powered_by) VALUES (?, ?, ?, ?, ?, ?)
+         ON CONFLICT(site_id) DO UPDATE SET agency_name = excluded.agency_name, logo_url = excluded.logo_url, accent = excluded.accent, footer = excluded.footer, powered_by = excluded.powered_by",
     )
     .bind(&ctx.site.id)
     .bind(&b.agency_name)
     .bind(&b.logo_url)
     .bind(&b.accent)
     .bind(&b.footer)
+    .bind(b.powered_by)
     .execute(&state.db)
     .await;
     if let Err(err) = saved {
@@ -440,6 +457,7 @@ mod tests {
             logo_url: logo_url.into(),
             accent: accent.into(),
             footer: String::new(),
+            powered_by: None,
         }
     }
 
