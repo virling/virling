@@ -475,8 +475,6 @@ a.ctl { text-decoration: none; }
 .d3-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
 .d3-row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
 .d3-row + .d3-row { gap: 10px; }
-.d3-site > button { width: auto; height: 44px; padding: 0 14px; gap: 10px; background: #fff; border-color: var(--rule); border-radius: 12px; font-size: 15px; font-weight: 400; }
-.d3-site .favicon { width: 24px; height: 24px; font-size: 13px; font-weight: 600; }
 .d3-online { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); }
 .d3-online i { width: 8px; height: 8px; border-radius: 50%; background: #16a34a; }
 .d3-online.idle i { background: #b9bcc2; }
