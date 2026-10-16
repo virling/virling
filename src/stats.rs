@@ -37,6 +37,87 @@ impl Period {
     }
 }
 
+/// Limits numbers to sessions whose first pageview matches every condition, and payments to those credited to them.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct Filter {
+    /// Column of the session's first pageview and the values it may hold; None matches NULL.
+    pub first: Vec<(&'static str, Vec<Option<String>>)>,
+    /// A path viewed anywhere in the session.
+    pub viewed: Option<String>,
+}
+
+/// `s` as a SQL string literal.
+pub(crate) fn lit(s: &str) -> String {
+    format!("'{}'", s.replace('\'', "''"))
+}
+
+impl Filter {
+    pub fn is_empty(&self) -> bool {
+        self.first.is_empty() && self.viewed.is_none()
+    }
+
+    /// A `scope` CTE of matching session IDs, led by a comma; empty without conditions.
+    pub(crate) fn cte(&self) -> String {
+        if self.is_empty() {
+            return String::new();
+        }
+        let mut conds: Vec<String> = self
+            .first
+            .iter()
+            .map(|(col, vals)| {
+                let mut any: Vec<String> = Vec::new();
+                let set: Vec<String> = vals.iter().flatten().map(|v| lit(v)).collect();
+                if !set.is_empty() {
+                    any.push(format!("{col} IN ({})", set.join(", ")));
+                }
+                if vals.iter().any(Option::is_none) {
+                    any.push(format!("{col} IS NULL"));
+                }
+                if any.is_empty() {
+                    "false".into()
+                } else {
+                    format!("({})", any.join(" OR "))
+                }
+            })
+            .collect();
+        if let Some(path) = &self.viewed {
+            conds.push(format!(
+                "session_id IN (SELECT session_id FROM events WHERE site_id = $site AND kind = 'pageview' AND path = {})",
+                lit(path)
+            ));
+        }
+        format!(
+            ",
+        scope AS (
+            SELECT session_id FROM (
+                SELECT * FROM events WHERE site_id = $site AND kind = 'pageview'
+                QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1
+            ) WHERE {}
+        )",
+            conds.join(" AND ")
+        )
+    }
+
+    /// Keeps rows whose session column `col` is in scope.
+    pub(crate) fn within(&self, col: &str) -> String {
+        if self.is_empty() {
+            String::new()
+        } else {
+            format!(" AND {col} IN (SELECT session_id FROM scope)")
+        }
+    }
+
+    /// Keeps payments `p` credited to a session in scope.
+    pub(crate) fn paid(&self) -> String {
+        if self.is_empty() {
+            String::new()
+        } else {
+            " AND EXISTS (SELECT 1 FROM attribution x WHERE x.site_id = p.site_id AND x.provider = p.provider
+                AND x.provider_payment_id = p.provider_payment_id AND x.session_id IN (SELECT session_id FROM scope))".into()
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Serialize)]
 pub struct Totals {
     pub visitors: u64,
@@ -76,6 +157,8 @@ pub struct DayPoint {
     pub matched_revenue_usd: f64,
     pub conversion: Option<f64>,
     pub revenue_per_visitor: Option<f64>,
+    /// Local hour of the day for hourly series.
+    pub hour: Option<u8>,
     /// Revenue by credited channel, largest first; None is Unattributed.
     pub by_channel: Vec<(Option<String>, f64)>,
 }
@@ -95,6 +178,12 @@ pub enum Dimension {
     Browser,
     Os,
     Device,
+    /// "path|channel|referrer_host", the sources of each landing page.
+    PageSource,
+    /// "country|city".
+    CountryCity,
+    /// "device|os".
+    DeviceOs,
 }
 
 impl Dimension {
@@ -112,6 +201,11 @@ impl Dimension {
             Dimension::Browser => first("browser"),
             Dimension::Os => first("os"),
             Dimension::Device => first("device"),
+            Dimension::PageSource => {
+                first("path || '|' || channel || '|' || coalesce(referrer_host, '')")
+            }
+            Dimension::CountryCity => first("country || '|' || city"),
+            Dimension::DeviceOs => first("device || '|' || os"),
             Dimension::Page => ("pageview", "path", false),
         }
     }
@@ -289,17 +383,18 @@ fn ratio(n: f64, d: u64) -> Option<f64> {
     (d > 0).then(|| n / d as f64)
 }
 
-fn totals(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<Totals> {
+fn totals(conn: &Connection, site_id: &str, period: &Period, f: &Filter) -> anyhow::Result<Totals> {
+    let (scope, within, paid) = (f.cte(), f.within("session_id"), f.paid());
     let sql = format!(
-        "WITH {BOUNDS},
+        "WITH {BOUNDS}{scope},
         tracked AS (
             SELECT DISTINCT visitor_id FROM events, bounds
-            WHERE site_id = $site AND ts >= lo AND ts < hi
+            WHERE site_id = $site AND ts >= lo AND ts < hi{within}
         )
         SELECT
             (SELECT count(*) FROM tracked),
             (SELECT count(DISTINCT session_id) FROM events, bounds
-             WHERE site_id = $site AND ts >= lo AND ts < hi),
+             WHERE site_id = $site AND ts >= lo AND ts < hi{within}),
             count(*),
             count(DISTINCT {CUSTOMER}),
             count(DISTINCT {CUSTOMER}) FILTER (WHERE NOT p.is_renewal),
@@ -308,7 +403,7 @@ fn totals(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<T
             count(*) FILTER (WHERE p.visitor_id IN (SELECT visitor_id FROM tracked)),
             coalesce(sum({NET_USD}) FILTER (WHERE p.visitor_id IN (SELECT visitor_id FROM tracked)), 0)
         FROM payments p, bounds
-        WHERE p.site_id = $site AND p.ts >= lo AND p.ts < hi AND p.status <> 'failed'"
+        WHERE p.site_id = $site AND p.ts >= lo AND p.ts < hi AND p.status <> 'failed'{paid}"
     );
     #[allow(clippy::type_complexity)]
     let (
@@ -364,10 +459,11 @@ pub(crate) fn overview(
     conn: &Connection,
     site_id: &str,
     period: &Period,
+    f: &Filter,
 ) -> anyhow::Result<Overview> {
     Ok(Overview {
-        current: totals(conn, site_id, period)?,
-        previous: totals(conn, site_id, &period.previous())?,
+        current: totals(conn, site_id, period, f)?,
+        previous: totals(conn, site_id, &period.previous(), f)?,
     })
 }
 
@@ -375,16 +471,18 @@ pub(crate) fn timeseries(
     conn: &Connection,
     site_id: &str,
     period: &Period,
+    f: &Filter,
 ) -> anyhow::Result<Vec<DayPoint>> {
+    let (scope, within, paid) = (f.cte(), f.within("session_id"), f.paid());
     let sql = format!(
-        "WITH {BOUNDS},
+        "WITH {BOUNDS}{scope},
         days AS (
             SELECT CAST(generate_series AS DATE) AS day
             FROM generate_series(CAST($from AS DATE)::TIMESTAMP, CAST($to AS DATE)::TIMESTAMP, INTERVAL 1 DAY)
         ),
         v AS (
             SELECT CAST(timezone($tz, ts) AS DATE) AS day, count(DISTINCT visitor_id) AS n
-            FROM events, bounds WHERE site_id = $site AND ts >= lo AND ts < hi GROUP BY 1
+            FROM events, bounds WHERE site_id = $site AND ts >= lo AND ts < hi{within} GROUP BY 1
         ),
         r AS (
             SELECT CAST(timezone($tz, p.ts) AS DATE) AS day, count(*) AS n,
@@ -397,7 +495,7 @@ pub(crate) fn timeseries(
                     AND CAST(timezone($tz, e.ts) AS DATE) = CAST(timezone($tz, p.ts) AS DATE)) AS matched
                 FROM payments p WHERE p.site_id = $site
             ) p, bounds
-            WHERE p.site_id = $site AND p.ts >= lo AND p.ts < hi AND p.status <> 'failed' GROUP BY 1
+            WHERE p.site_id = $site AND p.ts >= lo AND p.ts < hi AND p.status <> 'failed'{paid} GROUP BY 1
         )
         SELECT strftime(d.day, '%Y-%m-%d'), coalesce(v.n, 0), coalesce(r.n, 0),
             coalesce(r.customers, 0), coalesce(r.rev, 0), coalesce(r.converted, 0),
@@ -438,17 +536,18 @@ pub(crate) fn timeseries(
             matched_revenue_usd: matched_usd,
             conversion: ratio(converted as f64, visitors),
             revenue_per_visitor: ratio(matched_usd, visitors),
+            hour: None,
             by_channel: Vec::new(),
         });
     }
     let mut stmt = conn.prepare(&format!(
-        "WITH {BOUNDS}
+        "WITH {BOUNDS}{scope}
         SELECT strftime(CAST(timezone($tz, p.ts) AS DATE), '%Y-%m-%d'),
             CASE WHEN a.session_id IS NOT NULL THEN a.channel END, coalesce(sum({NET_USD}), 0)
         FROM payments p
         JOIN bounds ON p.ts >= lo AND p.ts < hi
         {ATTRIBUTION_JOIN}
-        WHERE p.site_id = $site AND p.status <> 'failed'
+        WHERE p.site_id = $site AND p.status <> 'failed'{paid}
         GROUP BY ALL"
     ))?;
     let rows = stmt.query_map(params, |r| {
@@ -472,13 +571,101 @@ pub(crate) fn timeseries(
     Ok(out)
 }
 
+/// Revenue and visitors per local hour of a one-day period.
+pub(crate) fn hourly(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+    f: &Filter,
+) -> anyhow::Result<Vec<DayPoint>> {
+    let (scope, within, paid) = (f.cte(), f.within("session_id"), f.paid());
+    let params = named_params! {
+        "site": site_id,
+        "tz": period.tz,
+        "from": period.from.to_string(),
+        "to": period.from.to_string(),
+    };
+    let mut stmt = conn.prepare(&format!(
+        "WITH {BOUNDS}{scope},
+        hours AS (SELECT unnest(range(24)) AS h),
+        v AS (
+            SELECT hour(timezone($tz, ts)) AS h, count(DISTINCT visitor_id) AS n
+            FROM events, bounds WHERE site_id = $site AND ts >= lo AND ts < hi{within} GROUP BY 1
+        ),
+        r AS (
+            SELECT hour(timezone($tz, p.ts)) AS h, count(*) AS n, count(DISTINCT {CUSTOMER}) AS c,
+                coalesce(sum({NET_USD}), 0) AS rev
+            FROM payments p, bounds
+            WHERE p.site_id = $site AND p.ts >= lo AND p.ts < hi AND p.status <> 'failed'{paid} GROUP BY 1
+        )
+        SELECT hours.h, coalesce(v.n, 0), coalesce(r.n, 0), coalesce(r.c, 0), coalesce(r.rev, 0)
+        FROM hours LEFT JOIN v USING (h) LEFT JOIN r USING (h) ORDER BY 1"
+    ))?;
+    let rows = stmt.query_map(params, |r| {
+        Ok((
+            r.get::<_, i64>(0)?,
+            r.get::<_, i64>(1)?,
+            r.get::<_, i64>(2)?,
+            r.get::<_, i64>(3)?,
+            r.get::<_, f64>(4)?,
+        ))
+    })?;
+    let mut out = Vec::new();
+    for row in rows {
+        let (h, visitors, payments, customers, revenue_usd) = row?;
+        out.push(DayPoint {
+            date: period.from,
+            visitors: visitors as u64,
+            payments: payments as u64,
+            customers: customers as u64,
+            revenue_usd,
+            converted: 0,
+            matched_revenue_usd: 0.0,
+            conversion: None,
+            revenue_per_visitor: None,
+            hour: Some(h as u8),
+            by_channel: Vec::new(),
+        });
+    }
+    let mut stmt = conn.prepare(&format!(
+        "WITH {BOUNDS}{scope}
+        SELECT hour(timezone($tz, p.ts)), CASE WHEN a.session_id IS NOT NULL THEN a.channel END,
+            coalesce(sum({NET_USD}), 0)
+        FROM payments p
+        JOIN bounds ON p.ts >= lo AND p.ts < hi
+        {ATTRIBUTION_JOIN}
+        WHERE p.site_id = $site AND p.status <> 'failed'{paid}
+        GROUP BY ALL"
+    ))?;
+    let rows = stmt.query_map(params, |r| {
+        Ok((
+            r.get::<_, i64>(0)?,
+            r.get::<_, Option<String>>(1)?,
+            r.get::<_, f64>(2)?,
+        ))
+    })?;
+    for row in rows {
+        let (h, channel, revenue) = row?;
+        if let Some(p) = out.get_mut(h as usize) {
+            p.by_channel.push((channel, revenue));
+        }
+    }
+    for p in &mut out {
+        p.by_channel
+            .sort_by(|a, b| b.1.total_cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
+    }
+    Ok(out)
+}
+
 pub(crate) fn breakdown(
     conn: &Connection,
     site_id: &str,
     period: &Period,
     dimension: Dimension,
+    f: &Filter,
 ) -> anyhow::Result<Vec<BreakdownRow>> {
     let (kind, key, first) = dimension.source();
+    let (scope, within, paid) = (f.cte(), f.within("session_id"), f.paid());
     let only_first = if first {
         "QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1"
     } else {
@@ -486,11 +673,11 @@ pub(crate) fn breakdown(
     };
     // Visitors count sessions in range; payments follow their credited session, wherever it falls.
     let sql = format!(
-        "WITH {BOUNDS},
+        "WITH {BOUNDS}{scope},
         keyed AS (
             SELECT session_id, visitor_id, ts, {key} AS key
             FROM events
-            WHERE site_id = $site AND kind = '{kind}'
+            WHERE site_id = $site AND kind = '{kind}'{within}
             {only_first}
         )
         SELECT unattributed, key, sum(visitors)::BIGINT, sum(payments)::BIGINT, sum(revenue),
@@ -507,7 +694,7 @@ pub(crate) fn breakdown(
             LEFT JOIN attribution a ON a.site_id = p.site_id AND a.provider = p.provider
                 AND a.provider_payment_id = p.provider_payment_id
             LEFT JOIN (SELECT DISTINCT session_id, key FROM keyed) k ON k.session_id = a.session_id
-            WHERE p.site_id = $site AND p.status <> 'failed'
+            WHERE p.site_id = $site AND p.status <> 'failed'{paid}
             GROUP BY ALL
         )
         GROUP BY ALL"
@@ -536,8 +723,8 @@ pub(crate) fn breakdown(
         let (unattributed, mut key, visitors, payments, revenue_usd, customers) = row?;
         match dimension {
             Dimension::Referrer => key = key.as_deref().map(source_domain),
-            Dimension::ChannelSource => {
-                key = key.map(|k| match k.split_once('|') {
+            Dimension::ChannelSource | Dimension::PageSource => {
+                key = key.map(|k| match k.rsplit_once('|') {
                     Some((c, h)) if !h.is_empty() => format!("{c}|{}", source_domain(h)),
                     _ => k,
                 })
@@ -674,13 +861,16 @@ pub(crate) fn payment_list(
     filter: PaymentFilter,
     limit: u32,
     offset: u32,
+    f: &Filter,
 ) -> anyhow::Result<PaymentPage> {
+    let scope = f.cte();
     let from = format!(
         "FROM payments p
         JOIN bounds ON p.ts >= lo AND p.ts < hi
         {ATTRIBUTION_JOIN}
-        WHERE p.site_id = $site AND p.status <> 'failed' AND {}",
-        filter.sql()
+        WHERE p.site_id = $site AND p.status <> 'failed' AND {}{}",
+        filter.sql(),
+        f.paid()
     );
     let from_first = from.replacen(
         ATTRIBUTION_JOIN,
@@ -688,7 +878,7 @@ pub(crate) fn payment_list(
         1,
     );
     let total: i64 = conn.query_row(
-        &format!("WITH {BOUNDS} SELECT count(*) {from}"),
+        &format!("WITH {BOUNDS}{scope} SELECT count(*) {from}"),
         named_params! {
             "site": site_id,
             "tz": period.tz,
@@ -698,7 +888,7 @@ pub(crate) fn payment_list(
         |r| r.get(0),
     )?;
     let sql = format!(
-        "WITH {BOUNDS} SELECT {PAYMENT_COLUMNS} {from_first}
+        "WITH {BOUNDS}{scope} SELECT {PAYMENT_COLUMNS} {from_first}
         ORDER BY p.ts DESC, p.provider, p.provider_payment_id
         LIMIT $limit OFFSET $offset"
     );
@@ -935,9 +1125,11 @@ pub(crate) fn last_pages(
     conn: &Connection,
     site_id: &str,
     period: &Period,
+    f: &Filter,
 ) -> anyhow::Result<Vec<BreakdownRow>> {
+    let (scope, within, paid) = (f.cte(), f.within("session_id"), f.paid());
     let sql = format!(
-        "WITH {BOUNDS},
+        "WITH {BOUNDS}{scope},
         last AS (
             SELECT {NET_USD} AS usd, {CUSTOMER} AS customer,
                 (SELECT e.path FROM events e
@@ -947,11 +1139,11 @@ pub(crate) fn last_pages(
             FROM payments p
             JOIN bounds ON p.ts >= lo AND p.ts < hi
             {ATTRIBUTION_JOIN}
-            WHERE p.site_id = $site AND p.status <> 'failed'
+            WHERE p.site_id = $site AND p.status <> 'failed'{paid}
         ),
         seen AS (
             SELECT path, count(DISTINCT visitor_id) AS visitors FROM events, bounds
-            WHERE site_id = $site AND kind = 'pageview' AND ts >= lo AND ts < hi
+            WHERE site_id = $site AND kind = 'pageview' AND ts >= lo AND ts < hi{within}
             GROUP BY path
         )
         SELECT l.path, coalesce(any_value(s.visitors), 0)::BIGINT, count(*), coalesce(sum(l.usd), 0),
@@ -1161,17 +1353,236 @@ pub(crate) fn payment_summary(
     })
 }
 
+/// One provider's payments in a range: new against renewals, and why unmatched ones did not match.
+#[derive(Debug, Clone, Default, PartialEq, Serialize)]
+pub struct ProviderSplit {
+    pub provider: String,
+    pub first_payments: u64,
+    pub first_usd: f64,
+    pub renewals: u64,
+    pub renewal_usd: f64,
+    /// Unmatched payments that carried no visitor ID.
+    pub no_visitor: u64,
+    /// Unmatched payments whose visitor ID has no visit in the window.
+    pub unseen: u64,
+    /// Net USD credited to visits that started before the range.
+    pub earlier_usd: f64,
+}
+
+pub(crate) fn payment_split(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+) -> anyhow::Result<Vec<ProviderSplit>> {
+    let mut stmt = conn.prepare(&format!(
+        "WITH {BOUNDS}
+        SELECT p.provider,
+            count(*) FILTER (WHERE NOT p.is_renewal), coalesce(sum({NET_USD}) FILTER (WHERE NOT p.is_renewal), 0),
+            count(*) FILTER (WHERE p.is_renewal), coalesce(sum({NET_USD}) FILTER (WHERE p.is_renewal), 0),
+            count(*) FILTER (WHERE a.session_id IS NULL AND p.visitor_id IS NULL),
+            count(*) FILTER (WHERE a.session_id IS NULL AND p.visitor_id IS NOT NULL),
+            coalesce(sum({NET_USD}) FILTER (WHERE a.touch_ts < lo), 0)
+        FROM payments p
+        JOIN bounds ON p.ts >= lo AND p.ts < hi
+        {ATTRIBUTION_JOIN}
+        WHERE p.site_id = $site AND p.status <> 'failed'
+        GROUP BY 1 ORDER BY 1"
+    ))?;
+    let rows = stmt.query_map(
+        named_params! {
+            "site": site_id,
+            "tz": period.tz,
+            "from": period.from.to_string(),
+            "to": period.to.to_string(),
+        },
+        |r| {
+            Ok(ProviderSplit {
+                provider: r.get(0)?,
+                first_payments: r.get::<_, i64>(1)? as u64,
+                first_usd: r.get(2)?,
+                renewals: r.get::<_, i64>(3)? as u64,
+                renewal_usd: r.get(4)?,
+                no_visitor: r.get::<_, i64>(5)? as u64,
+                unseen: r.get::<_, i64>(6)? as u64,
+                earlier_usd: r.get(7)?,
+            })
+        },
+    )?;
+    Ok(rows.collect::<Result<_, _>>()?)
+}
+
+/// A step of a funnel; the first step is always any visit.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Step {
+    Visit,
+    Page(String),
+    Goal(String),
+    Paid,
+}
+
+/// Visitors who reached a step after every step before it, and the median seconds since the step before.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct StepCount {
+    pub visitors: u64,
+    pub median_secs: Option<f64>,
+}
+
+pub(crate) fn funnel(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+    steps: &[Step],
+    f: &Filter,
+) -> anyhow::Result<Vec<StepCount>> {
+    let (scope, within) = (f.cte(), f.within("session_id"));
+    let mut ctes = vec![format!(
+        "s0 AS (SELECT visitor_id, min(ts) AS t FROM events, bounds
+            WHERE site_id = $site AND kind = 'pageview' AND ts >= lo AND ts < hi{within} GROUP BY 1)"
+    )];
+    let mut cols = vec!["(SELECT count(*) FROM s0), NULL::DOUBLE".to_string()];
+    for (i, step) in steps.iter().enumerate().skip(1) {
+        let b = i - 1;
+        ctes.push(match step {
+            Step::Paid => format!(
+                "s{i} AS (SELECT p.visitor_id, min(p.ts) AS t FROM s{b} b
+                JOIN payments p ON p.site_id = $site AND p.visitor_id = b.visitor_id AND p.ts >= b.t, bounds
+                WHERE p.ts < hi AND p.status <> 'failed' GROUP BY 1)"
+            ),
+            _ => {
+                let pred = match step {
+                    Step::Page(path) => format!("e.kind = 'pageview' AND e.path = {}", lit(path)),
+                    Step::Goal(name) => format!("e.kind = 'goal' AND e.name = {}", lit(name)),
+                    _ => "e.kind = 'pageview'".into(),
+                };
+                format!(
+                    "s{i} AS (SELECT e.visitor_id, min(e.ts) AS t FROM s{b} b
+                    JOIN events e ON e.site_id = $site AND e.visitor_id = b.visitor_id AND e.ts >= b.t, bounds
+                    WHERE e.ts < hi AND {pred} GROUP BY 1)"
+                )
+            }
+        });
+        cols.push(format!(
+            "(SELECT count(*) FROM s{i}),
+            (SELECT median(epoch_us(x.t) - epoch_us(y.t))::DOUBLE / 1e6 FROM s{i} x JOIN s{b} y USING (visitor_id))"
+        ));
+    }
+    let sql = format!(
+        "WITH {BOUNDS}{scope}, {} SELECT {}",
+        ctes.join(",\n"),
+        cols.join(", ")
+    );
+    conn.query_row(
+        &sql,
+        named_params! {
+            "site": site_id,
+            "tz": period.tz,
+            "from": period.from.to_string(),
+            "to": period.to.to_string(),
+        },
+        |r| {
+            (0..steps.len().max(1))
+                .map(|i| {
+                    Ok(StepCount {
+                        visitors: r.get::<_, i64>(i * 2)? as u64,
+                        median_secs: r.get(i * 2 + 1)?,
+                    })
+                })
+                .collect()
+        },
+    )
+    .map_err(Into::into)
+}
+
+/// Completions of a custom goal ("goal:name") or a page ("page:/path") in a range, split by the session's channel.
+#[derive(Debug, Clone, Default, PartialEq, Serialize)]
+pub struct GoalStat {
+    pub key: String,
+    pub completions: u64,
+    pub visitors: u64,
+    /// Channel and visitors, most first.
+    pub channels: Vec<(String, u64)>,
+}
+
+pub(crate) fn goal_table(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+    pages: &[String],
+    f: &Filter,
+) -> anyhow::Result<Vec<GoalStat>> {
+    let (scope, within) = (f.cte(), f.within("e.session_id"));
+    let pages: Vec<String> = pages.iter().map(|p| lit(p)).collect();
+    let pages = if pages.is_empty() {
+        "false".to_string()
+    } else {
+        format!("e.path IN ({})", pages.join(", "))
+    };
+    let mut stmt = conn.prepare(&format!(
+        "WITH {BOUNDS}{scope},
+        firsts AS (
+            SELECT session_id, channel FROM events WHERE site_id = $site AND kind = 'pageview'
+            QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1
+        ),
+        done AS (
+            SELECT CASE WHEN e.kind = 'goal' THEN 'goal:' || e.name ELSE 'page:' || e.path END AS key,
+                e.visitor_id, coalesce(f.channel, e.channel) AS channel
+            FROM events e
+            JOIN bounds ON e.ts >= lo AND e.ts < hi
+            LEFT JOIN firsts f ON f.session_id = e.session_id
+            WHERE e.site_id = $site AND ((e.kind = 'goal' AND e.name IS NOT NULL)
+                OR (e.kind = 'pageview' AND {pages})){within}
+        )
+        SELECT key, channel, count(*), count(DISTINCT visitor_id), grouping(channel)
+        FROM done GROUP BY GROUPING SETS ((key), (key, channel))
+        ORDER BY grouping(channel) DESC, count(DISTINCT visitor_id) DESC, key, channel"
+    ))?;
+    let rows = stmt.query_map(
+        named_params! {
+            "site": site_id,
+            "tz": period.tz,
+            "from": period.from.to_string(),
+            "to": period.to.to_string(),
+        },
+        |r| {
+            Ok((
+                r.get::<_, String>(0)?,
+                r.get::<_, Option<String>>(1)?,
+                r.get::<_, i64>(2)? as u64,
+                r.get::<_, i64>(3)? as u64,
+                r.get::<_, i64>(4)? == 1,
+            ))
+        },
+    )?;
+    let mut out: Vec<GoalStat> = Vec::new();
+    for row in rows {
+        let (key, channel, completions, visitors, total) = row?;
+        if total {
+            out.push(GoalStat {
+                key,
+                completions,
+                visitors,
+                channels: Vec::new(),
+            });
+        } else if let Some(g) = out.iter_mut().find(|g| g.key == key) {
+            g.channels.push((channel.unwrap_or_default(), visitors));
+        }
+    }
+    Ok(out)
+}
+
 fn channel_sources(
     conn: &Connection,
     site_id: &str,
     period: &Period,
+    f: &Filter,
 ) -> anyhow::Result<Vec<(String, Vec<String>)>> {
+    let (scope, within) = (f.cte(), f.within("session_id"));
     let sql = format!(
-        "WITH {BOUNDS},
+        "WITH {BOUNDS}{scope},
         touches AS (
             SELECT visitor_id, channel, referrer_host
             FROM events, bounds
-            WHERE site_id = $site AND kind = 'pageview' AND ts >= lo AND ts < hi
+            WHERE site_id = $site AND kind = 'pageview' AND ts >= lo AND ts < hi{within}
             QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1
         )
         SELECT channel, referrer_host, count(DISTINCT visitor_id) AS n
@@ -1231,17 +1642,22 @@ fn setup(conn: &Connection, site_id: &str) -> anyhow::Result<Setup> {
     })
 }
 
-pub(crate) fn report(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<Report> {
-    let dims = |d| breakdown(conn, site_id, period, d);
+pub(crate) fn report(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+    f: &Filter,
+) -> anyhow::Result<Report> {
+    let dims = |d| breakdown(conn, site_id, period, d, f);
     Ok(Report {
-        overview: overview(conn, site_id, period)?,
-        days: timeseries(conn, site_id, period)?,
-        previous_days: timeseries(conn, site_id, &period.previous())?,
+        overview: overview(conn, site_id, period, f)?,
+        days: timeseries(conn, site_id, period, f)?,
+        previous_days: timeseries(conn, site_id, &period.previous(), f)?,
         channels: dims(Dimension::Channel)?,
         referrers: dims(Dimension::Referrer)?,
         landing_pages: dims(Dimension::LandingPage)?,
         countries: dims(Dimension::Country)?,
-        channel_sources: channel_sources(conn, site_id, period)?,
+        channel_sources: channel_sources(conn, site_id, period, f)?,
         setup: setup(conn, site_id)?,
     })
 }
@@ -1733,7 +2149,9 @@ mod tests {
         store
             .rebuild_attribution("s", "last_non_direct", 90)
             .unwrap();
-        let rows = store.last_pages("s", &period()).unwrap();
+        let rows = store
+            .last_pages_in("s", &period(), &Filter::default())
+            .unwrap();
         let got: Vec<_> = rows
             .iter()
             .map(|r| (r.label.as_str(), r.visitors, r.payments, r.revenue_usd))
@@ -2042,5 +2460,99 @@ mod tests {
             100.0
         );
         assert_eq!(find(Dimension::ChannelSource, "Direct|").visitors, 1);
+    }
+
+    #[test]
+    fn filters_scope_numbers_to_matching_sessions() {
+        let (_dir, store) = store();
+        let mut pricing = visit("v1", "a", T + Duration::minutes(1), "Social");
+        pricing.path = "/pricing".into();
+        let mut goal = visit("v1", "a", T + Duration::minutes(2), "Social");
+        goal.kind = "goal".into();
+        goal.name = Some("signup".into());
+        store
+            .insert_events(&[
+                visit("v1", "a", T, "Social"),
+                pricing,
+                goal,
+                visit("v2", "b", T, "Direct"),
+            ])
+            .unwrap();
+        store
+            .upsert_payments(&[
+                pay("p1", T + Duration::hours(1), Some("v1"), None),
+                pay("p2", T + Duration::hours(1), None, None),
+            ])
+            .unwrap();
+        store
+            .rebuild_attribution("s", "last_non_direct", 30)
+            .unwrap();
+        let social = Filter {
+            first: vec![("channel", vec![Some("Social".into())])],
+            viewed: None,
+        };
+        let t = store.overview_in("s", &period(), &social).unwrap().current;
+        assert_eq!((t.visitors, t.payments, t.revenue_usd), (1, 1, 100.0));
+        let quoted = Filter {
+            first: vec![("channel", vec![Some("x' OR '1'='1".into())])],
+            viewed: None,
+        };
+        assert_eq!(
+            store
+                .overview_in("s", &period(), &quoted)
+                .unwrap()
+                .current
+                .visitors,
+            0
+        );
+        let viewed = Filter {
+            first: Vec::new(),
+            viewed: Some("/pricing".into()),
+        };
+        let rows = store
+            .breakdown_in("s", &period(), Dimension::Channel, &viewed)
+            .unwrap();
+        assert_eq!(rows.len(), 1);
+        let list = store
+            .payment_list_in("s", &period(), PaymentFilter::All, 10, 0, &social)
+            .unwrap();
+        assert_eq!(list.total, 1);
+
+        let steps = [
+            Step::Visit,
+            Step::Page("/pricing".into()),
+            Step::Goal("signup".into()),
+            Step::Paid,
+        ];
+        let f = store
+            .funnel("s", &period(), &steps, &Filter::default())
+            .unwrap();
+        let counts: Vec<u64> = f.iter().map(|c| c.visitors).collect();
+        assert_eq!(counts, [2, 1, 1, 1]);
+        assert_eq!(f[3].median_secs, Some(3480.0));
+        let goals = store
+            .goal_table("s", &period(), &["/pricing".into()], &Filter::default())
+            .unwrap();
+        let signup = goals.iter().find(|g| g.key == "goal:signup").unwrap();
+        assert_eq!((signup.completions, signup.visitors), (1, 1));
+        assert_eq!(signup.channels, [("Social".to_string(), 1)]);
+
+        let split = store.payment_split("s", &period()).unwrap();
+        assert_eq!(
+            (
+                split[0].first_payments,
+                split[0].no_visitor,
+                split[0].unseen
+            ),
+            (2, 1, 0)
+        );
+        let day = Period {
+            from: T.date(),
+            to: T.date(),
+            tz: "UTC".into(),
+        };
+        let hours = store.hourly("s", &day, &Filter::default()).unwrap();
+        assert_eq!(hours.len(), 24);
+        assert_eq!((hours[12].visitors, hours[13].revenue_usd), (2, 200.0));
     }
 }

@@ -1,47 +1,160 @@
-//! The dashboard's tabbed cards: Sources, Location and Pages.
+//! The dashboard's tabbed cards: Channels, Pages, Location and Devices.
 
 use std::collections::HashMap;
 
-use super::{Opt, group, link, money, usd};
+use super::{FilterHref, Opt, group, link, money, usd};
+use crate::channel::source_name;
 use crate::icons;
-use crate::stats::{BreakdownRow, Dimension};
+use crate::stats::{BreakdownRow, DayPoint, Dimension};
 
-/// Rows shown per card.
+/// Rows shown per card, and nested rows per opened row.
 const SHOWN: usize = 6;
+const KIDS: usize = 4;
+/// Below this many visitors a row's per-visitor value is marked as a small sample.
+const SMALL: u64 = 40;
+
+/// What a tab lists.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Tab {
+    Channel,
+    Source,
+    Campaign,
+    Keyword,
+    Landing,
+    Before,
+    Country,
+    City,
+    Device,
+    Browser,
+    Os,
+}
+
+impl Tab {
+    /// The breakdown of the rows; None reads the pages viewed last before paying.
+    pub fn dimension(self) -> Option<Dimension> {
+        Some(match self {
+            Tab::Channel => Dimension::Channel,
+            Tab::Source => Dimension::ChannelSource,
+            Tab::Campaign => Dimension::Campaign,
+            Tab::Keyword => Dimension::Keyword,
+            Tab::Landing => Dimension::LandingPage,
+            Tab::Before => return None,
+            Tab::Country => Dimension::Country,
+            Tab::City => Dimension::CountryCity,
+            Tab::Device => Dimension::Device,
+            Tab::Browser => Dimension::Browser,
+            Tab::Os => Dimension::Os,
+        })
+    }
+
+    /// The breakdown nested under each row, keyed "row|...".
+    pub fn kids(self) -> Option<Dimension> {
+        match self {
+            Tab::Channel => Some(Dimension::ChannelSource),
+            Tab::Landing => Some(Dimension::PageSource),
+            Tab::Country => Some(Dimension::CountryCity),
+            Tab::Device => Some(Dimension::DeviceOs),
+            _ => None,
+        }
+    }
+
+    /// Header of the first column.
+    fn head(self) -> &'static str {
+        match self {
+            Tab::Channel => "Channel",
+            Tab::Source => "Source",
+            Tab::Campaign => "utm_campaign",
+            Tab::Keyword => "Search term",
+            Tab::Landing => "First page of the visit",
+            Tab::Before => "Last page before checkout",
+            Tab::Country => "Country",
+            Tab::City => "City",
+            Tab::Device => "Device",
+            Tab::Browser => "Browser",
+            Tab::Os => "Operating system",
+        }
+    }
+
+    fn foot(self) -> &'static str {
+        match self {
+            Tab::Channel => "Click a channel to filter. Open it to see its sites.",
+            Tab::Source => "Click a source to filter.",
+            Tab::Campaign => "Add utm_campaign to your links to split these out.",
+            Tab::Keyword => "From utm_term on your links.",
+            Tab::Landing => "Click a page to filter. Open it to see where its visitors came from.",
+            Tab::Before => "Visitors here means everyone who viewed the page.",
+            Tab::Country => "Click a country to filter. Open it to see its cities.",
+            Tab::City => "Located from IP, approximate.",
+            Tab::Device => "Open a device to see its systems.",
+            Tab::Browser | Tab::Os => "From the user agent.",
+        }
+    }
+}
 
 pub struct Spec {
     /// Query param for the tab, also the card's anchor.
     pub key: &'static str,
+    title: &'static str,
     label: &'static str,
-    /// (param value, label, breakdown); None reads the pages viewed last before paying.
-    tabs: &'static [(&'static str, &'static str, Option<Dimension>)],
+    pub(super) tabs: &'static [(&'static str, &'static str, Tab)],
+    empty: (&'static str, &'static str),
 }
 
-pub const SPECS: [Spec; 3] = [
+pub const SPECS: [Spec; 4] = [
     Spec {
-        key: "sources",
-        label: "Source breakdown",
+        key: "channels",
+        title: "Channels",
+        label: "Break channels down by",
         tabs: &[
-            ("channel", "Channel", Some(Dimension::Channel)),
-            ("referrer", "Referrer", Some(Dimension::Referrer)),
-            ("campaign", "Campaign", Some(Dimension::Campaign)),
+            ("channel", "Channel", Tab::Channel),
+            ("source", "Source", Tab::Source),
+            ("campaign", "Campaign", Tab::Campaign),
+            ("keyword", "Keyword", Tab::Keyword),
         ],
-    },
-    Spec {
-        key: "location",
-        label: "Location breakdown",
-        tabs: &[
-            ("country", "Country", Some(Dimension::Country)),
-            ("device", "Device", Some(Dimension::Device)),
-        ],
+        empty: (
+            "No visits yet",
+            "Channels, sources and campaigns show up after the first visit.",
+        ),
     },
     Spec {
         key: "pages",
-        label: "Page breakdown",
+        title: "Pages",
+        label: "Break pages down by",
         tabs: &[
-            ("landing", "Landing", Some(Dimension::LandingPage)),
-            ("last", "Last before paying", None),
+            ("landing", "Landing page", Tab::Landing),
+            ("before", "Before paying", Tab::Before),
         ],
+        empty: (
+            "No pages yet",
+            "You will see which pages people land on and which ones sell.",
+        ),
+    },
+    Spec {
+        key: "location",
+        title: "Location",
+        label: "Break location down by",
+        tabs: &[
+            ("country", "Country", Tab::Country),
+            ("city", "City", Tab::City),
+        ],
+        empty: (
+            "No locations yet",
+            "Countries and cities show up after the first visit.",
+        ),
+    },
+    Spec {
+        key: "devices",
+        title: "Devices",
+        label: "Break devices down by",
+        tabs: &[
+            ("device", "Device", Tab::Device),
+            ("browser", "Browser", Tab::Browser),
+            ("os", "OS", Tab::Os),
+        ],
+        empty: (
+            "No devices yet",
+            "Devices, browsers and systems show up after the first visit.",
+        ),
     },
 ];
 
@@ -49,12 +162,6 @@ pub const SPECS: [Spec; 3] = [
 pub struct Pick {
     spec: &'static Spec,
     tab: usize,
-}
-
-impl Pick {
-    pub fn dimension(&self) -> Option<Dimension> {
-        self.spec.tabs[self.tab].2
-    }
 }
 
 pub fn picks(q: &HashMap<String, String>) -> Vec<Pick> {
@@ -80,27 +187,48 @@ pub fn params(picks: &[Pick]) -> Vec<(&'static str, &'static str)> {
 }
 
 pub struct BarRow {
+    pub(super) id: String,
     pub(super) icon: String,
-    pub(super) label: String,
+    pub(super) name: String,
+    pub(super) sub: String,
     pub(super) mono: bool,
+    pub(super) kid: bool,
     pub(super) visitors: String,
     pub(super) revenue: String,
     pub(super) per_visitor: String,
+    pub(super) small: bool,
+    /// Revenue in range from a visit before it, so no visitors to show.
+    pub(super) earlier: bool,
     /// Per visitor against the site average, "1.4x"; empty without an average.
     pub(super) ratio: String,
     pub(super) tone: &'static str,
-    /// Visitor and revenue shares, scaled so the largest share fills the bar.
+    /// Visitor and revenue shares of the site, scaled so the largest share fills the bar.
     pub(super) vw: f64,
     pub(super) rw: f64,
+    /// Filters the dashboard to this row; empty when it cannot.
+    pub(super) href: String,
+    pub(super) kids: Vec<BarRow>,
+    /// A short tag after the name, such as "Best value".
+    pub(super) tag: &'static str,
+}
+
+/// One tab's rows; every tab is rendered so switching needs no reload.
+pub struct Panel {
+    pub(super) on: bool,
+    pub(super) head: &'static str,
+    pub(super) rows: Vec<BarRow>,
+    pub(super) openable: bool,
+    pub(super) foot: String,
 }
 
 pub struct TabCard {
     pub(super) key: &'static str,
+    pub(super) title: &'static str,
     pub(super) label: &'static str,
     pub(super) tabs: Vec<Opt>,
-    pub(super) rows: Vec<BarRow>,
-    pub(super) note: &'static str,
-    pub(super) empty: &'static str,
+    pub(super) panels: Vec<Panel>,
+    pub(super) empty_title: &'static str,
+    pub(super) empty_text: &'static str,
 }
 
 /// "up" at 1.15x the average or more, "down" at 0.85x or less.
@@ -114,71 +242,401 @@ pub fn tone(x: f64) -> &'static str {
     }
 }
 
-fn label(dim: Option<Dimension>, r: &BreakdownRow) -> (String, String, bool) {
-    let key = r.key.as_deref().unwrap_or_default();
-    match dim {
-        Some(Dimension::Channel | Dimension::Referrer) => {
-            (icons::source(&r.label, 16), r.label.clone(), false)
-        }
-        Some(Dimension::Campaign) => (icons::glyph("paid", 16, "#6B717C"), r.label.clone(), false),
-        Some(Dimension::Country) => (icons::flag(key), icons::country(key), false),
-        Some(Dimension::Device) => (icons::device(key), r.label.clone(), false),
-        _ => (String::new(), r.label.clone(), true),
+/// Site-wide numbers every row is measured against.
+pub struct Base {
+    pub visitors: u64,
+    pub revenue: f64,
+    /// Revenue per visitor; None until a payment matched.
+    pub avg: Option<f64>,
+    /// Rows under `SMALL` visitors get a small-sample note.
+    pub warn_small: bool,
+}
+
+/// One row before formatting: what it shows and which filter params it sets.
+struct Item {
+    icon: String,
+    name: String,
+    sub: String,
+    mono: bool,
+    filter: Vec<(&'static str, String)>,
+    row: BreakdownRow,
+}
+
+fn none_label(tab: Tab) -> (&'static str, &'static str) {
+    match tab {
+        Tab::Campaign => ("No campaign", "Visits without UTM tags"),
+        Tab::Keyword => ("No search term", "Visits without utm_term"),
+        Tab::City => ("Unknown city", ""),
+        _ => ("Unknown", ""),
     }
 }
 
-/// Bar rows sized like the design: each share of the shown rows, over the largest share.
-pub fn bar_rows(
-    rows: &[&BreakdownRow],
-    avg: Option<f64>,
-    label: impl Fn(&BreakdownRow) -> (String, String, bool),
-) -> Vec<BarRow> {
-    let sv: f64 = rows.iter().map(|r| r.visitors as f64).sum();
-    let sr: f64 = rows.iter().map(|r| r.revenue_usd.max(0.0)).sum();
-    let share = |n: f64, total: f64| if total > 0.0 { n / total } else { 0.0 };
-    let m = rows
-        .iter()
-        .map(|r| share(r.visitors as f64, sv).max(share(r.revenue_usd.max(0.0), sr)))
-        .fold(0.0, f64::max);
-    let scale = |s: f64| if m > 0.0 { s / m * 100.0 } else { 0.0 };
-    rows.iter()
-        .map(|r| {
-            let (icon, label, mono) = label(r);
-            let pv = r.revenue_per_visitor.unwrap_or(0.0);
-            let x = avg.filter(|a| *a > 0.0 && r.visitors > 0).map(|a| pv / a);
-            BarRow {
-                icon,
-                label,
-                mono,
-                visitors: group(r.visitors),
-                revenue: money(r.revenue_usd),
-                per_visitor: usd(pv),
-                ratio: x.map(|x| format!("{x:.1}x")).unwrap_or_default(),
-                tone: x.map_or("", tone),
-                vw: scale(share(r.visitors as f64, sv)),
-                rw: scale(share(r.revenue_usd.max(0.0), sr)),
+fn item(tab: Tab, r: &BreakdownRow) -> Item {
+    let key = r.key.clone();
+    let (none, none_sub) = none_label(tab);
+    let v = |k: &str| key.clone().unwrap_or_else(|| k.to_string());
+    let (icon, name, sub, mono, filter): (String, String, String, bool, Vec<(&str, String)>) =
+        match tab {
+            Tab::Channel => (
+                icons::source(&r.label, 16),
+                r.label.clone(),
+                String::new(),
+                false,
+                vec![("channel", v(""))],
+            ),
+            Tab::Source => {
+                let k = key.clone().unwrap_or_default();
+                let (channel, host) = k.rsplit_once('|').unwrap_or((&k, ""));
+                if host.is_empty() {
+                    (
+                        icons::source(channel, 16),
+                        channel.to_string(),
+                        "No referrer".into(),
+                        false,
+                        vec![("channel", channel.to_string())],
+                    )
+                } else {
+                    (
+                        icons::source(host, 16),
+                        host.to_string(),
+                        channel.to_string(),
+                        false,
+                        vec![("source", host.to_string())],
+                    )
+                }
             }
-        })
-        .collect()
+            Tab::Campaign | Tab::Keyword => {
+                let param = if tab == Tab::Campaign {
+                    "campaign"
+                } else {
+                    "keyword"
+                };
+                match &key {
+                    Some(k) => (
+                        icons::glyph(
+                            if tab == Tab::Campaign {
+                                "paid"
+                            } else {
+                                "search"
+                            },
+                            16,
+                            "#6B717C",
+                        ),
+                        k.clone(),
+                        String::new(),
+                        false,
+                        vec![(param, k.clone())],
+                    ),
+                    None => (
+                        icons::glyph("globe", 16, "#6B717C"),
+                        none.into(),
+                        none_sub.into(),
+                        false,
+                        vec![(param, "(none)".into())],
+                    ),
+                }
+            }
+            Tab::Landing | Tab::Before => {
+                let path = v("");
+                let sub = if tab == Tab::Before {
+                    format!("{} before paying", super::plural(r.payments, "payment"))
+                } else {
+                    String::new()
+                };
+                let param = if tab == Tab::Before { "viewed" } else { "page" };
+                (
+                    icons::glyph("page", 16, "#6B717C"),
+                    path.clone(),
+                    sub,
+                    true,
+                    vec![(param, path)],
+                )
+            }
+            Tab::Country => {
+                let code = v("");
+                (
+                    icons::flag(&code),
+                    icons::country(&code),
+                    String::new(),
+                    false,
+                    vec![("country", code)],
+                )
+            }
+            Tab::City => {
+                let k = key.clone().unwrap_or_default();
+                let (code, city) = k.split_once('|').unwrap_or(("", &k));
+                (
+                    icons::flag(code),
+                    city.to_string(),
+                    icons::country(code),
+                    false,
+                    vec![("city", city.to_string())],
+                )
+            }
+            Tab::Device => {
+                let d = v("");
+                (
+                    icons::device(&d),
+                    d.clone(),
+                    String::new(),
+                    false,
+                    vec![("device", d)],
+                )
+            }
+            Tab::Browser | Tab::Os => {
+                let n = v("");
+                let param = if tab == Tab::Browser { "browser" } else { "os" };
+                (
+                    icons::ua(&n),
+                    n.clone(),
+                    String::new(),
+                    false,
+                    vec![(param, n)],
+                )
+            }
+        };
+    Item {
+        icon,
+        name,
+        sub,
+        mono,
+        filter,
+        row: r.clone(),
+    }
 }
 
-/// Builds one card from its breakdown; `avg` is the site's revenue per visitor.
+/// Nested rows of `parent` from a "parent|rest" breakdown.
+fn kid_items(tab: Tab, parent: &Item, kids: &[BreakdownRow]) -> Vec<Item> {
+    let Some(pk) = parent.row.key.as_deref() else {
+        return Vec::new();
+    };
+    let prefix = format!("{pk}|");
+    let mut out: Vec<Item> = kids
+        .iter()
+        .filter(|r| !r.unattributed)
+        .filter_map(|r| {
+            let rest = r.key.as_deref()?.strip_prefix(&prefix)?;
+            let (icon, name, filter) = match tab {
+                Tab::Channel if !rest.is_empty() => (
+                    icons::source(rest, 16),
+                    rest.to_string(),
+                    vec![("source", rest.to_string())],
+                ),
+                Tab::Landing => {
+                    let (channel, host) = rest.rsplit_once('|').unwrap_or((rest, ""));
+                    let mut f = parent.filter.clone();
+                    if host.is_empty() {
+                        f.push(("channel", channel.to_string()));
+                        (icons::source(channel, 16), channel.to_string(), f)
+                    } else {
+                        f.push(("source", host.to_string()));
+                        (icons::source(host, 16), host.to_string(), f)
+                    }
+                }
+                Tab::Country if !rest.is_empty() => (
+                    icons::glyph("pin", 16, "#6B717C"),
+                    rest.to_string(),
+                    vec![("city", rest.to_string())],
+                ),
+                Tab::Device if !rest.is_empty() => (
+                    icons::ua(rest),
+                    rest.to_string(),
+                    vec![("os", rest.to_string())],
+                ),
+                _ => return None,
+            };
+            Some(Item {
+                icon,
+                name,
+                sub: String::new(),
+                mono: false,
+                filter,
+                row: r.clone(),
+            })
+        })
+        .collect();
+    if tab == Tab::Landing {
+        let mut merged: Vec<Item> = Vec::new();
+        for i in out {
+            match merged.iter_mut().find(|m| m.name == i.name) {
+                Some(m) => {
+                    m.row.visitors += i.row.visitors;
+                    m.row.payments += i.row.payments;
+                    m.row.revenue_usd += i.row.revenue_usd;
+                }
+                None => merged.push(i),
+            }
+        }
+        out = merged;
+    }
+    out.sort_by(|a, b| {
+        b.row
+            .revenue_usd
+            .total_cmp(&a.row.revenue_usd)
+            .then(b.row.visitors.cmp(&a.row.visitors))
+    });
+    out.truncate(KIDS);
+    out
+}
+
+fn bar(i: &Item, base: &Base, m: f64, kid: bool, href: String, id: String) -> BarRow {
+    let r = &i.row;
+    let pv = if r.visitors > 0 {
+        r.revenue_usd / r.visitors as f64
+    } else {
+        0.0
+    };
+    let x = base
+        .avg
+        .filter(|a| *a > 0.0 && r.visitors > 0 && r.revenue_usd > 0.0)
+        .map(|a| pv / a);
+    let (sv, sr) = shares(r, base);
+    BarRow {
+        id,
+        icon: i.icon.clone(),
+        name: i.name.clone(),
+        sub: i.sub.clone(),
+        mono: i.mono,
+        kid,
+        visitors: group(r.visitors),
+        revenue: money(r.revenue_usd),
+        per_visitor: if r.visitors == 0 {
+            "–".into()
+        } else if r.revenue_usd > 0.0 {
+            usd(pv)
+        } else {
+            "No sales yet".into()
+        },
+        earlier: r.visitors == 0 && r.revenue_usd > 0.0,
+        small: base.warn_small
+            && !kid
+            && r.visitors > 0
+            && r.visitors < SMALL
+            && r.revenue_usd > 0.0,
+        ratio: x.map(|x| format!("{x:.1}x")).unwrap_or_default(),
+        tone: x.map_or("", tone),
+        vw: if m > 0.0 { sv / m * 100.0 } else { 0.0 },
+        rw: if m > 0.0 { sr / m * 100.0 } else { 0.0 },
+        href,
+        kids: Vec::new(),
+        tag: "",
+    }
+}
+
+fn shares(r: &BreakdownRow, base: &Base) -> (f64, f64) {
+    let share = |n: f64, t: f64| if t > 0.0 { n / t } else { 0.0 };
+    (
+        share(r.visitors as f64, base.visitors as f64),
+        share(r.revenue_usd.max(0.0), base.revenue),
+    )
+}
+
+fn panel(
+    key: &str,
+    tab: Tab,
+    rows: &[BreakdownRow],
+    kids: &[BreakdownRow],
+    base: &Base,
+    on: bool,
+    filter_href: &FilterHref,
+) -> Panel {
+    let mut items: Vec<Item> = rows
+        .iter()
+        .filter(|r| {
+            !r.unattributed && (r.key.is_some() || matches!(tab, Tab::Campaign | Tab::Keyword))
+        })
+        .filter(|r| r.visitors > 0 || r.revenue_usd > 0.0)
+        .map(|r| item(tab, r))
+        .collect();
+    let total = items.len();
+    // The "none" row of campaigns and keywords goes last.
+    items.sort_by_key(|i| i.row.key.is_none());
+    items.truncate(SHOWN);
+    let nested: Vec<Vec<Item>> = items
+        .iter()
+        .map(|i| {
+            if tab.kids().is_some() {
+                kid_items(tab, i, kids)
+            } else {
+                Vec::new()
+            }
+        })
+        .collect();
+    let m = items
+        .iter()
+        .chain(nested.iter().flatten())
+        .map(|i| {
+            let (v, r) = shares(&i.row, base);
+            v.max(r)
+        })
+        .fold(0.0, f64::max)
+        * 1.04;
+    let rows: Vec<BarRow> = items
+        .iter()
+        .zip(nested)
+        .enumerate()
+        .map(|(n, (i, ks))| {
+            let mut row = bar(
+                i,
+                base,
+                m,
+                false,
+                filter_href(&i.filter),
+                format!("{key}-{n}"),
+            );
+            if row.sub.is_empty() && !ks.is_empty() {
+                row.sub = match tab {
+                    Tab::Country if ks.len() > 1 => format!("{} cities", ks.len()),
+                    _ => ks
+                        .iter()
+                        .take(3)
+                        .map(|k| match tab {
+                            Tab::Channel | Tab::Landing => source_name(&k.name),
+                            _ => k.name.clone(),
+                        })
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                };
+            }
+            if ks.len() > 1 || (ks.len() == 1 && ks[0].name != i.name) {
+                row.kids = ks
+                    .iter()
+                    .map(|k| bar(k, base, m, true, filter_href(&k.filter), String::new()))
+                    .collect();
+            }
+            row
+        })
+        .collect();
+    let foot = match tab {
+        Tab::Source | Tab::City if total > SHOWN => {
+            format!("Top {SHOWN} of {total}. {}", tab.foot())
+        }
+        _ if rows.is_empty() => String::new(),
+        _ if base.visitors < 100 => "Early numbers. They settle after about 100 visitors.".into(),
+        _ => tab.foot().into(),
+    };
+    Panel {
+        on,
+        head: tab.head(),
+        openable: rows.iter().any(|r| !r.kids.is_empty()),
+        rows,
+        foot,
+    }
+}
+
+/// Builds one card with a panel per tab; `data` holds each tab's rows and nested rows, in tab order.
 pub fn card(
     pick: &Pick,
-    rows: &[BreakdownRow],
-    avg: Option<f64>,
-    base: &str,
+    data: &[(Vec<BreakdownRow>, Vec<BreakdownRow>)],
+    base: &Base,
+    tabs_base: &str,
     params: &[(&str, &str)],
+    filter_href: &FilterHref,
 ) -> TabCard {
     let spec = pick.spec;
-    let dim = pick.dimension();
-    let shown: Vec<&BreakdownRow> = rows
-        .iter()
-        .filter(|r| !r.unattributed && r.key.is_some())
-        .take(SHOWN)
-        .collect();
     TabCard {
         key: spec.key,
+        title: spec.title,
         label: spec.label,
         tabs: spec
             .tabs
@@ -188,24 +646,172 @@ pub fn card(
                 label: name.to_string(),
                 href: format!(
                     "{}#{}",
-                    link(base, params, &[(spec.key, if i == 0 { "" } else { k })]),
+                    link(
+                        tabs_base,
+                        params,
+                        &[(spec.key, if i == 0 { "" } else { k })]
+                    ),
                     spec.key
                 ),
                 on: i == pick.tab,
                 count: String::new(),
             })
             .collect(),
-        rows: bar_rows(&shown, avg, |r| label(dim, r)),
-        note: match (spec.key, dim) {
-            ("pages", None) => "Page read right before checkout",
-            ("pages", _) => "First page of the visit",
-            _ => "",
-        },
-        empty: match dim {
-            Some(Dimension::Campaign) => "No visits with utm_campaign in this range.",
-            None => "No payment matched to a page view in this range.",
-            _ => "Nothing in this range yet.",
-        },
+        panels: spec
+            .tabs
+            .iter()
+            .zip(data)
+            .enumerate()
+            .map(|(i, ((k, _, tab), (rows, kids)))| {
+                panel(
+                    &format!("{}-{k}", spec.key),
+                    *tab,
+                    rows,
+                    kids,
+                    base,
+                    i == pick.tab,
+                    filter_href,
+                )
+            })
+            .collect(),
+        empty_title: spec.empty.0,
+        empty_text: spec.empty.1,
+    }
+}
+
+/// Every tab of every card, for loading their rows.
+pub fn all_tabs() -> Vec<Tab> {
+    SPECS
+        .iter()
+        .flat_map(|s| s.tabs.iter().map(|t| t.2))
+        .collect()
+}
+
+/// The AI assistants card: share of visitors against share of revenue, and each assistant.
+pub struct AiCard {
+    pub(super) visitors_share: f64,
+    pub(super) revenue_share: f64,
+    pub(super) rows: Vec<BarRow>,
+    /// "AI revenue +40% vs previous period", empty without a trend.
+    pub(super) trend: String,
+    /// SVG path of AI's share of revenue per point, in a 100 by 24 box; empty without revenue.
+    pub(super) spark: String,
+    /// Greyed logos for the empty state.
+    pub(super) logos: Vec<String>,
+}
+
+fn ai_revenue(days: &[DayPoint]) -> f64 {
+    days.iter()
+        .flat_map(|d| &d.by_channel)
+        .filter(|(c, _)| c.as_deref() == Some("AI"))
+        .map(|(_, v)| v)
+        .sum()
+}
+
+/// Builds the AI assistants card from channel-source rows and the daily series.
+pub fn ai_card(
+    sources: &[BreakdownRow],
+    base: &Base,
+    days: &[DayPoint],
+    prev: Option<&[DayPoint]>,
+    filter_href: &FilterHref,
+) -> AiCard {
+    let items: Vec<Item> = sources
+        .iter()
+        .filter(|r| !r.unattributed && (r.visitors > 0 || r.revenue_usd > 0.0))
+        .filter_map(|r| {
+            let host = r.key.as_deref()?.strip_prefix("AI|")?;
+            (!host.is_empty()).then(|| Item {
+                icon: icons::source(host, 16),
+                name: source_name(host),
+                sub: host.to_string(),
+                mono: false,
+                filter: vec![("source", host.to_string())],
+                row: r.clone(),
+            })
+        })
+        .take(SHOWN)
+        .collect();
+    let (v, r): (u64, f64) = items.iter().fold((0, 0.0), |a, i| {
+        (a.0 + i.row.visitors, a.1 + i.row.revenue_usd)
+    });
+    let share = |n: f64, t: f64| if t > 0.0 { n / t * 100.0 } else { 0.0 };
+    let m = items
+        .iter()
+        .map(|i| {
+            let (v, r) = shares(&i.row, base);
+            v.max(r)
+        })
+        .fold(0.0, f64::max)
+        * 1.04;
+    let mut rows: Vec<BarRow> = items
+        .iter()
+        .map(|i| bar(i, base, m, false, filter_href(&i.filter), String::new()))
+        .collect();
+    let pv = |i: &Item| i.row.revenue_usd / i.row.visitors.max(1) as f64;
+    if items.iter().filter(|i| i.row.revenue_usd > 0.0).count() > 1
+        && let Some(best) = (0..items.len())
+            .filter(|&k| items[k].row.revenue_usd > 0.0 && items[k].row.visitors > 0)
+            .max_by(|&a, &b| pv(&items[a]).total_cmp(&pv(&items[b])))
+    {
+        rows[best].tag = "Best value";
+    }
+    let now = ai_revenue(days);
+    let trend = match prev.map(ai_revenue) {
+        Some(p) if p > 0.0 && now > 0.0 && ((now - p) / p).abs() >= 0.1 => {
+            format!(
+                "AI revenue {:+.0}% vs previous period",
+                (now - p) / p * 100.0
+            )
+        }
+        _ => String::new(),
+    };
+    let points: Vec<f64> = days
+        .iter()
+        .map(|d| {
+            let ai: f64 = d
+                .by_channel
+                .iter()
+                .filter(|(c, _)| c.as_deref() == Some("AI"))
+                .map(|(_, v)| v)
+                .sum();
+            share(ai, d.revenue_usd) / 100.0
+        })
+        .collect();
+    let spark = if now > 0.0 && points.len() > 1 {
+        let n = (points.len() - 1) as f64;
+        points
+            .iter()
+            .enumerate()
+            .map(|(i, s)| {
+                format!(
+                    "{}{:.1},{:.1}",
+                    if i == 0 { "M" } else { "L" },
+                    i as f64 / n * 100.0,
+                    22.0 - s * 20.0
+                )
+            })
+            .collect::<Vec<_>>()
+            .join(" ")
+    } else {
+        String::new()
+    };
+    AiCard {
+        visitors_share: share(v as f64, base.visitors as f64),
+        revenue_share: share(r, base.revenue),
+        rows,
+        trend,
+        spark,
+        logos: [
+            "chatgpt.com",
+            "claude.ai",
+            "perplexity.ai",
+            "gemini.google.com",
+            "copilot.microsoft.com",
+        ]
+        .iter()
+        .map(|h| icons::source(h, 18))
+        .collect(),
     }
 }
 
@@ -226,33 +832,58 @@ mod tests {
         }
     }
 
+    fn base() -> Base {
+        Base {
+            visitors: 400,
+            revenue: 400.0,
+            avg: Some(1.0),
+            warn_small: true,
+        }
+    }
+
+    fn href(f: &[(&'static str, String)]) -> String {
+        f.iter()
+            .map(|(k, v)| format!("{k}={v}"))
+            .collect::<Vec<_>>()
+            .join("&")
+    }
+
     #[test]
-    fn bars_scale_to_the_largest_share_and_badge_against_the_average() {
-        let rows = [row("/a", 300, 100.0), row("/b", 100, 300.0)];
-        let refs: Vec<&BreakdownRow> = rows.iter().collect();
-        let bars = bar_rows(&refs, Some(1.0), |r| (String::new(), r.label.clone(), true));
-        let w = |b: &BarRow| (b.vw.round(), b.rw.round());
-        assert_eq!(w(&bars[0]), (100.0, 33.0));
-        assert_eq!(w(&bars[1]), (33.0, 100.0));
-        assert_eq!((bars[0].ratio.as_str(), bars[0].tone), ("0.3x", "down"));
-        assert_eq!((bars[1].ratio.as_str(), bars[1].tone), ("3.0x", "up"));
-        assert_eq!(tone(1.0), "flat");
-        let none = bar_rows(&refs, None, |r| (String::new(), r.label.clone(), true));
-        assert!(none[0].ratio.is_empty());
+    fn bars_scale_to_site_shares_and_badge_against_the_average() {
+        let q = HashMap::new();
+        let picks = picks(&q);
+        let rows = [row("Social", 100, 300.0), row("AI", 300, 100.0)];
+        let kids = [
+            row("AI|chatgpt.com", 200, 80.0),
+            row("AI|claude.ai", 100, 20.0),
+        ];
+        let data = vec![(rows.to_vec(), kids.to_vec()); 4];
+        let c = card(&picks[0], &data, &base(), "/app/x.com", &[], &href);
+        let r = &c.panels[0].rows;
+        assert_eq!(r[0].name, "Social", "most revenue first");
+        assert_eq!((r[0].rw.round(), r[1].vw.round()), (96.0, 96.0));
+        assert_eq!((r[0].ratio.as_str(), r[0].tone), ("3.0x", "up"));
+        assert_eq!((r[1].ratio.as_str(), r[1].tone), ("0.3x", "down"));
+        assert_eq!(r[1].href, "channel=AI");
+        assert_eq!(r[1].sub, "ChatGPT, Claude");
+        assert_eq!(r[1].kids[0].href, "source=chatgpt.com");
+        assert!(c.panels[0].openable && r[0].kids.is_empty());
+        assert!(c.panels[0].on && !c.panels[1].on);
     }
 
     #[test]
     fn tabs_keep_the_other_cards_and_jump_back_to_the_card() {
-        let q: HashMap<String, String> = [("pages".to_string(), "last".to_string())].into();
+        let q: HashMap<String, String> = [("pages".to_string(), "before".to_string())].into();
         let picks = picks(&q);
-        assert_eq!(picks[2].dimension(), None);
+        assert_eq!(picks[1].tab, 1);
         let params = params(&picks);
-        assert_eq!(params, [("pages", "last")]);
-        let c = card(&picks[0], &[], None, "/app/x.com", &params);
+        assert_eq!(params, [("pages", "before")]);
+        let c = card(&picks[0], &[], &base(), "/app/x.com", &params, &href);
         assert_eq!(
             c.tabs[1].href,
-            "/app/x.com?pages=last&sources=referrer#sources"
+            "/app/x.com?pages=before&channels=source#channels"
         );
-        assert_eq!(c.tabs[0].href, "/app/x.com?pages=last#sources");
+        assert_eq!(c.tabs[0].href, "/app/x.com?pages=before#channels");
+        assert!(c.panels.is_empty());
     }
 }

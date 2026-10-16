@@ -948,9 +948,10 @@ mod tests {
         );
         for query in [
             "",
-            "?range=7d&sources=referrer&location=device",
-            "?range=12m&sources=campaign&pages=last",
-            "?sources=nope",
+            "?range=7d&channels=source&location=city",
+            "?range=12m&channels=campaign&pages=before",
+            "?channels=nope",
+            "?from=2020-01-01&to=2099-01-01&chart=channel",
         ] {
             let res = call(
                 &state,
@@ -960,20 +961,36 @@ mod tests {
             assert_eq!(res.status(), StatusCode::OK, "{query}");
             let body = body_text(res).await;
             assert!(
-                body.contains("$98") && body.contains("Payments and the path to them"),
+                body.contains("$98") && body.contains(r#"class="chart rev"#),
                 "{query}"
             );
-            assert!(!body.contains(r#"class="chart"#), "{query}");
+        }
+        for query in [
+            "?view=goals",
+            "?view=goals&gtab=goals",
+            "?view=visitors&vtab=recent",
+            "?view=payments",
+            "?view=retention&ret=refunds",
+            "?range=today&channel=Social",
+            "?country=DE&chart=total",
+        ] {
+            let res = call(
+                &state,
+                get(&format!("/app/example.com{query}"), Some(&cookie)),
+            )
+            .await;
+            assert_eq!(res.status(), StatusCode::OK, "{query}");
         }
         let body = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
-        assert!(body.contains("AI assistants") && body.contains("Client report"));
+        assert!(body.contains("Client report"));
         assert!(
-            body.contains("<span>Since tracking started</span>"),
+            body.contains(r#"aria-current="true"><span>Since tracking started</span>"#),
             "new sites default"
         );
-        assert!(body.contains("1 of 1 visitor paid"));
-        assert!(body.contains("$49 came from payments with no matched visit"));
-        assert!(body.contains(r#"class="step todo-step" href="/app/example.com/setup/payments""#));
+        assert!(body.contains("<b>1 of 2</b> payments matched"));
+        assert!(body.contains("1 payment from Stripe had no visitor ID"));
+        assert!(body.contains("client_reference_id: req.cookies.virling_vid"));
+        assert!(body.contains(r#"href="/app/example.com/setup/payments">Connect</a>"#));
         assert!(body.contains(r#"action="/app/example.com/setup/dismiss""#));
         let res = call(
             &state,
@@ -986,11 +1003,11 @@ mod tests {
         .await;
         assert_eq!(res.headers()["location"], "/app/example.com");
         let hidden = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
-        assert!(!hidden.contains("setup-strip"), "dismissed for good");
+        assert!(!hidden.contains("Finish setting up"), "dismissed for good");
         let week =
             body_text(call(&state, get("/app/example.com?range=7d", Some(&cookie))).await).await;
         assert!(
-            week.contains("<span>Last 7 days</span>"),
+            week.contains(r#"aria-current="true"><span>Last 7 days</span>"#),
             "label follows the range"
         );
         assert!(body.contains(r#"aria-label="Hacker News""#), "source logo");
@@ -999,7 +1016,18 @@ mod tests {
         assert!(body.contains(r#"href="/app/example.com/payments""#));
         assert!(body.contains(r#"href="/app/example.com?range=30d""#));
         assert!(!body.contains("range=all") && !body.contains("/app/sites/"));
-        assert!(body.contains("No goals yet"));
+        let social = body_text(
+            call(
+                &state,
+                get("/app/example.com?channel=Social", Some(&cookie)),
+            )
+            .await,
+        )
+        .await;
+        assert!(social.contains("Showing only") && social.contains("Social brought 1 visitor"));
+        let goals =
+            body_text(call(&state, get("/app/example.com?view=goals", Some(&cookie))).await).await;
+        assert!(goals.contains("Visited the site") && goals.contains("Edit funnel steps"));
         let res = call(&state, get("/app/example.com/payments", Some(&cookie))).await;
         assert_eq!(res.status(), StatusCode::OK);
         let body = body_text(res).await;
@@ -1117,26 +1145,36 @@ mod tests {
             "Channel",
             "Referral",
             "First page of the visit",
-            "visitors online now",
-            "Orange marks the visit that gets the credit.",
+            "No visitors online",
+            "Expand all",
         ] {
             assert!(home.contains(text), "{text}");
         }
-        assert!(home.contains(r#"href="/app/example.com?sources=referrer#sources""#));
-        assert!(home.contains(r#"href="/app/example.com?pages=last#pages""#));
-        assert!(home.contains(r#"class="d3-chip on""#), "credited visit");
-        assert!(home.contains(">/last</span>"), "last page before paying");
+        assert!(home.contains(r#"href="/app/example.com?channels=source#channels""#));
+        assert!(home.contains(r#"href="/app/example.com?pages=before#pages""#));
+        assert!(
+            home.contains(r#"href="/app/example.com?channel=Referral""#),
+            "rows filter"
+        );
+        assert!(
+            home.contains(r#"href="/app/example.com?source=someblog.dev""#),
+            "kids filter"
+        );
+        let pays = page("?view=payments").await;
+        assert!(pays.contains("The outlined step is the visit that gets the credit."));
+        assert!(pays.contains(r#"class="d3-chip on""#), "credited visit");
+        assert!(pays.contains(">/last</span>"), "last page before paying");
         let payer = crate::alias::Names::load(&state.db, &site, vec!["v:v1".into()])
             .await
             .unwrap()
             .get("v:v1")
             .name;
-        assert!(home.contains(&payer) && home.contains("Germany · Desktop · Firefox"));
-        let tabs = page("?sources=referrer&location=device&pages=last").await;
+        assert!(pays.contains(&payer) && pays.contains("Germany"));
+        let tabs = page("?channels=source&location=city&pages=before").await;
         assert!(tabs.contains("someblog.dev"));
-        assert!(tabs.contains("Page read right before checkout"));
+        assert!(tabs.contains("Last page before checkout"));
         assert!(
-            tabs.contains(r#"href="/app/example.com?sources=referrer&#38;location=device#pages""#)
+            tabs.contains(r#"href="/app/example.com?channels=source&#38;location=city#pages""#)
         );
     }
 
@@ -1335,7 +1373,17 @@ mod tests {
         assert!(pays.contains(&format!(
             r#"<a class="vis-link" href="/app/example.com/visitors/v1" title="Visitor timeline"><b>{label}</b></a>"#
         )));
-        let dash = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
+        let dash = body_text(
+            call(
+                &state,
+                get(
+                    "/app/example.com?view=visitors&vtab=customers",
+                    Some(&cookie),
+                ),
+            )
+            .await,
+        )
+        .await;
         assert!(dash.contains(r#"href="/app/example.com/visitors/v1""#));
         let mut req = get("/app/example.com/payments/stripe/pi_1", Some(&cookie));
         req.headers_mut().insert("x-drawer", "1".parse().unwrap());
@@ -1738,11 +1786,11 @@ mod tests {
         let site = site_id(&state).await;
         connect_fake(&state, &site, "dodo", "dodo_test_key_1234").await;
         let body = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
-        assert!(body.contains("Waiting for the first visit"));
-        assert!(body.contains("Not seen yet") && body.contains("Dodo Payments connected"));
-        assert!(body.contains(r#"data-site="example.com""#));
-        assert!(body.contains("/assets/art/02-empty-waiting.jpg"));
-        assert!(!body.contains(r#"class="chart"#));
+        assert!(body.contains("Waiting for your first visitor"));
+        assert!(body.contains("Waiting for the first pageview"));
+        assert!(body.contains("Dodo Payments, read-only key"));
+        assert!(body.contains(r#"data-site=&#34;example.com&#34;"#));
+        assert!(body.contains("after the first visit and payment"));
         let payments =
             body_text(call(&state, get("/app/example.com/payments", Some(&cookie))).await).await;
         assert!(
