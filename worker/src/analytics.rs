@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use worker::Url;
 
 use crate::channel;
-use crate::ua::{browser, device};
+use crate::ua::{browser, device, is_spam_referrer};
 
 pub const SITE: &str = "virling.com";
 pub const MAX_BATCH: usize = 50;
@@ -113,6 +113,9 @@ pub fn to_row(e: Incoming, user_agent: &str, country: Option<&str>, now_ms: i64)
             .and_then(|r| Url::parse(r).ok())
             .and_then(|r| r.host_str().map(str::to_ascii_lowercase))
             .filter(|h| !own_host(h));
+    if referrer_host.as_deref().is_some_and(is_spam_referrer) {
+        return None;
+    }
     let (utm_source, utm_medium) = (utm("utm_source").or_else(|| utm("ref")), utm("utm_medium"));
     let channel = channel::classify(
         utm_medium.as_deref(),

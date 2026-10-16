@@ -24,7 +24,7 @@ Add `data-respect-gpc` to the tag and the script sends nothing when the browser 
 
 ## Bots
 
-Events from user agents that look automated are dropped: an empty user agent, or one containing `bot`, `crawl`, `spider`, `slurp`, `headless`, `lighthouse`, `preview`, `curl/`, `wget/`, `python-`, `go-http`, `phantomjs` or `facebookexternalhit`.
+Events from user agents that look automated are dropped: an empty user agent, or one containing `bot`, `crawl`, `spider`, `slurp`, `headless`, `lighthouse`, `preview`, `curl/`, `wget/`, `python-`, `go-http`, `phantomjs`, `facebookexternalhit`, `playwright`, `puppeteer`, `selenium`, `webdriver`, `scrapy`, `pingdom`, `uptime`, `gtmetrix`, `pagespeed`, `prerender`, `okhttp`, `axios/`, `node-fetch`, `java/` or `postman`. Events whose referrer is a known referrer-spam domain, such as `semalt.com`, are dropped too.
 
 ## Rate limit
 
