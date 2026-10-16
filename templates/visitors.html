@@ -37,7 +37,7 @@
   <div class="vr th"><span>Visitor</span><span>First source</span><span class="num">Visits</span><span class="num vr-pv">Pages</span><span>Exit page</span><span>Exit link</span><span class="vr-goals">Goals</span><span class="num">Revenue</span><span class="num">Last seen</span><span></span></div>
   {% for v in rows %}
   <a class="vr prow" href="{{ v.href }}">
-    <span class="vr-who"><span class="av" style="background:{{ v.color }}">{{ v.initials }}</span><b>{{ v.name }}</b></span>
+    <span class="vr-who"><span class="av">{{ v.avatar|safe }}</span><b>{{ v.name }}</b></span>
     <span class="src">{{ v.icon|safe }}<span class="lbl">{{ v.source }}</span>{% if !v.channel.is_empty() %}<span class="ch">{{ v.channel }}</span>{% endif %}</span>
     <span class="num">{{ v.visits }}</span>
     <span class="num vr-pv">{{ v.pageviews }}</span>

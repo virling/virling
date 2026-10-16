@@ -3,7 +3,7 @@
 <a class="link-quiet" href="{{ back }}">&#8592; All visitors</a>
 <section class="box vt-head">
   <div class="vt-id">
-    <span class="av lg" style="background:{{ color }}">{{ initials }}</span>
+    <span class="av lg">{{ avatar|safe }}</span>
     <div class="vt-name">
       <h2>{{ name }}</h2>
       <span class="j-meta">{% if !country.is_empty() %}{{ flag|safe }}{{ country }}<i class="sep"></i>{% endif %}{% if !browser.is_empty() %}{{ browser }}<i class="sep"></i>{% endif %}First seen {{ first_seen }}<i class="sep"></i>Last seen {{ last_seen }}</span>
