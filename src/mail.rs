@@ -43,18 +43,48 @@ impl Mailer {
         text: String,
         html: String,
     ) -> anyhow::Result<()> {
+        let from = from.map(str::parse::<Mailbox>).transpose()?;
+        self.deliver(from, None, to, subject, text, html).await
+    }
+
+    /// Sends from the default address under display name `name`, with replies going to `reply_to`.
+    pub async fn send_named(
+        &self,
+        name: &str,
+        reply_to: &str,
+        to: &str,
+        subject: &str,
+        text: String,
+        html: String,
+    ) -> anyhow::Result<()> {
+        let from = match self {
+            Mailer::Smtp { from, .. } if !name.is_empty() => {
+                Some(Mailbox::new(Some(name.to_string()), from.email.clone()))
+            }
+            _ => None,
+        };
+        self.deliver(from, reply_to.parse().ok(), to, subject, text, html)
+            .await
+    }
+
+    async fn deliver(
+        &self,
+        from: Option<Mailbox>,
+        reply_to: Option<Mailbox>,
+        to: &str,
+        subject: &str,
+        text: String,
+        html: String,
+    ) -> anyhow::Result<()> {
         match self {
             Mailer::Smtp {
                 transport,
                 from: default_from,
             } => {
-                let sender: Mailbox = match from {
-                    Some(f) => f.parse()?,
-                    None => default_from.clone(),
-                };
+                let sender = from.unwrap_or_else(|| default_from.clone());
                 let message = Message::builder()
                     .from(sender.clone())
-                    .reply_to(sender)
+                    .reply_to(reply_to.unwrap_or(sender))
                     .to(to.parse()?)
                     .subject(subject)
                     .multipart(
