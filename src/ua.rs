@@ -16,9 +16,48 @@ pub fn is_bot(user_agent: &str) -> bool {
             "go-http",
             "phantomjs",
             "facebookexternalhit",
+            "playwright",
+            "puppeteer",
+            "selenium",
+            "webdriver",
+            "scrapy",
+            "pingdom",
+            "uptime",
+            "gtmetrix",
+            "pagespeed",
+            "prerender",
+            "okhttp",
+            "axios/",
+            "node-fetch",
+            "java/",
+            "postman",
         ]
         .iter()
         .any(|m| ua.contains(m))
+}
+
+/// Known referrer-spam domains and their subdomains.
+pub fn is_spam_referrer(host: &str) -> bool {
+    [
+        "semalt.com",
+        "darodar.com",
+        "buttons-for-website.com",
+        "buttons-for-your-website.com",
+        "free-share-buttons.com",
+        "social-buttons.com",
+        "best-seo-offer.com",
+        "best-seo-solution.com",
+        "ilovevitaly.com",
+        "priceg.com",
+        "hulfingtonpost.com",
+        "o-o-6-o-o.com",
+        "7makemoneyonline.com",
+        "get-free-traffic-now.com",
+        "trafficmonetize.com",
+        "seo-platform.com",
+    ]
+    .iter()
+    .any(|d| host == *d || host.ends_with(&format!(".{d}")))
 }
 
 pub fn browser(user_agent: &str) -> &'static str {
@@ -57,9 +96,20 @@ mod tests {
         assert!(is_bot("Mozilla/5.0 (compatible; Googlebot/2.1)"));
         assert!(is_bot("Mozilla/5.0 HeadlessChrome/120.0"));
         assert!(is_bot(""));
+        assert!(is_bot("Mozilla/5.0 Chrome/120 Playwright/1.45"));
+        assert!(is_bot("UptimeRobot/2.0"));
+        assert!(is_bot("axios/1.7.2"));
         assert!(!is_bot(
             "Mozilla/5.0 (Macintosh) AppleWebKit/605 Version/17.0 Safari/605.1"
         ));
+    }
+
+    #[test]
+    fn referrer_spam_is_matched_by_domain() {
+        assert!(is_spam_referrer("semalt.com"));
+        assert!(is_spam_referrer("forum.semalt.com"));
+        assert!(!is_spam_referrer("notsemalt.com"));
+        assert!(!is_spam_referrer("google.com"));
     }
 
     #[test]

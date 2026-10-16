@@ -14,7 +14,7 @@ use url::Url;
 use crate::app::AppState;
 use crate::channel;
 use crate::events::Event;
-use crate::ua::{browser, device, is_bot};
+use crate::ua::{browser, device, is_bot, is_spam_referrer};
 
 const SESSION_IDLE: Duration = Duration::minutes(30);
 const MAX_BATCH: usize = 50;
@@ -301,6 +301,9 @@ pub async fn collect(
                 .and_then(|r| r.host_str().map(|h| h.to_ascii_lowercase()))
                 .filter(|h| !host_belongs(h, &site.domain))
                 .or_else(|| utm_source.as_deref().and_then(channel::source_host));
+        if referrer_host.as_deref().is_some_and(is_spam_referrer) {
+            continue;
+        }
         let channel = channel::classify(
             utm_medium.as_deref(),
             utm_source.as_deref(),
