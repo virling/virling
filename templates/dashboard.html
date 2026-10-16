@@ -22,7 +22,7 @@
       <a class="d3-switch" role="switch" aria-checked="{{ compare }}" href="{{ compare_href }}"><span>Compare to previous period</span><i></i></a>
       <details{% if custom %} open{% endif %}>
         <summary>Custom range…</summary>
-        <form class="d3-custom" method="get" action="{{ base }}">
+        <form class="d3-custom" method="get" action="{{ base }}" data-cal>
           {% for (k, v) in hidden %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
           <label>From<input type="date" name="from" value="{{ custom_from }}" max="{{ today }}" required></label>
           <label>To<input type="date" name="to" value="{{ custom_to }}" max="{{ today }}" required></label>

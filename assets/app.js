@@ -279,3 +279,46 @@ document.addEventListener("click", (e) => {
   ids.forEach((id) => toggle(id, open));
   all.textContent = open ? "Collapse all" : "Expand all";
 });
+
+for (const form of document.querySelectorAll("[data-cal]")) {
+  const [from, to] = [form.elements.from, form.elements.to];
+  const max = from.max;
+  const iso = (d) => d.toISOString().slice(0, 10);
+  const parse = (s) => new Date(s + "T00:00:00Z");
+  const fmt = (s) => parse(s).toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: "UTC" });
+  let start = from.value, end = to.value;
+  let view = parse(end || max);
+  view.setUTCDate(1);
+  for (const l of form.querySelectorAll("label")) l.hidden = true;
+  const cal = document.createElement("div");
+  cal.className = "cal";
+  form.insertBefore(cal, form.querySelector("button[type=submit]"));
+  const draw = () => {
+    const y = view.getUTCFullYear(), m = view.getUTCMonth();
+    const first = (new Date(Date.UTC(y, m, 1)).getUTCDay() + 6) % 7;
+    const days = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    const title = view.toLocaleDateString(undefined, { month: "long", year: "numeric", timeZone: "UTC" });
+    let cells = "";
+    for (let i = 0; i < first; i++) cells += "<span></span>";
+    for (let d = 1; d <= days; d++) {
+      const s = iso(new Date(Date.UTC(y, m, d)));
+      const cls = [s === start || s === end ? "on" : "", start && end && s > start && s < end ? "in" : "", s === max ? "today" : ""].join(" ").trim();
+      cells += `<button type="button" data-d="${s}"${cls ? ` class="${cls}"` : ""}${s > max ? " disabled" : ""}>${d}</button>`;
+    }
+    const n = start && end ? Math.round((parse(end) - parse(start)) / 864e5) + 1 : 0;
+    cal.innerHTML = `<div class="cal-head"><button type="button" data-step="-1" aria-label="Previous month">&#8249;</button><b>${title}</b><button type="button" data-step="1" aria-label="Next month"${iso(new Date(Date.UTC(y, m + 1, 1))) > max ? " disabled" : ""}>&#8250;</button></div><div class="cal-dow"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div><div class="cal-grid">${cells}</div><p class="cal-sum">${start && end ? `${fmt(start)} – ${fmt(end)} · ${n} day${n === 1 ? "" : "s"}` : start ? `${fmt(start)} – pick an end date` : "Pick a start date"}</p>`;
+    form.querySelector("button[type=submit]").disabled = !(start && end);
+  };
+  cal.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    e.stopPropagation();
+    if (b.dataset.step) view.setUTCMonth(view.getUTCMonth() + Number(b.dataset.step));
+    else if (!start || end) { start = b.dataset.d; end = ""; }
+    else if (b.dataset.d < start) { end = start; start = b.dataset.d; }
+    else end = b.dataset.d;
+    from.value = start; to.value = end;
+    draw();
+  });
+  draw();
+}
