@@ -14,6 +14,7 @@ mod fx;
 mod icons;
 mod ingest;
 mod mail;
+mod mcp;
 mod onboarding;
 mod providers;
 mod settings;

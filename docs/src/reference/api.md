@@ -1,6 +1,6 @@
 # Read API
 
-A read-only JSON API over the same numbers as the dashboard: totals, breakdowns with revenue, payments and visitor timelines. The [CLI](cli.md) and AI agents use it. It is served when the app is on (`--app`).
+A read-only JSON API over the same numbers as the dashboard: totals, breakdowns with revenue, payments and visitor timelines. The [CLI](cli.md) and AI agents use it, and assistants such as claude.ai can read the same data through the [MCP server](mcp.md). It is served when the app is on (`--app`).
 
 ## API keys
 
