@@ -326,7 +326,7 @@ pub fn source(name: &str, size: u32) -> String {
     }
     match name {
         "Unattributed" => return glyph("unattributed", size, "#B9BCC2"),
-        "Newsletter" => return glyph("email", size, "#6B717C"),
+        _ if name.eq_ignore_ascii_case("newsletter") => return glyph("email", size, "#6B717C"),
         _ => {}
     }
     if let Some(g) = channel_glyph(name) {
