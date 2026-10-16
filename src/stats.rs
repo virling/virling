@@ -666,25 +666,22 @@ pub(crate) fn breakdown(
 ) -> anyhow::Result<Vec<BreakdownRow>> {
     let (kind, key, first) = dimension.source();
     let (scope, within, paid) = (f.cte(), f.within("session_id"), f.paid());
-    let (table, kind) = if first {
-        ("touches", "true".to_string())
+    let (table, kind, distinct) = if first {
+        ("touches", "true".to_string(), "")
     } else {
-        ("events", format!("kind = '{kind}'"))
+        ("events", format!("kind = '{kind}'"), "DISTINCT")
     };
     // Visitors count sessions in range; payments follow their credited session, wherever it falls.
     let sql = format!(
-        "WITH {BOUNDS}{scope},
-        keyed AS (
-            SELECT session_id, visitor_id, ts, {key} AS key
-            FROM {table}
-            WHERE site_id = $site AND {kind}{within}
-        )
+        "WITH {BOUNDS}{scope}
         SELECT unattributed, key, sum(visitors)::BIGINT, sum(payments)::BIGINT, sum(revenue),
             sum(customers)::BIGINT
         FROM (
-            SELECT false AS unattributed, key, count(DISTINCT visitor_id) AS visitors,
+            SELECT false AS unattributed, {key} AS key, count(DISTINCT visitor_id) AS visitors,
                    0 AS payments, 0.0 AS revenue, 0 AS customers
-            FROM keyed, bounds WHERE ts >= lo AND ts < hi GROUP BY key
+            FROM {table}, bounds
+            WHERE site_id = $site AND {kind} AND ts >= lo AND ts < hi{within}
+            GROUP BY 2
             UNION ALL
             SELECT a.session_id IS NULL, k.key, 0, count(*), coalesce(sum({NET_USD}), 0),
                    count(DISTINCT {CUSTOMER})
@@ -692,7 +689,11 @@ pub(crate) fn breakdown(
             JOIN bounds ON p.ts >= lo AND p.ts < hi
             LEFT JOIN attribution a ON a.site_id = p.site_id AND a.provider = p.provider
                 AND a.provider_payment_id = p.provider_payment_id
-            LEFT JOIN (SELECT DISTINCT session_id, key FROM keyed) k ON k.session_id = a.session_id
+            LEFT JOIN (
+                SELECT {distinct} session_id, {key} AS key FROM {table}
+                WHERE site_id = $site AND {kind}{within}
+                    AND session_id IN (SELECT session_id FROM attribution WHERE site_id = $site)
+            ) k ON k.session_id = a.session_id
             WHERE p.site_id = $site AND p.status <> 'failed'{paid}
             GROUP BY ALL
         )
