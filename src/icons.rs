@@ -353,6 +353,43 @@ pub fn source(name: &str, size: u32) -> String {
     )
 }
 
+/// Path of an image file for `source`'s logo, for email where SVG can't be inlined; empty when there is none.
+pub fn source_src(name: &str) -> String {
+    if let Some(slug) = brand_slug(name) {
+        return format!("/assets/icons/{slug}.svg");
+    }
+    let g = match name {
+        "Unattributed" => Some("unattributed"),
+        "Newsletter" => Some("email"),
+        _ => channel_glyph(name),
+    };
+    if let Some(g) = g {
+        return format!("/assets/icons/glyph-{g}.svg");
+    }
+    match crate::favicon::source_host(name) {
+        Some(host) => crate::favicon::source_icon(&host)
+            .map(|v| format!("/source-icons/{host}?v={v}"))
+            .unwrap_or_default(),
+        None => String::new(),
+    }
+}
+
+/// The file behind /assets/icons/{name}.svg: a browser or OS logo, a source logo, or "glyph-{name}".
+pub fn file(name: &str) -> Option<String> {
+    if let Some((_, svg)) = UA_ICONS.iter().find(|(s, _)| *s == name) {
+        return Some(svg.to_string());
+    }
+    if let Some((_, _, svg)) = BRANDS.iter().find(|b| b.0 == name) {
+        return Some(svg.to_string());
+    }
+    let path = glyph_path(name.strip_prefix("glyph-")?);
+    (!path.is_empty()).then(|| {
+        format!(
+            r##"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4B515C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{path}</svg>"##
+        )
+    })
+}
+
 /// Browser and OS logos, served as files since a list repeats them on every row.
 pub const UA_ICONS: [(&str, &str); 7] = [
     (

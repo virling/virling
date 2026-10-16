@@ -333,14 +333,14 @@ async fn art(Path(file): Path<String>) -> Response {
 }
 
 async fn ua_icon(Path(file): Path<String>) -> Response {
-    let slug = file.strip_suffix(".svg").unwrap_or_default();
-    match crate::icons::UA_ICONS.iter().find(|(s, _)| *s == slug) {
-        Some((_, svg)) => (
+    let name = file.strip_suffix(".svg").unwrap_or_default();
+    match crate::icons::file(name) {
+        Some(svg) => (
             [
                 (header::CONTENT_TYPE, "image/svg+xml"),
                 (header::CACHE_CONTROL, "public, max-age=86400"),
             ],
-            *svg,
+            svg,
         )
             .into_response(),
         None => StatusCode::NOT_FOUND.into_response(),
