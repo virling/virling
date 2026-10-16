@@ -50,11 +50,26 @@ pub struct Names(HashMap<String, u32>);
 impl Names {
     pub async fn load(db: &SqlitePool, site_id: &str, keys: Vec<String>) -> sqlx::Result<Names> {
         let mut map = HashMap::new();
-        let mut tx = db.begin().await?;
-        for key in keys {
-            if map.contains_key(&key) {
-                continue;
+        let mut unique = keys;
+        let mut seen = std::collections::HashSet::new();
+        unique.retain(|k| seen.insert(k.clone()));
+        for chunk in unique.chunks(500) {
+            let sql = format!(
+                "SELECT key, slot FROM aliases WHERE site_id = ? AND key IN ({})",
+                vec!["?"; chunk.len()].join(", ")
+            );
+            let mut q = sqlx::query_as::<_, (String, u32)>(sqlx::AssertSqlSafe(sql)).bind(site_id);
+            for key in chunk {
+                q = q.bind(key);
             }
+            map.extend(q.fetch_all(db).await?);
+        }
+        unique.retain(|k| !map.contains_key(k));
+        if unique.is_empty() {
+            return Ok(Names(map));
+        }
+        let mut tx = db.begin().await?;
+        for key in unique {
             sqlx::query(
                 "INSERT INTO aliases (site_id, key, slot)
                  SELECT ?1, ?2, COALESCE(MAX(slot) + 1, 0) FROM aliases WHERE site_id = ?1
