@@ -14,6 +14,8 @@ use crate::app::AppState;
 
 const MAX_BYTES: usize = 256 * 1024;
 const REFRESH_SECS: i64 = 86_400;
+/// A failed fetch is tried again sooner, so a site that was briefly down gets its icon.
+const RETRY_SECS: i64 = 600;
 const SOURCE_REFRESH_SECS: i64 = 30 * 86_400;
 const MAX_QUEUED: usize = 1000;
 const TYPES: [&str; 5] = [
@@ -217,11 +219,13 @@ async fn fetch_from(client: &Client, base: Url) -> anyhow::Result<(String, Vec<u
 
 static RUNNING: Mutex<Option<HashSet<String>>> = Mutex::new(None);
 
-/// Fetches the icon in the background unless one was tried in the last day.
-pub fn refresh(state: &AppState, site_id: &str, domain: &str, fetched_at: Option<i64>) {
+/// Fetches the icon in the background unless one was fetched in the last day or tried in the last ten minutes.
+pub fn refresh(state: &AppState, site_id: &str, domain: &str, fetched: Option<(i64, bool)>) {
     let now = OffsetDateTime::now_utc().unix_timestamp();
     // Tests never reach the network.
-    if cfg!(test) || fetched_at.is_some_and(|t| now - t < REFRESH_SECS) {
+    if cfg!(test)
+        || fetched.is_some_and(|(t, ok)| now - t < if ok { REFRESH_SECS } else { RETRY_SECS })
+    {
         return;
     }
     if !RUNNING

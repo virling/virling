@@ -150,8 +150,8 @@ pub async fn load(
             .map(|i| format!("{}?v={}", sites::app_path(&s.domain, "icon"), i.1))
             .unwrap_or_default()
     };
-    let fetched_at = icons.iter().find(|i| i.0 == site.id).map(|i| i.1);
-    favicon::refresh(state, &site.id, &site.domain, fetched_at);
+    let fetched = icons.iter().find(|i| i.0 == site.id).map(|i| (i.1, i.2));
+    favicon::refresh(state, &site.id, &site.domain, fetched);
     let shell = Shell {
         domain: site.domain.clone(),
         initial: site.domain[..1].to_ascii_uppercase(),
