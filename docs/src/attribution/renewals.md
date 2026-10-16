@@ -22,3 +22,5 @@ Payments without a customer ID cannot be linked to a first payment.
 The first payment must be in Virling. Payments older than the 90-day backfill are not imported, so renewals of subscriptions that started before that are Unattributed.
 
 Customers are matched per provider. A customer who moved from one provider to another counts as two customers.
+
+[Retention by channel](retention.md) uses the same rule: a customer's whole lifetime value counts toward the channel of their first payment.

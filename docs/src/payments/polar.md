@@ -1,11 +1,11 @@
 # Polar
 
-Virling reads Polar orders and refunds with an organization access token.
+Virling reads Polar orders, refunds and, when allowed, subscriptions with an organization access token.
 
 ## Create a token
 
 1. In Polar, open your organization's settings and create an **Organization Access Token**. Polar's guide: [organization access tokens](https://docs.polar.sh/integrate/oat).
-2. Give it only the `orders:read` and `refunds:read` scopes.
+2. Give it the `orders:read` and `refunds:read` scopes, plus `subscriptions:read` so [Retention](../attribution/retention.md) can tell who still pays. No other scopes are needed.
 3. Paste it into Virling. It starts with `polar_oat_`.
 
 Production and sandbox tokens both work. Virling tries `api.polar.sh` first and `sandbox-api.polar.sh` second. If a scope is missing, connecting fails with a message naming it.
@@ -15,6 +15,7 @@ Production and sandbox tokens both work. Virling tries `api.polar.sh` first and 
 - **Orders** from the last 90 days on the first run, then new orders every minute. Unpaid orders are checked again every 10 minutes for up to 30 days, and imported once paid.
 - **Refunds.** New refunds update the order they belong to. A pending refund is read again once it settles.
 - **Renewals.** An order with billing reason `subscription_cycle` is marked as a renewal.
+- **Subscription status**, once an hour, when the token has `subscriptions:read`. Without it, retention falls back to payment recency.
 
 ## How a payment finds its visitor
 

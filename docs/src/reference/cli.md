@@ -85,6 +85,7 @@ Commands that read a range take `--range today|7d|30d|90d|12m|all`, or `--from Y
 | `pages` | Revenue by every page viewed. |
 | `countries`, `devices` | Revenue by country and by device. |
 | `breakdown <DIMENSION>` | Any dimension of the API, including `keyword`, `browser` and `os`. |
+| `retention` | Customers acquired, still paying, net and average LTV, refund rate and 30-day churn by the first payment's channel. Takes `--by channel\|referrer\|campaign` and `--limit`. See [Retention by channel](../attribution/retention.md). |
 | `payments` | Payments, newest first, with the source and campaign credited and the visitor ID. Takes `--filter all\|attributed\|unattributed\|refunded`, `--limit` (up to 200) and `--offset`. |
 | `visitor <ID>` | One visitor's visits, pages, goals, exits and payments, oldest first. |
 

@@ -1,6 +1,6 @@
 # Read API
 
-A read-only JSON API over the same numbers as the dashboard: totals, breakdowns with revenue, payments and visitor timelines. The [CLI](cli.md) and AI agents use it, and assistants such as claude.ai can read the same data through the [MCP server](mcp.md). It is served when the app is on (`--app`).
+A read-only JSON API over the same numbers as the dashboard: totals, breakdowns with revenue, retention by channel, payments and visitor timelines. The [CLI](cli.md) and AI agents use it, and assistants such as claude.ai can read the same data through the [MCP server](mcp.md). It is served when the app is on (`--app`).
 
 ## API keys
 
@@ -138,6 +138,31 @@ Payments in the range, newest first, with the visit credited for each.
 ```
 
 `touch` is the credited visit, `null` when the payment is unattributed. `first_touch` is the payer's first visit. `visitor` is the visitor whose timeline shows the payment; pass it to the visitor endpoint.
+
+## GET /api/v1/sites/{domain}/retention
+
+Customers whose first payment is in the range, grouped by the channel, referrer and campaign credited for that first payment, with how many still pay. Takes the range parameters. See [Retention by channel](../attribution/retention.md) for every definition.
+
+```json
+{
+  "site": "example.com", "range": {"...": "..."},
+  "days_of_data": 142, "day_one": false,
+  "headline": "X sent 60% of your customers but only 25% of the ones still paying.",
+  "total": {"key": null, "label": "All customers", "customers": 100, "still_paying": 40, "...": "..."},
+  "channels": [{
+    "key": "Social", "label": "Social", "unattributed": false,
+    "customers": 60, "still_paying": 10, "first_payment_usd": 1740.0, "refunded_usd": 87.0,
+    "net_ltv_usd": 2610.0, "avg_ltv_usd": 43.5, "refund_rate": 0.05,
+    "churn_customers": 22, "churned": 15, "churn_30d": 0.68,
+    "share_customers": 0.6, "share_still_paying": 0.25
+  }],
+  "referrers": [{"key": "news.ycombinator.com", "label": "Hacker News", "...": "..."}],
+  "campaigns": [{"key": "launch", "label": "launch", "...": "..."}],
+  "status_sources": [{"provider": "stripe", "subscription_status": true}]
+}
+```
+
+`still_paying` uses the provider's subscription status, else payment recency. `churn_30d` looks at customers whose first payment was 30 to 60 days ago, whatever the range; `null` when there are none. `day_one` is true under 60 days of payments, when LTV is not meaningful yet. `headline` is `null` when the data is thin. `status_sources` says, per provider, whether subscription status was available.
 
 ## GET /api/v1/sites/{domain}/visitors/{visitor_id}
 
