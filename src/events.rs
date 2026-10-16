@@ -338,7 +338,7 @@ fn ts_value(ts: OffsetDateTime) -> Value {
 }
 
 /// The earliest pageview, by (ts, path), per key of `events`.
-fn earliest<'a>(events: &'a [Event], key: impl Fn(&Event) -> &str) -> Vec<&'a Event> {
+fn earliest(events: &[Event], key: impl Fn(&Event) -> &str) -> Vec<&Event> {
     let mut first: std::collections::HashMap<(&str, &str), &Event> = Default::default();
     for e in events.iter().filter(|e| e.kind == "pageview") {
         first
