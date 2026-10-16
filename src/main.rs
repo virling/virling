@@ -1,4 +1,5 @@
 mod alias;
+mod animals;
 mod api;
 mod app;
 mod auth;
@@ -1005,7 +1006,11 @@ mod tests {
         assert!(body.contains("Unattributed"));
         assert!(body.contains("Net revenue") && body.contains("1 of 2 matched to a visit"));
         assert!(body.contains(r#"data-total="2""#), "drawer can count rows");
-        let payer = crate::alias::alias("v:v1").name;
+        let payer = crate::alias::Names::load(&state.db, &site, vec!["v:v1".into()])
+            .await
+            .unwrap()
+            .get("v:v1")
+            .name;
         assert!(body.contains(&payer) && body.contains(r#"class="heat""#));
         assert!(body.contains("Customer") && body.contains("Payment 2"));
         let q = payer.split(' ').next().unwrap().to_lowercase();
@@ -1120,7 +1125,11 @@ mod tests {
         assert!(home.contains(r#"href="/app/example.com?pages=last#pages""#));
         assert!(home.contains(r#"class="d3-chip on""#), "credited visit");
         assert!(home.contains(">/last</span>"), "last page before paying");
-        let payer = crate::alias::alias("v:v1").name;
+        let payer = crate::alias::Names::load(&state.db, &site, vec!["v:v1".into()])
+            .await
+            .unwrap()
+            .get("v:v1")
+            .name;
         assert!(home.contains(&payer) && home.contains("Germany · Desktop · Firefox"));
         let tabs = page("?sources=referrer&location=device&pages=last").await;
         assert!(tabs.contains("someblog.dev"));
@@ -1257,7 +1266,11 @@ mod tests {
         };
         store.insert_events(&[exit]).unwrap();
         crate::sync::rebuild_attribution(&state, Some(&site)).await;
-        let label = crate::alias::alias("v:v1").name;
+        let label = crate::alias::Names::load(&state.db, &site, vec!["v:v1".into()])
+            .await
+            .unwrap()
+            .get("v:v1")
+            .name;
 
         let body =
             body_text(call(&state, get("/app/example.com/visitors", Some(&cookie))).await).await;

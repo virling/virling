@@ -6,6 +6,7 @@ use serde::Deserialize;
 use time::macros::format_description;
 use time::{Date, Duration, OffsetDateTime, UtcOffset};
 
+use crate::alias::Names;
 use crate::app::AppState;
 use crate::auth::Account;
 use crate::fx::minor_to_major;
@@ -16,7 +17,7 @@ use crate::stats::{
     Activity, BreakdownRow, Dimension, GoalRow, Journey, PaymentFilter, PaymentRow, Period, Totals,
     Who, sort_rows,
 };
-use crate::{alias, chart, favicon, icons, visitor_pages};
+use crate::{chart, favicon, icons, visitor_pages};
 
 mod cards;
 mod insight;
@@ -539,8 +540,14 @@ fn path_chips(j: Option<&Journey>) -> Vec<Chip> {
     chips
 }
 
-fn path_row(p: &PaymentRow, j: Option<&Journey>, domain: &str, offset: UtcOffset) -> PathRow {
-    let alias = alias::alias(&payer_key(p));
+fn path_row(
+    p: &PaymentRow,
+    j: Option<&Journey>,
+    names: &Names,
+    domain: &str,
+    offset: UtcOffset,
+) -> PathRow {
+    let alias = names.get(&payer_key(p));
     let meta: Vec<String> = j
         .map(|j| {
             [
@@ -600,6 +607,8 @@ pub struct Card {
 
 /// A payment or goal completion shown as the person behind it.
 pub struct CustomerView {
+    /// Looks up the generated name once the page's names are loaded.
+    key: String,
     name: String,
     avatar: String,
     /// Customer, Renewal, or empty for a goal completion.
@@ -709,6 +718,12 @@ fn encode(v: &str) -> String {
 
 impl CustomerView {
     /// Case-insensitive match on name, source, channel or chip labels; `q` is lowercase.
+    fn named(mut self, names: &Names) -> Self {
+        let alias = names.get(&self.key);
+        (self.name, self.avatar) = (alias.name, alias.avatar);
+        self
+    }
+
     fn matches(&self, q: &str) -> bool {
         [&self.name, &self.source, &self.channel]
             .into_iter()
@@ -776,13 +791,13 @@ pub fn payment_customer(
     domain: &str,
     offset: UtcOffset,
 ) -> CustomerView {
-    let alias = alias::alias(&payer_key(p));
     let (status, status_class) = status(&p.status);
     let (source, channel) = source_of(p);
     let first = p.first_touch.as_ref().map(|f| f.ts);
     CustomerView {
-        name: alias.name,
-        avatar: alias.avatar,
+        key: payer_key(p),
+        name: String::new(),
+        avatar: String::new(),
         badge: if p.is_renewal { "Renewal" } else { "Customer" },
         chips: chips(a),
         icon: icons::source(&source, 16),
@@ -819,10 +834,10 @@ fn goal_customer(g: &GoalRow, a: &Activity, domain: &str, offset: UtcOffset) -> 
         Some(c) => format!("c:{c}"),
         None => format!("v:{}", g.visitor_id),
     };
-    let alias = alias::alias(&key);
     CustomerView {
-        name: alias.name,
-        avatar: alias.avatar,
+        key,
+        name: String::new(),
+        avatar: String::new(),
         badge: if g.spent_usd > 0.0 { "Customer" } else { "" },
         chips: chips(a),
         icon: icons::source(&g.source, 16),
@@ -1220,6 +1235,16 @@ pub async fn dashboard(
     if steps.iter().all(|s| s.done) {
         steps.clear();
     }
+    let names = match Names::load(
+        &state.db,
+        &ctx.site.id,
+        recent.rows.iter().map(payer_key).collect(),
+    )
+    .await
+    {
+        Ok(n) => n,
+        Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
+    };
     render(DashboardPage {
         title: "Dashboard",
         range_label: rlabel,
@@ -1236,7 +1261,7 @@ pub async fn dashboard(
             .rows
             .iter()
             .zip(&journeys)
-            .map(|(r, j)| path_row(r, j.as_ref(), &ctx.site.domain, ctx.offset))
+            .map(|(r, j)| path_row(r, j.as_ref(), &names, &ctx.site.domain, ctx.offset))
             .collect(),
         payments_total: plural(recent.total, "payment"),
         payments_href: site_url("payments"),
@@ -1415,7 +1440,7 @@ pub async fn payments(
         } else {
             (SEARCH_LIMIT, 0)
         };
-        let (total, mut customers) = match &goal {
+        let (total, customers) = match &goal {
             Some(g) => {
                 let (total, rows) = store.goal_list(&id, &p, g, limit, skip)?;
                 let who: Vec<Who> = rows
@@ -1445,18 +1470,6 @@ pub async fn payments(
                 (list.total, views.collect::<Vec<_>>())
             }
         };
-        let total = if query.is_empty() {
-            total
-        } else {
-            customers.retain(|c| c.matches(&query));
-            let n = customers.len() as u64;
-            customers = customers
-                .into_iter()
-                .skip(((page - 1) * PER_PAGE) as usize)
-                .take(PER_PAGE as usize)
-                .collect();
-            n
-        };
         let ever = if s.payments > 0 {
             s.payments
         } else {
@@ -1480,6 +1493,29 @@ pub async fn payments(
     let (s, goals, goal, total, customers, ever) = match result {
         Ok(r) => r,
         Err(code) => return code.into_response(),
+    };
+    let names = match Names::load(
+        &state.db,
+        &ctx.site.id,
+        customers.iter().map(|c| c.key.clone()).collect(),
+    )
+    .await
+    {
+        Ok(n) => n,
+        Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
+    };
+    let mut customers: Vec<CustomerView> = customers.into_iter().map(|c| c.named(&names)).collect();
+    let total = if search.is_empty() {
+        total
+    } else {
+        customers.retain(|c| c.matches(&search));
+        let n = customers.len() as u64;
+        customers = customers
+            .into_iter()
+            .skip(((page - 1) * PER_PAGE) as usize)
+            .take(PER_PAGE as usize)
+            .collect();
+        n
     };
     let counts = [s.payments, s.attributed, s.unattributed, s.refunded];
     let base = sites::app_path(&ctx.site.domain, "payments");
@@ -1707,7 +1743,7 @@ pub(crate) fn duration(d: Duration) -> String {
     }
 }
 
-fn journey_view(j: Journey, domain: &str, offset: UtcOffset) -> JourneyView {
+fn journey_view(j: Journey, names: &Names, domain: &str, offset: UtcOffset) -> JourneyView {
     let p = &j.payment;
     let (status, status_class) = status(&p.status);
     let (credited, credited_channel) = source_of(p);
@@ -1722,7 +1758,7 @@ fn journey_view(j: Journey, domain: &str, offset: UtcOffset) -> JourneyView {
         .map(|f| f.source.clone())
         .or(j.sessions.first().map(|s| s.source.clone()))
         .unwrap_or_default();
-    let alias = alias::alias(&payer_key(p));
+    let alias = names.get(&payer_key(p));
     JourneyView {
         name: alias.name,
         avatar: alias.avatar,
@@ -1848,7 +1884,12 @@ pub async fn payment(
             Ok(None) => return StatusCode::NOT_FOUND.into_response(),
             Err(code) => return code.into_response(),
         };
-    let j = journey_view(journey, &ctx.site.domain, ctx.offset);
+    let names = match Names::load(&state.db, &ctx.site.id, vec![payer_key(&journey.payment)]).await
+    {
+        Ok(n) => n,
+        Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
+    };
+    let j = journey_view(journey, &names, &ctx.site.domain, ctx.offset);
     if headers.contains_key("x-drawer") {
         return render(JourneyFragment { j });
     }
