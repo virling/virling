@@ -42,8 +42,8 @@
     <span class="num">{{ v.visits }}</span>
     <span class="num vr-pv">{{ v.pageviews }}</span>
     <span class="vr-exit">{% if v.exit_page.is_empty() %}<span class="na">n/a</span>{% else %}<span class="mono">{{ v.exit_page }}</span>{% endif %}</span>
-    <span class="vr-out src">{% if v.exit_link.is_empty() %}<span class="na">None</span>{% else %}{{ v.exit_icon|safe }}<span class="lbl mono">{{ v.exit_link }}</span>{% endif %}</span>
-    <span class="vr-goals">{% for g in v.goals %}<span class="chip goal">{{ g }}</span>{% endfor %}{% if v.more_goals > 0 %}<span class="chip">+{{ v.more_goals }}</span>{% endif %}{% if v.goals.is_empty() %}<span class="na">None</span>{% endif %}</span>
+    <span class="vr-out src">{% if !v.exit_link.is_empty() %}{{ v.exit_icon|safe }}<span class="lbl mono">{{ v.exit_link }}</span>{% endif %}</span>
+    <span class="vr-goals">{% for g in v.goals %}<span class="chip goal">{{ g }}</span>{% endfor %}{% if v.more_goals > 0 %}<span class="chip">+{{ v.more_goals }}</span>{% endif %}</span>
     <span class="num vr-rev">{% if v.paid %}<b>{{ v.revenue }}</b>{% else %}<span class="na">Not paid</span>{% endif %}</span>
     <span class="num dim vr-seen" title="{{ v.last_full }}">{{ v.last_seen }}</span>
     <span class="vr-sum">{% if v.exit_link.is_empty() %}{% if !v.exit_page.is_empty() %}Left from <span class="mono">{{ v.exit_page }}</span>{% endif %}{% else %}{{ v.exit_icon|safe }}Clicked out to <span class="mono">{{ v.exit_link }}</span>{% endif %}<i class="sep"></i>{{ v.last_seen }}</span>
