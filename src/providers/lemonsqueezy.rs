@@ -43,12 +43,14 @@ pub async fn fetch(
     step(cur, serde_json::from_str(&body)?)
 }
 
-/// Lists every subscription; LemonSqueezy keys can always read them.
+/// Lists every subscription with its price and store currency; LemonSqueezy keys can always read them.
 pub async fn subscriptions(
     client: &reqwest::Client,
     key: &str,
 ) -> anyhow::Result<Option<Vec<Subscription>>> {
     let mut out = Vec::new();
+    let mut prices = HashMap::new();
+    let mut currencies = HashMap::new();
     for page in 1..=MAX_SUBSCRIPTION_PAGES {
         let body = get(
             client,
@@ -58,7 +60,28 @@ pub async fn subscriptions(
         )
         .await?;
         let list: SubscriptionList = serde_json::from_str(&body)?;
-        out.extend(list.data.into_iter().filter_map(to_subscription));
+        // Subscriptions carry only a price ID and store ID; each distinct one is read once.
+        for a in list.data.iter().map(|r| &r.attributes) {
+            if let Some(item) = &a.first_subscription_item
+                && !prices.contains_key(&item.price_id)
+            {
+                let body = get(client, key, &format!("prices/{}", item.price_id), &[]).await?;
+                let price: One<PriceAttributes> = serde_json::from_str(&body)?;
+                prices.insert(item.price_id, price.data.attributes);
+            }
+            if let Some(store) = a.store_id
+                && !currencies.contains_key(&store)
+            {
+                let body = get(client, key, &format!("stores/{store}"), &[]).await?;
+                let s: One<StoreAttributes> = serde_json::from_str(&body)?;
+                currencies.insert(store, s.data.attributes.currency);
+            }
+        }
+        out.extend(
+            list.data
+                .into_iter()
+                .filter_map(|r| to_subscription(r, &prices, &currencies)),
+        );
         if list.links.next.is_none() {
             break;
         }
@@ -67,8 +90,17 @@ pub async fn subscriptions(
 }
 
 /// on_trial, active and past_due are live, and so is cancelled until its ends_at (its grace period).
-fn to_subscription(r: SubscriptionResource) -> Option<Subscription> {
+fn to_subscription(
+    r: SubscriptionResource,
+    prices: &HashMap<i64, PriceAttributes>,
+    currencies: &HashMap<i64, String>,
+) -> Option<Subscription> {
     let a = r.attributes;
+    let item = a
+        .first_subscription_item
+        .as_ref()
+        .filter(|i| !i.is_usage_based);
+    let price = item.and_then(|i| prices.get(&i.price_id));
     let (live, ends_at) = match a.status.as_str() {
         "on_trial" | "active" | "past_due" => (true, None),
         "cancelled" => (a.ends_at.is_some(), a.ends_at),
@@ -80,6 +112,13 @@ fn to_subscription(r: SubscriptionResource) -> Option<Subscription> {
         status: a.status,
         live,
         ends_at,
+        amount: item
+            .zip(price)
+            .and_then(|(i, p)| Some(p.unit_price? * i.quantity)),
+        currency: a.store_id.and_then(|s| currencies.get(&s)).cloned(),
+        interval: price.and_then(|p| p.renewal_interval_unit.clone()),
+        interval_count: price.and_then(|p| p.renewal_interval_quantity).unwrap_or(1),
+        mrr_usd: None,
     })
 }
 
@@ -254,9 +293,41 @@ struct SubscriptionResource {
 #[derive(Deserialize)]
 struct SubscriptionAttributes {
     customer_id: Option<i64>,
+    store_id: Option<i64>,
     status: String,
     #[serde(default, with = "time::serde::rfc3339::option")]
     ends_at: Option<OffsetDateTime>,
+    first_subscription_item: Option<SubscriptionItem>,
+}
+
+#[derive(Deserialize)]
+struct SubscriptionItem {
+    price_id: i64,
+    quantity: i64,
+    #[serde(default)]
+    is_usage_based: bool,
+}
+
+#[derive(Deserialize)]
+struct One<T> {
+    data: OneData<T>,
+}
+
+#[derive(Deserialize)]
+struct OneData<T> {
+    attributes: T,
+}
+
+#[derive(Deserialize)]
+struct PriceAttributes {
+    unit_price: Option<i64>,
+    renewal_interval_unit: Option<String>,
+    renewal_interval_quantity: Option<i64>,
+}
+
+#[derive(Deserialize)]
+struct StoreAttributes {
+    currency: String,
 }
 
 #[derive(Deserialize)]
@@ -294,10 +365,33 @@ mod tests {
         let list: SubscriptionList =
             serde_json::from_str(include_str!("fixtures/lemonsqueezy_subscriptions.json")).unwrap();
         assert!(list.links.next.is_none());
-        let subs: Vec<(String, bool, bool)> = list
+        let price: One<PriceAttributes> =
+            serde_json::from_str(include_str!("fixtures/lemonsqueezy_price.json")).unwrap();
+        let store: One<StoreAttributes> =
+            serde_json::from_str(include_str!("fixtures/lemonsqueezy_store.json")).unwrap();
+        let prices = HashMap::from([(77, price.data.attributes)]);
+        let currencies = HashMap::from([(1, store.data.attributes.currency)]);
+        let subs: Vec<Subscription> = list
             .data
             .into_iter()
-            .filter_map(to_subscription)
+            .filter_map(|r| to_subscription(r, &prices, &currencies))
+            .collect();
+        // Two seats at 90.00 a year.
+        assert_eq!(
+            (
+                subs[0].amount,
+                subs[0].currency.as_deref(),
+                subs[0].interval.as_deref()
+            ),
+            (Some(18000), Some("EUR"), Some("year"))
+        );
+        assert_eq!(subs[0].monthly(), Some(1500.0));
+        assert_eq!(
+            (subs[1].amount, subs[1].currency.as_deref()),
+            (None, Some("EUR"))
+        );
+        let subs: Vec<(String, bool, bool)> = subs
+            .into_iter()
             .map(|s| (s.status, s.live, s.ends_at.is_some()))
             .collect();
         let want: Vec<(String, bool, bool)> = [

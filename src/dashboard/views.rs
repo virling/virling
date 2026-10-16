@@ -10,7 +10,7 @@ use super::{
 };
 use crate::alias::Names;
 use crate::events::EventStore;
-use crate::retention::{LTV_DAYS, Retention, RetentionRow};
+use crate::retention::{LTV_DAYS, Mrr, Retention, RetentionRow};
 use crate::stats::{
     Activity, Filter, Journey, PaymentFilter, PaymentPage, PaymentSummary, Period, ProviderSplit,
     Totals, Who,
@@ -327,6 +327,7 @@ pub struct PaymentsData {
     pub(super) journeys: Vec<Option<Journey>>,
     pub(super) split: Vec<ProviderSplit>,
     pub(super) summary: PaymentSummary,
+    pub(super) mrr: Option<Mrr>,
 }
 
 pub fn load_payments(
@@ -335,6 +336,7 @@ pub fn load_payments(
     p: &Period,
     window_days: i64,
     f: &Filter,
+    now: OffsetDateTime,
 ) -> anyhow::Result<PaymentsData> {
     let page = store.payment_list_in(id, p, PaymentFilter::All, 10, 0, f)?;
     let journeys = page
@@ -347,6 +349,7 @@ pub fn load_payments(
         journeys,
         split: store.payment_split(id, p)?,
         summary: store.payment_summary(id, p)?,
+        mrr: store.mrr(id, p, now)?,
     })
 }
 
@@ -515,12 +518,20 @@ pub fn payments_view(
                     },
                     s.refunded_usd > 0.0,
                 ),
-                (
-                    "Customers",
-                    group(s.customers),
-                    "paid in this range".into(),
-                    false,
-                ),
+                match &v.mrr {
+                    Some(m) => (
+                        "MRR",
+                        money(m.usd),
+                        plural(m.customers, "paying customer"),
+                        false,
+                    ),
+                    None => (
+                        "Customers",
+                        group(s.customers),
+                        "paid in this range".into(),
+                        false,
+                    ),
+                },
             ]
         },
         multi: rows
@@ -560,7 +571,12 @@ fn pct(v: Option<f64>) -> String {
     v.map_or_else(|| "–".into(), |v| format!("{:.0}%", v * 100.0))
 }
 
-pub fn retention_view(r: &Retention, rest: &HashMap<String, String>, href: &Href) -> RetentionView {
+pub fn retention_view(
+    r: &Retention,
+    mrr: Option<&Mrr>,
+    rest: &HashMap<String, String>,
+    href: &Href,
+) -> RetentionView {
     let refunds = rest.get("ret").map(String::as_str) == Some("refunds");
     let t = &r.total;
     let avg = (t.customers > 0).then(|| t.still_paying as f64 / t.customers as f64);
@@ -683,8 +699,14 @@ pub fn retention_view(r: &Retention, rest: &HashMap<String, String>, href: &Href
             "Share of these customers with any refund or chargeback.".into()
         } else {
             format!(
-                "Value each is net revenue per customer so far, after refunds. Average still paying: {}.",
-                pct(avg)
+                "Value each is net revenue per customer so far, after refunds. Average still paying: {}.{}",
+                pct(avg),
+                mrr.filter(|m| m.cohort_customers > 0)
+                    .map(|m| format!(
+                        " The ones still paying bring in {} a month.",
+                        money(m.cohort_usd)
+                    ))
+                    .unwrap_or_default()
             )
         },
     }

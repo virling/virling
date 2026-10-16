@@ -613,6 +613,11 @@ fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>, Vec<Subsc
                 status: if live { "active" } else { "canceled" }.into(),
                 live,
                 ends_at: None,
+                amount: Some(plan),
+                currency: Some(currency.into()),
+                interval: Some("month".into()),
+                interval_count: 1,
+                mrr_usd: Some((plan as f64 * rate).round() / 100.0),
             });
         }
     }

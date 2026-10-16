@@ -110,6 +110,10 @@ struct PolarSubscription {
     id: String,
     status: String,
     customer_id: String,
+    amount: Option<i64>,
+    currency: Option<String>,
+    recurring_interval: Option<String>,
+    recurring_interval_count: Option<i64>,
 }
 
 impl PolarSubscription {
@@ -121,6 +125,11 @@ impl PolarSubscription {
             customer_id: self.customer_id,
             status: self.status,
             ends_at: None,
+            amount: self.amount,
+            currency: self.currency,
+            interval: self.recurring_interval,
+            interval_count: self.recurring_interval_count.unwrap_or(1),
+            mrr_usd: None,
         }
     }
 }
@@ -497,12 +506,24 @@ mod tests {
         let list: List<PolarSubscription> =
             serde_json::from_str(include_str!("fixtures/polar_subscriptions.json")).unwrap();
         assert_eq!(list.pagination.max_page, 1);
-        let subs: Vec<(String, bool)> = list
+        let subs: Vec<Subscription> = list
             .items
             .into_iter()
             .map(PolarSubscription::into_subscription)
-            .map(|s| (s.status, s.live))
             .collect();
+        assert_eq!(
+            (
+                subs[0].amount,
+                subs[0].currency.as_deref(),
+                subs[0].monthly()
+            ),
+            (Some(1500), Some("usd"), Some(1500.0))
+        );
+        assert_eq!(
+            (subs[1].interval_count, subs[1].monthly()),
+            (1, Some(1250.0))
+        );
+        let subs: Vec<(String, bool)> = subs.into_iter().map(|s| (s.status, s.live)).collect();
         let want: Vec<(String, bool)> = [
             ("active", true),
             ("trialing", true),

@@ -4,7 +4,7 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
-use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription};
+use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription, months};
 
 const API: &str = "https://api.stripe.com/v1";
 // Last version where Charge.invoice exists, so one expanded list call yields billing_reason.
@@ -204,13 +204,41 @@ pub async fn subscriptions(
 
 /// Active, trialing and past_due (Stripe is still retrying) are live; a cancel at period end stays active until then.
 fn to_subscription(s: &StripeSubscription) -> Option<Subscription> {
+    let (amount, interval, interval_count) = match price_of(s) {
+        Some((a, i, n)) => (Some(a), Some(i), n),
+        None => (None, None, 1),
+    };
     Some(Subscription {
         subscription_id: s.id.clone(),
         customer_id: s.customer.clone()?,
         status: s.status.clone(),
         live: matches!(s.status.as_str(), "active" | "trialing" | "past_due"),
         ends_at: None,
+        amount,
+        currency: s.currency.clone(),
+        interval,
+        interval_count,
+        mrr_usd: None,
     })
+}
+
+/// Every item's price per the first item's billing period; None when an item has no fixed recurring price.
+fn price_of(s: &StripeSubscription) -> Option<(i64, String, i64)> {
+    let items = &s.items.as_ref()?.data;
+    let first = items.first()?.price.as_ref()?.recurring.as_ref()?;
+    let mut monthly = 0.0;
+    for item in items {
+        let price = item.price.as_ref()?;
+        let r = price.recurring.as_ref()?;
+        monthly += (price.unit_amount? * item.quantity.unwrap_or(1)) as f64
+            / months(&r.interval, r.interval_count)?;
+    }
+    let per = months(&first.interval, first.interval_count)?;
+    Some((
+        (monthly * per).round() as i64,
+        first.interval.clone(),
+        first.interval_count,
+    ))
 }
 
 fn page_query(after: Option<&str>) -> Vec<(&'static str, String)> {
@@ -438,6 +466,31 @@ struct StripeSubscription {
     id: String,
     customer: Option<String>,
     status: String,
+    currency: Option<String>,
+    items: Option<Items>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Items {
+    data: Vec<Item>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Item {
+    quantity: Option<i64>,
+    price: Option<Price>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Price {
+    unit_amount: Option<i64>,
+    recurring: Option<Recurring>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Recurring {
+    interval: String,
+    interval_count: i64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -698,6 +751,25 @@ mod tests {
         let first = to_subscription(&list.data[0]).unwrap();
         assert_eq!(first.customer_id, "cus_NffrFeUfNV2Hib");
         assert_eq!(first.ends_at, None);
+        // 29.00 a month plus three seats at 120.00 a year: 59.00 a month, billed monthly.
+        assert_eq!(
+            (
+                first.amount,
+                first.currency.as_deref(),
+                first.interval.as_deref()
+            ),
+            (Some(5900), Some("eur"), Some("month"))
+        );
+        assert_eq!(first.monthly(), Some(5900.0));
+        let quarterly = to_subscription(&list.data[1]).unwrap();
+        assert_eq!(
+            (quarterly.amount, quarterly.interval_count),
+            (Some(9000), 3)
+        );
+        assert_eq!(quarterly.monthly(), Some(3000.0));
+        let metered = to_subscription(&list.data[2]).unwrap();
+        assert_eq!((metered.amount, metered.monthly()), (None, None));
+        assert_eq!(to_subscription(&list.data[3]).unwrap().amount, None);
     }
 
     #[test]

@@ -154,7 +154,16 @@ async fn sync_subscriptions(state: &AppState, integration: &Integration) -> anyh
         .insert(integration.id.clone(), now);
     let store = state.events.clone();
     let (site, name) = (integration.site_id.clone(), provider.as_str());
-    let subscriptions = subscriptions.unwrap_or_default();
+    let mut subscriptions = subscriptions.unwrap_or_default();
+    for s in &mut subscriptions {
+        if let (Some(monthly), Some(currency)) = (s.monthly(), s.currency.as_deref()) {
+            s.mrr_usd = state
+                .rates
+                .to_usd(monthly.round() as i64, currency)
+                .await
+                .unwrap_or(None);
+        }
+    }
     tokio::task::spawn_blocking(move || store.replace_subscriptions(&site, name, &subscriptions))
         .await??;
     Ok(())

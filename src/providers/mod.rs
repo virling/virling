@@ -29,6 +29,33 @@ pub struct Subscription {
     pub live: bool,
     /// When a cancelled but still live subscription stops; None when it renews.
     pub ends_at: Option<OffsetDateTime>,
+    /// Price per billing period in minor units of `currency`, before discounts and tax; None when unknown.
+    pub amount: Option<i64>,
+    pub currency: Option<String>,
+    /// Billing period unit (day, week, month or year) and how many of them.
+    pub interval: Option<String>,
+    pub interval_count: i64,
+    /// `amount` per month in USD, set by sync.
+    pub mrr_usd: Option<f64>,
+}
+
+impl Subscription {
+    /// `amount` per month in minor units; None without a price or a known interval.
+    pub fn monthly(&self) -> Option<f64> {
+        Some(self.amount? as f64 / months(self.interval.as_deref()?, self.interval_count)?)
+    }
+}
+
+/// Months in `count` billing periods of `unit`: day, week, month or year.
+pub fn months(unit: &str, count: i64) -> Option<f64> {
+    let one = match unit {
+        "day" => 12.0 / 365.0,
+        "week" => 12.0 / 52.0,
+        "month" => 1.0,
+        "year" => 12.0,
+        _ => return None,
+    };
+    Some(one * count.max(1) as f64)
 }
 
 /// Most subscriptions read per round, newest first; older ones fall back to payment recency.

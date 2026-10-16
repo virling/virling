@@ -27,6 +27,10 @@ A customer is still paying when:
 
 Subscription status is read with the same read-only key, once an hour. Stripe needs read access to Subscriptions, which the setup already asks for. Dodo Payments and LemonSqueezy keys can always read it. Polar needs the optional `subscriptions:read` scope; without it, Polar customers use payment recency and the page says so.
 
+## MRR
+
+The same hourly read stores each subscription's price, currency and billing interval. MRR is the sum of those prices per month, converted to USD, over subscriptions that are live, past any trial and not ended. It is the list price before discounts and tax. Stripe adds up every item on the subscription; items without a fixed recurring price (metered or tiered) leave that subscription out. LemonSqueezy subscriptions carry only a price ID, so Virling also reads each distinct price and the store's currency. MRR shows on Latest payments, and Customers who stay adds what the customers from the range pay per month now.
+
 ## Metrics
 
 | Metric | Meaning |
