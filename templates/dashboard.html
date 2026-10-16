@@ -130,7 +130,22 @@
     {% call d3::row(r) %}{% endcall %}
     {% if !r.kids.is_empty() %}<div class="d3-kids" id="{{ r.id }}" hidden>{% for k in r.kids %}{% call d3::row(k) %}{% endcall %}{% endfor %}</div>{% endif %}
     {% endfor %}
-    <div class="d3-foot"><span>{{ p.foot }}</span>{% if p.openable %}<button type="button" class="d3-link" data-expand-all>Expand all</button>{% endif %}</div>
+    <div class="d3-foot"><span>{{ p.foot }}</span>{% if p.openable %}<button type="button" class="d3-link" data-expand-all>Expand all</button>{% endif %}{% if !p.new_link.is_empty() %}<button type="button" class="d3-link" data-open="new-link">+ Tracked link</button>{% endif %}</div>
+    {% if !p.new_link.is_empty() %}
+    <dialog class="d3-dlg" id="new-link">
+      <form method="post" action="{{ p.new_link }}">
+        <h3>New tracked link</h3>
+        <p class="muted">For places that hide where visitors came from, like newsletters, Discord or a QR code. Visits land in the right channel.</p>
+        <fieldset class="d3-places"><legend>Where will you share it?</legend>
+          {% for (value, label, _) in crate::links::PLACES %}<label><input type="radio" name="place" value="{{ value }}" required>{{ label }}</label>{% endfor %}
+        </fieldset>
+        <label class="d3-field d3-other">Other source<input name="other" maxlength="80" placeholder="e.g. indiehackers.com"></label>
+        <label class="d3-field">Page<input name="destination" value="/" required></label>
+        <label class="d3-field"><span>Name <span class="muted">(optional)</span></span><input name="name" maxlength="80" placeholder="Launch post"></label>
+        <div class="d3-dlg-actions"><button type="button" class="d3-btn" data-close>Cancel</button><button type="submit" class="d3-btn dark">Create link</button></div>
+      </form>
+    </dialog>
+    {% endif %}
     </div>
     {% endfor %}
   </div>

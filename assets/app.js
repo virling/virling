@@ -203,11 +203,12 @@ for (const input of document.querySelectorAll("input[data-swatch]")) {
 }
 
 for (const btn of document.querySelectorAll("[data-copy-text]")) {
-  const label = btn.textContent;
-  btn.addEventListener("click", async () => {
+  const label = btn.innerHTML;
+  btn.addEventListener("click", async (e) => {
+    e.preventDefault();
     await navigator.clipboard.writeText(btn.dataset.copyText);
-    btn.textContent = "Copied";
-    setTimeout(() => { btn.textContent = label; }, 1500);
+    btn.textContent = btn.querySelector("svg") ? "✓" : "Copied";
+    setTimeout(() => { btn.innerHTML = label; }, 1500);
   });
 }
 
@@ -321,4 +322,16 @@ for (const form of document.querySelectorAll("[data-cal]")) {
     draw();
   });
   draw();
+}
+
+for (const btn of document.querySelectorAll("[data-open]")) {
+  const dlg = document.getElementById(btn.dataset.open);
+  btn.addEventListener("click", () => dlg.showModal());
+  dlg.querySelector("[data-close]")?.addEventListener("click", () => dlg.close());
+  const other = dlg.querySelector(".d3-other");
+  if (other) {
+    const sync = () => { other.hidden = dlg.querySelector("[name=place]:checked")?.value !== "other"; };
+    dlg.addEventListener("change", sync);
+    sync();
+  }
 }

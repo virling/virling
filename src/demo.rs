@@ -766,17 +766,10 @@ async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
         anyhow::ensure!(res.url().path().starts_with("/app/"), "{url} redirected");
         Ok(res.text().await?)
     };
-    let mut queue: VecDeque<String> = [
-        "",
-        "/payments",
-        "/visitors",
-        "/retention",
-        "/links",
-        "/report",
-    ]
-    .iter()
-    .map(|p| format!("/app/{DOMAIN}{p}"))
-    .collect();
+    let mut queue: VecDeque<String> = ["", "/payments", "/visitors", "/retention", "/report"]
+        .iter()
+        .map(|p| format!("/app/{DOMAIN}{p}"))
+        .collect();
     let mut seen: HashSet<String> = queue.iter().filter_map(|u| target(u)).collect();
     let mut timelines = 0;
     let mut pages = Vec::new();
@@ -955,7 +948,6 @@ fn target(url: &str) -> Option<String> {
         "/payments" => ("payments/", &["range", "filter"]),
         "/report" => ("report/", &[]),
         "/retention" => ("retention/", &["range", "by"]),
-        "/links" => ("links/", &[]),
         "/visitors" => ("visitors/", &["range", "exit", "paid", "channel", "goal"]),
         p if p.starts_with("/visitors/") => {
             let id = &p["/visitors/".len()..];

@@ -1198,7 +1198,7 @@ mod tests {
         let cookie = sign_in(&state, "me%40example.com").await;
         let bad = form(
             "/app/example.com/links",
-            "name=Post&destination=https%3A%2F%2Fevil.com%2F&source=x.com&channel=social".into(),
+            "place=x&destination=https%3A%2F%2Fevil.com%2F".into(),
             Some(&cookie),
         );
         let res = call(&state, bad).await;
@@ -1206,14 +1206,16 @@ mod tests {
             res.headers()["location"]
                 .to_str()
                 .unwrap()
-                .ends_with("?error=destination")
+                .ends_with("?channels=campaign&link_error=destination#channels")
         );
         let ok = form(
             "/app/example.com/links",
-            "name=Day+3+post&destination=https%3A%2F%2Fexample.com%2Fpricing&source=X.com&channel=social".into(),
+            "place=x&destination=%2Fpricing&name=Day+3+post".into(),
             Some(&cookie),
         );
-        assert_eq!(call(&state, ok).await.status(), StatusCode::SEE_OTHER);
+        let res = call(&state, ok).await;
+        assert_eq!(res.status(), StatusCode::SEE_OTHER);
+        let ready = res.headers()["location"].to_str().unwrap().to_string();
         let slug: String = sqlx::query_scalar("SELECT slug FROM short_links")
             .fetch_one(&state.db)
             .await
@@ -1247,16 +1249,10 @@ mod tests {
             StatusCode::NOT_FOUND
         );
 
-        let body =
-            body_text(call(&state, get("/app/example.com/links", Some(&cookie))).await).await;
-        assert!(body.contains("Day 3 post") && body.contains(&format!("/l/{slug}")));
+        let body = body_text(call(&state, get(&ready, Some(&cookie))).await).await;
+        assert!(body.contains("Link ready:") && body.contains(&format!("/l/{slug}")));
+        assert!(body.contains("+ Tracked link"));
         let other = sign_in(&state, "other%40example.com").await;
-        assert_eq!(
-            call(&state, get("/app/example.com/links", Some(&other)))
-                .await
-                .status(),
-            StatusCode::NOT_FOUND
-        );
         let id: String = sqlx::query_scalar("SELECT id FROM short_links")
             .fetch_one(&state.db)
             .await
