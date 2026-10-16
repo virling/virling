@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/demo/app.css">
+<title>Payment · tallybird.app · Virling</title>
+</head>
+<body class="app">
+<aside class="side" id="side">
+  <a class="brand" href="/"><svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+  <div class="menu-wrap switcher" data-menu>
+    <button type="button" aria-haspopup="true" aria-expanded="false">
+      <img class="favicon" src="/demo/icons/site.svg" width="22" height="22" alt="">
+      <span class="grow">tallybird.app</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
+    </button>
+    <div class="menu" hidden>
+      
+      <a href="/demo/payments/" aria-current="true"><img class="favicon sm" src="/demo/icons/site.svg" width="16" height="16" alt="">tallybird.app</a>
+      
+      
+    </div>
+  </div>
+  <nav class="nav">
+    <a href="/demo/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Dashboard</a>
+    <a href="/demo/visitors/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 9M22 21a7 7 0 0 0-4-6.3"/></svg>Visitors</a>
+    <a href="/demo/payments/" aria-current="page">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>Payments</a>
+    <a href="/demo/retention/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>Retention</a>
+    <a href="/demo/links/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>Links</a>
+    <a href="/demo/report/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>Client report</a>
+    
+  </nav>
+  <div class="usage">
+    <span>3,535 visitors in the last 30 days</span>
+  </div>
+  <div class="menu-wrap account" data-menu>
+    <button type="button" aria-haspopup="true" aria-expanded="false">
+      <span class="favicon avatar">MC</span>
+      <span class="grow who"><b>maya.chen@tallybird.app</b><span>Self-hosted</span></span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
+    </button>
+    <div class="menu up" hidden>
+      <a href="/#join">Account settings</a>
+      <a href="/#join">Sign out</a>
+    </div>
+  </div>
+</aside>
+<div class="main">
+  
+  <header class="top">
+    <button class="burger" type="button" aria-controls="side" aria-expanded="false" aria-label="Menu" data-burger>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <h1>Payment</h1>
+    <span class="live-pill" title="Visitors in the last 5 minutes"><span class="dot"></span>4 live</span>
+    <span class="grow"></span>
+    
+  </header>
+  
+  <main class="content">
+<div class="notice row"><span>Demo with sample data.</span><a class="b" href="/#join">Join the waitlist</a></div>
+  
+<a class="link-quiet" href="/demo/payments/">&#8592; All payments</a>
+<section class="card journey-page">
+<div class="journey">
+  <div class="j-head">
+    <div class="j-who"><span class="av" style="background:#4F6D7A">CD</span><b>Clever Dingo</b></div>
+    <div class="j-amt"><b>$12.96</b><span class="badge ok">Paid</span></div>
+    <span class="j-meta">Sep 16, 2026 at 09:51<i class="sep"></i><img class="flag" src="/demo/flags/us.svg" width="16" height="12" alt="United States flag">United States<i class="sep"></i>Chrome on Desktop</span>
+  </div>
+  
+  <div class="j-stats">
+    <div><span class="k">Credited to</span><b><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="lbl">Email</span></b></div>
+    <div><span class="k">First touch</span><b><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="lbl">Email</span></b><span class="s">Aug 11</span></div>
+    <div><span class="k">Time to pay</span><b>36 days</b><span class="s">3 visits</span></div>
+  </div>
+  <a class="j-visitor" href="/demo/visitors/vc728ced1849d4f5b/"><b>Visitor timeline</b><span class="grow">Every visit, page and exit</span>Open<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+  <div class="j-sec">
+    <b class="j-title">Journey</b>
+    <ol class="tl">
+      
+      <li class="credited">
+        <span class="tl-ico"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>
+        <div class="tl-body">
+          <div class="tl-head"><b>Email</b><span class="credit">Credited</span><span class="grow"></span><span class="dim">Aug 11, 09:35</span></div>
+          <span class="dim">Campaign weekly-digest</span>
+          <div class="chips"><span class="chip mono">/blog/net-30-explained</span><span class="chip mono">/pricing</span><span class="chip mono">/about</span><span class="chip mono">/docs/stripe</span><span class="chip mono">/features/payment-reminders</span></div>
+        </div>
+      </li>
+      
+      <li>
+        <span class="tl-ico"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 8-6 2-3 6z"/></svg></span>
+        <div class="tl-body">
+          <div class="tl-head"><b>Direct</b><span class="grow"></span><span class="dim">Aug 17, 09:35</span></div>
+          
+          <div class="chips"><span class="chip mono">/features/recurring-invoices</span><span class="chip mono">/docs/stripe</span><span class="chip mono">/features/payment-reminders</span><span class="chip mono">/docs/getting-started</span><span class="chip mono">/</span><span class="chip goal">Goal: signup</span><span class="chip goal">Goal: trial</span></div>
+        </div>
+      </li>
+      
+      <li>
+        <span class="tl-ico"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 8-6 2-3 6z"/></svg></span>
+        <div class="tl-body">
+          <div class="tl-head"><b>Direct</b><span class="grow"></span><span class="dim">Sep 16, 08:52</span></div>
+          
+          <div class="chips"><span class="chip mono">/changelog</span><span class="chip mono">/features/payment-reminders</span></div>
+        </div>
+      </li>
+      
+      <li class="paid"><span class="tl-ico"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></span><div class="tl-head"><b>Paid $12.96</b><span class="prov-inline"><svg class="ico" width="14" height="14" role="img" aria-label="Stripe" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#635BFF" d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z"/></svg>Stripe</span><span class="grow"></span><span class="dim">Sep 16, 2026 at 09:51</span></div></li>
+    </ol>
+  </div>
+  
+  <div class="j-sec">
+    <b class="j-title">Details</b>
+    <div class="det"><span>Charged</span><span>EUR 12.00, shown as $12.96</span></div>
+    <div class="det"><span>Provider</span><span><svg class="ico" width="14" height="14" role="img" aria-label="Stripe" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#635BFF" d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z"/></svg>Stripe</span></div>
+    <div class="det"><span>Payment ID</span><span class="mono">pi_880fcede921b60c7</span></div>
+    <div class="det"><span>Customer</span><span class="mono">cus_c7cf5f5b564db08c</span></div>
+    <div class="det"><span>Visitor</span><span class="mono">vc728ced1849d4f5b</span></div>
+  </div>
+</div>
+</section>
+
+  </main>
+</div>
+<script src="/demo/app.js"></script>
+</body>
+</html>

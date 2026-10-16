@@ -3,10 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/demo/app.css">
 <title>Payments · tallybird.app · Virling</title>
 </head>
@@ -15,13 +14,13 @@
   <a class="brand" href="/"><svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
   <div class="menu-wrap switcher" data-menu>
     <button type="button" aria-haspopup="true" aria-expanded="false">
-      <span class="favicon">T</span>
+      <img class="favicon" src="/demo/icons/site.svg" width="22" height="22" alt="">
       <span class="grow">tallybird.app</span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
     </button>
     <div class="menu" hidden>
       
-      <a href="/demo/payments/" aria-current="true"><span class="favicon sm">T</span>tallybird.app</a>
+      <a href="/demo/payments/" aria-current="true"><img class="favicon sm" src="/demo/icons/site.svg" width="16" height="16" alt="">tallybird.app</a>
       
       
     </div>
@@ -29,14 +28,20 @@
   <nav class="nav">
     <a href="/demo/">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Dashboard</a>
+    <a href="/demo/visitors/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 9M22 21a7 7 0 0 0-4-6.3"/></svg>Visitors</a>
     <a href="/demo/payments/" aria-current="page">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>Payments</a>
+    <a href="/demo/retention/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>Retention</a>
+    <a href="/demo/links/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>Links</a>
     <a href="/demo/report/">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>Client report</a>
     
   </nav>
   <div class="usage">
-    <span>3,167 visitors in the last 30 days</span>
+    <span>3,535 visitors in the last 30 days</span>
   </div>
   <div class="menu-wrap account" data-menu>
     <button type="button" aria-haspopup="true" aria-expanded="false">
@@ -51,12 +56,13 @@
   </div>
 </aside>
 <div class="main">
+  
   <header class="top">
     <button class="burger" type="button" aria-controls="side" aria-expanded="false" aria-label="Menu" data-burger>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
     </button>
     <h1>Payments</h1>
-    <span class="live-pill" title="Visitors in the last 5 minutes"><span class="dot"></span>4 live</span>
+    <span class="live-pill" title="Visitors in the last 5 minutes"><span class="dot"></span>5 live</span>
     <span class="grow"></span>
     <div class="menu-wrap range" data-menu>
   <button type="button" aria-haspopup="true" aria-expanded="false">
@@ -81,41 +87,36 @@
   </div>
 </div>
   </header>
+  
   <main class="content">
 <div class="notice row"><span>Demo with sample data.</span><a class="b" href="/#join">Join the waitlist</a></div>
   
 <section class="box summary">
-  <div><span class="sn">Net revenue</span><b>$6,121</b><span class="dim">After $41 in refunds</span></div><div><span class="sn">Payments</span><b>232</b><span class="dim">From 232 customers</span></div><div><span class="sn">Attributed</span><b>91%</b><span class="dim">210 of 232 matched to a visit</span></div><div><span class="sn">Average payment</span><b>$26.38</b><span class="dim">All shown in USD</span></div>
+  <div><span class="sn">Net revenue</span><b>$6,318</b><span class="dim">After $12 in refunds</span></div><div><span class="sn">Payments</span><b>240</b><span class="dim">From 240 customers</span></div><div><span class="sn">Attributed</span><b>91%</b><span class="dim">218 of 240 matched to a visit</span></div><div><span class="sn">Average payment</span><b>$26.32</b><span class="dim">All shown in USD</span></div>
 </section>
 
 <div class="list-bar">
-  <nav class="sg" aria-label="Filter payments"><a href="/demo/payments/">All <span class="count">232</span></a><a href="/demo/payments/attributed/">Attributed <span class="count">210</span></a><a href="/demo/payments/unattributed/">Unattributed <span class="count">22</span></a><a href="/demo/payments/refunded/" class="on" aria-current="true">Refunded <span class="count">2</span></a></nav>
-  <span class="dim">Showing 1 to 2 of 2</span>
+  <div class="menu-wrap goal-pick" data-menu>
+    <button type="button" class="ctl" aria-haspopup="true" aria-expanded="false"><span class="dim">Goal</span>Payment 240<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="menu" hidden><a href="/demo/payments/" aria-current="true">Payment <span class="count">240</span></a></div>
+  </div>
+  <nav class="sg" aria-label="Filter payments"><a href="/demo/payments/">All <span class="count">240</span></a><a href="/demo/payments/attributed/">Attributed <span class="count">218</span></a><a href="/demo/payments/unattributed/">Unattributed <span class="count">22</span></a><a href="/demo/payments/refunded/" class="on" aria-current="true">Refunded <span class="count">1</span></a></nav>
+  
+  <span class="dim">Showing 1 to 1 of 1</span>
 </div>
 
-<section class="box pay-list" data-rows data-total="2" data-offset="0">
-  <div class="pr th"><span>Date</span><span>Credited to</span><span class="pr-first">First touch</span><span class="num">Amount</span><span>Status</span><span class="pr-prov">Provider</span><span></span></div>
-  
-  <a class="pr prow" href="/demo/payments/stripe/pi_b06b37b1f923f1f2/" data-drawer="/demo/payments/stripe/pi_b06b37b1f923f1f2/drawer.html">
-    <span class="dim">Sep 23, 18:59</span>
-    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Perplexity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#1FB8CD" d="M22.3977 7.0896h-2.3106V.0676l-7.5094 6.3542V.1577h-1.1554v6.1966L4.4904 0v7.0896H1.6023v10.3976h2.8882V24l6.932-6.3591v6.2005h1.1554v-6.0469l6.9318 6.1807v-6.4879h2.8882V7.0896zm-3.4657-4.531v4.531h-5.355l5.355-4.531zm-13.2862.0676 4.8691 4.4634H5.6458V2.6262zM2.7576 16.332V8.245h7.8476l-6.1149 6.1147v1.9723H2.7576zm2.8882 5.0404v-3.8852h.0001v-2.6488l5.7763-5.7764v7.0111l-5.7764 5.2993zm12.7086.0248-5.7766-5.1509V9.0618l5.7766 5.7766v6.5588zm2.8882-5.0652h-1.733v-1.9723L13.3948 8.245h7.8478v8.087z"/></svg><span class="lbl">Perplexity</span><span class="ch">AI</span></span>
-    <span class="pr-first src"><svg class="ico" width="16" height="16" role="img" aria-label="Perplexity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#1FB8CD" d="M22.3977 7.0896h-2.3106V.0676l-7.5094 6.3542V.1577h-1.1554v6.1966L4.4904 0v7.0896H1.6023v10.3976h2.8882V24l6.932-6.3591v6.2005h1.1554v-6.0469l6.9318 6.1807v-6.4879h2.8882V7.0896zm-3.4657-4.531v4.531h-5.355l5.355-4.531zm-13.2862.0676 4.8691 4.4634H5.6458V2.6262zM2.7576 16.332V8.245h7.8476l-6.1149 6.1147v1.9723H2.7576zm2.8882 5.0404v-3.8852h.0001v-2.6488l5.7763-5.7764v7.0111l-5.7764 5.2993zm12.7086.0248-5.7766-5.1509V9.0618l5.7766 5.7766v6.5588zm2.8882-5.0652h-1.733v-1.9723L13.3948 8.245h7.8478v8.087z"/></svg><span class="lbl">Perplexity</span></span>
-    <span class="num amt struck">$12.00</span>
-    <span><span class="badge ref">Refunded</span></span>
-    <span class="pr-prov dim"><svg class="ico" width="14" height="14" role="img" aria-label="Stripe" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#635BFF" d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z"/></svg>Stripe</span>
-    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
-  </a>
-  
-  <a class="pr prow" href="/demo/payments/stripe/pi_74169b729b53e7ba/" data-drawer="/demo/payments/stripe/pi_74169b729b53e7ba/drawer.html">
-    <span class="dim">Sep 17, 00:27</span>
-    <span class="src"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="lbl">Email</span></span>
-    <span class="pr-first src"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="lbl">Email</span></span>
-    <span class="num amt struck">$29.00</span>
-    <span><span class="badge ref">Refunded</span></span>
-    <span class="pr-prov dim"><svg class="ico" width="14" height="14" role="img" aria-label="Stripe" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#635BFF" d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z"/></svg>Stripe</span>
-    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
-  </a>
-  
+<section class="box pay-list" data-rows data-total="1" data-offset="0">
+  <div class="cr th"><span>Customer</span><span>Source</span><span class="num">Spent</span><span class="cr-wait">Time to complete</span><span>Completed at</span><span></span></div>
+
+<div class="cr prow"><a class="row-link" href="/demo/payments/stripe/pi_4c515e1fbd71cbcf/" aria-label="Fuzzy Seal, $12.00 on Sep 29, 14:58" data-drawer="/demo/payments/stripe/pi_4c515e1fbd71cbcf/drawer.html"></a>
+  <span class="cr-who"><span class="av" style="background:#3D5A80">FS</span><span class="cr-id"><span class="cr-nm"><a class="vis-link" title="Visitor timeline"><b>Fuzzy Seal</b></a><span class="renewal">Customer</span></span><span class="cr-chips"><span class="uchip"><img class="flag" src="/demo/flags/sg.svg" width="16" height="12" alt="Singapore flag">Singapore</span><span class="uchip"><svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Desktop</span><span class="uchip"><img class="ico" src="/demo/icons/apple.svg" width="12" height="12" alt="">macOS</span><span class="uchip"><img class="ico" src="/demo/icons/safari.svg" width="12" height="12" alt="">Safari</span></span></span></span>
+  <span class="cr-src"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="cr-id"><span class="lbl">Email</span></span></span>
+  <span class="cr-spent"><b class="struck">$12.00</b><span class="cr-meta"><svg class="ico" width="12" height="12" role="img" aria-label="Stripe" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#635BFF" d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z"/></svg><span class="badge ref">Refunded</span></span></span>
+  <span class="cr-wait">7 days</span>
+  <span class="cr-when"><span>Sep 29, 14:58</span><span class="heat" title="Visits in the 14 days before"><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h1"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="pay"></i></span></span>
+  <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+</div>
+
   
 </section>
 

@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/demo/app.css">
+<title>Visitors · tallybird.app · Virling</title>
+</head>
+<body class="app">
+<aside class="side" id="side">
+  <a class="brand" href="/"><svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+  <div class="menu-wrap switcher" data-menu>
+    <button type="button" aria-haspopup="true" aria-expanded="false">
+      <img class="favicon" src="/demo/icons/site.svg" width="22" height="22" alt="">
+      <span class="grow">tallybird.app</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
+    </button>
+    <div class="menu" hidden>
+      
+      <a href="/demo/visitors/" aria-current="true"><img class="favicon sm" src="/demo/icons/site.svg" width="16" height="16" alt="">tallybird.app</a>
+      
+      
+    </div>
+  </div>
+  <nav class="nav">
+    <a href="/demo/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Dashboard</a>
+    <a href="/demo/visitors/" aria-current="page">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 9M22 21a7 7 0 0 0-4-6.3"/></svg>Visitors</a>
+    <a href="/demo/payments/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>Payments</a>
+    <a href="/demo/retention/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>Retention</a>
+    <a href="/demo/links/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>Links</a>
+    <a href="/demo/report/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>Client report</a>
+    
+  </nav>
+  <div class="usage">
+    <span>3,535 visitors in the last 30 days</span>
+  </div>
+  <div class="menu-wrap account" data-menu>
+    <button type="button" aria-haspopup="true" aria-expanded="false">
+      <span class="favicon avatar">MC</span>
+      <span class="grow who"><b>maya.chen@tallybird.app</b><span>Self-hosted</span></span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
+    </button>
+    <div class="menu up" hidden>
+      <a href="/#join">Account settings</a>
+      <a href="/#join">Sign out</a>
+    </div>
+  </div>
+</aside>
+<div class="main">
+  
+  <header class="top">
+    <button class="burger" type="button" aria-controls="side" aria-expanded="false" aria-label="Menu" data-burger>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <h1>Visitors</h1>
+    <span class="live-pill" title="Visitors in the last 5 minutes"><span class="dot"></span>4 live</span>
+    <span class="grow"></span>
+    <div class="menu-wrap range" data-menu>
+  <button type="button" aria-haspopup="true" aria-expanded="false">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+    <span>Last 90 days</span>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <div class="menu right" hidden>
+    
+    
+    
+    <a href="/demo/visitors/7d-paid-no/">Last 7 days</a>
+    
+    <a href="/demo/visitors/paid-no/">Last 30 days</a>
+    
+    <a href="/demo/visitors/90d-paid-no/" aria-current="true">Last 90 days</a>
+    
+    
+    
+    
+    
+  </div>
+</div>
+  </header>
+  
+  <main class="content">
+<div class="notice row"><span>Demo with sample data.</span><a class="b" href="/#join">Join the waitlist</a></div>
+  
+<div class="list-bar vfilters">
+  <div class="vf-menus">
+    <div class="menu-wrap vf" data-menu>
+      <button type="button" class="ctl" aria-haspopup="true" aria-expanded="false">
+        <span class="vf-k">Source</span><span class="grow">All sources</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="menu vf-menu" hidden>
+        <a href="/demo/visitors/90d-paid-no/" aria-current="true"><span class="grow">All sources</span></a>
+        <span class="vf-sep">Channels</span>
+        
+        
+        
+      </div>
+    </div>
+    
+    <div class="menu-wrap vf" data-menu>
+      <button type="button" class="ctl" aria-haspopup="true" aria-expanded="false">
+        <span class="vf-k">Goal</span><span class="grow">Any goal</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="menu vf-menu" hidden>
+        <a href="/demo/visitors/90d-paid-no/" aria-current="true"><span class="grow">Any goal</span><span class="count"></span></a>
+      </div>
+    </div>
+    
+    <nav class="sg" aria-label="Filter by exit"><a href="/demo/visitors/90d-paid-no/" class="on" aria-current="true">Any exit</a></nav>
+    <nav class="sg" aria-label="Filter by payment"><a href="/demo/visitors/90d/">Everyone</a><a href="/demo/visitors/90d-paid-yes/">Paid</a><a href="/demo/visitors/90d-paid-no/" class="on" aria-current="true">Not paid</a></nav>
+    <a class="vf-clear" href="/demo/visitors/90d/">Clear filters</a>
+  </div>
+  <span class="dim">Showing 1 to 50 of 8,300 visitors</span>
+</div>
+<section class="box vis-list">
+  <div class="vr th"><span>Visitor</span><span>First source</span><span class="num">Visits</span><span class="num vr-pv">Pages</span><span>Exit page</span><span>Exit link</span><span class="vr-goals">Goals</span><span class="num">Revenue</span><span class="num">Last seen</span><span></span></div>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#7A5C61">EF</span><b>Eager Falcon</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="ChatGPT" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg><span class="lbl">ChatGPT</span><span class="ch">AI</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">2</span>
+    <span class="vr-exit"><span class="mono">/features/payment-reminders</span></span>
+    <span class="vr-out src"><svg class="ico" width="16" height="16" role="img" aria-label="X" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg><span class="lbl mono">x.com/tallybird</span></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 16:04">3m ago</span>
+    <span class="vr-sum"><svg class="ico" width="16" height="16" role="img" aria-label="X" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>Clicked out to <span class="mono">x.com/tallybird</span><i class="sep"></i>3m ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#5C5F8C">MC</span><b>Mellow Crane</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">Google</span><span class="ch">Organic search</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">1</span>
+    <span class="vr-exit"><span class="mono">/blog/late-payment-email-templates</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 16:03">4m ago</span>
+    <span class="vr-sum">Left from <span class="mono">/blog/late-payment-email-templates</span><i class="sep"></i>4m ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#3D5A80">PT</span><b>Plucky Tapir</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="lbl">Email</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">2</span>
+    <span class="vr-exit"><span class="mono">/docs/stripe</span></span>
+    <span class="vr-out src"><svg class="ico" width="16" height="16" role="img" aria-label="GitHub" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#181717" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg><span class="lbl mono">github.com/tallybird/tallybird-js</span></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 16:03">4m ago</span>
+    <span class="vr-sum"><svg class="ico" width="16" height="16" role="img" aria-label="GitHub" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#181717" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>Clicked out to <span class="mono">github.com/tallybird/tallybird-js</span><i class="sep"></i>4m ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#5C5F8C">ST</span><b>Silver Tapir</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Perplexity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#1FB8CD" d="M22.3977 7.0896h-2.3106V.0676l-7.5094 6.3542V.1577h-1.1554v6.1966L4.4904 0v7.0896H1.6023v10.3976h2.8882V24l6.932-6.3591v6.2005h1.1554v-6.0469l6.9318 6.1807v-6.4879h2.8882V7.0896zm-3.4657-4.531v4.531h-5.355l5.355-4.531zm-13.2862.0676 4.8691 4.4634H5.6458V2.6262zM2.7576 16.332V8.245h7.8476l-6.1149 6.1147v1.9723H2.7576zm2.8882 5.0404v-3.8852h.0001v-2.6488l5.7763-5.7764v7.0111l-5.7764 5.2993zm12.7086.0248-5.7766-5.1509V9.0618l5.7766 5.7766v6.5588zm2.8882-5.0652h-1.733v-1.9723L13.3948 8.245h7.8478v8.087z"/></svg><span class="lbl">Perplexity</span><span class="ch">AI</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">2</span>
+    <span class="vr-exit"><span class="mono">/docs/getting-started</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 16:03">4m ago</span>
+    <span class="vr-sum">Left from <span class="mono">/docs/getting-started</span><i class="sep"></i>4m ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#3E6B5C">TQ</span><b>Tidy Quail</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Claude" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#D97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg><span class="lbl">Claude</span><span class="ch">AI</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">2</span>
+    <span class="vr-exit"><span class="mono">/docs/getting-started</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 16:02">5m ago</span>
+    <span class="vr-sum">Left from <span class="mono">/docs/getting-started</span><i class="sep"></i>5m ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#8C6A43">KS</span><b>Keen Sparrow</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Perplexity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#1FB8CD" d="M22.3977 7.0896h-2.3106V.0676l-7.5094 6.3542V.1577h-1.1554v6.1966L4.4904 0v7.0896H1.6023v10.3976h2.8882V24l6.932-6.3591v6.2005h1.1554v-6.0469l6.9318 6.1807v-6.4879h2.8882V7.0896zm-3.4657-4.531v4.531h-5.355l5.355-4.531zm-13.2862.0676 4.8691 4.4634H5.6458V2.6262zM2.7576 16.332V8.245h7.8476l-6.1149 6.1147v1.9723H2.7576zm2.8882 5.0404v-3.8852h.0001v-2.6488l5.7763-5.7764v7.0111l-5.7764 5.2993zm12.7086.0248-5.7766-5.1509V9.0618l5.7766 5.7766v6.5588zm2.8882-5.0652h-1.733v-1.9723L13.3948 8.245h7.8478v8.087z"/></svg><span class="lbl">Perplexity</span><span class="ch">AI</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">8</span>
+    <span class="vr-exit"><span class="mono">/features/recurring-invoices</span></span>
+    <span class="vr-out src"><svg class="ico" width="16" height="16" role="img" aria-label="YouTube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg><span class="lbl mono">www.youtube.com/watch</span></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 15:53">14m ago</span>
+    <span class="vr-sum"><svg class="ico" width="16" height="16" role="img" aria-label="YouTube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>Clicked out to <span class="mono">www.youtube.com/watch</span><i class="sep"></i>14m ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#5B6C5D">RB</span><b>Rapid Badger</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 8-6 2-3 6z"/></svg><span class="lbl">Direct</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">1</span>
+    <span class="vr-exit"><span class="mono">/features/recurring-invoices</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 15:47">20m ago</span>
+    <span class="vr-sum">Left from <span class="mono">/features/recurring-invoices</span><i class="sep"></i>20m ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#3D5A80">CK</span><b>Crisp Koala</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">Google</span><span class="ch">Organic search</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">4</span>
+    <span class="vr-exit"><span class="mono">/templates/freelance-invoice</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 15:43">24m ago</span>
+    <span class="vr-sum">Left from <span class="mono">/templates/freelance-invoice</span><i class="sep"></i>24m ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#8C6A43">BL</span><b>Brave Lemur</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 8-6 2-3 6z"/></svg><span class="lbl">Direct</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">2</span>
+    <span class="vr-exit"><span class="mono">/changelog</span></span>
+    <span class="vr-out src"><svg class="ico" width="16" height="16" role="img" aria-label="GitHub" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#181717" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg><span class="lbl mono">github.com/tallybird/tallybird-js</span></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 15:42">25m ago</span>
+    <span class="vr-sum"><svg class="ico" width="16" height="16" role="img" aria-label="GitHub" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#181717" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>Clicked out to <span class="mono">github.com/tallybird/tallybird-js</span><i class="sep"></i>25m ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#6D597A">LL</span><b>Lucky Lynx</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="YouTube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg><span class="lbl">YouTube</span><span class="ch">Social</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">1</span>
+    <span class="vr-exit"><span class="mono">/</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 15:36">31m ago</span>
+    <span class="vr-sum">Left from <span class="mono">/</span><i class="sep"></i>31m ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#7A5C61">PM</span><b>Plucky Moose</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Bing" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#258FFA" d="M20.176 15.406a6.48 6.48 0 01-1.736 4.414c1.338-1.47.803-3.869-1.003-4.635-.862-.305-2.488-.85-3.367-1.158a1.834 1.834 0 01-.932-.818c-.381-.975-1.163-2.968-1.548-3.948-.095-.285-.31-.625-.265-.938.046-.598.724-1.003 1.276-.754l3.682 1.888c.621.292 1.305.692 1.796 1.172a6.486 6.486 0 012.097 4.777zm-1.44 1.888c-.264-1.194-1.135-1.744-2.216-2.028-1.527.902-4.853 2.878-6.952 4.13-1.103.68-2.13 1.35-2.919 1.242a2.866 2.866 0 01-2.77-2.325c-.012-.048-.008-.03-.001.01a6.4 6.4 0 00.947 2.653 6.498 6.498 0 005.486 3.022c1.908.062 3.536-1.153 5.099-2.096.292-.188.804-.496 1.332-.831l1.423-1.51c.553-.577.764-1.426.571-2.267zm-12.04 2.97c.422 0 .822-.1 1.173-.29.355-.215.964-.579 1.7-1.018L9.57 4.502c0-.99-.497-1.864-1.257-2.382-.08-.059-2.91-1.901-2.99-1.956-.605-.432-1.523.045-1.5.797v14.887l.417 2.36a2.488 2.488 0 002.455 2.056z"/></svg><span class="lbl">Bing</span><span class="ch">Organic search</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">3</span>
+    <span class="vr-exit"><span class="mono">/docs/getting-started</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 15:25">42m ago</span>
+    <span class="vr-sum">Left from <span class="mono">/docs/getting-started</span><i class="sep"></i>42m ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#6D597A">TK</span><b>Tidy Koala</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">Google</span><span class="ch">Organic search</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">3</span>
+    <span class="vr-exit"><span class="mono">/pricing</span></span>
+    <span class="vr-out src"><img class="ico" src="/demo/icons/docs.stripe.com.ico" width="16" height="16" alt=""><span class="lbl mono">docs.stripe.com/invoicing</span></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 15:16">51m ago</span>
+    <span class="vr-sum"><img class="ico" src="/demo/icons/docs.stripe.com.ico" width="16" height="16" alt="">Clicked out to <span class="mono">docs.stripe.com/invoicing</span><i class="sep"></i>51m ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#7A5C61">CG</span><b>Cosy Gecko</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="ChatGPT" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg><span class="lbl">ChatGPT</span><span class="ch">AI</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">1</span>
+    <span class="vr-exit"><span class="mono">/pricing</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 15:08">59m ago</span>
+    <span class="vr-sum">Left from <span class="mono">/pricing</span><i class="sep"></i>59m ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#5B6C5D">SS</span><b>Sunny Seal</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 8-6 2-3 6z"/></svg><span class="lbl">Direct</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">3</span>
+    <span class="vr-exit"><span class="mono">/pricing</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 15:08">59m ago</span>
+    <span class="vr-sum">Left from <span class="mono">/pricing</span><i class="sep"></i>59m ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#5B6C5D">RW</span><b>Rapid Wren</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">Google</span><span class="ch">Organic search</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">8</span>
+    <span class="vr-exit"><span class="mono">/changelog</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 15:07">1h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/changelog</span><i class="sep"></i>1h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#3D5A80">TB</span><b>Tidy Badger</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 8-6 2-3 6z"/></svg><span class="lbl">Direct</span></span>
+    <span class="num">2</span>
+    <span class="num vr-pv">4</span>
+    <span class="vr-exit"><span class="mono">/pricing</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"><span class="chip goal">signup</span></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 14:59">1h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/pricing</span><i class="sep"></i>1h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#8C6A43">PF</span><b>Plucky Falcon</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Perplexity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#1FB8CD" d="M22.3977 7.0896h-2.3106V.0676l-7.5094 6.3542V.1577h-1.1554v6.1966L4.4904 0v7.0896H1.6023v10.3976h2.8882V24l6.932-6.3591v6.2005h1.1554v-6.0469l6.9318 6.1807v-6.4879h2.8882V7.0896zm-3.4657-4.531v4.531h-5.355l5.355-4.531zm-13.2862.0676 4.8691 4.4634H5.6458V2.6262zM2.7576 16.332V8.245h7.8476l-6.1149 6.1147v1.9723H2.7576zm2.8882 5.0404v-3.8852h.0001v-2.6488l5.7763-5.7764v7.0111l-5.7764 5.2993zm12.7086.0248-5.7766-5.1509V9.0618l5.7766 5.7766v6.5588zm2.8882-5.0652h-1.733v-1.9723L13.3948 8.245h7.8478v8.087z"/></svg><span class="lbl">Perplexity</span><span class="ch">AI</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">1</span>
+    <span class="vr-exit"><span class="mono">/pricing</span></span>
+    <span class="vr-out src"><svg class="ico" width="16" height="16" role="img" aria-label="LinkedIn" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg><span class="lbl mono">www.linkedin.com/company/tallybird</span></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 14:56">1h ago</span>
+    <span class="vr-sum"><svg class="ico" width="16" height="16" role="img" aria-label="LinkedIn" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>Clicked out to <span class="mono">www.linkedin.com/company/tallybird</span><i class="sep"></i>1h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#5C5F8C">NF</span><b>Nimble Fox</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">Google</span><span class="ch">Organic search</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">3</span>
+    <span class="vr-exit"><span class="mono">/docs/stripe</span></span>
+    <span class="vr-out src"><svg class="ico" width="16" height="16" role="img" aria-label="YouTube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg><span class="lbl mono">www.youtube.com/watch</span></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 14:51">1h ago</span>
+    <span class="vr-sum"><svg class="ico" width="16" height="16" role="img" aria-label="YouTube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>Clicked out to <span class="mono">www.youtube.com/watch</span><i class="sep"></i>1h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#3D5A80">SR</span><b>Silver Robin</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="X" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg><span class="lbl">X</span><span class="ch">Social</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">1</span>
+    <span class="vr-exit"><span class="mono">/pricing</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"><span class="chip goal">signup</span></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 14:50">1h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/pricing</span><i class="sep"></i>1h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#6D597A">DN</span><b>Dapper Newt</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 8-6 2-3 6z"/></svg><span class="lbl">Direct</span></span>
+    <span class="num">2</span>
+    <span class="num vr-pv">5</span>
+    <span class="vr-exit"><span class="mono">/blog/net-30-explained</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 14:48">1h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/blog/net-30-explained</span><i class="sep"></i>1h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#7A5C61">CL</span><b>Cosy Lemur</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Hacker News" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#F0652F" d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg><span class="lbl">Hacker News</span><span class="ch">Social</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">6</span>
+    <span class="vr-exit"><span class="mono">/features/payment-reminders</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"><span class="chip goal">signup</span></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 14:42">1h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/features/payment-reminders</span><i class="sep"></i>1h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#3D5A80">PL</span><b>Plucky Lemur</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">Google</span><span class="ch">Organic search</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">1</span>
+    <span class="vr-exit"><span class="mono">/templates/freelance-invoice</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 14:28">1h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/templates/freelance-invoice</span><i class="sep"></i>1h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#7A5C61">CK</span><b>Calm Koala</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">Google</span><span class="ch">Organic search</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">2</span>
+    <span class="vr-exit"><span class="mono">/docs/stripe</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"><span class="chip goal">signup</span><span class="chip goal">trial</span></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 14:21">1h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/docs/stripe</span><i class="sep"></i>1h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#4F6D7A">CH</span><b>Clever Heron</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 8-6 2-3 6z"/></svg><span class="lbl">Direct</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">2</span>
+    <span class="vr-exit"><span class="mono">/blog/net-30-explained</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 14:16">1h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/blog/net-30-explained</span><i class="sep"></i>1h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#6D597A">DM</span><b>Dapper Marten</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="YouTube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg><span class="lbl">YouTube</span><span class="ch">Social</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">5</span>
+    <span class="vr-exit"><span class="mono">/about</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 14:07">2h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/about</span><i class="sep"></i>2h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#8C6A43">CS</span><b>Cosy Sparrow</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">Google</span><span class="ch">Organic search</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">8</span>
+    <span class="vr-exit"><span class="mono">/templates/freelance-invoice</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 14:05">2h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/templates/freelance-invoice</span><i class="sep"></i>2h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#5B6C5D">NI</span><b>Noble Ibex</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 8-6 2-3 6z"/></svg><span class="lbl">Direct</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">4</span>
+    <span class="vr-exit"><span class="mono">/changelog</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 14:00">2h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/changelog</span><i class="sep"></i>2h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#7A5C61">PR</span><b>Polar Raven</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">Google</span><span class="ch">Organic search</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">3</span>
+    <span class="vr-exit"><span class="mono">/blog/net-30-explained</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 13:59">2h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/blog/net-30-explained</span><i class="sep"></i>2h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#7A5C61">ML</span><b>Merry Lemur</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="YouTube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg><span class="lbl">YouTube</span><span class="ch">Social</span></span>
+    <span class="num">5</span>
+    <span class="num vr-pv">15</span>
+    <span class="vr-exit"><span class="mono">/</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 13:51">2h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/</span><i class="sep"></i>2h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#5C5F8C">RS</span><b>Rapid Sparrow</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="ChatGPT" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg><span class="lbl">ChatGPT</span><span class="ch">AI</span></span>
+    <span class="num">2</span>
+    <span class="num vr-pv">5</span>
+    <span class="vr-exit"><span class="mono">/pricing</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 13:48">2h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/pricing</span><i class="sep"></i>2h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#5C5F8C">AF</span><b>Amber Finch</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="lbl">Email</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">5</span>
+    <span class="vr-exit"><span class="mono">/changelog</span></span>
+    <span class="vr-out src"><svg class="ico" width="16" height="16" role="img" aria-label="LinkedIn" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg><span class="lbl mono">www.linkedin.com/company/tallybird</span></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 13:44">2h ago</span>
+    <span class="vr-sum"><svg class="ico" width="16" height="16" role="img" aria-label="LinkedIn" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>Clicked out to <span class="mono">www.linkedin.com/company/tallybird</span><i class="sep"></i>2h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#6D597A">RD</span><b>Rapid Dingo</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">Google</span><span class="ch">Organic search</span></span>
+    <span class="num">2</span>
+    <span class="num vr-pv">4</span>
+    <span class="vr-exit"><span class="mono">/features/recurring-invoices</span></span>
+    <span class="vr-out src"><img class="ico" src="/demo/icons/docs.stripe.com.ico" width="16" height="16" alt=""><span class="lbl mono">docs.stripe.com/invoicing</span></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 13:28">2h ago</span>
+    <span class="vr-sum"><img class="ico" src="/demo/icons/docs.stripe.com.ico" width="16" height="16" alt="">Clicked out to <span class="mono">docs.stripe.com/invoicing</span><i class="sep"></i>2h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#3D5A80">CR</span><b>Cosy Robin</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">Google</span><span class="ch">Organic search</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">5</span>
+    <span class="vr-exit"><span class="mono">/docs/getting-started</span></span>
+    <span class="vr-out src"><svg class="ico" width="16" height="16" role="img" aria-label="YouTube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg><span class="lbl mono">www.youtube.com/watch</span></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 13:24">2h ago</span>
+    <span class="vr-sum"><svg class="ico" width="16" height="16" role="img" aria-label="YouTube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>Clicked out to <span class="mono">www.youtube.com/watch</span><i class="sep"></i>2h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#6D597A">JB</span><b>Jolly Badger</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="lbl">Email</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">1</span>
+    <span class="vr-exit"><span class="mono">/changelog</span></span>
+    <span class="vr-out src"><svg class="ico" width="16" height="16" role="img" aria-label="YouTube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg><span class="lbl mono">www.youtube.com/watch</span></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 13:19">2h ago</span>
+    <span class="vr-sum"><svg class="ico" width="16" height="16" role="img" aria-label="YouTube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>Clicked out to <span class="mono">www.youtube.com/watch</span><i class="sep"></i>2h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#4F6D7A">MS</span><b>Misty Swan</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Claude" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#D97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg><span class="lbl">Claude</span><span class="ch">AI</span></span>
+    <span class="num">4</span>
+    <span class="num vr-pv">8</span>
+    <span class="vr-exit"><span class="mono">/about</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"><span class="chip goal">signup</span><span class="chip goal">trial</span></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 13:18">2h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/about</span><i class="sep"></i>2h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#6D597A">PF</span><b>Polar Finch</b></span>
+    <span class="src"><img class="ico" src="/demo/icons/stackoverflow.com.ico" width="16" height="16" alt=""><span class="lbl">stackoverflow.com</span><span class="ch">Referral</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">2</span>
+    <span class="vr-exit"><span class="mono">/blog/net-30-explained</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 13:16">2h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/blog/net-30-explained</span><i class="sep"></i>2h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#3E6B5C">RO</span><b>Rapid Otter</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 8-6 2-3 6z"/></svg><span class="lbl">Direct</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">6</span>
+    <span class="vr-exit"><span class="mono">/templates/freelance-invoice</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 13:15">2h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/templates/freelance-invoice</span><i class="sep"></i>2h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#3D5A80">SM</span><b>Silver Marten</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">Google</span><span class="ch">Organic search</span></span>
+    <span class="num">2</span>
+    <span class="num vr-pv">7</span>
+    <span class="vr-exit"><span class="mono">/compare</span></span>
+    <span class="vr-out src"><svg class="ico" width="16" height="16" role="img" aria-label="LinkedIn" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg><span class="lbl mono">www.linkedin.com/company/tallybird</span></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 12:58">3h ago</span>
+    <span class="vr-sum"><svg class="ico" width="16" height="16" role="img" aria-label="LinkedIn" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>Clicked out to <span class="mono">www.linkedin.com/company/tallybird</span><i class="sep"></i>3h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#3E6B5C">MP</span><b>Merry Puffin</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="YouTube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg><span class="lbl">YouTube</span><span class="ch">Social</span></span>
+    <span class="num">3</span>
+    <span class="num vr-pv">5</span>
+    <span class="vr-exit"><span class="mono">/pricing</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 12:57">3h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/pricing</span><i class="sep"></i>3h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#8C6A43">EB</span><b>Eager Bison</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="LinkedIn" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg><span class="lbl">LinkedIn</span><span class="ch">Social</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">2</span>
+    <span class="vr-exit"><span class="mono">/</span></span>
+    <span class="vr-out src"><svg class="ico" width="16" height="16" role="img" aria-label="GitHub" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#181717" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg><span class="lbl mono">github.com/tallybird/tallybird-js</span></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 12:54">3h ago</span>
+    <span class="vr-sum"><svg class="ico" width="16" height="16" role="img" aria-label="GitHub" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#181717" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>Clicked out to <span class="mono">github.com/tallybird/tallybird-js</span><i class="sep"></i>3h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#4F6D7A">FB</span><b>Fuzzy Badger</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="ChatGPT" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg><span class="lbl">ChatGPT</span><span class="ch">AI</span></span>
+    <span class="num">2</span>
+    <span class="num vr-pv">14</span>
+    <span class="vr-exit"><span class="mono">/pricing</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 12:45">3h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/pricing</span><i class="sep"></i>3h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#7A5C61">SY</span><b>Swift Yak</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="X" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg><span class="lbl">X</span><span class="ch">Social</span></span>
+    <span class="num">2</span>
+    <span class="num vr-pv">7</span>
+    <span class="vr-exit"><span class="mono">/pricing</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 12:35">3h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/pricing</span><i class="sep"></i>3h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#6D597A">BR</span><b>Bright Robin</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="X" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg><span class="lbl">X</span><span class="ch">Social</span></span>
+    <span class="num">2</span>
+    <span class="num vr-pv">5</span>
+    <span class="vr-exit"><span class="mono">/templates/freelance-invoice</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 12:31">3h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/templates/freelance-invoice</span><i class="sep"></i>3h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#4F6D7A">CF</span><b>Clever Falcon</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Hacker News" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#F0652F" d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg><span class="lbl">Hacker News</span><span class="ch">Social</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">4</span>
+    <span class="vr-exit"><span class="mono">/compare</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 12:30">3h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/compare</span><i class="sep"></i>3h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#8C6A43">GD</span><b>Golden Dingo</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Perplexity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#1FB8CD" d="M22.3977 7.0896h-2.3106V.0676l-7.5094 6.3542V.1577h-1.1554v6.1966L4.4904 0v7.0896H1.6023v10.3976h2.8882V24l6.932-6.3591v6.2005h1.1554v-6.0469l6.9318 6.1807v-6.4879h2.8882V7.0896zm-3.4657-4.531v4.531h-5.355l5.355-4.531zm-13.2862.0676 4.8691 4.4634H5.6458V2.6262zM2.7576 16.332V8.245h7.8476l-6.1149 6.1147v1.9723H2.7576zm2.8882 5.0404v-3.8852h.0001v-2.6488l5.7763-5.7764v7.0111l-5.7764 5.2993zm12.7086.0248-5.7766-5.1509V9.0618l5.7766 5.7766v6.5588zm2.8882-5.0652h-1.733v-1.9723L13.3948 8.245h7.8478v8.087z"/></svg><span class="lbl">Perplexity</span><span class="ch">AI</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">3</span>
+    <span class="vr-exit"><span class="mono">/compare</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 12:27">3h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/compare</span><i class="sep"></i>3h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#5B6C5D">LN</span><b>Lucky Newt</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Claude" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#D97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg><span class="lbl">Claude</span><span class="ch">AI</span></span>
+    <span class="num">2</span>
+    <span class="num vr-pv">10</span>
+    <span class="vr-exit"><span class="mono">/features/recurring-invoices</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"><span class="chip goal">signup</span></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 12:26">3h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/features/recurring-invoices</span><i class="sep"></i>3h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#6D597A">DD</span><b>Dapper Dingo</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">Google</span><span class="ch">Organic search</span></span>
+    <span class="num">2</span>
+    <span class="num vr-pv">4</span>
+    <span class="vr-exit"><span class="mono">/</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 12:18">3h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/</span><i class="sep"></i>3h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#6D597A">RT</span><b>Rapid Tapir</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="ChatGPT" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg><span class="lbl">ChatGPT</span><span class="ch">AI</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">4</span>
+    <span class="vr-exit"><span class="mono">/about</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 12:13">3h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/about</span><i class="sep"></i>3h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#8C6A43">EL</span><b>Eager Lemur</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">Google</span><span class="ch">Organic search</span></span>
+    <span class="num">1</span>
+    <span class="num vr-pv">1</span>
+    <span class="vr-exit"><span class="mono">/templates/freelance-invoice</span></span>
+    <span class="vr-out src"><svg class="ico" width="16" height="16" role="img" aria-label="YouTube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg><span class="lbl mono">www.youtube.com/watch</span></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 12:09">3h ago</span>
+    <span class="vr-sum"><svg class="ico" width="16" height="16" role="img" aria-label="YouTube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>Clicked out to <span class="mono">www.youtube.com/watch</span><i class="sep"></i>3h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  <a class="vr prow">
+    <span class="vr-who"><span class="av" style="background:#5B6C5D">GH</span><b>Gentle Heron</b></span>
+    <span class="src"><svg class="ico" width="16" height="16" role="img" aria-label="ChatGPT" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg><span class="lbl">ChatGPT</span><span class="ch">AI</span></span>
+    <span class="num">5</span>
+    <span class="num vr-pv">14</span>
+    <span class="vr-exit"><span class="mono">/blog/net-30-explained</span></span>
+    <span class="vr-out src"></span>
+    <span class="vr-goals"></span>
+    <span class="num vr-rev"><span class="na">Not paid</span></span>
+    <span class="num dim vr-seen" title="Oct 16, 12:02">4h ago</span>
+    <span class="vr-sum">Left from <span class="mono">/blog/net-30-explained</span><i class="sep"></i>4h ago</span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+  
+  
+</section>
+
+<div class="pager">
+  <span class="dim">Showing 1 to 50 of 8,300 visitors</span>
+  <span class="eh-actions">
+    
+    
+  </span>
+</div>
+
+
+  </main>
+</div>
+<script src="/demo/app.js"></script>
+</body>
+</html>
