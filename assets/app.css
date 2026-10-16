@@ -403,6 +403,8 @@ a.ctl { text-decoration: none; }
 .uchip img.ico { opacity: .75; }
 .av { width: 30px; height: 30px; flex: none; border-radius: 50%; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; letter-spacing: .02em; }
 .av.lg { width: 44px; height: 44px; font-size: 15px; }
+.av, .d3-av { overflow: hidden; }
+.av svg, .d3-av svg { width: 100%; height: 100%; display: block; }
 .cr-spent { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; font-variant-numeric: tabular-nums; }
 .cr-spent b { font-weight: 600; }
 .cr-meta { display: inline-flex; align-items: center; gap: 6px; }
