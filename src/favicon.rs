@@ -341,7 +341,7 @@ pub fn spawn_sources(state: AppState) {
 }
 
 /// Fetches the icon of `host` from `base` and caches it, keeping an older icon when that fails.
-async fn save_source(db: &SqlitePool, client: &Client, host: &str, base: Url) {
+pub(crate) async fn save_source(db: &SqlitePool, client: &Client, host: &str, base: Url) {
     let fetched = fetch_from(client, base).await;
     if let Err(err) = &fetched {
         tracing::debug!(%err, %host, "source icon fetch failed");
