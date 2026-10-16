@@ -309,13 +309,14 @@ pub fn index_cap() -> usize {
 /// Columns of `touches` and `first_touches`: an event's fields without kind and name.
 const TOUCH_COLUMNS: &str =
     "site_id, session_id, visitor_id, ts, path, referrer_host, utm_source, utm_medium,
-    utm_campaign, utm_content, utm_term, channel, country, device, browser, os, region, city, host";
+    utm_campaign, utm_content, utm_term, channel, country, device, browser, os, region, city, host,
+    language";
 
 const TOUCH_TABLE: &str = "site_id VARCHAR NOT NULL, session_id VARCHAR NOT NULL,
     visitor_id VARCHAR NOT NULL, ts TIMESTAMPTZ NOT NULL, path VARCHAR NOT NULL, referrer_host VARCHAR,
     utm_source VARCHAR, utm_medium VARCHAR, utm_campaign VARCHAR, utm_content VARCHAR, utm_term VARCHAR,
     channel VARCHAR NOT NULL, country VARCHAR, device VARCHAR NOT NULL, browser VARCHAR NOT NULL,
-    os VARCHAR, region VARCHAR, city VARCHAR, host VARCHAR";
+    os VARCHAR, region VARCHAR, city VARCHAR, host VARCHAR, language VARCHAR";
 
 /// Keeps the earlier (ts, path) pageview of a key in `touches` or `first_touches`.
 fn upsert_touches(table: &str, key: &str, rows: usize) -> String {
@@ -391,6 +392,7 @@ fn write_touches(
                 opt(&e.region),
                 opt(&e.city),
                 opt(&e.host),
+                opt(&e.language),
             ]);
         }
         stmt.execute(duckdb::params_from_iter(values))?;
@@ -402,7 +404,8 @@ impl DuckStore {
     pub fn open(path: &Path) -> anyhow::Result<Self> {
         let conn = Connection::open(path)?;
         let derived: i64 = conn.query_row(
-            "SELECT count(*) FROM duckdb_tables() WHERE table_name IN ('touches', 'first_touches')",
+            "SELECT count(*) FROM duckdb_columns()
+            WHERE table_name IN ('touches', 'first_touches') AND column_name = 'language'",
             [],
             |r| r.get(0),
         )?;

@@ -21,7 +21,7 @@ pub const DAY_US: i64 = 86_400 * 1_000_000;
 pub const HOUR_US: i64 = 3_600 * 1_000_000;
 
 /// First-pageview columns kept per session, in this order.
-pub const COLS: [&str; 10] = [
+pub const COLS: [&str; 11] = [
     "channel",
     "referrer_host",
     "utm_campaign",
@@ -32,6 +32,7 @@ pub const COLS: [&str; 10] = [
     "device",
     "browser",
     "os",
+    "language",
 ];
 pub const CHANNEL: usize = 0;
 pub const REFERRER: usize = 1;
@@ -91,7 +92,7 @@ struct Session {
     prev: u32,
     /// Time of the first pageview, or i64::MAX without one.
     touch: i64,
-    cols: [u32; 10],
+    cols: [u32; 11],
     /// Latest added pageview of this session, or NONE.
     pv: u32,
 }
@@ -219,7 +220,7 @@ impl SiteIndex {
                 last,
                 prev: ix.visitors[v as usize].last_session,
                 touch: i64::MAX,
-                cols: [NULL; 10],
+                cols: [NULL; 11],
                 pv: NONE,
             });
             ix.visitors[v as usize].last_session = s;
@@ -238,7 +239,7 @@ impl SiteIndex {
                 tracing::warn!(session = sid, "touch without events");
                 return Ok(None);
             };
-            let mut cols = [NULL; 10];
+            let mut cols = [NULL; 11];
             for (i, c) in cols.iter_mut().enumerate() {
                 *c = ix.strings.id(r.get::<_, Option<String>>(i + 2)?.as_deref());
             }
@@ -348,7 +349,7 @@ impl SiteIndex {
                     last: ts,
                     prev: self.visitors[v as usize].last_session,
                     touch: i64::MAX,
-                    cols: [NULL; 10],
+                    cols: [NULL; 11],
                     pv: NONE,
                 });
                 self.visitors[v as usize].last_session = s;
@@ -406,8 +407,9 @@ impl SiteIndex {
                             Some(e.device.as_str()),
                             Some(e.browser.as_str()),
                             Some(e.os.as_str()),
+                            e.language.as_deref(),
                         ];
-                        let mut cols = [NULL; 10];
+                        let mut cols = [NULL; 11];
                         for (c, v) in cols.iter_mut().zip(values) {
                             *c = self.strings.id(v);
                         }
@@ -917,7 +919,7 @@ impl SiteIndex {
                 prev: NONE,
                 touch: 0,
                 cols: {
-                    let mut c = [NULL; 10];
+                    let mut c = [NULL; 11];
                     match *k {
                         KeyOf::Col(i) => c[i] = ids.0,
                         KeyOf::Pair(a, b) | KeyOf::Strict(a, b) => {
@@ -1432,6 +1434,7 @@ pub mod read {
             Dimension::Device => KeyOf::Col(7),
             Dimension::Browser => KeyOf::Col(8),
             Dimension::Os => KeyOf::Col(9),
+            Dimension::Language => KeyOf::Col(10),
             Dimension::ChannelSource => KeyOf::Pair(0, 1),
             Dimension::PageSource => KeyOf::Triple(4, 0, 1),
             Dimension::CountryCity => KeyOf::Strict(5, 6),
@@ -1850,6 +1853,7 @@ mod tests {
                         Dimension::PageSource,
                         Dimension::CountryCity,
                         Dimension::DeviceOs,
+                        Dimension::Language,
                     ] {
                         check(
                             &format!("breakdown {d:?} {at}"),
