@@ -55,6 +55,7 @@
 - [Script attributes and API](reference/script.md)
 - [Event API](reference/event-api.md)
 - [Read API](reference/api.md)
+- [MCP server](reference/mcp.md)
 - [Outbound connections](reference/outbound.md)
 
 # Help

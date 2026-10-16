@@ -13,7 +13,7 @@ use crate::fx::Rates;
 use crate::ingest::{self, DailySalt, RateLimiter, Sessions};
 use crate::mail::Mailer;
 use crate::sites::SiteCache;
-use crate::{api, auth, dashboard, flags, onboarding, settings, visitor_pages, waitlist};
+use crate::{api, auth, dashboard, flags, mcp, onboarding, settings, visitor_pages, waitlist};
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -190,6 +190,7 @@ pub fn router(state: AppState) -> Router {
                 "/api/v1/sites/{domain}/visitors/{visitor_id}",
                 get(api::visitor),
             )
+            .route("/mcp", post(mcp::post))
             .route("/r/{token}", get(dashboard::shared))
             .route(
                 "/app/{domain}/settings/disconnect",
