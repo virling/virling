@@ -1,42 +1,83 @@
-//! Friendly generated names for payers, so lists never show a real name or email.
+//! Friendly generated names and animal faces, so lists never show a real name or email.
 
-const ADJECTIVES: [&str; 32] = [
-    "Amber", "Quiet", "Bright", "Calm", "Clever", "Gentle", "Golden", "Happy", "Lucky", "Merry",
-    "Misty", "Noble", "Polar", "Rapid", "Silver", "Sunny", "Swift", "Tidy", "Brave", "Cosy",
-    "Crisp", "Dapper", "Eager", "Fuzzy", "Jolly", "Keen", "Lively", "Mellow", "Nimble", "Plucky",
-    "Rosy", "Witty",
-];
-const ANIMALS: [&str; 32] = [
-    "Otter", "Heron", "Badger", "Falcon", "Fox", "Hare", "Koala", "Lynx", "Marten", "Owl", "Panda",
-    "Puffin", "Quail", "Raven", "Robin", "Seal", "Sparrow", "Stoat", "Swan", "Tapir", "Wren",
-    "Yak", "Beaver", "Bison", "Crane", "Dingo", "Finch", "Gecko", "Ibex", "Lemur", "Moose", "Newt",
-];
-const COLORS: [&str; 8] = [
-    "#3D5A80", "#5B6C5D", "#7A5C61", "#4F6D7A", "#6D597A", "#8C6A43", "#3E6B5C", "#5C5F8C",
+use std::collections::HashMap;
+
+use sqlx::SqlitePool;
+
+use crate::animals::{ADJECTIVES, ANIMALS};
+
+/// Every adjective and animal pair, before a numbered second round starts.
+const COMBOS: u32 = 3200;
+/// Coprime with COMBOS, so neighbouring slots differ in both words.
+const STRIDE: u32 = 1213;
+
+const EXTRAS: [&str; 3] = [
+    r##"<g stroke="#1F1A17" stroke-width="1.1" fill="none"><circle cx="16" cy="21" r="3"/><circle cx="24" cy="21" r="3"/><path d="M19 21h2"/></g>"##,
+    r##"<path d="M9 33q11 5 22 0v4q-11 5-22 0z" fill="#E2483A"/>"##,
+    r##"<path d="M15 12l5-10 5 10z" fill="#4C86C6"/><circle cx="20" cy="2.5" r="1.6" fill="#F4C84A"/>"##,
 ];
 
 pub struct Alias {
     pub name: String,
-    pub initials: String,
-    pub color: &'static str,
+    /// The animal face as inline SVG.
+    pub avatar: String,
 }
 
-/// FNV-1a, stable across builds and platforms.
-fn hash(id: &str) -> u64 {
-    id.bytes().fold(0xcbf2_9ce4_8422_2325, |h, b| {
-        (h ^ b as u64).wrapping_mul(0x0100_0000_01b3)
-    })
-}
-
-/// The same id always gets the same name and avatar color.
-pub fn alias(id: &str) -> Alias {
-    let h = hash(id);
-    let adjective = ADJECTIVES[(h % 32) as usize];
-    let animal = ANIMALS[((h >> 8) % 32) as usize];
+/// The name and face for a slot; no two slots share a name.
+pub fn alias(slot: u32) -> Alias {
+    let round = slot / COMBOS;
+    let i = (slot % COMBOS * STRIDE + 517) % COMBOS;
+    let (adjective, color) = ADJECTIVES[(i % 32) as usize];
+    let (animal, face) = ANIMALS[(i / 32) as usize];
+    let extra = match round {
+        0 => "",
+        r => EXTRAS[((r - 1) % 3) as usize],
+    };
     Alias {
-        name: format!("{adjective} {animal}"),
-        initials: format!("{}{}", &adjective[..1], &animal[..1]),
-        color: COLORS[((h >> 16) % 8) as usize],
+        name: match round {
+            0 => format!("{adjective} {animal}"),
+            r => format!("{adjective} {animal} {}", r + 1),
+        },
+        avatar: format!(
+            r#"<svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" fill="{color}"/>{face}{extra}</svg>"#
+        ),
+    }
+}
+
+/// Slots for the people on one page, given out on first sight and kept for good.
+pub struct Names(HashMap<String, u32>);
+
+impl Names {
+    pub async fn load(db: &SqlitePool, site_id: &str, keys: Vec<String>) -> sqlx::Result<Names> {
+        let mut map = HashMap::new();
+        let mut tx = db.begin().await?;
+        for key in keys {
+            if map.contains_key(&key) {
+                continue;
+            }
+            sqlx::query(
+                "INSERT INTO aliases (site_id, key, slot)
+                 SELECT ?1, ?2, COALESCE(MAX(slot) + 1, 0) FROM aliases WHERE site_id = ?1
+                 ON CONFLICT (site_id, key) DO NOTHING",
+            )
+            .bind(site_id)
+            .bind(&key)
+            .execute(&mut *tx)
+            .await?;
+            let slot: u32 =
+                sqlx::query_scalar("SELECT slot FROM aliases WHERE site_id = ? AND key = ?")
+                    .bind(site_id)
+                    .bind(&key)
+                    .fetch_one(&mut *tx)
+                    .await?;
+            map.insert(key, slot);
+        }
+        tx.commit().await?;
+        Ok(Names(map))
+    }
+
+    pub fn get(&self, key: &str) -> Alias {
+        alias(self.0[key])
     }
 }
 
@@ -45,15 +86,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn stable_and_unrelated_to_the_email() {
-        let id = "stripe:maya.chen@tallybird.app";
-        let (a, b) = (alias(id), alias(id));
-        assert_eq!((a.name.as_str(), a.color), (b.name.as_str(), b.color));
-        assert_eq!(a.initials.len(), 2);
-        let name = a.name.to_lowercase();
-        for part in ["maya", "chen", "tallybird", "stripe"] {
-            assert!(!name.contains(part), "{name} contains {part}");
-        }
-        assert_ne!(alias("cus_1").name, alias("cus_2").name);
+    fn every_slot_in_a_round_is_unique() {
+        let names: std::collections::HashSet<String> =
+            (0..COMBOS * 2).map(|s| alias(s).name).collect();
+        assert_eq!(names.len(), (COMBOS * 2) as usize);
+        let (a, b) = (alias(0), alias(1));
+        assert_ne!(a.name.split(' ').next(), b.name.split(' ').next());
+        assert_ne!(a.name.split(' ').nth(1), b.name.split(' ').nth(1));
+        assert!(a.avatar.starts_with("<svg") && a.avatar.ends_with("</svg>"));
+        assert_ne!(alias(7).avatar, alias(COMBOS + 7).avatar);
     }
 }
