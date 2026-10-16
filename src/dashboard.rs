@@ -19,6 +19,7 @@ use crate::stats::{
 use crate::{alias, chart, favicon, icons, visitor_pages};
 
 mod cards;
+mod insight;
 
 const RANGES: [(&str, &str, i64); 6] = [
     ("today", "Today", 1),
@@ -439,17 +440,135 @@ pub struct Tile {
     trend: &'static str,
     delta: String,
     sub: String,
-    href: String,
     on: bool,
     color: &'static str,
     big: bool,
 }
 
-pub struct KindView {
+pub struct Kpi {
     label: &'static str,
-    icon: &'static str,
+    value: String,
+    trend: &'static str,
+    delta: String,
+    note: String,
+}
+
+pub struct AiView {
+    visitors_share: String,
+    revenue_share: String,
+    /// Icon, name, visitors and revenue.
+    rows: Vec<(String, String, String, String)>,
+    line: String,
+}
+
+/// A step in a payment's path: a visit's source, or the last page before paying.
+pub struct Chip {
+    icon: String,
+    label: String,
+    credited: bool,
+}
+
+/// A payment with the visits that led to it.
+pub struct PathRow {
+    name: String,
+    initials: String,
+    meta: String,
+    chips: Vec<Chip>,
+    amount: String,
+    refunded: bool,
+    wait: String,
+    date: String,
     href: String,
-    on: bool,
+    visitor_href: String,
+}
+
+/// Chips for a journey's visits in order, merging repeats and keeping at most four plus the credited one.
+fn path_chips(j: Option<&Journey>) -> Vec<Chip> {
+    let mut chips: Vec<Chip> = Vec::new();
+    for s in j.map(|j| j.sessions.as_slice()).unwrap_or_default() {
+        match chips.last_mut() {
+            Some(last) if last.label == s.source => last.credited |= s.credited,
+            _ => chips.push(Chip {
+                icon: icons::source(&s.source, 14),
+                label: s.source.clone(),
+                credited: s.credited,
+            }),
+        }
+    }
+    let mut hidden = 0;
+    while chips.len() > 4 {
+        let Some(i) = (1..chips.len() - 1).find(|i| !chips[*i].credited) else {
+            break;
+        };
+        chips.remove(i);
+        hidden += 1;
+    }
+    if hidden > 0 {
+        chips.insert(
+            1,
+            Chip {
+                icon: String::new(),
+                label: format!("+{hidden}"),
+                credited: false,
+            },
+        );
+    }
+    if chips.is_empty() {
+        chips.push(Chip {
+            icon: icons::source("Unattributed", 14),
+            label: "No matched visit".into(),
+            credited: false,
+        });
+    }
+    if let Some(page) = j.and_then(|j| j.last_page.clone()) {
+        chips.push(Chip {
+            icon: String::new(),
+            label: page,
+            credited: false,
+        });
+    }
+    chips
+}
+
+fn path_row(p: &PaymentRow, j: Option<&Journey>, domain: &str, offset: UtcOffset) -> PathRow {
+    let alias = alias::alias(&payer_key(p));
+    let meta: Vec<String> = j
+        .map(|j| {
+            [
+                j.country.as_deref().map(icons::country),
+                j.device.clone().filter(|d| d != "Unknown"),
+                j.browser.clone().filter(|b| b != "Other"),
+            ]
+            .into_iter()
+            .flatten()
+            .collect()
+        })
+        .unwrap_or_default();
+    PathRow {
+        name: alias.name,
+        initials: alias.initials,
+        meta: meta.join(" · "),
+        chips: path_chips(j),
+        amount: amount(p),
+        refunded: p.status == "refunded",
+        wait: p
+            .first_touch
+            .as_ref()
+            .map(|f| since(p.ts - f.ts))
+            .unwrap_or_default(),
+        date: local(p.ts, offset),
+        href: format!(
+            "{}/{}/{}",
+            sites::app_path(domain, "payments"),
+            p.provider,
+            p.provider_payment_id
+        ),
+        visitor_href: p
+            .visitor
+            .as_deref()
+            .map(|v| visitor_pages::visitor_href(domain, v))
+            .unwrap_or_default(),
+    }
 }
 
 pub struct RowView {
@@ -522,17 +641,18 @@ struct DashboardPage {
     title: &'static str,
     range_label: &'static str,
     ranges: Vec<Opt>,
+    report_href: String,
     empty: Option<EmptyView>,
-    tiles: Vec<Tile>,
-    chart_title: String,
-    chart_sub: String,
-    kinds: Vec<KindView>,
-    kind_label: &'static str,
-    chart: String,
+    insight: Option<(String, String)>,
+    kpis: Vec<Kpi>,
     cards: Vec<cards::TabCard>,
-    customers: Vec<CustomerView>,
-    latest_total: u64,
+    unmatched: String,
+    credit: String,
+    ai: AiView,
+    paths: Vec<PathRow>,
+    payments_total: String,
     payments_href: String,
+    range_param: &'static str,
     steps: Vec<Step>,
     steps_done: usize,
     dismiss_href: String,
@@ -554,19 +674,10 @@ pub struct ReportQuery {
 #[derive(Deserialize, Default)]
 pub struct DashboardQuery {
     range: Option<String>,
-    metric: Option<String>,
-    chart: Option<String>,
-    /// Card tabs and metrics, read by `cards::picks`.
+    /// Card tabs, read by `cards::picks`.
     #[serde(flatten)]
     cards: std::collections::HashMap<String, String>,
 }
-
-const KIND_ICONS: [&str; 4] = [
-    r#"<path d="M3 17l5-6 4 3 5-7 4 4"/>"#,
-    r#"<path d="M3 17l5-6 4 3 5-7 4 4v9H3z" fill="currentColor" fill-opacity="0.18"/>"#,
-    r#"<path d="M5 20v-6M5 11V9M12 20v-9M12 8V4M19 20v-4M19 13v-3"/>"#,
-    r#"<path d="M5 20v-5M10 20v-8M15 20v-6M20 20v-10"/><path d="M3 9l5-3 5 4 8-6"/>"#,
-];
 
 fn source_of(p: &PaymentRow) -> (String, String) {
     match &p.touch {
@@ -830,6 +941,9 @@ fn metric_tile(
     }
 }
 
+/// Payments listed with their path on the dashboard.
+const PATH_ROWS: u32 = 8;
+
 pub async fn dashboard(
     State(state): State<AppState>,
     account: Account,
@@ -858,33 +972,33 @@ pub async fn dashboard(
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
     let picks = cards::picks(&q.cards);
-    let dims: Vec<Dimension> = picks.iter().map(|c| c.dimension()).collect();
-    let with_sources = picks.iter().any(|c| c.needs_sources());
+    let dims: Vec<Option<Dimension>> = picks.iter().map(|c| c.dimension()).collect();
     let store = state.events.clone();
     let (id, period_q) = (ctx.site.id.clone(), p.clone());
     let result = blocking(move || {
-        let recent = store.payment_list(&id, &period_q, PaymentFilter::All, 50, 0)?;
-        let who: Vec<Who> = recent.rows.iter().take(5).map(Who::of).collect();
-        let activity = store.activity(&id, &period_q.tz, &who)?;
+        let recent = store.payment_list(&id, &period_q, PaymentFilter::All, PATH_ROWS, 0)?;
+        let journeys = recent
+            .rows
+            .iter()
+            .map(|r| store.journey(&id, &r.provider, &r.provider_payment_id, window_days))
+            .collect::<anyhow::Result<Vec<_>>>()?;
         let breakdowns = dims
             .iter()
-            .map(|d| store.breakdown(&id, &period_q, *d))
+            .map(|d| match d {
+                Some(d) => store.breakdown(&id, &period_q, *d),
+                None => store.last_pages(&id, &period_q),
+            })
             .collect::<anyhow::Result<Vec<_>>>()?;
-        let sources = if with_sources {
-            store.breakdown(&id, &period_q, Dimension::ChannelSource)?
-        } else {
-            Vec::new()
-        };
         Ok((
             store.report(&id, &period_q)?,
+            store.breakdown(&id, &period_q, Dimension::ChannelSource)?,
             recent,
-            activity,
+            journeys,
             breakdowns,
-            sources,
         ))
     })
     .await;
-    let (report, recent, activity, breakdowns, sources) = match result {
+    let (report, sources, recent, journeys, breakdowns) = match result {
         Ok(r) => r,
         Err(code) => return code.into_response(),
     };
@@ -894,181 +1008,96 @@ pub async fn dashboard(
     let new_site = since.is_none_or(|d| d > p.previous().from);
     let age = since.map_or(0, |d| (ctx.today - d).whole_days());
     let young = new_site && age <= 30;
-    let metric = q
-        .metric
-        .as_deref()
-        .and_then(chart::Metric::parse)
-        .unwrap_or(chart::Metric::Revenue);
-    let default_kind = if young {
-        chart::Kind::Dual
-    } else {
-        chart::Kind::Line
-    };
-    let kind = q
-        .chart
-        .as_deref()
-        .and_then(chart::Kind::parse)
-        .unwrap_or(default_kind);
     let range_param = if rkey == rdefault { "" } else { rkey };
-    let metric_param = if metric == chart::Metric::Revenue {
-        ""
-    } else {
-        metric.key()
-    };
-    let kind_param = if kind == default_kind { "" } else { kind.key() };
-    let mut params: Vec<(&str, &str)> = vec![
-        ("range", range_param),
-        ("metric", metric_param),
-        ("chart", kind_param),
-    ];
+    let mut params: Vec<(&str, &str)> = vec![("range", range_param)];
     params.extend(cards::params(&picks));
 
     let cur = &report.overview.current;
     let prev = &report.overview.previous;
-    let lit = |m: chart::Metric| match kind {
-        chart::Kind::Channel => m == chart::Metric::Revenue,
-        chart::Kind::Dual => matches!(m, chart::Metric::Revenue | chart::Metric::Visitors),
-        _ => m == metric,
-    };
-    let tile_kind = match kind {
-        chart::Kind::Area => "area",
-        _ if young => "line",
-        _ => "",
-    };
-    let tiles = chart::Metric::ALL
-        .into_iter()
-        .map(|m| {
-            let (value, (trend, delta), sub) =
-                metric_tile(m, cur, prev, since.filter(|s| new_site && *s >= p.from));
-            let (trend, delta) = if new_site {
-                if m == chart::Metric::Revenue && !young {
-                    ("flat", "No earlier data".to_string())
-                } else {
-                    ("", String::new())
-                }
-            } else {
-                (trend, delta)
-            };
-            let m_param = if m == chart::Metric::Revenue {
-                ""
-            } else {
-                m.key()
-            };
-            Tile {
-                name: m.name(),
-                short: match m {
-                    chart::Metric::Conversion => "Conversion",
-                    chart::Metric::PerVisitor => "Per visitor",
-                    _ => m.name(),
-                },
-                value,
-                trend,
-                delta,
-                sub,
-                href: link(&base, &params, &[("metric", m_param), ("chart", tile_kind)]),
-                on: lit(m),
-                color: m.color(),
-                big: m == chart::Metric::Revenue,
-            }
-        })
-        .collect();
-
-    let current = chart::series(&report.days);
-    let previous = chart::series(&report.previous_days);
-    let unit = if current.weekly { "week" } else { "day" };
-    let sparse = young && kind == chart::Kind::Dual;
-    let (chart_title, chart_sub, chart_html) = match kind {
-        chart::Kind::Line | chart::Kind::Area => {
-            let area = kind == chart::Kind::Area;
-            let compare = !area && !new_site;
-            let sub = if compare {
-                format!(
-                    "{}, compared with the previous {} days",
-                    span(&p),
-                    days.min(365)
-                )
-            } else if new_site {
-                format!(
-                    "{}. Comparisons start once there is a full previous period",
-                    span(&p)
-                )
-            } else {
-                span(&p)
-            };
-            (
-                format!("{} per {unit}", metric.name()),
-                sub,
-                chart::line(
-                    &current,
-                    compare.then_some(&previous),
-                    metric,
-                    area,
-                    &span(&p),
-                ),
-            )
+    let change = |c: Option<f64>, p: Option<f64>| {
+        if new_site {
+            ("", String::new())
+        } else {
+            delta(c, p)
         }
-        chart::Kind::Channel => (
-            format!("Revenue per {unit} by channel"),
-            "Which channel each payment is credited to".into(),
-            chart::stacked(&current),
-        ),
-        chart::Kind::Dual if sparse => {
-            let mut pills: Vec<(Date, String)> = Vec::new();
-            let mut by_day: Vec<(Date, f64, u64, String)> = Vec::new();
-            for r in &recent.rows {
-                let d = r.ts.to_offset(ctx.offset).date();
-                let usd_amount = r.net_usd.unwrap_or(0.0);
-                match by_day.iter_mut().find(|b| b.0 == d) {
-                    Some(b) => {
-                        b.1 += usd_amount;
-                        b.2 += 1;
-                    }
-                    None => by_day.push((d, usd_amount, 1, source_of(r).0)),
-                }
-            }
-            for (d, total, n, source) in by_day {
-                let text = if n == 1 {
-                    format!(
-                        r#"<span class="pill-logo">{}</span>{} from {}"#,
-                        icons::source(&source, 12),
-                        money(total),
-                        chart::esc(&source)
-                    )
-                } else {
-                    format!("{} from {n} payments", money(total))
-                };
-                pills.push((d, text));
-            }
-            (
-                format!("Visitors and revenue per {unit}"),
-                "Comparisons start once there is a full previous period".into(),
-                chart::sparse(&current, since, ctx.today, &pills),
-            )
-        }
-        chart::Kind::Dual => (
-            format!("Visitors and revenue per {unit}"),
-            "Visitors on the left axis, revenue on the right".into(),
-            chart::dual(&current),
-        ),
     };
-    let kinds = chart::Kind::ALL
-        .into_iter()
-        .zip(KIND_ICONS)
-        .map(|(k, icon)| KindView {
-            label: k.label(),
-            icon,
-            href: link(
-                &base,
-                &params,
-                &[("chart", if k == default_kind { "" } else { k.key() })],
+    let kpi = |label, value, (trend, delta): (&'static str, String), note| Kpi {
+        label,
+        value,
+        trend,
+        delta,
+        note,
+    };
+    let kpis = vec![
+        kpi(
+            "Revenue",
+            money(cur.revenue_usd),
+            change(Some(cur.revenue_usd), Some(prev.revenue_usd)),
+            plural(cur.payments, "payment"),
+        ),
+        kpi(
+            "Visitors",
+            group(cur.visitors),
+            change(Some(cur.visitors as f64), Some(prev.visitors as f64)),
+            plural(cur.sessions, "session"),
+        ),
+        kpi(
+            "Conversion",
+            cur.conversion
+                .map_or_else(|| "n/a".into(), |c| format!("{:.2}%", c * 100.0)),
+            change(cur.conversion, prev.conversion),
+            format!(
+                "{} of {} paid",
+                group(cur.converted),
+                plural(cur.visitors, "visitor")
             ),
-            on: k == kind,
-        })
-        .collect();
+        ),
+        kpi(
+            "Revenue per visitor",
+            cur.revenue_per_visitor.map_or_else(|| "n/a".into(), usd),
+            change(cur.revenue_per_visitor, prev.revenue_per_visitor),
+            if cur.matched_payments > 0 {
+                "Matched revenue only".into()
+            } else {
+                "Needs a payment matched to a visit".into()
+            },
+        ),
+    ];
 
-    let soon = new_site.then(|| "Rows fill in as traffic grows".to_string());
+    let attributed: f64 = report
+        .channels
+        .iter()
+        .filter(|r| !r.unattributed)
+        .map(|r| r.revenue_usd)
+        .sum();
+    let avg = (cur.visitors > 0 && attributed > 0.0).then(|| attributed / cur.visitors as f64);
+    let cards: Vec<cards::TabCard> = picks
+        .iter()
+        .zip(&breakdowns)
+        .map(|(pick, rows)| cards::card(pick, rows, avg, &base, &params))
+        .collect();
+    let ai_rows = insight::ai_rows(&sources);
+    let (visitors_share, revenue_share) = insight::ai_shares(cur, &report.channels);
+    let insight = insight::summary(cur, avg, &report.channels, &ai_rows, &report.landing_pages);
+    let ai = AiView {
+        visitors_share,
+        revenue_share,
+        line: insight::ai_line(&ai_rows),
+        rows: ai_rows
+            .iter()
+            .take(5)
+            .map(|r| {
+                (
+                    icons::source(&r.host, 16),
+                    r.name.clone(),
+                    group(r.visitors),
+                    money(r.revenue_usd),
+                )
+            })
+            .collect(),
+    };
     let credit = format!(
-        "Credited to the {} within {} days",
+        "Credit: {}, {} days",
         if model == "first_touch" {
             "first visit"
         } else {
@@ -1076,19 +1105,6 @@ pub async fn dashboard(
         },
         window_days
     );
-    let cards: Vec<cards::TabCard> = picks
-        .iter()
-        .zip(&breakdowns)
-        .enumerate()
-        .map(|(i, (pick, rows))| {
-            let foot = if i == 0 {
-                Some(soon.clone().unwrap_or_else(|| credit.clone()))
-            } else {
-                soon.clone()
-            };
-            cards::card(pick, rows, &sources, &base, &params, foot)
-        })
-        .collect();
 
     let provider_label = |p: &str| provider_name(p).to_string();
     let empty = (setup.first_event.is_none() && setup.payments == 0).then(|| EmptyView {
@@ -1202,25 +1218,23 @@ pub async fn dashboard(
         title: "Dashboard",
         range_label: rlabel,
         ranges: range_opts(&base, rkey, rdefault, &params),
+        report_href: site_url("report"),
         empty,
-        tiles,
-        chart_title,
-        chart_sub,
-        kinds,
-        kind_label: kind.label(),
-        chart: chart_html,
+        insight,
+        kpis,
         cards,
-        customers: recent
+        unmatched: insight::unmatched(&report.channels),
+        credit,
+        ai,
+        paths: recent
             .rows
             .iter()
-            .zip(&activity)
-            .map(|(r, a)| payment_customer(r, a, &ctx.site.domain, ctx.offset))
+            .zip(&journeys)
+            .map(|(r, j)| path_row(r, j.as_ref(), &ctx.site.domain, ctx.offset))
             .collect(),
-        latest_total: recent.total,
-        payments_href: href(
-            &sites::app_path(&ctx.site.domain, "payments"),
-            &[("range", range_param)],
-        ),
+        payments_total: plural(recent.total, "payment"),
+        payments_href: site_url("payments"),
+        range_param,
         steps_done: steps.iter().filter(|s| s.done).count(),
         dismiss_href: site_url("setup/dismiss"),
         steps,
@@ -1918,7 +1932,6 @@ async fn client_report(
                 trend,
                 delta,
                 sub,
-                href: String::new(),
                 on: matches!(m, chart::Metric::Revenue | chart::Metric::Visitors),
                 color: m.color(),
                 big: m == chart::Metric::Revenue,

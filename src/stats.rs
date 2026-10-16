@@ -85,20 +85,8 @@ pub enum Dimension {
     LandingPage,
     Country,
     Campaign,
-    Keyword,
     /// "channel|referrer_host", to list each channel's sources.
     ChannelSource,
-    /// "country|region"
-    Region,
-    /// "country|city"
-    City,
-    Hostname,
-    /// Every page viewed, not only the first of a session.
-    Page,
-    /// Outbound links clicked.
-    ExitLink,
-    Browser,
-    Os,
     Device,
 }
 
@@ -112,20 +100,8 @@ impl Dimension {
             Dimension::LandingPage => first("path"),
             Dimension::Country => first("country"),
             Dimension::Campaign => first("utm_campaign"),
-            Dimension::Keyword => first("utm_term"),
             Dimension::ChannelSource => first("channel || '|' || coalesce(referrer_host, '')"),
-            Dimension::Region => first(
-                "CASE WHEN region IS NOT NULL THEN coalesce(country, '') || '|' || region END",
-            ),
-            Dimension::City => {
-                first("CASE WHEN city IS NOT NULL THEN coalesce(country, '') || '|' || city END")
-            }
-            Dimension::Browser => first("browser"),
-            Dimension::Os => first("os"),
             Dimension::Device => first("device"),
-            Dimension::Hostname => ("pageview", "host", false),
-            Dimension::Page => ("pageview", "path", false),
-            Dimension::ExitLink => ("exit", "name", false),
         }
     }
 }
@@ -246,6 +222,8 @@ pub struct Journey {
     pub country: Option<String>,
     pub browser: Option<String>,
     pub device: Option<String>,
+    /// Path of that last pageview.
+    pub last_page: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize)]
@@ -817,6 +795,7 @@ pub(crate) fn journey(
         country: seen.country,
         browser: seen.browser,
         device: seen.device,
+        last_page: seen.last_page,
     }))
 }
 
@@ -848,6 +827,8 @@ pub struct Activity {
     pub device: Option<String>,
     pub os: Option<String>,
     pub browser: Option<String>,
+    /// Path of the last pageview at or before the moment.
+    pub last_page: Option<String>,
     /// Sessions per local day, oldest first; the last entry is the day of the payment or goal.
     pub days: Vec<u32>,
 }
@@ -862,10 +843,10 @@ fn micros(ts: OffsetDateTime) -> duckdb::types::Value {
 /// Country, device, OS and browser of the last pageview at or before `who.ts`.
 fn last_seen(conn: &Connection, site_id: &str, who: &Who) -> anyhow::Result<Activity> {
     let mut stmt = conn.prepare(
-        "SELECT country, device, os, browser FROM events
+        "SELECT country, device, os, browser, path FROM events
         WHERE site_id = $site AND kind = 'pageview' AND ts <= $ts
             AND (visitor_id = $visitor OR session_id = $session)
-        ORDER BY ts DESC LIMIT 1",
+        ORDER BY ts DESC, path DESC LIMIT 1",
     )?;
     let row = stmt
         .query_map(
@@ -881,6 +862,7 @@ fn last_seen(conn: &Connection, site_id: &str, who: &Who) -> anyhow::Result<Acti
                     device: r.get(1)?,
                     os: r.get(2)?,
                     browser: r.get(3)?,
+                    last_page: r.get(4)?,
                     days: Vec::new(),
                 })
             },
@@ -927,6 +909,65 @@ pub(crate) fn activity(
         }
         out.push(a);
     }
+    Ok(out)
+}
+
+/// Pages by the revenue of payments whose payer viewed them last before paying; visitors count every view in range.
+pub(crate) fn last_pages(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+) -> anyhow::Result<Vec<BreakdownRow>> {
+    let sql = format!(
+        "WITH {BOUNDS},
+        last AS (
+            SELECT {NET_USD} AS usd, {CUSTOMER} AS customer,
+                (SELECT e.path FROM events e
+                 WHERE e.site_id = p.site_id AND e.kind = 'pageview' AND e.ts <= p.ts
+                    AND (e.visitor_id = p.visitor_id OR e.session_id = a.session_id)
+                 ORDER BY e.ts DESC, e.path DESC LIMIT 1) AS path
+            FROM payments p
+            JOIN bounds ON p.ts >= lo AND p.ts < hi
+            {ATTRIBUTION_JOIN}
+            WHERE p.site_id = $site AND p.status <> 'failed'
+        ),
+        seen AS (
+            SELECT path, count(DISTINCT visitor_id) AS visitors FROM events, bounds
+            WHERE site_id = $site AND kind = 'pageview' AND ts >= lo AND ts < hi
+            GROUP BY path
+        )
+        SELECT l.path, coalesce(any_value(s.visitors), 0)::BIGINT, count(*), coalesce(sum(l.usd), 0),
+            count(DISTINCT l.customer)
+        FROM last l LEFT JOIN seen s ON s.path = l.path
+        WHERE l.path IS NOT NULL
+        GROUP BY l.path"
+    );
+    let mut stmt = conn.prepare(&sql)?;
+    let rows = stmt.query_map(
+        named_params! {
+            "site": site_id,
+            "tz": period.tz,
+            "from": period.from.to_string(),
+            "to": period.to.to_string(),
+        },
+        |r| {
+            let path: String = r.get(0)?;
+            let visitors = r.get::<_, i64>(1)? as u64;
+            let revenue_usd: f64 = r.get(3)?;
+            Ok(BreakdownRow {
+                key: Some(path.clone()),
+                label: path,
+                unattributed: false,
+                visitors,
+                payments: r.get::<_, i64>(2)? as u64,
+                customers: r.get::<_, i64>(4)? as u64,
+                revenue_usd,
+                revenue_per_visitor: ratio(revenue_usd, visitors),
+            })
+        },
+    )?;
+    let mut out: Vec<BreakdownRow> = rows.collect::<Result<_, _>>()?;
+    sort_rows(&mut out);
     Ok(out)
 }
 
@@ -1643,7 +1684,44 @@ mod tests {
         assert_eq!(j.sessions[0].source, "Hacker News");
         assert_eq!(j.sessions[1].paths, ["/s2", "/pricing"]);
         assert_eq!(j.sessions[1].goals, ["signup"]);
+        assert_eq!(j.last_page.as_deref(), Some("/pricing"));
         assert!(store.journey("s", "stripe", "nope", 90).unwrap().is_none());
+    }
+
+    #[test]
+    fn last_pages_credit_the_page_viewed_before_paying() {
+        let (_dir, store) = store();
+        let page = |v: &str, s: &str, ts, path: &str| {
+            let mut e = visit(v, s, ts, "Direct");
+            e.path = path.into();
+            e
+        };
+        store
+            .insert_events(&[
+                page("v1", "a", T - Duration::hours(2), "/"),
+                page("v1", "a", T - Duration::hours(1), "/pricing"),
+                page("v1", "a", T + Duration::minutes(5), "/thanks"),
+                page("v2", "b", T - Duration::hours(1), "/pricing"),
+                page("v3", "c", T - Duration::hours(3), "/compare"),
+            ])
+            .unwrap();
+        store
+            .upsert_payments(&[
+                pay("p1", T, Some("v1"), None),
+                pay("p2", T, Some("v3"), None),
+                pay("p3", T, None, None),
+            ])
+            .unwrap();
+        store
+            .rebuild_attribution("s", "last_non_direct", 90)
+            .unwrap();
+        let rows = store.last_pages("s", &period()).unwrap();
+        let got: Vec<_> = rows
+            .iter()
+            .map(|r| (r.label.as_str(), r.visitors, r.payments, r.revenue_usd))
+            .collect();
+        assert_eq!(got, [("/pricing", 2, 1, 100.0), ("/compare", 1, 1, 100.0)]);
+        assert_eq!(rows[0].revenue_per_visitor, Some(50.0));
     }
 
     #[test]
@@ -1931,23 +2009,13 @@ mod tests {
         let campaign = find(Dimension::Campaign, "launch");
         assert_eq!((campaign.visitors, campaign.customers), (1, 1));
         assert_eq!(campaign.revenue_usd, 100.0);
-        assert_eq!(find(Dimension::Keyword, "invoices").visitors, 1);
-        assert_eq!(find(Dimension::Region, "DE|Bavaria").revenue_usd, 100.0);
-        assert_eq!(find(Dimension::City, "DE|Munich").visitors, 1);
-        assert_eq!(find(Dimension::Hostname, "docs.example.com").visitors, 1);
-        assert_eq!(find(Dimension::Page, "/pricing").revenue_usd, 100.0);
         assert_eq!(find(Dimension::LandingPage, "/a").revenue_usd, 100.0);
         assert!(
             rows(Dimension::LandingPage)
                 .iter()
                 .all(|r| r.key.as_deref() != Some("/pricing"))
         );
-        assert_eq!(
-            find(Dimension::ExitLink, "github.com/acme").revenue_usd,
-            100.0
-        );
-        assert_eq!(find(Dimension::Os, "iOS").visitors, 1);
-        assert_eq!(find(Dimension::Os, "macOS").revenue_usd, 0.0);
+        assert_eq!(find(Dimension::Device, "Desktop").visitors, 2);
         assert_eq!(
             find(Dimension::ChannelSource, "Social|news.ycombinator.com").revenue_usd,
             100.0

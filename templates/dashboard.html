@@ -1,6 +1,33 @@
 {% extends "app.html" %}
-{% block tools %}{% include "_range.html" %}{% endblock %}
+{% block top %}{% endblock %}
 {% block content %}
+<div class="d3">
+<header class="d3-head">
+  <div class="d3-row">
+    <button class="burger" type="button" aria-controls="side" aria-expanded="false" aria-label="Menu" data-burger>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <h1 class="sr">{{ title }}</h1>
+    <div class="menu-wrap d3-site" data-menu>
+      <button type="button" aria-haspopup="true" aria-expanded="false">
+        {% if shell.icon.is_empty() %}<span class="favicon">{{ shell.initial }}</span>{% else %}<img class="favicon" src="{{ shell.icon }}" width="24" height="24" alt="">{% endif %}
+        <span class="grow">{{ shell.domain }}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" aria-hidden="true"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"/></svg>
+      </button>
+      <div class="menu" hidden>
+        {% for s in shell.sites %}
+        <a href="{{ s.href }}"{% if s.on %} aria-current="true"{% endif %}>{% if s.icon.is_empty() %}<span class="favicon sm">{{ s.initial }}</span>{% else %}<img class="favicon sm" src="{{ s.icon }}" width="16" height="16" alt="">{% endif %}{{ s.label }}</a>
+        {% endfor %}
+        <a class="add" href="/app/setup">+ Add a site</a>
+      </div>
+    </div>
+    <span class="d3-online{% if shell.live == 0 %} idle{% endif %}" title="Visitors in the last 5 minutes"><i></i>{{ shell.live }} visitor{% if shell.live != 1 %}s{% endif %} online now</span>
+  </div>
+  <div class="d3-row">
+    {% include "_range.html" %}
+    <a class="d3-btn dark" href="{{ report_href }}">Client report</a>
+  </div>
+</header>
 {% if let Some(e) = empty %}
 <section class="box empty-hero" data-reload="20000">
   <img src="/assets/art/02-empty-waiting.jpg" width="1024" height="687" alt="Pencil drawing: a radio tower on a hill with one orange light">
@@ -21,11 +48,8 @@
 </section>
 <div class="ghost">
   <div class="fills"><span></span>Fills in from the first visit<span></span></div>
-  <section class="box">
-    <div class="tiles">{% for t in tiles %}<div class="tile ghost-tile"><span class="tn">{{ t.name }}</span><b>{% if t.big %}$0{% else if loop.index == 2 %}0{% else if loop.index == 3 %}0%{% else %}$0.00{% endif %}</b><i class="bar-ph"></i></div>{% endfor %}</div>
-    <div class="ghost-chart"><svg width="100%" height="220" viewBox="0 0 1000 220" preserveAspectRatio="none" aria-hidden="true"><path d="M0,10H1000M0,60H1000M0,110H1000M0,160H1000" stroke="#F2F2EE" vector-effect="non-scaling-stroke"/><path d="M0,210H1000" stroke="#E4E4DF" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg></div>
-  </section>
-  <div class="grid-bd">{% for c in cards %}<section class="box bd ghost-card"><div class="bd-head"><h2>{{ c.title }}</h2></div>{% for w in [160, 120, 140, 96, 110] %}<div class="ph-row"><i style="width:{{ w }}px"></i><i style="width:40px"></i></div>{% endfor %}</section>{% endfor %}</div>
+  <section class="d3-kpis">{% for k in kpis %}<div class="d3-kpi ghost-kpi"><span class="k">{{ k.label }}</span><b>{% if loop.index == 1 %}$0{% else if loop.index == 2 %}0{% else if loop.index == 3 %}0%{% else %}$0.00{% endif %}</b><i class="bar-ph"></i></div>{% endfor %}</section>
+  <div class="d3-pair">{% for t in ["Sources", "Location"] %}<section class="d3-card ghost-card"><h2>{{ t }}</h2>{% for w in [160, 120, 140, 96, 110] %}<div class="ph-row"><i style="width:{{ w }}px"></i><i style="width:40px"></i></div>{% endfor %}</section>{% endfor %}</div>
 </div>
 {% else %}
 {% if !steps.is_empty() %}
@@ -35,78 +59,108 @@
   <form method="post" action="{{ dismiss_href }}"><button class="ctl sq strip-x" type="submit" aria-label="Hide this checklist"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
 </section>
 {% endif %}
-<section class="box">
-  <nav class="tiles" aria-label="Metric">
-    {% for t in tiles %}<a class="tile{% if t.on %} on{% endif %}{% if t.big %} big{% endif %}" href="{{ t.href }}" style="--c:{{ t.color }}"{% if t.on %} aria-current="true"{% endif %}>
-      <span class="tn"><i class="dot" style="background:{% if t.on %}{{ t.color }}{% else %}#B9BCC2{% endif %}"></i><span class="full">{{ t.name }}</span><span class="short">{{ t.short }}</span></span>
-      <span class="tv"><b>{{ t.value }}</b>{% if !t.delta.is_empty() %}<span class="pill {{ t.trend }}">{{ t.delta }}</span>{% endif %}</span>
-      <span class="ts">{{ t.sub }}</span>
-    </a>{% endfor %}
-    <div class="tile now"><span class="tn"><i class="dot"></i><span class="full">Visitors now</span><span class="short">Now</span></span><span class="tv"><b>{{ shell.live }}</b></span><span class="ts">In the last 5 minutes</span></div>
-  </nav>
-  <div class="chart-wrap">
-    <div class="chart-head">
-      <div><h2>{{ chart_title }}</h2><span class="sub">{{ chart_sub }}</span></div>
-      <nav class="sg kinds" aria-label="Chart type">{% for k in kinds %}<a href="{{ k.href }}"{% if k.on %} class="on" aria-current="true"{% endif %}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ k.icon|safe }}</svg>{{ k.label }}</a>{% endfor %}</nav>
-      <div class="menu-wrap kinds-menu" data-menu>
-        <button type="button" class="ctl" aria-haspopup="true" aria-expanded="false">{{ kind_label }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
-        <div class="menu right" hidden>{% for k in kinds %}<a href="{{ k.href }}"{% if k.on %} aria-current="true"{% endif %}>{{ k.label }}</a>{% endfor %}</div>
+{% if let Some((lead, fix)) = insight %}
+<section class="d3-card d3-insight">
+  <div class="d3-ins-body">
+    <div class="d3-ins-k"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C2380F" stroke-width="2" aria-hidden="true"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>This month in one line</div>
+    <p class="d3-ins-lead">{{ lead }}</p>
+    {% if !fix.is_empty() %}<p class="d3-ins-fix">{{ fix }}</p>{% endif %}
+  </div>
+  <a class="d3-btn" href="#sources">See the channels</a>
+</section>
+{% endif %}
+<section class="d3-kpis">
+  {% for k in kpis %}
+  <div class="d3-kpi">
+    <span class="k">{{ k.label }}</span>
+    <span class="v"><b>{{ k.value }}</b>{% if !k.delta.is_empty() %}<span class="d3-delta {{ k.trend }}">{{ k.delta }}</span>{% endif %}</span>
+    <span class="k">{{ k.note }}</span>
+  </div>
+  {% endfor %}
+</section>
+<div class="d3-pair">
+{% for c in cards %}
+{% if loop.index == 3 %}</div>
+<div class="d3-pair">{% endif %}
+<section class="d3-card d3-tc d3-{{ c.key }}" id="{{ c.key }}">
+  <div class="d3-tc-head">
+    <nav class="d3-tabs" aria-label="{{ c.label }}">{% for t in c.tabs %}<a class="tab{% if t.on %} on{% endif %}" href="{{ t.href }}"{% if t.on %} aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav>
+    {% if c.key == "sources" %}<div class="d3-legend"><span><i class="lv"></i>Visitors</span><span><i class="lr"></i>Revenue</span></div>
+    {% else if c.key == "location" %}<span class="d3-note">Revenue</span>
+    {% else %}<span class="d3-note">{{ c.note }}</span>{% endif %}
+  </div>
+  {% if c.rows.is_empty() %}
+  <p class="d3-empty">{{ c.empty }}</p>
+  {% else %}
+  {% if c.key == "sources" %}<div class="d3-br th"><span>Source</span><span>Revenue</span><span>Per visitor</span></div>{% endif %}
+  {% for r in c.rows %}
+  <div class="d3-br">
+    <div class="d3-bar"><i class="bv" style="width:{{ "{:.1}"|format(r.vw) }}%"></i><i class="brv" style="width:{{ "{:.1}"|format(r.rw) }}%"></i><span class="t">{% if !r.icon.is_empty() %}<span class="ic">{{ r.icon|safe }}</span>{% endif %}<span class="nm{% if r.mono %} mono{% endif %}">{{ r.label }}</span><span class="n">{{ r.visitors }}</span></span></div>
+    <span class="rv">{{ r.revenue }}</span>
+    {% if c.key != "location" %}<span class="pv">{{ r.per_visitor }}{% if !r.ratio.is_empty() %}<span class="x {{ r.tone }}">{{ r.ratio }}</span>{% endif %}</span>{% endif %}
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% if c.key == "sources" %}<div class="d3-foot"><span>{{ unmatched }}</span><span>{{ credit }}</span></div>{% endif %}
+</section>
+{% endfor %}
+<section class="d3-card d3-ai">
+  <div class="d3-ai-head"><h2>AI assistants</h2><span class="d3-note">Visitors who came from an AI answer</span></div>
+  <div class="d3-ai-stats">
+    <div><span class="k">Share of visitors</span><b>{{ ai.visitors_share }}</b></div>
+    <div><span class="k">Share of revenue</span><b class="rev">{{ ai.revenue_share }}</b></div>
+  </div>
+  {% if ai.rows.is_empty() %}
+  <p class="d3-empty">No visits from AI assistants in this range.</p>
+  {% else %}
+  {% for (icon, name, visitors, revenue) in ai.rows %}
+  <div class="d3-ai-row"><span class="nm">{{ icon|safe }}{{ name }}</span><span class="n">{{ visitors }}</span><span class="rv">{{ revenue }}</span></div>
+  {% endfor %}
+  {% endif %}
+  {% if !ai.line.is_empty() %}<p class="d3-ai-line">{{ ai.line }}</p>{% endif %}
+</section>
+</div>
+<section class="d3-card d3-pay" data-rows data-total="{{ paths.len() }}" data-offset="0">
+  <div class="d3-pay-head">
+    <div class="d3-pay-title"><h2>Payments and the path to them</h2><a class="d3-note" href="{{ payments_href }}{% if !range_param.is_empty() %}?range={{ range_param }}{% endif %}">{{ payments_total }}</a></div>
+    <form class="d3-search" method="get" action="{{ payments_href }}" role="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B717C" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <label class="sr" for="pay-q">Search payments</label>
+      {% if !range_param.is_empty() %}<input type="hidden" name="range" value="{{ range_param }}">{% endif %}
+      <input id="pay-q" type="search" name="q" placeholder="Search by source or customer">
+    </form>
+  </div>
+  {% if paths.is_empty() %}
+  <p class="d3-empty pad">No payments in this range. <a href="/app/{{ shell.domain }}/setup/payments">Connect a provider</a></p>
+  {% else %}
+  <div class="d3-scroll">
+    <div class="d3-pt">
+      <div class="d3-pr th"><span>Customer</span><span>Path</span><span class="num">Amount</span><span>Time to pay</span><span>Paid</span></div>
+      {% for j in paths %}
+      <div class="d3-pr prow"><a class="row-link" href="{{ j.href }}" aria-label="{{ j.name }}, {{ j.amount }} on {{ j.date }}" data-drawer></a>
+        <div class="d3-who"><span class="d3-av">{{ j.initials }}</span><div class="id">{% if j.visitor_href.is_empty() %}<b>{{ j.name }}</b>{% else %}<a class="vis-link" href="{{ j.visitor_href }}" title="Visitor timeline"><b>{{ j.name }}</b></a>{% endif %}<span>{{ j.meta }}</span></div></div>
+        <div class="path">{% for p in j.chips %}<span class="d3-chip{% if p.credited %} on{% endif %}">{{ p.icon|safe }}{{ p.label }}</span>{% endfor %}</div>
+        <span class="num amt{% if j.refunded %} struck{% endif %}">{{ j.amount }}</span>
+        <span>{{ j.wait }}</span>
+        <span class="when">{{ j.date }}</span>
       </div>
+      {% endfor %}
     </div>
-    {{ chart|safe }}
+  </div>
+  <div class="d3-foot plain">Orange marks the visit that gets the credit.</div>
+  {% endif %}
+</section>
+{% if goals_card %}
+<section class="box goals-card" id="goals">
+  <img src="/assets/art/04-empty-goals.jpg" width="1024" height="687" alt="Pencil drawing: a hill with an orange flag at the top of a winding path">
+  <div>
+    <h2>No goals yet</h2>
+    <span class="sub">Track signups or trials to see which channels convert before anyone pays.</span>
+    <code>virling('goal', 'signup')</code>
   </div>
 </section>
-<div class="grid-bd">
-  {% for c in cards %}
-  <section class="box bd tc" data-card="{{ c.key }}" id="card-{{ c.key }}">
-    <div class="tc-head">
-      <h2>{{ c.title }}</h2>
-      <div class="menu-wrap tc-by" data-menu>
-        <button type="button" class="ctl" aria-haspopup="true" aria-expanded="false">{{ c.metric }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
-        <div class="menu right" hidden>{% for m in c.metrics %}<a href="{{ m.href }}"{% if m.on %} aria-current="true"{% endif %}>{{ m.label }}</a>{% endfor %}</div>
-      </div>
-    </div>
-    <nav class="tc-tabs" aria-label="{{ c.title }} view">{% for t in c.tabs %}<a href="{{ t.href }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav>
-    {% if !c.map.is_empty() %}
-    <div class="tc-map">{{ c.map|safe }}</div>
-    {% else if c.rows.is_empty() %}
-    <p class="bd-empty">{{ c.empty }}</p>
-    {% else %}
-    <div class="tc-row th"><span>{{ c.head }}</span><span>{{ c.metric }}</span></div>
-    {% for r in c.rows %}
-    {% if r.sources.is_empty() %}
-    <div class="tc-row{% if r.zero %} unattr{% endif %}">{% include "_bar.html" %}</div>
-    {% else %}
-    <details class="tc-open"><summary class="tc-row">{% include "_bar.html" %}</summary>
-      {% for r in r.sources %}<div class="tc-row sub">{% include "_bar.html" %}</div>{% endfor %}
-    </details>
-    {% endif %}
-    {% endfor %}
-    {% endif %}
-    {% if !c.foot.is_empty() || !c.foot_href.is_empty() %}<div class="bd-foot"><span>{{ c.foot }}</span>{% if !c.foot_href.is_empty() %}<a href="{{ c.foot_href }}">{{ c.foot_link }}</a>{% endif %}</div>{% endif %}
-  </section>
-  {% endfor %}
-</div>
-<div class="latest-row{% if goals_card %} with-goals{% endif %}">
-  <section class="box latest" data-rows data-total="{{ latest_total }}" data-offset="0">
-    <div class="box-head"><h2>Latest payments</h2><a href="{{ payments_href }}">All payments</a></div>
-    {% if customers.is_empty() %}
-    <p class="bd-empty">No payments in this range. <a href="/app/{{ shell.domain }}/setup/payments">Connect a provider</a></p>
-    {% else %}
-    {% include "_customers.html" %}
-    {% endif %}
-  </section>
-  {% if goals_card %}
-  <section class="box goals-card" id="goals">
-    <img src="/assets/art/04-empty-goals.jpg" width="1024" height="687" alt="Pencil drawing: a hill with an orange flag at the top of a winding path">
-    <div>
-      <h2>No goals yet</h2>
-      <span class="sub">Track signups or trials to see which channels convert before anyone pays.</span>
-      <code>virling('goal', 'signup')</code>
-    </div>
-  </section>
-  {% endif %}
-</div>
 {% endif %}
+{% endif %}
+</div>
 {% include "_drawer.html" %}
 {% endblock %}

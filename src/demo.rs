@@ -615,13 +615,7 @@ fn target(url: &str) -> Option<String> {
         .map(|kv| kv.split_once('=').unwrap_or((kv, "")))
         .collect();
     let (page, keys): (&str, &[&str]) = match path {
-        "" => (
-            "",
-            &[
-                "range", "metric", "chart", "acq", "acq_by", "loc", "loc_by", "pg", "pg_by", "dev",
-                "dev_by", "all",
-            ],
-        ),
+        "" => ("", &["range", "sources", "location", "pages"]),
         "/payments" => ("payments/", &["range", "filter"]),
         "/report" => ("report/", &["range"]),
         p => {
@@ -641,18 +635,14 @@ fn target(url: &str) -> Option<String> {
         return None;
     }
     let extra = params.iter().filter(|(k, _)| *k != "range").count();
-    if extra > 1
-        && params
-            .iter()
-            .any(|(k, _)| !matches!(*k, "range" | "metric" | "chart"))
-    {
+    if extra > 1 {
         return None;
     }
     let slug: Vec<String> = keys
         .iter()
         .filter_map(|k| params.iter().find(|p| p.0 == *k))
         .map(|(k, v)| match *k {
-            "range" | "metric" | "chart" | "filter" => v.to_string(),
+            "range" | "filter" => v.to_string(),
             _ => format!("{k}-{v}"),
         })
         .collect();
@@ -734,8 +724,8 @@ mod tests {
         let d = format!("/app/{DOMAIN}");
         assert_eq!(target(&d).as_deref(), Some("/demo/"));
         assert_eq!(
-            target(&format!("{d}?metric=visitors&range=7d")).as_deref(),
-            Some("/demo/7d-visitors/")
+            target(&format!("{d}?sources=referrer&range=7d")).as_deref(),
+            Some("/demo/7d-sources-referrer/")
         );
         assert_eq!(
             target(&format!("{d}/payments?filter=refunded")).as_deref(),
@@ -748,6 +738,7 @@ mod tests {
         for gone in [
             "?range=12m",
             "?sort_pages=visitors",
+            "?sources=referrer&pages=last",
             "/settings",
             "/payments?page=2",
         ] {

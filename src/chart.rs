@@ -9,43 +9,8 @@ use crate::stats::DayPoint;
 
 const BLUE: &str = "#2F5BEA";
 const ORANGE: &str = "#E8471C";
-const GREY: &str = "#B9BCC2";
 const INK: &str = "#0E1116";
 const NS: &str = r#" vector-effect="non-scaling-stroke""#;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Kind {
-    Line,
-    Area,
-    Channel,
-    Dual,
-}
-
-impl Kind {
-    pub const ALL: [Kind; 4] = [Kind::Line, Kind::Area, Kind::Channel, Kind::Dual];
-
-    pub fn parse(s: &str) -> Option<Self> {
-        Kind::ALL.into_iter().find(|k| k.key() == s)
-    }
-
-    pub fn key(self) -> &'static str {
-        match self {
-            Kind::Line => "line",
-            Kind::Area => "area",
-            Kind::Channel => "channel",
-            Kind::Dual => "dual",
-        }
-    }
-
-    pub fn label(self) -> &'static str {
-        match self {
-            Kind::Line => "Line",
-            Kind::Area => "Area",
-            Kind::Channel => "By channel",
-            Kind::Dual => "Visitors vs revenue",
-        }
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Metric {
@@ -62,19 +27,6 @@ impl Metric {
         Metric::Conversion,
         Metric::PerVisitor,
     ];
-
-    pub fn parse(s: &str) -> Option<Self> {
-        Metric::ALL.into_iter().find(|m| m.key() == s)
-    }
-
-    pub fn key(self) -> &'static str {
-        match self {
-            Metric::Revenue => "revenue",
-            Metric::Visitors => "visitors",
-            Metric::Conversion => "conversion",
-            Metric::PerVisitor => "rpv",
-        }
-    }
 
     pub fn name(self) -> &'static str {
         match self {
@@ -93,25 +45,6 @@ impl Metric {
         }
     }
 
-    /// Conversion is in percent.
-    fn value(self, p: &DayPoint) -> f64 {
-        match self {
-            Metric::Revenue => p.revenue_usd,
-            Metric::Visitors => p.visitors as f64,
-            Metric::Conversion => p.conversion.unwrap_or(0.0) * 100.0,
-            Metric::PerVisitor => p.revenue_per_visitor.unwrap_or(0.0),
-        }
-    }
-
-    fn format(self, v: f64) -> String {
-        match self {
-            Metric::Revenue => money(v),
-            Metric::Visitors => group(v.round() as u64),
-            Metric::Conversion => format!("{v:.2}%"),
-            Metric::PerVisitor => format!("${v:.2}"),
-        }
-    }
-
     fn tick(self, t: f64, step: f64) -> String {
         match self {
             Metric::Revenue if step >= 1.0 => format!("${}", group(t.round() as u64)),
@@ -119,10 +52,6 @@ impl Metric {
             Metric::Visitors => group(t.round() as u64),
             Metric::Conversion => format!("{}%", trim(t)),
         }
-    }
-
-    fn integer(self) -> bool {
-        matches!(self, Metric::Revenue | Metric::Visitors)
     }
 }
 
@@ -171,30 +100,11 @@ pub fn series(days: &[DayPoint]) -> Series {
     }
 }
 
-pub fn channel_color(channel: Option<&str>) -> &'static str {
-    match channel {
-        Some("Organic search") => BLUE,
-        Some("Referral") => ORANGE,
-        Some("Direct") => "#1BAF7A",
-        Some("Social") => "#EDA100",
-        Some("Email") => "#E87BA4",
-        Some("Paid") => "#7A5AF8",
-        Some("AI") => "#0E9AA7",
-        _ => GREY,
-    }
-}
-
 pub fn esc(s: &str) -> String {
     s.replace('&', "&amp;")
         .replace('<', "&lt;")
         .replace('>', "&gt;")
         .replace('"', "&quot;")
-}
-
-/// "$1,234.50"
-fn cents(v: f64) -> String {
-    let c = (v * 100.0).round() as u64;
-    format!("${}.{:02}", group(c / 100), c % 100)
 }
 
 fn trim(v: f64) -> String {
@@ -335,19 +245,17 @@ fn tip(xf: f64, date: &str, rows: &[Row], foot: &str) -> String {
     s
 }
 
-fn column(left: f64, width: f64, bar: bool, inner: &str) -> String {
+fn column(left: f64, width: f64, inner: &str) -> String {
     format!(
-        r#"<div class="hov{}" style="left:{:.3}%;width:{:.3}%">{inner}</div>"#,
-        if bar { " bar" } else { "" },
+        r#"<div class="hov bar" style="left:{:.3}%;width:{:.3}%">{inner}</div>"#,
         left * 100.0,
         width * 100.0
     )
 }
 
-fn marker(yf: f64, color: &str, open: bool) -> String {
+fn marker(yf: f64, color: &str) -> String {
     format!(
-        r#"<span class="mk{}" style="top:{:.2}%;--c:{color}"></span>"#,
-        if open { " o" } else { "" },
+        r#"<span class="mk" style="top:{:.2}%;--c:{color}"></span>"#,
         (1.0 - yf) * 100.0
     )
 }
@@ -385,215 +293,6 @@ fn top_channel(p: &DayPoint) -> String {
 
 fn unit(s: &Series) -> &'static str {
     if s.weekly { "week" } else { "day" }
-}
-
-/// Line or area chart of one metric, with the previous period dashed on line charts.
-pub fn line(cur: &Series, prev: Option<&Series>, metric: Metric, area: bool, span: &str) -> String {
-    let pts = &cur.points;
-    let n = pts.len();
-    let vals: Vec<f64> = pts.iter().map(|p| metric.value(p)).collect();
-    let prev_pts: &[DayPoint] = match prev {
-        Some(s) if !area => &s.points,
-        _ => &[],
-    };
-    let pvals: Vec<f64> = prev_pts.iter().take(n).map(|p| metric.value(p)).collect();
-    let max = vals.iter().chain(&pvals).fold(0.0, |a: f64, b| a.max(*b));
-    let (step, top) = nice_ticks(max * 1.05, metric.integer());
-    let xf = |i: usize| {
-        if n > 1 {
-            i as f64 / (n - 1) as f64
-        } else {
-            0.5
-        }
-    };
-    let path = |vs: &[f64]| {
-        vs.iter()
-            .enumerate()
-            .map(|(i, v)| {
-                format!(
-                    "{}{:.1},{:.1}",
-                    if i == 0 { "M" } else { "L" },
-                    xf(i) * 1000.0,
-                    1000.0 - v / top * 1000.0
-                )
-            })
-            .collect::<Vec<_>>()
-            .join(" ")
-    };
-    let color = metric.color();
-    let mut svg = grid(top, step);
-    let d = path(&vals);
-    if area && n > 0 {
-        let _ = write!(
-            svg,
-            r#"<path d="{d} L{:.1},1000 L{:.1},1000 Z" fill="{color}" fill-opacity="0.10"/>"#,
-            xf(n - 1) * 1000.0,
-            xf(0) * 1000.0
-        );
-    }
-    if !pvals.is_empty() {
-        let _ = write!(
-            svg,
-            r#"<path d="{}" fill="none" stroke="{GREY}" stroke-width="1.5" stroke-dasharray="4 4"{NS}/>"#,
-            path(&pvals)
-        );
-    }
-    let _ = write!(
-        svg,
-        r#"<path d="{d}" fill="none" stroke="{color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"{NS}/>"#
-    );
-    let width = if n > 1 { 1.0 / (n - 1) as f64 } else { 1.0 };
-    let mut cols = String::new();
-    for (i, p) in pts.iter().enumerate() {
-        let x = xf(i);
-        let mut inner = String::from(r#"<i class="cross"></i>"#);
-        let mut rows = vec![Row {
-            swatch: swatch(color, "ln"),
-            name: "This period".into(),
-            value: metric.format(vals[i]),
-        }];
-        if let Some(pv) = pvals.get(i) {
-            inner.push_str(&marker(pv / top, "#8A909A", true));
-            rows.push(Row {
-                swatch: swatch(GREY, "dash"),
-                name: esc(&tip_date(prev_pts[i].date, cur.weekly)),
-                value: metric.format(*pv),
-            });
-        }
-        inner.push_str(&marker(vals[i] / top, color, false));
-        if p.payments > 0 {
-            inner.push_str(r#"<span class="pd"></span>"#);
-            if metric != Metric::Revenue {
-                rows.push(Row {
-                    swatch: swatch(ORANGE, "ln"),
-                    name: "Revenue".into(),
-                    value: Metric::Revenue.format(p.revenue_usd),
-                });
-            }
-        }
-        let foot = top_channel(p);
-        inner.push_str(&tip(x, &tip_date(p.date, cur.weekly), &rows, &foot));
-        cols.push_str(&column(x - width / 2.0, width, false, &inner));
-    }
-    let chart = frame(
-        "",
-        &format!("{} per {}", metric.name(), unit(cur)),
-        &axis(top, step, |t| metric.tick(t, step)),
-        "",
-        &svg,
-        &cols,
-        &x_axis(pts, false),
-    );
-    let mut legend = format!(
-        r#"<div class="legend"><span>{}{}, {}</span>"#,
-        swatch(color, "ln"),
-        metric.name(),
-        esc(span)
-    );
-    if !pvals.is_empty() {
-        let _ = write!(
-            legend,
-            r#"<span>{}Previous {} {}s</span>"#,
-            swatch(GREY, "dash"),
-            prev_pts.len(),
-            unit(cur)
-        );
-    }
-    legend.push_str("</div>");
-    chart + &legend
-}
-
-/// Channels in a stable order: largest total first, Unattributed last.
-fn channel_order(pts: &[DayPoint]) -> Vec<(Option<String>, f64)> {
-    let mut totals: Vec<(Option<String>, f64)> = Vec::new();
-    for p in pts {
-        for (c, r) in &p.by_channel {
-            match totals.iter_mut().find(|t| t.0 == *c) {
-                Some(t) => t.1 += r,
-                None => totals.push((c.clone(), *r)),
-            }
-        }
-    }
-    totals.sort_by(|a, b| {
-        a.0.is_none()
-            .cmp(&b.0.is_none())
-            .then(b.1.total_cmp(&a.1))
-            .then_with(|| a.0.cmp(&b.0))
-    });
-    totals
-}
-
-/// Revenue per day stacked by credited channel.
-pub fn stacked(cur: &Series) -> String {
-    let pts = &cur.points;
-    let n = pts.len().max(1);
-    let order = channel_order(pts);
-    let max = pts.iter().map(|p| p.revenue_usd).fold(0.0, f64::max);
-    let (step, top) = nice_ticks(max * 1.05, true);
-    let w = 1000.0 / n as f64;
-    let bw = w * 0.62;
-    let gap = 7.0;
-    let mut svg = grid(top, step);
-    let mut cols = String::new();
-    for (i, p) in pts.iter().enumerate() {
-        let x = w * i as f64 + (w - bw) / 2.0;
-        let mut base = 1000.0;
-        let mut rows = Vec::new();
-        for (c, _) in &order {
-            let Some((_, r)) = p.by_channel.iter().find(|b| b.0 == *c) else {
-                continue;
-            };
-            let color = channel_color(c.as_deref());
-            let h = r / top * 1000.0;
-            if h - gap > 0.5 {
-                let _ = write!(
-                    svg,
-                    r#"<rect x="{x:.1}" y="{:.1}" width="{bw:.1}" height="{:.1}" fill="{color}"/>"#,
-                    base - h + gap,
-                    h - gap
-                );
-            }
-            base -= h;
-            rows.push((
-                *r,
-                Row {
-                    swatch: swatch(color, ""),
-                    name: esc(c.as_deref().unwrap_or("Unattributed")),
-                    value: cents(*r),
-                },
-            ));
-        }
-        rows.sort_by(|a, b| b.0.total_cmp(&a.0));
-        let mut rows: Vec<Row> = rows.into_iter().map(|r| r.1).collect();
-        rows.push(Row {
-            swatch: String::new(),
-            name: "<b>Total</b>".into(),
-            value: cents(p.revenue_usd),
-        });
-        let xf = (i as f64 + 0.5) / n as f64;
-        let inner = tip(xf, &tip_date(p.date, cur.weekly), &rows, "");
-        cols.push_str(&column(i as f64 / n as f64, 1.0 / n as f64, true, &inner));
-    }
-    let chart = frame(
-        "",
-        &format!("Revenue per {} by channel", unit(cur)),
-        &axis(top, step, |t| Metric::Revenue.tick(t, step)),
-        "",
-        &svg,
-        &cols,
-        &x_axis(pts, true),
-    );
-    let legend: String = order
-        .iter()
-        .map(|(c, _)| {
-            format!(
-                "<span>{}{}</span>",
-                swatch(channel_color(c.as_deref()), ""),
-                esc(c.as_deref().unwrap_or("Unattributed"))
-            )
-        })
-        .collect();
-    format!(r#"{chart}<div class="legend">{legend}</div>"#)
 }
 
 /// Visitor bars on the left axis, revenue line on the right axis.
@@ -653,9 +352,9 @@ pub fn dual(cur: &Series) -> String {
                 value: format!("${:.2}", p.revenue_per_visitor.unwrap_or(0.0)),
             },
         ];
-        let inner = marker(p.revenue_usd / rtop, ORANGE, false)
+        let inner = marker(p.revenue_usd / rtop, ORANGE)
             + &tip(xf, &tip_date(p.date, cur.weekly), &rows, &top_channel(p));
-        cols.push_str(&column(i as f64 / n as f64, 1.0 / n as f64, true, &inner));
+        cols.push_str(&column(i as f64 / n as f64, 1.0 / n as f64, &inner));
     }
     let chart = frame(
         "dual",
@@ -671,145 +370,6 @@ pub fn dual(cur: &Series) -> String {
         swatch(BLUE, ""),
         swatch(ORANGE, "ln")
     )
-}
-
-/// Visitor and revenue bars for a new site, with days before tracking started shaded and payment pills above their day.
-pub fn sparse(cur: &Series, since: Option<Date>, today: Date, pills: &[(Date, String)]) -> String {
-    let pts = &cur.points;
-    let n = pts.len().max(1);
-    let few = pts.len() <= 14;
-    let vmax = pts.iter().map(|p| p.visitors as f64).fold(0.0, f64::max);
-    let rmax = pts.iter().map(|p| p.revenue_usd).fold(0.0, f64::max);
-    let (step, top) = nice_ticks(vmax * 1.05, true);
-    let (rstep, rtop) = nice_ticks(rmax * 1.05, true);
-    let w = 1000.0 / n as f64;
-    let bw = (w * 0.3).min(32.0);
-    let gap = (w * 0.04).min(6.0);
-    let before = since.map_or(pts.len(), |s| pts.iter().filter(|p| p.date < s).count());
-    let mut svg = String::new();
-    let mut over = String::new();
-    if before > 0 {
-        let _ = write!(
-            svg,
-            r##"<rect x="0" y="0" width="{:.1}" height="1000" fill="#F6F6F3"/>"##,
-            w * before as f64
-        );
-    }
-    svg.push_str(&grid(top, step));
-    if before > 0 && before < pts.len() {
-        let x = w * before as f64;
-        let _ = write!(
-            svg,
-            r##"<path d="M{x:.1},-40V1000" stroke="#0E1116" stroke-opacity="0.35" stroke-dasharray="3 3"{NS}/>"##
-        );
-        let _ = write!(
-            over,
-            r#"<span class="first" style="left:{:.2}%">First visit</span>"#,
-            x / 10.0
-        );
-    }
-    if before >= 2 {
-        let note = since.map_or_else(
-            || "Waiting for the first visit".to_string(),
-            |s| format!("Script added {}", short(s)),
-        );
-        let _ = write!(
-            over,
-            r#"<div class="before{}" style="width:{:.2}%"><b>Not tracking yet</b><span>{note}</span></div>"#,
-            if before == pts.len() { " all" } else { "" },
-            before as f64 / n as f64 * 100.0
-        );
-    }
-    let mut cols = String::new();
-    for (i, p) in pts.iter().enumerate() {
-        let xf = (i as f64 + 0.5) / n as f64;
-        if i >= before {
-            let h = p.visitors as f64 / top * 1000.0;
-            let rh = p.revenue_usd / rtop * 1000.0;
-            let fade = if p.date == today {
-                r#" fill-opacity="0.6""#
-            } else {
-                ""
-            };
-            let mid = w * (i as f64 + 0.5);
-            let _ = write!(
-                svg,
-                r#"<rect x="{:.1}" y="{:.1}" width="{bw:.1}" height="{h:.1}" fill="{BLUE}"{fade}/><rect x="{:.1}" y="{:.1}" width="{bw:.1}" height="{rh:.1}" fill="{ORANGE}"{fade}/>"#,
-                mid - gap / 2.0 - bw,
-                1000.0 - h,
-                mid + gap / 2.0,
-                1000.0 - rh
-            );
-            let yf = (p.visitors as f64 / top).max(p.revenue_usd / rtop) * 100.0;
-            if few {
-                let _ = write!(
-                    over,
-                    r#"<span class="val" style="left:{:.2}%;bottom:calc({:.2}% + 6px)">{}</span>"#,
-                    (mid - gap / 2.0 - bw / 2.0) / 10.0,
-                    p.visitors as f64 / top * 100.0,
-                    group(p.visitors)
-                );
-                if let Some((_, pill)) = pills.iter().find(|(d, _)| *d == p.date) {
-                    let _ = write!(
-                        over,
-                        r#"<span class="pay" style="left:{:.2}%;bottom:calc({yf:.2}% + 24px)">{pill}</span>"#,
-                        xf * 100.0
-                    );
-                }
-            }
-            let rows = [
-                Row {
-                    swatch: swatch(BLUE, ""),
-                    name: "Visitors".into(),
-                    value: group(p.visitors),
-                },
-                Row {
-                    swatch: swatch(ORANGE, ""),
-                    name: "Revenue".into(),
-                    value: money(p.revenue_usd),
-                },
-            ];
-            let inner = tip(xf, &tip_date(p.date, cur.weekly), &rows, &top_channel(p));
-            cols.push_str(&column(i as f64 / n as f64, 1.0 / n as f64, true, &inner));
-        }
-    }
-    let xa = if few {
-        pts.iter()
-            .enumerate()
-            .map(|(i, p)| {
-                let text = if p.date == today {
-                    "Today".to_string()
-                } else {
-                    short(p.date)
-                };
-                format!(
-                    r#"<span style="left:{:.2}%">{text}</span>"#,
-                    (i as f64 + 0.5) / n as f64 * 100.0
-                )
-            })
-            .collect()
-    } else {
-        x_axis(pts, true)
-    };
-    let chart = frame(
-        "sparse",
-        &format!("Visitors and revenue per {}", unit(cur)),
-        &axis(top, step, |t| group(t.round() as u64)),
-        &axis(rtop, rstep, |t| Metric::Revenue.tick(t, rstep)),
-        &svg,
-        &(over + &cols),
-        &xa,
-    );
-    let mut legend = format!(
-        r#"<div class="legend"><span>{}Visitors, left axis</span><span>{}Revenue, right axis</span>"#,
-        swatch(BLUE, ""),
-        swatch(ORANGE, "")
-    );
-    if pts.last().is_some_and(|p| p.date == today) {
-        legend.push_str(r#"<span class="quiet">Today is still counting</span>"#);
-    }
-    legend.push_str("</div>");
-    chart + &legend
 }
 
 #[cfg(test)]
@@ -875,82 +435,10 @@ mod tests {
     }
 
     #[test]
-    fn line_compares_with_previous_period() {
-        let cur = series(&days(30));
-        let prev = series(&days(30));
-        let html = line(
-            &cur,
-            Some(&prev),
-            Metric::Revenue,
-            false,
-            "Sep 15 to Oct 14",
-        );
-        assert_eq!(count(&html, r#"class="hov""#), 30);
-        assert_eq!(count(&html, "stroke-dasharray=\"4 4\""), 1);
-        assert!(html.contains("Previous 30 days"));
-        assert!(html.contains("Revenue, Sep 15 to Oct 14"));
-        assert!(html.contains("1 payment from Referral"));
-        assert!(html.contains("Sep 15, Tue"));
-        let area = line(&cur, Some(&prev), Metric::Visitors, true, "x");
-        assert_eq!(count(&area, "stroke-dasharray"), 0);
-        assert!(area.contains(r#"fill-opacity="0.10""#));
-        assert_eq!(count(&html, r#"class="pd""#), 29, "day 0 has no payment");
-        assert!(area.contains("1 payment from Referral") && area.contains(">Revenue<"));
-        let conv = line(&cur, None, Metric::Conversion, false, "x");
-        assert!(conv.contains("0.97%") && conv.contains('%'));
-    }
-
-    #[test]
-    fn stacked_bars_split_revenue_by_channel() {
-        let cur = series(&days(10));
-        let html = stacked(&cur);
-        assert_eq!(count(&html, "<rect"), 18);
-        assert_eq!(count(&html, ORANGE), 9 + 9 + 1, "bars, tooltips, legend");
-        let referral = html.find(">Referral</span>").unwrap();
-        let unattributed = html.rfind(">Unattributed</span>").unwrap();
-        assert!(referral < unattributed, "Unattributed is listed last");
-        assert!(html.contains("<b>Total</b>") && html.contains("$67.50"));
-        assert_eq!(cents(1234.5), "$1,234.50");
-    }
-
-    #[test]
     fn dual_has_two_axes() {
         let html = dual(&series(&days(7)));
         assert!(html.contains(r#"class="chart dual""#));
         assert!(html.contains(r#"<div class="ya r">"#));
         assert_eq!(count(&html, BLUE), 7 + 7 + 1, "bars, tooltips, legend");
-    }
-
-    #[test]
-    fn sparse_shades_days_before_tracking() {
-        let mut d = days(7);
-        d[0].visitors = 0;
-        d[1].visitors = 0;
-        let today = d[6].date;
-        let pills = [(d[3].date, "$49 from <X>".to_string())];
-        let html = sparse(&series(&d), Some(d[2].date), today, &pills);
-        assert!(html.contains("Not tracking yet") && html.contains("Script added Sep 17"));
-        assert!(html.contains("First visit"));
-        assert_eq!(count(&html, &format!(r#"fill="{BLUE}""#)), 5);
-        assert_eq!(
-            count(&html, &format!(r#"fill="{ORANGE}""#)),
-            5,
-            "revenue bars"
-        );
-        assert!(html.contains(r#"<div class="ya r">"#), "revenue axis");
-        assert!(html.contains("Revenue, right axis") && !html.contains("Payment<"));
-        assert!(html.contains(">Today<") && html.contains("Today is still counting"));
-        assert_eq!(count(&html, r#"class="pay""#), 1);
-    }
-
-    #[test]
-    fn labels_are_escaped() {
-        let mut d = days(3);
-        d[1].by_channel = vec![(Some("<script>".into()), 10.0)];
-        let html = stacked(&series(&d));
-        assert!(!html.contains("<script>") && html.contains("&lt;script&gt;"));
-        assert_eq!(Kind::parse("channel"), Some(Kind::Channel));
-        assert_eq!(Metric::parse("rpv"), Some(Metric::PerVisitor));
-        assert_eq!(Kind::parse("pie"), None);
     }
 }
