@@ -3,6 +3,7 @@ mod animals;
 mod api;
 mod app;
 mod auth;
+mod cache;
 mod channel;
 mod chart;
 mod crypto;
@@ -42,6 +43,7 @@ use sqlx::SqlitePool;
 use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions};
 
 use crate::app::{AppState, Config};
+use crate::cache::Cached;
 use crate::events::DuckStore;
 
 #[derive(Parser)]
@@ -169,7 +171,7 @@ async fn main() -> anyhow::Result<()> {
     };
     match command {
         Command::Serve(args) => {
-            let events = DuckStore::open(&cli.data_dir.join("events.duckdb"))?;
+            let events = Cached::new(DuckStore::open(&cli.data_dir.join("events.duckdb"))?);
             let config = Config {
                 marketing: args.marketing,
                 app: args.app,
