@@ -2,10 +2,18 @@
 
 use std::collections::HashMap;
 
-use super::{Href, Opt, cards, encode, group, since};
+use axum::extract::{Form, Path, State};
+use axum::http::StatusCode;
+use axum::response::{IntoResponse, Redirect, Response};
+use sqlx::SqlitePool;
+use time::OffsetDateTime;
+
+use super::{Href, Opt, cards, encode, group, load as load_ctx, since};
+use crate::app::AppState;
+use crate::auth::Account;
 use crate::events::EventStore;
-use crate::icons;
 use crate::stats::{BreakdownRow, Dimension, Filter, GoalStat, Period, Step, StepCount, Totals};
+use crate::{icons, sites};
 
 /// Custom goals a default funnel takes, most completed first.
 const DEFAULT_GOALS: usize = 2;
@@ -91,6 +99,157 @@ pub fn load(
     })
 }
 
+const SLOTS: [&str; 3] = ["s1", "s2", "s3"];
+
+/// A named funnel saved for a site.
+pub struct Saved {
+    pub(super) id: String,
+    pub(super) name: String,
+    /// Step keys such as "page:/pricing" or "goal:signup".
+    pub(super) steps: Vec<String>,
+}
+
+pub async fn saved(db: &SqlitePool, site_id: &str) -> sqlx::Result<Vec<Saved>> {
+    let rows: Vec<(String, String, String)> = sqlx::query_as(
+        "SELECT id, name, steps FROM funnels WHERE site_id = ? ORDER BY created_at, id",
+    )
+    .bind(site_id)
+    .fetch_all(db)
+    .await?;
+    Ok(rows
+        .into_iter()
+        .map(|(id, name, steps)| Saved {
+            id,
+            name,
+            steps: steps.lines().map(String::from).collect(),
+        })
+        .collect())
+}
+
+/// Sets s1..s3 from the saved funnel named by `funnel`, unless the URL already picks steps.
+pub fn apply_saved(rest: &mut HashMap<String, String>, saved: &[Saved]) {
+    if SLOTS.iter().any(|k| rest.contains_key(*k)) {
+        return;
+    }
+    let Some(f) = rest
+        .get("funnel")
+        .and_then(|id| saved.iter().find(|s| &s.id == id))
+    else {
+        return;
+    };
+    let steps = f.steps.clone();
+    rest.insert("s1".into(), String::new());
+    for (k, v) in SLOTS.iter().zip(steps) {
+        rest.insert(k.to_string(), v);
+    }
+}
+
+/// Query string of the form's other fields plus `funnel`, for the redirect back to the Goals view.
+fn back(domain: &str, form: &HashMap<String, String>, funnel: Option<&str>) -> String {
+    let mut keep: Vec<(&String, &String)> = form
+        .iter()
+        .filter(|(k, v)| {
+            !matches!(k.as_str(), "s1" | "s2" | "s3" | "fname" | "funnel") && !v.is_empty()
+        })
+        .collect();
+    keep.sort();
+    let mut q: Vec<String> = keep
+        .iter()
+        .map(|(k, v)| format!("{}={}", encode(k), encode(v)))
+        .collect();
+    if let Some(id) = funnel {
+        q.push(format!("funnel={}", encode(id)));
+    }
+    format!("{}?{}#goals", sites::app_path(domain, ""), q.join("&"))
+}
+
+/// Creates a funnel from the picked steps, or renames and updates the one in `funnel`.
+pub async fn save(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(form): Form<HashMap<String, String>>,
+) -> Response {
+    let ctx = match load_ctx(&state, &account, &domain, "dashboard").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    let steps: Vec<Step> = SLOTS
+        .iter()
+        .filter_map(|k| form.get(*k).and_then(|v| parse(v)))
+        .collect();
+    let name = match form
+        .get("fname")
+        .map(|n| n.trim())
+        .filter(|n| !n.is_empty())
+    {
+        Some(n) => n.chars().take(60).collect(),
+        None if steps.is_empty() => "Visit to paid".to_string(),
+        None => steps
+            .iter()
+            .map(|s| step_label(s).0)
+            .collect::<Vec<_>>()
+            .join(", "),
+    };
+    let lines = steps.iter().map(key).collect::<Vec<_>>().join("\n");
+    let id = form.get("funnel").filter(|id| !id.is_empty());
+    let res = match id {
+        Some(id) => {
+            sqlx::query("UPDATE funnels SET name = ?, steps = ? WHERE id = ? AND site_id = ?")
+                .bind(&name)
+                .bind(&lines)
+                .bind(id)
+                .bind(&ctx.site.id)
+                .execute(&state.db)
+                .await
+                .map(|_| id.clone())
+        }
+        None => {
+            let id = uuid::Uuid::new_v4().to_string();
+            sqlx::query(
+                "INSERT INTO funnels (id, site_id, name, steps, created_at) VALUES (?, ?, ?, ?, ?)",
+            )
+            .bind(&id)
+            .bind(&ctx.site.id)
+            .bind(&name)
+            .bind(&lines)
+            .bind(OffsetDateTime::now_utc().unix_timestamp())
+            .execute(&state.db)
+            .await
+            .map(|_| id)
+        }
+    };
+    match res {
+        Ok(id) => Redirect::to(&back(&ctx.site.domain, &form, Some(&id))).into_response(),
+        Err(err) => {
+            tracing::error!(%err, "saving a funnel failed");
+            StatusCode::SERVICE_UNAVAILABLE.into_response()
+        }
+    }
+}
+
+pub async fn delete(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(form): Form<HashMap<String, String>>,
+) -> Response {
+    let ctx = match load_ctx(&state, &account, &domain, "dashboard").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    if let Err(err) = sqlx::query("DELETE FROM funnels WHERE id = ? AND site_id = ?")
+        .bind(form.get("funnel").map_or("", String::as_str))
+        .bind(&ctx.site.id)
+        .execute(&state.db)
+        .await
+    {
+        tracing::error!(%err, "deleting a funnel failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    Redirect::to(&back(&ctx.site.domain, &form, None)).into_response()
+}
+
 /// "trial_started" -> "Trial started".
 fn humanize(name: &str) -> String {
     let s = name.replace(['_', '-'], " ");
@@ -161,6 +320,13 @@ pub struct GoalsView {
     pub(super) options: Vec<(String, String, [bool; 3])>,
     pub(super) hidden: Vec<(&'static str, String)>,
     pub(super) base: String,
+    /// The suggested funnel then each saved one; empty without saved funnels.
+    pub(super) saved: Vec<Opt>,
+    /// The saved funnel shown, empty for the suggested or an unsaved one.
+    pub(super) funnel_id: String,
+    pub(super) funnel_name: String,
+    pub(super) save_href: String,
+    pub(super) delete_href: String,
 }
 
 fn kids(by: &[(String, u64)], channels: &[BreakdownRow], base: f64) -> Vec<GoalKid> {
@@ -192,6 +358,7 @@ fn kids(by: &[(String, u64)], channels: &[BreakdownRow], base: f64) -> Vec<GoalK
     out.into_iter().map(|(_, k)| k).collect()
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn view(
     g: &GoalsData,
     cur: &Totals,
@@ -200,7 +367,31 @@ pub fn view(
     href: &Href,
     raw: &[(&'static str, String)],
     base: &str,
+    saved: &[Saved],
 ) -> GoalsView {
+    let picked = raw.iter().find(|(k, _)| *k == "funnel").map(|(_, v)| v);
+    let current = picked.and_then(|id| saved.iter().find(|s| &s.id == id));
+    let adhoc = raw.iter().any(|(k, _)| SLOTS.contains(k));
+    let mut saved_tabs = vec![Opt {
+        label: "Suggested".into(),
+        href: href(&[("funnel", ""), ("s1", ""), ("s2", ""), ("s3", "")]),
+        on: current.is_none() && !adhoc,
+        count: String::new(),
+    }];
+    saved_tabs.extend(saved.iter().map(|s| Opt {
+        label: s.name.clone(),
+        href: href(&[
+            ("funnel", &encode(&s.id)),
+            ("s1", ""),
+            ("s2", ""),
+            ("s3", ""),
+        ]),
+        on: current.is_some_and(|c| c.id == s.id),
+        count: String::new(),
+    }));
+    if saved.is_empty() {
+        saved_tabs.clear();
+    }
     let funnel = !raw.iter().any(|(k, v)| *k == "gtab" && v == "goals");
     let first = g.counts.first().map_or(0, |c| c.visitors);
     let mut steps: Vec<StepView> = Vec::new();
@@ -410,10 +601,15 @@ pub fn view(
         options,
         hidden: raw
             .iter()
-            .filter(|(k, _)| !matches!(*k, "s1" | "s2" | "s3"))
+            .filter(|(k, _)| !matches!(*k, "s1" | "s2" | "s3" | "funnel"))
             .cloned()
             .collect(),
         base: base.to_string(),
+        saved: saved_tabs,
+        funnel_id: current.map(|c| c.id.clone()).unwrap_or_default(),
+        funnel_name: current.map(|c| c.name.clone()).unwrap_or_default(),
+        save_href: format!("{base}/funnels"),
+        delete_href: format!("{base}/funnels/delete"),
     }
 }
 

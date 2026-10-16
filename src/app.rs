@@ -173,6 +173,11 @@ pub fn router(state: AppState) -> Router {
             .route("/app/{domain}/retention", get(retention_page::page))
             .route("/app/{domain}/links", get(links::page).post(links::create))
             .route("/app/{domain}/links/delete", post(links::delete))
+            .route("/app/{domain}/funnels", post(dashboard::save_funnel))
+            .route(
+                "/app/{domain}/funnels/delete",
+                post(dashboard::delete_funnel),
+            )
             .route("/l/{slug}", get(links::follow))
             .route(
                 "/app/{domain}/visitors/{visitor_id}",
