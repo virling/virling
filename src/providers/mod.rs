@@ -19,6 +19,21 @@ pub struct Fetched {
     pub is_renewal: bool,
 }
 
+/// A subscription's current state as the provider reports it.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Subscription {
+    pub subscription_id: String,
+    pub customer_id: String,
+    pub status: String,
+    /// The provider still bills it: active, trialing or retrying a failed renewal.
+    pub live: bool,
+    /// When a cancelled but still live subscription stops; None when it renews.
+    pub ends_at: Option<OffsetDateTime>,
+}
+
+/// Most subscriptions read per round, newest first; older ones fall back to payment recency.
+pub const MAX_SUBSCRIPTION_PAGES: u32 = 50;
+
 /// A batch of payments plus the opaque cursor to resume from next time.
 #[derive(Debug, Default)]
 pub struct Page {
@@ -79,6 +94,20 @@ impl Provider {
             Provider::Dodo => dodo::fetch(client, key, cursor).await,
             Provider::Polar => polar::fetch(client, key, cursor).await,
             Provider::LemonSqueezy => lemonsqueezy::fetch(client, key, cursor).await,
+        }
+    }
+
+    /// Every subscription's current state; None when the key may not read subscriptions.
+    pub async fn subscriptions(
+        self,
+        client: &reqwest::Client,
+        key: &str,
+    ) -> anyhow::Result<Option<Vec<Subscription>>> {
+        match self {
+            Provider::Stripe => stripe::subscriptions(client, key).await,
+            Provider::Dodo => dodo::subscriptions(client, key).await,
+            Provider::Polar => polar::subscriptions(client, key).await,
+            Provider::LemonSqueezy => lemonsqueezy::subscriptions(client, key).await,
         }
     }
 }

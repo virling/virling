@@ -11,6 +11,7 @@ use time::{Date, Duration, OffsetDateTime};
 use crate::app::AppState;
 use crate::auth::{hash_token, random_token};
 use crate::dashboard::{RANGES, blocking, resolve_range};
+use crate::retention::Retention;
 use crate::sites::{self, Site};
 use crate::stats::{BreakdownRow, Dimension, PaymentFilter, PaymentRow, Period, Totals};
 use crate::visitors::Timeline;
@@ -461,6 +462,32 @@ pub async fn payments_for(
 }
 
 #[derive(Debug, Serialize)]
+pub struct RetentionOut {
+    pub site: String,
+    /// Customers whose first payment falls in this range.
+    pub range: RangeOut,
+    #[serde(flatten)]
+    pub retention: Retention,
+}
+
+pub async fn retention_for(
+    state: &AppState,
+    account: &str,
+    domain: &str,
+    q: &RangeQuery,
+) -> Result<RetentionOut, ApiError> {
+    let (site, period) = site_period(state, account, domain, q).await?;
+    let store = state.events.clone();
+    let (id, p) = (site.id.clone(), period.clone());
+    let retention = blocking(move || store.retention(&id, &p, OffsetDateTime::now_utc())).await?;
+    Ok(RetentionOut {
+        site: site.domain,
+        range: RangeOut::of(&period),
+        retention,
+    })
+}
+
+#[derive(Debug, Serialize)]
 pub struct VisitorOut {
     pub site: String,
     #[serde(flatten)]
@@ -523,6 +550,15 @@ pub async fn payments(
     Query(q): Query<PaymentsQuery>,
 ) -> ApiResult<PaymentsOut> {
     Ok(Json(payments_for(&state, &key.id, &domain, &q).await?))
+}
+
+pub async fn retention(
+    State(state): State<AppState>,
+    key: KeyAccount,
+    Path(domain): Path<String>,
+    Query(q): Query<RangeQuery>,
+) -> ApiResult<RetentionOut> {
+    Ok(Json(retention_for(&state, &key.id, &domain, &q).await?))
 }
 
 pub async fn visitor(
@@ -706,7 +742,13 @@ pub(crate) mod tests {
     #[tokio::test]
     async fn other_accounts_sites_are_not_found() {
         let f = fixture().await;
-        for path in ["overview", "breakdown/channel", "payments", "visitors/v9"] {
+        for path in [
+            "overview",
+            "breakdown/channel",
+            "payments",
+            "retention",
+            "visitors/v9",
+        ] {
             let (code, body) = get(
                 &f.state,
                 &format!("/api/v1/sites/other.com/{path}"),
@@ -864,6 +906,48 @@ pub(crate) mod tests {
         let (code, _) = get(
             &f.state,
             "/api/v1/sites/example.com/payments?filter=big",
+            Some(&f.key),
+        )
+        .await;
+        assert_eq!(code, StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn retention_counts_customers_by_first_channel() {
+        let f = fixture().await;
+        let (code, body) = get(
+            &f.state,
+            "/api/v1/sites/example.com/retention?range=30d",
+            Some(&f.key),
+        )
+        .await;
+        assert_eq!(code, StatusCode::OK, "{body}");
+        assert_eq!(body["site"], "example.com");
+        assert_eq!(
+            (body["days_of_data"].as_i64(), body["day_one"].as_bool()),
+            (Some(1), Some(true))
+        );
+        let t = &body["total"];
+        assert_eq!(
+            (t["customers"].as_u64(), t["still_paying"].as_u64()),
+            (Some(1), Some(1))
+        );
+        assert_eq!(t["net_ltv_usd"], 49.0);
+        assert!(t["churn_30d"].is_null());
+        let ch = &body["channels"][0];
+        assert_eq!(
+            (ch["key"].as_str(), ch["label"].as_str()),
+            (Some("AI"), Some("AI"))
+        );
+        assert_eq!(ch["share_still_paying"], 1.0);
+        assert_eq!(body["referrers"][0]["label"], "ChatGPT");
+        assert_eq!(body["referrers"][0]["key"], "chatgpt.com");
+        assert_eq!(body["campaigns"][0]["key"], "launch");
+        assert!(body["headline"].is_null());
+        assert_eq!(body["status_sources"][0]["provider"], "stripe");
+        let (code, _) = get(
+            &f.state,
+            "/api/v1/sites/example.com/retention?range=5d",
             Some(&f.key),
         )
         .await;

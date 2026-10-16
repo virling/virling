@@ -9,7 +9,7 @@ use crate::channel::{source_domain, source_name};
 pub(crate) const NET_USD: &str = "p.amount_usd * (p.amount - p.refunded) / nullif(p.amount, 0)";
 
 /// Who paid: provider and customer_id, else visitor_id, else the payment itself.
-const CUSTOMER: &str = "coalesce('c:' || p.provider || ':' || p.customer_id, 'v:' || p.visitor_id, 'p:' || p.provider || ':' || p.provider_payment_id)";
+pub(crate) const CUSTOMER: &str = "coalesce('c:' || p.provider || ':' || p.customer_id, 'v:' || p.visitor_id, 'p:' || p.provider || ':' || p.provider_payment_id)";
 
 /// Local dates `$from..=$to` in IANA zone `$tz` as a half-open UTC range [lo, hi).
 pub(crate) const BOUNDS: &str = "bounds AS (

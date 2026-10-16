@@ -258,7 +258,7 @@ fn provider_card(p: Provider, selected: bool) -> ProviderCard {
             "polar_oat_...",
             "How to create a read-only key, 1 minute",
             "https://docs.polar.sh/integrate/oat",
-            "Create an organization access token with the orders:read and refunds:read scopes. No other scopes are needed.",
+            "Create an organization access token with the orders:read and refunds:read scopes, plus subscriptions:read so retention knows who still pays. No other scopes are needed.",
         ),
         Provider::LemonSqueezy => (
             "LemonSqueezy",

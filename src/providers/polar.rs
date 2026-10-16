@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use time::{Duration, OffsetDateTime};
 
-use super::{Fetched, Page};
+use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription};
 
 const LIMIT: u32 = 100;
 const RECHECK_PER_CALL: usize = 10;
@@ -105,6 +105,26 @@ struct Refund {
     order_id: String,
 }
 
+#[derive(Debug, Deserialize)]
+struct PolarSubscription {
+    id: String,
+    status: String,
+    customer_id: String,
+}
+
+impl PolarSubscription {
+    /// Active, trialing and past_due are live; a cancel at period end stays active until then.
+    fn into_subscription(self) -> Subscription {
+        Subscription {
+            live: matches!(self.status.as_str(), "active" | "trialing" | "past_due"),
+            subscription_id: self.id,
+            customer_id: self.customer_id,
+            status: self.status,
+            ends_at: None,
+        }
+    }
+}
+
 enum Mapped {
     Payment(Fetched),
     Pending,
@@ -123,6 +143,43 @@ pub async fn check_key(client: &reqwest::Client, key: &str) -> anyhow::Result<()
     )
     .await?;
     Ok(())
+}
+
+/// Lists every subscription; None when the token lacks the optional subscriptions:read scope.
+pub async fn subscriptions(
+    client: &reqwest::Client,
+    key: &str,
+) -> anyhow::Result<Option<Vec<Subscription>>> {
+    let env = detect_env(client, key).await?;
+    let mut out = Vec::new();
+    for page in 1..=MAX_SUBSCRIPTION_PAGES {
+        let resp = client
+            .get(format!("{}/v1/subscriptions/", env.base()))
+            .bearer_auth(key)
+            .query(&[("limit", LIMIT), ("page", page)])
+            .send()
+            .await
+            .context("could not reach Polar")?;
+        match resp.status() {
+            StatusCode::FORBIDDEN => return Ok(None),
+            s if !s.is_success() => return Err(api_error(s, "subscriptions:read")),
+            _ => {}
+        }
+        let list: List<PolarSubscription> = resp
+            .json()
+            .await
+            .context("unexpected response from Polar")?;
+        let last = page >= list.pagination.max_page;
+        out.extend(
+            list.items
+                .into_iter()
+                .map(PolarSubscription::into_subscription),
+        );
+        if last {
+            break;
+        }
+    }
+    Ok(Some(out))
 }
 
 pub async fn fetch(
@@ -422,7 +479,7 @@ fn api_error(status: StatusCode, scope: &str) -> anyhow::Error {
             "Polar did not accept this token. Paste an Organization Access Token from your Polar organization settings."
         ),
         StatusCode::FORBIDDEN => anyhow::anyhow!(
-            "This Polar token is missing the {scope} scope. Create an Organization Access Token with only orders:read and refunds:read."
+            "This Polar token is missing the {scope} scope. Create an Organization Access Token with orders:read, refunds:read and subscriptions:read."
         ),
         StatusCode::TOO_MANY_REQUESTS => {
             anyhow::anyhow!("Polar rate limit reached, sync will retry shortly.")
@@ -434,6 +491,31 @@ fn api_error(status: StatusCode, scope: &str) -> anyhow::Error {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn subscription_status_decides_live() {
+        let list: List<PolarSubscription> =
+            serde_json::from_str(include_str!("fixtures/polar_subscriptions.json")).unwrap();
+        assert_eq!(list.pagination.max_page, 1);
+        let subs: Vec<(String, bool)> = list
+            .items
+            .into_iter()
+            .map(PolarSubscription::into_subscription)
+            .map(|s| (s.status, s.live))
+            .collect();
+        let want: Vec<(String, bool)> = [
+            ("active", true),
+            ("trialing", true),
+            ("past_due", true),
+            ("canceled", false),
+            ("unpaid", false),
+            ("incomplete", false),
+        ]
+        .iter()
+        .map(|(s, l)| (s.to_string(), *l))
+        .collect();
+        assert_eq!(subs, want);
+    }
     use crate::providers::{Provider, e2e};
     use time::macros::datetime;
 

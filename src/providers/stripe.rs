@@ -4,7 +4,7 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
-use super::{Fetched, Page};
+use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription};
 
 const API: &str = "https://api.stripe.com/v1";
 // Last version where Charge.invoice exists, so one expanded list call yields billing_reason.
@@ -172,6 +172,44 @@ pub async fn fetch(
         payments,
         cursor: Some(serde_json::to_string(&cur)?),
         more,
+    })
+}
+
+/// Lists every subscription newest first; None when the key lacks Subscriptions read access.
+pub async fn subscriptions(
+    client: &reqwest::Client,
+    key: &str,
+) -> anyhow::Result<Option<Vec<Subscription>>> {
+    let mut out = Vec::new();
+    let mut after: Option<String> = None;
+    for _ in 0..MAX_SUBSCRIPTION_PAGES {
+        let mut query = page_query(after.as_deref());
+        query.push(("status", "all".into()));
+        let resp = request(client, key, "/subscriptions", &query).await?;
+        if resp.status().as_u16() == 403 {
+            return Ok(None);
+        }
+        if !resp.status().is_success() {
+            anyhow::bail!("Stripe /subscriptions returned {}", resp.status());
+        }
+        let list: List<StripeSubscription> = resp.json().await?;
+        after = list.data.last().map(|s| s.id.clone());
+        out.extend(list.data.iter().filter_map(to_subscription));
+        if !list.has_more || after.is_none() {
+            break;
+        }
+    }
+    Ok(Some(out))
+}
+
+/// Active, trialing and past_due (Stripe is still retrying) are live; a cancel at period end stays active until then.
+fn to_subscription(s: &StripeSubscription) -> Option<Subscription> {
+    Some(Subscription {
+        subscription_id: s.id.clone(),
+        customer_id: s.customer.clone()?,
+        status: s.status.clone(),
+        live: matches!(s.status.as_str(), "active" | "trialing" | "past_due"),
+        ends_at: None,
     })
 }
 
@@ -393,6 +431,13 @@ struct Session {
     client_reference_id: Option<String>,
     #[serde(default)]
     metadata: HashMap<String, String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct StripeSubscription {
+    id: String,
+    customer: Option<String>,
+    status: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -626,6 +671,33 @@ mod tests {
         };
         let s = serde_json::to_string(&c).unwrap();
         assert_eq!(serde_json::from_str::<Cursor>(&s).unwrap(), c);
+    }
+
+    #[test]
+    fn subscription_status_decides_live() {
+        let list: List<StripeSubscription> =
+            serde_json::from_str(include_str!("fixtures/stripe_subscriptions.json")).unwrap();
+        let subs: Vec<(String, bool)> = list
+            .data
+            .iter()
+            .filter_map(to_subscription)
+            .map(|s| (s.status, s.live))
+            .collect();
+        assert_eq!(
+            subs,
+            [
+                ("active".to_string(), true),
+                ("trialing".to_string(), true),
+                ("past_due".to_string(), true),
+                ("canceled".to_string(), false),
+                ("unpaid".to_string(), false),
+                ("incomplete_expired".to_string(), false),
+                ("paused".to_string(), false),
+            ]
+        );
+        let first = to_subscription(&list.data[0]).unwrap();
+        assert_eq!(first.customer_id, "cus_NffrFeUfNV2Hib");
+        assert_eq!(first.ends_at, None);
     }
 
     #[test]

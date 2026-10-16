@@ -5,6 +5,8 @@ use duckdb::types::{TimeUnit, Value};
 use duckdb::{Connection, named_params, params};
 use time::{OffsetDateTime, UtcOffset};
 
+use crate::providers::Subscription;
+use crate::retention::{self, Retention};
 use crate::stats::{
     self, Activity, GoalCount, GoalRow, Journey, Overview, PaymentFilter, PaymentPage,
     PaymentSummary, Period, Report, Who,
@@ -64,6 +66,20 @@ pub trait EventStore: Send + Sync {
     fn insert_events(&self, events: &[Event]) -> anyhow::Result<()>;
     /// Inserts or replaces payments keyed by (site_id, provider, provider_payment_id).
     fn upsert_payments(&self, payments: &[Payment]) -> anyhow::Result<()>;
+    /// Replaces the stored subscription states of one provider of a site.
+    fn replace_subscriptions(
+        &self,
+        site_id: &str,
+        provider: &str,
+        subscriptions: &[Subscription],
+    ) -> anyhow::Result<()>;
+    /// Customers acquired in the period and how many still pay, by first channel, referrer and campaign.
+    fn retention(
+        &self,
+        site_id: &str,
+        period: &Period,
+        now: OffsetDateTime,
+    ) -> anyhow::Result<Retention>;
     #[cfg(test)]
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64>;
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>>;
@@ -259,6 +275,16 @@ impl DuckStore {
                 device VARCHAR,
                 touch_ts TIMESTAMPTZ,
                 PRIMARY KEY (site_id, provider, provider_payment_id)
+            );
+            CREATE TABLE IF NOT EXISTS subscriptions (
+                site_id VARCHAR NOT NULL,
+                provider VARCHAR NOT NULL,
+                subscription_id VARCHAR NOT NULL,
+                customer_id VARCHAR NOT NULL,
+                status VARCHAR NOT NULL,
+                live BOOLEAN NOT NULL,
+                ends_at TIMESTAMPTZ,
+                PRIMARY KEY (site_id, provider, subscription_id)
             );",
         )?;
         Ok(Self {
@@ -305,6 +331,49 @@ impl EventStore for DuckStore {
         }
         tx.commit()?;
         Ok(())
+    }
+
+    fn replace_subscriptions(
+        &self,
+        site_id: &str,
+        provider: &str,
+        subscriptions: &[Subscription],
+    ) -> anyhow::Result<()> {
+        let mut conn = self.conn.lock().unwrap();
+        let tx = conn.transaction()?;
+        tx.execute(
+            "DELETE FROM subscriptions WHERE site_id = ? AND provider = ?",
+            params![site_id, provider],
+        )?;
+        {
+            let mut stmt =
+                tx.prepare("INSERT OR REPLACE INTO subscriptions VALUES (?, ?, ?, ?, ?, ?, ?)")?;
+            for s in subscriptions {
+                stmt.execute(params![
+                    site_id,
+                    provider,
+                    s.subscription_id,
+                    s.customer_id,
+                    s.status,
+                    s.live,
+                    s.ends_at.map(|t| Value::Timestamp(
+                        TimeUnit::Microsecond,
+                        (t.unix_timestamp_nanos() / 1000) as i64
+                    )),
+                ])?;
+            }
+        }
+        tx.commit()?;
+        Ok(())
+    }
+
+    fn retention(
+        &self,
+        site_id: &str,
+        period: &Period,
+        now: OffsetDateTime,
+    ) -> anyhow::Result<Retention> {
+        retention::retention(&self.conn.lock().unwrap(), site_id, period, now)
     }
 
     #[cfg(test)]

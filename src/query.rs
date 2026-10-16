@@ -24,6 +24,7 @@ pub const EXAMPLES: &str = "Examples:
   virling query channels --from 2026-09-01 --to 2026-09-30
   virling query referrers --json
   virling query payments --limit 20 --filter attributed
+  virling query retention --by referrer --range 90d
   virling query visitor vlx3k2a9b7f1c0d4e8
 
 Run `virling query <COMMAND> --help` for each command's options.";
@@ -151,6 +152,28 @@ Revenue per visitor is matched revenue divided by visitors.",
         dimension: String,
         #[command(flatten)]
         args: BreakdownArgs,
+    },
+    /// Which channels bring customers who keep paying: LTV, refunds and churn by first channel
+    #[command(
+        long_about = "Customers whose first payment falls in the range, grouped by the channel,
+referrer or campaign credited for that first payment. Renewals keep the first channel.
+
+Still paying: a live subscription per the provider, else a payment not fully refunded
+within the last billing interval plus 7 days. Net LTV is every payment so far, net of
+refunds. Refund rate is the share of customers with any refund. 30-day churn looks at
+customers who first paid 30 to 60 days ago, whatever the range: the share with no
+payment and no live subscription in the last 30 days.",
+        after_help = "Examples:\n  virling query retention\n  virling query retention --by referrer --range 90d\n  virling query retention --by campaign --json"
+    )]
+    Retention {
+        #[command(flatten)]
+        range: RangeArgs,
+        /// Group customers by their first payment's channel, referrer or campaign
+        #[arg(long, default_value = "channel", value_parser = ["channel", "referrer", "campaign"])]
+        by: String,
+        /// Rows to show, most customers first
+        #[arg(long, default_value_t = 20)]
+        limit: usize,
     },
     /// Payments, newest first, with the visit credited for each
     #[command(
@@ -296,6 +319,17 @@ pub async fn run(args: QueryArgs) -> anyhow::Result<String> {
                 client.get(&["sites", &site, "payments"], &q).await?,
                 payments_table,
             )
+        }
+        QueryCommand::Retention { range, by, limit } => {
+            let site = client.site(args.site).await?;
+            let body = client
+                .get(&["sites", &site, "retention"], &range_query(&range))
+                .await?;
+            return Ok(if args.json {
+                serde_json::to_string_pretty(&body)? + "\n"
+            } else {
+                retention_table(&body, &by, limit)
+            });
         }
         QueryCommand::Visitor { id } => {
             let site = client.site(args.site).await?;
@@ -482,6 +516,67 @@ fn breakdown_table(body: &Value) -> String {
         out += &format!(
             "\nShowing {} of {total} rows. Use --limit for more.\n",
             rows.len()
+        );
+    }
+    out
+}
+
+fn retention_table(body: &Value, by: &str, limit: usize) -> String {
+    let key = match by {
+        "referrer" => "referrers",
+        "campaign" => "campaigns",
+        _ => "channels",
+    };
+    let all = body[key].as_array().map_or(&[][..], |v| v);
+    let rows: Vec<Vec<String>> = all
+        .iter()
+        .take(limit)
+        .map(|r| {
+            vec![
+                text(&r["label"]),
+                count(&r["customers"]),
+                count(&r["still_paying"]),
+                dollars(&r["net_ltv_usd"]),
+                dollars(&r["avg_ltv_usd"]),
+                percent(&r["refund_rate"]),
+                percent(&r["churn_30d"]),
+            ]
+        })
+        .collect();
+    let mut out = range_line(body);
+    if let Some(h) = body["headline"].as_str() {
+        out += &format!("{h}\n\n");
+    }
+    if rows.is_empty() {
+        return out + "No customers acquired in this range.\n";
+    }
+    let mut head = by.to_string();
+    head[..1].make_ascii_uppercase();
+    out += &table(
+        &[
+            &head,
+            "Customers",
+            "Still paying",
+            "Net LTV",
+            "Avg LTV",
+            "Refund rate",
+            "30-day churn",
+        ],
+        &[false, true, true, true, true, true, true],
+        &rows,
+    );
+    if all.len() > rows.len() {
+        out += &format!(
+            "\nShowing {} of {} rows. Use --limit for more.\n",
+            rows.len(),
+            all.len()
+        );
+    }
+    if body["day_one"].as_bool() == Some(true) {
+        out += &format!(
+            "\nOnly {} of payments so far. LTV needs about {} days to mean much; refunds and churn count now.\n",
+            plural(body["days_of_data"].as_u64().unwrap_or(0), "day"),
+            crate::retention::LTV_DAYS
         );
     }
     out
@@ -701,6 +796,19 @@ mod tests {
             "{out}"
         );
         assert!(out.ends_with("Payments 1-1 of 1.\n"), "{out}");
+
+        let out = query(&url, &f.key, &["retention", "--by", "referrer"])
+            .await
+            .unwrap();
+        assert!(
+            out.contains("Referrer  Customers  Still paying  Net LTV  Avg LTV  Refund rate  30-day churn\nChatGPT           1             1   $49.00   $49.00        0.00%             -\n"),
+            "{out}"
+        );
+        assert!(out.ends_with("Only 1 day of payments so far. LTV needs about 60 days to mean much; refunds and churn count now.\n"), "{out}");
+        let v: Value =
+            serde_json::from_str(&query(&url, &f.key, &["retention", "--json"]).await.unwrap())
+                .unwrap();
+        assert_eq!(v["channels"][0]["customers"], 1);
 
         let out = query(&url, &f.key, &["visitor", "v1"]).await.unwrap();
         assert!(

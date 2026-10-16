@@ -1,0 +1,52 @@
+{% extends "app.html" %}
+{% block tools %}{% include "_range.html" %}{% endblock %}
+{% block content %}
+{% if no_payments %}
+<section class="box pay-empty">
+  <img src="/assets/art/03-empty-payments.jpg" width="1024" height="687" alt="Pencil drawing: an empty jar on a desk next to a laptop, with one orange coin">
+  <div>
+    <h2>No customers yet</h2>
+    <p>Connect a payment provider and this page shows which channels bring customers who keep paying, not only the ones who pay once.</p>
+    <div class="eh-actions"><a class="b" href="/app/{{ shell.domain }}/setup/payments">Connect a provider</a></div>
+  </div>
+</section>
+{% else %}
+{% if !headline.is_empty() %}
+<section class="box rt-head">
+  <h2>{{ headline }}</h2>
+  <span class="dim">{{ based }}</span>
+</section>
+{% endif %}
+{% if day_one %}
+<div class="notice row rt-early"><span>{{ day_one_note }}</span></div>
+{% endif %}
+<section class="box summary rt-sum">
+  {% for s in stats %}<div><span class="sn">{% if !s.tone.is_empty() %}<i class="dot {{ s.tone }}"></i>{% endif %}{{ s.name }}</span><b{% if !s.tone.is_empty() %} class="{{ s.tone }}"{% endif %}>{{ s.value }}</b><span class="dim">{{ s.sub }}</span></div>{% endfor %}
+</section>
+<section class="box rt{% if day_one %} early{% endif %}">
+  <div class="rt-top">
+    <nav class="tc-tabs" aria-label="Group customers by">{% for t in tabs %}<a href="{{ t.href }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav>
+  </div>
+  {% if rows.is_empty() %}
+  <p class="bd-empty pad">{{ empty }}</p>
+  {% else %}
+  <div class="rt-row th"><span>{{ head }}</span><span class="num c-cust">Customers</span><span class="num c-net">Net LTV</span><span class="num c-avg">Avg LTV</span><span class="num c-ref">Refund rate</span><span class="num c-churn">30-day churn</span></div>
+  {% for r in rows %}
+  <div class="rt-row{% if r.unattr %} unattr{% endif %}">
+    <span class="rt-name"><span class="rt-bar" style="width:{{ "{:.1}"|format(r.bar) }}%"><i style="width:{{ "{:.1}"|format(r.fill) }}%"></i></span><span class="t">{{ r.icon|safe }}<span class="lbl">{{ r.label }}</span></span></span>
+    <span class="num c-cust" data-k="Customers"><b>{{ r.acquired }}</b><span class="dim">{{ r.paying }} paying</span></span>
+    <span class="num c-net rev" data-k="Net LTV">{{ r.net }}</span>
+    <span class="num c-avg" data-k="Avg LTV">{{ r.avg }}</span>
+    <span class="num c-ref" data-k="Refunds">{{ r.refund }}</span>
+    <span class="num c-churn" data-k="30-day churn" title="{{ r.churn_title }}">{{ r.churn }}</span>
+  </div>
+  {% endfor %}
+  {% endif %}
+  <div class="rt-foot">
+    <span class="rt-key"><i class="sw acq"></i>Acquired in range<i class="sw pay"></i>Still paying</span>
+    <a href="https://docs.virling.com/attribution/retention.html">How this is counted</a>
+  </div>
+</section>
+{% if !status_note.is_empty() %}<p class="dim rt-note">{{ status_note }}</p>{% endif %}
+{% endif %}
+{% endblock %}

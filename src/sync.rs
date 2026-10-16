@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use std::sync::Mutex;
 use std::time::Duration;
 
 use time::OffsetDateTime;
@@ -8,6 +10,11 @@ use crate::providers::Provider;
 
 const INTERVAL: Duration = Duration::from_secs(60);
 const MAX_PAGES_PER_RUN: usize = 50;
+/// Subscription status changes slowly, so it is read at most this often per integration.
+const SUBSCRIPTIONS_EVERY: i64 = 3600;
+
+/// When each integration's subscriptions were last read, by integration id.
+static SUBSCRIPTIONS_READ: Mutex<Option<HashMap<String, i64>>> = Mutex::new(None);
 
 #[derive(sqlx::FromRow)]
 struct Integration {
@@ -76,7 +83,10 @@ async fn sync_integrations(state: &AppState, site_id: Option<&str>) -> anyhow::R
     .fetch_all(&state.db)
     .await?;
     for integration in integrations {
-        let result = sync_one(state, &integration).await;
+        let mut result = sync_one(state, &integration).await;
+        if result.is_ok() {
+            result = sync_subscriptions(state, &integration).await;
+        }
         let error = result.as_ref().err().map(|e| e.to_string());
         if let Some(err) = &error {
             tracing::warn!(provider = %integration.provider, site = %integration.site_id, %err, "sync failed");
@@ -117,6 +127,37 @@ pub async fn rebuild_attribution(state: &AppState, site_id: Option<&str>) {
             tracing::error!(site = %site_id, ?result, "attribution rebuild failed");
         }
     }
+}
+
+/// Stores the provider's subscription states once an hour; a key without access keeps the payment-recency rule.
+async fn sync_subscriptions(state: &AppState, integration: &Integration) -> anyhow::Result<()> {
+    let now = OffsetDateTime::now_utc().unix_timestamp();
+    let due = SUBSCRIPTIONS_READ
+        .lock()
+        .unwrap()
+        .get_or_insert_default()
+        .get(&integration.id)
+        .is_none_or(|t| now - t >= SUBSCRIPTIONS_EVERY);
+    if !due {
+        return Ok(());
+    }
+    let provider = Provider::parse(&integration.provider)
+        .ok_or_else(|| anyhow::anyhow!("unknown provider {}", integration.provider))?;
+    let key = state
+        .vault
+        .decrypt(&integration.key_ciphertext, &integration.key_nonce)?;
+    let subscriptions = provider.subscriptions(&state.http, &key).await?;
+    SUBSCRIPTIONS_READ
+        .lock()
+        .unwrap()
+        .get_or_insert_default()
+        .insert(integration.id.clone(), now);
+    let store = state.events.clone();
+    let (site, name) = (integration.site_id.clone(), provider.as_str());
+    let subscriptions = subscriptions.unwrap_or_default();
+    tokio::task::spawn_blocking(move || store.replace_subscriptions(&site, name, &subscriptions))
+        .await??;
+    Ok(())
 }
 
 async fn sync_one(state: &AppState, integration: &Integration) -> anyhow::Result<()> {
