@@ -89,10 +89,7 @@ impl Filter {
         format!(
             ",
         scope AS (
-            SELECT session_id FROM (
-                SELECT * FROM events WHERE site_id = $site AND kind = 'pageview'
-                QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1
-            ) WHERE {}
+            SELECT session_id FROM touches WHERE site_id = $site AND {}
         )",
             conds.join(" AND ")
         )
@@ -492,10 +489,13 @@ pub(crate) fn timeseries(
                 count(DISTINCT {CUSTOMER}) FILTER (WHERE matched) AS converted,
                 coalesce(sum({NET_USD}) FILTER (WHERE matched), 0) AS matched_rev
             FROM (
-                SELECT p.*, EXISTS (
-                    SELECT 1 FROM events e WHERE e.site_id = $site AND e.visitor_id = p.visitor_id
-                    AND CAST(timezone($tz, e.ts) AS DATE) = CAST(timezone($tz, p.ts) AS DATE)) AS matched
-                FROM payments p WHERE p.site_id = $site
+                SELECT p.*, m.visitor_id IS NOT NULL AS matched
+                FROM payments p
+                LEFT JOIN (
+                    SELECT DISTINCT visitor_id, CAST(timezone($tz, ts) AS DATE) AS day FROM events, bounds
+                    WHERE site_id = $site AND ts >= lo AND ts < hi
+                ) m ON m.visitor_id = p.visitor_id AND m.day = CAST(timezone($tz, p.ts) AS DATE)
+                WHERE p.site_id = $site
             ) p, bounds
             WHERE p.site_id = $site AND p.ts >= lo AND p.ts < hi AND p.status <> 'failed'{paid} GROUP BY 1
         )
@@ -668,19 +668,18 @@ pub(crate) fn breakdown(
 ) -> anyhow::Result<Vec<BreakdownRow>> {
     let (kind, key, first) = dimension.source();
     let (scope, within, paid) = (f.cte(), f.within("session_id"), f.paid());
-    let only_first = if first {
-        "QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1"
+    let (table, kind) = if first {
+        ("touches", "true".to_string())
     } else {
-        ""
+        ("events", format!("kind = '{kind}'"))
     };
     // Visitors count sessions in range; payments follow their credited session, wherever it falls.
     let sql = format!(
         "WITH {BOUNDS}{scope},
         keyed AS (
             SELECT session_id, visitor_id, ts, {key} AS key
-            FROM events
-            WHERE site_id = $site AND kind = '{kind}'{within}
-            {only_first}
+            FROM {table}
+            WHERE site_id = $site AND {kind}{within}
         )
         SELECT unattributed, key, sum(visitors)::BIGINT, sum(payments)::BIGINT, sum(revenue),
             sum(customers)::BIGINT
@@ -781,23 +780,21 @@ pub(crate) const PAYMENT_COLUMNS: &str =
     p.amount_usd, p.refunded, p.status, p.visitor_id, p.customer_id, p.is_renewal,
     a.session_id, epoch_us(a.touch_ts), a.channel, a.referrer_host, a.campaign, a.landing_page,
     a.country, a.device, epoch_us(f.ts), f.channel, f.referrer_host,
-    coalesce(p.visitor_id,
-        (SELECT c.visitor_id FROM events c WHERE c.site_id = p.site_id AND c.session_id = a.session_id LIMIT 1),
-        (SELECT q.visitor_id FROM payments q WHERE q.site_id = p.site_id AND q.provider = p.provider
-            AND q.customer_id = p.customer_id AND q.visitor_id IS NOT NULL ORDER BY q.ts LIMIT 1))";
+    coalesce(p.visitor_id, sv.visitor_id, cv.visitor_id)";
 
 pub(crate) const ATTRIBUTION_JOIN: &str = "LEFT JOIN attribution a ON a.site_id = p.site_id
     AND a.provider = p.provider AND a.provider_payment_id = p.provider_payment_id";
 
-/// The first pageview of the payer, or of the credited visitor when the payment has no visitor ID.
-pub(crate) const FIRST_TOUCH_JOIN: &str = "LEFT JOIN LATERAL (
-        SELECT e.ts, e.channel, e.referrer_host FROM events e
-        WHERE e.site_id = p.site_id AND e.kind = 'pageview' AND e.ts <= p.ts
-            AND e.visitor_id = coalesce(p.visitor_id,
-                (SELECT c.visitor_id FROM events c WHERE c.site_id = p.site_id AND c.session_id = a.session_id LIMIT 1))
-        ORDER BY e.ts, e.path
-        LIMIT 1
-    ) f ON true";
+/// The first pageview of the payer, or of the credited visitor when the payment has no visitor ID,
+/// plus the credited session's visitor (sv) and the customer's earliest visitor (cv) for PAYMENT_COLUMNS.
+pub(crate) const FIRST_TOUCH_JOIN: &str =
+    "LEFT JOIN touches sv ON sv.site_id = p.site_id AND sv.session_id = a.session_id
+    LEFT JOIN (
+        SELECT site_id, provider, customer_id, arg_min(visitor_id, ts) AS visitor_id FROM payments
+        WHERE visitor_id IS NOT NULL AND customer_id IS NOT NULL GROUP BY ALL
+    ) cv ON cv.site_id = p.site_id AND cv.provider = p.provider AND cv.customer_id = p.customer_id
+    LEFT JOIN first_touches f ON f.site_id = p.site_id
+        AND f.visitor_id = coalesce(p.visitor_id, sv.visitor_id) AND f.ts <= p.ts";
 
 pub(crate) fn payment_row(r: &duckdb::Row) -> duckdb::Result<PaymentRow> {
     let amount: i64 = r.get(3)?;
@@ -931,9 +928,8 @@ pub(crate) fn journey(
     let mut stmt = conn.prepare(
         "WITH firsts AS (
             SELECT session_id, ts, channel, referrer_host, utm_campaign
-            FROM events
-            WHERE site_id = $site AND kind = 'pageview' AND (visitor_id = $visitor OR session_id = $credited)
-            QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1
+            FROM touches
+            WHERE site_id = $site AND (visitor_id = $visitor OR session_id = $credited)
         ),
         picked AS (
             SELECT * FROM firsts
@@ -1088,36 +1084,86 @@ pub(crate) fn activity(
     tz: &str,
     who: &[Who],
 ) -> anyhow::Result<Vec<Activity>> {
-    let mut stmt = conn.prepare(
-        "SELECT CAST(timezone($tz, $ts) AS DATE) - CAST(timezone($tz, ts) AS DATE) AS ago,
+    if who.is_empty() {
+        return Ok(Vec::new());
+    }
+    let list: Vec<serde_json::Value> = who
+        .iter()
+        .enumerate()
+        .map(|(i, w)| {
+            serde_json::json!({
+                "i": i,
+                "v": w.visitor_id,
+                "s": w.session_id,
+                "t": (w.ts.unix_timestamp_nanos() / 1000) as i64,
+            })
+        })
+        .collect();
+    // Pageviews of each visitor or credited session at or before its moment, all moments in one pass.
+    let seen = r#"WITH w AS (
+            SELECT i, v, s, make_timestamp(t)::TIMESTAMPTZ AS moment FROM (
+                SELECT unnest(from_json($who, '[{"i":"BIGINT","v":"VARCHAR","s":"VARCHAR","t":"BIGINT"}]'), recursive := true)
+            )
+        ),
+        seen AS (
+            SELECT w.i, w.moment, e.ts, e.path, e.session_id, e.country, e.device, e.os, e.browser
+            FROM w JOIN events e ON e.site_id = $site AND e.kind = 'pageview' AND e.visitor_id = w.v AND e.ts <= w.moment
+            UNION
+            SELECT w.i, w.moment, e.ts, e.path, e.session_id, e.country, e.device, e.os, e.browser
+            FROM w JOIN events e ON e.site_id = $site AND e.kind = 'pageview' AND e.session_id = w.s AND e.ts <= w.moment
+        )"#;
+    let who_json = serde_json::to_string(&list)?;
+    let mut out = vec![
+        Activity {
+            days: vec![0; ACTIVITY_DAYS],
+            ..Default::default()
+        };
+        who.len()
+    ];
+    let mut stmt = conn.prepare(&format!(
+        "{seen}
+        SELECT i, country, device, os, browser, path FROM seen
+        QUALIFY row_number() OVER (PARTITION BY i ORDER BY ts DESC, path DESC) = 1"
+    ))?;
+    let rows = stmt.query_map(named_params! { "site": site_id, "who": who_json }, |r| {
+        Ok((
+            r.get::<_, i64>(0)?,
+            r.get(1)?,
+            r.get(2)?,
+            r.get(3)?,
+            r.get(4)?,
+            r.get(5)?,
+        ))
+    })?;
+    for row in rows {
+        let (i, country, device, os, browser, last_page) = row?;
+        let a = &mut out[i as usize];
+        (a.country, a.device, a.os, a.browser, a.last_page) =
+            (country, device, os, browser, last_page);
+    }
+    let mut stmt = conn.prepare(&format!(
+        "{seen}
+        SELECT i, CAST(timezone($tz, moment) AS DATE) - CAST(timezone($tz, ts) AS DATE) AS ago,
             count(DISTINCT session_id)
-        FROM events
-        WHERE site_id = $site AND kind = 'pageview' AND ts <= $ts
-            AND (visitor_id = $visitor OR session_id = $session)
-            AND epoch_us(ts) > epoch_us($ts) - 15 * 86400000000
-        GROUP BY ago",
+        FROM seen
+        WHERE epoch_us(ts) > epoch_us(moment) - 15 * 86400000000
+        GROUP BY i, ago"
+    ))?;
+    let rows = stmt.query_map(
+        named_params! { "site": site_id, "tz": tz, "who": who_json },
+        |r| {
+            Ok((
+                r.get::<_, i64>(0)?,
+                r.get::<_, i64>(1)?,
+                r.get::<_, i64>(2)?,
+            ))
+        },
     )?;
-    let mut out = Vec::with_capacity(who.len());
-    for w in who {
-        let mut a = last_seen(conn, site_id, w)?;
-        a.days = vec![0; ACTIVITY_DAYS];
-        let rows = stmt.query_map(
-            named_params! {
-                "site": site_id,
-                "tz": tz,
-                "visitor": w.visitor_id,
-                "session": w.session_id,
-                "ts": micros(w.ts),
-            },
-            |r| Ok((r.get::<_, i64>(0)?, r.get::<_, i64>(1)?)),
-        )?;
-        for row in rows {
-            let (ago, n) = row?;
-            if (0..ACTIVITY_DAYS as i64).contains(&ago) {
-                a.days[ACTIVITY_DAYS - 1 - ago as usize] = n as u32;
-            }
+    for row in rows {
+        let (i, ago, n) = row?;
+        if (0..ACTIVITY_DAYS as i64).contains(&ago) {
+            out[i as usize].days[ACTIVITY_DAYS - 1 - ago as usize] = n as u32;
         }
-        out.push(a);
     }
     Ok(out)
 }
@@ -1132,16 +1178,27 @@ pub(crate) fn last_pages(
     let (scope, within, paid) = (f.cte(), f.within("session_id"), f.paid());
     let sql = format!(
         "WITH {BOUNDS}{scope},
-        last AS (
-            SELECT {NET_USD} AS usd, {CUSTOMER} AS customer,
-                (SELECT e.path FROM events e
-                 WHERE e.site_id = p.site_id AND e.kind = 'pageview' AND e.ts <= p.ts
-                    AND (e.visitor_id = p.visitor_id OR e.session_id = a.session_id)
-                 ORDER BY e.ts DESC, e.path DESC LIMIT 1) AS path
+        pays AS (
+            SELECT p.provider, p.provider_payment_id, p.ts, p.visitor_id, a.session_id,
+                {NET_USD} AS usd, {CUSTOMER} AS customer
             FROM payments p
             JOIN bounds ON p.ts >= lo AND p.ts < hi
             {ATTRIBUTION_JOIN}
             WHERE p.site_id = $site AND p.status <> 'failed'{paid}
+        ),
+        viewed AS (
+            SELECT y.provider, y.provider_payment_id, e.ts, e.path FROM pays y
+            JOIN events e ON e.site_id = $site AND e.kind = 'pageview' AND e.visitor_id = y.visitor_id AND e.ts <= y.ts
+            UNION
+            SELECT y.provider, y.provider_payment_id, e.ts, e.path FROM pays y
+            JOIN events e ON e.site_id = $site AND e.kind = 'pageview' AND e.session_id = y.session_id AND e.ts <= y.ts
+        ),
+        last AS (
+            SELECT y.usd, y.customer, l.path FROM pays y
+            LEFT JOIN (
+                SELECT provider, provider_payment_id, path FROM viewed
+                QUALIFY row_number() OVER (PARTITION BY provider, provider_payment_id ORDER BY ts DESC, path DESC) = 1
+            ) l USING (provider, provider_payment_id)
         ),
         seen AS (
             SELECT path, count(DISTINCT visitor_id) AS visitors FROM events, bounds
@@ -1275,19 +1332,20 @@ pub(crate) fn goal_list(
         )
         SELECT d.visitor_id, d.session_id, epoch_us(d.ts),
             coalesce(l.channel, d.channel), CASE WHEN l.session_id IS NULL THEN d.referrer_host ELSE l.referrer_host END,
-            (SELECT epoch_us(min(e.ts)) FROM events e
-                WHERE e.site_id = $site AND e.kind = 'pageview' AND e.visitor_id = d.visitor_id),
-            (SELECT coalesce(sum({NET_USD}), 0) FROM payments p
-                WHERE p.site_id = $site AND p.visitor_id = d.visitor_id AND p.status <> 'failed'),
-            (SELECT p.provider || ':' || p.customer_id FROM payments p
-                WHERE p.site_id = $site AND p.visitor_id = d.visitor_id AND p.customer_id IS NOT NULL
-                ORDER BY p.ts LIMIT 1)
+            epoch_us(ft.ts), coalesce(spent.usd, 0), firstpay.customer
         FROM done d
-        LEFT JOIN LATERAL (
-            SELECT session_id, channel, referrer_host FROM events e
-            WHERE e.site_id = $site AND e.session_id = d.session_id AND e.kind = 'pageview'
-            ORDER BY e.ts, e.path LIMIT 1
-        ) l ON true
+        LEFT JOIN first_touches ft ON ft.site_id = $site AND ft.visitor_id = d.visitor_id
+        LEFT JOIN (
+            SELECT p.visitor_id, coalesce(sum({NET_USD}), 0) AS usd FROM payments p
+            WHERE p.site_id = $site AND p.status <> 'failed'
+            GROUP BY 1
+        ) spent ON spent.visitor_id = d.visitor_id
+        LEFT JOIN (
+            SELECT p.visitor_id, arg_min(p.provider || ':' || p.customer_id, p.ts) AS customer FROM payments p
+            WHERE p.site_id = $site AND p.customer_id IS NOT NULL
+            GROUP BY 1
+        ) firstpay ON firstpay.visitor_id = d.visitor_id
+        LEFT JOIN touches l ON l.site_id = $site AND l.session_id = d.session_id
         ORDER BY d.ts DESC, d.session_id"
     ))?;
     let rows = stmt.query_map(params, |r| {
@@ -1521,16 +1579,12 @@ pub(crate) fn goal_table(
     };
     let mut stmt = conn.prepare(&format!(
         "WITH {BOUNDS}{scope},
-        firsts AS (
-            SELECT session_id, channel FROM events WHERE site_id = $site AND kind = 'pageview'
-            QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1
-        ),
         done AS (
             SELECT CASE WHEN e.kind = 'goal' THEN 'goal:' || e.name ELSE 'page:' || e.path END AS key,
                 e.visitor_id, coalesce(f.channel, e.channel) AS channel
             FROM events e
             JOIN bounds ON e.ts >= lo AND e.ts < hi
-            LEFT JOIN firsts f ON f.session_id = e.session_id
+            LEFT JOIN touches f ON f.site_id = $site AND f.session_id = e.session_id
             WHERE e.site_id = $site AND ((e.kind = 'goal' AND e.name IS NOT NULL)
                 OR (e.kind = 'pageview' AND {pages})){within}
         )
@@ -1644,23 +1698,36 @@ fn setup(conn: &Connection, site_id: &str) -> anyhow::Result<Setup> {
     })
 }
 
-pub(crate) fn report(
-    conn: &Connection,
+/// Runs each part on its own connection from `conn`, all at once.
+pub(crate) fn report<C: std::ops::Deref<Target = Connection>>(
+    conn: &(dyn Fn() -> anyhow::Result<C> + Sync),
     site_id: &str,
     period: &Period,
     f: &Filter,
 ) -> anyhow::Result<Report> {
-    let dims = |d| breakdown(conn, site_id, period, d, f);
-    Ok(Report {
-        overview: overview(conn, site_id, period, f)?,
-        days: timeseries(conn, site_id, period, f)?,
-        previous_days: timeseries(conn, site_id, &period.previous(), f)?,
-        channels: dims(Dimension::Channel)?,
-        referrers: dims(Dimension::Referrer)?,
-        landing_pages: dims(Dimension::LandingPage)?,
-        countries: dims(Dimension::Country)?,
-        channel_sources: channel_sources(conn, site_id, period, f)?,
-        setup: setup(conn, site_id)?,
+    let previous = period.previous();
+    std::thread::scope(|s| {
+        let dims = |d| s.spawn(move || breakdown(&*conn()?, site_id, period, d, f));
+        let overview = s.spawn(|| overview(&*conn()?, site_id, period, f));
+        let days = s.spawn(|| timeseries(&*conn()?, site_id, period, f));
+        let previous_days = s.spawn(|| timeseries(&*conn()?, site_id, &previous, f));
+        let channels = dims(Dimension::Channel);
+        let referrers = dims(Dimension::Referrer);
+        let landing_pages = dims(Dimension::LandingPage);
+        let countries = dims(Dimension::Country);
+        let channel_sources = s.spawn(|| channel_sources(&*conn()?, site_id, period, f));
+        let setup = s.spawn(|| setup(&*conn()?, site_id));
+        Ok(Report {
+            overview: overview.join().unwrap()?,
+            days: days.join().unwrap()?,
+            previous_days: previous_days.join().unwrap()?,
+            channels: channels.join().unwrap()?,
+            referrers: referrers.join().unwrap()?,
+            landing_pages: landing_pages.join().unwrap()?,
+            countries: countries.join().unwrap()?,
+            channel_sources: channel_sources.join().unwrap()?,
+            setup: setup.join().unwrap()?,
+        })
     })
 }
 
