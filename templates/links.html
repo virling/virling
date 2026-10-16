@@ -1,0 +1,63 @@
+{% extends "app.html" %}
+{% block tools %}{% include "_range.html" %}{% endblock %}
+{% block content %}
+<div class="settings">
+<section class="set-sec">
+<div class="set-intro"><h2>Tracked links</h2><p class="muted">Share a short link in a post, newsletter or bio. Every click lands with tags, so you see the visitors and revenue each link brought.</p></div>
+<div class="card">
+  {% if !error.is_empty() %}<div class="alert" role="alert">{{ error }}</div>{% endif %}
+  {% for l in links %}
+  <div class="conn link-row">
+    <div class="grow">
+      <div class="link-name"><span class="src">{{ l.icon|safe }}</span><b>{{ l.name }}</b><span class="ch">{{ l.channel }}, {{ l.source }}</span></div>
+      <div class="link-url"><span class="mono small">{{ l.short_url }}</span><button class="copy" type="button" data-copy-text="{{ l.short_url }}">Copy</button></div>
+      <div class="muted small link-dest">To {{ l.destination }}</div>
+    </div>
+    <div class="link-nums">
+      <div><span class="muted small">Clicks</span><b>{{ l.clicks }}</b></div>
+      <div><span class="muted small">Visitors</span><b>{{ l.visitors }}</b></div>
+      <div><span class="muted small">Revenue</span><b class="rev">{{ l.revenue }}</b></div>
+      <div><span class="muted small">Per visitor</span><b>{{ l.per_visitor }}</b></div>
+    </div>
+    <form method="post" action="/app/{{ shell.domain }}/links/delete" data-confirm="Delete {{ l.name }}? The short link stops working right away." data-confirm-ok="Delete link">
+      <input type="hidden" name="id" value="{{ l.id }}">
+      <button class="btn ghost" type="submit">Delete</button>
+    </form>
+  </div>
+  {% endfor %}
+  {% if links.is_empty() %}<p class="empty">No links yet. Create one below and share it instead of your plain URL.</p>{% endif %}
+</div>
+</section>
+<section class="set-sec">
+<div class="set-intro"><h2>New link</h2><p class="muted">Pick where you will share it, so its visits land in the right channel.</p></div>
+<form class="card" method="post" action="/app/{{ shell.domain }}/links">
+  <div class="setting">
+    <div><b><label for="link_name">Name</label></b><span class="muted">Only you see this.</span></div>
+    <input class="input" id="link_name" name="name" maxlength="80" placeholder="Day 3 build-in-public post" required>
+  </div>
+  <div class="setting">
+    <div><b><label for="link_dest">Destination</label></b><span class="muted">A page on {{ shell.domain }}.</span></div>
+    <input class="input" id="link_dest" name="destination" type="url" value="{{ home }}" required>
+  </div>
+  <div class="setting">
+    <div><b><label for="link_source">Source</label></b><span class="muted">Where it is shared, such as x.com, linkedin.com or newsletter.</span></div>
+    <input class="input" id="link_source" name="source" maxlength="80" placeholder="x.com" required>
+  </div>
+  <div class="setting">
+    <div><b>Channel</b><span class="muted">How it is shared.</span></div>
+    <div class="seg">
+      {% for (value, label) in channels %}<label><input type="radio" name="channel" value="{{ value }}"{% if loop.first %} checked{% endif %}>{{ label }}</label>{% endfor %}
+    </div>
+  </div>
+  <div class="actions end"><button class="btn" type="submit">Create link</button></div>
+</form>
+</section>
+</div>
+<dialog class="confirm" id="confirm">
+  <p data-confirm-text></p>
+  <div class="actions end">
+    <button class="btn ghost" type="button" value="cancel" data-confirm-cancel>Cancel</button>
+    <button class="btn danger" type="button" data-confirm-ok>Delete</button>
+  </div>
+</dialog>
+{% endblock %}

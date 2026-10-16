@@ -14,7 +14,8 @@ use crate::ingest::{self, DailySalt, RateLimiter, Sessions};
 use crate::mail::Mailer;
 use crate::sites::SiteCache;
 use crate::{
-    api, auth, dashboard, flags, mcp, onboarding, retention_page, settings, visitor_pages, waitlist,
+    api, auth, dashboard, flags, links, mcp, onboarding, retention_page, settings, visitor_pages,
+    waitlist,
 };
 
 #[derive(Debug, Clone)]
@@ -170,6 +171,9 @@ pub fn router(state: AppState) -> Router {
             .route("/app/{domain}/payments", get(dashboard::payments))
             .route("/app/{domain}/visitors", get(visitor_pages::list))
             .route("/app/{domain}/retention", get(retention_page::page))
+            .route("/app/{domain}/links", get(links::page).post(links::create))
+            .route("/app/{domain}/links/delete", post(links::delete))
+            .route("/l/{slug}", get(links::follow))
             .route(
                 "/app/{domain}/visitors/{visitor_id}",
                 get(visitor_pages::timeline),
