@@ -45,6 +45,8 @@ pub struct Totals {
     pub payments: u64,
     /// Distinct customer_id, else visitor_id, else payment, among non-failed payments.
     pub customers: u64,
+    /// Distinct customers among first, not renewal, payments.
+    pub new_customers: u64,
     pub revenue_usd: f64,
     /// Customers whose payment matches a visitor tracked in the period.
     pub converted: u64,
@@ -300,6 +302,7 @@ fn totals(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<T
              WHERE site_id = $site AND ts >= lo AND ts < hi),
             count(*),
             count(DISTINCT {CUSTOMER}),
+            count(DISTINCT {CUSTOMER}) FILTER (WHERE NOT p.is_renewal),
             coalesce(sum({NET_USD}), 0),
             count(DISTINCT {CUSTOMER}) FILTER (WHERE p.visitor_id IN (SELECT visitor_id FROM tracked)),
             count(*) FILTER (WHERE p.visitor_id IN (SELECT visitor_id FROM tracked)),
@@ -308,16 +311,17 @@ fn totals(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<T
         WHERE p.site_id = $site AND p.ts >= lo AND p.ts < hi AND p.status <> 'failed'"
     );
     #[allow(clippy::type_complexity)]
-    let (visitors, sessions, payments, customers, revenue_usd, converted, matched, matched_usd): (
-        i64,
-        i64,
-        i64,
-        i64,
-        f64,
-        i64,
-        i64,
-        f64,
-    ) = conn.query_row(
+    let (
+        visitors,
+        sessions,
+        payments,
+        customers,
+        new_customers,
+        revenue_usd,
+        converted,
+        matched,
+        matched_usd,
+    ): (i64, i64, i64, i64, i64, f64, i64, i64, f64) = conn.query_row(
         &sql,
         named_params! {
             "site": site_id,
@@ -335,6 +339,7 @@ fn totals(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<T
                 r.get(5)?,
                 r.get(6)?,
                 r.get(7)?,
+                r.get(8)?,
             ))
         },
     )?;
@@ -345,6 +350,7 @@ fn totals(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<T
         sessions: sessions as u64,
         payments: payments as u64,
         customers: customers as u64,
+        new_customers: new_customers as u64,
         revenue_usd,
         converted: converted as u64,
         matched_payments: matched as u64,
