@@ -534,8 +534,9 @@ pub(crate) fn working(srcs: &[Src], avg: Option<f64>) -> Option<Insight> {
         title: s.0.title(),
         mono: false,
         text: format!(
-            "{} visitors paid {} each, {} your average.",
+            "{} visitors brought {}. That's {} per visitor, {} your average.",
             group(s.0.visitors),
+            money(s.0.revenue),
             usd(s.0.per_visitor().unwrap_or(0.0)),
             times(s.1)
         ),
@@ -549,8 +550,8 @@ pub(crate) fn not_paying(srcs: &[Src], avg: Option<f64>) -> Option<Insight> {
         .filter(|s| s.folded == 0 && s.visitors >= SMALL && s.host.is_some())
         .filter_map(|s| Some((s, ratio(s.per_visitor(), avg)?)))
         .filter(|(_, x)| *x <= 0.5)
-        .min_by(|a, b| a.1.total_cmp(&b.1).then(b.0.visitors.cmp(&a.0.visitors)))?
-        .0;
+        .min_by(|a, b| a.1.total_cmp(&b.1).then(b.0.visitors.cmp(&a.0.visitors)))?;
+    let (s, x) = (s.0, s.1);
     let (icon, src) = s.icon(18);
     Some(Insight {
         kind: "Not paying off",
@@ -561,15 +562,14 @@ pub(crate) fn not_paying(srcs: &[Src], avg: Option<f64>) -> Option<Insight> {
         mono: false,
         text: if s.revenue > 0.0 {
             format!(
-                "{} visitors brought {}. Worth less time until that changes.",
+                "{} visitors brought {}. That's {} per visitor, {} your average.",
                 group(s.visitors),
-                money(s.revenue)
+                money(s.revenue),
+                usd(s.per_visitor().unwrap_or(0.0)),
+                times(x)
             )
         } else {
-            format!(
-                "{} visitors and no payment yet. Worth less time until that changes.",
-                group(s.visitors)
-            )
+            format!("{} visitors and no payment yet.", group(s.visitors))
         },
     })
 }
@@ -1335,12 +1335,15 @@ mod tests {
         let avg = Some(1.72);
         let w = working(&s, avg).unwrap();
         assert_eq!(w.title, "ChatGPT answers");
-        assert_eq!(w.text, "122 visitors paid $3.38 each, twice your average.");
+        assert_eq!(
+            w.text,
+            "122 visitors brought $412. That's $3.38 per visitor, twice your average."
+        );
         let n = not_paying(&s, avg).unwrap();
         assert_eq!(n.title, "Posts on x.com");
         assert_eq!(
             n.text,
-            "61 visitors brought $15. Worth less time until that changes."
+            "61 visitors brought $15. That's $0.25 per visitor, 0.1x your average."
         );
         let pages = [
             row("/compare", 112, 268.0),
