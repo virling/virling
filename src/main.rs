@@ -15,6 +15,7 @@ mod favicon;
 mod flags;
 mod fx;
 mod icons;
+mod index;
 mod ingest;
 mod links;
 mod mail;
