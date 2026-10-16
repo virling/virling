@@ -14,7 +14,7 @@
   }
 
   function send(name, goal) {
-    var body = JSON.stringify([{ n: name, u: location.href, r: ref, s: site, v: vid, w: screen.width, g: goal }]);
+    var body = JSON.stringify([{ n: name, u: location.href, r: ref, s: site, v: vid, w: screen.width, g: goal, l: n.language }]);
     ref = null;
     n.sendBeacon && n.sendBeacon(endpoint, body) || fetch(endpoint, { method: "POST", body: body, keepalive: true });
   }

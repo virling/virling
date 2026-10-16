@@ -26,6 +26,7 @@ On load, and on each route change, the script sends one pageview to `/api/event`
 | Site | The `data-site` value. |
 | Visitor ID | The `virling_vid` first-party cookie, unless cookieless. |
 | Screen width | `screen.width` in CSS pixels, used for Desktop, Tablet or Mobile. |
+| Language | `navigator.language`, stored as a code such as `en-US`. In cookieless mode only the base code, such as `en`, is kept. |
 
 Each event is sent immediately, with `navigator.sendBeacon` when the browser has it and `fetch` with `keepalive` otherwise. Nothing is batched or held back, so an event still arrives when the visitor leaves right after.
 

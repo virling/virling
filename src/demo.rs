@@ -291,6 +291,31 @@ struct Visitor {
     browser: &'static str,
     os: &'static str,
     place: Option<(&'static str, &'static str)>,
+    language: &'static str,
+}
+
+/// Browser language for a visitor from `country`; about one in four outside English countries browse in US English.
+fn language(country: &str, id: &str) -> &'static str {
+    let roll = u8::from_str_radix(&id[id.len() - 2..], 16).unwrap_or(0);
+    match country {
+        "US" => "en-US",
+        "GB" => "en-GB",
+        "IN" => "en-IN",
+        "AU" => "en-AU",
+        "SG" => "en-SG",
+        "CA" if roll.is_multiple_of(5) => "fr-CA",
+        "CA" => "en-CA",
+        _ if roll < 64 => "en-US",
+        "DE" => "de-DE",
+        "FR" => "fr-FR",
+        "NL" => "nl-NL",
+        "BR" => "pt-BR",
+        "ES" => "es-ES",
+        "SE" => "sv-SE",
+        "PL" => "pl",
+        "JP" => "ja",
+        _ => "en",
+    }
 }
 
 /// Region and city per country, as a proxy with location headers would report them.
@@ -368,8 +393,10 @@ fn visitor(rng: &mut Rng) -> Visitor {
         .iter()
         .find(|p| p.0 == country)
         .map(|p| p.1[rng.below(p.1.len())]);
+    let id = rng.id("v");
     Visitor {
-        id: rng.id("v"),
+        language: language(country, &id),
+        id,
         country,
         device,
         browser,
@@ -438,6 +465,7 @@ fn session(
             os: v.os.into(),
             region: v.place.map(|p| p.0.into()),
             city: v.place.map(|p| p.1.into()),
+            language: Some(v.language.into()),
             host: Some(
                 if path.starts_with("/docs") {
                     "docs.tallybird.app"

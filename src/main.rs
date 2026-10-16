@@ -740,6 +740,7 @@ mod tests {
             region: None,
             city: None,
             host: None,
+            language: None,
         };
         store
             .insert_events(&[
@@ -1087,6 +1088,7 @@ mod tests {
                 region: None,
                 city: None,
                 host: None,
+                language: None,
             }])
             .unwrap();
         let goals = body_text(
@@ -1309,6 +1311,7 @@ mod tests {
             region: None,
             city: None,
             host: None,
+            language: None,
             site_id: site.clone(),
             ts: time::OffsetDateTime::now_utc() - time::Duration::days(3)
                 + time::Duration::minutes(2),
@@ -1434,6 +1437,7 @@ mod tests {
             region: None,
             city: None,
             host: None,
+            language: None,
         };
         store
             .insert_events(&[

@@ -609,6 +609,7 @@ mod tests {
             region: None,
             city: None,
             host: None,
+            language: None,
         }
     }
 

@@ -184,6 +184,7 @@ pub enum Dimension {
     CountryCity,
     /// "device|os".
     DeviceOs,
+    Language,
 }
 
 impl Dimension {
@@ -206,6 +207,7 @@ impl Dimension {
             }
             Dimension::CountryCity => first("country || '|' || city"),
             Dimension::DeviceOs => first("device || '|' || os"),
+            Dimension::Language => first("language"),
             Dimension::Page => ("pageview", "path", false),
         }
     }
@@ -1706,6 +1708,7 @@ mod tests {
             region: None,
             city: None,
             host: None,
+            language: None,
         }
     }
 
@@ -2422,6 +2425,7 @@ mod tests {
         a.city = Some("Munich".into());
         a.host = Some("docs.example.com".into());
         a.os = "iOS".into();
+        a.language = Some("de-DE".into());
         let mut second = visit("v1", "a", T + Duration::minutes(1), "Social");
         second.path = "/pricing".into();
         let mut exit = visit("v1", "a", T + Duration::minutes(2), "Social");
@@ -2455,6 +2459,8 @@ mod tests {
         );
         assert_eq!(find(Dimension::Os, "iOS").visitors, 1);
         assert_eq!(find(Dimension::Os, "macOS").revenue_usd, 0.0);
+        let de = find(Dimension::Language, "de-DE");
+        assert_eq!((de.visitors, de.revenue_usd), (1, 100.0));
         assert_eq!(
             find(Dimension::ChannelSource, "Social|news.ycombinator.com").revenue_usd,
             100.0
