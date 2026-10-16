@@ -6,7 +6,7 @@ use duckdb::{Connection, named_params, params};
 use time::{OffsetDateTime, UtcOffset};
 
 use crate::providers::Subscription;
-use crate::retention::{self, Retention};
+use crate::retention::{self, Mrr, Retention};
 use crate::stats::{
     self, Activity, GoalCount, GoalRow, Journey, Overview, PaymentFilter, PaymentPage,
     PaymentSummary, Period, Report, Who,
@@ -75,6 +75,13 @@ pub trait EventStore: Send + Sync {
         provider: &str,
         subscriptions: &[Subscription],
     ) -> anyhow::Result<()>;
+    /// Monthly recurring revenue of paying subscriptions now, and the part from customers who first paid in the period; None until a subscription has a price.
+    fn mrr(
+        &self,
+        site_id: &str,
+        period: &Period,
+        now: OffsetDateTime,
+    ) -> anyhow::Result<Option<Mrr>>;
     /// Customers acquired in the period and how many still pay, by first channel, referrer and campaign.
     fn retention(
         &self,
@@ -347,7 +354,12 @@ impl DuckStore {
                 live BOOLEAN NOT NULL,
                 ends_at TIMESTAMPTZ,
                 PRIMARY KEY (site_id, provider, subscription_id)
-            );",
+            );
+            ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS amount BIGINT;
+            ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS currency VARCHAR;
+            ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS billing_interval VARCHAR;
+            ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS interval_count INTEGER;
+            ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS mrr_usd DOUBLE;",
         )?;
         Ok(Self {
             conn: Mutex::new(conn),
@@ -409,8 +421,11 @@ impl EventStore for DuckStore {
             params![site_id, provider],
         )?;
         {
-            let mut stmt =
-                tx.prepare("INSERT OR REPLACE INTO subscriptions VALUES (?, ?, ?, ?, ?, ?, ?)")?;
+            let mut stmt = tx.prepare(
+                "INSERT OR REPLACE INTO subscriptions (site_id, provider, subscription_id, customer_id,
+                    status, live, ends_at, amount, currency, billing_interval, interval_count, mrr_usd)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            )?;
             for s in subscriptions {
                 stmt.execute(params![
                     site_id,
@@ -423,11 +438,25 @@ impl EventStore for DuckStore {
                         TimeUnit::Microsecond,
                         (t.unix_timestamp_nanos() / 1000) as i64
                     )),
+                    s.amount,
+                    s.currency.as_deref().map(str::to_ascii_lowercase),
+                    s.interval,
+                    s.interval_count,
+                    s.mrr_usd,
                 ])?;
             }
         }
         tx.commit()?;
         Ok(())
+    }
+
+    fn mrr(
+        &self,
+        site_id: &str,
+        period: &Period,
+        now: OffsetDateTime,
+    ) -> anyhow::Result<Option<Mrr>> {
+        retention::mrr(&self.conn.lock().unwrap(), site_id, period, now)
     }
 
     fn retention(

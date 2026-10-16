@@ -227,6 +227,10 @@ struct DodoSubscriptionRow {
     subscription_id: String,
     status: String,
     customer: Customer,
+    recurring_pre_tax_amount: Option<i64>,
+    currency: Option<String>,
+    payment_frequency_interval: Option<String>,
+    payment_frequency_count: Option<i64>,
 }
 
 impl DodoSubscriptionRow {
@@ -238,6 +242,13 @@ impl DodoSubscriptionRow {
             customer_id: self.customer.customer_id,
             status: self.status,
             ends_at: None,
+            amount: self.recurring_pre_tax_amount,
+            currency: self.currency,
+            interval: self
+                .payment_frequency_interval
+                .map(|i| i.to_ascii_lowercase()),
+            interval_count: self.payment_frequency_count.unwrap_or(1),
+            mrr_usd: None,
         }
     }
 }
@@ -561,10 +572,26 @@ mod tests {
     fn subscription_status_decides_live() {
         let list: List<DodoSubscriptionRow> =
             serde_json::from_str(include_str!("fixtures/dodo_subscriptions.json")).unwrap();
-        let subs: Vec<(String, String, bool)> = list
+        let subs: Vec<Subscription> = list
             .items
             .into_iter()
             .map(DodoSubscriptionRow::into_subscription)
+            .collect();
+        assert_eq!(
+            (
+                subs[0].amount,
+                subs[0].currency.as_deref(),
+                subs[0].interval.as_deref()
+            ),
+            (Some(1500), Some("USD"), Some("month"))
+        );
+        assert_eq!(subs[0].monthly(), Some(1500.0));
+        assert_eq!(
+            (subs[1].interval_count, subs[1].monthly()),
+            (2, Some(3000.0))
+        );
+        let subs: Vec<(String, String, bool)> = subs
+            .into_iter()
             .map(|s| (s.customer_id, s.status, s.live))
             .collect();
         let want = [

@@ -8,7 +8,7 @@ Virling imports LemonSqueezy orders and subscription invoices, so they count tow
 2. Paste it into Virling.
 
 > [!WARNING]
-> **The key has full access.** LemonSqueezy API keys cannot be made read-only and cover every store on your account. Virling only reads orders and subscription invoices, and stores the key encrypted. Delete the key in LemonSqueezy at any time to revoke access.
+> **The key has full access.** LemonSqueezy API keys cannot be made read-only and cover every store on your account. Virling only reads orders, subscriptions with their prices and store currency, and subscription invoices, and stores the key encrypted. Delete the key in LemonSqueezy at any time to revoke access.
 
 ## What is imported
 
