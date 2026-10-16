@@ -25,7 +25,7 @@
 </section>
 <section class="box rt{% if day_one %} early{% endif %}">
   <div class="rt-top">
-    <nav class="tc-tabs" aria-label="Group customers by">{% for t in tabs %}<a href="{{ t.href }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav>
+    <nav class="d3-tabs" aria-label="Group customers by">{% for t in tabs %}<a href="{{ t.href }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav>
   </div>
   {% if rows.is_empty() %}
   <p class="bd-empty pad">{{ empty }}</p>
