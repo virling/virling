@@ -138,7 +138,7 @@
       <div class="d3-pr th"><span>Customer</span><span>Path</span><span class="num">Amount</span><span>Time to pay</span><span>Paid</span></div>
       {% for j in paths %}
       <div class="d3-pr prow"><a class="row-link" href="{{ j.href }}" aria-label="{{ j.name }}, {{ j.amount }} on {{ j.date }}" data-drawer></a>
-        <div class="d3-who"><span class="d3-av">{{ j.initials }}</span><div class="id">{% if j.visitor_href.is_empty() %}<b>{{ j.name }}</b>{% else %}<a class="vis-link" href="{{ j.visitor_href }}" title="Visitor timeline"><b>{{ j.name }}</b></a>{% endif %}<span>{{ j.meta }}</span></div></div>
+        <div class="d3-who"><span class="d3-av">{{ j.avatar|safe }}</span><div class="id">{% if j.visitor_href.is_empty() %}<b>{{ j.name }}</b>{% else %}<a class="vis-link" href="{{ j.visitor_href }}" title="Visitor timeline"><b>{{ j.name }}</b></a>{% endif %}<span>{{ j.meta }}</span></div></div>
         <div class="path">{% for p in j.chips %}<span class="d3-chip{% if p.credited %} on{% endif %}">{{ p.icon|safe }}{{ p.label }}</span>{% endfor %}</div>
         <span class="num amt{% if j.refunded %} struck{% endif %}">{{ j.amount }}</span>
         <span>{{ j.wait }}</span>

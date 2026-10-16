@@ -480,7 +480,7 @@ pub struct Chip {
 /// A payment with the visits that led to it.
 pub struct PathRow {
     name: String,
-    initials: String,
+    avatar: String,
     meta: String,
     chips: Vec<Chip>,
     amount: String,
@@ -555,7 +555,7 @@ fn path_row(p: &PaymentRow, j: Option<&Journey>, domain: &str, offset: UtcOffset
         .unwrap_or_default();
     PathRow {
         name: alias.name,
-        initials: alias.initials,
+        avatar: alias.avatar,
         meta: meta.join(" · "),
         chips: path_chips(j),
         amount: amount(p),
@@ -601,8 +601,7 @@ pub struct Card {
 /// A payment or goal completion shown as the person behind it.
 pub struct CustomerView {
     name: String,
-    initials: String,
-    color: &'static str,
+    avatar: String,
     /// Customer, Renewal, or empty for a goal completion.
     badge: &'static str,
     /// Icon HTML and label for country, device, OS and browser.
@@ -783,8 +782,7 @@ pub fn payment_customer(
     let first = p.first_touch.as_ref().map(|f| f.ts);
     CustomerView {
         name: alias.name,
-        initials: alias.initials,
-        color: alias.color,
+        avatar: alias.avatar,
         badge: if p.is_renewal { "Renewal" } else { "Customer" },
         chips: chips(a),
         icon: icons::source(&source, 16),
@@ -824,8 +822,7 @@ fn goal_customer(g: &GoalRow, a: &Activity, domain: &str, offset: UtcOffset) -> 
     let alias = alias::alias(&key);
     CustomerView {
         name: alias.name,
-        initials: alias.initials,
-        color: alias.color,
+        avatar: alias.avatar,
         badge: if g.spent_usd > 0.0 { "Customer" } else { "" },
         chips: chips(a),
         icon: icons::source(&g.source, 16),
@@ -1671,8 +1668,7 @@ pub struct SessionView {
 
 pub struct JourneyView {
     name: String,
-    initials: String,
-    color: &'static str,
+    avatar: String,
     amount: String,
     charged: String,
     provider: &'static str,
@@ -1729,8 +1725,7 @@ fn journey_view(j: Journey, domain: &str, offset: UtcOffset) -> JourneyView {
     let alias = alias::alias(&payer_key(p));
     JourneyView {
         name: alias.name,
-        initials: alias.initials,
-        color: alias.color,
+        avatar: alias.avatar,
         amount: amount(p),
         charged: match p.amount_usd {
             Some(u) if p.currency != "usd" => format!(
