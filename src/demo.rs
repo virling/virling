@@ -38,6 +38,52 @@ const BLOG: &[&str] = &[
 ];
 const PRODUCT: &[&str] = &["/", "/pricing", "/features/recurring-invoices", "/compare"];
 const DOCS: &[&str] = &["/docs/getting-started", "/docs/stripe", "/pricing"];
+/// Where a visit goes after its first page.
+const NEXT: &[&str] = &[
+    "/pricing",
+    "/pricing",
+    "/features/recurring-invoices",
+    "/features/payment-reminders",
+    "/docs/getting-started",
+    "/docs/stripe",
+    "/templates/freelance-invoice",
+    "/blog/net-30-explained",
+    "/compare",
+    "/changelog",
+    "/about",
+    "/",
+];
+/// Tracked short links as (slug, name, source, channel, destination path).
+const LINKS: &[(&str, &str, &str, &str, &str)] = &[
+    (
+        "launch-thread",
+        "Launch thread on X",
+        "x.com",
+        "social",
+        "/",
+    ),
+    (
+        "founder-posts",
+        "Founder posts on LinkedIn",
+        "linkedin.com",
+        "social",
+        "/pricing",
+    ),
+    (
+        "weekly-digest",
+        "Weekly digest footer",
+        "newsletter",
+        "email",
+        "/changelog",
+    ),
+    (
+        "demo-video",
+        "Demo video description",
+        "youtube.com",
+        "social",
+        "/features/recurring-invoices",
+    ),
+];
 
 const SOURCES: &[Source] = &[
     Source {
@@ -122,7 +168,7 @@ const SOURCES: &[Source] = &[
     },
     Source {
         host: Some("www.linkedin.com"),
-        utm: Some(("linkedin", "social", "founder-posts")),
+        utm: Some(("linkedin.com", "social", "founder-posts")),
         weight: 3.0,
         growth: 1.5,
         convert: 0.014,
@@ -135,6 +181,22 @@ const SOURCES: &[Source] = &[
         growth: 1.1,
         convert: 0.012,
         paths: BLOG,
+    },
+    Source {
+        host: Some("t.co"),
+        utm: Some(("x.com", "social", "launch-thread")),
+        weight: 2.0,
+        growth: 1.2,
+        convert: 0.014,
+        paths: PRODUCT,
+    },
+    Source {
+        host: Some("www.youtube.com"),
+        utm: Some(("youtube.com", "social", "demo-video")),
+        weight: 1.6,
+        growth: 1.6,
+        convert: 0.018,
+        paths: &["/", "/features/recurring-invoices", "/pricing"],
     },
     Source {
         host: Some("stackoverflow.com"),
@@ -335,13 +397,25 @@ fn session(
     };
     let channel =
         channel::classify(utm_medium.as_deref(), utm_source.as_deref(), src.host).as_str();
-    let pages = 1 + (rng.f() * rng.f() * 5.0) as usize;
+    let pages = rng.pick(&[
+        (1, 24.0),
+        (2, 22.0),
+        (3, 18.0),
+        (4, 14.0),
+        (5, 10.0),
+        (6, 7.0),
+        (8, 5.0),
+    ]);
     let mut path = src.paths[rng.below(src.paths.len())];
     let mut last = path;
+    let mut at = ts;
     for n in 0..pages {
+        if n > 0 {
+            at += Duration::seconds(15 + rng.below(180) as i64);
+        }
         out.push(Event {
             site_id: site.into(),
-            ts: ts + Duration::seconds(n as i64 * (20 + rng.below(90) as i64)),
+            ts: at,
             visitor_id: v.id.clone(),
             session_id: session_id.clone(),
             kind: "pageview".into(),
@@ -374,14 +448,11 @@ fn session(
             ),
         });
         last = path;
-        path = [
-            "/pricing",
-            "/features/recurring-invoices",
-            "/docs/getting-started",
-            "/",
-        ][rng.below(4)];
+        while path == last {
+            path = NEXT[rng.below(NEXT.len())];
+        }
     }
-    if rng.f() < 0.2 {
+    if rng.f() < 0.3 {
         let mut exit = out[out.len() - 1].clone();
         exit.ts += Duration::seconds(30);
         exit.kind = "exit".into();
@@ -390,6 +461,36 @@ fn session(
         exit.referrer_host = None;
         out.push(exit);
     }
+}
+
+/// A goal completed in the visitor's latest visit, `after` its last page; returns when.
+fn goal(events: &mut Vec<Event>, visitor: &str, name: &str, after: Duration) -> OffsetDateTime {
+    if events
+        .last()
+        .is_some_and(|e| e.visitor_id == visitor && e.kind == "exit")
+    {
+        events.pop();
+    }
+    let mut g = events
+        .iter()
+        .rev()
+        .find(|e| e.visitor_id == visitor && e.kind == "pageview")
+        .expect("the visitor has a pageview")
+        .clone();
+    g.ts += after;
+    g.kind = "goal".into();
+    g.name = Some(name.into());
+    g.path = if name == "signup" {
+        "/signup"
+    } else {
+        "/welcome"
+    }
+    .into();
+    g.referrer_host = None;
+    g.host = Some(DOMAIN.into());
+    let ts = g.ts;
+    events.push(g);
+    ts
 }
 
 /// About 180 days of visits for a small invoicing SaaS, with Stripe payments, renewals and refunds.
@@ -432,49 +533,52 @@ fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>, Vec<Subsc
             let v = visitor(&mut rng);
             session(&mut rng, site, &v, src, ts, &mut events);
             let mut last = ts;
-            if rng.f() < 0.28 {
-                let direct = SOURCES.len() - 1;
-                let back = &SOURCES[rng.pick(&[(direct, 50.0), (0, 20.0), (6, 15.0), (1, 15.0)])];
-                let again = ts + Duration::hours(6 + rng.below(24 * 9) as i64);
-                if again < now {
-                    session(&mut rng, site, &v, back, again, &mut events);
-                    last = again;
+            let direct = SOURCES.len() - 1;
+            let returns = rng.pick(&[
+                (0, 58.0),
+                (1, 20.0),
+                (2, 11.0),
+                (3, 6.0),
+                (4, 3.0),
+                (5, 2.0),
+            ]);
+            for _ in 0..returns {
+                let back = &SOURCES
+                    [rng.pick(&[(direct, 45.0), (0, 20.0), (6, 15.0), (1, 12.0), (4, 8.0)])];
+                let again = last + Duration::hours(4 + rng.below(24 * 8) as i64);
+                if again >= now {
+                    break;
                 }
+                session(&mut rng, site, &v, back, again, &mut events);
+                last = again;
             }
             if rng.f() >= src.convert * 1.4 {
+                if rng.f() < 0.07 + 0.04 * returns as f64 {
+                    goal(&mut events, &v.id, "signup", Duration::seconds(50));
+                    if rng.f() < 0.55 {
+                        goal(&mut events, &v.id, "trial", Duration::seconds(110));
+                    }
+                }
                 continue;
             }
-            if rng.f() < 0.5 {
-                let direct = SOURCES.len() - 1;
+            if returns == 0 && rng.f() < 0.6 {
                 let back = &SOURCES[rng.pick(&[(0, 35.0), (6, 25.0), (1, 20.0), (direct, 20.0)])];
                 let again = last + Duration::hours(3 + rng.below(24 * 6) as i64);
                 if again < now {
                     session(&mut rng, site, &v, back, again, &mut events);
-                    last = again;
                 }
             }
-            let paid = last + Duration::minutes(5 + rng.below(40) as i64);
+            goal(&mut events, &v.id, "signup", Duration::seconds(50));
+            let trial = goal(&mut events, &v.id, "trial", Duration::seconds(110));
+            let paid = trial + Duration::minutes(3 + rng.below(12) as i64);
             if paid > now {
                 continue;
             }
-            let mut goal = events
-                .iter()
-                .rev()
-                .find(|e| e.visitor_id == v.id && e.kind == "pageview")
-                .expect("the buyer visited")
-                .clone();
-            goal.ts = paid - Duration::minutes(3);
-            goal.kind = "goal".into();
-            goal.name = Some("signup".into());
-            goal.path = "/signup".into();
-            goal.referrer_host = None;
-            goal.host = Some(DOMAIN.into());
-            events.push(goal);
             let plan = rng.pick(PLANS);
             let (currency, rate) = rng.pick(CURRENCIES);
             let customer = rng.id("cus_");
             let refunded = rng.f() < 0.04;
-            let tracked = rng.f() < 0.92;
+            let tracked = rng.f() < 0.9;
             let mut at = paid;
             let mut renewal = false;
             while at <= now {
@@ -565,12 +669,35 @@ async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
     store.insert_events(&events)?;
     store.upsert_payments(&payments)?;
     store.replace_subscriptions(&site, "stripe", &subscriptions)?;
+    for (n, (slug, name, source, channel, path)) in LINKS.iter().enumerate() {
+        let clicks: HashSet<&str> = events
+            .iter()
+            .filter(|e| e.utm_campaign.as_deref() == Some(*slug) && e.ts > now - Duration::days(30))
+            .map(|e| e.session_id.as_str())
+            .collect();
+        sqlx::query(
+            "INSERT INTO short_links (id, site_id, slug, name, destination, source, channel, clicks, last_click_at, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        )
+        .bind(format!("link{n}"))
+        .bind(&site)
+        .bind(slug)
+        .bind(name)
+        .bind(format!("https://{DOMAIN}{path}"))
+        .bind(source)
+        .bind(channel)
+        .bind(clicks.len() as i64 * 23 / 20)
+        .bind(now.unix_timestamp())
+        .bind((now - Duration::days(DAYS - 10 * n as i64)).unix_timestamp())
+        .execute(&db)
+        .await?;
+    }
     let config = Config {
         marketing: false,
         app: true,
         trust_proxy: false,
         events_per_second: 200,
-        base_url: "http://localhost".into(),
+        base_url: "https://go.tallybird.app".into(),
         waitlist_from: String::new(),
     };
     let state = AppState::new(
@@ -596,10 +723,17 @@ async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
         anyhow::ensure!(res.url().path().starts_with("/app/"), "{url} redirected");
         Ok(res.text().await?)
     };
-    let mut queue: VecDeque<String> = ["", "/payments", "/visitors", "/retention", "/report"]
-        .iter()
-        .map(|p| format!("/app/{DOMAIN}{p}"))
-        .collect();
+    let mut queue: VecDeque<String> = [
+        "",
+        "/payments",
+        "/visitors",
+        "/retention",
+        "/links",
+        "/report",
+    ]
+    .iter()
+    .map(|p| format!("/app/{DOMAIN}{p}"))
+    .collect();
     let mut seen: HashSet<String> = queue.iter().filter_map(|u| target(u)).collect();
     let mut timelines = 0;
     let mut pages = Vec::new();
@@ -778,6 +912,7 @@ fn target(url: &str) -> Option<String> {
         "/payments" => ("payments/", &["range", "filter"]),
         "/report" => ("report/", &["range"]),
         "/retention" => ("retention/", &["range", "by"]),
+        "/links" => ("links/", &[]),
         "/visitors" => ("visitors/", &["range", "exit", "paid", "channel", "goal"]),
         p if p.starts_with("/visitors/") => {
             let id = &p["/visitors/".len()..];
@@ -874,15 +1009,30 @@ fn rewrite(html: &str, built: &HashSet<String>) -> String {
         rest = &rest[end..];
     }
     out.push_str(rest);
+    while let Some(i) = out.find("<form") {
+        let end = out[i..].find("</form>").map_or(out.len(), |e| i + e + 7);
+        out.replace_range(i..end, "");
+    }
+    let mut from = 0;
+    while let Some(i) = out[from..]
+        .find("<section class=\"set-sec\">")
+        .map(|i| from + i)
+    {
+        let end = out[i..]
+            .find("</section>")
+            .map_or(out.len(), |e| i + e + 10);
+        if out[i..end].contains("class=\"card") {
+            from = end;
+        } else {
+            out.replace_range(i..end, "");
+            from = i;
+        }
+    }
     let sep = r#"<span class="vf-sep">Referrers</span>"#;
     if let Some(i) = out.find(sep)
         && out[i + sep.len()..].trim_start().starts_with("</div>")
     {
         out.replace_range(i..i + sep.len(), "");
-    }
-    while let Some(i) = out.find("<form") {
-        let end = out[i..].find("</form>").map_or(out.len(), |e| i + e + 7);
-        out.replace_range(i..end, "");
     }
     out.replace("/assets/flags/", "/demo/flags/")
         .replace("/assets/app.css", "/demo/app.css")
