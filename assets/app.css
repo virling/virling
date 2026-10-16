@@ -266,7 +266,7 @@ img.favicon { background: none; object-fit: contain; }
 .conn { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--rule-2); }
 .conn .grow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 .conn .err { flex-basis: 100%; color: var(--error-text); }
-.setting > .input { flex: none; width: 280px; height: 40px; font-size: 14px; }
+.setting > .input, .setting .actions > .input { flex: none; width: 280px; height: 40px; font-size: 14px; }
 .affix.compact { flex: none; width: 160px; height: 40px; }
 .affix.compact input { font-size: 14px; }
 .swatch { display: block; width: 16px; height: 16px; border-radius: 4px; background: var(--ink); box-shadow: inset 0 0 0 1px rgba(14,17,22,.15); }
@@ -766,6 +766,8 @@ body.shared { display: flex; flex-direction: column; align-items: center; gap: 1
   .pay-empty img { max-width: 240px; }
   .chart { height: 180px; gap: 1px; }
   .setting { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .setting .actions { align-self: stretch; }
+  .setting .actions > .input { flex: 1; width: auto; min-width: 0; }
   .cards, .stat-row { grid-template-columns: 1fr 1fr; }
   .stat-row > div:last-child { grid-column: span 2; }
   .step-main { padding: 32px 16px; }

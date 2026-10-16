@@ -53,6 +53,6 @@ The tracking script. See [Script attributes and API](script.md).
 
 Returns `200` with the body `ok` while the server runs. Use it for uptime checks and container health checks.
 
-## Not available yet
+## Reading stats
 
-An authenticated API to read stats, payments or attribution <span class="na">Not available yet</span>. Reports are in the app only.
+To read totals, breakdowns, payments and visitor timelines, use the [Read API](api.md).

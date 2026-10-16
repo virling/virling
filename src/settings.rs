@@ -7,6 +7,7 @@ use serde::Deserialize;
 use sqlx::SqlitePool;
 use time::OffsetDateTime;
 
+use crate::api;
 use crate::app::AppState;
 use crate::auth::{Account, random_token};
 use crate::dashboard::{Opt, Shell, ago, load, provider_name};
@@ -44,9 +45,20 @@ struct SettingsPage {
     brand_saved: bool,
     brand_error: &'static str,
     share_link: Option<String>,
+    api_keys: Vec<KeyView>,
+    /// A key just created, shown this once.
+    new_key: Option<String>,
 }
 
-#[derive(Deserialize)]
+pub struct KeyView {
+    id: String,
+    name: String,
+    prefix: String,
+    created: String,
+    used: String,
+}
+
+#[derive(Deserialize, Default)]
 pub struct SavedQuery {
     saved: Option<String>,
     error: Option<String>,
@@ -77,7 +89,17 @@ pub async fn page(
     Path(domain): Path<String>,
     Query(q): Query<SavedQuery>,
 ) -> Response {
-    let ctx = match load(&state, &account, &domain, "settings").await {
+    show(&state, &account, &domain, q, None).await
+}
+
+async fn show(
+    state: &AppState,
+    account: &Account,
+    domain: &str,
+    q: SavedQuery,
+    new_key: Option<String>,
+) -> Response {
+    let ctx = match load(state, account, domain, "settings").await {
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
@@ -98,8 +120,9 @@ pub async fn page(
             .bind(&ctx.site.id)
             .fetch_optional(&state.db)
             .await;
-    let (Ok((model, window_days)), Ok(integrations), Ok(brand), Ok(token)) =
-        (row, integrations, brand, token)
+    let keys = api::list_keys(&state.db, &account.id).await;
+    let (Ok((model, window_days)), Ok(integrations), Ok(brand), Ok(token), Ok(keys)) =
+        (row, integrations, brand, token, keys)
     else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
@@ -146,6 +169,23 @@ pub async fn page(
         share_link: token
             .flatten()
             .map(|t| format!("{}/r/{t}", state.config.base_url)),
+        api_keys: keys
+            .into_iter()
+            .map(|k| {
+                let at = |t: i64| OffsetDateTime::from_unix_timestamp(t).unwrap_or(now);
+                KeyView {
+                    created: format!("Created {}", ago(at(k.created_at), now)),
+                    used: k.last_used_at.map_or_else(
+                        || "Never used".into(),
+                        |t| format!("Used {}", ago(at(t), now)),
+                    ),
+                    id: k.id,
+                    name: k.name,
+                    prefix: k.prefix,
+                }
+            })
+            .collect(),
+        new_key,
         brand_saved: q.saved.as_deref() == Some("report"),
         brand_error: match q.error.as_deref() {
             Some("logo") => "The logo URL must start with https://.",
@@ -342,6 +382,52 @@ pub async fn revoke(
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     }
     Redirect::to(&format!("{}#share", app_path(&ctx.site.domain, "settings"))).into_response()
+}
+
+#[derive(Deserialize)]
+pub struct KeyInput {
+    name: String,
+}
+
+/// Creates an API key for the account and shows it once on the settings page.
+pub async fn create_key(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(input): Form<KeyInput>,
+) -> Response {
+    if let Err(code) = load(&state, &account, &domain, "settings").await {
+        return code.into_response();
+    }
+    match api::create_key(&state.db, &account.id, &input.name).await {
+        Ok(key) => show(&state, &account, &domain, SavedQuery::default(), Some(key)).await,
+        Err(err) => {
+            tracing::error!(%err, "creating an API key failed");
+            StatusCode::SERVICE_UNAVAILABLE.into_response()
+        }
+    }
+}
+
+#[derive(Deserialize)]
+pub struct RevokeKeyInput {
+    id: String,
+}
+
+pub async fn revoke_key(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(input): Form<RevokeKeyInput>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "settings").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    if let Err(err) = api::revoke_key(&state.db, &account.id, &input.id).await {
+        tracing::error!(%err, "revoking an API key failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    Redirect::to(&format!("{}#api", app_path(&ctx.site.domain, "settings"))).into_response()
 }
 
 #[cfg(test)]

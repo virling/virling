@@ -103,6 +103,31 @@
   <form class="actions end" method="post" action="/app/{{ shell.domain }}/settings/share"><button class="btn" type="submit">Create link</button></form>
   {% endif %}
 </section>
+<section class="card" id="api">
+  <div class="card-head"><h2>API keys</h2><a class="btn secondary" href="https://docs.virling.com/reference/api.html">API docs</a></div>
+  <p class="muted">A key lets a script, the CLI or an AI agent read the reports of every site on your account. Keys can't change anything.</p>
+  {% if let Some(key) = new_key %}
+  <div class="notice ok-note" role="status">Copy this key now. It is shown only once.</div>
+  <div class="code" data-tabs>
+    <div class="code-head"><span class="code-title">New API key</span><button class="copy" type="button" data-copy>Copy</button></div>
+    <pre class="wrap">{{ key }}</pre>
+  </div>
+  {% endif %}
+  {% for k in api_keys %}
+  <div class="conn">
+    <div class="grow"><b>{{ k.name }}</b> <span class="mono small">{{ k.prefix }}...</span> <span class="muted small">{{ k.created }}. {{ k.used }}.</span></div>
+    <form method="post" action="/app/{{ shell.domain }}/settings/api-keys/revoke" data-confirm="Revoke {{ k.name }}? Anything using this key stops working right away." data-confirm-ok="Revoke key">
+      <input type="hidden" name="id" value="{{ k.id }}">
+      <button class="btn ghost" type="submit">Revoke</button>
+    </form>
+  </div>
+  {% endfor %}
+  {% if api_keys.is_empty() %}<p class="empty">No API keys yet.</p>{% endif %}
+  <form class="setting" method="post" action="/app/{{ shell.domain }}/settings/api-keys">
+    <div><b><label for="key_name">New key</label></b><span class="muted">Name it after what uses it, so you know which one to revoke.</span></div>
+    <div class="actions"><input class="input" id="key_name" name="name" maxlength="60" placeholder="Claude Code on my laptop" required><button class="btn" type="submit">Create key</button></div>
+  </form>
+</section>
 </div>
 <dialog class="confirm" id="confirm">
   <p data-confirm-text></p>

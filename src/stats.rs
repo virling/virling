@@ -176,6 +176,7 @@ impl PaymentFilter {
 /// The payer's earliest visit at or before the payment.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct FirstTouch {
+    #[serde(with = "time::serde::rfc3339")]
     pub ts: OffsetDateTime,
     pub channel: String,
     pub referrer_host: Option<String>,
@@ -186,6 +187,7 @@ pub struct FirstTouch {
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Touch {
     pub session_id: String,
+    #[serde(with = "time::serde::rfc3339")]
     pub ts: OffsetDateTime,
     pub channel: String,
     pub referrer_host: Option<String>,
@@ -201,6 +203,7 @@ pub struct Touch {
 pub struct PaymentRow {
     pub provider: String,
     pub provider_payment_id: String,
+    #[serde(with = "time::serde::rfc3339")]
     pub ts: OffsetDateTime,
     pub amount: i64,
     pub currency: String,

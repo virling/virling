@@ -54,6 +54,7 @@
 - [Environment variables](reference/env.md)
 - [Script attributes and API](reference/script.md)
 - [Event API](reference/event-api.md)
+- [Read API](reference/api.md)
 - [Outbound connections](reference/outbound.md)
 
 # Help

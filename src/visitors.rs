@@ -72,19 +72,23 @@ pub struct Facets {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
 pub enum Step {
     Page {
+        #[serde(with = "time::serde::rfc3339")]
         ts: OffsetDateTime,
         path: String,
         /// Until the next pageview, else until the page was hidden or left; None when unknown.
         secs: Option<i64>,
     },
     Goal {
+        #[serde(with = "time::serde::rfc3339")]
         ts: OffsetDateTime,
         name: String,
     },
     /// How the visit ended: the last page and the link clicked out, if any.
     Exit {
+        #[serde(with = "time::serde::rfc3339")]
         ts: OffsetDateTime,
         page: String,
         link: Option<String>,
@@ -103,7 +107,9 @@ impl Step {
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Visit {
+    #[serde(with = "time::serde::rfc3339")]
     pub start: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
     pub end: OffsetDateTime,
     pub channel: String,
     pub referrer_host: Option<String>,
@@ -114,6 +120,7 @@ pub struct Visit {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
 pub enum Entry {
     Visit(Visit),
     /// A payment outside any visit, such as a renewal.

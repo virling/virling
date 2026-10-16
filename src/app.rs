@@ -13,7 +13,7 @@ use crate::fx::Rates;
 use crate::ingest::{self, DailySalt, RateLimiter, Sessions};
 use crate::mail::Mailer;
 use crate::sites::SiteCache;
-use crate::{auth, dashboard, flags, onboarding, settings, visitor_pages, waitlist};
+use crate::{api, auth, dashboard, flags, onboarding, settings, visitor_pages, waitlist};
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -171,6 +171,25 @@ pub fn router(state: AppState) -> Router {
             .route("/app/{domain}/settings/report", post(settings::save_brand))
             .route("/app/{domain}/settings/share", post(settings::share))
             .route("/app/{domain}/settings/unshare", post(settings::revoke))
+            .route(
+                "/app/{domain}/settings/api-keys",
+                post(settings::create_key),
+            )
+            .route(
+                "/app/{domain}/settings/api-keys/revoke",
+                post(settings::revoke_key),
+            )
+            .route("/api/v1/sites", get(api::sites))
+            .route("/api/v1/sites/{domain}/overview", get(api::overview))
+            .route(
+                "/api/v1/sites/{domain}/breakdown/{dimension}",
+                get(api::breakdown),
+            )
+            .route("/api/v1/sites/{domain}/payments", get(api::payments))
+            .route(
+                "/api/v1/sites/{domain}/visitors/{visitor_id}",
+                get(api::visitor),
+            )
             .route("/r/{token}", get(dashboard::shared))
             .route(
                 "/app/{domain}/settings/disconnect",
