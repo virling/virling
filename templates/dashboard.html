@@ -169,6 +169,7 @@
   </div>
   {% if !g.empty %}
   {% if g.funnel %}
+  {% if !g.saved.is_empty() %}<div class="d3-fch"><span class="dim">Funnel</span><nav class="d3-tabs" aria-label="Saved funnels">{% for t in g.saved %}<a href="{{ t.href }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>{% endif %}
   <div class="d3-fch"><span class="dim">Visitors from</span><nav class="d3-tabs" aria-label="Funnel channel">{% for t in g.channel_tabs %}<a href="{{ t.href }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
   <div class="d3-fhead"><b>{{ g.head }}</b> <span class="dim">{{ g.head2 }}</span></div>
   <div class="d3-fscroll"><div class="d3-funnel">
@@ -183,9 +184,13 @@
   <div class="d3-foot"><span>{{ g.foot }}</span><details class="d3-edit"><summary class="d3-link">Edit funnel steps</summary>
     <form method="get" action="{{ g.base }}">
       {% for (k, v) in g.hidden %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+      {% if !g.funnel_id.is_empty() %}<input type="hidden" name="funnel" value="{{ g.funnel_id }}">{% endif %}
       <span class="dim">Between a visit and paying:</span>
       {% for i in 0..3 %}<label class="sr" for="s{{ i + 1 }}">Step {{ i + 2 }}</label><select id="s{{ i + 1 }}" name="s{{ i + 1 }}"><option value="">None</option>{% for (v, label, on) in g.options %}<option value="{{ v }}"{% if on[i] %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>{% endfor %}
-      <button class="d3-btn dark sm" type="submit">Save</button>
+      <label class="sr" for="fname">Funnel name</label><input id="fname" name="fname" value="{{ g.funnel_name }}" placeholder="Name, to save it" maxlength="60">
+      <span class="acts"><button class="d3-btn sm" type="submit">Show</button>
+      <button class="d3-btn dark sm" type="submit" formmethod="post" formaction="{{ g.save_href }}">{% if g.funnel_id.is_empty() %}Save funnel{% else %}Save{% endif %}</button>
+      {% if !g.funnel_id.is_empty() %}<button class="d3-btn sm" type="submit" formmethod="post" formaction="{{ g.delete_href }}">Delete</button>{% endif %}</span>
     </form>
   </details></div>
   {% else %}

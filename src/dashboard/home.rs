@@ -64,8 +64,8 @@ const FILTERS: [(&str, &str); 12] = [
 ];
 
 /// Params kept by every link besides the range, filters and card tabs.
-const KEEP: [&str; 9] = [
-    "compare", "view", "chart", "gtab", "vtab", "ret", "s1", "s2", "s3",
+const KEEP: [&str; 10] = [
+    "compare", "view", "chart", "gtab", "vtab", "ret", "s1", "s2", "s3", "funnel",
 ];
 
 const VIEWS: [(&str, &str); 5] = [
@@ -655,7 +655,15 @@ async fn page(
     let id = ctx.site.id.clone();
     let wanted = filters.clone();
     let pq = p.clone();
-    let rest = q.rest.clone();
+    let funnels = if view == "goals" {
+        goals::saved(&state.db, &ctx.site.id)
+            .await
+            .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?
+    } else {
+        Vec::new()
+    };
+    let mut rest = q.rest.clone();
+    goals::apply_saved(&mut rest, &funnels);
     let now = OffsetDateTime::now_utc();
     let tz = ctx.site.timezone.clone();
     let data = blocking(move || {
@@ -1214,6 +1222,7 @@ async fn page(
                 &href,
                 &raw,
                 &base,
+                &funnels,
             ));
         }
         Data::Visitors(v) => {

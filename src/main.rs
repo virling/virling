@@ -1288,6 +1288,94 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn saved_funnels_save_rename_and_delete() {
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        seed(&store, &site);
+        let res = call(
+            &state,
+            form(
+                "/app/example.com/funnels",
+                "view=goals&range=30d&s1=page%3A%2Fpricing&s2=goal%3Asignup&s3=&fname=Trial+path"
+                    .into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(res.status(), StatusCode::SEE_OTHER);
+        let (id, steps): (String, String) = sqlx::query_as("SELECT id, steps FROM funnels")
+            .fetch_one(&state.db)
+            .await
+            .unwrap();
+        assert_eq!(steps, "page:/pricing\ngoal:signup");
+        assert_eq!(
+            res.headers()["location"],
+            format!("/app/example.com?range=30d&view=goals&funnel={id}#goals").as_str()
+        );
+        let page = |q: String| {
+            let (state, cookie) = (state.clone(), cookie.clone());
+            async move {
+                body_text(
+                    call(
+                        &state,
+                        get(&format!("/app/example.com?view=goals{q}"), Some(&cookie)),
+                    )
+                    .await,
+                )
+                .await
+            }
+        };
+        let body = page(String::new()).await;
+        assert!(body.contains(">Suggested</a>") && body.contains(">Trial path</a>"));
+        let body = page(format!("&funnel={id}")).await;
+        assert!(body.contains(r#"aria-current="true">Trial path</a>"#));
+        assert!(body.contains("<b>Signup</b>") && body.contains(r#"value="Trial path""#));
+        let body = page(format!("&funnel={id}&s1=goal%3Asignup")).await;
+        assert!(!body.contains("<b>Viewed pricing</b>"), "URL steps win");
+
+        let other = sign_in(&state, "other%40example.com").await;
+        let rename = format!("view=goals&funnel={id}&s1=page%3A%2Fpricing&fname=Pricing+only");
+        call(
+            &state,
+            form("/app/example.com/funnels", rename.clone(), Some(&other)),
+        )
+        .await;
+        call(
+            &state,
+            form("/app/example.com/funnels", rename, Some(&cookie)),
+        )
+        .await;
+        let (name, steps): (String, String) = sqlx::query_as("SELECT name, steps FROM funnels")
+            .fetch_one(&state.db)
+            .await
+            .unwrap();
+        assert_eq!(
+            (name.as_str(), steps.as_str()),
+            ("Pricing only", "page:/pricing")
+        );
+
+        let res = call(
+            &state,
+            form(
+                "/app/example.com/funnels/delete",
+                format!("view=goals&funnel={id}"),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            res.headers()["location"],
+            "/app/example.com?view=goals#goals"
+        );
+        let left: i64 = sqlx::query_scalar("SELECT count(*) FROM funnels")
+            .fetch_one(&state.db)
+            .await
+            .unwrap();
+        assert_eq!(left, 0);
+    }
+
+    #[tokio::test]
     async fn visitors_and_timeline_render() {
         let (_dir, state, store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;

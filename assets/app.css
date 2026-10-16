@@ -602,7 +602,9 @@ a.ctl { text-decoration: none; }
 .d3-edit { position: relative; }
 .d3-edit summary { list-style: none; }
 .d3-edit summary::-webkit-details-marker { display: none; }
-.d3-edit select { height: 36px; padding: 0 8px; border: 1px solid var(--field); border-radius: 8px; background: #fff; font-size: 13px; }
+.d3-edit .acts { display: flex; gap: 8px; }
+.d3-edit .acts .d3-btn { flex: 1; justify-content: center; }
+.d3-edit select, .d3-edit input { height: 36px; padding: 0 8px; border: 1px solid var(--field); border-radius: 8px; background: #fff; font-size: 13px; }
 .d3-grow { display: grid; grid-template-columns: minmax(0, 1fr) 110px 150px 90px; align-items: center; column-gap: 12px; min-height: 52px; padding: 4px 8px; border-radius: 10px; }
 .d3-grow.th { min-height: 0; margin-top: 4px; padding: 14px 8px 8px; border-bottom: 1px solid var(--rule-2); border-radius: 0; font-size: 12px; font-weight: 500; color: var(--ink-3); }
 .d3-grow:not(.th):hover { background: #fafaf8; }

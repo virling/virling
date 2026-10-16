@@ -28,6 +28,7 @@ pub mod report;
 pub mod schedule;
 mod views;
 
+pub use goals::{delete as delete_funnel, save as save_funnel};
 pub use home::dashboard;
 
 pub(crate) const RANGES: [(&str, &str, i64); 6] = [
