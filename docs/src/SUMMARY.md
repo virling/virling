@@ -36,6 +36,7 @@
 - [Channels](attribution/channels.md)
 - [Model and lookback window](attribution/model.md)
 - [Renewals](attribution/renewals.md)
+- [Retention by channel](attribution/retention.md)
 - [Unattributed revenue](attribution/unattributed.md)
 - [Currencies](attribution/currencies.md)
 

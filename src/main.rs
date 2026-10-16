@@ -18,6 +18,8 @@ mod mcp;
 mod onboarding;
 mod providers;
 mod query;
+mod retention;
+mod retention_page;
 mod settings;
 mod sites;
 mod stats;

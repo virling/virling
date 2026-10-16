@@ -1,0 +1,238 @@
+{
+  "items": [
+    {
+      "addons": [],
+      "billing": {
+        "city": null,
+        "country": "US",
+        "state": null,
+        "street": null,
+        "zipcode": null
+      },
+      "cancel_at_next_billing_date": false,
+      "cancelled_at": null,
+      "created_at": "2026-09-01T09:00:00Z",
+      "currency": "USD",
+      "customer": {
+        "customer_id": "cus_Wn4cTb6Jk1Ps",
+        "email": "alan@example.com",
+        "name": "Alan Turing"
+      },
+      "discount_cycles_remaining": null,
+      "discount_id": null,
+      "expires_at": null,
+      "metadata": {
+        "virling_vid": "v_77be02"
+      },
+      "next_billing_date": "2026-11-01T09:00:00Z",
+      "on_demand": false,
+      "payment_frequency_count": 1,
+      "payment_frequency_interval": "Month",
+      "previous_billing_date": "2026-10-01T09:00:00Z",
+      "product_id": "pdt_Xk2Lm9Nq",
+      "quantity": 1,
+      "recurring_pre_tax_amount": 1500,
+      "status": "active",
+      "subscription_id": "sub_Hq3nK8wZ2xV5bM",
+      "subscription_period_count": 10,
+      "subscription_period_interval": "Year",
+      "tax_inclusive": false,
+      "trial_period_days": 0
+    },
+    {
+      "addons": [],
+      "billing": {
+        "city": null,
+        "country": "US",
+        "state": null,
+        "street": null,
+        "zipcode": null
+      },
+      "cancel_at_next_billing_date": false,
+      "cancelled_at": null,
+      "created_at": "2026-09-01T09:00:00Z",
+      "currency": "USD",
+      "customer": {
+        "customer_id": "cus_Hold00000001",
+        "email": "alan@example.com",
+        "name": "Alan Turing"
+      },
+      "discount_cycles_remaining": null,
+      "discount_id": null,
+      "expires_at": null,
+      "metadata": {
+        "virling_vid": "v_77be02"
+      },
+      "next_billing_date": "2026-11-01T09:00:00Z",
+      "on_demand": false,
+      "payment_frequency_count": 1,
+      "payment_frequency_interval": "Month",
+      "previous_billing_date": "2026-10-01T09:00:00Z",
+      "product_id": "pdt_Xk2Lm9Nq",
+      "quantity": 1,
+      "recurring_pre_tax_amount": 1500,
+      "status": "on_hold",
+      "subscription_id": "sub_Hold0001",
+      "subscription_period_count": 10,
+      "subscription_period_interval": "Year",
+      "tax_inclusive": false,
+      "trial_period_days": 0
+    },
+    {
+      "addons": [],
+      "billing": {
+        "city": null,
+        "country": "US",
+        "state": null,
+        "street": null,
+        "zipcode": null
+      },
+      "cancel_at_next_billing_date": false,
+      "cancelled_at": "2026-10-01T09:00:00Z",
+      "created_at": "2026-09-01T09:00:00Z",
+      "currency": "USD",
+      "customer": {
+        "customer_id": "cus_Gone00000001",
+        "email": "alan@example.com",
+        "name": "Alan Turing"
+      },
+      "discount_cycles_remaining": null,
+      "discount_id": null,
+      "expires_at": null,
+      "metadata": {
+        "virling_vid": "v_77be02"
+      },
+      "next_billing_date": "2026-11-01T09:00:00Z",
+      "on_demand": false,
+      "payment_frequency_count": 1,
+      "payment_frequency_interval": "Month",
+      "previous_billing_date": "2026-10-01T09:00:00Z",
+      "product_id": "pdt_Xk2Lm9Nq",
+      "quantity": 1,
+      "recurring_pre_tax_amount": 1500,
+      "status": "cancelled",
+      "subscription_id": "sub_Gone0001",
+      "subscription_period_count": 10,
+      "subscription_period_interval": "Year",
+      "tax_inclusive": false,
+      "trial_period_days": 0
+    },
+    {
+      "addons": [],
+      "billing": {
+        "city": null,
+        "country": "US",
+        "state": null,
+        "street": null,
+        "zipcode": null
+      },
+      "cancel_at_next_billing_date": false,
+      "cancelled_at": null,
+      "created_at": "2026-09-01T09:00:00Z",
+      "currency": "USD",
+      "customer": {
+        "customer_id": "cus_Gone00000002",
+        "email": "alan@example.com",
+        "name": "Alan Turing"
+      },
+      "discount_cycles_remaining": null,
+      "discount_id": null,
+      "expires_at": null,
+      "metadata": {
+        "virling_vid": "v_77be02"
+      },
+      "next_billing_date": "2026-11-01T09:00:00Z",
+      "on_demand": false,
+      "payment_frequency_count": 1,
+      "payment_frequency_interval": "Month",
+      "previous_billing_date": "2026-10-01T09:00:00Z",
+      "product_id": "pdt_Xk2Lm9Nq",
+      "quantity": 1,
+      "recurring_pre_tax_amount": 1500,
+      "status": "expired",
+      "subscription_id": "sub_Gone0002",
+      "subscription_period_count": 10,
+      "subscription_period_interval": "Year",
+      "tax_inclusive": false,
+      "trial_period_days": 0
+    },
+    {
+      "addons": [],
+      "billing": {
+        "city": null,
+        "country": "US",
+        "state": null,
+        "street": null,
+        "zipcode": null
+      },
+      "cancel_at_next_billing_date": false,
+      "cancelled_at": null,
+      "created_at": "2026-09-01T09:00:00Z",
+      "currency": "USD",
+      "customer": {
+        "customer_id": "cus_Gone00000003",
+        "email": "alan@example.com",
+        "name": "Alan Turing"
+      },
+      "discount_cycles_remaining": null,
+      "discount_id": null,
+      "expires_at": null,
+      "metadata": {
+        "virling_vid": "v_77be02"
+      },
+      "next_billing_date": "2026-11-01T09:00:00Z",
+      "on_demand": false,
+      "payment_frequency_count": 1,
+      "payment_frequency_interval": "Month",
+      "previous_billing_date": "2026-10-01T09:00:00Z",
+      "product_id": "pdt_Xk2Lm9Nq",
+      "quantity": 1,
+      "recurring_pre_tax_amount": 1500,
+      "status": "failed",
+      "subscription_id": "sub_Gone0003",
+      "subscription_period_count": 10,
+      "subscription_period_interval": "Year",
+      "tax_inclusive": false,
+      "trial_period_days": 0
+    },
+    {
+      "addons": [],
+      "billing": {
+        "city": null,
+        "country": "US",
+        "state": null,
+        "street": null,
+        "zipcode": null
+      },
+      "cancel_at_next_billing_date": false,
+      "cancelled_at": null,
+      "created_at": "2026-09-01T09:00:00Z",
+      "currency": "USD",
+      "customer": {
+        "customer_id": "cus_Pend00000001",
+        "email": "alan@example.com",
+        "name": "Alan Turing"
+      },
+      "discount_cycles_remaining": null,
+      "discount_id": null,
+      "expires_at": null,
+      "metadata": {
+        "virling_vid": "v_77be02"
+      },
+      "next_billing_date": "2026-11-01T09:00:00Z",
+      "on_demand": false,
+      "payment_frequency_count": 1,
+      "payment_frequency_interval": "Month",
+      "previous_billing_date": "2026-10-01T09:00:00Z",
+      "product_id": "pdt_Xk2Lm9Nq",
+      "quantity": 1,
+      "recurring_pre_tax_amount": 1500,
+      "status": "pending",
+      "subscription_id": "sub_Pend0001",
+      "subscription_period_count": 10,
+      "subscription_period_interval": "Year",
+      "tax_inclusive": false,
+      "trial_period_days": 0
+    }
+  ]
+}

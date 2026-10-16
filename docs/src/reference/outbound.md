@@ -4,10 +4,10 @@ Every host a Virling server connects to. Your visitors' browsers only connect to
 
 | Host | When | Why |
 | --- | --- | --- |
-| `api.stripe.com` | With Stripe connected, every minute | Read charges, events and Checkout Sessions |
+| `api.stripe.com` | With Stripe connected, every minute | Read charges, events and Checkout Sessions, and subscriptions hourly |
 | `live.dodopayments.com`, `test.dodopayments.com` | With Dodo Payments connected, every minute | Read payments, refunds and subscriptions. Both are tried when connecting to detect the key's mode. |
-| `api.polar.sh`, `sandbox-api.polar.sh` | With Polar connected, every minute | Read orders and refunds. Both are tried when connecting. |
-| `api.lemonsqueezy.com` | With LemonSqueezy connected, every minute | Read orders and subscription invoices |
+| `api.polar.sh`, `sandbox-api.polar.sh` | With Polar connected, every minute | Read orders and refunds, and subscriptions hourly when the token allows. Both are tried when connecting. |
+| `api.lemonsqueezy.com` | With LemonSqueezy connected, every minute | Read orders and subscription invoices, and subscriptions hourly |
 | `api.frankfurter.dev` | When converting a non-USD payment, at most every 12 hours | ECB exchange rates. See [Currencies](../attribution/currencies.md). |
 | Your SMTP server | When someone requests a sign-in link | Send the email, if `VIRLING_SMTP_URL` is set |
 | Your sites and their referrers, `https://<host>/` | When the app shows a site, or a referrer without a bundled logo. Site icons at most daily, referrer icons at most every 30 days. | Fetch the homepage's favicon, from public addresses only. Nothing about visitors is sent, and pages, including shared reports, load the cached copy from Virling. |

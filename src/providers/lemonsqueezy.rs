@@ -4,7 +4,7 @@ use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use time::{Duration, OffsetDateTime};
 
-use super::{Fetched, Page};
+use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription};
 
 const API: &str = "https://api.lemonsqueezy.com/v1";
 const PAGE_SIZE: u32 = 100;
@@ -41,6 +41,46 @@ pub async fn fetch(
     )
     .await?;
     step(cur, serde_json::from_str(&body)?)
+}
+
+/// Lists every subscription; LemonSqueezy keys can always read them.
+pub async fn subscriptions(
+    client: &reqwest::Client,
+    key: &str,
+) -> anyhow::Result<Option<Vec<Subscription>>> {
+    let mut out = Vec::new();
+    for page in 1..=MAX_SUBSCRIPTION_PAGES {
+        let body = get(
+            client,
+            key,
+            "subscriptions",
+            &[("page[number]", page), ("page[size]", PAGE_SIZE)],
+        )
+        .await?;
+        let list: SubscriptionList = serde_json::from_str(&body)?;
+        out.extend(list.data.into_iter().filter_map(to_subscription));
+        if list.links.next.is_none() {
+            break;
+        }
+    }
+    Ok(Some(out))
+}
+
+/// on_trial, active and past_due are live, and so is cancelled until its ends_at (its grace period).
+fn to_subscription(r: SubscriptionResource) -> Option<Subscription> {
+    let a = r.attributes;
+    let (live, ends_at) = match a.status.as_str() {
+        "on_trial" | "active" | "past_due" => (true, None),
+        "cancelled" => (a.ends_at.is_some(), a.ends_at),
+        _ => (false, None),
+    };
+    Some(Subscription {
+        subscription_id: r.id,
+        customer_id: a.customer_id?.to_string(),
+        status: a.status,
+        live,
+        ends_at,
+    })
 }
 
 async fn get(
@@ -199,6 +239,27 @@ struct Links {
 }
 
 #[derive(Deserialize)]
+struct SubscriptionList {
+    data: Vec<SubscriptionResource>,
+    #[serde(default)]
+    links: Links,
+}
+
+#[derive(Deserialize)]
+struct SubscriptionResource {
+    id: String,
+    attributes: SubscriptionAttributes,
+}
+
+#[derive(Deserialize)]
+struct SubscriptionAttributes {
+    customer_id: Option<i64>,
+    status: String,
+    #[serde(default, with = "time::serde::rfc3339::option")]
+    ends_at: Option<OffsetDateTime>,
+}
+
+#[derive(Deserialize)]
 struct Resource {
     id: String,
     attributes: Attributes,
@@ -227,6 +288,32 @@ struct Attributes {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn subscription_status_decides_live() {
+        let list: SubscriptionList =
+            serde_json::from_str(include_str!("fixtures/lemonsqueezy_subscriptions.json")).unwrap();
+        assert!(list.links.next.is_none());
+        let subs: Vec<(String, bool, bool)> = list
+            .data
+            .into_iter()
+            .filter_map(to_subscription)
+            .map(|s| (s.status, s.live, s.ends_at.is_some()))
+            .collect();
+        let want: Vec<(String, bool, bool)> = [
+            ("active", true, false),
+            ("on_trial", true, false),
+            ("past_due", true, false),
+            ("cancelled", true, true),
+            ("expired", false, false),
+            ("paused", false, false),
+            ("unpaid", false, false),
+        ]
+        .iter()
+        .map(|(s, l, e)| (s.to_string(), *l, *e))
+        .collect();
+        assert_eq!(subs, want);
+    }
     use crate::providers::{Provider, e2e};
     use time::macros::datetime;
 

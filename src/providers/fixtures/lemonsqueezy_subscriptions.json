@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "page": {
+      "currentPage": 1,
+      "lastPage": 1
+    }
+  },
+  "links": {
+    "first": "x",
+    "last": "x"
+  },
+  "data": [
+    {
+      "type": "subscriptions",
+      "id": "1000",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 5000,
+        "order_id": 9000,
+        "status": "active",
+        "status_formatted": "Active",
+        "cancelled": false,
+        "renews_at": "2026-11-01T10:00:00.000000Z",
+        "ends_at": null,
+        "created_at": "2026-08-01T10:00:00.000000Z"
+      }
+    },
+    {
+      "type": "subscriptions",
+      "id": "1001",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 5001,
+        "order_id": 9001,
+        "status": "on_trial",
+        "status_formatted": "On_Trial",
+        "cancelled": false,
+        "renews_at": "2026-11-01T10:00:00.000000Z",
+        "ends_at": null,
+        "created_at": "2026-08-01T10:00:00.000000Z"
+      }
+    },
+    {
+      "type": "subscriptions",
+      "id": "1002",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 5002,
+        "order_id": 9002,
+        "status": "past_due",
+        "status_formatted": "Past_Due",
+        "cancelled": false,
+        "renews_at": "2026-11-01T10:00:00.000000Z",
+        "ends_at": null,
+        "created_at": "2026-08-01T10:00:00.000000Z"
+      }
+    },
+    {
+      "type": "subscriptions",
+      "id": "1003",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 5003,
+        "order_id": 9003,
+        "status": "cancelled",
+        "status_formatted": "Cancelled",
+        "cancelled": true,
+        "renews_at": "2026-11-01T10:00:00.000000Z",
+        "ends_at": "2026-11-01T10:00:00.000000Z",
+        "created_at": "2026-08-01T10:00:00.000000Z"
+      }
+    },
+    {
+      "type": "subscriptions",
+      "id": "1004",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 5004,
+        "order_id": 9004,
+        "status": "expired",
+        "status_formatted": "Expired",
+        "cancelled": false,
+        "renews_at": "2026-11-01T10:00:00.000000Z",
+        "ends_at": "2026-11-01T10:00:00.000000Z",
+        "created_at": "2026-08-01T10:00:00.000000Z"
+      }
+    },
+    {
+      "type": "subscriptions",
+      "id": "1005",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 5005,
+        "order_id": 9005,
+        "status": "paused",
+        "status_formatted": "Paused",
+        "cancelled": false,
+        "renews_at": "2026-11-01T10:00:00.000000Z",
+        "ends_at": null,
+        "created_at": "2026-08-01T10:00:00.000000Z"
+      }
+    },
+    {
+      "type": "subscriptions",
+      "id": "1006",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 5006,
+        "order_id": 9006,
+        "status": "unpaid",
+        "status_formatted": "Unpaid",
+        "cancelled": false,
+        "renews_at": "2026-11-01T10:00:00.000000Z",
+        "ends_at": null,
+        "created_at": "2026-08-01T10:00:00.000000Z"
+      }
+    }
+  ]
+}

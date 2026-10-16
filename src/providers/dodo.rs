@@ -7,7 +7,7 @@ use serde::de::DeserializeOwned;
 use time::format_description::well_known::Rfc3339;
 use time::{Duration, OffsetDateTime};
 
-use super::{Fetched, Page};
+use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription};
 
 const LIVE_URL: &str = "https://live.dodopayments.com";
 const TEST_URL: &str = "https://test.dodopayments.com";
@@ -23,6 +23,7 @@ const MAX_PAGE: u32 = 1000;
 const LOOKUP_BUDGET: usize = 2;
 /// A subscription payment made this long after the subscription started is a renewal.
 const RENEWAL_GAP: Duration = Duration::hours(12);
+const SUBSCRIPTION_PAGE: usize = 100;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Mode {
@@ -219,6 +220,26 @@ struct DodoDispute {
 struct DodoSubscription {
     #[serde(with = "time::serde::rfc3339")]
     created_at: OffsetDateTime,
+}
+
+#[derive(Debug, Deserialize)]
+struct DodoSubscriptionRow {
+    subscription_id: String,
+    status: String,
+    customer: Customer,
+}
+
+impl DodoSubscriptionRow {
+    /// Active is live, and so is on_hold while Dodo waits for a new payment method after a failed renewal.
+    fn into_subscription(self) -> Subscription {
+        Subscription {
+            live: matches!(self.status.as_str(), "active" | "on_hold"),
+            subscription_id: self.subscription_id,
+            customer_id: self.customer.customer_id,
+            status: self.status,
+            ends_at: None,
+        }
+    }
 }
 
 /// Lost or accepted disputes mean the money went back to the customer.
@@ -462,6 +483,42 @@ pub async fn check_key(client: &reqwest::Client, key: &str) -> anyhow::Result<()
     detect_mode(client, key.trim()).await.map(|_| ())
 }
 
+/// Lists every subscription; None when the key may not read them.
+pub async fn subscriptions(
+    client: &reqwest::Client,
+    key: &str,
+) -> anyhow::Result<Option<Vec<Subscription>>> {
+    let key = key.trim();
+    let base = detect_mode(client, key).await?.base();
+    let mut out = Vec::new();
+    for page in 0..MAX_SUBSCRIPTION_PAGES {
+        let query = [
+            ("page_size", SUBSCRIPTION_PAGE.to_string()),
+            ("page_number", page.to_string()),
+        ];
+        let res = request(client, key, base, "/subscriptions", &query).await?;
+        let status = res.status();
+        if status == StatusCode::FORBIDDEN {
+            return Ok(None);
+        }
+        let body = res
+            .text()
+            .await
+            .context("could not read Dodo Payments response")?;
+        let list: List<DodoSubscriptionRow> = parse("/subscriptions", status, &body)?;
+        let n = list.items.len();
+        out.extend(
+            list.items
+                .into_iter()
+                .map(DodoSubscriptionRow::into_subscription),
+        );
+        if n < SUBSCRIPTION_PAGE {
+            break;
+        }
+    }
+    Ok(Some(out))
+}
+
 pub async fn fetch(
     client: &reqwest::Client,
     key: &str,
@@ -499,6 +556,31 @@ pub async fn fetch(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn subscription_status_decides_live() {
+        let list: List<DodoSubscriptionRow> =
+            serde_json::from_str(include_str!("fixtures/dodo_subscriptions.json")).unwrap();
+        let subs: Vec<(String, String, bool)> = list
+            .items
+            .into_iter()
+            .map(DodoSubscriptionRow::into_subscription)
+            .map(|s| (s.customer_id, s.status, s.live))
+            .collect();
+        let want = [
+            ("cus_Wn4cTb6Jk1Ps", "active", true),
+            ("cus_Hold00000001", "on_hold", true),
+            ("cus_Gone00000001", "cancelled", false),
+            ("cus_Gone00000002", "expired", false),
+            ("cus_Gone00000003", "failed", false),
+            ("cus_Pend00000001", "pending", false),
+        ];
+        let want: Vec<(String, String, bool)> = want
+            .iter()
+            .map(|(c, s, l)| (c.to_string(), s.to_string(), *l))
+            .collect();
+        assert_eq!(subs, want);
+    }
     use crate::providers::{Provider, e2e};
     use time::macros::datetime;
 

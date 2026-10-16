@@ -1,0 +1,14 @@
+{
+  "object": "list",
+  "url": "/v1/subscriptions",
+  "has_more": false,
+  "data": [
+    { "id": "sub_1MowQVLkdIwHu7ixeRlqHVzs", "object": "subscription", "customer": "cus_NffrFeUfNV2Hib", "status": "active", "cancel_at_period_end": true, "current_period_end": 1700000000, "canceled_at": 1699000000 },
+    { "id": "sub_1Trialing000000000000000", "object": "subscription", "customer": "cus_Trial0000000", "status": "trialing", "cancel_at_period_end": false, "current_period_end": 1700000000, "canceled_at": null },
+    { "id": "sub_1PastDue0000000000000000", "object": "subscription", "customer": "cus_PastDue00000", "status": "past_due", "cancel_at_period_end": false, "current_period_end": 1700000000, "canceled_at": null },
+    { "id": "sub_1Canceled000000000000000", "object": "subscription", "customer": "cus_Canceled0000", "status": "canceled", "cancel_at_period_end": false, "current_period_end": 1690000000, "canceled_at": 1690000000 },
+    { "id": "sub_1Unpaid00000000000000000", "object": "subscription", "customer": "cus_Unpaid000000", "status": "unpaid", "cancel_at_period_end": false, "current_period_end": 1690000000, "canceled_at": null },
+    { "id": "sub_1IncompleteExp0000000000", "object": "subscription", "customer": "cus_Incomplete00", "status": "incomplete_expired", "cancel_at_period_end": false, "current_period_end": 1690000000, "canceled_at": null },
+    { "id": "sub_1Paused00000000000000000", "object": "subscription", "customer": "cus_Paused000000", "status": "paused", "cancel_at_period_end": false, "current_period_end": 1690000000, "canceled_at": null }
+  ]
+}
