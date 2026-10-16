@@ -27,7 +27,6 @@ mod visitor_pages;
 mod visitors;
 mod waitlist;
 mod waitlist_copy;
-mod world;
 
 use std::net::SocketAddr;
 use std::path::PathBuf;
@@ -944,11 +943,9 @@ mod tests {
         );
         for query in [
             "",
-            "?range=7d&chart=channel&metric=visitors",
-            "?range=12m&all=referrers&sort_countries=visitors",
-            "?pages=visitors&channels=visitors",
-            "?chart=area&metric=rpv",
-            "?chart=line&metric=conversion",
+            "?range=7d&sources=referrer&location=device",
+            "?range=12m&sources=campaign&pages=last",
+            "?sources=nope",
         ] {
             let res = call(
                 &state,
@@ -958,18 +955,19 @@ mod tests {
             assert_eq!(res.status(), StatusCode::OK, "{query}");
             let body = body_text(res).await;
             assert!(
-                body.contains("$98") && body.contains("Latest payments"),
+                body.contains("$98") && body.contains("Payments and the path to them"),
                 "{query}"
             );
-            assert!(body.contains(r#"class="chart"#), "{query}");
+            assert!(!body.contains(r#"class="chart"#), "{query}");
         }
         let body = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
-        assert!(!body.contains("New site") && body.contains("Visitors and revenue per day"));
+        assert!(body.contains("AI assistants") && body.contains("Client report"));
         assert!(
             body.contains("<span>Since tracking started</span>"),
             "new sites default"
         );
-        assert!(body.contains("1 of 1 visitor converted. 1 payment not matched to a visit"));
+        assert!(body.contains("1 of 1 visitor paid"));
+        assert!(body.contains("$49 came from payments with no matched visit"));
         assert!(body.contains(r#"class="step todo-step" href="/app/example.com/setup/payments""#));
         assert!(body.contains(r#"action="/app/example.com/setup/dismiss""#));
         let res = call(
@@ -992,21 +990,11 @@ mod tests {
         );
         assert!(body.contains(r#"aria-label="Hacker News""#), "source logo");
         assert!(body.contains(r#"src="/assets/flags/de.svg""#) && body.contains("Germany"));
-        assert!(body.contains("Rows fill in as traffic grows"));
         assert!(body.contains(r#"href="/app/example.com?range=7d""#));
         assert!(body.contains(r#"href="/app/example.com/payments""#));
         assert!(body.contains(r#"href="/app/example.com?range=30d""#));
         assert!(!body.contains("range=all") && !body.contains("/app/sites/"));
         assert!(body.contains("No goals yet"));
-        let area = body_text(
-            call(
-                &state,
-                get("/app/example.com?chart=area&metric=visitors", Some(&cookie)),
-            )
-            .await,
-        )
-        .await;
-        assert!(area.contains("Visitors per day") && area.contains(r#"fill-opacity="0.10""#));
         let res = call(&state, get("/app/example.com/payments", Some(&cookie))).await;
         assert_eq!(res.status(), StatusCode::OK);
         let body = body_text(res).await;
@@ -1101,7 +1089,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn dashboard_cards_switch_tabs_and_metrics() {
+    async fn dashboard_cards_switch_tabs() {
         let (_dir, state, store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;
         let site = site_id(&state).await;
@@ -1116,31 +1104,27 @@ mod tests {
             }
         };
         let home = page("").await;
-        for title in [
-            "Acquisition",
-            "Location",
-            "Pages",
-            "Devices",
-            "Visitors now",
+        for text in [
+            "Channel",
+            "Referral",
+            "First page of the visit",
+            "visitors online now",
+            "Orange marks the visit that gets the credit.",
         ] {
-            assert!(home.contains(title), "{title}");
+            assert!(home.contains(text), "{text}");
         }
-        assert!(
-            home.contains(r#"class="world""#),
-            "map is the default location tab"
-        );
-        assert!(
-            home.contains(r#"<details class="tc-open">"#),
-            "channels open into sources"
-        );
-        assert!(home.contains(r#"href="/app/example.com?acq=referrer#card-acq""#));
-        assert!(home.contains(r#"href="/app/example.com?acq_by=visitors#card-acq""#));
-        let tabs = page("?acq=referrer&acq_by=visitors&loc=city&pg=exit&dev=os").await;
+        assert!(home.contains(r#"href="/app/example.com?sources=referrer#sources""#));
+        assert!(home.contains(r#"href="/app/example.com?pages=last#pages""#));
+        assert!(home.contains(r#"class="d3-chip on""#), "credited visit");
+        assert!(home.contains(">/last</span>"), "last page before paying");
+        let payer = crate::alias::alias("v:v1").name;
+        assert!(home.contains(&payer) && home.contains("Germany · Desktop · Firefox"));
+        let tabs = page("?sources=referrer&location=device&pages=last").await;
         assert!(tabs.contains("someblog.dev"));
-        assert!(tabs.contains("visitor location headers"));
-        assert!(tabs.contains("No outbound link clicks in this range."));
-        assert!(tabs.contains("macOS"));
-        assert!(tabs.contains(r#"href="/app/example.com?acq=referrer&#38;acq_by=visitors&#38;loc=city&#38;pg=exit#card-dev""#));
+        assert!(tabs.contains("Page read right before checkout"));
+        assert!(
+            tabs.contains(r#"href="/app/example.com?sources=referrer&#38;location=device#pages""#)
+        );
     }
 
     #[tokio::test]
