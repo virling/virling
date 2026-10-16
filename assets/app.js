@@ -209,3 +209,34 @@ for (const btn of document.querySelectorAll("[data-copy-text]")) {
     setTimeout(() => { btn.textContent = "Copy"; }, 1500);
   });
 }
+
+for (const pop of document.querySelectorAll("[data-pop]")) {
+  const toggle = pop.querySelector("[data-pop-toggle]");
+  const panel = pop.querySelector("form, [data-pop-panel]");
+  const open = (state) => {
+    panel.hidden = !state;
+    toggle.setAttribute("aria-expanded", String(state));
+    if (state) panel.querySelector("input:not([type=hidden]), button")?.focus();
+  };
+  toggle.addEventListener("click", () => open(panel.hidden));
+  pop.querySelector("[data-pop-close]")?.addEventListener("click", () => { open(false); toggle.focus(); });
+  panel.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !e.target.closest("[data-select] .menu")) { open(false); toggle.focus(); }
+  });
+  document.addEventListener("click", (e) => { if (!pop.contains(e.target)) open(false); });
+}
+
+const noteForm = document.querySelector("[data-note-form]");
+if (noteForm) {
+  const text = document.querySelector("[data-note-text]");
+  const edit = (on) => {
+    noteForm.hidden = !on;
+    text.hidden = on;
+    if (!on) return;
+    noteForm.scrollIntoView({ block: "center", behavior: "smooth" });
+    noteForm.querySelector("textarea").focus({ preventScroll: true });
+  };
+  document.querySelectorAll("[data-note-edit]").forEach((b) => b.addEventListener("click", () => edit(true)));
+  text.addEventListener("click", () => edit(true));
+  noteForm.querySelector("[data-note-cancel]").addEventListener("click", () => edit(false));
+}

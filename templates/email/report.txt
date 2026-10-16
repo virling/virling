@@ -1,0 +1,22 @@
+{% if !r.agency.is_empty() %}{{ r.agency }}: w{% else %}W{% endif %}eekly revenue report for {{ r.site }}
+{{ r.week }}
+
+{{ r.headline }}
+{% if !r.subline.is_empty() %}{{ r.subline }}
+{% endif %}
+{% for k in r.kpis %}{{ k.label }}: {{ k.value }}{% if !k.change.is_empty() %}, {{ k.change }} {{ k.note }}{% endif %}
+{% endfor %}
+{{ r.best_day }}
+
+Where the money came from
+{% for s in r.sources %}- {{ s.name }}: {{ s.visitors }} visitors, {{ s.revenue }}, {{ s.per_visitor }} per visitor
+{% endfor %}{% for i in r.insights %}
+{{ i.kind }}: {{ i.title }}. {{ i.text }}{% endfor %}
+{% if !r.note.is_empty() %}
+A note from {% if r.agency.is_empty() %}your agency{% else %}{{ r.agency }}{% endif %}:
+{{ r.note }}
+{% endif %}
+Open the full report: {{ link }}
+
+{% if !r.footer.is_empty() %}{{ r.footer }}
+{% endif %}{{ r.credit }}

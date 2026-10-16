@@ -1,33 +1,79 @@
-<article class="report"{% if !brand.accent.is_empty() %} style="--accent:{{ brand.accent }}"{% endif %}>
-  <header class="box rp-head">
-    {% if !brand.logo_url.is_empty() || !brand.agency_name.is_empty() %}<div class="rp-brand">{% if !brand.logo_url.is_empty() %}<img class="rp-logo" src="{{ brand.logo_url }}" alt="">{% endif %}{% if !brand.agency_name.is_empty() %}<b>{{ brand.agency_name }}</b>{% endif %}</div>{% endif %}
-    <div class="rp-title"><h2>{{ report.site }}</h2><span class="sub">Revenue report, {{ report.span }}</span></div>
-  </header>
-  <section class="box">
-    <div class="tiles">
-      {% for t in report.tiles %}<div class="tile{% if t.on %} on{% endif %}{% if t.big %} big{% endif %}" style="--c:{{ t.color }}">
-        <span class="tn"><i class="dot" style="background:{% if t.on %}{{ t.color }}{% else %}#B9BCC2{% endif %}"></i><span class="full">{{ t.name }}</span><span class="short">{{ t.short }}</span></span>
-        <span class="tv"><b>{{ t.value }}</b>{% if !t.delta.is_empty() %}<span class="pill {{ t.trend }}">{{ t.delta }}</span>{% endif %}</span>
-        <span class="ts">{{ t.sub }}</span>
-      </div>{% endfor %}
+<article class="r2" style="--accent:{{ report.accent }}">
+  <div class="r2-head">
+    <div class="r2-agency">
+      {% if !report.logo.is_empty() %}<img class="r2-mark logo" src="{{ report.logo }}" alt="">{% else if !report.initials.is_empty() %}<span class="r2-mark">{{ report.initials }}</span>{% endif %}
+      <div>{% if !report.agency.is_empty() %}<div class="r2-name">{{ report.agency }}</div>{% endif %}<div class="r2-small">Weekly revenue report</div></div>
     </div>
-    <div class="chart-wrap">
-      <div class="chart-head"><div><h2>{{ report.chart_title }}</h2><span class="sub">{{ report.chart_sub }}</span></div></div>
-      {{ report.chart|safe }}
+    <div class="r2-for"><div class="r2-small">Prepared for</div><div class="r2-b">{{ report.site }}</div><div class="r2-range">{{ report.week }}</div></div>
+  </div>
+
+  <section class="r2-lead">
+    <div class="r2-eyebrow">The week in one line</div>
+    <h1>{{ report.headline }}</h1>
+    {% if !report.subline.is_empty() %}<p>{{ report.subline }}</p>{% endif %}
+  </section>
+
+  <section class="r2-kpis">
+    {% for k in report.kpis %}<div class="kpi"><div class="kl">{{ k.label }}</div><div class="kv">{{ k.value }}</div><div class="kn">{% if !k.change.is_empty() %}<b class="{{ k.tone }}">{{ k.change }}</b> {% endif %}<span>{{ k.note }}</span></div></div>
+    {% endfor %}
+  </section>
+
+  <section class="r2-sec chart">
+    <div class="r2-sec-head">
+      <h2>Revenue by day</h2>
+      <div class="r2-legend"><span><i class="r2-sw"></i>Revenue</span><span><svg width="18" height="8" aria-hidden="true"><path d="M0 4h18" stroke="#2F5BEA" stroke-width="1.6" stroke-dasharray="4 4"></path></svg>Visitors</span></div>
+    </div>
+    <div class="r2-chart-wrap">{{ report.chart|safe }}</div>
+    <p class="r2-p">{{ report.best_day }}</p>
+  </section>
+
+  <section class="r2-sec">
+    <div class="r2-sec-head">
+      <h2>Where the money came from</h2>
+      <div class="r2-legend"><span><i class="r2-sw vis"></i>Share of visitors</span><span><i class="r2-sw line"></i>Share of revenue</span></div>
+    </div>
+    <div class="rrow th"><span>Source</span><span class="n v">Visitors</span><span class="n">Revenue</span><span class="n">Per visitor</span></div>
+    {% for r in report.sources %}{% include "_report_row.html" %}{% endfor %}
+    {% if report.sources.is_empty() %}<p class="r2-empty">No visits this week.</p>{% endif %}
+    {% if !report.avg_note.is_empty() && !report.sources.is_empty() %}<p class="r2-avg">{{ report.avg_note }}</p>{% endif %}
+  </section>
+
+  <section class="r2-sec">
+    <h2>Pages that sold</h2>
+    <div class="rrow th"><span>First page of the visit</span><span class="n v">Visitors</span><span class="n">Revenue</span><span class="n">Per visitor</span></div>
+    {% for r in report.pages %}{% include "_report_row.html" %}{% endfor %}
+    {% if report.pages.is_empty() %}<p class="r2-empty">No page views this week.</p>{% endif %}
+  </section>
+
+  {% if !report.insights.is_empty() %}
+  <section class="r2-ins">
+    {% for i in report.insights %}<div class="ins {{ i.class }}">
+      <span class="ik">{{ i.kind }}</span>
+      <div class="it{% if i.mono %} mono{% endif %}">{{ i.icon|safe }}{{ i.title }}</div>
+      <p>{{ i.text }}</p>
+    </div>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  {% if report.editable || !report.note.is_empty() %}
+  <section class="r2-note{% if report.note.is_empty() %} r2-note-empty{% endif %}" id="note">
+    {% if !report.initials.is_empty() %}<span class="r2-avatar">{{ report.initials }}</span>{% endif %}
+    <div class="r2-note-body">
+      <div class="r2-b">A note from {% if report.agency.is_empty() %}your agency{% else %}{{ report.agency }}{% endif %}</div>
+      {% if report.note.is_empty() %}<p class="r2-note-text ph" data-note-text>[Your note to the client. For example: what you shipped this week, what moved the numbers, and what you will do next.]</p>{% else %}<p class="r2-note-text" data-note-text>{{ report.note }}</p>{% endif %}
+      {% if report.editable %}<form class="r2-note-form noprint" method="post" action="/app/{{ report.site }}/report/note" data-note-form hidden>
+        <label class="sr" for="note-text">Note to the client</label>
+        <textarea class="input" id="note-text" name="note" rows="5" maxlength="2000" placeholder="What you shipped this week, what moved the numbers, and what you will do next.">{{ report.note }}</textarea>
+        <input type="hidden" name="week" value="{{ week_param }}">
+        <div class="actions end"><button class="btn ghost" type="button" data-note-cancel>Cancel</button><button class="btn" type="submit">Save note</button></div>
+      </form>{% endif %}
     </div>
   </section>
-  <div class="rp-grid">
-    {% for (title, c) in report.cards %}
-    <section class="box bd">
-      <div class="bd-head"><h2>{{ title }}</h2></div>
-      <div class="bd-row th"><span class="first">{{ c.head }}</span><span class="num">Visitors</span><span class="num sorted">Revenue</span><span class="num">Per visitor</span></div>
-      {% for r in c.rows %}
-      <div class="bd-row"><div class="bd-name"><span class="bar" style="width:{{ "{:.1}"|format(r.width) }}%"></span><span class="t">{{ r.icon|safe }}{% if r.mono %}<span class="mono">{{ r.label }}</span>{% else %}<span class="lbl">{{ r.label }}</span>{% endif %}</span></div><span class="num v">{{ r.visitors }}</span><span class="num r{% if r.zero %} zero{% endif %}">{{ r.revenue }}</span><span class="num p{% if r.zero %} zero{% endif %}">{{ r.per_visitor }}</span></div>
-      {% endfor %}
-      {% if c.rows.is_empty() %}<p class="bd-empty">Nothing in this range yet.</p>{% endif %}
-      <div class="bd-foot"><span>{{ c.foot }}</span></div>
-    </section>
-    {% endfor %}
-  </div>
-  {% if !brand.footer.is_empty() %}<footer class="rp-foot">{{ brand.footer }}</footer>{% endif %}
+  {% endif %}
+
+  <footer class="r2-foot">
+    <span class="r2-credit">{% if !report.footer.is_empty() %}<span class="r2-brandline">{{ report.footer }}</span>{% endif %}{{ report.credit }}</span>
+    {% if report.powered_by %}<span class="r2-powered">Powered by <b>virling</b></span>{% endif %}
+  </footer>
 </article>

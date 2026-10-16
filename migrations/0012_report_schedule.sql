@@ -1,0 +1,14 @@
+ALTER TABLE report_brands ADD COLUMN note TEXT NOT NULL DEFAULT '';
+ALTER TABLE report_brands ADD COLUMN powered_by INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE report_brands ADD COLUMN send_on INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE report_brands ADD COLUMN send_weekday INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE report_brands ADD COLUMN send_minute INTEGER NOT NULL DEFAULT 540;
+ALTER TABLE report_brands ADD COLUMN recipients TEXT NOT NULL DEFAULT '';
+ALTER TABLE report_brands ADD COLUMN send_from INTEGER NOT NULL DEFAULT 0;
+CREATE TABLE report_sends (
+    site_id TEXT NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+    week TEXT NOT NULL,
+    sent_at INTEGER,
+    recipients INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (site_id, week)
+);

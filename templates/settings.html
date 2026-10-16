@@ -66,7 +66,7 @@
 </section>
 <form class="card" method="post" action="/app/{{ shell.domain }}/settings/report" id="report">
   <div class="card-head"><h2>Client report</h2><a class="btn secondary" href="/app/{{ shell.domain }}/report">Open report</a></div>
-  <p class="muted">Your branding on the report for this client. Virling is not shown on it.</p>
+  <p class="muted">Your branding on the report for this client. Virling only appears in the small Powered by line, which you can turn off.</p>
   {% if brand_saved %}<div class="notice ok-note" role="status">Saved. The report uses your branding now.</div>{% endif %}
   {% if !brand_error.is_empty() %}<div class="alert" role="alert">{{ brand_error }}</div>{% endif %}
   <div class="setting">
@@ -84,6 +84,10 @@
   <div class="setting">
     <div><b><label for="footer">Footer</label></b><span class="muted">One line at the bottom, like your contact details.</span></div>
     <input class="input" id="footer" name="footer" value="{{ brand.footer }}" maxlength="200">
+  </div>
+  <div class="setting">
+    <div><b><label for="powered_by">Show Powered by Virling on reports</label></b><span class="muted">A small line at the bottom of the report page, the client link and the weekly email.</span></div>
+    <label class="switch"><input type="checkbox" id="powered_by" name="powered_by"{% if brand.powered_by %} checked{% endif %}><span></span><span class="sr">Show Powered by Virling on reports</span></label>
   </div>
   <div class="actions end"><button class="btn" type="submit">Save branding</button></div>
 </form>

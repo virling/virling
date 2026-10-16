@@ -178,7 +178,19 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/visitors/{visitor_id}",
                 get(visitor_pages::timeline),
             )
-            .route("/app/{domain}/report", get(dashboard::report))
+            .route("/app/{domain}/report", get(dashboard::report::page))
+            .route(
+                "/app/{domain}/report/note",
+                post(dashboard::report::save_note),
+            )
+            .route(
+                "/app/{domain}/report/schedule",
+                post(dashboard::report::save_schedule),
+            )
+            .route(
+                "/app/{domain}/report/send",
+                post(dashboard::report::send_now),
+            )
             .route(
                 "/app/{domain}/payments/{provider}/{payment_id}",
                 get(dashboard::payment),
@@ -211,7 +223,7 @@ pub fn router(state: AppState) -> Router {
                 get(api::visitor),
             )
             .route("/mcp", post(mcp::post))
-            .route("/r/{token}", get(dashboard::shared))
+            .route("/r/{token}", get(dashboard::report::shared))
             .route(
                 "/app/{domain}/settings/disconnect",
                 post(settings::disconnect),
@@ -333,14 +345,14 @@ async fn art(Path(file): Path<String>) -> Response {
 }
 
 async fn ua_icon(Path(file): Path<String>) -> Response {
-    let slug = file.strip_suffix(".svg").unwrap_or_default();
-    match crate::icons::UA_ICONS.iter().find(|(s, _)| *s == slug) {
-        Some((_, svg)) => (
+    let name = file.strip_suffix(".svg").unwrap_or_default();
+    match crate::icons::file(name) {
+        Some(svg) => (
             [
                 (header::CONTENT_TYPE, "image/svg+xml"),
                 (header::CACHE_CONTROL, "public, max-age=86400"),
             ],
-            *svg,
+            svg,
         )
             .into_response(),
         None => StatusCode::NOT_FOUND.into_response(),
