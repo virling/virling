@@ -89,6 +89,8 @@ pub trait EventStore: Send + Sync {
         period: &Period,
         dimension: Dimension,
     ) -> anyhow::Result<Vec<BreakdownRow>>;
+    /// Pages viewed last before paying, by the revenue of those payments.
+    fn last_pages(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<BreakdownRow>>;
     fn payment_list(
         &self,
         site_id: &str,
@@ -435,6 +437,10 @@ impl EventStore for DuckStore {
         dimension: Dimension,
     ) -> anyhow::Result<Vec<BreakdownRow>> {
         stats::breakdown(&self.conn.lock().unwrap(), site_id, period, dimension)
+    }
+
+    fn last_pages(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<BreakdownRow>> {
+        stats::last_pages(&self.conn.lock().unwrap(), site_id, period)
     }
 
     fn payment_list(
