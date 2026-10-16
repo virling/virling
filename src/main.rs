@@ -16,6 +16,7 @@ mod ingest;
 mod mail;
 mod onboarding;
 mod providers;
+mod query;
 mod settings;
 mod sites;
 mod stats;
@@ -67,6 +68,12 @@ enum Command {
         #[arg(long, default_value = "UTC")]
         timezone: String,
     },
+    #[command(
+        about = query::ABOUT,
+        long_about = query::LONG_ABOUT,
+        after_help = query::EXAMPLES
+    )]
+    Query(query::QueryArgs),
     /// Render the sample-data demo to static HTML
     #[command(hide = true)]
     Demo { out: PathBuf },
@@ -126,6 +133,16 @@ async fn main() -> anyhow::Result<()> {
     if let Some(Command::Demo { out }) = &cli.command {
         return demo::export(out).await;
     }
+    if let Some(Command::Query(args)) = cli.command {
+        match query::run(args).await {
+            Ok(out) => print!("{out}"),
+            Err(err) => {
+                eprintln!("error: {err:#}");
+                std::process::exit(1);
+            }
+        }
+        return Ok(());
+    }
     std::fs::create_dir_all(&cli.data_dir)
         .with_context(|| format!("creating {}", cli.data_dir.display()))?;
     let db = open_sqlite(&cli.data_dir).await?;
@@ -184,7 +201,9 @@ async fn main() -> anyhow::Result<()> {
                 "Added {domain}. Script tag:\n<script defer src=\"https://YOUR-VIRLING-HOST/v.js\" data-site=\"{domain}\"></script>"
             );
         }
-        Command::Demo { .. } => unreachable!("handled before the data dir is opened"),
+        Command::Demo { .. } | Command::Query(_) => {
+            unreachable!("handled before the data dir is opened")
+        }
     }
     Ok(())
 }

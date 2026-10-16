@@ -57,7 +57,53 @@ Added example.com. Script tag:
 
 It fails if the domain is not valid, the email is not valid, or the site already exists. It works while the server is running. New sites are picked up within a minute.
 
+## query
+
+Reads reports from a running Virling server through the [Read API](api.md): totals, revenue by channel, referrer, campaign or page, payments and visitor timelines. It runs anywhere, not only on the server, and does not touch the data folder.
+
+```sh
+virling query [OPTIONS] <COMMAND>
+```
+
+| Flag and env | Default | What it does |
+| --- | --- | --- |
+| `--url <URL>`<br>`VIRLING_URL` | `http://localhost:8080` | The Virling server. |
+| `--key <KEY>`<br>`VIRLING_API_KEY` | | An API key from **Settings > API keys** in the app. |
+| `--site <DOMAIN>`<br>`VIRLING_SITE` | the only site | Which site to read. Needed when the account has more than one. |
+| `--json` | off | Print the API response as JSON instead of a table. Use it from scripts and AI agents. |
+
+Commands that read a range take `--range today|7d|30d|90d|12m|all`, or `--from YYYY-MM-DD --to YYYY-MM-DD` for exact local dates. Without them the range is the last 30 days, or since tracking started for a site tracked for 30 days or less.
+
+| Command | What it prints |
+| --- | --- |
+| `sites` | The sites the key can read. |
+| `overview` | Visitors, revenue, payments, conversion and revenue per visitor, with the previous period and the change. |
+| `channels` | Revenue by channel. |
+| `referrers` | Revenue by referring domain. |
+| `campaigns` | Revenue by `utm_campaign`. |
+| `landing-pages` | Revenue by the first page of each visit. |
+| `pages` | Revenue by every page viewed. |
+| `countries`, `devices` | Revenue by country and by device. |
+| `breakdown <DIMENSION>` | Any dimension of the API, including `keyword`, `browser` and `os`. |
+| `payments` | Payments, newest first, with the source and campaign credited and the visitor ID. Takes `--filter all\|attributed\|unattributed\|refunded`, `--limit` (up to 200) and `--offset`. |
+| `visitor <ID>` | One visitor's visits, pages, goals, exits and payments, oldest first. |
+
+Breakdowns take `--limit` (default 20) and are sorted by revenue, then visitors. Every command has examples in `virling query <COMMAND> --help`.
+
+```sh
+$ export VIRLING_URL=https://stats.example.com VIRLING_API_KEY=vk_...
+$ virling query channels --range 30d
+example.com  2026-09-17 to 2026-10-16 (UTC)
+
+Channel       Visitors  Payments    Revenue  Per visitor
+Search           1,020        11    $539.00        $0.53
+AI                 210         9    $441.00        $2.10
+Unattributed         0         7    $343.00            -
+Direct             610         4    $196.00        $0.32
+```
+
+Errors go to standard error with a non-zero exit code, such as a wrong key (`401`) or a site of another account (`404`).
+
 ## Not available yet
 
 - Removing a site or a user from the CLI <span class="na">Not available yet</span>
-- Listing sites from the CLI <span class="na">Not available yet</span>
