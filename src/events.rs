@@ -1,10 +1,11 @@
 use std::path::Path;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 use duckdb::types::{TimeUnit, Value};
 use duckdb::{Connection, named_params, params};
 use time::{OffsetDateTime, UtcOffset};
 
+use crate::index::{Indexes, SiteIndex, Zones, read};
 use crate::providers::Subscription;
 use crate::retention::{self, Retention};
 use crate::stats::{
@@ -268,12 +269,14 @@ pub struct LatestPageview {
 
 pub struct DuckStore {
     conn: Mutex<Connection>,
+    index: Arc<Indexes>,
+    zones: Zones,
     /// Idle read connections, so reads never wait on each other or on writes.
     readers: Mutex<Vec<Connection>>,
 }
 
 /// A pooled read connection, returned to the pool on drop.
-struct Reader<'a> {
+pub struct Reader<'a> {
     store: &'a DuckStore,
     conn: Option<Connection>,
 }
@@ -292,6 +295,15 @@ impl Drop for Reader<'_> {
             self.store.readers.lock().unwrap().push(conn);
         }
     }
+}
+
+/// Memory budget of session indexes in bytes, from VIRLING_INDEX_MB (default 512; 0 turns them off).
+pub fn index_cap() -> usize {
+    std::env::var("VIRLING_INDEX_MB")
+        .ok()
+        .and_then(|v| v.parse::<usize>().ok())
+        .unwrap_or(512)
+        * 1_000_000
 }
 
 /// Columns of `touches` and `first_touches`: an event's fields without kind and name.
@@ -486,8 +498,47 @@ impl DuckStore {
         }
         Ok(Self {
             conn: Mutex::new(conn),
+            index: Arc::new(Indexes::new(index_cap())),
+            zones: Zones::default(),
             readers: Mutex::default(),
         })
+    }
+
+    /// `read` over the site's session index, when it is loaded and fits the question.
+    fn indexed<T>(
+        &self,
+        site_id: &str,
+        read: impl FnOnce(&SiteIndex, &Zones, &Connection) -> anyhow::Result<Option<T>>,
+    ) -> anyhow::Result<Option<T>> {
+        let Some(ix) = self
+            .index
+            .get(site_id, || Ok(self.conn.lock().unwrap().try_clone()?))?
+        else {
+            return Ok(None);
+        };
+        let conn = self.read()?;
+        let ix = ix.read().unwrap();
+        read(&ix, &self.zones, &conn)
+    }
+
+    /// Reads the site's index now instead of in the background.
+    #[cfg(test)]
+    pub fn load_index(&self, site_id: &str) {
+        let conn = self.conn.lock().unwrap().try_clone().unwrap();
+        self.index.load(site_id, &conn).unwrap();
+    }
+
+    #[cfg(test)]
+    pub fn index_for_test(&self, site_id: &str) -> Arc<std::sync::RwLock<SiteIndex>> {
+        self.index
+            .get(site_id, || Ok(self.conn.lock().unwrap().try_clone()?))
+            .unwrap()
+            .expect("index loaded")
+    }
+
+    #[cfg(test)]
+    pub fn conn_for_test(&self) -> Reader<'_> {
+        self.read().unwrap()
     }
 
     fn read(&self) -> anyhow::Result<Reader<'_>> {
@@ -557,6 +608,8 @@ impl EventStore for DuckStore {
             &earliest(events, |e| &e.visitor_id),
         )?;
         tx.commit()?;
+        drop(conn);
+        self.index.apply(events);
         Ok(())
     }
 
@@ -642,6 +695,9 @@ impl EventStore for DuckStore {
             }
         }
         tx.commit()?;
+        for p in payments {
+            self.index.payments_changed(&p.site_id);
+        }
         Ok(())
     }
 
@@ -712,10 +768,14 @@ impl EventStore for DuckStore {
             named_params! { "site": site_id, "model": model, "window_days": window_days },
         )?;
         tx.commit()?;
+        self.index.payments_changed(site_id);
         Ok(())
     }
 
     fn overview_in(&self, site_id: &str, period: &Period, f: &Filter) -> anyhow::Result<Overview> {
+        if let Some(o) = self.indexed(site_id, |ix, z, c| read::overview(ix, z, c, period, f))? {
+            return Ok(o);
+        }
         stats::overview(&*self.read()?, site_id, period, f)
     }
 
@@ -731,6 +791,11 @@ impl EventStore for DuckStore {
         dimension: Dimension,
         f: &Filter,
     ) -> anyhow::Result<Vec<BreakdownRow>> {
+        if let Some(rows) = self.indexed(site_id, |ix, z, c| {
+            read::breakdown(ix, z, c, period, dimension, f)
+        })? {
+            return Ok(rows);
+        }
         stats::breakdown(&*self.read()?, site_id, period, dimension, f)
     }
 
@@ -740,6 +805,11 @@ impl EventStore for DuckStore {
         period: &Period,
         f: &Filter,
     ) -> anyhow::Result<Vec<BreakdownRow>> {
+        if let Some(rows) =
+            self.indexed(site_id, |ix, z, c| read::last_pages(ix, z, c, period, f))?
+        {
+            return Ok(rows);
+        }
         stats::last_pages(&*self.read()?, site_id, period, f)
     }
 
@@ -772,6 +842,29 @@ impl EventStore for DuckStore {
     }
 
     fn report_in(&self, site_id: &str, period: &Period, f: &Filter) -> anyhow::Result<Report> {
+        let indexed = self.indexed(site_id, |ix, z, c| {
+            let dims = |d| read::breakdown(ix, z, c, period, d, f);
+            let (Some(days), Some(previous_days)) = (
+                read::timeseries(ix, z, c, period, f)?,
+                read::timeseries(ix, z, c, &period.previous(), f)?,
+            ) else {
+                return Ok(None);
+            };
+            Ok(Some(Report {
+                overview: read::overview(ix, z, c, period, f)?.unwrap(),
+                days,
+                previous_days,
+                channels: dims(Dimension::Channel)?.unwrap(),
+                referrers: dims(Dimension::Referrer)?.unwrap(),
+                landing_pages: dims(Dimension::LandingPage)?.unwrap(),
+                countries: dims(Dimension::Country)?.unwrap(),
+                channel_sources: read::channel_sources(ix, z, c, period, f)?.unwrap(),
+                setup: stats::setup(c, site_id)?,
+            }))
+        })?;
+        if let Some(r) = indexed {
+            return Ok(r);
+        }
         stats::report(&|| self.read(), site_id, period, f)
     }
 
@@ -781,6 +874,9 @@ impl EventStore for DuckStore {
         period: &Period,
         f: &Filter,
     ) -> anyhow::Result<Vec<stats::DayPoint>> {
+        if let Some(h) = self.indexed(site_id, |ix, z, c| read::hourly(ix, z, c, period, f))? {
+            return Ok(h);
+        }
         stats::hourly(&*self.read()?, site_id, period, f)
     }
 
@@ -843,6 +939,9 @@ impl EventStore for DuckStore {
     }
 
     fn visitor_facets(&self, site_id: &str, period: &Period) -> anyhow::Result<Facets> {
+        if let Some(f) = self.indexed(site_id, |ix, z, c| read::facets(ix, z, c, period))? {
+            return Ok(f);
+        }
         visitors::facets(&*self.read()?, site_id, period)
     }
 

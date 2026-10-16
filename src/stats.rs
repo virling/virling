@@ -378,7 +378,7 @@ pub(crate) fn source(referrer_host: Option<&str>, channel: &str) -> String {
     referrer_host.map_or_else(|| channel.to_string(), source_name)
 }
 
-fn ratio(n: f64, d: u64) -> Option<f64> {
+pub(crate) fn ratio(n: f64, d: u64) -> Option<f64> {
     (d > 0).then(|| n / d as f64)
 }
 
@@ -720,9 +720,20 @@ pub(crate) fn breakdown(
             ))
         },
     )?;
+    Ok(breakdown_rows(
+        dimension,
+        rows.collect::<Result<Vec<_>, _>>()?,
+    ))
+}
+
+/// Merges (unattributed, key, visitors, payments, revenue, customers) rows into a sorted breakdown.
+pub(crate) fn breakdown_rows(
+    dimension: Dimension,
+    rows: Vec<(bool, Option<String>, i64, i64, f64, i64)>,
+) -> Vec<BreakdownRow> {
     let mut out: Vec<BreakdownRow> = Vec::new();
     for row in rows {
-        let (unattributed, mut key, visitors, payments, revenue_usd, customers) = row?;
+        let (unattributed, mut key, visitors, payments, revenue_usd, customers) = row;
         match dimension {
             Dimension::Referrer => key = key.as_deref().map(source_domain),
             Dimension::ChannelSource | Dimension::PageSource => {
@@ -763,7 +774,7 @@ pub(crate) fn breakdown(
         r.revenue_per_visitor = ratio(r.revenue_usd, r.visitors);
     }
     sort_rows(&mut out);
-    Ok(out)
+    out
 }
 
 /// Most revenue first, then most visitors, then by label.
@@ -1627,7 +1638,7 @@ pub(crate) fn goal_table(
     Ok(out)
 }
 
-fn channel_sources(
+pub(crate) fn channel_sources(
     conn: &Connection,
     site_id: &str,
     period: &Period,
@@ -1672,7 +1683,7 @@ fn channel_sources(
     Ok(out)
 }
 
-fn setup(conn: &Connection, site_id: &str) -> anyhow::Result<Setup> {
+pub(crate) fn setup(conn: &Connection, site_id: &str) -> anyhow::Result<Setup> {
     let (first, has_goals, payments): (Option<i64>, bool, i64) = conn.query_row(
         "SELECT
             (SELECT epoch_us(min(ts)) FROM events WHERE site_id = $site),

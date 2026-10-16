@@ -522,7 +522,10 @@ fn goal(events: &mut Vec<Event>, visitor: &str, name: &str, after: Duration) -> 
 }
 
 /// About 180 days of visits for a small invoicing SaaS, with Stripe payments, renewals and refunds.
-fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>, Vec<Subscription>) {
+pub(crate) fn seed(
+    site: &str,
+    now: OffsetDateTime,
+) -> (Vec<Event>, Vec<Payment>, Vec<Subscription>) {
     let mut rng = Rng(0x5EED_DE30_0000_0001);
     let mut events = Vec::new();
     let mut payments = Vec::new();
