@@ -207,9 +207,8 @@ pub(crate) fn visitor_list(
             GROUP BY 1
         ),
         firsts AS (
-            SELECT visitor_id, channel, referrer_host FROM events
-            WHERE site_id = $site AND kind = 'pageview' AND visitor_id IN (SELECT visitor_id FROM per)
-            QUALIFY row_number() OVER (PARTITION BY visitor_id ORDER BY ts, path) = 1
+            SELECT visitor_id, channel, referrer_host FROM first_touches
+            WHERE site_id = $site AND visitor_id IN (SELECT visitor_id FROM per)
         ),
         {OWNED},
         pd AS (
@@ -304,9 +303,8 @@ pub(crate) fn facets(conn: &Connection, site_id: &str, period: &Period) -> anyho
             WHERE site_id = $site AND ts >= lo AND ts < hi
         ),
         firsts AS (
-            SELECT visitor_id, channel, referrer_host FROM events
-            WHERE site_id = $site AND kind = 'pageview' AND visitor_id IN (SELECT visitor_id FROM seen)
-            QUALIFY row_number() OVER (PARTITION BY visitor_id ORDER BY ts, path) = 1
+            SELECT visitor_id, channel, referrer_host FROM first_touches
+            WHERE site_id = $site AND visitor_id IN (SELECT visitor_id FROM seen)
         )
         SELECT channel, referrer_host, count(*) AS n FROM firsts
         GROUP BY ALL ORDER BY n DESC, channel, referrer_host"
