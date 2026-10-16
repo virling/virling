@@ -1,6 +1,6 @@
 //! Seeds a sample site and renders its app pages to static HTML for virling.com/demo.
 
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::path::Path;
 use std::sync::Arc;
 
@@ -9,10 +9,15 @@ use time::{Duration, OffsetDateTime};
 
 use crate::app::{self, AppState, Config};
 use crate::events::{DuckStore, Event, EventStore, Payment};
-use crate::{auth, channel, crypto, flags, mail, sites, sync};
+use crate::providers::Subscription;
+use crate::{auth, channel, crypto, favicon, flags, icons, mail, sites, sync};
 
 const DOMAIN: &str = "tallybird.app";
 const DAYS: i64 = 180;
+/// Visitor timelines the demo prebuilds, taken from the first payments it reaches.
+const TIMELINES: usize = 12;
+/// A made-up mark for the made-up site, so the site switcher shows an icon.
+const SITE_ICON: &str = r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#1F6F5C"/><path d="M9 9v14M13.5 9v14M18 9v14M22.5 9v14M7 20l18-8" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>"##;
 const BANNER: &str = r#"<div class="notice row"><span>Demo with sample data.</span><a class="b" href="/#join">Join the waitlist</a></div>"#;
 
 /// Where visitors come from: referrer host, utm source/medium/campaign, share of traffic, growth over the period, chance to buy.
@@ -33,6 +38,52 @@ const BLOG: &[&str] = &[
 ];
 const PRODUCT: &[&str] = &["/", "/pricing", "/features/recurring-invoices", "/compare"];
 const DOCS: &[&str] = &["/docs/getting-started", "/docs/stripe", "/pricing"];
+/// Where a visit goes after its first page.
+const NEXT: &[&str] = &[
+    "/pricing",
+    "/pricing",
+    "/features/recurring-invoices",
+    "/features/payment-reminders",
+    "/docs/getting-started",
+    "/docs/stripe",
+    "/templates/freelance-invoice",
+    "/blog/net-30-explained",
+    "/compare",
+    "/changelog",
+    "/about",
+    "/",
+];
+/// Tracked short links as (slug, name, source, channel, destination path).
+const LINKS: &[(&str, &str, &str, &str, &str)] = &[
+    (
+        "launch-thread",
+        "Launch thread on X",
+        "x.com",
+        "social",
+        "/",
+    ),
+    (
+        "founder-posts",
+        "Founder posts on LinkedIn",
+        "linkedin.com",
+        "social",
+        "/pricing",
+    ),
+    (
+        "weekly-digest",
+        "Weekly digest footer",
+        "newsletter",
+        "email",
+        "/changelog",
+    ),
+    (
+        "demo-video",
+        "Demo video description",
+        "youtube.com",
+        "social",
+        "/features/recurring-invoices",
+    ),
+];
 
 const SOURCES: &[Source] = &[
     Source {
@@ -46,7 +97,7 @@ const SOURCES: &[Source] = &[
     Source {
         host: Some("chatgpt.com"),
         utm: None,
-        weight: 6.0,
+        weight: 4.0,
         growth: 2.6,
         convert: 0.032,
         paths: PRODUCT,
@@ -54,7 +105,7 @@ const SOURCES: &[Source] = &[
     Source {
         host: Some("www.perplexity.ai"),
         utm: None,
-        weight: 2.5,
+        weight: 1.8,
         growth: 2.4,
         convert: 0.03,
         paths: PRODUCT,
@@ -62,7 +113,7 @@ const SOURCES: &[Source] = &[
     Source {
         host: Some("claude.ai"),
         utm: None,
-        weight: 2.0,
+        weight: 1.5,
         growth: 3.0,
         convert: 0.034,
         paths: DOCS,
@@ -72,7 +123,7 @@ const SOURCES: &[Source] = &[
         utm: None,
         weight: 8.0,
         growth: 1.0,
-        convert: 0.006,
+        convert: 0.011,
         paths: PRODUCT,
     },
     Source {
@@ -102,7 +153,7 @@ const SOURCES: &[Source] = &[
     Source {
         host: Some("www.bing.com"),
         utm: None,
-        weight: 3.0,
+        weight: 2.0,
         growth: 1.0,
         convert: 0.01,
         paths: BLOG,
@@ -112,8 +163,48 @@ const SOURCES: &[Source] = &[
         utm: None,
         weight: 2.5,
         growth: 1.1,
-        convert: 0.005,
+        convert: 0.011,
         paths: BLOG,
+    },
+    Source {
+        host: Some("www.linkedin.com"),
+        utm: Some(("linkedin.com", "social", "founder-posts")),
+        weight: 3.0,
+        growth: 1.5,
+        convert: 0.014,
+        paths: PRODUCT,
+    },
+    Source {
+        host: Some("duckduckgo.com"),
+        utm: None,
+        weight: 1.5,
+        growth: 1.1,
+        convert: 0.012,
+        paths: BLOG,
+    },
+    Source {
+        host: Some("t.co"),
+        utm: Some(("x.com", "social", "launch-thread")),
+        weight: 2.0,
+        growth: 1.2,
+        convert: 0.014,
+        paths: PRODUCT,
+    },
+    Source {
+        host: Some("www.youtube.com"),
+        utm: Some(("youtube.com", "social", "demo-video")),
+        weight: 1.6,
+        growth: 1.6,
+        convert: 0.018,
+        paths: &["/", "/features/recurring-invoices", "/pricing"],
+    },
+    Source {
+        host: Some("stackoverflow.com"),
+        utm: None,
+        weight: 1.2,
+        growth: 1.0,
+        convert: 0.008,
+        paths: DOCS,
     },
     Source {
         host: None,
@@ -143,11 +234,10 @@ const COUNTRIES: &[(&str, f64)] = &[
 ];
 const DEVICES: &[(&str, f64)] = &[("Desktop", 66.0), ("Mobile", 31.0), ("Tablet", 3.0)];
 const BROWSERS: &[(&str, f64)] = &[
-    ("Chrome", 58.0),
+    ("Chrome", 63.0),
     ("Safari", 24.0),
-    ("Firefox", 8.0),
-    ("Edge", 7.0),
-    ("Arc", 3.0),
+    ("Firefox", 10.0),
+    ("Opera", 3.0),
 ];
 /// Monthly plans in cents.
 const PLANS: &[(i64, f64)] = &[(1200, 55.0), (2900, 35.0), (7900, 10.0)];
@@ -252,14 +342,23 @@ const EXITS: &[&str] = &[
     "docs.stripe.com/invoicing",
     "x.com/tallybird",
     "www.youtube.com/watch",
+    "www.linkedin.com/company/tallybird",
 ];
+/// Paying customers coming back to sign in or read the changelog.
+const RETURNING: Source = Source {
+    host: None,
+    utm: None,
+    weight: 0.0,
+    growth: 1.0,
+    convert: 0.0,
+    paths: &["/login", "/changelog", "/docs/getting-started"],
+};
 
 fn visitor(rng: &mut Rng) -> Visitor {
     let device = rng.pick(DEVICES);
     let browser = rng.pick(BROWSERS);
     let os = match (device, browser) {
         ("Desktop", "Safari") => "macOS",
-        ("Desktop", "Edge") => "Windows",
         ("Desktop", _) => rng.pick(&[("Windows", 55.0), ("macOS", 38.0), ("Linux", 7.0)]),
         (_, "Safari") => "iOS",
         _ => rng.pick(&[("Android", 70.0), ("iOS", 30.0)]),
@@ -298,13 +397,25 @@ fn session(
     };
     let channel =
         channel::classify(utm_medium.as_deref(), utm_source.as_deref(), src.host).as_str();
-    let pages = 1 + (rng.f() * rng.f() * 5.0) as usize;
+    let pages = rng.pick(&[
+        (1, 24.0),
+        (2, 22.0),
+        (3, 18.0),
+        (4, 14.0),
+        (5, 10.0),
+        (6, 7.0),
+        (8, 5.0),
+    ]);
     let mut path = src.paths[rng.below(src.paths.len())];
     let mut last = path;
+    let mut at = ts;
     for n in 0..pages {
+        if n > 0 {
+            at += Duration::seconds(15 + rng.below(180) as i64);
+        }
         out.push(Event {
             site_id: site.into(),
-            ts: ts + Duration::seconds(n as i64 * (20 + rng.below(90) as i64)),
+            ts: at,
             visitor_id: v.id.clone(),
             session_id: session_id.clone(),
             kind: "pageview".into(),
@@ -337,14 +448,11 @@ fn session(
             ),
         });
         last = path;
-        path = [
-            "/pricing",
-            "/features/recurring-invoices",
-            "/docs/getting-started",
-            "/",
-        ][rng.below(4)];
+        while path == last {
+            path = NEXT[rng.below(NEXT.len())];
+        }
     }
-    if rng.f() < 0.15 {
+    if rng.f() < 0.3 {
         let mut exit = out[out.len() - 1].clone();
         exit.ts += Duration::seconds(30);
         exit.kind = "exit".into();
@@ -355,11 +463,42 @@ fn session(
     }
 }
 
+/// A goal completed in the visitor's latest visit, `after` its last page; returns when.
+fn goal(events: &mut Vec<Event>, visitor: &str, name: &str, after: Duration) -> OffsetDateTime {
+    if events
+        .last()
+        .is_some_and(|e| e.visitor_id == visitor && e.kind == "exit")
+    {
+        events.pop();
+    }
+    let mut g = events
+        .iter()
+        .rev()
+        .find(|e| e.visitor_id == visitor && e.kind == "pageview")
+        .expect("the visitor has a pageview")
+        .clone();
+    g.ts += after;
+    g.kind = "goal".into();
+    g.name = Some(name.into());
+    g.path = if name == "signup" {
+        "/signup"
+    } else {
+        "/welcome"
+    }
+    .into();
+    g.referrer_host = None;
+    g.host = Some(DOMAIN.into());
+    let ts = g.ts;
+    events.push(g);
+    ts
+}
+
 /// About 180 days of visits for a small invoicing SaaS, with Stripe payments, renewals and refunds.
-fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>) {
+fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>, Vec<Subscription>) {
     let mut rng = Rng(0x5EED_DE30_0000_0001);
     let mut events = Vec::new();
     let mut payments = Vec::new();
+    let mut subscriptions = Vec::new();
     let start = now.date() - Duration::days(DAYS);
     for d in 0..=DAYS {
         let day = (start + Duration::days(d)).midnight().assume_utc();
@@ -394,52 +533,59 @@ fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>) {
             let v = visitor(&mut rng);
             session(&mut rng, site, &v, src, ts, &mut events);
             let mut last = ts;
-            if rng.f() < 0.28 {
-                let back = &SOURCES[rng.pick(&[(10, 50.0), (0, 20.0), (6, 15.0), (1, 15.0)])];
-                let again = ts + Duration::hours(6 + rng.below(24 * 9) as i64);
-                if again < now {
-                    session(&mut rng, site, &v, back, again, &mut events);
-                    last = again;
+            let direct = SOURCES.len() - 1;
+            let returns = rng.pick(&[
+                (0, 58.0),
+                (1, 20.0),
+                (2, 11.0),
+                (3, 6.0),
+                (4, 3.0),
+                (5, 2.0),
+            ]);
+            for _ in 0..returns {
+                let back = &SOURCES
+                    [rng.pick(&[(direct, 45.0), (0, 20.0), (6, 15.0), (1, 12.0), (4, 8.0)])];
+                let again = last + Duration::hours(4 + rng.below(24 * 8) as i64);
+                if again >= now {
+                    break;
                 }
+                session(&mut rng, site, &v, back, again, &mut events);
+                last = again;
             }
             if rng.f() >= src.convert * 1.4 {
+                if rng.f() < 0.07 + 0.04 * returns as f64 {
+                    goal(&mut events, &v.id, "signup", Duration::seconds(50));
+                    if rng.f() < 0.55 {
+                        goal(&mut events, &v.id, "trial", Duration::seconds(110));
+                    }
+                }
                 continue;
             }
-            let paid = last + Duration::minutes(5 + rng.below(60 * 48) as i64);
+            if returns == 0 && rng.f() < 0.6 {
+                let back = &SOURCES[rng.pick(&[(0, 35.0), (6, 25.0), (1, 20.0), (direct, 20.0)])];
+                let again = last + Duration::hours(3 + rng.below(24 * 6) as i64);
+                if again < now {
+                    session(&mut rng, site, &v, back, again, &mut events);
+                }
+            }
+            goal(&mut events, &v.id, "signup", Duration::seconds(50));
+            let trial = goal(&mut events, &v.id, "trial", Duration::seconds(110));
+            let paid = trial + Duration::minutes(3 + rng.below(12) as i64);
             if paid > now {
                 continue;
             }
-            events.push(Event {
-                site_id: site.into(),
-                ts: paid - Duration::minutes(3),
-                visitor_id: v.id.clone(),
-                session_id: rng.id("s"),
-                kind: "goal".into(),
-                name: Some("signup".into()),
-                path: "/signup".into(),
-                referrer_host: None,
-                utm_source: None,
-                utm_medium: None,
-                utm_campaign: None,
-                utm_content: None,
-                utm_term: None,
-                channel: "Direct".into(),
-                country: Some(v.country.into()),
-                device: v.device.into(),
-                browser: v.browser.into(),
-                os: v.os.into(),
-                region: v.place.map(|p| p.0.into()),
-                city: v.place.map(|p| p.1.into()),
-                host: Some(DOMAIN.into()),
-            });
             let plan = rng.pick(PLANS);
             let (currency, rate) = rng.pick(CURRENCIES);
             let customer = rng.id("cus_");
-            let refunded = rng.f() < 0.03;
+            let refunded = rng.f() < 0.04;
             let tracked = rng.f() < 0.9;
             let mut at = paid;
             let mut renewal = false;
             while at <= now {
+                if renewal && tracked && rng.f() < 0.93 {
+                    let back = at - Duration::minutes(10 + rng.below(6 * 60) as i64);
+                    session(&mut rng, site, &v, &RETURNING, back, &mut events);
+                }
                 payments.push(Payment {
                     site_id: site.into(),
                     provider: "stripe".into(),
@@ -460,6 +606,14 @@ fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>) {
                 at += Duration::days(30);
                 renewal = true;
             }
+            let live = at > now;
+            subscriptions.push(Subscription {
+                subscription_id: rng.id("sub_"),
+                customer_id: customer,
+                status: if live { "active" } else { "canceled" }.into(),
+                live,
+                ends_at: None,
+            });
         }
     }
     for n in 0..4 {
@@ -468,7 +622,7 @@ fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>) {
         session(&mut rng, site, &v, &SOURCES[n as usize], ts, &mut events);
     }
     events.retain(|e| e.ts <= now);
-    (events, payments)
+    (events, payments, subscriptions)
 }
 
 /// Seeds a throwaway data dir, serves the app on localhost and writes the reachable demo pages to `out`.
@@ -485,12 +639,14 @@ async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
     let account = sites::find_or_create_account(&db, "maya.chen@tallybird.app").await?;
     let site = sites::create_site(&db, &account, DOMAIN, "UTC").await?;
     let now = OffsetDateTime::now_utc();
-    // A stored empty icon stops the favicon fetch for the made-up domain.
-    sqlx::query("INSERT INTO site_icons (site_id, fetched_at) VALUES (?, ?)")
-        .bind(&site)
-        .bind(now.unix_timestamp())
-        .execute(&db)
-        .await?;
+    sqlx::query(
+        "INSERT INTO site_icons (site_id, content_type, body, fetched_at) VALUES (?, 'image/svg+xml', ?, ?)",
+    )
+    .bind(&site)
+    .bind(SITE_ICON.as_bytes())
+    .bind(now.unix_timestamp())
+    .execute(&db)
+    .await?;
     sqlx::query("INSERT INTO report_brands (site_id, agency_name) VALUES (?, ?)")
         .bind(&site)
         .bind("Fieldwork Studio")
@@ -506,22 +662,47 @@ async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
     .bind(now.unix_timestamp() + 3600)
     .execute(&db)
     .await?;
+    fetch_favicons(&db).await?;
 
     let store = Arc::new(DuckStore::open(&dir.join("events.duckdb"))?);
-    let (events, payments) = seed(&site, now);
+    let (events, payments, subscriptions) = seed(&site, now);
     store.insert_events(&events)?;
     store.upsert_payments(&payments)?;
+    store.replace_subscriptions(&site, "stripe", &subscriptions)?;
+    for (n, (slug, name, source, channel, path)) in LINKS.iter().enumerate() {
+        let clicks: HashSet<&str> = events
+            .iter()
+            .filter(|e| e.utm_campaign.as_deref() == Some(*slug) && e.ts > now - Duration::days(30))
+            .map(|e| e.session_id.as_str())
+            .collect();
+        sqlx::query(
+            "INSERT INTO short_links (id, site_id, slug, name, destination, source, channel, clicks, last_click_at, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        )
+        .bind(format!("link{n}"))
+        .bind(&site)
+        .bind(slug)
+        .bind(name)
+        .bind(format!("https://{DOMAIN}{path}"))
+        .bind(source)
+        .bind(channel)
+        .bind(clicks.len() as i64 * 23 / 20)
+        .bind(now.unix_timestamp())
+        .bind((now - Duration::days(DAYS - 10 * n as i64)).unix_timestamp())
+        .execute(&db)
+        .await?;
+    }
     let config = Config {
         marketing: false,
         app: true,
         trust_proxy: false,
         events_per_second: 200,
-        base_url: "http://localhost".into(),
+        base_url: "https://go.tallybird.app".into(),
         waitlist_from: String::new(),
     };
     let state = AppState::new(
         config,
-        db,
+        db.clone(),
         store,
         mail::Mailer::Log,
         crypto::Vault::load(dir, None)?,
@@ -531,9 +712,6 @@ async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
     let base = format!("http://{}", listener.local_addr()?);
     tokio::spawn(axum::serve(listener, app::router(state)).into_future());
 
-    if out.exists() {
-        std::fs::remove_dir_all(out)?;
-    }
     let client = reqwest::Client::new();
     let cookie = format!("{}={token}", auth::SESSION_COOKIE);
     let fetch = async |url: &str, drawer: bool| -> anyhow::Result<String> {
@@ -545,35 +723,78 @@ async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
         anyhow::ensure!(res.url().path().starts_with("/app/"), "{url} redirected");
         Ok(res.text().await?)
     };
-    let mut queue: VecDeque<String> = ["", "/payments", "/report"]
-        .iter()
-        .map(|p| format!("/app/{DOMAIN}{p}"))
-        .collect();
+    let mut queue: VecDeque<String> = [
+        "",
+        "/payments",
+        "/visitors",
+        "/retention",
+        "/links",
+        "/report",
+    ]
+    .iter()
+    .map(|p| format!("/app/{DOMAIN}{p}"))
+    .collect();
     let mut seen: HashSet<String> = queue.iter().filter_map(|u| target(u)).collect();
-    let mut pages = 0;
+    let mut timelines = 0;
+    let mut pages = Vec::new();
     while let Some(url) = queue.pop_front() {
         let page = fetch(&url, false)
             .await
             .with_context(|| format!("fetching {url}"))?;
         for link in links(&page) {
-            if let Some(t) = target(&link)
-                && seen.insert(t)
-            {
+            let Some(t) = target(&link) else { continue };
+            let timeline = is_timeline(&t);
+            if (!timeline || timelines < TIMELINES) && seen.insert(t) {
+                timelines += usize::from(timeline);
                 queue.push_back(link);
             }
         }
         let path = target(&url).expect("queued urls have a target");
-        write(out, &path, "index.html", &rewrite(&page))?;
         if path.starts_with("/demo/payments/") && path.matches('/').count() == 5 {
-            write(
-                out,
-                &path,
-                "drawer.html",
-                &rewrite(&fetch(&url, true).await?),
-            )?;
+            pages.push((path.clone(), "drawer.html", fetch(&url, true).await?));
         }
-        pages += 1;
+        pages.push((path, "index.html", page));
     }
+
+    if out.exists() {
+        std::fs::remove_dir_all(out)?;
+    }
+    let mut rewritten = Vec::new();
+    let mut hosts = HashSet::new();
+    for (path, file, html) in &pages {
+        let html = rewrite(html, &seen);
+        if let Some(i) = html
+            .find("class=\"letter\"")
+            .or_else(|| html.find("<span class=\"favicon\">"))
+            .or_else(|| html.find("<span class=\"favicon sm\">"))
+        {
+            anyhow::bail!(
+                "{path}{file} shows a letter tile: {}",
+                &html[i.saturating_sub(300)..i]
+            );
+        }
+        hosts.extend(source_icons(&html));
+        rewritten.push((path, file, html));
+    }
+    let icon_dir = out.join("icons");
+    std::fs::create_dir_all(&icon_dir)?;
+    std::fs::write(icon_dir.join("site.svg"), SITE_ICON)?;
+    for (slug, svg) in icons::UA_ICONS {
+        std::fs::write(icon_dir.join(format!("{slug}.svg")), svg)?;
+    }
+    let mut kinds = HashMap::new();
+    for host in &hosts {
+        let (kind, body) = favicon::source_body(&db, host)
+            .await
+            .with_context(|| format!("no cached icon for {host}"))?;
+        std::fs::write(icon_dir.join(icon_file(host, &kind)), body)?;
+        kinds.insert(host.clone(), kind);
+    }
+    for (path, file, html) in &rewritten {
+        write(out, path, file, &local_icons(html, &kinds))?;
+    }
+    std::fs::write(out.join("app.css"), include_str!("../assets/app.css"))?;
+    std::fs::write(out.join("app.js"), include_str!("../assets/app.js"))?;
     let flag_dir = out.join("flags");
     std::fs::create_dir_all(&flag_dir)?;
     for (code, _) in COUNTRIES {
@@ -583,8 +804,80 @@ async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
             svg,
         )?;
     }
-    println!("Wrote {pages} pages to {}", out.display());
+    println!(
+        "Wrote {} pages and {} favicons to {}",
+        pages.len(),
+        hosts.len(),
+        out.display()
+    );
     Ok(())
+}
+
+/// Caches the favicon of every seeded host without a bundled logo, so no row falls back to a letter.
+async fn fetch_favicons(db: &sqlx::SqlitePool) -> anyhow::Result<()> {
+    let client = favicon::client();
+    let exits = EXITS.iter().filter_map(|e| e.split('/').next());
+    for name in SOURCES.iter().filter_map(|s| s.host).chain(exits) {
+        if icons::brand_slug(name).is_some() {
+            continue;
+        }
+        let host = favicon::source_host(name).context("source host")?;
+        favicon::save_source(db, &client, &host, format!("https://{host}/").parse()?).await;
+        anyhow::ensure!(
+            favicon::source_icon(&host).is_some(),
+            "no favicon for {host}"
+        );
+    }
+    Ok(())
+}
+
+fn is_timeline(target: &str) -> bool {
+    target.starts_with("/demo/visitors/v")
+}
+
+/// Hosts of the cached favicons a page shows.
+fn source_icons(html: &str) -> Vec<String> {
+    html.split("src=\"/source-icons/")
+        .skip(1)
+        .filter_map(|s| s.split(['?', '"']).next())
+        .map(str::to_string)
+        .collect()
+}
+
+fn icon_file(host: &str, kind: &str) -> String {
+    let ext = match kind {
+        "image/svg+xml" => "svg",
+        "image/png" => "png",
+        "image/webp" => "webp",
+        _ => "ico",
+    };
+    format!("{host}.{ext}")
+}
+
+/// Points favicon and logo images at the files the export writes under /demo/icons.
+fn local_icons(html: &str, kinds: &HashMap<String, String>) -> String {
+    let site = format!("src=\"/app/{DOMAIN}/icon");
+    let mut out = String::with_capacity(html.len());
+    let mut rest = html;
+    while let Some((i, prefix, is_site)) = [("src=\"/source-icons/", false), (&*site, true)]
+        .into_iter()
+        .filter_map(|(p, is_site)| rest.find(p).map(|i| (i, p, is_site)))
+        .min_by_key(|m| m.0)
+    {
+        out.push_str(&rest[..i]);
+        let tail = &rest[i + prefix.len()..];
+        let end = tail.find('"').unwrap_or(tail.len());
+        let file = if is_site {
+            "site.svg".to_string()
+        } else {
+            let host = tail[..end].split('?').next().unwrap_or_default();
+            icon_file(host, kinds.get(host).map_or("", String::as_str))
+        };
+        out.push_str(&format!("src=\"/demo/icons/{file}"));
+        rest = &tail[end..];
+    }
+    out.push_str(rest);
+    out.replace("/assets/icons/", "/demo/icons/")
 }
 
 fn write(out: &Path, path: &str, file: &str, html: &str) -> anyhow::Result<()> {
@@ -618,6 +911,15 @@ fn target(url: &str) -> Option<String> {
         "" => ("", &["range", "sources", "location", "pages"]),
         "/payments" => ("payments/", &["range", "filter"]),
         "/report" => ("report/", &[]),
+        "/retention" => ("retention/", &["range", "by"]),
+        "/links" => ("links/", &[]),
+        "/visitors" => ("visitors/", &["range", "exit", "paid", "channel", "goal"]),
+        p if p.starts_with("/visitors/") => {
+            let id = &p["/visitors/".len()..];
+            let ok =
+                query.is_empty() && !id.is_empty() && id.chars().all(|c| c.is_ascii_alphanumeric());
+            return ok.then(|| format!("/demo/visitors/{id}/"));
+        }
         p => {
             let id = p.strip_prefix("/payments/")?;
             let ok = query.is_empty()
@@ -635,7 +937,8 @@ fn target(url: &str) -> Option<String> {
         return None;
     }
     let extra = params.iter().filter(|(k, _)| *k != "range").count();
-    if extra > 1 {
+    let unranged = |k: &str| matches!(k, "channel" | "goal");
+    if extra > 1 || (params.len() > 1 && params.iter().any(|(k, _)| unranged(k))) {
         return None;
     }
     let slug: Vec<String> = keys
@@ -643,7 +946,7 @@ fn target(url: &str) -> Option<String> {
         .filter_map(|k| params.iter().find(|p| p.0 == *k))
         .map(|(k, v)| match *k {
             "range" | "filter" => v.to_string(),
-            _ => format!("{k}-{v}"),
+            _ => format!("{k}-{}", v.replace("%20", "-").to_ascii_lowercase()),
         })
         .collect();
     Some(if slug.is_empty() {
@@ -654,7 +957,7 @@ fn target(url: &str) -> Option<String> {
 }
 
 /// Points app links at the static pages, drops what needs a server and adds the demo banner.
-fn rewrite(html: &str) -> String {
+fn rewrite(html: &str, built: &HashSet<String>) -> String {
     let html = html
         .replace(
             &format!(r#"<a href="/app/{DOMAIN}/settings">Account settings</a>"#),
@@ -679,8 +982,9 @@ fn rewrite(html: &str) -> String {
             out.push_str(&tag.replacen("href=\"/app\"", "href=\"/\"", 1));
         } else if !href.starts_with("/app/") {
             out.push_str(tag);
-        } else if let Some(t) = target(&href.replace("&#38;", "&")) {
-            let frag = href.find('#').map_or("", |i| &href[i..]);
+        } else if let Some(t) = target(&href.replace("&#38;", "&")).filter(|t| built.contains(t)) {
+            let plain = href.replace("&#38;", "&");
+            let frag = plain.find('#').map_or("", |i| &plain[i..]);
             let tag = tag.replacen(
                 &format!("href=\"{href}\""),
                 &format!("href=\"{t}{frag}\""),
@@ -693,6 +997,7 @@ fn rewrite(html: &str) -> String {
         } else if !tag.contains("class=")
             || tag.contains("class=\"b")
             || tag.contains("class=\"add\"")
+            || tag.contains("class=\"j-visitor\"")
             || href.contains("/setup")
             || href.contains("/settings")
         {
@@ -708,11 +1013,35 @@ fn rewrite(html: &str) -> String {
         let end = out[i..].find("</form>").map_or(out.len(), |e| i + e + 7);
         out.replace_range(i..end, "");
     }
-    out.replace("/assets/flags/", "/demo/flags/").replacen(
-        "<main class=\"content\">",
-        &format!("<main class=\"content\">\n{BANNER}"),
-        1,
-    )
+    let mut from = 0;
+    while let Some(i) = out[from..]
+        .find("<section class=\"set-sec\">")
+        .map(|i| from + i)
+    {
+        let end = out[i..]
+            .find("</section>")
+            .map_or(out.len(), |e| i + e + 10);
+        if out[i..end].contains("class=\"card") {
+            from = end;
+        } else {
+            out.replace_range(i..end, "");
+            from = i;
+        }
+    }
+    let sep = r#"<span class="vf-sep">Referrers</span>"#;
+    if let Some(i) = out.find(sep)
+        && out[i + sep.len()..].trim_start().starts_with("</div>")
+    {
+        out.replace_range(i..i + sep.len(), "");
+    }
+    out.replace("/assets/flags/", "/demo/flags/")
+        .replace("/assets/app.css", "/demo/app.css")
+        .replace("/assets/app.js", "/demo/app.js")
+        .replacen(
+            "<main class=\"content\">",
+            &format!("<main class=\"content\">\n{BANNER}"),
+            1,
+        )
 }
 
 #[cfg(test)]
@@ -735,12 +1064,26 @@ mod tests {
             target(&format!("{d}/payments/stripe/pi_1")).as_deref(),
             Some("/demo/payments/stripe/pi_1/")
         );
+        assert_eq!(
+            target(&format!("{d}/visitors?range=90d&exit=link")).as_deref(),
+            Some("/demo/visitors/90d-exit-link/")
+        );
+        assert_eq!(
+            target(&format!("{d}/visitors?channel=Organic%20search")).as_deref(),
+            Some("/demo/visitors/channel-organic-search/")
+        );
+        assert_eq!(
+            target(&format!("{d}/visitors/v1a2b")).as_deref(),
+            Some("/demo/visitors/v1a2b/")
+        );
         for gone in [
             "?range=12m",
             "?sort_pages=visitors",
             "?sources=referrer&pages=last",
             "/settings",
             "/payments?page=2",
+            "/visitors?range=7d&channel=AI",
+            "/visitors?exit=link&paid=yes",
         ] {
             assert_eq!(target(&format!("{d}{gone}")), None, "{gone}");
         }
@@ -750,12 +1093,18 @@ mod tests {
     fn rewrite_drops_server_actions() {
         let d = format!("/app/{DOMAIN}");
         let html = format!(
-            r#"<main class="content"><a href="{d}/payments/stripe/pi_1" data-drawer>x</a><a href="{d}/settings">Settings</a><a class="num sort" href="{d}?sort_pages=visitors">V</a><form method="post" action="/logout"><button>Sign out</button></form><img src="/assets/flags/de.svg">"#
+            r#"<main class="content"><a href="{d}/payments/stripe/pi_1" data-drawer>x</a><a href="{d}/settings">Settings</a><a class="num sort" href="{d}?sort_pages=visitors">V</a><form method="post" action="/logout"><button>Sign out</button></form><img src="/assets/flags/de.svg"><a class="j-visitor" href="{d}/visitors/v9">Visitor timeline</a><a class="tab" href="{d}?range=7d&#38;sources=referrer#sources">R</a>"#
         );
-        let got = rewrite(&html);
+        let built = HashSet::from([
+            "/demo/payments/stripe/pi_1/".to_string(),
+            "/demo/7d-sources-referrer/".to_string(),
+        ]);
+        let got = rewrite(&html, &built);
         assert!(got.contains(r#"<a href="/demo/payments/stripe/pi_1/" data-drawer="/demo/payments/stripe/pi_1/drawer.html">"#));
         assert!(!got.contains("Settings") && !got.contains("Sign out"));
         assert!(got.contains(r#"<a class="num sort">V</a>"#));
         assert!(got.contains("/demo/flags/de.svg") && got.contains("Demo with sample data."));
+        assert!(!got.contains("Visitor timeline"));
+        assert!(got.contains(r#"<a class="tab" href="/demo/7d-sources-referrer/#sources">"#));
     }
 }

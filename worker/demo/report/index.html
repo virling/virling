@@ -3,166 +3,150 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/demo/app.css">
 <title>Client report · tallybird.app · Virling</title>
 </head>
-<body class="app">
-<aside class="side" id="side">
-  <a class="brand" href="/"><svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
-  <div class="menu-wrap switcher" data-menu>
-    <button type="button" aria-haspopup="true" aria-expanded="false">
-      <span class="favicon">T</span>
-      <span class="grow">tallybird.app</span>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
-    </button>
-    <div class="menu" hidden>
-      
-      <a href="/demo/report/" aria-current="true"><span class="favicon sm">T</span>tallybird.app</a>
-      
-      
-    </div>
-  </div>
-  <nav class="nav">
-    <a href="/demo/">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Dashboard</a>
-    <a href="/demo/payments/">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>Payments</a>
-    <a href="/demo/report/" aria-current="page">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>Client report</a>
-    
+<body class="r2-page">
+<header class="r2-top noprint">
+<div class="r2-top-in">
+  <nav class="r2-crumbs" aria-label="Breadcrumb">
+    <a class="r2-home" href="/demo/"><svg width="24" height="24" viewBox="0 0 48 48" role="img" aria-label="Virling"><circle cx="8" cy="9" r="3.4" fill="#0E1116"></circle><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"></circle><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"></circle><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"></path><circle cx="24" cy="39" r="6" fill="#E8471C"></circle></svg><span>virling</span></a>
+    <span class="sl">/</span>
+    <a class="r2-crumb" href="/demo/">tallybird.app</a>
+    <span class="sl">/</span>
+    <b>Client report</b>
   </nav>
-  <div class="usage">
-    <span>3,167 visitors in the last 30 days</span>
-  </div>
-  <div class="menu-wrap account" data-menu>
-    <button type="button" aria-haspopup="true" aria-expanded="false">
-      <span class="favicon avatar">MC</span>
-      <span class="grow who"><b>maya.chen@tallybird.app</b><span>Self-hosted</span></span>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
-    </button>
-    <div class="menu up" hidden>
-      <a href="/#join">Account settings</a>
-      <a href="/#join">Sign out</a>
+  <div class="r2-actions">
+  <div class="menu-wrap r2-week" data-menu>
+    <button class="r2-btn" type="button" aria-haspopup="true" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg><span>Oct 5 to Oct 11</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="menu right" hidden>
+      <a href="/demo/report/" aria-current="true">Oct 5 to Oct 11</a>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
     </div>
   </div>
-</aside>
-<div class="main">
-  <header class="top">
-    <button class="burger" type="button" aria-controls="side" aria-expanded="false" aria-label="Menu" data-burger>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-    </button>
-    <h1>Client report</h1>
-    <span class="live-pill" title="Visitors in the last 5 minutes"><span class="dot"></span>4 live</span>
-    <span class="grow"></span>
-    <div class="menu-wrap range" data-menu>
-  <button type="button" aria-haspopup="true" aria-expanded="false">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-    <span>Last 7 days</span>
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-  </button>
-  <div class="menu right" hidden>
-    
-    
-    
-    <a href="/demo/report/" aria-current="true">Last 7 days</a>
-    
-    
-    
-    <a href="/demo/report/90d/">Last 90 days</a>
-    
-    
-    
-    
+  <button class="r2-btn" type="button" data-note-edit><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>Edit note</button>
+  <button class="r2-btn" type="button" data-print><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg>Download PDF</button>
+  
+  </div>
+</div>
+</header>
+
+<div class="r2-wrap noprint">
+  
+  
+  
+  <div class="r2-sched" data-pop>
+    <span class="r2-sched-line"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A909A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg><span>The weekly email is off. Turn it on to send this report to your client every week.</span></span>
+    <button class="r2-link" type="button" aria-expanded="false" aria-controls="sched-pop" data-pop-toggle>Change schedule</button>
     
   </div>
-</div><button class="ctl" type="button" data-print><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/></svg>Save as PDF</button>
-  </header>
-  <main class="content">
-<div class="notice row"><span>Demo with sample data.</span><a class="b" href="/#join">Join the waitlist</a></div>
+</div>
+
+<main class="r2-main">
+<article class="r2" style="--accent:#E8471C">
+  <div class="r2-head">
+    <div class="r2-agency">
+      <span class="r2-mark">FS</span>
+      <div><div class="r2-name">Fieldwork Studio</div><div class="r2-small">Weekly revenue report</div></div>
+    </div>
+    <div class="r2-for"><div class="r2-small">Prepared for</div><div class="r2-b">tallybird.app</div><div class="r2-range">Mon Oct 5 to Sun Oct 11, 2026</div></div>
+  </div>
+
+  <section class="r2-lead">
+    <div class="r2-eyebrow">The week in one line</div>
+    <h1>Revenue rose 12% to $1,806. AI assistants sent 15% of visitors and 21% of the money.</h1>
+    <p>Google was your top revenue source this week, ahead of Direct traffic, with fewer visitors.</p>
+  </section>
+
+  <section class="r2-kpis">
+    <div class="kpi"><div class="kl">Revenue</div><div class="kv">$1,806</div><div class="kn"><b class="up">+12%</b> <span>from $1,610</span></div></div>
+    <div class="kpi"><div class="kl">New customers</div><div class="kv">19</div><div class="kn"><b class="up">+6%</b> <span>from 18</span></div></div>
+    <div class="kpi"><div class="kl">Revenue per visitor</div><div class="kv">$1.69</div><div class="kn"><b class="up">+9%</b> <span>from $1.56</span></div></div>
+    <div class="kpi"><div class="kl">Visitors</div><div class="kv">1,067</div><div class="kn"><b class="up">+3%</b> <span>from 1,035</span></div></div>
+    
+  </section>
+
+  <section class="r2-sec chart">
+    <div class="r2-sec-head">
+      <h2>Revenue by day</h2>
+      <div class="r2-legend"><span><i class="r2-sw"></i>Revenue</span><span><svg width="18" height="8" aria-hidden="true"><path d="M0 4h18" stroke="#2F5BEA" stroke-width="1.6" stroke-dasharray="4 4"></path></svg>Visitors</span></div>
+    </div>
+    <div class="r2-chart-wrap"><svg viewBox="0 0 760 250" width="100%" role="img" aria-label="Revenue per day as bars and visitors per day as a line, Monday Oct 5 to Sunday Oct 11. Friday was the best day: $438 from 11 payments, on the most visitors of the week." class="r2-chart"><path d="M0 206H760" stroke="#E4E4DF" stroke-width="1"></path><rect x="26.3" y="94.8" width="56" height="111.2" rx="6.0" fill="#E8471C" fill-opacity="0.32"></rect><text x="54.3" y="86.8" text-anchor="middle" font-size="13" font-weight="600" fill="#0E1116" font-family="Schibsted Grotesk, sans-serif">$329</text><rect x="134.9" y="130.8" width="56" height="75.2" rx="6.0" fill="#E8471C" fill-opacity="0.32"></rect><text x="162.9" y="122.8" text-anchor="middle" font-size="13" font-weight="600" fill="#0E1116" font-family="Schibsted Grotesk, sans-serif">$222</text><rect x="243.4" y="157.6" width="56" height="48.4" rx="6.0" fill="#E8471C" fill-opacity="0.32"></rect><text x="271.4" y="149.6" text-anchor="middle" font-size="13" font-weight="600" fill="#0E1116" font-family="Schibsted Grotesk, sans-serif">$143</text><rect x="352.0" y="142.9" width="56" height="63.1" rx="6.0" fill="#E8471C" fill-opacity="0.32"></rect><text x="380.0" y="134.9" text-anchor="middle" font-size="13" font-weight="600" fill="#0E1116" font-family="Schibsted Grotesk, sans-serif">$186</text><rect x="460.6" y="57.7" width="56" height="148.3" rx="6.0" fill="#E8471C" fill-opacity="1"></rect><text x="488.6" y="49.7" text-anchor="middle" font-size="13" font-weight="600" fill="#0E1116" font-family="Schibsted Grotesk, sans-serif">$438</text><rect x="569.1" y="132.8" width="56" height="73.2" rx="6.0" fill="#E8471C" fill-opacity="0.32"></rect><text x="597.1" y="124.8" text-anchor="middle" font-size="13" font-weight="600" fill="#0E1116" font-family="Schibsted Grotesk, sans-serif">$216</text><rect x="677.7" y="114.6" width="56" height="91.4" rx="6.0" fill="#E8471C" fill-opacity="0.32"></rect><text x="705.7" y="106.6" text-anchor="middle" font-size="13" font-weight="600" fill="#0E1116" font-family="Schibsted Grotesk, sans-serif">$270</text><path d="M54.3 65.9 L162.9 79.3 L271.4 73.6 L380.0 70.8 L488.6 60.9 L597.1 88.5 L705.7 92.8" fill="none" stroke="#2F5BEA" stroke-width="1.6" stroke-dasharray="4 4"></path><circle cx="54.3" cy="65.9" r="3" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="1.6"></circle><circle cx="162.9" cy="79.3" r="3" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="1.6"></circle><circle cx="271.4" cy="73.6" r="3" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="1.6"></circle><circle cx="380.0" cy="70.8" r="3" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="1.6"></circle><circle cx="488.6" cy="60.9" r="3" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="1.6"></circle><circle cx="597.1" cy="88.5" r="3" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="1.6"></circle><circle cx="705.7" cy="92.8" r="3" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="1.6"></circle><text x="54.3" y="226" text-anchor="middle" font-size="12" fill="#4B515C" font-family="Schibsted Grotesk, sans-serif">Mon</text><text x="54.3" y="242" text-anchor="middle" font-size="11" fill="#8A909A" font-family="Geist Mono, monospace">Oct 5</text><text x="162.9" y="226" text-anchor="middle" font-size="12" fill="#4B515C" font-family="Schibsted Grotesk, sans-serif">Tue</text><text x="162.9" y="242" text-anchor="middle" font-size="11" fill="#8A909A" font-family="Geist Mono, monospace">Oct 6</text><text x="271.4" y="226" text-anchor="middle" font-size="12" fill="#4B515C" font-family="Schibsted Grotesk, sans-serif">Wed</text><text x="271.4" y="242" text-anchor="middle" font-size="11" fill="#8A909A" font-family="Geist Mono, monospace">Oct 7</text><text x="380.0" y="226" text-anchor="middle" font-size="12" fill="#4B515C" font-family="Schibsted Grotesk, sans-serif">Thu</text><text x="380.0" y="242" text-anchor="middle" font-size="11" fill="#8A909A" font-family="Geist Mono, monospace">Oct 8</text><text x="488.6" y="226" text-anchor="middle" font-size="12" fill="#4B515C" font-family="Schibsted Grotesk, sans-serif">Fri</text><text x="488.6" y="242" text-anchor="middle" font-size="11" fill="#8A909A" font-family="Geist Mono, monospace">Oct 9</text><text x="597.1" y="226" text-anchor="middle" font-size="12" fill="#4B515C" font-family="Schibsted Grotesk, sans-serif">Sat</text><text x="597.1" y="242" text-anchor="middle" font-size="11" fill="#8A909A" font-family="Geist Mono, monospace">Oct 10</text><text x="705.7" y="226" text-anchor="middle" font-size="12" fill="#4B515C" font-family="Schibsted Grotesk, sans-serif">Sun</text><text x="705.7" y="242" text-anchor="middle" font-size="11" fill="#8A909A" font-family="Geist Mono, monospace">Oct 11</text></svg></div>
+    <p class="r2-p">Friday was the best day: $438 from 11 payments, on the most visitors of the week.</p>
+  </section>
+
+  <section class="r2-sec">
+    <div class="r2-sec-head">
+      <h2>Where the money came from</h2>
+      <div class="r2-legend"><span><i class="r2-sw vis"></i>Share of visitors</span><span><i class="r2-sw line"></i>Share of revenue</span></div>
+    </div>
+    <div class="rrow th"><span>Source</span><span class="n v">Visitors</span><span class="n">Revenue</span><span class="n">Per visitor</span></div>
+    <div class="rrow"><div class="rbar"><span class="vb" style="width:78.9%"></span><span class="rb" style="width:62.3%"></span><span class="ri"><svg class="ico" width="18" height="18" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg></span><span class="rt"><b>google.com</b><span class="rs">Search</span></span></div><span class="n v">315</span><span class="n r">$421</span><span class="n"><span class="pv"><span class="pvl">$1.34<span class="badge down">0.8x</span></span></span></span></div><div class="rrow"><div class="rbar"><span class="vb" style="width:30.1%"></span><span class="rb" style="width:49.7%"></span><span class="ri"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4B515C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span><span class="rt"><b>Other sites</b><span class="rs">8 smaller referrers</span></span></div><span class="n v">120</span><span class="n r">$335</span><span class="n"><span class="pv"><span class="pvl">$2.79<span class="badge up">1.7x</span></span></span></span></div><div class="rrow"><div class="rbar"><span class="vb" style="width:100.0%"></span><span class="rb" style="width:47.7%"></span><span class="ri"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4B515C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 8-6 2-3 6z"/></svg></span><span class="rt"><b>Direct</b><span class="rs">Typed or bookmarked</span></span></div><span class="n v">399</span><span class="n r">$322</span><span class="n"><span class="pv"><span class="pvl">$0.81<span class="badge down">0.5x</span></span></span></span></div><div class="rrow"><div class="rbar"><span class="vb" style="width:34.1%"></span><span class="rb" style="width:34.1%"></span><span class="ri"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4B515C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span><span class="rt"><b>Email</b><span class="rs">Newsletters</span></span></div><span class="n v">136</span><span class="n r">$230</span><span class="n"><span class="pv"><span class="pvl">$1.69<span class="badge flat">1.0x</span></span></span></span></div><div class="rrow"><div class="rbar"><span class="vb" style="width:27.6%"></span><span class="rb" style="width:34.1%"></span><span class="ri"><svg class="ico" width="18" height="18" role="img" aria-label="ChatGPT" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg></span><span class="rt"><b>chatgpt.com</b><span class="rs">AI assistant</span></span></div><span class="n v">110</span><span class="n r">$230</span><span class="n"><span class="pv"><span class="pvl">$2.09<span class="badge up">1.2x</span></span></span></span></div><div class="rrow"><div class="rbar"><span class="vb" style="width:25.3%"></span><span class="rb" style="width:8.2%"></span><span class="ri"><svg class="ico" width="18" height="18" role="img" aria-label="X" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg></span><span class="rt"><b>x.com</b><span class="rs">Social</span></span></div><span class="n v">101</span><span class="n r">$55.44</span><span class="n"><span class="pv"><span class="pvl">$0.55<span class="badge down">0.3x</span></span></span></span></div><div class="rrow"><div class="rbar"><span class="vb" style="width:7.5%"></span><span class="rb" style="width:6.1%"></span><span class="ri"><svg class="ico" width="18" height="18" role="img" aria-label="Claude" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#D97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg></span><span class="rt"><b>claude.ai</b><span class="rs">AI assistant</span></span></div><span class="n v">30</span><span class="n r">$41</span><span class="n"><span class="pv"><span class="pvl">$1.37<span class="badge down">0.8x</span></span></span></span></div><div class="rrow"><div class="rbar"><span class="vb" style="width:10.8%"></span><span class="rb" style="width:4.3%"></span><span class="ri"><svg class="ico" width="18" height="18" role="img" aria-label="LinkedIn" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></span><span class="rt"><b>linkedin.com</b><span class="rs">Social</span></span></div><span class="n v">43</span><span class="n r">$29</span><span class="n"><span class="pv"><span class="pvl">$0.67<span class="badge down">0.4x</span></span></span></span></div>
+    
+    <p class="r2-avg">Per visitor is compared with your average of $1.69. Green means a source pays better than average.</p>
+  </section>
+
+  <section class="r2-sec">
+    <h2>Pages that sold</h2>
+    <div class="rrow th"><span>First page of the visit</span><span class="n v">Visitors</span><span class="n">Revenue</span><span class="n">Per visitor</span></div>
+    <div class="rrow"><div class="rbar"><span class="vb" style="width:58.4%"></span><span class="rb" style="width:48.9%"></span><span class="rt"><span class="rp">/pricing</span><span class="rs">22% of visitors landed here</span></span></div><span class="n v">233</span><span class="n r">$330</span><span class="n"><span class="pv"><span class="pvl">$1.42<span class="badge down">0.8x</span></span></span></span></div><div class="rrow"><div class="rbar"><span class="vb" style="width:45.1%"></span><span class="rb" style="width:47.4%"></span><span class="rt"><span class="rp">/features/recurring-invoices</span><span class="rs">17% of visitors landed here</span></span></div><span class="n v">180</span><span class="n r">$320</span><span class="n"><span class="pv"><span class="pvl">$1.78<span class="badge flat">1.1x</span></span></span></span></div><div class="rrow"><div class="rbar"><span class="vb" style="width:37.8%"></span><span class="rb" style="width:42.8%"></span><span class="rt"><span class="rp">/blog/net-30-explained</span><span class="rs">14% of visitors landed here</span></span></div><span class="n v">151</span><span class="n r">$289</span><span class="n"><span class="pv"><span class="pvl">$1.91<span class="badge flat">1.1x</span></span></span></span></div><div class="rrow"><div class="rbar"><span class="vb" style="width:4.5%"></span><span class="rb" style="width:31.3%"></span><span class="rt"><span class="rp">/docs/stripe</span><span class="rs">2% of visitors landed here</span></span></div><span class="n v">18</span><span class="n r">$212</span><span class="n"><span class="pv"><span class="pvl">$11.76<span class="badge up">6.9x</span></span><span class="ss">small sample</span></span></span></div><div class="rrow"><div class="rbar"><span class="vb" style="width:39.6%"></span><span class="rb" style="width:25.5%"></span><span class="rt"><span class="rp">/compare</span><span class="rs">15% of visitors landed here</span></span></div><span class="n v">158</span><span class="n r">$172</span><span class="n"><span class="pv"><span class="pvl">$1.09<span class="badge down">0.6x</span></span></span></span></div><div class="rrow"><div class="rbar"><span class="vb" style="width:43.9%"></span><span class="rb" style="width:16.0%"></span><span class="rt"><span class="rp">/</span><span class="rs">16% of visitors landed here</span></span></div><span class="n v">175</span><span class="n r">$108</span><span class="n"><span class="pv"><span class="pvl">$0.62<span class="badge down">0.4x</span></span></span></span></div>
+    
+  </section>
+
+  
+  <section class="r2-ins">
+    <div class="ins good">
+      <span class="ik">Working</span>
+      <div class="it"><svg class="ico" width="18" height="18" role="img" aria-label="ChatGPT" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg>ChatGPT answers</div>
+      <p>110 visitors paid $2.09 each, 1.2x your average.</p>
+    </div>
+    <div class="ins bad">
+      <span class="ik">Not paying off</span>
+      <div class="it"><svg class="ico" width="18" height="18" role="img" aria-label="X" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>Posts on x.com</div>
+      <p>101 visitors brought $55.44. Worth less time until that changes.</p>
+    </div>
+    
+  </section>
   
 
-<article class="report">
-  <header class="box rp-head">
-    <div class="rp-brand"><b>Fieldwork Studio</b></div>
-    <div class="rp-title"><h2>tallybird.app</h2><span class="sub">Revenue report, Oct 9 to Oct 15, 2026</span></div>
-  </header>
-  <section class="box">
-    <div class="tiles">
-      <div class="tile on big" style="--c:#E8471C">
-        <span class="tn"><i class="dot" style="background:#E8471C"></i><span class="full">Revenue</span><span class="short">Revenue</span></span>
-        <span class="tv"><b>$1,423</b><span class="pill down">-2.9%</span></span>
-        <span class="ts">47 payments from 47 customers</span>
-      </div><div class="tile on" style="--c:#2F5BEA">
-        <span class="tn"><i class="dot" style="background:#2F5BEA"></i><span class="full">Visitors</span><span class="short">Visitors</span></span>
-        <span class="tv"><b>768</b><span class="pill down">-14%</span></span>
-        <span class="ts">825 sessions</span>
-      </div><div class="tile" style="--c:#0E1116">
-        <span class="tn"><i class="dot" style="background:#B9BCC2"></i><span class="full">Conversion rate</span><span class="short">Conversion</span></span>
-        <span class="tv"><b>1.43%</b><span class="pill down">-24%</span></span>
-        <span class="ts">11 of 768 visitors converted. 36 payments not matched to a visit</span>
-      </div><div class="tile" style="--c:#0E1116">
-        <span class="tn"><i class="dot" style="background:#B9BCC2"></i><span class="full">Revenue per visitor</span><span class="short">Per visitor</span></span>
-        <span class="tv"><b>$0.39</b><span class="pill down">-45%</span></span>
-        <span class="ts">Matched revenue divided by visitors</span>
-      </div>
-    </div>
-    <div class="chart-wrap">
-      <div class="chart-head"><div><h2>Visitors and revenue per day</h2><span class="sub">Oct 9 to Oct 15. Changes are against the previous 7 days</span></div></div>
-      <div class="chart dual" role="img" aria-label="Visitors and revenue per day"><div class="ya"><span style="top:100.00%">0</span><span style="top:75.00%">40</span><span style="top:50.00%">80</span><span style="top:25.00%">120</span><span style="top:0.00%">160</span></div><div class="ya r"><span style="top:100.00%">$0</span><span style="top:75.00%">$150</span><span style="top:50.00%">$300</span><span style="top:25.00%">$450</span><span style="top:0.00%">$600</span></div><div class="plot"><svg viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true"><path d="M0,750.0H1000" stroke="#EFEFEB" vector-effect="non-scaling-stroke"/><path d="M0,500.0H1000" stroke="#EFEFEB" vector-effect="non-scaling-stroke"/><path d="M0,250.0H1000" stroke="#EFEFEB" vector-effect="non-scaling-stroke"/><path d="M0,0.0H1000" stroke="#EFEFEB" vector-effect="non-scaling-stroke"/><path d="M0,1000H1000" stroke="#D6D7D1" vector-effect="non-scaling-stroke"/><rect x="31.4" y="175.0" width="80.0" height="825.0" fill="#2F5BEA"/><rect x="174.3" y="343.8" width="80.0" height="656.2" fill="#2F5BEA"/><rect x="317.1" y="393.8" width="80.0" height="606.2" fill="#2F5BEA"/><rect x="460.0" y="175.0" width="80.0" height="825.0" fill="#2F5BEA"/><rect x="602.9" y="150.0" width="80.0" height="850.0" fill="#2F5BEA"/><rect x="745.7" y="175.0" width="80.0" height="825.0" fill="#2F5BEA"/><rect x="888.6" y="450.0" width="80.0" height="550.0" fill="#2F5BEA"/><path d="M71.4,682.3 L214.3,661.7 L357.1,304.5 L500.0,472.0 L642.9,918.4 L785.7,638.1 L928.6,951.7" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M71.4,682.3 L214.3,661.7 L357.1,304.5 L500.0,472.0 L642.9,918.4 L785.7,638.1 L928.6,951.7" fill="none" stroke="#E8471C" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg><div class="hov bar" style="left:0.000%;width:14.286%"><span class="mk" style="top:68.23%;--c:#E8471C"></span><div class="tip"><span class="d">Oct 9, Fri</span><div class="row"><span><i class="sw " style="--c:#2F5BEA"></i>Visitors</span><b>132</b></div><div class="row"><span><i class="sw ln" style="--c:#E8471C"></i>Revenue</span><b>$191</b></div><div class="row"><span>Per visitor</span><b>$0.22</b></div><div class="foot">7 payments, most from AI</div></div></div><div class="hov bar" style="left:14.286%;width:14.286%"><span class="mk" style="top:66.17%;--c:#E8471C"></span><div class="tip"><span class="d">Oct 10, Sat</span><div class="row"><span><i class="sw " style="--c:#2F5BEA"></i>Visitors</span><b>105</b></div><div class="row"><span><i class="sw ln" style="--c:#E8471C"></i>Revenue</span><b>$203</b></div><div class="row"><span>Per visitor</span><b>$0.55</b></div><div class="foot">7 payments, most from Organic search</div></div></div><div class="hov bar" style="left:28.571%;width:14.286%"><span class="mk" style="top:30.45%;--c:#E8471C"></span><div class="tip"><span class="d">Oct 11, Sun</span><div class="row"><span><i class="sw " style="--c:#2F5BEA"></i>Visitors</span><b>97</b></div><div class="row"><span><i class="sw ln" style="--c:#E8471C"></i>Revenue</span><b>$417</b></div><div class="row"><span>Per visitor</span><b>$0.00</b></div><div class="foot">9 payments, most from Direct</div></div></div><div class="hov bar" style="left:42.857%;width:14.286%"><span class="mk" style="top:47.20%;--c:#E8471C"></span><div class="tip"><span class="d">Oct 12, Mon</span><div class="row"><span><i class="sw " style="--c:#2F5BEA"></i>Visitors</span><b>132</b></div><div class="row"><span><i class="sw ln" style="--c:#E8471C"></i>Revenue</span><b>$317</b></div><div class="row"><span>Per visitor</span><b>$0.55</b></div><div class="foot">13 payments, most from Organic search</div></div></div><div class="hov bar" style="left:57.143%;width:14.286%"><span class="mk" style="top:91.84%;--c:#E8471C"></span><div class="tip l"><span class="d">Oct 13, Tue</span><div class="row"><span><i class="sw " style="--c:#2F5BEA"></i>Visitors</span><b>136</b></div><div class="row"><span><i class="sw ln" style="--c:#E8471C"></i>Revenue</span><b>$48.96</b></div><div class="row"><span>Per visitor</span><b>$0.10</b></div><div class="foot">4 payments, most from AI</div></div></div><div class="hov bar" style="left:71.429%;width:14.286%"><span class="mk" style="top:63.81%;--c:#E8471C"></span><div class="tip l"><span class="d">Oct 14, Wed</span><div class="row"><span><i class="sw " style="--c:#2F5BEA"></i>Visitors</span><b>132</b></div><div class="row"><span><i class="sw ln" style="--c:#E8471C"></i>Revenue</span><b>$217</b></div><div class="row"><span>Per visitor</span><b>$0.72</b></div><div class="foot">6 payments, most from AI</div></div></div><div class="hov bar" style="left:85.714%;width:14.286%"><span class="mk" style="top:95.17%;--c:#E8471C"></span><div class="tip l"><span class="d">Oct 15, Thu</span><div class="row"><span><i class="sw " style="--c:#2F5BEA"></i>Visitors</span><b>88</b></div><div class="row"><span><i class="sw ln" style="--c:#E8471C"></i>Revenue</span><b>$29</b></div><div class="row"><span>Per visitor</span><b>$0.33</b></div><div class="foot">1 payment from AI</div></div></div></div><div class="xa"><span style="left:7.14%">Oct 9</span><span style="left:35.71%">Oct 11</span><span style="left:50.00%">Oct 12</span><span style="left:78.57%">Oct 14</span><span style="left:92.86%">Oct 15</span></div></div><div class="legend"><span><i class="sw " style="--c:#2F5BEA"></i>Visitors, left axis</span><span><i class="sw ln" style="--c:#E8471C"></i>Revenue, right axis</span></div>
+  
+  <section class="r2-note r2-note-empty" id="note">
+    <span class="r2-avatar">FS</span>
+    <div class="r2-note-body">
+      <div class="r2-b">A note from Fieldwork Studio</div>
+      <p class="r2-note-text ph" data-note-text>[Your note to the client. For example: what you shipped this week, what moved the numbers, and what you will do next.]</p>
+      
     </div>
   </section>
-  <div class="rp-grid">
-    
-    <section class="box bd">
-      <div class="bd-head"><h2>Top sources</h2></div>
-      <div class="bd-row th"><span class="first">Referrer</span><span class="num">Visitors</span><span class="num sorted">Revenue</span><span class="num">Per visitor</span></div>
-      
-      <div class="bd-row"><div class="bd-name"><span class="bar" style="width:100.0%"></span><span class="t"><span class="letter" style="width:16px;height:16px;font-size:10px" aria-hidden="true">C</span><span class="lbl">chatgpt.com</span></span></div><span class="num v">110</span><span class="num r">$373</span><span class="num p">$3.39</span></div>
-      
-      <div class="bd-row"><div class="bd-name"><span class="bar" style="width:92.1%"></span><span class="t"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span class="lbl">google.com</span></span></div><span class="num v">258</span><span class="num r">$344</span><span class="num p">$1.33</span></div>
-      
-      <div class="bd-row"><div class="bd-name"><span class="bar" style="width:35.4%"></span><span class="t"><svg class="ico" width="16" height="16" role="img" aria-label="Claude" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#D97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg><span class="lbl">claude.ai</span></span></div><span class="num v">42</span><span class="num r">$132</span><span class="num p">$3.14</span></div>
-      
-      <div class="bd-row"><div class="bd-name"><span class="bar" style="width:19.4%"></span><span class="t"><span class="letter" style="width:16px;height:16px;font-size:10px" aria-hidden="true">B</span><span class="lbl">bing.com</span></span></div><span class="num v">9</span><span class="num r">$72.32</span><span class="num p">$8.04</span></div>
-      
-      <div class="bd-row"><div class="bd-name"><span class="bar" style="width:16.2%"></span><span class="t"><svg class="ico" width="16" height="16" role="img" aria-label="Perplexity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#1FB8CD" d="M22.3977 7.0896h-2.3106V.0676l-7.5094 6.3542V.1577h-1.1554v6.1966L4.4904 0v7.0896H1.6023v10.3976h2.8882V24l6.932-6.3591v6.2005h1.1554v-6.0469l6.9318 6.1807v-6.4879h2.8882V7.0896zm-3.4657-4.531v4.531h-5.355l5.355-4.531zm-13.2862.0676 4.8691 4.4634H5.6458V2.6262zM2.7576 16.332V8.245h7.8476l-6.1149 6.1147v1.9723H2.7576zm2.8882 5.0404v-3.8852h.0001v-2.6488l5.7763-5.7764v7.0111l-5.7764 5.2993zm12.7086.0248-5.7766-5.1509V9.0618l5.7766 5.7766v6.5588zm2.8882-5.0652h-1.733v-1.9723L13.3948 8.245h7.8478v8.087z"/></svg><span class="lbl">perplexity.ai</span></span></div><span class="num v">34</span><span class="num r">$60.32</span><span class="num p">$1.77</span></div>
-      
-      <div class="bd-row"><div class="bd-name"><span class="bar" style="width:4.1%"></span><span class="t"><svg class="ico" width="16" height="16" role="img" aria-label="X" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg><span class="lbl">x.com</span></span></div><span class="num v">42</span><span class="num r">$15.24</span><span class="num p">$0.36</span></div>
-      
-      
-      <div class="bd-foot"><span>Credited to the last non-direct visit within 90 days</span></div>
-    </section>
-    
-    <section class="box bd">
-      <div class="bd-head"><h2>Top pages</h2></div>
-      <div class="bd-row th"><span class="first">Page</span><span class="num">Visitors</span><span class="num sorted">Revenue</span><span class="num">Per visitor</span></div>
-      
-      <div class="bd-row"><div class="bd-name"><span class="bar" style="width:100.0%"></span><span class="t"><span class="mono">/compare</span></span></div><span class="num v">97</span><span class="num r">$235</span><span class="num p">$2.42</span></div>
-      
-      <div class="bd-row"><div class="bd-name"><span class="bar" style="width:89.6%"></span><span class="t"><span class="mono">/features/recurring-invoices</span></span></div><span class="num v">103</span><span class="num r">$210</span><span class="num p">$2.04</span></div>
-      
-      <div class="bd-row"><div class="bd-name"><span class="bar" style="width:74.7%"></span><span class="t"><span class="mono">/blog/late-payment-email-templates</span></span></div><span class="num v">60</span><span class="num r">$175</span><span class="num p">$2.92</span></div>
-      
-      <div class="bd-row"><div class="bd-name"><span class="bar" style="width:60.7%"></span><span class="t"><span class="mono">/pricing</span></span></div><span class="num v">136</span><span class="num r">$142</span><span class="num p">$1.05</span></div>
-      
-      <div class="bd-row"><div class="bd-name"><span class="bar" style="width:56.7%"></span><span class="t"><span class="mono">/templates/freelance-invoice</span></span></div><span class="num v">72</span><span class="num r">$133</span><span class="num p">$1.85</span></div>
-      
-      <div class="bd-row"><div class="bd-name"><span class="bar" style="width:46.0%"></span><span class="t"><span class="mono">/</span></span></div><span class="num v">104</span><span class="num r">$108</span><span class="num p">$1.04</span></div>
-      
-      
-      <div class="bd-foot"><span></span></div>
-    </section>
-    
-  </div>
   
-</article>
 
-  </main>
-</div>
+  <footer class="r2-foot">
+    <span class="r2-credit">Each payment is credited to the last non-direct visit within 90 days. $142 from 6 payments had no matched visit, so it counts in the total but in no source.</span>
+    <span class="r2-powered">Powered by <b>virling</b></span>
+  </footer>
+</article>
+</main>
+<dialog class="confirm" id="confirm">
+  <p data-confirm-text></p>
+  <div class="actions end">
+    <button class="btn ghost" type="button" value="cancel" data-confirm-cancel>Cancel</button>
+    <button class="btn" type="button" data-confirm-ok>Send now</button>
+  </div>
+</dialog>
 <script src="/demo/app.js"></script>
 </body>
 </html>

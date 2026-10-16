@@ -363,7 +363,7 @@ a.ctl { text-decoration: none; }
 .strip-x { width: 28px; height: 28px; padding: 0; justify-content: center; flex: none; }
 .step, .check { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; font-size: 13px; }
 .step b, .check b { font-weight: 600; }
-.ok { width: 16px; height: 16px; flex: none; border-radius: 50%; background: var(--up); color: #fff; display: inline-flex; align-items: center; justify-content: center; }
+.ok:not(.badge) { width: 16px; height: 16px; flex: none; border-radius: 50%; background: var(--up); color: #fff; display: inline-flex; align-items: center; justify-content: center; }
 .todo { width: 16px; height: 16px; flex: none; border-radius: 50%; border: 1.5px dashed #b9bcc2; }
 .wait { position: relative; width: 16px; height: 16px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
 .wait::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--visitors); opacity: .18; }
@@ -648,6 +648,7 @@ a.d3-note:hover { color: var(--ink); }
 .vt-steps .t { font: 12px var(--mono); color: var(--ink-3); }
 .vt-steps .p { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; white-space: nowrap; }
 .vt-steps .mono { font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
+.vt-steps .st-page .p { display: block; text-overflow: ellipsis; }
 .vt-steps .d { text-align: right; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--ink-2); }
 .vt-steps .na { color: #b9bcc2; }
 .st-exit { background: #fafaf8; }
@@ -751,6 +752,7 @@ a.d3-note:hover { color: var(--ink); }
 .rt-sum b.blue { color: var(--visitors-text); }
 .rt-sum b.orange { color: var(--revenue-text); }
 .rt { padding: 4px 16px 0; }
+.rt-top { display: flex; padding: 12px 0 8px; }
 .rt-row { display: grid; grid-template-columns: minmax(0, 1fr) 128px 96px 88px 92px 104px; column-gap: 16px; align-items: center; min-height: 40px; margin: 0 -8px; padding: 0 8px; border-radius: 8px; font-size: 13px; }
 .rt-row:not(.th):hover { background: #fafaf8; }
 .rt-row.th { min-height: 28px; font-size: 12px; font-weight: 500; color: var(--ink-3); }
@@ -806,6 +808,8 @@ a.d3-note:hover { color: var(--ink); }
 .link-name { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .link-name .src { display: inline-flex; }
 .link-url { display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+.link-url .copy { height: 24px; padding: 0 8px; border: 1px solid var(--field); border-radius: 6px; background: var(--paper); color: var(--ink-2); font: inherit; font-size: 12px; font-weight: 500; cursor: pointer; }
+.link-url .copy:hover { background: var(--hover); color: var(--ink); }
 .link-dest { margin-top: 4px; overflow-wrap: anywhere; }
 .link-nums { display: grid; grid-template-columns: repeat(4, minmax(72px, auto)); gap: 16px; text-align: right; }
 .link-nums div { display: flex; flex-direction: column; gap: 2px; }
