@@ -11,7 +11,7 @@ use crate::stats::{
     self, Activity, GoalCount, GoalRow, Journey, Overview, PaymentFilter, PaymentPage,
     PaymentSummary, Period, Report, Who,
 };
-use crate::stats::{BreakdownRow, Dimension};
+use crate::stats::{BreakdownRow, Dimension, Filter, GoalStat, ProviderSplit, Step, StepCount};
 use crate::visitors::{self, Facets, Timeline, VisitorFilter, VisitorPage};
 
 #[derive(Debug, Clone)]
@@ -96,7 +96,10 @@ pub trait EventStore: Send + Sync {
         model: &str,
         window_days: i64,
     ) -> anyhow::Result<()>;
-    fn overview(&self, site_id: &str, period: &Period) -> anyhow::Result<Overview>;
+    fn overview(&self, site_id: &str, period: &Period) -> anyhow::Result<Overview> {
+        self.overview_in(site_id, period, &Filter::default())
+    }
+    fn overview_in(&self, site_id: &str, period: &Period, f: &Filter) -> anyhow::Result<Overview>;
     #[cfg(test)]
     fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<stats::DayPoint>>;
     fn breakdown(
@@ -104,9 +107,23 @@ pub trait EventStore: Send + Sync {
         site_id: &str,
         period: &Period,
         dimension: Dimension,
+    ) -> anyhow::Result<Vec<BreakdownRow>> {
+        self.breakdown_in(site_id, period, dimension, &Filter::default())
+    }
+    fn breakdown_in(
+        &self,
+        site_id: &str,
+        period: &Period,
+        dimension: Dimension,
+        f: &Filter,
     ) -> anyhow::Result<Vec<BreakdownRow>>;
     /// Pages viewed last before paying, by the revenue of those payments.
-    fn last_pages(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<BreakdownRow>>;
+    fn last_pages_in(
+        &self,
+        site_id: &str,
+        period: &Period,
+        f: &Filter,
+    ) -> anyhow::Result<Vec<BreakdownRow>>;
     fn payment_list(
         &self,
         site_id: &str,
@@ -114,6 +131,17 @@ pub trait EventStore: Send + Sync {
         filter: PaymentFilter,
         limit: u32,
         offset: u32,
+    ) -> anyhow::Result<PaymentPage> {
+        self.payment_list_in(site_id, period, filter, limit, offset, &Filter::default())
+    }
+    fn payment_list_in(
+        &self,
+        site_id: &str,
+        period: &Period,
+        filter: PaymentFilter,
+        limit: u32,
+        offset: u32,
+        f: &Filter,
     ) -> anyhow::Result<PaymentPage>;
     /// The payer's sessions in the window before the payment plus the credited one, oldest first.
     fn journey(
@@ -124,8 +152,36 @@ pub trait EventStore: Send + Sync {
         window_days: i64,
     ) -> anyhow::Result<Option<Journey>>;
     /// Totals, current and previous daily series, the four breakdowns and setup facts.
-    fn report(&self, site_id: &str, period: &Period) -> anyhow::Result<Report>;
+    fn report(&self, site_id: &str, period: &Period) -> anyhow::Result<Report> {
+        self.report_in(site_id, period, &Filter::default())
+    }
+    fn report_in(&self, site_id: &str, period: &Period, f: &Filter) -> anyhow::Result<Report>;
+    /// Per local hour of the period's first day.
+    fn hourly(
+        &self,
+        site_id: &str,
+        period: &Period,
+        f: &Filter,
+    ) -> anyhow::Result<Vec<stats::DayPoint>>;
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary>;
+    /// Payments per provider, new against renewals and why unmatched ones did not match.
+    fn payment_split(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ProviderSplit>>;
+    /// Visitors who reached each step in order.
+    fn funnel(
+        &self,
+        site_id: &str,
+        period: &Period,
+        steps: &[Step],
+        f: &Filter,
+    ) -> anyhow::Result<Vec<StepCount>>;
+    /// Custom goals and views of `pages`, with completions and visitors by channel.
+    fn goal_table(
+        &self,
+        site_id: &str,
+        period: &Period,
+        pages: &[String],
+        f: &Filter,
+    ) -> anyhow::Result<Vec<GoalStat>>;
     /// Last seen device and sessions per day before each moment, in zone `tz`.
     fn activity(&self, site_id: &str, tz: &str, who: &[Who]) -> anyhow::Result<Vec<Activity>>;
     fn goal_counts(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<GoalCount>>;
@@ -490,35 +546,47 @@ impl EventStore for DuckStore {
         Ok(())
     }
 
-    fn overview(&self, site_id: &str, period: &Period) -> anyhow::Result<Overview> {
-        stats::overview(&self.conn.lock().unwrap(), site_id, period)
+    fn overview_in(&self, site_id: &str, period: &Period, f: &Filter) -> anyhow::Result<Overview> {
+        stats::overview(&self.conn.lock().unwrap(), site_id, period, f)
     }
 
     #[cfg(test)]
     fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<stats::DayPoint>> {
-        stats::timeseries(&self.conn.lock().unwrap(), site_id, period)
+        stats::timeseries(
+            &self.conn.lock().unwrap(),
+            site_id,
+            period,
+            &Filter::default(),
+        )
     }
 
-    fn breakdown(
+    fn breakdown_in(
         &self,
         site_id: &str,
         period: &Period,
         dimension: Dimension,
+        f: &Filter,
     ) -> anyhow::Result<Vec<BreakdownRow>> {
-        stats::breakdown(&self.conn.lock().unwrap(), site_id, period, dimension)
+        stats::breakdown(&self.conn.lock().unwrap(), site_id, period, dimension, f)
     }
 
-    fn last_pages(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<BreakdownRow>> {
-        stats::last_pages(&self.conn.lock().unwrap(), site_id, period)
+    fn last_pages_in(
+        &self,
+        site_id: &str,
+        period: &Period,
+        f: &Filter,
+    ) -> anyhow::Result<Vec<BreakdownRow>> {
+        stats::last_pages(&self.conn.lock().unwrap(), site_id, period, f)
     }
 
-    fn payment_list(
+    fn payment_list_in(
         &self,
         site_id: &str,
         period: &Period,
         filter: PaymentFilter,
         limit: u32,
         offset: u32,
+        f: &Filter,
     ) -> anyhow::Result<PaymentPage> {
         stats::payment_list(
             &self.conn.lock().unwrap(),
@@ -527,6 +595,7 @@ impl EventStore for DuckStore {
             filter,
             limit,
             offset,
+            f,
         )
     }
 
@@ -546,8 +615,41 @@ impl EventStore for DuckStore {
         )
     }
 
-    fn report(&self, site_id: &str, period: &Period) -> anyhow::Result<Report> {
-        stats::report(&self.conn.lock().unwrap(), site_id, period)
+    fn report_in(&self, site_id: &str, period: &Period, f: &Filter) -> anyhow::Result<Report> {
+        stats::report(&self.conn.lock().unwrap(), site_id, period, f)
+    }
+
+    fn hourly(
+        &self,
+        site_id: &str,
+        period: &Period,
+        f: &Filter,
+    ) -> anyhow::Result<Vec<stats::DayPoint>> {
+        stats::hourly(&self.conn.lock().unwrap(), site_id, period, f)
+    }
+
+    fn payment_split(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ProviderSplit>> {
+        stats::payment_split(&self.conn.lock().unwrap(), site_id, period)
+    }
+
+    fn funnel(
+        &self,
+        site_id: &str,
+        period: &Period,
+        steps: &[Step],
+        f: &Filter,
+    ) -> anyhow::Result<Vec<StepCount>> {
+        stats::funnel(&self.conn.lock().unwrap(), site_id, period, steps, f)
+    }
+
+    fn goal_table(
+        &self,
+        site_id: &str,
+        period: &Period,
+        pages: &[String],
+        f: &Filter,
+    ) -> anyhow::Result<Vec<GoalStat>> {
+        stats::goal_table(&self.conn.lock().unwrap(), site_id, period, pages, f)
     }
 
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary> {

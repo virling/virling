@@ -1,6 +1,6 @@
-//! Generated one-line summaries for the dashboard's insight and AI assistants cards.
+//! Generated one-line summaries for the dashboard's insight card.
 
-use super::{group, money, usd};
+use super::{group, usd};
 use crate::channel;
 use crate::stats::{BreakdownRow, Totals};
 
@@ -11,7 +11,6 @@ const MIN_MATCHED: u64 = 3;
 const MIN_ROW_VISITORS: u64 = 10;
 
 pub struct AiRow {
-    pub(super) host: String,
     pub(super) name: String,
     pub(super) visitors: u64,
     pub(super) revenue_usd: f64,
@@ -34,7 +33,6 @@ pub fn ai_rows(sources: &[BreakdownRow]) -> Vec<AiRow> {
         .filter_map(|r| {
             let host = r.key.as_deref()?.strip_prefix("AI|")?;
             (!host.is_empty() && r.visitors > 0).then(|| AiRow {
-                host: host.to_string(),
                 name: channel::source_name(host),
                 visitors: r.visitors,
                 revenue_usd: r.revenue_usd,
@@ -65,65 +63,6 @@ pub(super) fn times(x: f64) -> String {
         "three times".into()
     } else {
         format!("{x:.1}x")
-    }
-}
-
-fn count_word(n: usize) -> String {
-    match n {
-        2 => "two".into(),
-        3 => "three".into(),
-        4 => "four".into(),
-        5 => "five".into(),
-        n => n.to_string(),
-    }
-}
-
-/// AI share of visitors and of revenue, as "27%".
-pub fn ai_shares(t: &Totals, channels: &[BreakdownRow]) -> (String, String) {
-    let ai = channels
-        .iter()
-        .find(|r| !r.unattributed && r.key.as_deref() == Some("AI"));
-    let (v, r) = ai.map_or((0.0, 0.0), |a| (a.visitors as f64, a.revenue_usd));
-    (pct(v, t.visitors as f64), pct(r, t.revenue_usd))
-}
-
-/// One line under the AI assistants list.
-pub fn ai_line(rows: &[AiRow]) -> String {
-    let Some(best) = rows
-        .iter()
-        .filter(|r| r.revenue_usd > 0.0)
-        .max_by(|a, b| a.per_visitor().total_cmp(&b.per_visitor()))
-    else {
-        return if rows.is_empty() {
-            String::new()
-        } else {
-            "No AI visitor has paid in this range yet.".into()
-        };
-    };
-    let n = rows.len();
-    if n == 1 {
-        return format!(
-            "{} is the only AI assistant sending visitors so far.",
-            best.name
-        );
-    }
-    if rows.last().is_some_and(|l| l.host == best.host) {
-        format!(
-            "{} sends the fewest of the {} but the highest value per visitor.",
-            best.name,
-            count_word(n)
-        )
-    } else if rows[0].host == best.host {
-        format!(
-            "{} sends the most AI visitors and the highest value per visitor.",
-            best.name
-        )
-    } else {
-        format!(
-            "{} has the highest value per visitor, {}.",
-            best.name,
-            usd(best.per_visitor())
-        )
     }
 }
 
@@ -206,20 +145,6 @@ pub fn summary(
     Some((lead, fix))
 }
 
-/// "$608 came from payments with no matched visit", or empty when every payment matched.
-pub fn unmatched(channels: &[BreakdownRow]) -> String {
-    let usd: f64 = channels
-        .iter()
-        .filter(|r| r.unattributed)
-        .map(|r| r.revenue_usd)
-        .sum();
-    if usd > 0.0 {
-        format!("{} came from payments with no matched visit", money(usd))
-    } else {
-        String::new()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -258,13 +183,8 @@ mod tests {
         let ai = ai_rows(&sources);
         let names: Vec<_> = ai.iter().map(|r| r.name.as_str()).collect();
         assert_eq!(names, ["ChatGPT", "Perplexity", "Claude"]);
-        assert_eq!(
-            ai_line(&ai),
-            "Claude sends the fewest of the three but the highest value per visitor."
-        );
         let t = totals(3167, 6121.0);
         let channels = [row("AI", 844, 1978.0), row("Organic search", 1228, 1717.0)];
-        assert_eq!(ai_shares(&t, &channels), ("27%".into(), "32%".into()));
         let landing = [row("/pricing", 619, 1200.0), row("/compare", 479, 570.0)];
         let (lead, fix) = summary(&t, t.revenue_per_visitor, &channels, &ai, &landing).unwrap();
         assert_eq!(
@@ -281,12 +201,5 @@ mod tests {
     fn thin_data_hides_the_summary() {
         let channels = [row("Direct", 20, 100.0)];
         assert!(summary(&totals(20, 100.0), Some(5.0), &channels, &[], &[]).is_none());
-        assert_eq!(ai_line(&[]), "");
-        let mut lost = row("x", 0, 50.0);
-        lost.unattributed = true;
-        assert_eq!(
-            unmatched(&[lost]),
-            "$50 came from payments with no matched visit"
-        );
     }
 }

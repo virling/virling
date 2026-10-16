@@ -1,0 +1,16 @@
+{% macro row(r) %}
+<div class="d3-row{% if r.kid %} kid{% endif %}">
+  <div class="nmw">
+    {% if r.href.is_empty() %}<span class="nm">{% else %}<a class="nm" href="{{ r.href }}" title="Show only {{ r.name }}">{% endif %}
+      <span class="vb" style="width:{{ "{:.1}"|format(r.vw) }}%"></span><span class="rb" style="width:{{ "{:.1}"|format(r.rw) }}%"></span>
+      <span class="ic">{{ r.icon|safe }}</span>
+      <span class="tx"><b{% if r.mono %} class="mono"{% endif %}>{{ r.name }}{% if !r.tag.is_empty() %}<span class="best">{{ r.tag }}</span>{% endif %}</b>{% if !r.sub.is_empty() %}<span>{{ r.sub }}</span>{% endif %}</span>
+    {% if r.href.is_empty() %}</span>{% else %}</a>{% endif %}
+    {% if !r.kids.is_empty() %}<button type="button" class="chev" data-toggle="{{ r.id }}" aria-controls="{{ r.id }}" aria-expanded="false" aria-label="Show what is inside {{ r.name }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>{% endif %}
+  </div>
+  <span class="num v">{% if r.earlier %}<span class="early" title="Paid in this range after a visit before it">earlier visit</span>{% else %}{{ r.visitors }}{% endif %}</span>
+  <span class="num rv">{{ r.revenue }}</span>
+  <span class="num pv">{{ r.per_visitor }}{% if r.small %}<small>small sample</small>{% endif %}</span>
+  <span class="x">{% if !r.ratio.is_empty() %}<span class="bdg {{ r.tone }}">{{ r.ratio }}</span>{% endif %}</span>
+</div>
+{% endmacro %}

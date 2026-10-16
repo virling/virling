@@ -1444,6 +1444,7 @@ mod tests {
             matched_revenue_usd: 0.0,
             conversion: None,
             revenue_per_visitor: None,
+            hour: None,
             by_channel: Vec::new(),
         };
         let days = [

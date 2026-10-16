@@ -12,13 +12,23 @@ use crate::auth::Account;
 use crate::fx::minor_to_major;
 use crate::onboarding::render;
 use crate::sites::{self, Site};
-use crate::stats::{Activity, Dimension, GoalRow, Journey, PaymentFilter, PaymentRow, Period, Who};
+use crate::stats::{Activity, GoalRow, Journey, PaymentFilter, PaymentRow, Period, Who};
 use crate::{favicon, icons, visitor_pages};
 
+/// Builds a link from the current params with some set or cleared.
+pub(crate) type Href<'a> = dyn Fn(&[(&str, &str)]) -> String + 'a;
+/// Builds a link that filters the dashboard by owned params.
+pub(crate) type FilterHref<'a> = dyn Fn(&[(&'static str, String)]) -> String + 'a;
+
 mod cards;
+mod goals;
+mod home;
 mod insight;
 pub mod report;
 pub mod schedule;
+mod views;
+
+pub use home::dashboard;
 
 pub(crate) const RANGES: [(&str, &str, i64); 6] = [
     ("today", "Today", 1),
@@ -424,41 +434,11 @@ fn delta(cur: Option<f64>, prev: Option<f64>) -> (&'static str, String) {
     }
 }
 
-pub struct Kpi {
-    label: &'static str,
-    value: String,
-    trend: &'static str,
-    delta: String,
-    note: String,
-}
-
-pub struct AiView {
-    visitors_share: String,
-    revenue_share: String,
-    /// Icon, name, visitors and revenue.
-    rows: Vec<(String, String, String, String)>,
-    line: String,
-}
-
 /// A step in a payment's path: a visit's source, or the last page before paying.
 pub struct Chip {
     icon: String,
     label: String,
     credited: bool,
-}
-
-/// A payment with the visits that led to it.
-pub struct PathRow {
-    name: String,
-    avatar: String,
-    meta: String,
-    chips: Vec<Chip>,
-    amount: String,
-    refunded: bool,
-    wait: String,
-    date: String,
-    href: String,
-    visitor_href: String,
 }
 
 /// Chips for a journey's visits in order, merging repeats and keeping at most four plus the credited one.
@@ -509,54 +489,6 @@ fn path_chips(j: Option<&Journey>) -> Vec<Chip> {
     chips
 }
 
-fn path_row(
-    p: &PaymentRow,
-    j: Option<&Journey>,
-    names: &Names,
-    domain: &str,
-    offset: UtcOffset,
-) -> PathRow {
-    let alias = names.get(&payer_key(p));
-    let meta: Vec<String> = j
-        .map(|j| {
-            [
-                j.country.as_deref().map(icons::country),
-                j.device.clone().filter(|d| d != "Unknown"),
-                j.browser.clone().filter(|b| b != "Other"),
-            ]
-            .into_iter()
-            .flatten()
-            .collect()
-        })
-        .unwrap_or_default();
-    PathRow {
-        name: alias.name,
-        avatar: alias.avatar,
-        meta: meta.join(" · "),
-        chips: path_chips(j),
-        amount: amount(p),
-        refunded: p.status == "refunded",
-        wait: p
-            .first_touch
-            .as_ref()
-            .map(|f| since(p.ts - f.ts))
-            .unwrap_or_default(),
-        date: local(p.ts, offset),
-        href: format!(
-            "{}/{}/{}",
-            sites::app_path(domain, "payments"),
-            p.provider,
-            p.provider_payment_id
-        ),
-        visitor_href: p
-            .visitor
-            .as_deref()
-            .map(|v| visitor_pages::visitor_href(domain, v))
-            .unwrap_or_default(),
-    }
-}
-
-/// A payment or goal completion shown as the person behind it.
 pub struct CustomerView {
     /// Looks up the generated name once the page's names are loaded.
     key: String,
@@ -585,49 +517,6 @@ pub struct CustomerView {
     visitor_href: String,
 }
 
-pub struct Step {
-    done: bool,
-    icon: String,
-    title: String,
-    sub: String,
-    /// Where an unfinished step is completed.
-    href: String,
-}
-
-pub struct EmptyView {
-    domain: String,
-    script_host: String,
-    cookieless: bool,
-    checks: Vec<Step>,
-    providers: Vec<(String, &'static str, bool)>,
-}
-
-#[derive(Template)]
-#[template(path = "dashboard.html")]
-struct DashboardPage {
-    shell: Shell,
-    title: &'static str,
-    range_label: &'static str,
-    ranges: Vec<Opt>,
-    report_href: String,
-    empty: Option<EmptyView>,
-    insight: Option<(String, String)>,
-    kpis: Vec<Kpi>,
-    cards: Vec<cards::TabCard>,
-    unmatched: String,
-    credit: String,
-    ai: AiView,
-    paths: Vec<PathRow>,
-    payments_total: String,
-    payments_href: String,
-    range_param: &'static str,
-    steps: Vec<Step>,
-    steps_done: usize,
-    dismiss_href: String,
-    steps_title: &'static str,
-    goals_card: bool,
-}
-
 #[derive(Deserialize, Default)]
 pub struct ReportQuery {
     range: Option<String>,
@@ -637,14 +526,6 @@ pub struct ReportQuery {
     goal: Option<String>,
     /// Search over names, sources and countries.
     q: Option<String>,
-}
-
-#[derive(Deserialize, Default)]
-pub struct DashboardQuery {
-    range: Option<String>,
-    /// Card tabs, read by `cards::picks`.
-    #[serde(flatten)]
-    cards: std::collections::HashMap<String, String>,
 }
 
 fn source_of(p: &PaymentRow) -> (String, String) {
@@ -683,23 +564,13 @@ impl CustomerView {
     }
 }
 
-/// "a few seconds", "5 minutes", "an hour", "2 days", "a month"
+/// "<1m", "40m", "3h", "29d"
 fn since(d: Duration) -> String {
-    let count = |n: i64, one: &str, unit: &str| {
-        if n == 1 {
-            one.to_string()
-        } else {
-            format!("{n} {unit}s")
-        }
-    };
-    let days = d.whole_days();
     match d.whole_seconds() {
-        ..60 => "a few seconds".into(),
-        60..3600 => count(d.whole_minutes(), "a minute", "minute"),
-        3600..86400 => count(d.whole_hours(), "an hour", "hour"),
-        _ if days < 30 => count(days, "a day", "day"),
-        _ if days < 365 => count(days / 30, "a month", "month"),
-        _ => count(days / 365, "a year", "year"),
+        ..60 => "<1m".into(),
+        60..3600 => format!("{}m", d.whole_minutes()),
+        3600..86400 => format!("{}h", d.whole_hours()),
+        _ => format!("{}d", d.whole_days()),
     }
 }
 
@@ -809,323 +680,6 @@ fn goal_customer(g: &GoalRow, a: &Activity, domain: &str, offset: UtcOffset) -> 
         href: String::new(),
         visitor_href: visitor_pages::visitor_href(domain, &g.visitor_id),
     }
-}
-
-/// Payments listed with their path on the dashboard.
-const PATH_ROWS: u32 = 8;
-
-pub async fn dashboard(
-    State(state): State<AppState>,
-    account: Account,
-    Path(domain): Path<String>,
-    Query(q): Query<DashboardQuery>,
-) -> Response {
-    let ctx = match load(&state, &account, &domain, "dashboard").await {
-        Ok(ctx) => ctx,
-        Err(code) => return code.into_response(),
-    };
-    let (rkey, rlabel, days, rdefault) = range(&ctx, q.range.as_deref());
-    let p = period(&ctx, days);
-    let settings: Result<(String, i64, bool), _> = sqlx::query_as(
-        "SELECT attribution_model, window_days, setup_dismissed FROM sites WHERE id = ?",
-    )
-    .bind(&ctx.site.id)
-    .fetch_one(&state.db)
-    .await;
-    let providers: Result<Vec<String>, _> = sqlx::query_scalar(
-        "SELECT provider FROM integrations WHERE site_id = ? ORDER BY created_at",
-    )
-    .bind(&ctx.site.id)
-    .fetch_all(&state.db)
-    .await;
-    let (Ok((model, window_days, dismissed)), Ok(providers)) = (settings, providers) else {
-        return StatusCode::SERVICE_UNAVAILABLE.into_response();
-    };
-    let picks = cards::picks(&q.cards);
-    let dims: Vec<Option<Dimension>> = picks.iter().map(|c| c.dimension()).collect();
-    let store = state.events.clone();
-    let (id, period_q) = (ctx.site.id.clone(), p.clone());
-    let result = blocking(move || {
-        let recent = store.payment_list(&id, &period_q, PaymentFilter::All, PATH_ROWS, 0)?;
-        let journeys = recent
-            .rows
-            .iter()
-            .map(|r| store.journey(&id, &r.provider, &r.provider_payment_id, window_days))
-            .collect::<anyhow::Result<Vec<_>>>()?;
-        let breakdowns = dims
-            .iter()
-            .map(|d| match d {
-                Some(d) => store.breakdown(&id, &period_q, *d),
-                None => store.last_pages(&id, &period_q),
-            })
-            .collect::<anyhow::Result<Vec<_>>>()?;
-        Ok((
-            store.report(&id, &period_q)?,
-            store.breakdown(&id, &period_q, Dimension::ChannelSource)?,
-            recent,
-            journeys,
-            breakdowns,
-        ))
-    })
-    .await;
-    let (report, sources, recent, journeys, breakdowns) = match result {
-        Ok(r) => r,
-        Err(code) => return code.into_response(),
-    };
-    let base = sites::app_path(&ctx.site.domain, "");
-    let setup = &report.setup;
-    let since = setup.first_event.map(|t| t.to_offset(ctx.offset).date());
-    let new_site = since.is_none_or(|d| d > p.previous().from);
-    let age = since.map_or(0, |d| (ctx.today - d).whole_days());
-    let young = new_site && age <= 30;
-    let range_param = if rkey == rdefault { "" } else { rkey };
-    let mut params: Vec<(&str, &str)> = vec![("range", range_param)];
-    params.extend(cards::params(&picks));
-
-    let cur = &report.overview.current;
-    let prev = &report.overview.previous;
-    let change = |c: Option<f64>, p: Option<f64>| {
-        if new_site {
-            ("", String::new())
-        } else {
-            delta(c, p)
-        }
-    };
-    let kpi = |label, value, (trend, delta): (&'static str, String), note| Kpi {
-        label,
-        value,
-        trend,
-        delta,
-        note,
-    };
-    let kpis = vec![
-        kpi(
-            "Revenue",
-            money(cur.revenue_usd),
-            change(Some(cur.revenue_usd), Some(prev.revenue_usd)),
-            plural(cur.payments, "payment"),
-        ),
-        kpi(
-            "Visitors",
-            group(cur.visitors),
-            change(Some(cur.visitors as f64), Some(prev.visitors as f64)),
-            plural(cur.sessions, "session"),
-        ),
-        kpi(
-            "Conversion",
-            cur.conversion
-                .map_or_else(|| "n/a".into(), |c| format!("{:.2}%", c * 100.0)),
-            change(cur.conversion, prev.conversion),
-            format!(
-                "{} of {} paid",
-                group(cur.converted),
-                plural(cur.visitors, "visitor")
-            ),
-        ),
-        kpi(
-            "Revenue per visitor",
-            cur.revenue_per_visitor.map_or_else(|| "n/a".into(), usd),
-            change(cur.revenue_per_visitor, prev.revenue_per_visitor),
-            if cur.matched_payments > 0 {
-                "Matched revenue only".into()
-            } else {
-                "Needs a payment matched to a visit".into()
-            },
-        ),
-    ];
-
-    let attributed: f64 = report
-        .channels
-        .iter()
-        .filter(|r| !r.unattributed)
-        .map(|r| r.revenue_usd)
-        .sum();
-    let avg = (cur.visitors > 0 && attributed > 0.0).then(|| attributed / cur.visitors as f64);
-    let cards: Vec<cards::TabCard> = picks
-        .iter()
-        .zip(&breakdowns)
-        .map(|(pick, rows)| cards::card(pick, rows, avg, &base, &params))
-        .collect();
-    let ai_rows = insight::ai_rows(&sources);
-    let (visitors_share, revenue_share) = insight::ai_shares(cur, &report.channels);
-    let insight = insight::summary(cur, avg, &report.channels, &ai_rows, &report.landing_pages);
-    let ai = AiView {
-        visitors_share,
-        revenue_share,
-        line: insight::ai_line(&ai_rows),
-        rows: ai_rows
-            .iter()
-            .take(5)
-            .map(|r| {
-                (
-                    icons::source(&r.host, 16),
-                    r.name.clone(),
-                    group(r.visitors),
-                    money(r.revenue_usd),
-                )
-            })
-            .collect(),
-    };
-    let credit = format!(
-        "Credit: {}, {} days",
-        if model == "first_touch" {
-            "first visit"
-        } else {
-            "last non-direct visit"
-        },
-        window_days
-    );
-
-    let provider_label = |p: &str| provider_name(p).to_string();
-    let empty = (setup.first_event.is_none() && setup.payments == 0).then(|| EmptyView {
-        domain: ctx.site.domain.clone(),
-        script_host: state.config.base_url.clone(),
-        cookieless: ctx.site.cookieless,
-        checks: vec![
-            Step {
-                done: false,
-                icon: icons::glyph("direct", 14, "#0E1116"),
-                title: "Script tag".into(),
-                sub: "Not seen yet".into(),
-                href: String::new(),
-            },
-            match providers.first() {
-                Some(pr) => Step {
-                    done: true,
-                    icon: icons::provider(pr, 14),
-                    title: provider_label(pr),
-                    sub: "Connected".into(),
-                    href: String::new(),
-                },
-                None => Step {
-                    done: false,
-                    icon: icons::glyph("card", 14, "#0E1116"),
-                    title: "Payments".into(),
-                    sub: "Not connected".into(),
-                    href: String::new(),
-                },
-            },
-            Step {
-                done: false,
-                icon: icons::glyph("link", 14, "#0E1116"),
-                title: "Checkout link".into(),
-                sub: "Passes virling_vid".into(),
-                href: String::new(),
-            },
-        ],
-        providers: ["dodo", "stripe", "polar", "lemonsqueezy"]
-            .into_iter()
-            .map(|pr| {
-                (
-                    icons::provider(pr, 12),
-                    provider_name(pr),
-                    providers.iter().any(|c| c == pr),
-                )
-            })
-            .collect(),
-    });
-    let site_url = |page: &str| sites::app_path(&ctx.site.domain, page);
-    let mut steps = if young && age <= 14 && empty.is_none() && !dismissed {
-        let matched = setup.first_match.as_ref();
-        vec![
-            Step {
-                done: since.is_some(),
-                icon: icons::glyph("direct", 14, "#0E1116"),
-                title: "Script installed".into(),
-                sub: since.map(day).unwrap_or_else(|| "Not seen yet".into()),
-                href: site_url("setup/script"),
-            },
-            match providers.first() {
-                Some(pr) => Step {
-                    done: true,
-                    icon: icons::provider(pr, 14),
-                    title: format!("{} connected", provider_short(pr)),
-                    sub: format!("{} total", plural(setup.payments, "payment")),
-                    href: String::new(),
-                },
-                None => Step {
-                    done: false,
-                    icon: icons::glyph("card", 14, "#8A909A"),
-                    title: "Connect payments".into(),
-                    sub: "Stripe, Polar, Dodo, Lemon Squeezy".into(),
-                    href: site_url("setup/payments"),
-                },
-            },
-            match matched {
-                Some(m) => {
-                    let source = source_of(m).0;
-                    Step {
-                        done: true,
-                        icon: icons::source(&source, 14),
-                        title: "Payment matched".into(),
-                        sub: format!("{} from {}", amount(m), source),
-                        href: String::new(),
-                    }
-                }
-                None => Step {
-                    done: false,
-                    icon: icons::glyph("link", 14, "#8A909A"),
-                    title: "Payment matched".into(),
-                    sub: "Pass virling_vid at checkout".into(),
-                    href: site_url("setup/checkout"),
-                },
-            },
-            Step {
-                done: setup.has_goals,
-                icon: icons::glyph("unattributed", 14, "#8A909A"),
-                title: "Track a goal".into(),
-                sub: "Signups, trials".into(),
-                href: "#goals".into(),
-            },
-        ]
-    } else {
-        Vec::new()
-    };
-    if steps.iter().all(|s| s.done) {
-        steps.clear();
-    }
-    let names = match Names::load(
-        &state.db,
-        &ctx.site.id,
-        recent.rows.iter().map(payer_key).collect(),
-    )
-    .await
-    {
-        Ok(n) => n,
-        Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
-    };
-    render(DashboardPage {
-        title: "Dashboard",
-        range_label: rlabel,
-        ranges: range_opts(&base, rkey, rdefault, &params),
-        report_href: site_url("report"),
-        empty,
-        insight,
-        kpis,
-        cards,
-        unmatched: insight::unmatched(&report.channels),
-        credit,
-        ai,
-        paths: recent
-            .rows
-            .iter()
-            .zip(&journeys)
-            .map(|(r, j)| path_row(r, j.as_ref(), &names, &ctx.site.domain, ctx.offset))
-            .collect(),
-        payments_total: plural(recent.total, "payment"),
-        payments_href: site_url("payments"),
-        range_param,
-        steps_done: steps.iter().filter(|s| s.done).count(),
-        dismiss_href: site_url("setup/dismiss"),
-        steps,
-        goals_card: young && !setup.has_goals,
-        steps_title: if age <= 7 {
-            "First week"
-        } else {
-            "First two weeks"
-        },
-        shell: ctx.shell,
-    })
 }
 
 pub struct Summary {

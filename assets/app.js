@@ -203,10 +203,11 @@ for (const input of document.querySelectorAll("input[data-swatch]")) {
 }
 
 for (const btn of document.querySelectorAll("[data-copy-text]")) {
+  const label = btn.textContent;
   btn.addEventListener("click", async () => {
     await navigator.clipboard.writeText(btn.dataset.copyText);
     btn.textContent = "Copied";
-    setTimeout(() => { btn.textContent = "Copy"; }, 1500);
+    setTimeout(() => { btn.textContent = label; }, 1500);
   });
 }
 
@@ -240,3 +241,41 @@ if (noteForm) {
   text.addEventListener("click", () => edit(true));
   noteForm.querySelector("[data-note-cancel]").addEventListener("click", () => edit(false));
 }
+
+const toggle = (id, open) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.hidden = !(open ?? el.hidden);
+  for (const b of document.querySelectorAll(`[data-toggle="${id}"]`)) b.setAttribute("aria-expanded", String(!el.hidden));
+};
+document.addEventListener("click", (e) => {
+  const tab = e.target.closest("a[data-tab]");
+  if (tab && !(e.metaKey || e.ctrlKey || e.shiftKey)) {
+    e.preventDefault();
+    for (const t of tab.parentElement.querySelectorAll("a[data-tab]")) {
+      const on = t === tab;
+      t.classList.toggle("on", on);
+      on ? t.setAttribute("aria-current", "true") : t.removeAttribute("aria-current");
+      document.getElementById(t.dataset.tab).hidden = !on;
+    }
+    const next = new URL(tab.href);
+    const key = tab.closest("[id]").id;
+    const value = next.searchParams.get(key);
+    for (const a of document.querySelectorAll("a[href]")) {
+      const u = new URL(a.href);
+      if (u.pathname !== location.pathname || a === tab || a.dataset.tab?.startsWith(key + "-")) continue;
+      value ? u.searchParams.set(key, value) : u.searchParams.delete(key);
+      a.setAttribute("href", u.pathname + u.search + u.hash);
+    }
+    history.replaceState(null, "", next.pathname + next.search);
+    return;
+  }
+  const b = e.target.closest("[data-toggle]");
+  if (b) return toggle(b.dataset.toggle);
+  const all = e.target.closest("[data-expand-all]");
+  if (!all) return;
+  const ids = [...all.closest("[data-card]").querySelectorAll(".chev[data-toggle]")].map((c) => c.dataset.toggle);
+  const open = ids.some((id) => document.getElementById(id).hidden);
+  ids.forEach((id) => toggle(id, open));
+  all.textContent = open ? "Collapse all" : "Expand all";
+});
