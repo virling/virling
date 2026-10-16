@@ -296,6 +296,9 @@ fn glyph_path(name: &str) -> &'static str {
         "pin" => {
             r#"<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>"#
         }
+        "language" => {
+            r#"<path d="M4 5h9M8.5 3v2M6 5c0 4 3 7 6 8M11 5c0 3-2.5 7-6 9"/><path d="M13 21l4-9 4 9M14.5 18h5"/>"#
+        }
         "globe" => {
             r#"<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>"#
         }
@@ -303,7 +306,7 @@ fn glyph_path(name: &str) -> &'static str {
     }
 }
 
-/// A stroked 24x24 glyph: direct, email, unattributed, search, link, social, paid, ai, card, desktop, mobile, tablet, windows, page, pin or globe.
+/// A stroked 24x24 glyph: direct, email, unattributed, search, link, social, paid, ai, card, desktop, mobile, tablet, windows, page, pin, language or globe.
 pub fn glyph(name: &str, size: u32, color: &str) -> String {
     format!(
         r#"<svg class="ico" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{}</svg>"#,

@@ -24,6 +24,7 @@ pub enum Tab {
     Before,
     Country,
     City,
+    Language,
     Device,
     Browser,
     Os,
@@ -41,6 +42,7 @@ impl Tab {
             Tab::Before => return None,
             Tab::Country => Dimension::Country,
             Tab::City => Dimension::CountryCity,
+            Tab::Language => Dimension::Language,
             Tab::Device => Dimension::Device,
             Tab::Browser => Dimension::Browser,
             Tab::Os => Dimension::Os,
@@ -69,6 +71,7 @@ impl Tab {
             Tab::Before => "Last page before checkout",
             Tab::Country => "Country",
             Tab::City => "City",
+            Tab::Language => "Browser language",
             Tab::Device => "Device",
             Tab::Browser => "Browser",
             Tab::Os => "Operating system",
@@ -85,6 +88,7 @@ impl Tab {
             Tab::Before => "Visitors here means everyone who viewed the page.",
             Tab::Country => "Click a country to filter. Open it to see its cities.",
             Tab::City => "Located from IP, approximate.",
+            Tab::Language => "Click a language to filter. From the browser setting.",
             Tab::Device => "Open a device to see its systems.",
             Tab::Browser | Tab::Os => "From the user agent.",
         }
@@ -136,6 +140,7 @@ pub const SPECS: [Spec; 4] = [
         tabs: &[
             ("country", "Country", Tab::Country),
             ("city", "City", Tab::City),
+            ("language", "Language", Tab::Language),
         ],
         empty: (
             "No locations yet",
@@ -262,6 +267,76 @@ struct Item {
     row: BreakdownRow,
 }
 
+/// "English (US)", "German" or "pt-BR" for a tag like "en-US"; unknown languages keep their tag.
+pub fn language_name(tag: &str) -> String {
+    let (lang, region) = tag.split_once('-').unwrap_or((tag, ""));
+    let Some(name) = LANGUAGES.iter().find(|l| l.0 == lang).map(|l| l.1) else {
+        return tag.to_string();
+    };
+    match region {
+        "" => name.to_string(),
+        "US" => format!("{name} (US)"),
+        "GB" => format!("{name} (UK)"),
+        r => format!("{name} ({})", icons::country(r)),
+    }
+}
+
+/// The region's flag, else a language glyph.
+pub fn language_icon(tag: &str) -> String {
+    tag.split_once('-')
+        .map(|(_, region)| icons::flag(region))
+        .filter(|f| !f.is_empty())
+        .unwrap_or_else(|| icons::glyph("language", 16, "#6B717C"))
+}
+
+/// ISO 639-1 codes of common browser languages and their English names.
+const LANGUAGES: &[(&str, &str)] = &[
+    ("ar", "Arabic"),
+    ("bg", "Bulgarian"),
+    ("bn", "Bengali"),
+    ("ca", "Catalan"),
+    ("cs", "Czech"),
+    ("da", "Danish"),
+    ("de", "German"),
+    ("el", "Greek"),
+    ("en", "English"),
+    ("es", "Spanish"),
+    ("et", "Estonian"),
+    ("fa", "Persian"),
+    ("fi", "Finnish"),
+    ("fil", "Filipino"),
+    ("fr", "French"),
+    ("he", "Hebrew"),
+    ("hi", "Hindi"),
+    ("hr", "Croatian"),
+    ("hu", "Hungarian"),
+    ("id", "Indonesian"),
+    ("it", "Italian"),
+    ("ja", "Japanese"),
+    ("ko", "Korean"),
+    ("lt", "Lithuanian"),
+    ("lv", "Latvian"),
+    ("ms", "Malay"),
+    ("nb", "Norwegian"),
+    ("nl", "Dutch"),
+    ("no", "Norwegian"),
+    ("pl", "Polish"),
+    ("pt", "Portuguese"),
+    ("ro", "Romanian"),
+    ("ru", "Russian"),
+    ("sk", "Slovak"),
+    ("sl", "Slovenian"),
+    ("sr", "Serbian"),
+    ("sv", "Swedish"),
+    ("ta", "Tamil"),
+    ("th", "Thai"),
+    ("tr", "Turkish"),
+    ("uk", "Ukrainian"),
+    ("ur", "Urdu"),
+    ("vi", "Vietnamese"),
+    ("zh", "Chinese"),
+];
+
 fn none_label(tab: Tab) -> (&'static str, &'static str) {
     match tab {
         Tab::Campaign => ("No campaign", "Visits without UTM tags"),
@@ -371,6 +446,16 @@ fn item(tab: Tab, r: &BreakdownRow) -> Item {
                     icons::country(code),
                     false,
                     vec![("city", city.to_string())],
+                )
+            }
+            Tab::Language => {
+                let tag = v("");
+                (
+                    language_icon(&tag),
+                    language_name(&tag),
+                    tag.clone(),
+                    false,
+                    vec![("language", tag)],
                 )
             }
             Tab::Device => {
@@ -608,7 +693,7 @@ fn panel(
         })
         .collect();
     let foot = match tab {
-        Tab::Source | Tab::City if total > SHOWN => {
+        Tab::Source | Tab::City | Tab::Language if total > SHOWN => {
             format!("Top {SHOWN} of {total}. {}", tab.foot())
         }
         _ if rows.is_empty() => String::new(),
@@ -830,6 +915,26 @@ mod tests {
             revenue_usd: revenue,
             revenue_per_visitor: Some(revenue / visitors as f64),
         }
+    }
+
+    #[test]
+    fn languages_read_as_names_with_flags() {
+        assert_eq!(language_name("en-US"), "English (US)");
+        assert_eq!(language_name("en-GB"), "English (UK)");
+        assert_eq!(language_name("de-AT"), "German (Austria)");
+        assert_eq!(language_name("de"), "German");
+        assert_eq!(language_name("xx-YY"), "xx-YY");
+        let us = item(Tab::Language, &row("en-US", 10, 5.0));
+        assert!(us.icon.contains("/assets/flags/us.svg"));
+        assert_eq!(
+            (us.sub.as_str(), us.filter[0].1.as_str()),
+            ("en-US", "en-US")
+        );
+        assert!(
+            item(Tab::Language, &row("de", 10, 5.0))
+                .icon
+                .contains("M4 5h9")
+        );
     }
 
     fn base() -> Base {

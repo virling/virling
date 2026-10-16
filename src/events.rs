@@ -38,6 +38,8 @@ pub struct Event {
     pub city: Option<String>,
     /// Page hostname, lowercase.
     pub host: Option<String>,
+    /// Browser language as "en" or "en-US".
+    pub language: Option<String>,
 }
 
 /// A payment as stored, one row per provider payment ID so re-syncs never double count.
@@ -298,12 +300,14 @@ impl DuckStore {
                 os VARCHAR,
                 region VARCHAR,
                 city VARCHAR,
-                host VARCHAR
+                host VARCHAR,
+                language VARCHAR
             );
             ALTER TABLE events ADD COLUMN IF NOT EXISTS os VARCHAR;
             ALTER TABLE events ADD COLUMN IF NOT EXISTS region VARCHAR;
             ALTER TABLE events ADD COLUMN IF NOT EXISTS city VARCHAR;
             ALTER TABLE events ADD COLUMN IF NOT EXISTS host VARCHAR;
+            ALTER TABLE events ADD COLUMN IF NOT EXISTS language VARCHAR;
             CREATE TABLE IF NOT EXISTS payments (
                 site_id VARCHAR NOT NULL,
                 provider VARCHAR NOT NULL,
@@ -383,6 +387,7 @@ impl EventStore for DuckStore {
                     e.region,
                     e.city,
                     e.host,
+                    e.language,
                 ])?;
             }
             app.flush()?;

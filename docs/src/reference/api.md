@@ -87,6 +87,7 @@ Visitors and credited revenue per value of a dimension, most revenue first, then
 | `country` | Two-letter country code. |
 | `device` | Desktop, Mobile, Tablet or Unknown. |
 | `browser`, `os` | Browser and operating system. |
+| `language` | Browser language, such as `en` or `en-US`. |
 
 It takes the range parameters and `limit` (default 100, up to 1000).
 

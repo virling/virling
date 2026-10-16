@@ -35,6 +35,8 @@ pub struct Incoming {
     w: Option<u32>,
     /// goal name
     g: Option<String>,
+    /// navigator.language
+    l: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -159,6 +161,22 @@ fn country(headers: &HeaderMap) -> Option<String> {
         })
 }
 
+/// "en" or "en-US" from a language tag such as "en-us" or "zh-Hans-CN"; `base` drops the region.
+fn language(tag: &str, base: bool) -> Option<String> {
+    let mut parts = tag.trim().split(['-', '_']);
+    let lang = parts.next()?.to_ascii_lowercase();
+    if !(2..=3).contains(&lang.len()) || !lang.bytes().all(|b| b.is_ascii_lowercase()) {
+        return None;
+    }
+    let region = parts
+        .find(|p| p.len() == 2 && p.bytes().all(|b| b.is_ascii_alphabetic()))
+        .filter(|_| !base);
+    Some(match region {
+        Some(r) => format!("{lang}-{}", r.to_ascii_uppercase()),
+        None => lang,
+    })
+}
+
 fn client_ip(headers: &HeaderMap, peer: SocketAddr, trust_proxy: bool) -> IpAddr {
     if trust_proxy {
         let forwarded = headers
@@ -239,6 +257,12 @@ pub async fn collect(
     let city = place(&headers, &["cf-ipcity", "x-vercel-ip-city"]);
     let browser = browser(user_agent);
     let os = os(user_agent);
+    let accept_language = headers
+        .get(header::ACCEPT_LANGUAGE)
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.split([',', ';']).next())
+        .unwrap_or("")
+        .to_string();
     let now = OffsetDateTime::now_utc();
 
     let mut events = Vec::with_capacity(incoming.len());
@@ -346,6 +370,7 @@ pub async fn collect(
             browser: browser.to_string(),
             os: os.to_string(),
             host: Some(page_host.to_ascii_lowercase()),
+            language: language(e.l.as_deref().unwrap_or(&accept_language), site.cookieless),
         });
     }
 
@@ -421,6 +446,25 @@ mod tests {
         ];
         for (ua, want) in cases {
             assert_eq!(os(ua), want, "{ua}");
+        }
+    }
+
+    #[test]
+    fn normalizes_browser_languages() {
+        let cases = [
+            ("en-US", false, Some("en-US")),
+            ("en-us", false, Some("en-US")),
+            ("de", false, Some("de")),
+            ("zh-Hans-CN", false, Some("zh-CN")),
+            ("pt_BR", false, Some("pt-BR")),
+            ("es-419", false, Some("es")),
+            ("en-GB", true, Some("en")),
+            ("", false, None),
+            ("*", false, None),
+            ("english", false, None),
+        ];
+        for (tag, base, want) in cases {
+            assert_eq!(language(tag, base).as_deref(), want, "{tag}");
         }
     }
 

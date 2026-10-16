@@ -48,7 +48,7 @@ const PRESETS: [(&str, &str); 8] = [
 ];
 
 /// Filter params, and the first-pageview column each one matches; "viewed" matches any page of the visit.
-const FILTERS: [(&str, &str); 11] = [
+const FILTERS: [(&str, &str); 12] = [
     ("channel", "channel"),
     ("source", "referrer_host"),
     ("campaign", "utm_campaign"),
@@ -57,6 +57,7 @@ const FILTERS: [(&str, &str); 11] = [
     ("viewed", ""),
     ("country", "country"),
     ("city", "city"),
+    ("language", "language"),
     ("device", "device"),
     ("browser", "browser"),
     ("os", "os"),
@@ -327,6 +328,7 @@ fn chip_view(key: &str, value: &str) -> (String, String) {
         ),
         "country" => (icons::flag(value), icons::country(value)),
         "city" => (icons::glyph("pin", 16, "#6B717C"), value.to_string()),
+        "language" => (cards::language_icon(value), cards::language_name(value)),
         "device" => (icons::device(value), value.to_string()),
         _ => (icons::ua(value), value.to_string()),
     }

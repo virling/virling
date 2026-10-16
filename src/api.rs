@@ -22,7 +22,7 @@ pub const MAX_PAYMENTS: u32 = 200;
 pub const MAX_ROWS: usize = 1000;
 
 /// Breakdown dimensions by API name, with what each row is.
-pub const DIMENSIONS: [(&str, Dimension, &str); 10] = [
+pub const DIMENSIONS: [(&str, Dimension, &str); 11] = [
     (
         "channel",
         Dimension::Channel,
@@ -53,6 +53,11 @@ pub const DIMENSIONS: [(&str, Dimension, &str); 10] = [
     ),
     ("browser", Dimension::Browser, "Browser name"),
     ("os", Dimension::Os, "Operating system"),
+    (
+        "language",
+        Dimension::Language,
+        "Browser language, such as en or en-US",
+    ),
 ];
 
 pub struct ApiError(pub StatusCode, pub String);
@@ -614,6 +619,7 @@ pub(crate) mod tests {
             region: None,
             city: None,
             host: None,
+            language: None,
         }
     }
 
