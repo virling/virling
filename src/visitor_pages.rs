@@ -6,6 +6,7 @@ use serde::Deserialize;
 use time::macros::format_description;
 use time::{Duration, OffsetDateTime, UtcOffset};
 
+use crate::alias::Names;
 use crate::app::AppState;
 use crate::auth::Account;
 use crate::channel::{source_domain, source_name};
@@ -13,11 +14,11 @@ use crate::dashboard::{
     Opt, PER_PAGE, Shell, ago, amount, blocking, day, duration, group, href, link, load, local,
     money, payer_key, period, plural, provider_short, range, range_opts, status,
 };
+use crate::icons;
 use crate::onboarding::render;
 use crate::sites;
 use crate::stats::PaymentRow;
 use crate::visitors::{Entry, Step, Timeline, VisitorFilter, VisitorRow};
-use crate::{alias, icons};
 
 /// Percent-encodes a query value or path segment.
 fn enc(s: &str) -> String {
@@ -99,11 +100,12 @@ struct VisitorsPage {
 
 fn visitor_view(
     v: &VisitorRow,
+    names: &Names,
     domain: &str,
     offset: UtcOffset,
     now: OffsetDateTime,
 ) -> VisitorView {
-    let alias = alias::alias(&v.who);
+    let alias = names.get(&v.who);
     VisitorView {
         href: visitor_href(domain, &v.visitor_id),
         name: alias.name,
@@ -308,6 +310,16 @@ pub async fn list(
     let shown = list.rows.len() as u64;
     let first = (page as u64 - 1) * PER_PAGE as u64;
     let now = OffsetDateTime::now_utc();
+    let names = match Names::load(
+        &state.db,
+        &ctx.site.id,
+        list.rows.iter().map(|v| v.who.clone()).collect(),
+    )
+    .await
+    {
+        Ok(n) => n,
+        Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
+    };
     render(VisitorsPage {
         title: "Visitors",
         range_label: rlabel,
@@ -323,7 +335,7 @@ pub async fn list(
         rows: list
             .rows
             .iter()
-            .map(|v| visitor_view(v, &ctx.site.domain, ctx.offset, now))
+            .map(|v| visitor_view(v, &names, &ctx.site.domain, ctx.offset, now))
             .collect(),
         filtered: channel.is_some()
             || source.is_some()
@@ -572,10 +584,14 @@ pub async fn timeline(
     let revenue: f64 = t.payments.iter().filter_map(|p| p.net_usd).sum();
     let last = visits.last().map(|v| v.end);
     let now = OffsetDateTime::now_utc();
-    let alias = alias::alias(&match t.payments.first() {
+    let key = match t.payments.first() {
         Some(p) => payer_key(p),
         None => format!("v:{}", t.visitor_id),
-    });
+    };
+    let alias = match Names::load(&state.db, &ctx.site.id, vec![key.clone()]).await {
+        Ok(n) => n.get(&key),
+        Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
+    };
     render(VisitorPage {
         title: "Visitor",
         back: sites::app_path(&ctx.site.domain, "visitors"),
