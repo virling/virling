@@ -20,7 +20,7 @@ use crate::{alias, chart, favicon, icons, visitor_pages};
 
 mod cards;
 
-const RANGES: [(&str, &str, i64); 6] = [
+pub(crate) const RANGES: [(&str, &str, i64); 6] = [
     ("today", "Today", 1),
     ("7d", "Last 7 days", 7),
     ("30d", "Last 30 days", 30),
@@ -202,7 +202,16 @@ pub(crate) fn range(
     ctx: &Ctx,
     key: Option<&str>,
 ) -> (&'static str, &'static str, i64, &'static str) {
-    let tracked = ctx.first_day.map(|d| (ctx.today - d).whole_days() + 1);
+    resolve_range(ctx.today, ctx.first_day, key)
+}
+
+/// `range` for a site whose local today and first tracked day are known.
+pub(crate) fn resolve_range(
+    today: Date,
+    first_day: Option<Date>,
+    key: Option<&str>,
+) -> (&'static str, &'static str, i64, &'static str) {
+    let tracked = first_day.map(|d| (today - d).whole_days() + 1);
     let default = if tracked.is_some_and(|n| n <= 30) {
         "all"
     } else {

@@ -1,4 +1,5 @@
 mod alias;
+mod api;
 mod app;
 mod auth;
 mod channel;
