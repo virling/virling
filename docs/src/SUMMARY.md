@@ -17,6 +17,7 @@
 - [Add the script](track/script.md)
 - [Framework guides](track/frameworks.md)
 - [Goals](track/goals.md)
+- [Tracked links](track/links.md)
 - [Single-page apps](track/spa.md)
 - [Cookieless mode](track/cookieless.md)
 - [Privacy and consent](track/privacy.md)

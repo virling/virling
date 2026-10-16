@@ -201,3 +201,11 @@ for (const input of document.querySelectorAll("input[data-swatch]")) {
     if (/^#[0-9a-f]{6}$/i.test(input.value.trim())) swatch.style.background = input.value.trim();
   });
 }
+
+for (const btn of document.querySelectorAll("[data-copy-text]")) {
+  btn.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(btn.dataset.copyText);
+    btn.textContent = "Copied";
+    setTimeout(() => { btn.textContent = "Copy"; }, 1500);
+  });
+}

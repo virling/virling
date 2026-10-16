@@ -13,6 +13,7 @@ mod flags;
 mod fx;
 mod icons;
 mod ingest;
+mod links;
 mod mail;
 mod mcp;
 mod onboarding;
@@ -1126,6 +1127,101 @@ mod tests {
         assert!(tabs.contains("Page read right before checkout"));
         assert!(
             tabs.contains(r#"href="/app/example.com?sources=referrer&#38;location=device#pages""#)
+        );
+    }
+
+    #[tokio::test]
+    async fn short_links_redirect_with_tags_and_count_clicks() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let bad = form(
+            "/app/example.com/links",
+            "name=Post&destination=https%3A%2F%2Fevil.com%2F&source=x.com&channel=social".into(),
+            Some(&cookie),
+        );
+        let res = call(&state, bad).await;
+        assert!(
+            res.headers()["location"]
+                .to_str()
+                .unwrap()
+                .ends_with("?error=destination")
+        );
+        let ok = form(
+            "/app/example.com/links",
+            "name=Day+3+post&destination=https%3A%2F%2Fexample.com%2Fpricing&source=X.com&channel=social".into(),
+            Some(&cookie),
+        );
+        assert_eq!(call(&state, ok).await.status(), StatusCode::SEE_OTHER);
+        let slug: String = sqlx::query_scalar("SELECT slug FROM short_links")
+            .fetch_one(&state.db)
+            .await
+            .unwrap();
+
+        let click = Request::get(format!("/l/{slug}"))
+            .header("user-agent", UA)
+            .body(Body::empty())
+            .unwrap();
+        let res = call(&state, click).await;
+        assert_eq!(res.status(), StatusCode::FOUND);
+        assert_eq!(
+            res.headers()["location"],
+            format!(
+                "https://example.com/pricing?utm_source=x.com&utm_medium=social&utm_campaign={slug}"
+            )
+            .as_str()
+        );
+        let bot = Request::get(format!("/l/{slug}"))
+            .header("user-agent", "Googlebot/2.1")
+            .body(Body::empty())
+            .unwrap();
+        assert_eq!(call(&state, bot).await.status(), StatusCode::FOUND);
+        let clicks: i64 = sqlx::query_scalar("SELECT clicks FROM short_links")
+            .fetch_one(&state.db)
+            .await
+            .unwrap();
+        assert_eq!(clicks, 1, "bots are not counted");
+        assert_eq!(
+            call(&state, get("/l/missing", None)).await.status(),
+            StatusCode::NOT_FOUND
+        );
+
+        let body =
+            body_text(call(&state, get("/app/example.com/links", Some(&cookie))).await).await;
+        assert!(body.contains("Day 3 post") && body.contains(&format!("/l/{slug}")));
+        let other = sign_in(&state, "other%40example.com").await;
+        assert_eq!(
+            call(&state, get("/app/example.com/links", Some(&other)))
+                .await
+                .status(),
+            StatusCode::NOT_FOUND
+        );
+        let id: String = sqlx::query_scalar("SELECT id FROM short_links")
+            .fetch_one(&state.db)
+            .await
+            .unwrap();
+        call(
+            &state,
+            form(
+                "/app/example.com/links/delete",
+                format!("id={id}"),
+                Some(&other),
+            ),
+        )
+        .await;
+        call(
+            &state,
+            form(
+                "/app/example.com/links/delete",
+                format!("id={id}"),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            call(&state, get(&format!("/l/{slug}"), None))
+                .await
+                .status(),
+            StatusCode::NOT_FOUND
         );
     }
 
