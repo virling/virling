@@ -119,6 +119,18 @@ pub fn router(state: AppState) -> Router {
         .route("/assets/dia/{file}", get(diagram))
         .route("/assets/icons/{file}", get(ua_icon))
         .route(
+            "/favicon.ico",
+            get(|| async {
+                (
+                    [
+                        (header::CONTENT_TYPE, "image/x-icon"),
+                        (header::CACHE_CONTROL, "public, max-age=604800"),
+                    ],
+                    include_bytes!("../assets/favicon.ico").as_slice(),
+                )
+            }),
+        )
+        .route(
             "/favicon.svg",
             get(|| asset("image/svg+xml", include_str!("../assets/favicon.svg"))),
         );
