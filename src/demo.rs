@@ -9,6 +9,7 @@ use time::{Duration, OffsetDateTime};
 
 use crate::app::{self, AppState, Config};
 use crate::events::{DuckStore, Event, EventStore, Payment};
+use crate::providers::Subscription;
 use crate::{auth, channel, crypto, favicon, flags, icons, mail, sites, sync};
 
 const DOMAIN: &str = "tallybird.app";
@@ -392,10 +393,11 @@ fn session(
 }
 
 /// About 180 days of visits for a small invoicing SaaS, with Stripe payments, renewals and refunds.
-fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>) {
+fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>, Vec<Subscription>) {
     let mut rng = Rng(0x5EED_DE30_0000_0001);
     let mut events = Vec::new();
     let mut payments = Vec::new();
+    let mut subscriptions = Vec::new();
     let start = now.date() - Duration::days(DAYS);
     for d in 0..=DAYS {
         let day = (start + Duration::days(d)).midnight().assume_utc();
@@ -500,6 +502,14 @@ fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>) {
                 at += Duration::days(30);
                 renewal = true;
             }
+            let live = at > now;
+            subscriptions.push(Subscription {
+                subscription_id: rng.id("sub_"),
+                customer_id: customer,
+                status: if live { "active" } else { "canceled" }.into(),
+                live,
+                ends_at: None,
+            });
         }
     }
     for n in 0..4 {
@@ -508,7 +518,7 @@ fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>) {
         session(&mut rng, site, &v, &SOURCES[n as usize], ts, &mut events);
     }
     events.retain(|e| e.ts <= now);
-    (events, payments)
+    (events, payments, subscriptions)
 }
 
 /// Seeds a throwaway data dir, serves the app on localhost and writes the reachable demo pages to `out`.
@@ -551,9 +561,10 @@ async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
     fetch_favicons(&db).await?;
 
     let store = Arc::new(DuckStore::open(&dir.join("events.duckdb"))?);
-    let (events, payments) = seed(&site, now);
+    let (events, payments, subscriptions) = seed(&site, now);
     store.insert_events(&events)?;
     store.upsert_payments(&payments)?;
+    store.replace_subscriptions(&site, "stripe", &subscriptions)?;
     let config = Config {
         marketing: false,
         app: true,
@@ -585,7 +596,7 @@ async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
         anyhow::ensure!(res.url().path().starts_with("/app/"), "{url} redirected");
         Ok(res.text().await?)
     };
-    let mut queue: VecDeque<String> = ["", "/payments", "/visitors", "/report"]
+    let mut queue: VecDeque<String> = ["", "/payments", "/visitors", "/retention", "/report"]
         .iter()
         .map(|p| format!("/app/{DOMAIN}{p}"))
         .collect();
@@ -766,6 +777,7 @@ fn target(url: &str) -> Option<String> {
         "" => ("", &["range", "sources", "location", "pages"]),
         "/payments" => ("payments/", &["range", "filter"]),
         "/report" => ("report/", &[]),
+        "/retention" => ("retention/", &["range", "by"]),
         "/visitors" => ("visitors/", &["range", "exit", "paid", "channel", "goal"]),
         p if p.starts_with("/visitors/") => {
             let id = &p["/visitors/".len()..];
