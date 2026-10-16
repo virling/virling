@@ -80,7 +80,15 @@ enum Command {
     Query(query::QueryArgs),
     /// Render the sample-data demo to static HTML
     #[command(hide = true)]
-    Demo { out: PathBuf },
+    Demo {
+        out: PathBuf,
+        /// Seed OUT as a data directory to serve instead of exporting pages
+        #[arg(long)]
+        data: bool,
+        /// Owner of the seeded site with --data
+        #[arg(long, default_value = "maya.chen@tallybird.app")]
+        email: String,
+    },
 }
 
 #[derive(Parser)]
@@ -134,8 +142,12 @@ async fn main() -> anyhow::Result<()> {
         )
         .init();
     let cli = Cli::parse();
-    if let Some(Command::Demo { out }) = &cli.command {
-        return demo::export(out).await;
+    if let Some(Command::Demo { out, data, email }) = &cli.command {
+        return if *data {
+            demo::data(out, email).await
+        } else {
+            demo::export(out).await
+        };
     }
     if let Some(Command::Query(args)) = cli.command {
         match query::run(args).await {

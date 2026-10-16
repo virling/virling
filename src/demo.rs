@@ -634,9 +634,18 @@ pub async fn export(out: &Path) -> anyhow::Result<()> {
     result
 }
 
-async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
+/// Seeds `dir` as a data directory owned by `email`, for running the app on the sample data.
+pub async fn data(dir: &Path, email: &str) -> anyhow::Result<()> {
+    std::fs::create_dir_all(dir)?;
+    let (state, _) = seeded(dir, email).await?;
+    state.db.close().await;
+    Ok(())
+}
+
+/// The demo account, site and sample data in `dir`, plus a session token for `email`.
+async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
     let db = crate::open_sqlite(dir).await?;
-    let account = sites::find_or_create_account(&db, "maya.chen@tallybird.app").await?;
+    let account = sites::find_or_create_account(&db, email).await?;
     let site = sites::create_site(&db, &account, DOMAIN, "UTC").await?;
     let now = OffsetDateTime::now_utc();
     sqlx::query(
@@ -708,6 +717,12 @@ async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
         crypto::Vault::load(dir, None)?,
     );
     sync::rebuild_attribution(&state, Some(&site)).await;
+    Ok((state, token))
+}
+
+async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
+    let (state, token) = seeded(dir, "maya.chen@tallybird.app").await?;
+    let db = state.db.clone();
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
     let base = format!("http://{}", listener.local_addr()?);
     tokio::spawn(axum::serve(listener, app::router(state)).into_future());
