@@ -689,6 +689,14 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
     .bind(now.unix_timestamp())
     .execute(&db)
     .await?;
+    sqlx::query(
+        "INSERT INTO funnels (id, site_id, name, steps, created_at) VALUES ('funnel0', ?, 'Trial path', ?, ?)",
+    )
+    .bind(&site)
+    .bind("page:/pricing\ngoal:signup\ngoal:trial")
+    .bind(now.unix_timestamp())
+    .execute(&db)
+    .await?;
     sqlx::query("INSERT INTO report_brands (site_id, agency_name) VALUES (?, ?)")
         .bind(&site)
         .bind("Fieldwork Studio")
