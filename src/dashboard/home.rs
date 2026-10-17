@@ -130,6 +130,7 @@ pub struct Fix {
 
 pub struct Matching {
     connected: bool,
+    syncing: bool,
     bold: String,
     label: String,
     title: String,
@@ -249,13 +250,17 @@ fn fix_line(provider: &str) -> &'static str {
     }
 }
 
-fn matching(split: &[ProviderSplit], connected: bool, domain: &str, window: i64) -> Matching {
+/// `sync` is None when no provider is connected, else whether one is still on its first sync.
+fn matching(split: &[ProviderSplit], sync: Option<bool>, domain: &str, window: i64) -> Matching {
     let total: u64 = split.iter().map(|s| s.first_payments + s.renewals).sum();
     let unmatched: u64 = split.iter().map(|s| s.no_visitor + s.unseen).sum();
     let matched = total - unmatched;
-    let connected = connected || total > 0;
+    let connected = sync.is_some() || total > 0;
+    let syncing = sync == Some(true) && total == 0;
     let (bold, label) = if !connected {
         (String::new(), "Payments not connected".to_string())
+    } else if syncing {
+        (String::new(), SYNCING.to_string())
     } else if total == 0 {
         (String::new(), "No payments yet".to_string())
     } else if total < 20 {
@@ -309,6 +314,11 @@ fn matching(split: &[ProviderSplit], connected: bool, domain: &str, window: i64)
             "Payments are not connected yet".to_string(),
             "Connect a payment provider with a read-only key so revenue can be matched to the visits that led to it.".to_string(),
         )
+    } else if syncing {
+        (
+            SYNCING.to_string(),
+            "Importing the last 90 days. Matches show up here as payments come in.".to_string(),
+        )
     } else if total == 0 {
         (
             "No payments in this range".to_string(),
@@ -331,6 +341,7 @@ fn matching(split: &[ProviderSplit], connected: bool, domain: &str, window: i64)
     };
     Matching {
         connected,
+        syncing,
         bold,
         label,
         title,
@@ -380,7 +391,10 @@ fn pv_text(t: &Totals) -> String {
     t.revenue_per_visitor.map_or_else(|| "–".into(), usd)
 }
 
+const SYNCING: &str = "Syncing payments…";
+
 /// KPI tiles: against the previous period, the whole site when filtered, or early-data notes on a new site.
+#[allow(clippy::too_many_arguments)]
 fn kpis(
     cur: &Totals,
     prev: &Totals,
@@ -389,6 +403,7 @@ fn kpis(
     compare: bool,
     young: bool,
     since: Option<Date>,
+    sync: Option<bool>,
 ) -> Vec<Kpi> {
     let conv = |t: &Totals| {
         t.conversion
@@ -454,10 +469,11 @@ fn kpis(
                 money(cur.revenue_usd),
                 String::new(),
                 "",
-                if cur.payments > 0 {
-                    format!("from {}", plural(cur.payments, "payment"))
-                } else {
-                    "connect payments to see revenue".into()
+                match sync {
+                    _ if cur.payments > 0 => format!("from {}", plural(cur.payments, "payment")),
+                    None => "connect payments to see revenue".into(),
+                    Some(true) => SYNCING.into(),
+                    Some(false) => "no payments in this range".into(),
                 },
             ),
             kpi(
@@ -580,12 +596,7 @@ pub async fn dashboard(
             .bind(&ctx.site.id)
             .fetch_one(&state.db)
             .await;
-    let providers: Result<Vec<String>, _> = sqlx::query_scalar(
-        "SELECT provider FROM integrations WHERE site_id = ? ORDER BY created_at",
-    )
-    .bind(&ctx.site.id)
-    .fetch_all(&state.db)
-    .await;
+    let providers = super::providers(&state.db, &ctx.site.id).await;
     let (Ok((window_days, dismissed)), Ok(providers)) = (settings, providers) else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
@@ -600,7 +611,7 @@ async fn page(
     q: DashboardQuery,
     window_days: i64,
     dismissed: bool,
-    providers: Vec<String>,
+    (providers, syncing): (Vec<String>, bool),
     // Some(hide revenue) renders the public page.
     public: Option<bool>,
 ) -> Result<Response, StatusCode> {
@@ -889,7 +900,12 @@ async fn page(
         view,
         views: views_opts,
         live_href: href(&[("view", "visitors"), ("vtab", "")]),
-        matching: matching(&split, !providers.is_empty(), &ctx.site.domain, window_days),
+        matching: matching(
+            &split,
+            (!providers.is_empty()).then_some(syncing),
+            &ctx.site.domain,
+            window_days,
+        ),
         range_label,
         compare,
         vs: compare && rkey != "all",
@@ -1107,6 +1123,7 @@ async fn page(
                 compare,
                 young && filters.is_empty(),
                 since,
+                page.matching.connected.then_some(page.matching.syncing),
             );
             let (when, before) = match rkey {
                 "today" => ("today", "today".to_string()),
@@ -1327,6 +1344,7 @@ async fn page(
                 &q.rest,
                 &href,
                 page.shell.live,
+                page.matching.connected,
             ));
         }
         Data::Payments(v) => {
@@ -1532,9 +1550,17 @@ pub async fn public(
         first_day: first.map(|t| t.to_offset(offset).date()),
         offset,
     };
-    page(state, ctx, q, window_days, true, Vec::new(), Some(hide))
-        .await
-        .unwrap_or_else(|code| code.into_response())
+    page(
+        state,
+        ctx,
+        q,
+        window_days,
+        true,
+        (Vec::new(), false),
+        Some(hide),
+    )
+    .await
+    .unwrap_or_else(|code| code.into_response())
 }
 
 enum Data {
@@ -1578,6 +1604,32 @@ mod tests {
     }
 
     #[test]
+    fn revenue_follows_the_provider_connection() {
+        let note = |sync: Option<bool>| {
+            let k = kpis(
+                &Totals::default(),
+                &Totals::default(),
+                None,
+                "",
+                true,
+                true,
+                None,
+                sync,
+            );
+            k.into_iter().find(|k| k.label == "Revenue").unwrap().note
+        };
+        assert_eq!(note(None), "connect payments to see revenue");
+        assert_eq!(note(Some(true)), "Syncing payments…");
+        assert_eq!(note(Some(false)), "no payments in this range");
+        let m = matching(&[], Some(true), "x.com", 30);
+        assert!(m.connected && m.syncing);
+        assert_eq!(m.title, "Syncing payments…");
+        let m = matching(&[], Some(false), "x.com", 30);
+        assert!(m.connected && !m.syncing);
+        assert_eq!(m.label, "No payments yet");
+    }
+
+    #[test]
     fn previews_hide_amounts_when_asked() {
         let t = Totals {
             visitors: 1200,
@@ -1601,7 +1653,7 @@ mod tests {
             unseen: 1,
             ..Default::default()
         }];
-        let m = matching(&split, true, "x.com", 30);
+        let m = matching(&split, Some(false), "x.com", 30);
         assert_eq!(
             (m.bold.as_str(), m.label.as_str()),
             ("94%", " of payments matched")
@@ -1612,6 +1664,6 @@ mod tests {
             "client_reference_id: req.cookies.virling_vid"
         );
         assert!(m.fixes[1].code.is_empty());
-        assert!(!matching(&[], false, "x.com", 30).connected);
+        assert!(!matching(&[], None, "x.com", 30).connected);
     }
 }

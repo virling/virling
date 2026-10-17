@@ -224,6 +224,7 @@ pub fn visitor_keys(v: &VisitorsData) -> Vec<String> {
         .collect()
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn visitors_view(
     v: VisitorsData,
     names: &Names,
@@ -232,6 +233,7 @@ pub fn visitors_view(
     rest: &HashMap<String, String>,
     href: &Href,
     live_now: u64,
+    connected: bool,
 ) -> VisitorsView {
     let now = v.now;
     let tab = match rest.get("vtab").map(String::as_str) {
@@ -276,7 +278,11 @@ pub fn visitors_view(
             vec![(group(v.paying), "paying customers in this range")],
             (
                 "No customers yet",
-                "Connect payments and every customer shows up here with the channel that brought them.",
+                if connected {
+                    "Every customer shows up here with the channel that brought them."
+                } else {
+                    "Connect payments and every customer shows up here with the channel that brought them."
+                },
             ),
         ),
         _ => (

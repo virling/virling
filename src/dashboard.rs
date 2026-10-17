@@ -110,6 +110,21 @@ pub async fn blocking<T: Send + 'static>(
 }
 
 /// Loads the site if the account owns it (else 404) plus the shell and the site's local clock.
+/// Connected payment providers, oldest first, and whether one has not finished its first sync.
+pub(crate) async fn providers(
+    db: &sqlx::SqlitePool,
+    site_id: &str,
+) -> sqlx::Result<(Vec<String>, bool)> {
+    let rows: Vec<(String, bool)> = sqlx::query_as(
+        "SELECT provider, last_synced_at IS NULL FROM integrations WHERE site_id = ? ORDER BY created_at",
+    )
+    .bind(site_id)
+    .fetch_all(db)
+    .await?;
+    let syncing = rows.iter().any(|r| r.1);
+    Ok((rows.into_iter().map(|r| r.0).collect(), syncing))
+}
+
 pub async fn load(
     state: &AppState,
     account: &Account,
