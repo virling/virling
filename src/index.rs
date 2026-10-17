@@ -845,6 +845,8 @@ impl SiteIndex {
         let (Some(lo), Some(hi)) = (pieces.first().map(|p| p.0), pieces.last().map(|p| p.1)) else {
             return out;
         };
+        let base = pieces[0].2;
+        let mut counts = vec![0u64; (pieces[pieces.len() - 1].2 - base + 1) as usize];
         let mut marks = Marks::new(self.visitors.len());
         for s in self.overlapping_ids(lo, hi) {
             if !scope.has(s) {
@@ -857,8 +859,13 @@ impl SiteIndex {
                     break;
                 }
                 if marks.first(sess.visitor, p.2) {
-                    *out.entry(p.2).or_default() += 1;
+                    counts[(p.2 - base) as usize] += 1;
                 }
+            }
+        }
+        for (i, n) in counts.into_iter().enumerate() {
+            if n > 0 {
+                out.insert(base + i as i64, n);
             }
         }
         out
@@ -958,6 +965,36 @@ impl SiteIndex {
         })
     }
 
+    /// Distinct visitors per value of every column, over sessions whose first pageview is in [lo, hi).
+    fn touch_counts(&self, lo: i64, hi: i64, scope: &Scope) -> Arc<Vec<Vec<(u32, i64)>>> {
+        self.memo(format!("counts {lo} {hi} {}", scope.1), || {
+            let touched = self.touched(lo, hi, scope);
+            let n = self.strings.names.len();
+            let mut counts = vec![0u32; n * 15];
+            let mut stamp = vec![NONE; n * 15];
+            for &s in touched.iter() {
+                let sess = &self.sessions[s as usize];
+                for (c, &id) in sess.cols.iter().enumerate() {
+                    let at = c * n + id as usize;
+                    if stamp[at] != sess.visitor {
+                        stamp[at] = sess.visitor;
+                        counts[at] += 1;
+                    }
+                }
+            }
+            (0..15)
+                .map(|c| {
+                    counts[c * n..(c + 1) * n]
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, k)| **k > 0)
+                        .map(|(id, k)| (id as u32, *k as i64))
+                        .collect()
+                })
+                .collect()
+        })
+    }
+
     /// Distinct visitors per value of column `k` of sessions whose first pageview is in [lo, hi).
     pub fn touch_visitors(
         &self,
@@ -966,27 +1003,9 @@ impl SiteIndex {
         scope: &Scope,
         k: usize,
     ) -> Vec<(Option<String>, i64)> {
-        let touched = self.touched(lo, hi, scope);
-        let mut counts = vec![0i64; self.strings.names.len()];
-        let mut run: Vec<u32> = Vec::new();
-        let mut visitor = NONE;
-        for &s in touched.iter() {
-            let sess = &self.sessions[s as usize];
-            if sess.visitor != visitor {
-                visitor = sess.visitor;
-                run.clear();
-            }
-            let id = sess.cols[k];
-            if !run.contains(&id) {
-                run.push(id);
-                counts[id as usize] += 1;
-            }
-        }
-        counts
+        self.touch_counts(lo, hi, scope)[k]
             .iter()
-            .enumerate()
-            .filter(|(_, n)| **n > 0)
-            .map(|(id, n)| (self.strings.name(id as u32).map(str::to_string), *n))
+            .map(|&(id, n)| (self.strings.name(id).map(str::to_string), n))
             .collect()
     }
 
@@ -1547,6 +1566,13 @@ pub mod read {
     }
 
     pub fn totals(ix: &SiteIndex, lo: i64, hi: i64, scope: &Scope) -> Totals {
+        (*ix.memo(format!("totals {lo} {hi} {}", scope.1), || {
+            count_totals(ix, lo, hi, scope)
+        }))
+        .clone()
+    }
+
+    fn count_totals(ix: &SiteIndex, lo: i64, hi: i64, scope: &Scope) -> Totals {
         let (visitors, sessions, seen) = ix.tracked(lo, hi, scope);
         let (payments, customers, new_customers, revenue_usd, converted, matched, matched_usd) =
             ix.payment_totals(lo, hi, scope, &seen);
