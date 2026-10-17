@@ -304,7 +304,6 @@ struct PaymentsStep {
     domain: String,
     cards: Vec<ProviderCard>,
     error: Option<String>,
-    key: String,
     connected: Option<ConnectedStats>,
     replacing: bool,
 }
@@ -333,7 +332,6 @@ fn payments_page(
     want: Option<Provider>,
     replace: Option<Provider>,
     error: Option<String>,
-    key: String,
 ) -> PaymentsStep {
     let linked: Vec<&str> = connected
         .as_ref()
@@ -355,7 +353,6 @@ fn payments_page(
             .map(|p| provider_card(p, selected == Some(p)))
             .collect(),
         error,
-        key,
         connected,
         replacing: replace.is_some(),
     }
@@ -440,14 +437,7 @@ pub async fn payments_step(
     };
     let want = q.provider.as_deref().and_then(Provider::parse);
     let replace = want.filter(|_| q.replace.is_some());
-    render(payments_page(
-        site,
-        connected,
-        want,
-        replace,
-        None,
-        String::new(),
-    ))
+    render(payments_page(site, connected, want, replace, None))
 }
 
 #[derive(Deserialize)]
@@ -485,7 +475,6 @@ pub async fn connect_payments(
             Some(provider),
             Some(provider),
             Some(err.to_string()),
-            key.to_string(),
         ));
     }
     let bg = state.clone();

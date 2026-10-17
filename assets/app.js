@@ -109,6 +109,8 @@ document.querySelector("[data-burger]")?.addEventListener("click", (e) => {
 for (const form of document.querySelectorAll("[data-providers]")) {
   form.addEventListener("change", (e) => {
     if (e.target.name !== "provider") return;
+    form.querySelectorAll("[data-key-err]").forEach((el) => el.remove());
+    form.querySelectorAll("[aria-invalid]").forEach((el) => el.removeAttribute("aria-invalid"));
     for (const panel of form.querySelectorAll("[data-provider]")) {
       const on = panel.dataset.provider === e.target.value;
       panel.hidden = !on;

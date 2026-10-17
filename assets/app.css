@@ -68,6 +68,8 @@ h1, h2, h3 { margin: 0; letter-spacing: -0.03em; }
 .hint { font-size: 13px; font-weight: 400; color: var(--ink-3); }
 .alert { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; background: var(--error-soft); color: var(--error-text); border-radius: 12px; font-size: 14px; }
 .alert svg { flex: none; margin-top: 2px; }
+.field-err { margin: 0; font-size: 14px; color: var(--error-text); }
+.field input[aria-invalid] { border-color: var(--error); }
 .notice { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px; background: #fff; border: 1px solid var(--rule); border-radius: 12px; font-size: 14px; color: var(--ink-2); }
 
 .auth { min-height: 100vh; display: flex; flex-direction: column; }
@@ -150,6 +152,7 @@ h1, h2, h3 { margin: 0; letter-spacing: -0.03em; }
 .cards { border: 0; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .cards .card { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 16px 18px; background: #fff; border: 1px solid var(--rule); border-radius: 14px; cursor: pointer; }
 .cards .card input { position: absolute; opacity: 0; pointer-events: none; }
+.cards .card .ico { margin-bottom: 8px; }
 .cards .card b { font-size: 16px; }
 .cards .card span { font-size: 13px; color: var(--ink-3); }
 .cards .card:has(input:checked) { border: 2px solid var(--ink); padding: 15px 17px; }

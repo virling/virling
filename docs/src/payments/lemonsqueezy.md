@@ -18,7 +18,7 @@ Virling imports LemonSqueezy orders and subscription invoices, so they count tow
 
 ## Checkout attribution
 
-LemonSqueezy only returns checkout custom data in webhooks, and Virling does not receive webhooks yet ([issue #15](https://github.com/virling/virling/issues/15)). Until then, LemonSqueezy payments show as Unattributed.
+LemonSqueezy only returns checkout custom data in webhooks, and Virling does not receive webhooks yet. Until then, LemonSqueezy payments show as Unattributed.
 
 You can tag checkouts now, and they will match once webhook support ships. In the browser:
 
