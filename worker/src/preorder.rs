@@ -50,6 +50,14 @@ pub fn session_body(email: Option<&str>, visitor_id: Option<&str>, code: Option<
     body
 }
 
+/// The `virling_vid` cookie from a `Cookie` header, for when the page script didn't send one.
+pub fn cookie_visitor(header: &str) -> Option<String> {
+    header
+        .split(';')
+        .find_map(|c| c.trim().strip_prefix("virling_vid="))
+        .map(str::to_string)
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum VerifyError {
     Malformed,
@@ -317,6 +325,15 @@ mod tests {
         assert!(bare.get("customer").is_none());
         assert!(bare["metadata"].get("virling_vid").is_none());
         assert!(bare.get("discount_codes").is_none());
+    }
+
+    #[test]
+    fn reads_visitor_from_cookie_header() {
+        assert_eq!(
+            cookie_visitor("a=1; virling_vid=vabc123; b=2").as_deref(),
+            Some("vabc123")
+        );
+        assert_eq!(cookie_visitor("a=1"), None);
     }
 
     #[test]
