@@ -61,6 +61,7 @@ for (const root of document.querySelectorAll("[data-wedge]")) {
       if (!res.ok) throw new Error(body.error || "Something went wrong. Try again.");
       root.classList.add("is-joined");
       window.virling && virling("goal", "waitlist_" + root.dataset.wedge);
+      window.virling && virling("goal", "signup");
     } catch (err) {
       error.textContent = err.message;
     } finally {
@@ -73,6 +74,7 @@ for (const button of document.querySelectorAll("[data-copy-snippet]")) {
   const snippet = button.parentElement.querySelector("[data-snippet]");
   button.addEventListener("click", async () => {
     await navigator.clipboard.writeText(snippet.textContent);
+    window.virling && virling("goal", "copy_snippet");
     button.textContent = "Copied";
     setTimeout(() => { button.textContent = "Copy"; }, 2000);
   });
@@ -150,6 +152,7 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
   const start = async () => {
     if (started) return;
     started = true;
+    window.virling && virling("goal", "checkout_started");
     setState("loading");
     timer = setTimeout(fail, 20000);
     status().then(showSpots).catch(() => {});
@@ -233,3 +236,8 @@ if ("IntersectionObserver" in window) {
 } else {
   boxes.forEach(loadDiagrams);
 }
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest && e.target.closest("[data-goal]");
+  if (el && window.virling) virling("goal", el.dataset.goal);
+}, true);
