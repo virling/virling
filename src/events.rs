@@ -585,6 +585,7 @@ impl DuckStore {
 
     /// Writes events and their first pageviews in one transaction, then adds them to loaded indexes.
     fn write_events(&self, events: &[Event]) -> anyhow::Result<()> {
+        let _gate = self.index.gate();
         let mut conn = self.conn.lock().unwrap();
         let tx = conn.transaction()?;
         {
@@ -1322,5 +1323,38 @@ mod payment_tests {
             (a.visitors, a.sessions, a.payments),
             (b.visitors, b.sessions, b.payments)
         );
+    }
+    #[test]
+    fn events_written_while_the_index_loads_count_once() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = DuckStore::open(&dir.path().join("e.duckdb")).unwrap();
+        let (mut events, _, _) = crate::demo::seed("site", OffsetDateTime::now_utc());
+        events.sort_by_key(|e| e.ts);
+        let later = events.split_off(events.len() / 2);
+        store.insert_events(&events).unwrap();
+        std::thread::scope(|scope| {
+            scope.spawn(|| {
+                for chunk in later.chunks(5) {
+                    store.insert_events(chunk).unwrap();
+                }
+            });
+            while !store.settled("site") {
+                std::thread::yield_now();
+            }
+        });
+        let p = Period {
+            from: time::macros::date!(2000 - 01 - 01),
+            to: OffsetDateTime::now_utc().date(),
+            tz: "UTC".into(),
+        };
+        let all = crate::visitors::VisitorFilter::default();
+        let index = store.visitor_list("site", &p, &all, 1_000_000, 0).unwrap();
+        let sql =
+            crate::visitors::visitor_list(&store.read().unwrap(), "site", &p, &all, 1_000_000, 0)
+                .unwrap();
+        let views = |page: &crate::visitors::VisitorPage| -> u64 {
+            page.rows.iter().map(|r| r.pageviews).sum()
+        };
+        assert_eq!((index.total, views(&index)), (sql.total, views(&sql)));
     }
 }
