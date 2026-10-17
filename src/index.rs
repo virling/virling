@@ -11,6 +11,7 @@ use crate::channel::source_name;
 use crate::events::Event;
 use crate::stats::{CUSTOMER, Filter, NET_USD, Period};
 
+pub mod goals;
 pub mod rows;
 
 /// No session, visitor or pageview.
@@ -208,6 +209,8 @@ pub struct SiteIndex {
     /// Net USD paid and first "provider:customer" per visitor key.
     spent: HashMap<u64, f64>,
     first_pay: HashMap<u64, Box<str>>,
+    /// Times of the payments carrying each visitor ID, by visitor key.
+    paid_at: HashMap<u64, Vec<i64>>,
 }
 
 /// Inserts `item` into `order`, kept sorted by `at`, searching from the end since items mostly arrive in order.
@@ -253,6 +256,7 @@ impl SiteIndex {
             owned: HashMap::new(),
             spent: HashMap::new(),
             first_pay: HashMap::new(),
+            paid_at: HashMap::new(),
         };
         let mut stmt = conn.prepare(
             "SELECT session_id, min(visitor_id), max(visitor_id), min(us), max(us), max(gap)
@@ -461,6 +465,12 @@ impl SiteIndex {
         self.owned = owned;
         self.spent = spent;
         self.first_pay = first_pay;
+        self.paid_at.clear();
+        for p in &self.payments {
+            if let Some(v) = p.visitor {
+                self.paid_at.entry(v).or_default().push(p.ts);
+            }
+        }
         self.memo.get_mut().unwrap().clear();
         Ok(())
     }

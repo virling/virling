@@ -5,7 +5,7 @@ use duckdb::types::{TimeUnit, Value};
 use duckdb::{Connection, named_params, params};
 use time::{OffsetDateTime, UtcOffset};
 
-use crate::index::{Indexes, SiteIndex, Zones, read, rows};
+use crate::index::{Indexes, SiteIndex, Zones, goals, read, rows};
 use crate::providers::Subscription;
 use crate::retention::{self, Mrr, Retention};
 use crate::stats::{
@@ -953,6 +953,11 @@ impl EventStore for DuckStore {
         steps: &[Step],
         f: &Filter,
     ) -> anyhow::Result<Vec<StepCount>> {
+        if let Some(c) = self.indexed(site_id, |ix, z, c| {
+            goals::read::funnel(ix, z, c, period, steps, f)
+        })? {
+            return Ok(c);
+        }
         stats::funnel(&*self.read()?, site_id, period, steps, f)
     }
 
@@ -963,6 +968,11 @@ impl EventStore for DuckStore {
         pages: &[String],
         f: &Filter,
     ) -> anyhow::Result<Vec<GoalStat>> {
+        if let Some(t) = self.indexed(site_id, |ix, z, c| {
+            goals::read::goal_table(ix, z, c, period, pages, f)
+        })? {
+            return Ok(t);
+        }
         stats::goal_table(&*self.read()?, site_id, period, pages, f)
     }
 
