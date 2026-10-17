@@ -1,0 +1,78 @@
+{% import "_d3.html" as d3 %}
+{% if let Some((lead, fix)) = insight %}
+<section class="d3-card d3-insight">
+  <span class="bulb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span>
+  <div><b>{{ lead }}</b>{% if !fix.is_empty() %}<span>{{ fix }}</span>{% endif %}</div>
+</section>
+{% endif %}
+<section class="d3-kpis">
+  {% for k in kpis %}
+  <div class="d3-card d3-kpi">
+    <span class="k">{{ k.label }}</span>
+    <b>{{ k.value }}</b>
+    <span class="n">{% if !k.delta.is_empty() %}<b class="{{ k.tone }}">{{ k.delta }}</b> {% endif %}<span>{{ k.note }}</span></span>
+  </div>
+  {% endfor %}
+</section>
+{% if !earlier.is_empty() %}<p class="d3-earlier">{{ earlier }}</p>{% endif %}
+<section class="d3-card d3-chart" id="revenue">
+  <div class="d3-ch-head" data-key="chart"><h2>{% for c in charts %}{% if c.on %}{{ c.title }}{% endif %}{% endfor %}</h2><nav class="d3-tabs" aria-label="Chart type">{% for t in chart_tabs %}<a href="{{ t.href }}" data-tab="chart-p{{ loop.index0 }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
+  {% for c in charts %}
+  <div id="chart-p{{ loop.index0 }}" data-title="{{ c.title }}"{% if !c.on %} hidden{% endif %}>
+  {{ c.svg|safe }}
+  <p class="d3-note">{{ c.note }}</p>
+  </div>
+  {% endfor %}
+</section>
+<section class="d3-cards">
+  {% for c in cards %}
+  <div class="d3-card d3-bc" id="{{ c.key }}">
+    <div class="d3-bc-head"><h2>{{ c.title }}</h2><nav class="d3-tabs" aria-label="{{ c.label }}">{% for t in c.tabs %}<a href="{{ t.href }}" data-tab="{{ c.key }}-p{{ loop.index0 }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
+    {% for p in c.panels %}
+    <div class="d3-panel" id="{{ c.key }}-p{{ loop.index0 }}" data-card{% if !p.on %} hidden{% endif %}>
+    <div class="d3-row th"><span>{{ p.head }}</span><span class="num v">Visitors</span><span class="num rv">Revenue</span><span class="num pv">Per visitor</span><span class="x"></span></div>
+    {% if p.rows.is_empty() %}
+    <div class="d3-skel"></div><div class="d3-skel s"></div>
+    <div class="d3-empty"><b>{{ c.empty_title }}</b><span>{{ c.empty_text }}</span></div>
+    {% endif %}
+    {% for r in p.rows %}
+    {% call d3::row(r) %}{% endcall %}
+    {% if !r.kids.is_empty() %}<div class="d3-kids" id="{{ r.id }}" hidden>{% for k in r.kids %}{% call d3::row(k) %}{% endcall %}{% endfor %}</div>{% endif %}
+    {% endfor %}
+    <div class="d3-foot"><span>{{ p.foot }}</span>{% if p.openable %}<button type="button" class="d3-link" data-expand-all>Expand all</button>{% endif %}{% if !p.new_link.is_empty() %}<button type="button" class="d3-link" data-open="new-link">+ Tracked link</button>{% endif %}</div>
+    {% if !p.new_link.is_empty() %}
+    <dialog class="d3-dlg" id="new-link">
+      <form method="post" action="{{ p.new_link }}">
+        <h3>New tracked link</h3>
+        <p class="muted">For places that hide where visitors came from, like newsletters, Discord or a QR code. Visits land in the right channel.</p>
+        <fieldset class="d3-places"><legend>Where will you share it?</legend>
+          {% for (value, label, _) in crate::links::PLACES %}<label><input type="radio" name="place" value="{{ value }}" required>{{ label }}</label>{% endfor %}
+        </fieldset>
+        <label class="d3-field d3-other">Other source<input name="other" maxlength="80" placeholder="e.g. indiehackers.com"></label>
+        <label class="d3-field">Page<input name="destination" value="/" required></label>
+        <label class="d3-field"><span>Name <span class="muted">(optional)</span></span><input name="name" maxlength="80" placeholder="Launch post"></label>
+        <div class="d3-dlg-actions"><button type="button" class="d3-btn" data-close>Cancel</button><button type="submit" class="d3-btn dark">Create link</button></div>
+      </form>
+    </dialog>
+    {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% if loop.index == 1 %}{% if let Some(a) = ai %}
+  <div class="d3-card d3-bc d3-ai" id="ai">
+    <div class="d3-bc-head"><h2>AI assistants</h2>{% if !a.rows.is_empty() %}<div class="d3-ai-cmp" aria-label="AI share of visitors and of revenue">
+      <span class="l">Visitors</span><span class="t"><i style="width:{{ "{:.1}"|format(a.visitors_share) }}%"></i></span><b>{{ "{:.0}"|format(a.visitors_share) }}%</b>
+      <span class="l">Revenue</span><span class="t rv"><i style="width:{{ "{:.1}"|format(a.revenue_share) }}%"></i></span><b>{{ "{:.0}"|format(a.revenue_share) }}%</b>
+    </div>{% endif %}</div>
+    {% if a.rows.is_empty() %}
+    <div class="d3-empty"><span class="d3-ai-logos">{% for l in a.logos %}{{ l|safe }}{% endfor %}</span><b>No visits from AI assistants yet</b><span>Visitors who click through from ChatGPT, Claude, Perplexity and others show up here.</span></div>
+    {% else %}
+    {% if !a.spark.is_empty() %}<div class="d3-spark"><span>AI share of revenue</span><svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><path d="{{ a.spark }}" fill="none" stroke="#E8471C" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg></div>{% endif %}
+    <div class="d3-row th"><span>Assistant</span><span class="num v">Visitors</span><span class="num rv">Revenue</span><span class="num pv">Per visitor</span><span class="x"></span></div>
+    {% for r in a.rows %}{% call d3::row(r) %}{% endcall %}{% endfor %}
+    {% if !a.trend.is_empty() %}<div class="d3-foot"><span>{{ a.trend }}</span></div>{% endif %}
+    {% endif %}
+  </div>
+  {% endif %}{% endif %}
+  {% endfor %}
+</section>

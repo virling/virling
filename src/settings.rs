@@ -46,6 +46,11 @@ struct SettingsPage {
     brand_error: &'static str,
     plan_saved: bool,
     share_link: Option<String>,
+    /// The public dashboard's URL, its switches, and whether they were just saved.
+    public_link: String,
+    public_on: bool,
+    public_hide: bool,
+    public_saved: bool,
     api_keys: Vec<KeyView>,
     /// A key just created, shown this once.
     new_key: Option<String>,
@@ -118,11 +123,12 @@ async fn show(
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
-    let row: Result<(String, i64), _> =
-        sqlx::query_as("SELECT attribution_model, window_days FROM sites WHERE id = ?")
-            .bind(&ctx.site.id)
-            .fetch_one(&state.db)
-            .await;
+    let row: Result<(String, i64, bool, bool), _> = sqlx::query_as(
+        "SELECT attribution_model, window_days, public_dashboard, public_hide_revenue FROM sites WHERE id = ?",
+    )
+    .bind(&ctx.site.id)
+    .fetch_one(&state.db)
+    .await;
     let integrations: Result<Vec<IntegrationRow>, _> = sqlx::query_as(
         "SELECT provider, last_synced_at, last_error FROM integrations WHERE site_id = ? ORDER BY created_at",
     )
@@ -136,8 +142,13 @@ async fn show(
             .fetch_optional(&state.db)
             .await;
     let keys = api::list_keys(&state.db, &account.id).await;
-    let (Ok((model, window_days)), Ok(integrations), Ok(brand), Ok(token), Ok(keys)) =
-        (row, integrations, brand, token, keys)
+    let (
+        Ok((model, window_days, public_on, public_hide)),
+        Ok(integrations),
+        Ok(brand),
+        Ok(token),
+        Ok(keys),
+    ) = (row, integrations, brand, token, keys)
     else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
@@ -181,6 +192,10 @@ async fn show(
             .collect(),
         saved: q.saved.as_deref() == Some("1"),
         brand,
+        public_link: format!("{}/share/{}", state.config.base_url, ctx.site.domain),
+        public_on,
+        public_hide,
+        public_saved: q.saved.as_deref() == Some("public"),
         share_link: token
             .flatten()
             .map(|t| format!("{}/r/{t}", state.config.base_url)),
@@ -249,6 +264,41 @@ pub async fn save(
     sync::rebuild_attribution(&state, Some(&ctx.site.id)).await;
     Redirect::to(&format!(
         "{}?saved=1",
+        app_path(&ctx.site.domain, "settings")
+    ))
+    .into_response()
+}
+
+#[derive(Deserialize)]
+pub struct PublicInput {
+    public_dashboard: Option<String>,
+    hide_revenue: Option<String>,
+}
+
+/// Turns the public dashboard on or off; off is a 404 on the next request.
+pub async fn save_public(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(input): Form<PublicInput>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "settings").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    if let Err(err) =
+        sqlx::query("UPDATE sites SET public_dashboard = ?, public_hide_revenue = ? WHERE id = ?")
+            .bind(input.public_dashboard.is_some())
+            .bind(input.hide_revenue.is_some())
+            .bind(&ctx.site.id)
+            .execute(&state.db)
+            .await
+    {
+        tracing::error!(%err, "saving the public dashboard failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    Redirect::to(&format!(
+        "{}?saved=public#public",
         app_path(&ctx.site.domain, "settings")
     ))
     .into_response()

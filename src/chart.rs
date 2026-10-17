@@ -296,15 +296,27 @@ fn running(points: &[DayPoint]) -> Vec<f64> {
 }
 
 /// The dashboard's revenue chart and its legend. `prev` lines up the previous period by position,
-/// `pre` hatches the first fraction of the plot with a note, and `only` names an active filter.
+/// `pre` hatches the first fraction of the plot with a note, `only` names an active filter,
+/// and `hidden` shows shares of the period's revenue instead of amounts.
 pub fn revenue(
     cur: &Series,
     prev: Option<&Series>,
     kind: Kind,
     pre: Option<(f64, &str)>,
     only: Option<&str>,
+    hidden: bool,
 ) -> String {
     let pts = &cur.points;
+    let sum: f64 = pts.iter().map(|p| p.revenue_usd).sum();
+    let amount = |v: f64| {
+        if !hidden {
+            money(v)
+        } else if sum > 0.0 {
+            format!("{:.0}%", v / sum * 100.0)
+        } else {
+            "0%".into()
+        }
+    };
     let n = pts.len().max(1);
     let w = 1000.0 / n as f64;
     let total = kind == Kind::Total;
@@ -429,13 +441,13 @@ pub fn revenue(
         let mut rows = vec![Row {
             swatch: swatch(ORANGE, if total { "ln" } else { "" }),
             name: if total { "So far" } else { "Revenue" }.into(),
-            value: money(vals[i]),
+            value: amount(vals[i]),
         }];
         if let Some(pv) = prev_vals.as_ref().and_then(|v| v.get(i)) {
             rows.push(Row {
                 swatch: swatch("#8A909A", "ln"),
                 name: "Previous period".into(),
-                value: money(*pv),
+                value: amount(*pv),
             });
         }
         if kind == Kind::Channel && only.is_none() {
@@ -443,7 +455,7 @@ pub fn revenue(
                 rows.push(Row {
                     swatch: swatch(channel_color(c.as_deref()), ""),
                     name: esc(c.as_deref().unwrap_or("Unmatched")),
-                    value: money(*v),
+                    value: amount(*v),
                 });
             }
         }
@@ -483,7 +495,7 @@ pub fn revenue(
                 cols,
                 r#"<span class="end-l" style="bottom:calc({:.2}% + 12px)">{} so far</span>"#,
                 last / top * 100.0,
-                money(last)
+                amount(last)
             );
         }
     }
@@ -529,7 +541,9 @@ pub fn revenue(
     let chart = frame(
         &format!("rev {}", if kind == Kind::Bars { "bars" } else { "" }),
         &format!("Revenue per {unit}"),
-        &axis(top, step, |t| tick(t, step)),
+        &axis(top, step, |t| {
+            if hidden { String::new() } else { tick(t, step) }
+        }),
         "",
         &svg,
         &cols,
@@ -611,18 +625,27 @@ mod tests {
     fn revenue_kinds() {
         let d = days(7);
         let s = series(&d);
-        let bars = revenue(&s, None, Kind::Bars, None, None);
+        let bars = revenue(&s, None, Kind::Bars, None, None, false);
         assert_eq!(count(&bars, r#"class="vd""#), 7);
         assert_eq!(
             count(&bars, ORANGE),
             1 + 7 + 1,
             "best bar, tooltips, legend"
         );
-        let line = revenue(&s, Some(&s), Kind::Line, None, None);
+        let line = revenue(&s, Some(&s), Kind::Line, None, None, false);
         assert!(line.contains("stroke-dasharray") && line.contains("Previous 7 days"));
-        let total = revenue(&s, None, Kind::Total, Some((0.5, "Not tracking yet")), None);
+        let total = revenue(
+            &s,
+            None,
+            Kind::Total,
+            Some((0.5, "Not tracking yet")),
+            None,
+            false,
+        );
         assert!(total.contains("$210 so far") && total.contains(r#"class="pre""#));
-        let split = revenue(&s, None, Kind::Channel, None, None);
+        let split = revenue(&s, None, Kind::Channel, None, None, false);
         assert!(split.contains("Referral") && split.contains("Unmatched"));
+        let hidden = revenue(&s, None, Kind::Total, None, None, true);
+        assert!(hidden.contains("100% so far") && !hidden.contains('$'));
     }
 }

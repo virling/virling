@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+{% include "_head.html" %}
+<title>{{ og_title }} · Virling</title>
+<meta name="description" content="{{ og_desc }}">
+<link rel="canonical" href="{{ url }}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="{{ url }}">
+<meta property="og:title" content="{{ og_title }}">
+<meta property="og:description" content="{{ og_desc }}">
+<meta property="og:image" content="{{ og_image }}">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="506">
+<meta property="og:image:alt" content="A scale with many balloons on one side and a small stack of coins on the other">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ og_title }}">
+<meta name="twitter:description" content="{{ og_desc }}">
+<meta name="twitter:image" content="{{ og_image }}">
+</head>
+<body class="app pub">
+<div class="main">
+<main class="content">
+<div class="d3">
+<header class="d3-head">
+  {% if !icon.is_empty() %}<img class="favicon" src="{{ icon }}" width="24" height="24" alt="">{% endif %}
+  <h1>{{ domain }}</h1>
+  <span class="d3-pill" title="Visitors in the last 5 minutes"><i class="d3-dot{% if live == 0 %} idle{% endif %}"></i>{% if live == 0 %}No visitors online{% else %}{{ live }} visitor{% if live != 1 %}s{% endif %} online now{% endif %}</span>
+  <span class="grow"></span>
+  <div class="menu-wrap d3-range" data-menu>
+    <button type="button" class="d3-btn" aria-haspopup="true" aria-expanded="false">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>{{ range_label }}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4B515C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="menu right d3-rmenu" hidden>
+      {% for r in ranges %}<a href="{{ r.href }}"{% if r.on %} aria-current="true"{% endif %}><span>{{ r.label }}</span><span class="hint">{{ r.count }}</span></a>{% endfor %}
+    </div>
+  </div>
+</header>
+<div class="d3-body">
+{% include "_overview.html" %}
+{% if let Some(rt) = retention %}
+{% include "_retention.html" %}
+{% endif %}
+<footer class="pub-foot"><a href="https://virling.com" rel="noopener">{% include "_logo.html" %}<span>Powered by <b>Virling</b></span></a></footer>
+</div>
+</div>
+</main>
+</div>
+<script src="/assets/app.js?v={{ crate::assets::asset_v() }}"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<section class="d3-card d3-ret">
+  <div class="d3-sec-head"><div><h2>Customers who stay</h2><p>Customers who first paid in this range, by the channel that brought them.</p></div><nav class="d3-tabs" aria-label="Customer quality">{% for t in rt.tabs %}<a href="{{ t.href }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
+  {% if let Some((t, x, prog, label)) = rt.waiting %}
+  <div class="d3-empty"><b>{{ t }}</b><span>{{ x }}</span><span class="prog"><i style="width:{{ "{:.1}"|format(prog) }}%"></i></span><span class="sm">{{ label }}</span></div>
+  {% else %}
+  <div class="d3-rhead{% if rt.refunds %} ref{% endif %}"><b>{{ rt.head }}</b></div>
+  <div class="d3-rrow th"><span>Channel</span><span class="num">Customers</span><span class="num">{{ rt.col }}</span><span class="num c4">{{ rt.col2 }}</span></div>
+  {% for r in rt.rows %}
+  <div class="d3-rrow"><span class="nm"><span class="ic">{{ r.icon|safe }}</span><b>{{ r.name }}</b><span class="bar"><i class="{% if rt.refunds %}ref{% endif %}" style="width:{{ "{:.1}"|format(r.w) }}%"></i></span></span><span class="num dim">{{ r.n }}</span><span class="num strong">{{ r.val }}<span class="bdg {{ r.tone }}">{{ r.badge }}</span></span><span class="num c4 dim">{{ r.val2 }}</span></div>
+  {% endfor %}
+  <div class="d3-foot"><span>{{ rt.foot }}</span></div>
+  {% endif %}
+</section>

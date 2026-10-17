@@ -29,7 +29,7 @@ pub mod schedule;
 mod views;
 
 pub use goals::{delete as delete_funnel, save as save_funnel};
-pub use home::dashboard;
+pub use home::{dashboard, public};
 
 pub(crate) const RANGES: [(&str, &str, i64); 6] = [
     ("today", "Today", 1),
@@ -745,6 +745,23 @@ pub async fn icon(
         return StatusCode::NOT_FOUND.into_response();
     };
     image(kind, body, "private, max-age=86400")
+}
+
+/// The favicon of a site with a public dashboard.
+pub async fn public_icon(State(state): State<AppState>, Path(domain): Path<String>) -> Response {
+    let row: Option<(String, Vec<u8>)> = sqlx::query_as(
+        "SELECT i.content_type, i.body FROM site_icons i JOIN sites s ON s.id = i.site_id
+         WHERE s.domain = ? AND s.public_dashboard = 1 AND i.body IS NOT NULL",
+    )
+    .bind(&domain)
+    .fetch_optional(&state.db)
+    .await
+    .ok()
+    .flatten();
+    let Some((kind, body)) = row else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    image(kind, body, "public, max-age=86400")
 }
 
 /// A referrer's cached favicon, served by us so no page loads images from third parties.

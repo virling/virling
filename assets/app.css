@@ -430,6 +430,12 @@ a.ctl { text-decoration: none; }
 .d3-ptabs .c { height: 20px; padding: 0 7px; display: inline-flex; align-items: center; border-radius: 999px; background: #f0f0eb; font-size: 11px; font-weight: 600; color: var(--ink-2); }
 .d3-ptabs .c.live { background: #e3f4ec; color: #1a6b43; }
 .d3-body { padding: 20px 28px 40px; display: flex; flex-direction: column; gap: 16px; }
+.pub .main { max-width: 1320px; margin: 0 auto; }
+.pub .d3-head .favicon { width: 24px; height: 24px; border-radius: 6px; }
+.pub-foot { display: flex; justify-content: center; padding-top: 8px; }
+.pub-foot a { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+.pub-foot a:hover { color: var(--ink); }
+.pub-foot svg { width: 18px; height: 18px; }
 .d3-card { background: #fff; border: 1px solid var(--rule); border-radius: 14px; min-width: 0; }
 .d3-tabs { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 10px; background: #f0f0eb; }
 .d3-tabs a { height: 36px; padding: 0 12px; display: inline-flex; align-items: center; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--ink-2); text-decoration: none; white-space: nowrap; }
