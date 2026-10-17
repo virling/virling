@@ -5,7 +5,7 @@ use duckdb::types::{TimeUnit, Value};
 use duckdb::{Connection, named_params, params};
 use time::{OffsetDateTime, UtcOffset};
 
-use crate::index::{Indexes, SiteIndex, Zones, read};
+use crate::index::{Indexes, SiteIndex, Zones, read, rows};
 use crate::providers::Subscription;
 use crate::retention::{self, Mrr, Retention};
 use crate::stats::{
@@ -99,6 +99,11 @@ pub trait EventStore: Send + Sync {
     fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64>;
     /// Current UTC offset of IANA zone `tz`.
     fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset>;
+
+    /// Whether reads of the site no longer wait on a background load.
+    fn settled(&self, _site_id: &str) -> bool {
+        true
+    }
     /// Recomputes the credited touch of every payment of a site; unattributed payments get a row with a NULL session.
     fn rebuild_attribution(
         &self,
@@ -772,6 +777,13 @@ impl EventStore for DuckStore {
         Ok(n as u64)
     }
 
+    fn settled(&self, site_id: &str) -> bool {
+        let get = self
+            .index
+            .get(site_id, || Ok(self.conn.lock().unwrap().try_clone()?));
+        get.is_ok_and(|ix| ix.is_some()) || self.index.unfit(site_id)
+    }
+
     fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset> {
         let conn = self.read()?;
         let secs: i64 = conn.query_row(
@@ -857,6 +869,11 @@ impl EventStore for DuckStore {
         offset: u32,
         f: &Filter,
     ) -> anyhow::Result<PaymentPage> {
+        if let Some(page) = self.indexed(site_id, |ix, z, c| {
+            rows::read::payment_list(ix, z, c, period, filter, limit, offset, f)
+        })? {
+            return Ok(page);
+        }
         stats::payment_list(&*self.read()?, site_id, period, filter, limit, offset, f)
     }
 
@@ -867,6 +884,13 @@ impl EventStore for DuckStore {
         provider_payment_id: &str,
         window_days: i64,
     ) -> anyhow::Result<Option<Journey>> {
+        if let Some(j) = self.indexed(site_id, |ix, _, _| {
+            Ok(ix
+                .journey(provider, provider_payment_id, window_days)
+                .map(Some))
+        })? {
+            return Ok(j);
+        }
         stats::journey(
             &*self.read()?,
             site_id,
@@ -943,14 +967,29 @@ impl EventStore for DuckStore {
     }
 
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary> {
+        if let Some(s) = self.indexed(site_id, |ix, z, c| {
+            rows::read::payment_summary(ix, z, c, period)
+        })? {
+            return Ok(s);
+        }
         stats::payment_summary(&*self.read()?, site_id, period)
     }
 
     fn activity(&self, site_id: &str, tz: &str, who: &[Who]) -> anyhow::Result<Vec<Activity>> {
+        if let Some(a) =
+            self.indexed(site_id, |ix, z, c| rows::read::activity(ix, z, c, tz, who))?
+        {
+            return Ok(a);
+        }
         stats::activity(&*self.read()?, site_id, tz, who)
     }
 
     fn goal_counts(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<GoalCount>> {
+        if let Some(g) = self.indexed(site_id, |ix, z, c| {
+            rows::read::goal_counts(ix, z, c, period)
+        })? {
+            return Ok(g);
+        }
         stats::goal_counts(&*self.read()?, site_id, period)
     }
 
@@ -962,6 +1001,11 @@ impl EventStore for DuckStore {
         limit: u32,
         offset: u32,
     ) -> anyhow::Result<(u64, Vec<GoalRow>)> {
+        if let Some(g) = self.indexed(site_id, |ix, z, c| {
+            rows::read::goal_list(ix, z, c, period, goal, limit, offset)
+        })? {
+            return Ok(g);
+        }
         stats::goal_list(&*self.read()?, site_id, period, goal, limit, offset)
     }
 
@@ -973,6 +1017,11 @@ impl EventStore for DuckStore {
         limit: u32,
         offset: u32,
     ) -> anyhow::Result<VisitorPage> {
+        if let Some(page) = self.indexed(site_id, |ix, z, c| {
+            rows::read::visitor_list(ix, z, c, period, filter, limit, offset)
+        })? {
+            return Ok(page);
+        }
         visitors::visitor_list(&*self.read()?, site_id, period, filter, limit, offset)
     }
 
@@ -984,6 +1033,9 @@ impl EventStore for DuckStore {
     }
 
     fn timeline(&self, site_id: &str, visitor_id: &str) -> anyhow::Result<Option<Timeline>> {
+        if let Some(t) = self.indexed(site_id, |ix, _, _| Ok(Some(ix.timeline(visitor_id))))? {
+            return Ok(t);
+        }
         visitors::timeline(&*self.read()?, site_id, visitor_id)
     }
 }

@@ -153,6 +153,10 @@ impl<S: EventStore> EventStore for Cached<S> {
         })
     }
 
+    fn settled(&self, site_id: &str) -> bool {
+        self.inner.settled(site_id)
+    }
+
     fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64> {
         self.inner.live_visitors(site_id)
     }

@@ -374,6 +374,10 @@ pub(crate) fn from_micros(us: i64) -> OffsetDateTime {
         .unwrap_or(OffsetDateTime::UNIX_EPOCH)
 }
 
+pub(crate) fn micros_of(ts: OffsetDateTime) -> i64 {
+    (ts.unix_timestamp_nanos() / 1000) as i64
+}
+
 pub(crate) fn source(referrer_host: Option<&str>, channel: &str) -> String {
     referrer_host.map_or_else(|| channel.to_string(), source_name)
 }

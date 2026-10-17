@@ -177,6 +177,12 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         eprintln!("rebuilt attribution in {:.0} ms", ms(started.elapsed()));
     }
 
+    let started = Instant::now();
+    while !events.settled(&site_id) {
+        tokio::time::sleep(Elapsed::from_millis(20)).await;
+    }
+    eprintln!("loaded the site in {:.0} ms", ms(started.elapsed()));
+
     let all = Period {
         from: date!(2000 - 01 - 01),
         to: date!(2100 - 01 - 01),
@@ -286,7 +292,6 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
             Auth::Session,
         ),
         get("page.retention", format!("{app}/retention"), Auth::Session),
-        get("page.links", format!("{app}/links"), Auth::Session),
         get("page.report", format!("{app}/report"), Auth::Session),
         get("page.settings", format!("{app}/settings"), Auth::Session),
         get("page.share", format!("/r/{share}"), Auth::None),
