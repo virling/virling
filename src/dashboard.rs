@@ -61,6 +61,8 @@ pub struct Shell {
     pub email: String,
     pub avatar: String,
     pub live: u64,
+    /// Agency accounts get the client report; personal ones a weekly email to themselves.
+    pub agency: bool,
 }
 
 /// A site in the switcher.
@@ -119,8 +121,8 @@ pub async fn load(
     let Some(site) = all.iter().find(|s| s.domain == domain).cloned() else {
         return Err(StatusCode::NOT_FOUND);
     };
-    let (plan, email): (String, String) =
-        sqlx::query_as("SELECT plan, email FROM accounts WHERE id = ?")
+    let (plan, email, account_type): (String, String, String) =
+        sqlx::query_as("SELECT plan, email, account_type FROM accounts WHERE id = ?")
             .bind(&account.id)
             .fetch_one(&state.db)
             .await
@@ -184,6 +186,7 @@ pub async fn load(
         avatar: initials(&email),
         email,
         live,
+        agency: account_type == "agency",
     };
     Ok(Ctx {
         site,

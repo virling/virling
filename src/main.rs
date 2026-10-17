@@ -461,6 +461,13 @@ mod tests {
         }
     }
 
+    async fn make_agency(state: &AppState) {
+        sqlx::query("UPDATE accounts SET account_type = 'agency'")
+            .execute(&state.db)
+            .await
+            .unwrap();
+    }
+
     fn link_in(text: &str, prefix: &str) -> String {
         let start = text.find(prefix).expect("link in email");
         text[start..].split_whitespace().next().unwrap().to_string()
@@ -995,7 +1002,22 @@ mod tests {
             assert_eq!(res.status(), StatusCode::OK, "{query}");
         }
         let body = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
-        assert!(body.contains("Client report"));
+        assert!(body.contains(">Weekly email</a>") && !body.contains("Client report"));
+        let res = call(
+            &state,
+            form(
+                "/app/example.com/settings/plan",
+                "account_type=agency".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            res.headers()["location"],
+            "/app/example.com/settings?saved=plan#plan"
+        );
+        let body = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
+        assert!(body.contains(">Client report</a>") && !body.contains(">Weekly email</a>"));
         assert!(
             body.contains(r#"aria-current="true"><span>Since tracking started</span>"#),
             "new sites default"
@@ -1469,6 +1491,7 @@ mod tests {
     async fn client_report_renders() {
         let (_dir, state, store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;
+        make_agency(&state).await;
         let site = site_id(&state).await;
         let monday = seed_last_week(&store, &site);
         crate::sync::rebuild_attribution(&state, Some(&site)).await;
@@ -1655,6 +1678,7 @@ mod tests {
         use crate::dashboard::schedule;
         let (_dir, state, store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;
+        make_agency(&state).await;
         let site = site_id(&state).await;
         let monday = seed_last_week(&store, &site);
         crate::sync::rebuild_attribution(&state, Some(&site)).await;
@@ -1760,9 +1784,83 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn personal_plan_gets_a_weekly_email_to_itself() {
+        use crate::dashboard::schedule;
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        let monday = seed_last_week(&store, &site);
+        crate::sync::rebuild_attribution(&state, Some(&site)).await;
+        // An agency that switched to Personal keeps its old client recipients and branding.
+        sqlx::query("INSERT INTO report_brands (site_id, agency_name, note, recipients) VALUES (?, 'Kettle', 'Hi there', 'client@kettle.co')")
+            .bind(&site)
+            .execute(&state.db)
+            .await
+            .unwrap();
+        let page =
+            body_text(call(&state, get("/app/example.com/report", Some(&cookie))).await).await;
+        assert!(
+            page.contains("<b>Weekly email</b>")
+                && page.contains(r#"<div class="r2-name">virling</div>"#)
+        );
+        for gone in [
+            "Send to client",
+            "Edit note",
+            "Kettle",
+            "Hi there",
+            "client@kettle.co",
+            "Powered by",
+        ] {
+            assert!(!page.contains(gone), "{gone}");
+        }
+        let settings =
+            body_text(call(&state, get("/app/example.com/settings", Some(&cookie))).await).await;
+        assert!(!settings.contains("Agency name") && !settings.contains("Client link"));
+        let ok = call(
+            &state,
+            form(
+                "/app/example.com/report/schedule",
+                "on=on&weekday=0&minute=540&recipients=&week=".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            ok.headers()["location"],
+            "/app/example.com/report?saved=schedule"
+        );
+        let (s, _) = schedule::load(&state.db, &site).await.unwrap();
+        assert_eq!(s.recipients, ["me@example.com"]);
+        sqlx::query("UPDATE report_brands SET send_from = 0, recipients = 'client@kettle.co' WHERE site_id = ?")
+            .bind(&site)
+            .execute(&state.db)
+            .await
+            .unwrap();
+        let before = sent(&state).len();
+        let at = time::PrimitiveDateTime::new(
+            monday + time::Duration::days(7),
+            time::macros::time!(9:00),
+        )
+        .assume_utc()
+        .max(time::OffsetDateTime::now_utc());
+        assert_eq!(
+            schedule::tick(&state, at + time::Duration::minutes(1))
+                .await
+                .unwrap(),
+            1
+        );
+        let mails = sent(&state);
+        assert_eq!(mails.len(), before + 1);
+        let (to, _, text) = &mails[before];
+        assert_eq!(to, "me@example.com", "never the old client");
+        assert!(!text.contains("Kettle") && !text.contains("Hi there"));
+    }
+
+    #[tokio::test]
     async fn report_email_renders_with_our_icons() {
         let (_dir, state, store) = setup().await;
         let site = site_id(&state).await;
+        make_agency(&state).await;
         let monday = seed_last_week(&store, &site);
         crate::sync::rebuild_attribution(&state, Some(&site)).await;
         let s: crate::sites::Site =
