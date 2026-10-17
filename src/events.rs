@@ -6,6 +6,7 @@ use duckdb::types::{TimeUnit, Value};
 use duckdb::{Connection, named_params, params};
 use time::{OffsetDateTime, UtcOffset};
 
+use crate::channel::Channel;
 use crate::index::{self, Indexes, SiteIndex, Zones, goals, read, rows};
 use crate::providers::Subscription;
 use crate::retention::{self, Mrr, Retention};
@@ -333,6 +334,38 @@ pub fn index_cap() -> usize {
         * 1_000_000
 }
 
+/// A stored utm_medium, utm_source or referrer host.
+type Tag = Option<String>;
+
+/// Moves stored visits from community sites into Communities, which used to be Social; returns rows changed.
+fn reclassify_channels(conn: &Connection) -> anyhow::Result<usize> {
+    let mut stmt =
+        conn.prepare("SELECT DISTINCT utm_medium, utm_source, referrer_host, channel FROM events")?;
+    let rows: Vec<(Tag, Tag, Tag, String)> = stmt
+        .query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?)))?
+        .collect::<Result<_, _>>()?;
+    let stale: Vec<_> = rows
+        .into_iter()
+        .filter_map(|(m, s, h, c)| {
+            let now = crate::channel::classify(m.as_deref(), s.as_deref(), h.as_deref());
+            (now == Channel::Communities && c != now.as_str()).then_some((m, s, h, now.as_str()))
+        })
+        .collect();
+    let mut changed = 0;
+    for table in ["events", "touches", "first_touches"] {
+        for (m, s, h, channel) in &stale {
+            changed += conn.execute(
+                &format!(
+                    "UPDATE {table} SET channel = ? WHERE utm_medium IS NOT DISTINCT FROM ?
+                     AND utm_source IS NOT DISTINCT FROM ? AND referrer_host IS NOT DISTINCT FROM ?"
+                ),
+                params![channel, m, s, h],
+            )?;
+        }
+    }
+    Ok(changed)
+}
+
 /// Columns of `touches` and `first_touches`: an event's fields without kind and name.
 const TOUCH_COLUMNS: &str =
     "site_id, session_id, visitor_id, ts, path, referrer_host, utm_source, utm_medium,
@@ -532,6 +565,10 @@ impl DuckStore {
                     QUALIFY row_number() OVER (PARTITION BY site_id, visitor_id ORDER BY ts, path) = 1;
                 COMMIT;"
             ))?;
+        }
+        let changed = reclassify_channels(&conn)?;
+        if changed > 0 {
+            tracing::info!(changed, "moved stored visits to their current channel");
         }
         Ok(Self {
             conn: Mutex::new(conn),
@@ -1356,5 +1393,60 @@ mod payment_tests {
             page.rows.iter().map(|r| r.pageviews).sum()
         };
         assert_eq!((index.total, views(&index)), (sql.total, views(&sql)));
+    }
+}
+
+#[cfg(test)]
+mod channel_tests {
+    use super::*;
+
+    #[test]
+    fn reopening_moves_stored_visits_to_their_current_channel() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("e.duckdb");
+        let visit = |session: &str, host: &str, channel: &str| Event {
+            site_id: "s".into(),
+            ts: OffsetDateTime::from_unix_timestamp(1_760_000_000).unwrap(),
+            visitor_id: session.into(),
+            session_id: session.into(),
+            kind: "pageview".into(),
+            name: None,
+            path: "/".into(),
+            referrer_host: Some(host.into()),
+            utm_source: None,
+            utm_medium: None,
+            utm_campaign: None,
+            utm_content: None,
+            utm_term: None,
+            channel: channel.into(),
+            country: None,
+            device: "Desktop".into(),
+            browser: "Firefox".into(),
+            os: "macOS".into(),
+            region: None,
+            city: None,
+            host: None,
+            language: None,
+        };
+        DuckStore::open(&path)
+            .unwrap()
+            .insert_events(&[
+                visit("a", "news.ycombinator.com", "Social"),
+                visit("b", "x.com", "Social"),
+            ])
+            .unwrap();
+        let store = DuckStore::open(&path).unwrap();
+        let mut channels: Vec<String> = store.dump().into_iter().map(|r| r.1).collect();
+        channels.sort();
+        assert_eq!(channels, ["Communities", "Social"]);
+        let conn = store.conn.lock().unwrap();
+        let touched: String = conn
+            .query_row(
+                "SELECT channel FROM first_touches WHERE visitor_id = 'a'",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(touched, "Communities");
     }
 }
