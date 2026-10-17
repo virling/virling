@@ -580,6 +580,10 @@ impl DuckStore {
             ))?;
         }
         conn.execute(MARK_RENEWALS, params![None::<&str>])?;
+        conn.execute(
+            "UPDATE payments SET amount_usd = round(amount_usd, 2) WHERE amount_usd <> round(amount_usd, 2)",
+            [],
+        )?;
         let changed = reclassify_channels(&conn)?;
         if changed > 0 {
             tracing::info!(changed, "moved stored visits to their current channel");
@@ -1351,6 +1355,79 @@ mod payment_tests {
             )
             .unwrap();
         assert!(renewal, "a re-sync keeps the repeat payment a renewal");
+    }
+
+    #[test]
+    fn inr_totals_equal_the_rows_shown() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("e.duckdb");
+        let day = |d: u8, h: u8| {
+            time::macros::date!(2026 - 08 - 10)
+                .replace_day(d)
+                .unwrap()
+                .with_hms(h, 0, 0)
+                .unwrap()
+                .assume_utc()
+        };
+        // Stored before conversions were rounded: each shows as $7.40, unrounded they sum to $22.21.
+        let inr = |id: &str, ts: OffsetDateTime, refunded: i64| Payment {
+            ts,
+            amount: 65000,
+            currency: "inr".into(),
+            amount_usd: Some(7.4049),
+            refunded,
+            status: if refunded > 0 {
+                "partially_refunded".into()
+            } else {
+                "paid".into()
+            },
+            ..payment(id, 0)
+        };
+        {
+            let store = DuckStore::open(&path).unwrap();
+            store
+                .upsert_payments(&[
+                    inr("pay_1", day(11, 9), 0),
+                    inr("pay_2", day(11, 15), 0),
+                    inr("pay_3", day(12, 9), 0),
+                    inr("pay_4", day(13, 9), 21667),
+                ])
+                .unwrap();
+        }
+        let store = DuckStore::open(&path).unwrap();
+        store
+            .rebuild_attribution("s", "last_non_direct", 90)
+            .unwrap();
+        let p = Period {
+            from: time::macros::date!(2026 - 08 - 10),
+            to: time::macros::date!(2026 - 08 - 16),
+            tz: "Asia/Kolkata".into(),
+        };
+        let shown = |usd: f64| crate::dashboard::money(usd);
+        let rows = store
+            .payment_list("s", &p, PaymentFilter::All, 10, 0)
+            .unwrap()
+            .rows;
+        assert!(rows.iter().all(|r| r.amount_usd == Some(7.4)));
+        let row_cents: i64 = rows
+            .iter()
+            .map(|r| (r.net_usd.unwrap() * 100.0).round() as i64)
+            .sum();
+        let summary = store.payment_summary("s", &p).unwrap();
+        assert_eq!(shown(summary.net_usd), shown(row_cents as f64 / 100.0));
+        assert_eq!(shown(summary.net_usd), "$27.13");
+        assert_eq!(
+            shown(summary.net_usd + summary.refunded_usd),
+            shown(4.0 * 7.4)
+        );
+        let days = stats::timeseries(&store.read().unwrap(), "s", &p, &Filter::default()).unwrap();
+        let day_cents: i64 = days
+            .iter()
+            .map(|d| (d.revenue_usd * 100.0).round() as i64)
+            .sum();
+        let total = store.overview("s", &p).unwrap().current.revenue_usd;
+        assert_eq!(shown(total), shown(day_cents as f64 / 100.0));
+        assert_eq!(shown(total), "$27.13");
     }
 
     #[test]

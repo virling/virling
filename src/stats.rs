@@ -6,7 +6,8 @@ use time::{Date, Duration, OffsetDateTime};
 use crate::channel::{source_domain, source_name};
 
 /// Net USD of a payment `p`; NULL when it has no USD conversion, so it counts as a payment but not revenue.
-pub(crate) const NET_USD: &str = "p.amount_usd * (p.amount - p.refunded) / nullif(p.amount, 0)";
+pub(crate) const NET_USD: &str =
+    "round(p.amount_usd * (p.amount - p.refunded) / nullif(p.amount, 0), 2)";
 
 /// Who paid: provider and customer_id, else visitor_id, else the payment itself.
 pub(crate) const CUSTOMER: &str = "coalesce('c:' || p.provider || ':' || p.customer_id, 'v:' || p.visitor_id, 'p:' || p.provider || ':' || p.provider_payment_id)";
@@ -372,6 +373,11 @@ pub struct Report {
 pub(crate) fn from_micros(us: i64) -> OffsetDateTime {
     OffsetDateTime::from_unix_timestamp_nanos(us as i128 * 1000)
         .unwrap_or(OffsetDateTime::UNIX_EPOCH)
+}
+
+/// `usd` rounded to whole cents, as NET_USD rounds.
+pub(crate) fn cents(usd: f64) -> f64 {
+    (usd * 100.0).round() / 100.0
 }
 
 pub(crate) fn micros_of(ts: OffsetDateTime) -> i64 {
@@ -858,7 +864,7 @@ pub(crate) fn payment_row(r: &duckdb::Row) -> duckdb::Result<PaymentRow> {
         refunded,
         net_usd: amount_usd
             .filter(|_| amount != 0)
-            .map(|usd| usd * (amount - refunded) as f64 / amount as f64),
+            .map(|usd| cents(usd * (amount - refunded) as f64 / amount as f64)),
         status: r.get(7)?,
         visitor_id: r.get(8)?,
         customer_id: r.get(9)?,
@@ -1392,7 +1398,7 @@ pub(crate) fn payment_summary(
         SELECT count(*), count(a.session_id), count(*) FILTER (WHERE a.session_id IS NULL),
             count(*) FILTER (WHERE p.refunded > 0), count(DISTINCT {CUSTOMER}),
             coalesce(sum({NET_USD}), 0),
-            coalesce(sum(p.amount_usd * p.refunded / nullif(p.amount, 0)), 0)
+            coalesce(sum(p.amount_usd - {NET_USD}), 0)
         FROM payments p
         JOIN bounds ON p.ts >= lo AND p.ts < hi
         {ATTRIBUTION_JOIN}

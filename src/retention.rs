@@ -125,7 +125,7 @@ const CUSTOMERS: &str = "
 pays AS (
     SELECT {CUSTOMER} AS cust, p.provider, p.customer_id, p.provider_payment_id, p.ts,
         epoch_us(p.ts) AS us, p.is_renewal, p.amount, p.refunded, p.amount_usd,
-        {NET_USD} AS net, p.amount_usd * p.refunded / nullif(p.amount, 0) AS refunded_usd
+        {NET_USD} AS net, p.amount_usd - {NET_USD} AS refunded_usd
     FROM payments p
     WHERE p.site_id = $site AND p.status <> 'failed' AND epoch_us(p.ts) <= $now
 ),
