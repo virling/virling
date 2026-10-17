@@ -228,8 +228,12 @@ fn insert_sorted(order: &mut Vec<u32>, item: u32, at: impl Fn(u32) -> i64) {
 
 impl SiteIndex {
     /// Reads a site from one snapshot; None when its data breaks an index invariant.
-    pub fn load(conn: &Connection, site_id: &str) -> anyhow::Result<Option<SiteIndex>> {
-        conn.execute_batch("BEGIN TRANSACTION")?;
+    pub fn load(
+        conn: &Connection,
+        site_id: &str,
+        begin: impl FnOnce() -> anyhow::Result<()>,
+    ) -> anyhow::Result<Option<SiteIndex>> {
+        begin()?;
         let result = Self::read(conn, site_id);
         conn.execute_batch("COMMIT")?;
         result
@@ -679,6 +683,19 @@ impl SiteIndex {
         self.goal_by_ts.shrink_to_fit();
         self.session_ids.shrink_to_fit();
         self.visitor_ids.shrink_to_fit();
+    }
+
+    /// (time, path) of the first pageview of a session, or of a visitor, as `touches` and `first_touches` keep it.
+    pub fn first_view(&self, by_session: bool, id: &str) -> Option<(i64, &str)> {
+        let s = if by_session {
+            *self.session_ids.get(&key(id))?
+        } else {
+            let v = *self.visitor_ids.get(&key(id))?;
+            self.visitors[v as usize].first_touch
+        };
+        let sess = self.sessions.get(s as usize)?;
+        (sess.touch != i64::MAX)
+            .then(|| (sess.touch, self.strings.name(sess.cols[PATH]).unwrap_or("")))
     }
 
     pub fn first_event(&self) -> Option<i64> {
@@ -1511,6 +1528,8 @@ pub struct Indexes {
     cap: usize,
     /// Sites whose payments changed since the index read them.
     stale_payments: Mutex<HashSet<String>>,
+    /// Held by writers from commit until their events are applied, and by a load while its snapshot starts.
+    gate: Mutex<()>,
 }
 
 impl Indexes {
@@ -1519,6 +1538,7 @@ impl Indexes {
             slots: Mutex::default(),
             cap,
             stale_payments: Mutex::default(),
+            gate: Mutex::default(),
         }
     }
 
@@ -1567,7 +1587,18 @@ impl Indexes {
             .entry(site_id.to_string())
             .or_insert((Slot::Loading(Vec::new()), Instant::now()));
         self.stale_payments.lock().unwrap().remove(site_id);
-        let loaded = SiteIndex::load(conn, site_id)?;
+        // The snapshot starts while no write commits, so pending holds exactly the events it misses.
+        let loaded = SiteIndex::load(conn, site_id, || {
+            let _gate = self.gate.lock().unwrap();
+            conn.execute_batch("BEGIN TRANSACTION")?;
+            conn.query_row("SELECT count(*) FROM events WHERE false", [], |r| {
+                r.get::<_, i64>(0)
+            })?;
+            if let Some((Slot::Loading(pending), _)) = self.slots.lock().unwrap().get_mut(site_id) {
+                pending.clear();
+            }
+            Ok(())
+        })?;
         let mut slots = self.slots.lock().unwrap();
         let pending = match slots.remove(site_id) {
             Some((Slot::Loading(p), _)) => p,
@@ -1659,12 +1690,24 @@ impl Indexes {
         }
     }
 
+    /// The site's index when loaded and whole, without starting a load.
+    pub fn ready(&self, site_id: &str) -> Option<Arc<RwLock<SiteIndex>>> {
+        match self.slots.lock().unwrap().get(site_id) {
+            Some((Slot::Ready(ix, _), _)) if !ix.read().unwrap().broken => Some(ix.clone()),
+            _ => None,
+        }
+    }
+
     pub fn unfit(&self, site_id: &str) -> bool {
         self.cap == 0
             || matches!(
                 self.slots.lock().unwrap().get(site_id),
                 Some((Slot::Unfit, _))
             )
+    }
+
+    pub fn gate(&self) -> std::sync::MutexGuard<'_, ()> {
+        self.gate.lock().unwrap()
     }
 
     pub fn payments_changed(&self, site_id: &str) {

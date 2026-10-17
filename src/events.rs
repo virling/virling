@@ -1,5 +1,6 @@
+use std::collections::HashMap;
 use std::path::Path;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Condvar, Mutex};
 
 use duckdb::types::{TimeUnit, Value};
 use duckdb::{Connection, named_params, params};
@@ -285,6 +286,20 @@ pub struct DuckStore {
     zones: Zones,
     /// Idle read connections, so reads never wait on each other or on writes.
     readers: Mutex<Vec<Connection>>,
+    /// Events waiting to be written, so concurrent inserts share one transaction.
+    queue: Mutex<Queue>,
+    written: Condvar,
+}
+
+#[derive(Default)]
+struct Queue {
+    events: Vec<Event>,
+    /// Batch the queued events go out in, the last batch written, and whether one is being written.
+    next: u64,
+    done: u64,
+    writing: bool,
+    /// Errors of failed batches.
+    failed: HashMap<u64, String>,
 }
 
 /// A pooled read connection, returned to the pool on drop.
@@ -371,6 +386,34 @@ fn earliest(events: &[Event], key: impl Fn(&Event) -> &str) -> Vec<&Event> {
     first.into_values().collect()
 }
 
+/// An event's values in TOUCH_COLUMNS order.
+fn touch_values(e: &Event) -> [Value; 20] {
+    let text = |v: &str| Value::Text(v.to_string());
+    let opt = |v: &Option<String>| v.as_deref().map_or(Value::Null, text);
+    [
+        text(&e.site_id),
+        text(&e.session_id),
+        text(&e.visitor_id),
+        ts_value(e.ts),
+        text(&e.path),
+        opt(&e.referrer_host),
+        opt(&e.utm_source),
+        opt(&e.utm_medium),
+        opt(&e.utm_campaign),
+        opt(&e.utm_content),
+        opt(&e.utm_term),
+        text(&e.channel),
+        opt(&e.country),
+        text(&e.device),
+        text(&e.browser),
+        text(&e.os),
+        opt(&e.region),
+        opt(&e.city),
+        opt(&e.host),
+        opt(&e.language),
+    ]
+}
+
 /// Upserts `rows` into `table`, a few hundred per statement.
 fn write_touches(
     tx: &duckdb::Transaction,
@@ -380,33 +423,7 @@ fn write_touches(
 ) -> anyhow::Result<()> {
     for chunk in rows.chunks(500) {
         let mut stmt = tx.prepare(&upsert_touches(table, key, chunk.len()))?;
-        let mut values: Vec<Value> = Vec::new();
-        for e in chunk {
-            let text = |v: &str| Value::Text(v.to_string());
-            let opt = |v: &Option<String>| v.as_deref().map_or(Value::Null, text);
-            values.extend([
-                text(&e.site_id),
-                text(&e.session_id),
-                text(&e.visitor_id),
-                ts_value(e.ts),
-                text(&e.path),
-                opt(&e.referrer_host),
-                opt(&e.utm_source),
-                opt(&e.utm_medium),
-                opt(&e.utm_campaign),
-                opt(&e.utm_content),
-                opt(&e.utm_term),
-                text(&e.channel),
-                opt(&e.country),
-                text(&e.device),
-                text(&e.browser),
-                text(&e.os),
-                opt(&e.region),
-                opt(&e.city),
-                opt(&e.host),
-                opt(&e.language),
-            ]);
-        }
+        let values: Vec<Value> = chunk.iter().flat_map(|e| touch_values(e)).collect();
         stmt.execute(duckdb::params_from_iter(values))?;
     }
     Ok(())
@@ -521,6 +538,11 @@ impl DuckStore {
             index: Arc::new(Indexes::new(index_cap())),
             zones: Zones::default(),
             readers: Mutex::default(),
+            queue: Mutex::new(Queue {
+                next: 1,
+                ..Default::default()
+            }),
+            written: Condvar::new(),
         })
     }
 
@@ -561,25 +583,9 @@ impl DuckStore {
         self.read().unwrap()
     }
 
-    fn read(&self) -> anyhow::Result<Reader<'_>> {
-        let pooled = self.readers.lock().unwrap().pop();
-        let conn = match pooled {
-            Some(conn) => conn,
-            None => {
-                let conn = self.conn.lock().unwrap().try_clone()?;
-                conn.execute_batch("SET TimeZone = 'UTC'")?;
-                conn
-            }
-        };
-        Ok(Reader {
-            store: self,
-            conn: Some(conn),
-        })
-    }
-}
-
-impl EventStore for DuckStore {
-    fn insert_events(&self, events: &[Event]) -> anyhow::Result<()> {
+    /// Writes events and their first pageviews in one transaction, then adds them to loaded indexes.
+    fn write_events(&self, events: &[Event]) -> anyhow::Result<()> {
+        let _gate = self.index.gate();
         let mut conn = self.conn.lock().unwrap();
         let tx = conn.transaction()?;
         {
@@ -615,22 +621,104 @@ impl EventStore for DuckStore {
             }
             app.flush()?;
         }
-        write_touches(
-            &tx,
-            "touches",
-            "session_id",
-            &earliest(events, |e| &e.session_id),
-        )?;
-        write_touches(
-            &tx,
-            "first_touches",
-            "visitor_id",
-            &earliest(events, |e| &e.visitor_id),
-        )?;
+        // A loaded index knows every stored first pageview: append new keys, upsert only earlier ones.
+        let mut ready: HashMap<&str, Option<Arc<std::sync::RwLock<SiteIndex>>>> = HashMap::new();
+        for (table, key, by_session) in [
+            ("touches", "session_id", true),
+            ("first_touches", "visitor_id", false),
+        ] {
+            let rows = if by_session {
+                earliest(events, |e| &e.session_id)
+            } else {
+                earliest(events, |e| &e.visitor_id)
+            };
+            let (mut new, mut earlier) = (Vec::new(), Vec::new());
+            for e in rows {
+                let ix = ready
+                    .entry(&e.site_id)
+                    .or_insert_with(|| self.index.ready(&e.site_id));
+                let Some(ix) = ix else {
+                    earlier.push(e);
+                    continue;
+                };
+                let ix = ix.read().unwrap();
+                let id = if by_session {
+                    &e.session_id
+                } else {
+                    &e.visitor_id
+                };
+                match ix.first_view(by_session, id) {
+                    None => new.push(e),
+                    Some((ts, path))
+                        if (e.ts, e.path.as_str()) < (stats::from_micros(ts), path) =>
+                    {
+                        earlier.push(e)
+                    }
+                    Some(_) => {}
+                }
+            }
+            if !new.is_empty() {
+                let mut app = tx.appender(table)?;
+                for e in new {
+                    app.append_row(touch_values(e))?;
+                }
+                app.flush()?;
+            }
+            write_touches(&tx, table, key, &earlier)?;
+        }
         tx.commit()?;
-        drop(conn);
         self.index.apply(events);
+        drop(conn);
         Ok(())
+    }
+
+    fn read(&self) -> anyhow::Result<Reader<'_>> {
+        let pooled = self.readers.lock().unwrap().pop();
+        let conn = match pooled {
+            Some(conn) => conn,
+            None => {
+                let conn = self.conn.lock().unwrap().try_clone()?;
+                conn.execute_batch("SET TimeZone = 'UTC'")?;
+                conn
+            }
+        };
+        Ok(Reader {
+            store: self,
+            conn: Some(conn),
+        })
+    }
+}
+
+impl EventStore for DuckStore {
+    fn insert_events(&self, events: &[Event]) -> anyhow::Result<()> {
+        let mut q = self.queue.lock().unwrap();
+        q.events.extend_from_slice(events);
+        let mine = q.next;
+        loop {
+            if q.done >= mine {
+                return match q.failed.get(&mine) {
+                    Some(err) => Err(anyhow::anyhow!("{err}")),
+                    None => Ok(()),
+                };
+            }
+            if !q.writing {
+                let batch = std::mem::take(&mut q.events);
+                q.writing = true;
+                q.next += 1;
+                drop(q);
+                let result = self.write_events(&batch);
+                q = self.queue.lock().unwrap();
+                q.writing = false;
+                q.done = mine;
+                if let Err(err) = &result {
+                    q.failed.insert(mine, format!("{err:#}"));
+                    q.failed.retain(|b, _| *b + 1000 > mine);
+                }
+                self.written.notify_all();
+                return result;
+            }
+            q = self.written.wait(q).unwrap();
+        }
     }
 
     fn replace_subscriptions(
@@ -1147,5 +1235,126 @@ mod payment_tests {
             .find(|p| p.provider_payment_id == "pi_1")
             .unwrap();
         assert_eq!((pi_1.refunded, pi_1.net_usd), (2900, Some(0.0)));
+    }
+    #[test]
+    fn concurrent_appends_keep_touches_exact() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = DuckStore::open(&dir.path().join("e.duckdb")).unwrap();
+        let (mut events, _, _) = crate::demo::seed("site", OffsetDateTime::now_utc());
+        events.sort_by_key(|e| e.ts);
+        let mut later = events.split_off(events.len() / 2);
+        store.insert_events(&events).unwrap();
+        store.load_index("site");
+        // Earlier pageviews of stored sessions, then the rest out of order in mixed batches.
+        let mut early: Vec<Event> = events
+            .iter()
+            .filter(|e| e.kind == "pageview")
+            .step_by(7)
+            .cloned()
+            .collect();
+        for (i, e) in early.iter_mut().enumerate() {
+            e.ts -= time::Duration::seconds(1 + i as i64 % 3);
+            e.path = format!("/early{}", i % 2);
+        }
+        later.extend(early);
+        later.reverse();
+        let total = (events.len() + later.len()) as u64;
+        std::thread::scope(|scope| {
+            for t in 0..8 {
+                let mine: Vec<Event> = later.iter().skip(t).step_by(8).cloned().collect();
+                let store = &store;
+                scope.spawn(move || {
+                    let mut rest = &mine[..];
+                    let mut n = t + 1;
+                    while !rest.is_empty() {
+                        let (chunk, tail) = rest.split_at(n.min(rest.len()));
+                        store.insert_events(chunk).unwrap();
+                        rest = tail;
+                        n = n % 20 + 1;
+                    }
+                });
+            }
+        });
+        assert_eq!(store.count_events("site").unwrap(), total);
+        let conn = store.read().unwrap();
+        for (table, key) in [("touches", "session_id"), ("first_touches", "visitor_id")] {
+            let rebuilt = format!(
+                "SELECT {TOUCH_COLUMNS} FROM events WHERE kind = 'pageview'
+                QUALIFY row_number() OVER (PARTITION BY site_id, {key} ORDER BY ts, path) = 1"
+            );
+            let differ: i64 = conn
+                .query_row(
+                    &format!(
+                        "SELECT (SELECT count(*) FROM (SELECT {TOUCH_COLUMNS} FROM {table} EXCEPT {rebuilt}))
+                            + (SELECT count(*) FROM ({rebuilt} EXCEPT SELECT {TOUCH_COLUMNS} FROM {table}))"
+                    ),
+                    [],
+                    |r| r.get(0),
+                )
+                .unwrap();
+            assert_eq!(differ, 0, "{table}");
+        }
+        let today = OffsetDateTime::now_utc().date();
+        let p = Period {
+            from: today - time::Duration::days(29),
+            to: today,
+            tz: "UTC".into(),
+        };
+        let f = Filter::default();
+        let counts = |rows: Vec<BreakdownRow>| {
+            let mut v: Vec<_> = rows
+                .into_iter()
+                .map(|r| (r.label, r.visitors, r.payments))
+                .collect();
+            v.sort();
+            v
+        };
+        let sql = stats::breakdown(&conn, "site", &p, Dimension::Page, &f).unwrap();
+        assert!(!sql.is_empty());
+        assert_eq!(
+            counts(store.breakdown_in("site", &p, Dimension::Page, &f).unwrap()),
+            counts(sql)
+        );
+        let (a, b) = (
+            store.overview("site", &p).unwrap().current,
+            stats::overview(&conn, "site", &p, &f).unwrap().current,
+        );
+        assert_eq!(
+            (a.visitors, a.sessions, a.payments),
+            (b.visitors, b.sessions, b.payments)
+        );
+    }
+    #[test]
+    fn events_written_while_the_index_loads_count_once() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = DuckStore::open(&dir.path().join("e.duckdb")).unwrap();
+        let (mut events, _, _) = crate::demo::seed("site", OffsetDateTime::now_utc());
+        events.sort_by_key(|e| e.ts);
+        let later = events.split_off(events.len() / 2);
+        store.insert_events(&events).unwrap();
+        std::thread::scope(|scope| {
+            scope.spawn(|| {
+                for chunk in later.chunks(5) {
+                    store.insert_events(chunk).unwrap();
+                }
+            });
+            while !store.settled("site") {
+                std::thread::yield_now();
+            }
+        });
+        let p = Period {
+            from: time::macros::date!(2000 - 01 - 01),
+            to: OffsetDateTime::now_utc().date(),
+            tz: "UTC".into(),
+        };
+        let all = crate::visitors::VisitorFilter::default();
+        let index = store.visitor_list("site", &p, &all, 1_000_000, 0).unwrap();
+        let sql =
+            crate::visitors::visitor_list(&store.read().unwrap(), "site", &p, &all, 1_000_000, 0)
+                .unwrap();
+        let views = |page: &crate::visitors::VisitorPage| -> u64 {
+            page.rows.iter().map(|r| r.pageviews).sum()
+        };
+        assert_eq!((index.total, views(&index)), (sql.total, views(&sql)));
     }
 }
