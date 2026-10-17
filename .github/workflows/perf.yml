@@ -1,0 +1,42 @@
+name: Perf
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      scale:
+        description: Copies of the demo data (1, 10 or 100)
+        default: "10"
+  schedule:
+    - cron: "0 4 * * 1"
+
+concurrency:
+  group: perf-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        scale: ${{ fromJSON(github.event_name == 'pull_request' && '[1]' || github.event_name == 'schedule' && '[10, 100]' || format('[{0}]', inputs.scale)) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: perf
+      - run: cargo build --release
+      - name: Bench at ${{ matrix.scale }}x
+        env:
+          VIRLING_INDEX_MB: 8192
+        run: |
+          budgets=""
+          if [ "${{ matrix.scale }}" -le 10 ]; then budgets="--budgets .github/perf-budgets.txt"; fi
+          ./target/release/virling --data-dir "$RUNNER_TEMP/bench" bench \
+            --scale ${{ matrix.scale }} --no-cache $budgets
