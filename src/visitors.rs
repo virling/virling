@@ -11,7 +11,7 @@ use crate::stats::{
 const IDLE: Duration = Duration::minutes(30);
 
 /// Non-failed payments per visitor: their own plus every payment of a customer they paid as.
-const OWNED: &str = "owned AS (
+pub(crate) const OWNED: &str = "owned AS (
     SELECT visitor_id, provider, provider_payment_id FROM payments
     WHERE site_id = $site AND visitor_id IS NOT NULL AND status <> 'failed'
     UNION
@@ -326,14 +326,14 @@ pub(crate) fn facets(conn: &Connection, site_id: &str, period: &Period) -> anyho
     Ok(Facets { sources, goals })
 }
 
-struct Ev {
-    ts: OffsetDateTime,
-    kind: String,
-    name: Option<String>,
-    path: String,
-    channel: String,
-    referrer_host: Option<String>,
-    campaign: Option<String>,
+pub(crate) struct Ev {
+    pub ts: OffsetDateTime,
+    pub kind: String,
+    pub name: Option<String>,
+    pub path: String,
+    pub channel: String,
+    pub referrer_host: Option<String>,
+    pub campaign: Option<String>,
 }
 
 /// Steps of one visit's events, oldest first, ending with how the visit ended.
@@ -415,10 +415,28 @@ pub(crate) fn timeline(
     let payments: Vec<PaymentRow> = stmt
         .query_map(params, payment_row)?
         .collect::<Result<_, _>>()?;
-    if events.is_empty() && payments.is_empty() {
-        return Ok(None);
-    }
+    let mut stmt = conn.prepare(
+        "SELECT country, browser, device FROM events
+        WHERE site_id = $site AND visitor_id = $visitor AND kind = 'pageview'
+        ORDER BY ts DESC LIMIT 1",
+    )?;
+    let last = stmt
+        .query_map(params, |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))?
+        .next()
+        .transpose()?;
+    Ok(assemble(visitor_id, events, payments, last))
+}
 
+/// A visitor's events (ordered as the timeline query orders them) and payments as visits.
+pub(crate) fn assemble(
+    visitor_id: &str,
+    events: Vec<Ev>,
+    payments: Vec<PaymentRow>,
+    last: Option<(Option<String>, Option<String>, Option<String>)>,
+) -> Option<Timeline> {
+    if events.is_empty() && payments.is_empty() {
+        return None;
+    }
     let mut groups: Vec<&[Ev]> = Vec::new();
     let mut start = 0;
     for i in 1..=events.len() {
@@ -459,25 +477,15 @@ pub(crate) fn timeline(
         }
     }
     entries.sort_by_key(|e| e.ts());
-
-    let mut stmt = conn.prepare(
-        "SELECT country, browser, device FROM events
-        WHERE site_id = $site AND visitor_id = $visitor AND kind = 'pageview'
-        ORDER BY ts DESC LIMIT 1",
-    )?;
-    let last = stmt
-        .query_map(params, |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))?
-        .next()
-        .transpose()?;
     let (country, browser, device) = last.unwrap_or((None, None, None));
-    Ok(Some(Timeline {
+    Some(Timeline {
         visitor_id: visitor_id.to_string(),
         entries,
         payments,
         country,
         browser,
         device,
-    }))
+    })
 }
 
 #[cfg(test)]
