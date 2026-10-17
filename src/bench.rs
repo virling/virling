@@ -52,6 +52,8 @@ struct Route {
     drawer: bool,
     /// Sends a new pageview before each timed request, so every read misses the cache.
     fresh: bool,
+    /// Sends this many pageviews at once per run, each from a new visitor, timing every one.
+    visitors: usize,
 }
 
 fn get(name: &str, path: String, auth: Auth) -> Route {
@@ -62,6 +64,7 @@ fn get(name: &str, path: String, auth: Auth) -> Route {
         auth,
         drawer: false,
         fresh: false,
+        visitors: 0,
     }
 }
 
@@ -360,6 +363,13 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         body: Some(pageview.clone()),
         ..get("ingest.pageview", "/api/event".into(), Auth::None)
     });
+    for (name, visitors) in [("ingest.new_visitor", 1), ("ingest.concurrent16", 16)] {
+        routes.push(Route {
+            body: Some(pageview.clone()),
+            visitors,
+            ..get(name, "/api/event".into(), Auth::None)
+        });
+    }
     for (name, path, auth) in [
         ("fresh.page.dashboard", app.clone(), Auth::Session),
         (
@@ -441,8 +451,55 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         ..get("nudge", "/api/event".into(), Auth::None)
     };
 
+    let mut sent = 0;
+    let mut burst = async |r: &Route| -> anyhow::Result<Vec<f64>> {
+        let mut set = tokio::task::JoinSet::new();
+        for _ in 0..r.visitors {
+            sent += 1;
+            let mut body = r.body.clone().unwrap_or_default();
+            body["v"] = json!(format!("benchnew{sent:08}"));
+            let req = client
+                .post(format!("{base}{}", r.path))
+                .header("user-agent", "Mozilla/5.0 (Macintosh) Firefox/130.0")
+                .json(&body);
+            set.spawn(async move {
+                let started = Instant::now();
+                let res = req.send().await?;
+                anyhow::ensure!(
+                    res.status().is_success(),
+                    "ingest answered {}",
+                    res.status()
+                );
+                Ok(ms(started.elapsed()))
+            });
+        }
+        let mut out = Vec::new();
+        while let Some(t) = set.join_next().await {
+            out.push(t??);
+        }
+        Ok(out)
+    };
+
     let mut timings = Vec::new();
     for r in &routes {
+        if r.visitors > 0 {
+            let cold = burst(r).await?.into_iter().fold(0.0, f64::max);
+            let mut runs = Vec::new();
+            for _ in 0..args.runs {
+                runs.extend(burst(r).await?);
+            }
+            runs.sort_by(f64::total_cmp);
+            let at =
+                |q: f64| runs[((runs.len() as f64 * q).ceil() as usize).clamp(1, runs.len()) - 1];
+            timings.push(Timing {
+                name: r.name.clone(),
+                cold,
+                p50: at(0.5),
+                p95: at(0.95),
+                max: at(1.0),
+            });
+            continue;
+        }
         if r.fresh {
             send(&nudge).await?;
         }
