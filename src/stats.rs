@@ -1683,6 +1683,20 @@ pub(crate) fn channel_sources(
     Ok(out)
 }
 
+/// Earliest payment credited to a visit.
+pub(crate) fn first_match(conn: &Connection, site_id: &str) -> anyhow::Result<Option<PaymentRow>> {
+    let mut stmt = conn.prepare(&format!(
+        "SELECT {PAYMENT_COLUMNS} FROM payments p {ATTRIBUTION_JOIN} {FIRST_TOUCH_JOIN}
+        WHERE p.site_id = $site AND p.status <> 'failed' AND a.session_id IS NOT NULL
+        ORDER BY p.ts, p.provider, p.provider_payment_id
+        LIMIT 1"
+    ))?;
+    Ok(stmt
+        .query_map(named_params! { "site": site_id }, payment_row)?
+        .next()
+        .transpose()?)
+}
+
 pub(crate) fn setup(conn: &Connection, site_id: &str) -> anyhow::Result<Setup> {
     let (first, has_goals, payments): (Option<i64>, bool, i64) = conn.query_row(
         "SELECT
@@ -1692,16 +1706,7 @@ pub(crate) fn setup(conn: &Connection, site_id: &str) -> anyhow::Result<Setup> {
         named_params! { "site": site_id },
         |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
     )?;
-    let mut stmt = conn.prepare(&format!(
-        "SELECT {PAYMENT_COLUMNS} FROM payments p {ATTRIBUTION_JOIN} {FIRST_TOUCH_JOIN}
-        WHERE p.site_id = $site AND p.status <> 'failed' AND a.session_id IS NOT NULL
-        ORDER BY p.ts, p.provider, p.provider_payment_id
-        LIMIT 1"
-    ))?;
-    let first_match = stmt
-        .query_map(named_params! { "site": site_id }, payment_row)?
-        .next()
-        .transpose()?;
+    let first_match = first_match(conn, site_id)?;
     Ok(Setup {
         first_event: first.map(from_micros),
         has_goals,
