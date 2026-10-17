@@ -300,6 +300,7 @@ async fn preorder_session(mut req: Request, ctx: RouteContext<()>) -> Result<Res
             429,
         );
     }
+    let cookie = req.headers().get("Cookie")?.unwrap_or_default();
     let raw = req.text().await?;
     let input = if raw.trim().is_empty() {
         SessionInput::default()
@@ -325,7 +326,9 @@ async fn preorder_session(mut req: Request, ctx: RouteContext<()>) -> Result<Res
         .with_body(Some(
             preorder::session_body(
                 email.as_deref(),
-                visitor(input.visitor_id).as_deref(),
+                visitor(input.visitor_id)
+                    .or_else(|| visitor(preorder::cookie_visitor(&cookie)))
+                    .as_deref(),
                 discount_code(input.code).as_deref(),
             )
             .to_string()
