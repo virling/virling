@@ -6,6 +6,8 @@ use worker::wasm_bindgen::JsValue;
 use worker::*;
 
 // Shared with the server, which also uses source_name.
+#[path = "../../src/assets.rs"]
+mod assets;
 #[allow(dead_code)]
 #[path = "../../src/channel.rs"]
 mod channel;
