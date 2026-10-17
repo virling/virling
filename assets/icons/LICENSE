@@ -16,6 +16,9 @@ used only as small icons that identify a traffic source.
 dodo.svg (Dodo Payments) and polar.svg (Polar) are those companies' own
 logos and trademarks, used only to identify their payment services.
 
+lobsters.svg wraps the site's own icon from lobste.rs, used only as a small
+icon that identifies a traffic source.
+
 Flags in ../flags are from flag-icons, https://github.com/lipis/flag-icons,
 under the MIT License:
 

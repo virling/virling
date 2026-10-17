@@ -8,6 +8,7 @@ pub enum Channel {
     Ai,
     #[serde(rename = "Organic search")]
     OrganicSearch,
+    Communities,
     Social,
     Referral,
     Direct,
@@ -20,6 +21,7 @@ impl Channel {
             Channel::Email => "Email",
             Channel::Ai => "AI",
             Channel::OrganicSearch => "Organic search",
+            Channel::Communities => "Communities",
             Channel::Social => "Social",
             Channel::Referral => "Referral",
             Channel::Direct => "Direct",
@@ -52,6 +54,17 @@ const SEARCH: &[&str] = &[
     "qwant.com",
 ];
 
+const COMMUNITIES: &[&str] = &[
+    "news.ycombinator.com",
+    "reddit.com",
+    "producthunt.com",
+    "indiehackers.com",
+    "dev.to",
+    "hashnode.com",
+    "hashnode.dev",
+    "lobste.rs",
+];
+
 const SOCIAL: &[&str] = &[
     "t.co",
     "x.com",
@@ -60,8 +73,6 @@ const SOCIAL: &[&str] = &[
     "instagram.com",
     "linkedin.com",
     "lnkd.in",
-    "reddit.com",
-    "news.ycombinator.com",
     "youtube.com",
     "youtu.be",
     "threads.net",
@@ -73,8 +84,6 @@ const SOCIAL: &[&str] = &[
     "pinterest.com",
     "pin.it",
     "tiktok.com",
-    "producthunt.com",
-    "indiehackers.com",
     "discord.com",
     "discordapp.com",
     "discord.gg",
@@ -85,9 +94,18 @@ const SOCIAL: &[&str] = &[
     "wa.me",
     "substack.com",
     "medium.com",
-    "dev.to",
-    "hashnode.com",
-    "hashnode.dev",
+];
+
+const COMMUNITY_SOURCES: &[&str] = &[
+    "hackernews",
+    "hn",
+    "ycombinator",
+    "reddit",
+    "producthunt",
+    "indiehackers",
+    "devto",
+    "hashnode",
+    "lobsters",
 ];
 
 const SOCIAL_SOURCES: &[&str] = &[
@@ -98,25 +116,18 @@ const SOCIAL_SOURCES: &[&str] = &[
     "instagram",
     "ig",
     "linkedin",
-    "reddit",
-    "hackernews",
-    "hn",
     "youtube",
     "threads",
     "bluesky",
     "mastodon",
     "tiktok",
     "pinterest",
-    "producthunt",
     "discord",
     "slack",
     "telegram",
     "whatsapp",
     "substack",
     "medium",
-    "devto",
-    "hashnode",
-    "indiehackers",
 ];
 
 const SEARCH_SOURCES: &[&str] = &[
@@ -152,7 +163,7 @@ fn host_matches(host: &str, list: &[&str]) -> bool {
 /// A utm_source that names a known source host ("chatgpt.com"), to stand in for a missing referrer.
 pub fn source_host(utm_source: &str) -> Option<String> {
     let s = utm_source.to_ascii_lowercase();
-    [AI, SEARCH, SOCIAL]
+    [AI, SEARCH, COMMUNITIES, SOCIAL]
         .iter()
         .any(|list| host_matches(&s, list))
         .then_some(s)
@@ -183,6 +194,9 @@ pub fn classify(
         if host_matches(host, SEARCH) {
             return Channel::OrganicSearch;
         }
+        if host_matches(host, COMMUNITIES) {
+            return Channel::Communities;
+        }
         if host_matches(host, SOCIAL) {
             return Channel::Social;
         }
@@ -195,6 +209,9 @@ pub fn classify(
         }
         if SEARCH_SOURCES.contains(&s) || host_matches(s, SEARCH) {
             return Channel::OrganicSearch;
+        }
+        if COMMUNITY_SOURCES.contains(&s) || host_matches(s, COMMUNITIES) {
+            return Channel::Communities;
         }
         if SOCIAL_SOURCES.contains(&s) || host_matches(s, SOCIAL) {
             return Channel::Social;
@@ -283,6 +300,8 @@ pub fn source_name(host: &str) -> String {
         ("medium.com", "Medium"),
         ("dev.to", "DEV"),
         ("hashnode.com", "Hashnode"),
+        ("hashnode.dev", "Hashnode"),
+        ("lobste.rs", "Lobsters"),
         ("search.brave.com", "Brave"),
         ("ecosia.org", "Ecosia"),
         ("baidu.com", "Baidu"),
@@ -303,12 +322,18 @@ pub fn source_name(host: &str) -> String {
 #[cfg(test)]
 #[allow(dead_code)]
 pub(crate) fn known_sources() -> Vec<String> {
-    let hosts = [AI, SEARCH, SOCIAL].concat();
+    let hosts = [AI, SEARCH, COMMUNITIES, SOCIAL].concat();
     let hosts = hosts.iter().map(|h| match h.strip_suffix('.') {
         Some(prefix) => format!("{prefix}.com"),
         None => h.to_string(),
     });
-    let names = [SOCIAL_SOURCES, SEARCH_SOURCES, AI_SOURCES].concat();
+    let names = [
+        COMMUNITY_SOURCES,
+        SOCIAL_SOURCES,
+        SEARCH_SOURCES,
+        AI_SOURCES,
+    ]
+    .concat();
     hosts
         .chain(names.iter().map(|s| s.to_string()))
         .flat_map(|h| [source_name(&h), source_domain(&h), h])
@@ -333,12 +358,13 @@ mod tests {
         );
         assert_eq!(
             classify(None, None, Some("news.ycombinator.com")),
-            Channel::Social
+            Channel::Communities
         );
         assert_eq!(
             classify(None, None, Some("old.reddit.com")),
-            Channel::Social
+            Channel::Communities
         );
+        assert_eq!(classify(None, None, Some("x.com")), Channel::Social);
         assert_eq!(
             classify(None, None, Some("someblog.dev")),
             Channel::Referral
@@ -393,19 +419,56 @@ mod tests {
             "web.whatsapp.com",
             "someone.substack.com",
             "medium.com",
-            "dev.to",
-            "blog.hashnode.dev",
-            "www.indiehackers.com",
         ] {
             assert_eq!(classify(None, None, Some(host)), Channel::Social, "{host}");
         }
-        for source in ["bluesky", "discord", "substack", "dev.to"] {
+        for source in ["bluesky", "discord", "substack"] {
             assert_eq!(
                 classify(None, Some(source), None),
                 Channel::Social,
                 "{source}"
             );
         }
+    }
+
+    #[test]
+    fn community_sites_get_their_own_channel() {
+        for host in [
+            "news.ycombinator.com",
+            "www.reddit.com",
+            "old.reddit.com",
+            "www.producthunt.com",
+            "www.indiehackers.com",
+            "dev.to",
+            "hashnode.com",
+            "blog.hashnode.dev",
+            "lobste.rs",
+        ] {
+            assert_eq!(
+                classify(None, None, Some(host)),
+                Channel::Communities,
+                "{host}"
+            );
+        }
+        for source in [
+            "hn",
+            "HackerNews",
+            "reddit",
+            "producthunt",
+            "indiehackers",
+            "devto",
+            "dev.to",
+            "hashnode",
+            "lobsters",
+        ] {
+            assert_eq!(
+                classify(None, Some(source), None),
+                Channel::Communities,
+                "{source}"
+            );
+        }
+        assert_eq!(source_host("dev.to").as_deref(), Some("dev.to"));
+        assert_eq!(source_name("lobste.rs"), "Lobsters");
     }
 
     #[test]

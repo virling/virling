@@ -70,6 +70,13 @@ const LINKS: &[(&str, &str, &str, &str, &str)] = &[
         "/pricing",
     ),
     (
+        "launch-day",
+        "Product Hunt launch",
+        "producthunt.com",
+        "community",
+        "/",
+    ),
+    (
         "weekly-digest",
         "Weekly digest footer",
         "newsletter",
@@ -165,6 +172,22 @@ const SOURCES: &[Source] = &[
         growth: 1.1,
         convert: 0.011,
         paths: BLOG,
+    },
+    Source {
+        host: Some("www.producthunt.com"),
+        utm: Some(("producthunt.com", "community", "launch-day")),
+        weight: 1.6,
+        growth: 1.0,
+        convert: 0.045,
+        paths: PRODUCT,
+    },
+    Source {
+        host: Some("www.indiehackers.com"),
+        utm: None,
+        weight: 1.2,
+        growth: 1.2,
+        convert: 0.05,
+        paths: &["/blog/we-stopped-chasing-invoices", "/pricing"],
     },
     Source {
         host: Some("www.linkedin.com"),

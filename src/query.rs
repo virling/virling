@@ -108,7 +108,7 @@ Revenue per visitor is matched revenue divided by visitors.",
         after_help = "Examples:\n  virling query overview --site example.com\n  virling query overview --range 7d\n  virling query overview --from 2026-09-01 --to 2026-09-30 --json"
     )]
     Overview(RangeArgs),
-    /// Revenue by channel: Search, Social, AI, Email, Paid, Referral, Direct
+    /// Revenue by channel: Search, Communities, Social, AI, Email, Paid, Referral, Direct
     #[command(
         after_help = breakdown_help!("  virling query channels\n  virling query channels --range 90d --json")
     )]

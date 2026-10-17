@@ -78,7 +78,7 @@ Visitors and credited revenue per value of a dimension, most revenue first, then
 
 | Dimension | Rows |
 | --- | --- |
-| `channel` | Search, Social, AI, Email, Paid, Referral, Direct and so on. |
+| `channel` | Search, Communities, Social, AI, Email, Paid, Referral, Direct and so on. |
 | `referrer` | Referring domain, such as `chatgpt.com`. |
 | `campaign` | `utm_campaign`. |
 | `keyword` | `utm_term`. |

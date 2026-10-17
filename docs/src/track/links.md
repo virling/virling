@@ -11,7 +11,7 @@ In the app, open **Links** and fill in:
 | Name | Only for you, such as "Launch post on X". |
 | Destination | A page on the site or one of its subdomains. |
 | Source | Where it is shared: `x.com`, `linkedin.com`, `newsletter`. It becomes `utm_source`. |
-| Channel | Social, Email, Paid or Referral. It becomes `utm_medium` (`social`, `email`, `cpc`, `referral`). |
+| Channel | Social, Communities, Email, Paid or Referral. It becomes `utm_medium` (`social`, `community`, `email`, `cpc`, `referral`). |
 
 The link's id becomes `utm_campaign`, so its visits also show under the Campaign tab.
 
