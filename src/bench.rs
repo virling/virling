@@ -373,6 +373,13 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         body: Some(pageview.clone()),
         ..get("ingest.pageview", "/api/event".into(), Auth::None)
     });
+    routes.push(Route {
+        body: Some(
+            json!({ "s": domain, "u": format!("https://{domain}/pricing"),
+            "ua": "Mozilla/5.0 (compatible; GPTBot/1.2; +https://openai.com/gptbot)" }),
+        ),
+        ..get("ingest.crawl", "/api/crawl".into(), Auth::None)
+    });
     for (name, visitors) in [("ingest.new_visitor", 1), ("ingest.concurrent16", 16)] {
         routes.push(Route {
             body: Some(pageview.clone()),

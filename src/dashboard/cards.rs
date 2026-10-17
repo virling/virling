@@ -2,8 +2,11 @@
 
 use std::collections::HashMap;
 
+use time::OffsetDateTime;
+
 use super::{FilterHref, Opt, group, link, money, usd};
 use crate::channel::source_name;
+use crate::crawlers::{BotHits, Kind, by_name};
 use crate::icons;
 use crate::stats::{BreakdownRow, DayPoint, Dimension};
 
@@ -963,6 +966,59 @@ pub fn ai_card(
         .iter()
         .map(|h| icons::source(h, 18))
         .collect(),
+    }
+}
+
+pub struct CrawlerRow {
+    pub(super) icon: String,
+    pub(super) name: &'static str,
+    pub(super) company: &'static str,
+    pub(super) kind: &'static str,
+    pub(super) kind_class: &'static str,
+    pub(super) hits: String,
+    pub(super) pages: String,
+    pub(super) top: String,
+    pub(super) seen: String,
+}
+
+/// The AI crawlers card: which bots read the site's pages.
+pub struct CrawlerCard {
+    pub(super) rows: Vec<CrawlerRow>,
+    /// Greyed logos for the empty state.
+    pub(super) logos: Vec<String>,
+    pub(super) docs: &'static str,
+}
+
+/// Builds the AI crawlers card from each bot's hits, most hits first.
+pub fn crawler_card(bots: &[BotHits], now: OffsetDateTime) -> CrawlerCard {
+    CrawlerCard {
+        rows: bots
+            .iter()
+            .filter_map(|b| Some((b, by_name(&b.bot)?)))
+            .take(SHOWN)
+            .map(|(b, c)| CrawlerRow {
+                icon: icons::source(c.logo, 16),
+                name: c.name,
+                company: c.company,
+                kind: c.kind.label(),
+                kind_class: match c.kind {
+                    Kind::Training => "",
+                    Kind::Search => "srch",
+                    Kind::Answer => "up",
+                },
+                hits: group(b.hits.max(0) as u64),
+                pages: group(b.pages.max(0) as u64),
+                top: b.top_page.clone(),
+                seen: OffsetDateTime::from_unix_timestamp(b.last_seen)
+                    .map(|t| super::ago(t, now))
+                    .unwrap_or_default(),
+            })
+            .collect(),
+        logos: ["openai", "anthropic", "perplexity", "google", "meta"]
+            .iter()
+            .map(|l| icons::source(l, 18))
+            .collect(),
+        docs: "https://docs.virling.com/track/ai-crawlers.html",
     }
 }
 

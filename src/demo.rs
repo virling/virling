@@ -53,6 +53,30 @@ const NEXT: &[&str] = &[
     "/about",
     "/",
 ];
+/// AI crawlers and their usual fetches a day.
+const CRAWLS: &[(&str, usize)] = &[
+    ("GPTBot", 42),
+    ("ClaudeBot", 27),
+    ("Bytespider", 16),
+    ("PerplexityBot", 12),
+    ("meta-externalagent", 10),
+    ("OAI-SearchBot", 8),
+    ("ChatGPT-User", 6),
+    ("Amazonbot", 5),
+    ("Claude-User", 3),
+    ("CCBot", 2),
+];
+/// Pages the crawlers read.
+const CRAWLED: &[&str] = &[
+    "/",
+    "/pricing",
+    "/blog/net-30-explained",
+    "/features/recurring-invoices",
+    "/docs/getting-started",
+    "/compare",
+    "/blog/we-stopped-chasing-invoices",
+    "/changelog",
+];
 /// Tracked short links as (slug, name, source, channel, destination path).
 const LINKS: &[(&str, &str, &str, &str, &str)] = &[
     (
@@ -772,6 +796,44 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
         .execute(&db)
         .await?;
     }
+    let mut tx = db.begin().await?;
+    let mut pages: HashMap<(&str, &str), (i64, i64)> = HashMap::new();
+    for d in 0..DAYS {
+        for (i, (bot, per_day)) in CRAWLS.iter().enumerate() {
+            let n = (per_day * (1 + (d as usize * 7 + i * 3) % 5) / 3) as i64;
+            let seen =
+                (now - Duration::days(d) - Duration::hours(1 + i as i64 * 5 % 23)).unix_timestamp();
+            sqlx::query("INSERT INTO crawler_days (site_id, day, bot, hits, last_seen) VALUES (?, ?, ?, ?, ?)")
+                .bind(&site)
+                .bind(seen.div_euclid(86400))
+                .bind(bot)
+                .bind(n)
+                .bind(seen)
+                .execute(&mut *tx)
+                .await?;
+            for j in 0..n.min(4) {
+                let page = pages
+                    .entry((
+                        bot,
+                        CRAWLED[(d as usize + i * 5 + j as usize * 3) % CRAWLED.len()],
+                    ))
+                    .or_insert((0, seen));
+                page.0 += (n / (j + 1)).max(1);
+                page.1 = page.1.max(seen);
+            }
+        }
+    }
+    for ((bot, path), (hits, seen)) in pages {
+        sqlx::query("INSERT INTO crawler_pages (site_id, bot, path, hits, last_seen) VALUES (?, ?, ?, ?, ?)")
+            .bind(&site)
+            .bind(bot)
+            .bind(path)
+            .bind(hits)
+            .bind(seen)
+            .execute(&mut *tx)
+            .await?;
+    }
+    tx.commit().await?;
     let config = Config {
         marketing: false,
         app: true,

@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use axum::Router;
-use axum::extract::Path;
-use axum::http::{StatusCode, header};
+use axum::extract::{Path, State};
+use axum::http::{HeaderMap, StatusCode, header};
 use axum::response::{Html, IntoResponse, Redirect, Response};
 use axum::routing::{get, post};
 use sqlx::SqlitePool;
@@ -14,8 +14,8 @@ use crate::ingest::{self, DailySalt, RateLimiter, Sessions};
 use crate::mail::Mailer;
 use crate::sites::SiteCache;
 use crate::{
-    api, auth, dashboard, flags, links, mcp, onboarding, retention_page, settings, visitor_pages,
-    waitlist,
+    api, auth, crawlers, dashboard, flags, links, mcp, onboarding, retention_page, settings,
+    visitor_pages, waitlist,
 };
 
 #[derive(Debug, Clone)]
@@ -87,6 +87,7 @@ pub fn router(state: AppState) -> Router {
             "/api/event",
             post(ingest::collect).options(ingest::preflight),
         )
+        .route("/api/crawl", post(crawlers::collect))
         .route("/health", get(|| async { "ok" }))
         .route(
             "/assets/site.css",
@@ -256,7 +257,8 @@ pub fn router(state: AppState) -> Router {
     app.with_state(state)
 }
 
-async fn tracker() -> Response {
+async fn tracker(State(state): State<AppState>, headers: HeaderMap) -> Response {
+    crawlers::script_fetch(&state, &headers);
     (
         [
             (header::CONTENT_TYPE, "text/javascript; charset=utf-8"),

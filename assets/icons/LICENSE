@@ -3,8 +3,8 @@ github, producthunt, facebook, instagram, duckduckgo, stripe, lemonsqueezy,
 claude, perplexity, googlegemini, bluesky, threads, mastodon, tiktok,
 pinterest, discord, telegram, whatsapp, substack, medium, devdotto, hashnode,
 indiehackers, brave, ecosia, baidu, deepseek, kagi, qwant, startpage, googlechrome,
-safari, firefoxbrowser, opera, apple, android, linux) are from Simple Icons, https://simpleicons.org, released under CC0 1.0
-Universal. chatgpt (OpenAI) and slack are from Simple Icons 14.0.0, bing
+safari, firefoxbrowser, opera, apple, android, linux, anthropic, meta, bytedance) are from Simple Icons, https://simpleicons.org, released under CC0 1.0
+Universal. amazon is from Simple Icons 14.0.0. chatgpt (OpenAI) and slack are from Simple Icons 14.0.0, bing
 (Microsoft Bing) from 12.0.0 and yahoo from 9.0.0, before those marks were
 removed from the set; slack is recoloured in its four brand colours. The
 trademarks belong to their owners.
@@ -18,6 +18,9 @@ logos and trademarks, used only to identify their payment services.
 
 lobsters.svg wraps the site's own icon from lobste.rs, used only as a small
 icon that identifies a traffic source.
+
+commoncrawl.svg is the mark from Common Crawl's own logo on commoncrawl.org,
+used only as a small icon that identifies its crawler.
 
 Flags in ../flags are from flag-icons, https://github.com/lipis/flag-icons,
 under the MIT License:
