@@ -594,7 +594,7 @@ fn bar(i: &Item, base: &Base, m: f64, kid: bool, href: String, id: String) -> Ba
         } else if r.revenue_usd > 0.0 {
             usd(pv)
         } else {
-            "No sales yet".into()
+            "$0".into()
         },
         earlier: r.visitors == 0 && r.revenue_usd > 0.0,
         small: base.warn_small

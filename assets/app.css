@@ -581,6 +581,9 @@ a.ctl { text-decoration: none; }
 .d3-row.kid .tx b { font-weight: 500; }
 .d3-kids { margin: 0 0 6px 20px; padding-left: 10px; border-left: 1px solid var(--rule-2); }
 .d3-kids[hidden] { display: none; }
+.d3-panel:has(.d3-kids:not([hidden])) { max-height: 560px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.d3-panel:has(.d3-kids:not([hidden])) .d3-row.th { position: sticky; top: 0; z-index: 2; background: #fff; }
+.d3-panel:has(.d3-kids:not([hidden])) .d3-foot { position: sticky; bottom: 0; z-index: 2; background: #fff; }
 .d3-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; margin-top: auto; padding-top: 4px; border-top: 1px solid var(--rule-2); font-size: 12px; color: var(--ink-3); }
 .d3-bc .d3-foot { margin-top: auto; }
 .d3-bc > .d3-row:last-of-type, .d3-bc > .d3-kids:last-of-type { margin-bottom: 6px; }
