@@ -161,6 +161,60 @@ LEFT JOIN attribution a ON a.site_id = $site AND a.provider = f.provider
 WHERE NOT f.is_renewal AND ((f.ts >= b.lo AND f.ts < b.hi) OR f.us > $now - 60 * 86400000000)
 ";
 
+/// Monthly recurring revenue in USD from subscriptions that pay now: live, past any trial and not ended.
+#[derive(Debug, Clone, Default, PartialEq, Serialize)]
+pub struct Mrr {
+    pub usd: f64,
+    pub customers: u64,
+    /// The part from customers whose first payment was in the period.
+    pub cohort_usd: f64,
+    pub cohort_customers: u64,
+}
+
+pub(crate) fn mrr(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+    now: OffsetDateTime,
+) -> anyhow::Result<Option<Mrr>> {
+    let sql = format!(
+        "WITH {BOUNDS},
+        subs AS (
+            SELECT provider, customer_id, sum(mrr_usd) AS usd FROM subscriptions
+            WHERE site_id = $site AND live AND status NOT IN ('trialing', 'on_trial')
+                AND (ends_at IS NULL OR epoch_us(ends_at) > $now) AND mrr_usd IS NOT NULL
+            GROUP BY ALL
+        ),
+        cohort AS (
+            SELECT DISTINCT p.provider, p.customer_id FROM payments p, bounds
+            WHERE p.site_id = $site AND NOT p.is_renewal AND p.status <> 'failed'
+                AND p.ts >= lo AND p.ts < hi
+        )
+        SELECT (SELECT count(*) FROM subscriptions WHERE site_id = $site AND mrr_usd IS NOT NULL),
+            coalesce(sum(s.usd), 0), count(*),
+            coalesce(sum(s.usd) FILTER (WHERE c.provider IS NOT NULL), 0), count(c.provider)
+        FROM subs s LEFT JOIN cohort c USING (provider, customer_id)"
+    );
+    let (priced, usd, customers, cohort_usd, cohort_customers): (i64, f64, i64, f64, i64) = conn
+        .query_row(
+            &sql,
+            named_params! {
+                "site": site_id,
+                "tz": period.tz,
+                "from": period.from.to_string(),
+                "to": period.to.to_string(),
+                "now": micros(now),
+            },
+            |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?, r.get(4)?)),
+        )?;
+    Ok((priced > 0).then_some(Mrr {
+        usd,
+        customers: customers as u64,
+        cohort_usd,
+        cohort_customers: cohort_customers as u64,
+    }))
+}
+
 fn micros(t: OffsetDateTime) -> i64 {
     (t.unix_timestamp_nanos() / 1000) as i64
 }
@@ -740,6 +794,11 @@ mod tests {
             status: "x".into(),
             live,
             ends_at: ends.map(|d| NOW + Duration::days(d)),
+            amount: None,
+            currency: None,
+            interval: None,
+            interval_count: 1,
+            mrr_usd: None,
         };
         store
             .replace_subscriptions(
@@ -768,11 +827,56 @@ mod tests {
         assert_eq!(r.channels[0].label, "Unattributed");
         assert!(r.status_sources[0].subscription_status);
         assert!(r.day_one);
+        assert_eq!(store.mrr("s", &period(), NOW).unwrap(), None, "no prices");
         store.replace_subscriptions("s", "stripe", &[]).unwrap();
         let r = store.retention("s", &period(), NOW).unwrap();
         assert_eq!(
             r.total.still_paying, 1,
             "only the renewal 15 days ago is recent"
+        );
+    }
+
+    #[test]
+    fn mrr_counts_paying_subscriptions_now() {
+        let (_d, store) = store();
+        store
+            .upsert_payments(&[
+                pay("a1", "cus_new", None, 10, 0),
+                pay("b1", "cus_old", None, 200, 0),
+                renewal(pay("b2", "cus_old", None, 20, 0)),
+            ])
+            .unwrap();
+        let sub = |id: &str, customer: &str, status: &str, live: bool, usd: f64| Subscription {
+            subscription_id: id.into(),
+            customer_id: customer.into(),
+            status: status.into(),
+            live,
+            ends_at: None,
+            amount: Some(2900),
+            currency: Some("usd".into()),
+            interval: Some("month".into()),
+            interval_count: 1,
+            mrr_usd: Some(usd),
+        };
+        store
+            .replace_subscriptions(
+                "s",
+                "stripe",
+                &[
+                    sub("s1", "cus_new", "active", true, 29.0),
+                    sub("s2", "cus_new", "active", true, 10.0),
+                    sub("s3", "cus_old", "past_due", true, 79.0),
+                    sub("s4", "cus_trial", "trialing", true, 29.0),
+                    sub("s5", "cus_gone", "canceled", false, 29.0),
+                ],
+            )
+            .unwrap();
+        let m = store.mrr("s", &period(), NOW).unwrap().unwrap();
+        assert_eq!((m.usd, m.customers), (118.0, 2));
+        assert_eq!(
+            (m.cohort_usd, m.cohort_customers),
+            (39.0, 1),
+            "cus_old first paid before the range"
         );
     }
 }

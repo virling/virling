@@ -751,8 +751,18 @@ async fn page(
             }
             "goals" => Data::Goals(goals::load(&*store, &id, &pq, &f, &rest)?),
             "visitors" => Data::Visitors(views::load_visitors(&*store, &id, &pq, &tz, now, &f)?),
-            "payments" => Data::Payments(views::load_payments(&*store, &id, &pq, window_days, &f)?),
-            _ => Data::Retention(Box::new(store.retention(&id, &pq, now)?)),
+            "payments" => Data::Payments(views::load_payments(
+                &*store,
+                &id,
+                &pq,
+                window_days,
+                &f,
+                now,
+            )?),
+            _ => Data::Retention(
+                Box::new(store.retention(&id, &pq, now)?),
+                store.mrr(&id, &pq, now)?,
+            ),
         };
         Ok((split, overview, all, data))
     })
@@ -1252,8 +1262,8 @@ async fn page(
                 ctx.offset,
             ));
         }
-        Data::Retention(r) => {
-            page.retention = Some(views::retention_view(&r, &q.rest, &href));
+        Data::Retention(r, mrr) => {
+            page.retention = Some(views::retention_view(&r, mrr.as_ref(), &q.rest, &href));
         }
     }
     Ok(render(page))
@@ -1270,7 +1280,10 @@ enum Data {
     Goals(goals::GoalsData),
     Visitors(views::VisitorsData),
     Payments(views::PaymentsData),
-    Retention(Box<crate::retention::Retention>),
+    Retention(
+        Box<crate::retention::Retention>,
+        Option<crate::retention::Mrr>,
+    ),
 }
 
 #[cfg(test)]
