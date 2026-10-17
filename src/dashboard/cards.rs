@@ -65,7 +65,7 @@ impl Tab {
         match self {
             Tab::Channel => "Channel",
             Tab::Source => "Source",
-            Tab::Campaign => "utm_campaign",
+            Tab::Campaign => "Campaign or tracked link",
             Tab::Keyword => "Search term",
             Tab::Landing => "First page of the visit",
             Tab::Before => "Last page before checkout",
@@ -82,7 +82,7 @@ impl Tab {
         match self {
             Tab::Channel => "Click a channel to filter. Open it to see its sites.",
             Tab::Source => "Click a source to filter.",
-            Tab::Campaign => "Add utm_campaign to your links to split these out.",
+            Tab::Campaign => "Tracked links and utm_campaign tags.",
             Tab::Keyword => "From utm_term on your links.",
             Tab::Landing => "Click a page to filter. Open it to see where its visitors came from.",
             Tab::Before => "Visitors here means everyone who viewed the page.",
@@ -215,6 +215,8 @@ pub struct BarRow {
     pub(super) kids: Vec<BarRow>,
     /// A short tag after the name, such as "Best value".
     pub(super) tag: &'static str,
+    /// A tracked link's short URL, with a copy button.
+    pub(super) copy: String,
 }
 
 /// One tab's rows; every tab is rendered so switching needs no reload.
@@ -224,6 +226,8 @@ pub struct Panel {
     pub(super) rows: Vec<BarRow>,
     pub(super) openable: bool,
     pub(super) foot: String,
+    /// Where the "Tracked link" form posts; empty on tabs without one.
+    pub(super) new_link: String,
 }
 
 pub struct TabCard {
@@ -605,6 +609,7 @@ fn bar(i: &Item, base: &Base, m: f64, kid: bool, href: String, id: String) -> Ba
         href,
         kids: Vec::new(),
         tag: "",
+        copy: String::new(),
     }
 }
 
@@ -706,6 +711,7 @@ fn panel(
         openable: rows.iter().any(|r| !r.kids.is_empty()),
         rows,
         foot,
+        new_link: String::new(),
     }
 }
 
@@ -762,6 +768,52 @@ pub fn card(
         empty_title: spec.empty.0,
         empty_text: spec.empty.1,
     }
+}
+
+/// Shows tracked links by name in the Campaign tab, adds the new-link form and notes a link just made.
+pub fn with_links(
+    cards: &mut [TabCard],
+    links: &[crate::links::SiteLink],
+    base_url: &str,
+    action: &str,
+    new_link: Option<&str>,
+    error: Option<&str>,
+) {
+    let Some(card) = cards.iter_mut().find(|c| c.key == "channels") else {
+        return;
+    };
+    let Some(panel) = SPECS[0]
+        .tabs
+        .iter()
+        .position(|t| t.2 == Tab::Campaign)
+        .and_then(|i| card.panels.get_mut(i))
+    else {
+        return;
+    };
+    let short = |slug: &str| format!("{base_url}/l/{slug}");
+    for row in &mut panel.rows {
+        if let Some(l) = links.iter().find(|l| l.slug == row.name) {
+            row.icon = icons::source(&l.source, 16);
+            let place = crate::links::PLACES
+                .iter()
+                .find(|p| p.2 == l.source)
+                .map_or_else(|| source_name(&l.source), |p| p.1.to_string());
+            row.sub = format!("{place} · {} clicks", group(l.clicks.max(0) as u64));
+            row.name = l.name.clone();
+            row.copy = short(&l.slug);
+        }
+    }
+    panel.new_link = action.to_string();
+    panel.foot = match (new_link, error) {
+        (_, Some("destination")) => {
+            "That page is not on this site. Use a path like /pricing.".into()
+        }
+        (_, Some(_)) => "Pick where you will share the link.".into(),
+        (Some(slug), _) if links.iter().any(|l| l.slug == slug) => {
+            format!("Link ready: {}", short(slug))
+        }
+        _ => panel.foot.clone(),
+    };
 }
 
 /// Every tab of every card, for loading their rows.

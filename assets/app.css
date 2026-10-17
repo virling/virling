@@ -1177,3 +1177,21 @@ body.r2-page { min-height: 100vh; background: #f6f6f3; line-height: normal; }
   .r2-sec, .r2-kpis, .r2-ins, .r2-note, .r2-foot { break-inside: avoid; }
   .r2-note.r2-note-empty { display: none; }
 }
+.d3-copy { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--field); border-radius: 8px; background: #fff; color: var(--ink-2); cursor: pointer; }
+.d3-copy:hover { color: var(--ink); border-color: #b9bcc2; }
+.d3-dlg { width: min(460px, calc(100vw - 32px)); padding: 24px; border: 1px solid var(--rule); border-radius: 16px; box-shadow: var(--shadow-pop); }
+.d3-dlg::backdrop { background: rgba(14, 17, 22, .35); }
+.d3-dlg form { display: flex; flex-direction: column; gap: 14px; }
+.d3-dlg h3 { margin: 0; font-size: 18px; }
+.d3-dlg p { margin: -6px 0 0; font-size: 13px; line-height: 1.5; }
+.d3-places { margin: 0; padding: 0; border: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.d3-places legend { margin-bottom: 8px; font-size: 13px; font-weight: 600; }
+.d3-places label { height: 34px; padding: 0 12px; display: inline-flex; align-items: center; border: 1px solid var(--field); border-radius: 999px; font-size: 13px; cursor: pointer; }
+.d3-places input { position: absolute; opacity: 0; pointer-events: none; }
+.d3-places label:has(input:checked) { background: var(--ink); border-color: var(--ink); color: #fff; }
+.d3-places label:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
+.d3-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; }
+.d3-field .muted { display: inline; font-weight: 400; }
+.d3-field[hidden] { display: none; }
+.d3-field input { height: 40px; padding: 0 12px; border: 1px solid var(--field); border-radius: 10px; font-size: 14px; font-weight: 400; }
+.d3-dlg-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }

@@ -1197,6 +1197,17 @@ async fn page(
                     cards::card(pick, mine, &base_numbers, &base, &params, &filter_href)
                 })
                 .collect();
+            let links = crate::links::site_links(&state.db, &ctx.site.id)
+                .await
+                .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+            cards::with_links(
+                &mut page.cards,
+                &links,
+                &state.config.base_url,
+                &crate::sites::app_path(&ctx.site.domain, "links"),
+                q.rest.get("new_link").map(String::as_str),
+                q.rest.get("link_error").map(String::as_str),
+            );
             page.ai = Some(cards::ai_card(
                 &sources,
                 &base_numbers,
