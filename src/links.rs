@@ -14,8 +14,9 @@ use crate::sites::app_path;
 use crate::ua::is_bot;
 
 /// (value, label, utm_medium) for the channel a link is shared on.
-const CHANNELS: [(&str, &str, &str); 4] = [
+const CHANNELS: [(&str, &str, &str); 5] = [
     ("social", "Social", "social"),
+    ("community", "Communities", "community"),
     ("email", "Email", "email"),
     ("paid", "Paid", "cpc"),
     ("referral", "Referral", "referral"),
@@ -114,6 +115,7 @@ pub async fn create(
     };
     let channel = match crate::channel::classify(None, Some(&source), None) {
         Channel::Social => "social",
+        Channel::Communities => "community",
         Channel::Email => "email",
         Channel::Paid => "paid",
         _ => "referral",
@@ -275,6 +277,19 @@ mod tests {
         assert!(valid_destination("https://evil.com/", "example.com").is_none());
         assert!(valid_destination("https://notexample.com/", "example.com").is_none());
         assert!(valid_destination("javascript:alert(1)", "example.com").is_none());
+    }
+
+    #[test]
+    fn product_hunt_and_reddit_links_land_in_communities() {
+        for place in ["producthunt", "reddit"] {
+            let source = PLACES.iter().find(|p| p.0 == place).unwrap().2;
+            let host = crate::channel::source_host(source);
+            assert_eq!(
+                crate::channel::classify(Some("community"), Some(source), host.as_deref()),
+                Channel::Communities,
+                "{place}"
+            );
+        }
     }
 
     #[test]

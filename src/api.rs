@@ -26,7 +26,7 @@ pub const DIMENSIONS: [(&str, Dimension, &str); 11] = [
     (
         "channel",
         Dimension::Channel,
-        "Channel of the visit, such as Search, Social, AI, Email, Paid, Referral or Direct",
+        "Channel of the visit, such as Search, Communities, Social, AI, Email, Paid, Referral or Direct",
     ),
     (
         "referrer",

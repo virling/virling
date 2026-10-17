@@ -1,6 +1,6 @@
 # Channels
 
-Every session gets one channel, decided by its first pageview: Paid, Email, AI, Organic search, Social, Referral or Direct.
+Every session gets one channel, decided by its first pageview: Paid, Email, AI, Organic search, Communities, Social, Referral or Direct.
 
 ## Rule order
 
@@ -12,10 +12,11 @@ The rules run in this order and the first match wins:
 2. **Referrer host**, when the visitor came from another site:
    - A known AI host is **AI**.
    - A known search host is **Organic search**.
+   - A known community host is **Communities**.
    - A known social host is **Social**.
    - Any other host is **Referral**.
 3. **`utm_source`**, or `ref` when `utm_source` is missing, when there is no referrer:
-   - A known AI source is **AI**, a known search source is **Organic search**, a known social source is **Social**.
+   - A known AI source is **AI**, a known search source is **Organic search**, a known community source is **Communities**, a known social source is **Social**.
    - Any other value is **Referral**.
 4. Any other `utm_medium` with no referrer and no source is **Referral**.
 5. Everything else is **Direct**.
@@ -30,7 +31,8 @@ A leading `www.` is ignored, and subdomains match: `old.reddit.com` matches `red
 | --- | --- |
 | AI | `chatgpt.com`, `chat.openai.com`, `perplexity.ai`, `claude.ai`, `gemini.google.com`, `copilot.microsoft.com`, `chat.deepseek.com` |
 | Organic search | `google.`, `bing.com`, `duckduckgo.com`, `search.yahoo.`, `yahoo.`, `ecosia.org`, `yandex.`, `baidu.com`, `search.brave.com`, `startpage.com`, `kagi.com`, `qwant.com` |
-| Social | `t.co`, `x.com`, `twitter.com`, `facebook.com`, `instagram.com`, `linkedin.com`, `lnkd.in`, `reddit.com`, `news.ycombinator.com`, `youtube.com`, `youtu.be`, `threads.net`, `bsky.app`, `mastodon.social`, `pinterest.com`, `tiktok.com`, `producthunt.com`, `indiehackers.com` |
+| Communities | `news.ycombinator.com`, `reddit.com`, `producthunt.com`, `indiehackers.com`, `dev.to`, `hashnode.com`, `hashnode.dev`, `lobste.rs` |
+| Social | `t.co`, `x.com`, `twitter.com`, `facebook.com`, `instagram.com`, `linkedin.com`, `lnkd.in`, `youtube.com`, `youtu.be`, `threads.net`, `bsky.app`, `mastodon.social`, `pinterest.com`, `tiktok.com` |
 
 AI is checked before search, so `gemini.google.com` is AI, not Organic search.
 
@@ -42,7 +44,8 @@ These `utm_source` or `ref` values are matched exactly, lowercased:
 | --- | --- |
 | AI | `chatgpt`, `openai`, `perplexity`, `claude`, `gemini`, `copilot` |
 | Organic search | `google`, `bing`, `duckduckgo`, `yahoo`, `ecosia`, `brave` |
-| Social | `twitter`, `x`, `facebook`, `fb`, `instagram`, `ig`, `linkedin`, `reddit`, `hackernews`, `hn`, `youtube`, `threads`, `bluesky`, `tiktok`, `producthunt` |
+| Communities | `hackernews`, `hn`, `ycombinator`, `reddit`, `producthunt`, `indiehackers`, `devto`, `hashnode`, `lobsters` |
+| Social | `twitter`, `x`, `facebook`, `fb`, `instagram`, `ig`, `linkedin`, `youtube`, `threads`, `bluesky`, `tiktok` |
 
 ## Examples
 
@@ -50,9 +53,9 @@ These `utm_source` or `ref` values are matched exactly, lowercased:
 | --- | --- |
 | `/?utm_source=google&utm_medium=cpc` from google.com | Paid, medium wins over the referrer |
 | `/?utm_medium=newsletter` | Email |
-| From `news.ycombinator.com` | Social |
+| From `news.ycombinator.com` | Communities |
 | From `chatgpt.com` | AI |
-| `/?ref=producthunt` with no referrer | Social |
+| `/?ref=producthunt` with no referrer | Communities |
 | From `someblog.dev` | Referral |
 | Typed URL or bookmark | Direct |
 

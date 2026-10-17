@@ -100,6 +100,11 @@ const BRANDS: &[(&str, &str, &str)] = &[
         include_str!("../assets/icons/lemonsqueezy.svg"),
     ),
     (
+        "lobsters",
+        "Lobsters",
+        include_str!("../assets/icons/lobsters.svg"),
+    ),
+    (
         "linkedin",
         "LinkedIn",
         include_str!("../assets/icons/linkedin.svg"),
@@ -201,7 +206,10 @@ pub fn brand_slug(source: &str) -> Option<&'static str> {
         _ if h.starts_with("google.") || h.contains(".google.") => "google",
         "x" | "twitter" | "x.com" | "t.co" | "twitter.com" => "x",
         "reddit" | "reddit.com" | "old.reddit.com" => "reddit",
-        "hacker news" | "hackernews" | "hn" | "news.ycombinator.com" => "ycombinator",
+        "hacker news" | "hackernews" | "hn" | "ycombinator" | "news.ycombinator.com" => {
+            "ycombinator"
+        }
+        "lobsters" | "lobste.rs" => "lobsters",
         "linkedin" | "linkedin.com" | "lnkd.in" => "linkedin",
         "youtube" | "youtube.com" | "youtu.be" => "youtube",
         "github" | "github.com" => "github",
@@ -281,6 +289,9 @@ fn glyph_path(name: &str) -> &'static str {
         "social" => {
             r#"<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 11l7.6-3.8M8.2 13l7.6 3.8"/>"#
         }
+        "community" => {
+            r#"<path d="M14 10a6 6 0 0 1-8.7 5.4L2 16.5l1-3.2A6 6 0 1 1 14 10z"/><path d="M16.5 8.6A6 6 0 0 1 21 18.3l1 3.2-3.3-1.1A6 6 0 0 1 10.6 18"/>"#
+        }
         "paid" => r#"<path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/>"#,
         "ai" => r#"<path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/>"#,
         "card" => r#"<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>"#,
@@ -306,7 +317,7 @@ fn glyph_path(name: &str) -> &'static str {
     }
 }
 
-/// A stroked 24x24 glyph: direct, email, unattributed, search, link, social, paid, ai, card, desktop, mobile, tablet, windows, page, pin, language or globe.
+/// A stroked 24x24 glyph: direct, email, unattributed, search, link, social, community, paid, ai, card, desktop, mobile, tablet, windows, page, pin, language or globe.
 pub fn glyph(name: &str, size: u32, color: &str) -> String {
     format!(
         r#"<svg class="ico" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{}</svg>"#,
@@ -321,6 +332,7 @@ pub fn channel_glyph(channel: &str) -> Option<&'static str> {
         "Organic search" => "search",
         "Referral" => "link",
         "Social" => "social",
+        "Communities" => "community",
         "Paid" => "paid",
         "AI" => "ai",
         "Unattributed" => "unattributed",

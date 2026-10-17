@@ -43,7 +43,7 @@ Ranges: `--range today|7d|30d|90d|12m|all`, or exact local dates `--from 2026-09
 - In payments, `touch` is the credited visit (`source` like "ChatGPT", `channel` like "AI", `campaign`, `landing_page`); `null` means unattributed. `first_touch` is the payer's first ever visit. `visitor` is the ID to pass to `virling query visitor`.
 - A visitor timeline is `entries` of `visit` (with `steps`: `page` with `secs` on page, `goal`, `exit`, `payment`) or a standalone `payment` such as a renewal.
 - Retention groups customers by their first payment's channel, referrer and campaign; renewals stay with it. `still_paying` comes from the provider's subscription status, else a recent payment. `churn_30d` covers customers who first paid 30 to 60 days ago. Under 60 days of payments (`day_one: true`) talk about refunds and churn, not LTV.
-- Channels include Search, Social, AI (ChatGPT, Perplexity, Claude and similar), Email, Paid, Referral and Direct.
+- Channels include Search, Communities (Hacker News, Reddit, Product Hunt and similar), Social, AI (ChatGPT, Perplexity, Claude and similar), Email, Paid, Referral and Direct.
 
 Report numbers with their range and site, and say when the data is thin (a handful of payments) instead of drawing strong conclusions.
 

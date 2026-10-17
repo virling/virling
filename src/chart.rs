@@ -279,6 +279,7 @@ pub fn channel_color(channel: Option<&str>) -> &'static str {
         Some("Email") => "#1E7A4C",
         Some("Referral") => "#9B6BDB",
         Some("Social") => "#E36F9C",
+        Some("Communities") => "#B5622E",
         Some("Paid") => "#0E9AA7",
         Some(_) => "#B9BCC2",
         None => "#D6D7D1",

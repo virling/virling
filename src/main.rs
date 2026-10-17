@@ -403,7 +403,7 @@ mod tests {
         let home = by_path("/");
         assert_eq!(
             (home.1.as_str(), home.2.as_deref(), home.6.as_str()),
-            ("Social", Some("news.ycombinator.com"), "Mobile")
+            ("Communities", Some("news.ycombinator.com"), "Mobile")
         );
         let goal = by_path("/signup");
         assert_eq!(
@@ -762,7 +762,7 @@ mod tests {
         };
         store
             .insert_events(&[
-                visit("first", 5, "Social", "news.ycombinator.com"),
+                visit("first", 5, "Communities", "news.ycombinator.com"),
                 visit("last", 3, "Referral", "someblog.dev"),
             ])
             .unwrap();
@@ -1002,7 +1002,7 @@ mod tests {
             "?view=visitors&vtab=recent",
             "?view=payments",
             "?view=retention&ret=refunds",
-            "?range=today&channel=Social",
+            "?range=today&channel=Communities",
             "?country=DE&chart=total",
         ] {
             let res = call(
@@ -1065,12 +1065,14 @@ mod tests {
         let social = body_text(
             call(
                 &state,
-                get("/app/example.com?channel=Social", Some(&cookie)),
+                get("/app/example.com?channel=Communities", Some(&cookie)),
             )
             .await,
         )
         .await;
-        assert!(social.contains("Showing only") && social.contains("Social brought 1 visitor"));
+        assert!(
+            social.contains("Showing only") && social.contains("Communities brought 1 visitor")
+        );
         let goals =
             body_text(call(&state, get("/app/example.com?view=goals", Some(&cookie))).await).await;
         assert!(goals.contains("Visited the site") && goals.contains("Edit funnel steps"));
