@@ -4,6 +4,120 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.0] - 2026-10-17
+
+### Added
+
+- Add end-to-end tests for renewal attribution
+- Add account menu to the app sidebar
+- Add static demo dashboard at /demo
+- Add Visitors page with per-visitor exit timeline
+- Add read API with per-account API keys
+- Add a WordPress plugin
+- Add virling query CLI for the read API
+- Add agent skill for revenue attribution questions
+- Add read-only MCP server at /mcp
+- Add retention by first channel
+- Add tracked short links
+- Add a Language tab to the Location card
+- Add a Personal or Agency plan setting
+- Add a hidden bench command that times every route
+- Add a public shareable dashboard
+
+### Changed
+
+- Update docs for v0.1.1 and the install script
+- Format the font table
+- Move tracked links into the Campaign tab
+- Format the worker module list
+
+### Fixed
+
+- Fix ok badges, retention tabs and link copy styles
+
+### Removed
+
+- Drop more automation traffic and referrer spam
+- Remove the site switcher from the dashboard top bar
+- Drop the links redirect from the bench routes
+
+### Other
+
+- Key the release build cache by runner image
+- Replace agency report doodle with a real report mock
+- Skip failed payments when finding a customer's first
+- Credit plan changes to the customer's first channel
+- Count the same customer ID on two providers as two customers
+- Track outbound clicks and page leaves
+- Store exits for virling.com and show exit pages
+- Bundle logos for ChatGPT, Bing, Copilot, Slack and more
+- Test that every known source has a bundled logo
+- Fetch and cache favicons for unknown referrers
+- List favicon fetches under outbound connections
+- Keep the logo coverage test out of the worker build
+- Use the two-step checkout so payment methods load
+- Send pre-orders to the hosted checkout page
+- Revert "Send pre-orders to the hosted checkout page"
+- Ask for the billing address so payment methods load
+- Show payments as customer rows with time to pay
+- Give demo visitors an operating system
+- Tab the dashboard breakdowns and add a world map
+- Give demo visits a region, city, host and exits
+- Mark the static demo as generated for GitHub
+- Serve fonts from our own domain
+- Cache landing CSS, JS and fonts for a year
+- Serve landing art as sized WebP
+- Defer site.js and fix low-contrast landing text
+- Inline the landing stylesheet
+- Pin the demo to the styles it was built with
+- Load the home page diagrams on scroll
+- Serve /favicon.ico
+- Rebuild the dashboard to the v3 design
+- Document retention by channel
+- Leave empty exit link and goal cells blank
+- Retry a failed site icon fetch after ten minutes
+- Count new customers in period totals
+- Serve source logos and glyphs as image files
+- Let mail go out under a display name
+- Rebuild the client report as a weekly emailed report
+- Give every visitor a generated face
+- Give every visitor a unique animal name and face
+- Refresh demo seed and export visitors and icons
+- Seed subscriptions and export the retention page
+- Use the email glyph for a lowercase newsletter source
+- Seed richer demo visits, goals and tracked links
+- Regenerate the demo with the current UI
+- Let the demo seed a data dir to run the app on
+- Say per visitor in report insight cards
+- Build the current dashboard design
+- Pick custom ranges on an in-app calendar
+- Store subscription prices and show MRR
+- Save named funnels per site
+- Keep first pageviews in tables and drop correlated queries
+- Cache store reads per site until its data changes
+- Read known alias slots in one query and slim breakdowns
+- Serve dashboard aggregates from a per-site session index
+- Keep language in touches and the session index
+- Share per-range work across index reads
+- Count every dimension in one pass over the range
+- Read MRR from pooled connections and pass it through the cache
+- Switch revenue chart types without a reload
+- Regenerate the demo with the current UI
+- Serve payment, visitor and goal rows from the index
+- Wait for the site index before timing routes
+- Version app.css and app.js so updates load at once
+- Share the asset version with the site worker
+- Keep expanded cards at a fixed height
+- Serve the goal table and funnels from the index
+- Serve retention and MRR from the index
+- Count each AI visitor once in the AI share
+- Time new-visitor and concurrent ingest in the bench
+- Share commits across concurrent ingests, skip no-op upserts
+- Count events written during an index load once
+- Time fresh 12m and all-time dashboards in the bench
+- Keep long-range counts and day totals across appends
+- Run the bench in CI against checked-in budgets
+
 ## [0.1.1] - 2026-10-15
 
 ### Added
