@@ -13,7 +13,7 @@ Virling links website visits to payments (Stripe, Polar, Dodo Payments, LemonSqu
 2. It needs the server URL and an API key. Ask the user for them if these are not set:
    ```sh
    export VIRLING_URL=https://stats.example.com   # their Virling server
-   export VIRLING_API_KEY=vk_...                  # app: Settings > API keys
+   export VIRLING_API_KEY=vk_...                  # app: Account settings > API keys
    ```
    Never print the key back or write it into files the user did not ask for.
 3. `virling query sites --json`. With one site, `--site` can be left out. With several, pass `--site <domain>` (or set `VIRLING_SITE`).

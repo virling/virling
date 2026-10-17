@@ -9,7 +9,7 @@ pub const ABOUT: &str = "Read revenue analytics from a Virling server";
 pub const LONG_ABOUT: &str = "Read revenue analytics from a Virling server through its read API.
 
 Every command calls GET /api/v1 on the server at --url with the API key from --key.
-Create a key in the app under Settings > API keys. Keys are read-only.
+Create a key in the app under Account settings > API keys. Keys are read-only.
 
 Prints tables for people by default. Add --json to print the API response as JSON,
 which is what scripts and AI agents should read.
@@ -40,7 +40,7 @@ pub struct QueryArgs {
         display_order = 100
     )]
     url: String,
-    /// API key from Settings > API keys
+    /// API key from Account settings > API keys
     #[arg(
         long,
         env = "VIRLING_API_KEY",
@@ -235,7 +235,7 @@ impl Client {
             let msg = body["error"].as_str().unwrap_or("unexpected response");
             let hint = match status.as_u16() {
                 401 => {
-                    "\nCreate a key in Settings > API keys and pass it with --key or VIRLING_API_KEY."
+                    "\nCreate a key in Account settings > API keys and pass it with --key or VIRLING_API_KEY."
                 }
                 404 if body.is_null() => {
                     "\nThis server has no read API. Check --url, and that it runs with --app."
@@ -280,7 +280,7 @@ fn range_query(r: &RangeArgs) -> Vec<(&'static str, String)> {
 /// Runs a query command and returns what to print.
 pub async fn run(args: QueryArgs) -> anyhow::Result<String> {
     let key = args.key.clone().filter(|k| !k.trim().is_empty()).context(
-        "no API key: create one in Settings > API keys, then pass --key or set VIRLING_API_KEY",
+        "no API key: create one in Account settings > API keys, then pass --key or set VIRLING_API_KEY",
     )?;
     let base = url::Url::parse(args.url.trim()).context("--url is not a valid URL")?;
     let client = Client {
@@ -824,7 +824,10 @@ mod tests {
     async fn explains_failures() {
         let (f, url) = server().await;
         let err = query(&url, "vk_wrong", &["sites"]).await.unwrap_err();
-        assert!(err.to_string().contains("Settings > API keys"), "{err}");
+        assert!(
+            err.to_string().contains("Account settings > API keys"),
+            "{err}"
+        );
         let err = query(&url, &f.key, &["overview", "--site", "other.com"])
             .await
             .unwrap_err();
