@@ -165,6 +165,14 @@ pub struct Waiting {
     install_href: String,
 }
 
+/// One revenue chart type, all rendered so the tabs switch without a reload.
+pub struct ChartPanel {
+    title: &'static str,
+    svg: String,
+    note: String,
+    on: bool,
+}
+
 #[derive(Template)]
 #[template(path = "dashboard.html")]
 struct DashboardPage {
@@ -196,9 +204,7 @@ struct DashboardPage {
     kpis: Vec<Kpi>,
     /// Revenue in range that came from visits before it.
     earlier: String,
-    chart: String,
-    chart_title: &'static str,
-    chart_note: String,
+    charts: Vec<ChartPanel>,
     chart_tabs: Vec<Opt>,
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
@@ -868,9 +874,7 @@ async fn page(
         insight: None,
         kpis: Vec::new(),
         earlier: String::new(),
-        chart: String::new(),
-        chart_title: "",
-        chart_note: String::new(),
+        charts: Vec::new(),
         chart_tabs: Vec::new(),
         cards: Vec::new(),
         ai: None,
@@ -1090,11 +1094,11 @@ async fn page(
                 );
             }
 
-            let kind = match q.chart.as_deref() {
-                Some("line") => Kind::Line,
-                Some("channel") => Kind::Channel,
-                Some("total") => Kind::Total,
-                _ => Kind::Bars,
+            let picked = match q.chart.as_deref() {
+                Some("line") => 1,
+                Some("channel") => 2,
+                Some("total") => 3,
+                _ => 0,
             };
             let (s, prev) = match &hours {
                 Some((h, ph)) => (
@@ -1114,26 +1118,12 @@ async fn page(
             };
             let show_prev = compare && !young && filters.is_empty();
             let hatch = pre(&p, since);
-            page.chart = chart::revenue(
-                &s,
-                show_prev.then_some(&prev),
-                kind,
-                hatch.as_ref().map(|(f, l)| (*f, l.as_str())),
-                (!filters.is_empty()).then_some(filter_label.as_str()),
-            );
             let unit = if hours.is_some() {
                 "hour"
             } else if s.weekly {
                 "week"
             } else {
                 "day"
-            };
-            page.chart_title = match kind {
-                Kind::Bars if hours.is_some() => "Revenue per hour",
-                Kind::Bars => "Revenue",
-                Kind::Line => "Revenue against the previous period",
-                Kind::Channel => "Revenue by channel",
-                Kind::Total => "Revenue so far this period",
             };
             let total: f64 = s.points.iter().map(|d| d.revenue_usd).sum();
             let prev_total: f64 = prev.points.iter().map(|d| d.revenue_usd).sum();
@@ -1142,63 +1132,84 @@ async fn page(
                 .iter()
                 .filter(|d| d.revenue_usd > 0.0)
                 .max_by(|a, b| a.revenue_usd.total_cmp(&b.revenue_usd));
-            page.chart_note = if total <= 0.0 {
-                "Nothing to show yet.".into()
-            } else {
-                match kind {
-                    Kind::Bars => match best {
-                        Some(b) => format!(
-                            "Best {unit}{}: {}, {} from {}. Hover a bar for the details.",
-                            if filters.is_empty() {
-                                String::new()
-                            } else {
-                                format!(" for {filter_label}")
-                            },
-                            match b.hour {
-                                Some(h) => format!("{h:02}:00"),
-                                None => day(b.date),
-                            },
-                            money(b.revenue_usd),
-                            plural(b.payments, "payment")
+            let kinds = [
+                ("", "Bars", Kind::Bars),
+                ("line", "Line", Kind::Line),
+                ("channel", "By channel", Kind::Channel),
+                ("total", "Cumulative", Kind::Total),
+            ];
+            // Every chart type is rendered so switching needs no reload.
+            for (i, (k, label, kind)) in kinds.into_iter().enumerate() {
+                let svg = chart::revenue(
+                    &s,
+                    show_prev.then_some(&prev),
+                    kind,
+                    hatch.as_ref().map(|(f, l)| (*f, l.as_str())),
+                    (!filters.is_empty()).then_some(filter_label.as_str()),
+                );
+                let title = match kind {
+                    Kind::Bars if hours.is_some() => "Revenue per hour",
+                    Kind::Bars => "Revenue",
+                    Kind::Line => "Revenue against the previous period",
+                    Kind::Channel => "Revenue by channel",
+                    Kind::Total => "Revenue so far this period",
+                };
+                let note = if total <= 0.0 {
+                    "Nothing to show yet.".into()
+                } else {
+                    match kind {
+                        Kind::Bars => match best {
+                            Some(b) => format!(
+                                "Best {unit}{}: {}, {} from {}. Hover a bar for the details.",
+                                if filters.is_empty() {
+                                    String::new()
+                                } else {
+                                    format!(" for {filter_label}")
+                                },
+                                match b.hour {
+                                    Some(h) => format!("{h:02}:00"),
+                                    None => day(b.date),
+                                },
+                                money(b.revenue_usd),
+                                plural(b.payments, "payment")
+                            ),
+                            None => String::new(),
+                        },
+                        Kind::Line if show_prev => format!(
+                            "The dashed line is the previous {} {unit}s, lined up by {unit}. Hover for both values.",
+                            s.points.len()
                         ),
-                        None => String::new(),
-                    },
-                    Kind::Line if show_prev => format!(
-                        "The dashed line is the previous {} {unit}s, lined up by {unit}. Hover for both values.",
-                        s.points.len()
-                    ),
-                    Kind::Line => format!("Hover the chart for each {unit}."),
-                    Kind::Channel if !filters.is_empty() => format!(
-                        "Showing {filter_label} only. Remove the filter to see every channel."
-                    ),
-                    Kind::Channel => "Hover a bar to see the split.".into(),
-                    Kind::Total if show_prev && prev_total > 0.0 => {
-                        let pct = (total / prev_total - 1.0) * 100.0;
-                        format!(
-                            "You are at {}, {:.0}% {} the previous period ({}).",
-                            money(total),
-                            pct.abs(),
-                            if pct >= 0.0 { "ahead of" } else { "behind" },
-                            money(prev_total)
-                        )
+                        Kind::Line => format!("Hover the chart for each {unit}."),
+                        Kind::Channel if !filters.is_empty() => format!(
+                            "Showing {filter_label} only. Remove the filter to see every channel."
+                        ),
+                        Kind::Channel => "Hover a bar to see the split.".into(),
+                        Kind::Total if show_prev && prev_total > 0.0 => {
+                            let pct = (total / prev_total - 1.0) * 100.0;
+                            format!(
+                                "You are at {}, {:.0}% {} the previous period ({}).",
+                                money(total),
+                                pct.abs(),
+                                if pct >= 0.0 { "ahead of" } else { "behind" },
+                                money(prev_total)
+                            )
+                        }
+                        Kind::Total => format!("{} so far this period.", money(total)),
                     }
-                    Kind::Total => format!("{} so far this period.", money(total)),
-                }
-            };
-            page.chart_tabs = [
-                ("", "Bars"),
-                ("line", "Line"),
-                ("channel", "By channel"),
-                ("total", "Cumulative"),
-            ]
-            .iter()
-            .map(|(k, label)| Opt {
-                label: label.to_string(),
-                href: format!("{}#revenue", href(&[("chart", k)])),
-                on: q.chart.as_deref().unwrap_or("") == *k || (k.is_empty() && kind == Kind::Bars),
-                count: String::new(),
-            })
-            .collect();
+                };
+                page.charts.push(ChartPanel {
+                    title,
+                    svg,
+                    note,
+                    on: i == picked,
+                });
+                page.chart_tabs.push(Opt {
+                    label: label.to_string(),
+                    href: format!("{}#revenue", href(&[("chart", k)])),
+                    on: i == picked,
+                    count: String::new(),
+                });
+            }
             let base_numbers = cards::Base {
                 visitors: cur.visitors,
                 revenue: cur.revenue_usd,

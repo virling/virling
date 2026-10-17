@@ -257,10 +257,12 @@ document.addEventListener("click", (e) => {
       const on = t === tab;
       t.classList.toggle("on", on);
       on ? t.setAttribute("aria-current", "true") : t.removeAttribute("aria-current");
-      document.getElementById(t.dataset.tab).hidden = !on;
+      const panel = document.getElementById(t.dataset.tab);
+      panel.hidden = !on;
+      if (on && panel.dataset.title) tab.closest("[data-key]").querySelector("h2").textContent = panel.dataset.title;
     }
     const next = new URL(tab.href);
-    const key = tab.closest("[id]").id;
+    const key = tab.closest("[data-key]")?.dataset.key ?? tab.closest("[id]").id;
     const value = next.searchParams.get(key);
     for (const a of document.querySelectorAll("a[href]")) {
       const u = new URL(a.href);
