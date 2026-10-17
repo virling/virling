@@ -273,6 +273,19 @@ LEFT JOIN firsts f ON p.is_renewal AND f.provider = p.provider AND f.customer_id
 LEFT JOIN own inh ON inh.provider = f.provider AND inh.provider_payment_id = f.provider_payment_id
 ";
 
+/// Marks every payment after a customer's first kept payment, across all time, as a renewal.
+const MARK_RENEWALS: &str = "
+UPDATE payments SET is_renewal = true
+FROM (
+    SELECT site_id, provider, provider_payment_id
+    FROM payments
+    WHERE customer_id IS NOT NULL AND status <> 'failed' AND site_id = coalesce(?, site_id)
+    QUALIFY row_number() OVER (PARTITION BY site_id, provider, customer_id ORDER BY ts, provider_payment_id) > 1
+) later
+WHERE NOT payments.is_renewal AND payments.site_id = later.site_id
+    AND payments.provider = later.provider AND payments.provider_payment_id = later.provider_payment_id
+";
+
 #[derive(Debug, Clone)]
 pub struct LatestPageview {
     pub path: String,
@@ -566,6 +579,7 @@ impl DuckStore {
                 COMMIT;"
             ))?;
         }
+        conn.execute(MARK_RENEWALS, params![None::<&str>])?;
         let changed = reclassify_channels(&conn)?;
         if changed > 0 {
             tracing::info!(changed, "moved stored visits to their current channel");
@@ -865,6 +879,11 @@ impl EventStore for DuckStore {
                     p.customer_id,
                     p.is_renewal,
                 ])?;
+            }
+            let sites: std::collections::BTreeSet<&str> =
+                payments.iter().map(|p| p.site_id.as_str()).collect();
+            for site in sites {
+                tx.execute(MARK_RENEWALS, params![site])?;
             }
         }
         tx.commit()?;
@@ -1273,6 +1292,67 @@ mod payment_tests {
             .unwrap();
         assert_eq!((pi_1.refunded, pi_1.net_usd), (2900, Some(0.0)));
     }
+    #[test]
+    fn a_repeat_customer_is_new_once_across_all_time() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = DuckStore::open(&dir.path().join("e.duckdb")).unwrap();
+        let at = |d: time::Date| d.with_hms(12, 0, 0).unwrap().assume_utc();
+        let (aug, oct) = (
+            time::macros::date!(2026 - 08 - 21),
+            time::macros::date!(2026 - 10 - 14),
+        );
+        let first = Payment {
+            ts: at(aug),
+            provider: "dodo".into(),
+            ..payment("pay_aug", 0)
+        };
+        let again = Payment {
+            ts: at(oct),
+            provider_payment_id: "pay_oct".into(),
+            ..first.clone()
+        };
+        // The later payment syncs first, as a range-limited sync would.
+        store.upsert_payments(std::slice::from_ref(&again)).unwrap();
+        store.upsert_payments(&[first, again.clone()]).unwrap();
+        store
+            .rebuild_attribution("s", "last_non_direct", 90)
+            .unwrap();
+        store.load_index("s");
+        let conn = store.read().unwrap();
+        for (from, new, renewals) in [(aug, 1, 1), (oct, 0, 1)] {
+            let p = Period {
+                from,
+                to: oct,
+                tz: "UTC".into(),
+            };
+            let split = store.payment_split("s", &p).unwrap();
+            assert_eq!(
+                (split[0].first_payments, split[0].renewals),
+                (new, renewals),
+                "{from}"
+            );
+            assert_eq!(split, stats::payment_split(&conn, "s", &p).unwrap());
+            let f = Filter::default();
+            let o = store.overview_in("s", &p, &f).unwrap();
+            assert_eq!(o.current.new_customers, new, "{from}");
+            assert_eq!(o, stats::overview(&conn, "s", &p, &f).unwrap());
+        }
+        drop(conn);
+        drop(store);
+        let store = DuckStore::open(&dir.path().join("e.duckdb")).unwrap();
+        store.upsert_payments(&[again]).unwrap();
+        let renewal: bool = store
+            .read()
+            .unwrap()
+            .query_row(
+                "SELECT is_renewal FROM payments WHERE provider_payment_id = 'pay_oct'",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert!(renewal, "a re-sync keeps the repeat payment a renewal");
+    }
+
     #[test]
     fn concurrent_appends_keep_touches_exact() {
         let dir = tempfile::tempdir().unwrap();
