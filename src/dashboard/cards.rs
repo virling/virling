@@ -848,6 +848,7 @@ fn ai_revenue(days: &[DayPoint]) -> f64 {
 /// Builds the AI assistants card from channel-source rows and the daily series.
 pub fn ai_card(
     sources: &[BreakdownRow],
+    channels: &[BreakdownRow],
     base: &Base,
     days: &[DayPoint],
     prev: Option<&[DayPoint]>,
@@ -869,9 +870,11 @@ pub fn ai_card(
         })
         .take(SHOWN)
         .collect();
-    let (v, r): (u64, f64) = items.iter().fold((0, 0.0), |a, i| {
-        (a.0 + i.row.visitors, a.1 + i.row.revenue_usd)
-    });
+    // The AI channel row counts each visitor once, even one who came from two assistants.
+    let (v, r) = channels
+        .iter()
+        .find(|c| c.key.as_deref() == Some("AI"))
+        .map_or((0, 0.0), |c| (c.visitors, c.revenue_usd));
     let share = |n: f64, t: f64| if t > 0.0 { n / t * 100.0 } else { 0.0 };
     let m = items
         .iter()

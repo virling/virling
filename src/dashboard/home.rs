@@ -1239,6 +1239,7 @@ async fn page(
             );
             page.ai = Some(cards::ai_card(
                 &sources,
+                &tabs[0].0,
                 &base_numbers,
                 &report.days,
                 (show_prev).then_some(report.previous_days.as_slice()),
