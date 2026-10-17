@@ -44,13 +44,20 @@ struct SettingsPage {
     brand: Brand,
     brand_saved: bool,
     brand_error: &'static str,
-    plan_saved: bool,
     share_link: Option<String>,
     /// The public dashboard's URL, its switches, and whether they were just saved.
     public_link: String,
     public_on: bool,
     public_hide: bool,
     public_saved: bool,
+}
+
+#[derive(Template)]
+#[template(path = "account.html")]
+struct AccountPage {
+    shell: Shell,
+    title: &'static str,
+    plan_saved: bool,
     api_keys: Vec<KeyView>,
     /// A key just created, shown this once.
     new_key: Option<String>,
@@ -109,17 +116,7 @@ pub async fn page(
     Path(domain): Path<String>,
     Query(q): Query<SavedQuery>,
 ) -> Response {
-    show(&state, &account, &domain, q, None).await
-}
-
-async fn show(
-    state: &AppState,
-    account: &Account,
-    domain: &str,
-    q: SavedQuery,
-    new_key: Option<String>,
-) -> Response {
-    let ctx = match load(state, account, domain, "settings").await {
+    let ctx = match load(&state, &account, &domain, "settings").await {
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
@@ -141,14 +138,8 @@ async fn show(
             .bind(&ctx.site.id)
             .fetch_optional(&state.db)
             .await;
-    let keys = api::list_keys(&state.db, &account.id).await;
-    let (
-        Ok((model, window_days, public_on, public_hide)),
-        Ok(integrations),
-        Ok(brand),
-        Ok(token),
-        Ok(keys),
-    ) = (row, integrations, brand, token, keys)
+    let (Ok((model, window_days, public_on, public_hide)), Ok(integrations), Ok(brand), Ok(token)) =
+        (row, integrations, brand, token)
     else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
@@ -199,6 +190,43 @@ async fn show(
         share_link: token
             .flatten()
             .map(|t| format!("{}/r/{t}", state.config.base_url)),
+        brand_saved: q.saved.as_deref() == Some("report"),
+        brand_error: match q.error.as_deref() {
+            Some("logo") => "The logo URL must start with https://.",
+            Some("accent") => "The accent color must be a hex color like #2F5BEA.",
+            _ => "",
+        },
+        shell: ctx.shell,
+    })
+}
+
+/// The account page: email, plan and API keys, which apply to every site.
+pub async fn account_page(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Query(q): Query<SavedQuery>,
+) -> Response {
+    show_account(&state, &account, &domain, q, None).await
+}
+
+async fn show_account(
+    state: &AppState,
+    account: &Account,
+    domain: &str,
+    q: SavedQuery,
+    new_key: Option<String>,
+) -> Response {
+    let ctx = match load(state, account, domain, "account").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    let Ok(keys) = api::list_keys(&state.db, &account.id).await else {
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    };
+    let now = OffsetDateTime::now_utc();
+    render(AccountPage {
+        title: "Account settings",
         api_keys: keys
             .into_iter()
             .map(|k| {
@@ -216,13 +244,7 @@ async fn show(
             })
             .collect(),
         new_key,
-        brand_saved: q.saved.as_deref() == Some("report"),
         plan_saved: q.saved.as_deref() == Some("plan"),
-        brand_error: match q.error.as_deref() {
-            Some("logo") => "The logo URL must start with https://.",
-            Some("accent") => "The accent color must be a hex color like #2F5BEA.",
-            _ => "",
-        },
         shell: ctx.shell,
     })
 }
@@ -420,7 +442,7 @@ pub async fn save_plan(
     Path(domain): Path<String>,
     Form(input): Form<PlanInput>,
 ) -> Response {
-    let ctx = match load(&state, &account, &domain, "settings").await {
+    let ctx = match load(&state, &account, &domain, "account").await {
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
@@ -438,7 +460,7 @@ pub async fn save_plan(
     }
     Redirect::to(&format!(
         "{}?saved=plan#plan",
-        app_path(&ctx.site.domain, "settings")
+        app_path(&ctx.site.domain, "account")
     ))
     .into_response()
 }
@@ -493,18 +515,18 @@ pub struct KeyInput {
     name: String,
 }
 
-/// Creates an API key for the account and shows it once on the settings page.
+/// Creates an API key for the account and shows it once on the account page.
 pub async fn create_key(
     State(state): State<AppState>,
     account: Account,
     Path(domain): Path<String>,
     Form(input): Form<KeyInput>,
 ) -> Response {
-    if let Err(code) = load(&state, &account, &domain, "settings").await {
+    if let Err(code) = load(&state, &account, &domain, "account").await {
         return code.into_response();
     }
     match api::create_key(&state.db, &account.id, &input.name).await {
-        Ok(key) => show(&state, &account, &domain, SavedQuery::default(), Some(key)).await,
+        Ok(key) => show_account(&state, &account, &domain, SavedQuery::default(), Some(key)).await,
         Err(err) => {
             tracing::error!(%err, "creating an API key failed");
             StatusCode::SERVICE_UNAVAILABLE.into_response()
@@ -523,7 +545,7 @@ pub async fn revoke_key(
     Path(domain): Path<String>,
     Form(input): Form<RevokeKeyInput>,
 ) -> Response {
-    let ctx = match load(&state, &account, &domain, "settings").await {
+    let ctx = match load(&state, &account, &domain, "account").await {
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
@@ -531,7 +553,7 @@ pub async fn revoke_key(
         tracing::error!(%err, "revoking an API key failed");
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     }
-    Redirect::to(&format!("{}#api", app_path(&ctx.site.domain, "settings"))).into_response()
+    Redirect::to(&format!("{}#api", app_path(&ctx.site.domain, "account"))).into_response()
 }
 
 #[cfg(test)]
