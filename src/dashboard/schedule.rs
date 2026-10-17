@@ -68,6 +68,16 @@ pub fn recipients(input: &str) -> Option<Vec<String>> {
     (out.len() <= MAX_RECIPIENTS).then_some(out)
 }
 
+/// Whether the site's account is an agency, and the account's email.
+pub async fn owner(db: &SqlitePool, site_id: &str) -> sqlx::Result<(bool, String)> {
+    sqlx::query_as(
+        "SELECT a.account_type = 'agency', a.email FROM accounts a JOIN sites s ON s.account_id = a.id WHERE s.id = ?",
+    )
+    .bind(site_id)
+    .fetch_one(db)
+    .await
+}
+
 /// The site's schedule and agency note.
 pub async fn load(db: &SqlitePool, site_id: &str) -> sqlx::Result<(Schedule, String)> {
     let row: Option<(bool, i64, i64, String, i64, String)> = sqlx::query_as(
@@ -176,18 +186,33 @@ pub async fn run(state: AppState) {
     }
 }
 
-type Row = (String, String, String, bool, i64, i64, String, i64);
+type Row = (
+    String,
+    String,
+    String,
+    bool,
+    i64,
+    i64,
+    String,
+    i64,
+    bool,
+    String,
+);
 
 /// Sends every report due at `now` that has not gone out for its week; returns how many went out.
 pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize> {
     let rows: Vec<Row> = sqlx::query_as(
-        "SELECT s.id, s.domain, s.timezone, s.cookieless, b.send_weekday, b.send_minute, b.recipients, b.send_from
-         FROM report_brands b JOIN sites s ON s.id = b.site_id WHERE b.send_on = 1 AND b.recipients <> ''",
+        "SELECT s.id, s.domain, s.timezone, s.cookieless, b.send_weekday, b.send_minute, b.recipients, b.send_from,
+            a.account_type = 'agency', a.email
+         FROM report_brands b JOIN sites s ON s.id = b.site_id JOIN accounts a ON a.id = s.account_id
+         WHERE b.send_on = 1 AND (b.recipients <> '' OR a.account_type <> 'agency')",
     )
     .fetch_all(&state.db)
     .await?;
     let mut sent = 0;
-    for (id, domain, timezone, cookieless, weekday, minute, list, from) in rows {
+    for (id, domain, timezone, cookieless, weekday, minute, list, from, agency, email) in rows {
+        // A personal account's weekly email only ever goes to the account itself.
+        let list = if agency { list } else { email };
         let site = Site {
             id,
             domain,

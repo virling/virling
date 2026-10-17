@@ -13,7 +13,7 @@
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
 <td valign="top" style="padding-bottom:20px;border-bottom:1px solid #EFEFEB">
 <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-{% if !r.logo.is_empty() %}<td valign="middle" style="padding-right:12px"><img src="{{ r.logo }}" width="44" height="44" alt="" style="display:block;border:0;border-radius:12px"></td>{% else if !r.initials.is_empty() %}<td valign="middle" style="padding-right:12px"><div style="width:44px;height:44px;line-height:44px;border-radius:12px;background:{{ r.accent }};color:#FFFFFF;font-weight:700;font-size:16px;text-align:center">{{ r.initials }}</div></td>{% endif %}
+{% if r.personal %}<td valign="middle" style="padding-right:12px"><img src="{{ base }}/assets/email-logo.png" width="120" height="30" alt="Virling" style="display:block;border:0"></td>{% else if !r.logo.is_empty() %}<td valign="middle" style="padding-right:12px"><img src="{{ r.logo }}" width="44" height="44" alt="" style="display:block;border:0;border-radius:12px"></td>{% else if !r.initials.is_empty() %}<td valign="middle" style="padding-right:12px"><div style="width:44px;height:44px;line-height:44px;border-radius:12px;background:{{ r.accent }};color:#FFFFFF;font-weight:700;font-size:16px;text-align:center">{{ r.initials }}</div></td>{% endif %}
 <td valign="middle">{% if !r.agency.is_empty() %}<div style="font-weight:700;font-size:17px">{{ r.agency }}</div>{% endif %}<div style="font-size:13px;color:#6B717C">Weekly revenue report</div></td>
 </tr></table>
 </td>
