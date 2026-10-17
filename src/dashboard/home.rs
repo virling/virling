@@ -381,6 +381,7 @@ fn pv_text(t: &Totals) -> String {
 }
 
 /// KPI tiles: against the previous period, the whole site when filtered, or early-data notes on a new site.
+#[allow(clippy::too_many_arguments)]
 fn kpis(
     cur: &Totals,
     prev: &Totals,
@@ -389,6 +390,7 @@ fn kpis(
     compare: bool,
     young: bool,
     since: Option<Date>,
+    start: Date,
 ) -> Vec<Kpi> {
     let conv = |t: &Totals| {
         t.conversion
@@ -465,8 +467,8 @@ fn kpis(
                 group(cur.new_customers),
                 String::new(),
                 "",
-                if cur.new_customers > 0 && !since_txt.is_empty() {
-                    format!("since {since_txt}")
+                if cur.new_customers > 0 {
+                    format!("since {}", day(start))
                 } else {
                     "none yet".into()
                 },
@@ -1107,6 +1109,7 @@ async fn page(
                 compare,
                 young && filters.is_empty(),
                 since,
+                from,
             );
             let (when, before) = match rkey {
                 "today" => ("today", "today".to_string()),
@@ -1575,6 +1578,27 @@ mod tests {
             Some((date!(2026 - 10 - 15), date!(2026 - 10 - 15)))
         );
         assert_eq!(preset("all", t, None), None);
+    }
+
+    #[test]
+    fn new_customers_are_counted_since_the_range_start() {
+        let t = Totals {
+            new_customers: 2,
+            ..Default::default()
+        };
+        // The script went live Oct 18 (Asia/Kolkata), the payments synced from Oct 14, the range is 7 days.
+        let k = kpis(
+            &t,
+            &Totals::default(),
+            None,
+            "",
+            true,
+            true,
+            Some(date!(2026 - 10 - 18)),
+            preset("7d", date!(2026 - 10 - 18), None).unwrap().0,
+        );
+        let new = k.iter().find(|k| k.label == "New customers").unwrap();
+        assert_eq!(new.note, "since Oct 12");
     }
 
     #[test]
