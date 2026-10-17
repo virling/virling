@@ -388,6 +388,16 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
             Auth::Session,
         ),
         (
+            "fresh.page.dashboard.12m",
+            format!("{app}?range=12m"),
+            Auth::Session,
+        ),
+        (
+            "fresh.page.dashboard.all",
+            format!("{app}?range=all"),
+            Auth::Session,
+        ),
+        (
             "fresh.page.payments",
             format!("{app}/payments"),
             Auth::Session,

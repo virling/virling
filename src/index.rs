@@ -11,7 +11,9 @@ use crate::channel::source_name;
 use crate::events::Event;
 use crate::stats::{CUSTOMER, Filter, NET_USD, Period};
 
+mod days;
 pub mod goals;
+mod ranges;
 pub mod retention;
 pub mod rows;
 
@@ -102,6 +104,8 @@ struct Session {
     /// Latest added goal, exit or leave of this session, or NONE.
     mark: u32,
     id: Box<str>,
+    /// Per column, `secs` of the visitor's touched session before this one with the same value, or 0.
+    same: [u32; 15],
 }
 
 #[derive(Clone, Copy)]
@@ -114,6 +118,8 @@ struct Pageview {
     /// Previous pageview added for the same session, or NONE.
     prev: u32,
     attrs: u32,
+    /// `secs` of the visitor's pageview of the same path before this one, or 0.
+    same: u32,
 }
 
 pub(crate) const GOAL: u8 = 1;
@@ -214,6 +220,13 @@ pub struct SiteIndex {
     paid_at: HashMap<u64, Vec<i64>>,
     subs: Vec<retention::Sub>,
     status_sources: Vec<crate::retention::StatusSource>,
+    /// Last page viewed before each payment, filled on first use; UNKNOWN until then.
+    last_page_of: Vec<std::sync::atomic::AtomicU32>,
+    /// Payments by key of their visitor ID and of their credited session.
+    pays_by_visitor: HashMap<u64, Vec<u32>>,
+    pays_by_session: HashMap<u64, Vec<u32>>,
+    days: days::Days,
+    kept: Mutex<ranges::Kept>,
 }
 
 /// Inserts `item` into `order`, kept sorted by `at`, searching from the end since items mostly arrive in order.
@@ -266,6 +279,11 @@ impl SiteIndex {
             paid_at: HashMap::new(),
             subs: Vec::new(),
             status_sources: Vec::new(),
+            last_page_of: Vec::new(),
+            pays_by_visitor: HashMap::new(),
+            pays_by_session: HashMap::new(),
+            days: Mutex::default(),
+            kept: Mutex::default(),
         };
         let mut stmt = conn.prepare(
             "SELECT session_id, min(visitor_id), max(visitor_id), min(us), max(us), max(gap)
@@ -297,6 +315,7 @@ impl SiteIndex {
                 pv: NONE,
                 mark: NONE,
                 id: sid.as_str().into(),
+                same: [0; 15],
             });
             ix.visitors[v as usize].last_session = s;
             ix.session_ids.insert(key(&sid), s);
@@ -354,6 +373,7 @@ impl SiteIndex {
                     referrer,
                     prev: ix.sessions[s as usize].pv,
                     attrs,
+                    same: 0,
                 });
                 ix.sessions[s as usize].pv = p;
                 ix.pv_by_ts.push(p);
@@ -379,6 +399,10 @@ impl SiteIndex {
                 prev: ix.sessions[s as usize].mark,
             });
             ix.sessions[s as usize].mark = m;
+        }
+        for v in 0..ix.visitors.len() as u32 {
+            ix.relink_sessions(v, NONE);
+            ix.relink_all_pages(v);
         }
         ix.load_payments(conn, site_id)?;
         ix.shrink();
@@ -475,6 +499,7 @@ impl SiteIndex {
         self.spent = spent;
         self.first_pay = first_pay;
         self.load_subscriptions(conn, site_id)?;
+        self.index_payments();
         self.paid_at.clear();
         for p in &self.payments {
             if let Some(v) = p.visitor {
@@ -482,6 +507,7 @@ impl SiteIndex {
             }
         }
         self.memo.get_mut().unwrap().clear();
+        self.days.get_mut().unwrap().clear();
         Ok(())
     }
 
@@ -498,11 +524,13 @@ impl SiteIndex {
     /// Adds newly stored events; idempotent, so events already read from the snapshot may be applied again.
     pub fn apply(&mut self, events: &[Event]) {
         self.memo.get_mut().unwrap().clear();
+        let mut spans = Vec::with_capacity(events.len());
         for e in events {
             let ts = (e.ts.unix_timestamp_nanos() / 1000) as i64;
             let v = self.visitor(&e.visitor_id);
             let next = self.sessions.len() as u32;
             let s = *self.session_ids.entry(key(&e.session_id)).or_insert(next);
+            let before = self.sessions.get(s as usize).map(|x| (x.first, x.last));
             if s == next {
                 self.sessions.push(Session {
                     visitor: v,
@@ -514,6 +542,7 @@ impl SiteIndex {
                     pv: NONE,
                     mark: NONE,
                     id: e.session_id.as_str().into(),
+                    same: [0; 15],
                 });
                 self.visitors[v as usize].last_session = s;
                 let sessions = &self.sessions;
@@ -535,6 +564,11 @@ impl SiteIndex {
                 let sess = &self.sessions[s as usize];
                 self.longest = self.longest.max(sess.last - sess.first);
             }
+            spans.push((
+                self.sessions[s as usize].first,
+                self.sessions[s as usize].last,
+            ));
+            self.kept_span(s, before);
             let attrs = self.attrs_id([
                 e.utm_campaign.clone(),
                 e.country.clone(),
@@ -554,8 +588,12 @@ impl SiteIndex {
                         referrer: self.strings.id(e.referrer_host.as_deref()),
                         prev: self.sessions[s as usize].pv,
                         attrs,
+                        same: 0,
                     });
                     self.sessions[s as usize].pv = p;
+                    let latest = self.relink_pages(v, path);
+                    self.kept_page(latest);
+                    self.page_viewed(v, s);
                     let pageviews = &self.pageviews;
                     insert_sorted(&mut self.pv_by_ts, p, |i| pageviews[i as usize].ts);
                     let sess = &self.sessions[s as usize];
@@ -563,7 +601,8 @@ impl SiteIndex {
                         || (ts, &*e.path)
                             < (sess.touch, self.strings.name(sess.cols[PATH]).unwrap_or(""));
                     if earlier {
-                        if sess.touch != i64::MAX {
+                        let had = sess.touch != i64::MAX;
+                        if had {
                             let at = self.by_touch.iter().rposition(|&x| x == s).unwrap();
                             self.by_touch.remove(at);
                         }
@@ -599,6 +638,8 @@ impl SiteIndex {
                         if before {
                             self.visitors[v as usize].first_touch = s;
                         }
+                        let latest = self.relink_sessions(v, s);
+                        self.kept_touch(s, latest && !had);
                     }
                 }
                 kind => {
@@ -626,6 +667,7 @@ impl SiteIndex {
                 }
             }
         }
+        self.days_changed(spans);
     }
 
     /// Rough heap size in bytes.
@@ -950,6 +992,13 @@ impl SiteIndex {
 
     /// Distinct visitors and sessions with an event in [lo, hi), plus which visitors those are.
     pub fn tracked(&self, lo: i64, hi: i64, scope: &Scope) -> (u64, u64, Vec<bool>) {
+        if scope.all() {
+            return self.kept_tracked(lo, hi);
+        }
+        self.count_tracked(lo, hi, scope)
+    }
+
+    fn count_tracked(&self, lo: i64, hi: i64, scope: &Scope) -> (u64, u64, Vec<bool>) {
         let mut seen = vec![false; self.visitors.len()];
         let (mut visitors, mut sessions) = (0, 0);
         for s in self.overlapping_ids(lo, hi) {
@@ -1144,6 +1193,9 @@ impl SiteIndex {
     /// Distinct visitors per value of every column, over sessions whose first pageview is in [lo, hi).
     fn touch_counts(&self, lo: i64, hi: i64, scope: &Scope) -> Arc<Vec<Vec<(u32, i64)>>> {
         self.memo(format!("counts {lo} {hi} {}", scope.1), || {
+            if let Some(counts) = self.linked_counts(lo, hi, scope) {
+                return counts;
+            }
             let touched = self.touched(lo, hi, scope);
             let n = self.strings.names.len();
             let mut counts = vec![0u32; n * 15];
@@ -1187,27 +1239,39 @@ impl SiteIndex {
 
     /// Payment rows of a breakdown keyed by column `k` of the credited session's first pageview.
     pub fn touch_payments(&self, lo: i64, hi: i64, scope: &Scope, k: usize) -> Vec<RawRow> {
-        let mut rows: HashMap<(bool, u32), Agg> = HashMap::new();
-        for p in self.pays(lo, hi, scope) {
-            let key = self
-                .pay_session(p)
-                .map_or(NULL, |s| self.sessions[s as usize].cols[k]);
-            let e = rows.entry((!p.credited, key)).or_default();
-            e.0 += 1;
-            e.1 += p.net.unwrap_or(0.0);
-            e.2.insert(p.customer);
-        }
-        rows.into_iter()
-            .map(|((u, key), (n, r, c))| {
-                (
-                    u,
-                    self.strings.name(key).map(str::to_string),
-                    0,
-                    n,
-                    r,
-                    c.len() as i64,
-                )
-            })
+        let make = || {
+            let mut rows: Vec<HashMap<(bool, u32), Agg>> = vec![HashMap::new(); 15];
+            for p in self.pays(lo, hi, scope) {
+                let cols = self
+                    .pay_session(p)
+                    .map_or([NULL; 15], |s| self.sessions[s as usize].cols);
+                for (k, rows) in rows.iter_mut().enumerate() {
+                    let e = rows.entry((!p.credited, cols[k])).or_default();
+                    e.0 += 1;
+                    e.1 += p.net.unwrap_or(0.0);
+                    e.2.insert(p.customer);
+                }
+            }
+            rows
+        };
+        let all = if scope.all() {
+            let mut kept = self.kept.lock().unwrap();
+            if kept.tpay.len() >= 32 {
+                kept.tpay.clear();
+            }
+            kept.tpay
+                .entry((lo, hi))
+                .or_insert_with(|| Arc::new(make()))
+                .clone()
+        } else {
+            self.memo(format!("tpay {lo} {hi} {}", scope.1), make)
+        };
+        all[k]
+            .iter()
+            .map(|(&(u, key), (n, r, c))| (u, key, *n, *r, c.len() as i64))
+            .collect::<Vec<_>>()
+            .into_iter()
+            .map(|(u, key, n, r, c)| (u, self.strings.name(key).map(str::to_string), 0, n, r, c))
             .collect()
     }
 
@@ -1232,6 +1296,9 @@ impl SiteIndex {
     }
 
     fn count_pages(&self, lo: i64, hi: i64, scope: &Scope) -> HashMap<u32, i64> {
+        if let Some(counts) = self.linked_pages(lo, hi, scope) {
+            return counts;
+        }
         let sessions = self.overlapping_by_visitor(lo, hi, scope);
         let mut stamp = vec![NONE; self.strings.names.len()];
         let mut counts = vec![0i64; self.strings.names.len()];
@@ -1337,8 +1404,14 @@ impl SiteIndex {
     pub fn last_pages(&self, lo: i64, hi: i64, scope: &Scope) -> Vec<(String, u64, u64, f64, u64)> {
         let seen = self.page_visitors(lo, hi, scope);
         let mut rows: HashMap<u32, (u64, f64, HashSet<u32>)> = HashMap::new();
-        for p in self.pays(lo, hi, scope) {
-            if let Some(path) = self.last_page(p) {
+        let from = self.payments.partition_point(|p| p.ts < lo);
+        let to = self.payments.partition_point(|p| p.ts < hi);
+        for i in from..to {
+            let p = &self.payments[i];
+            if !(scope.all() || self.pay_session(p).is_some_and(|s| scope.has(s))) {
+                continue;
+            }
+            if let Some(path) = self.cached_last_page(i) {
                 let e = rows.entry(path).or_default();
                 e.0 += 1;
                 e.1 += p.net.unwrap_or(0.0);
@@ -1360,6 +1433,9 @@ impl SiteIndex {
 
     /// (channel, referrer host) of each session's first pageview in [lo, hi), by distinct visitors.
     pub fn channel_sources(&self, lo: i64, hi: i64, scope: &Scope) -> Vec<(String, String, u64)> {
+        if let Some(rows) = self.linked_sources(lo, hi, scope) {
+            return rows;
+        }
         // A session's first pageview in range is its first pageview, unless the session started before the range.
         let mut late: HashMap<u32, Vec<(u32, u32)>> = HashMap::new();
         for s in self.overlapping_ids(lo, hi) {
@@ -1824,8 +1900,7 @@ pub mod read {
         let Some(pieces) = z.pieces(conn, &period.tz, lo, hi, DAY_US)? else {
             return Ok(None);
         };
-        let visitors = ix.visitors_per(&pieces, &scope);
-        let mut pays = ix.payments_per(&pieces, &scope, true);
+        let (visitors, mut pays) = ix.per_day(&pieces, &scope, &period.tz);
         let mut out = Vec::new();
         let mut d = period.from;
         while d <= period.to {
@@ -2269,6 +2344,164 @@ pub(crate) mod tests {
                     &format!("facets {tz} {from}..{to}"),
                     read::facets(&ix, &z, &conn, &p).unwrap(),
                     visitors::facets(&conn, SITE, &p).unwrap(),
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn index_follows_out_of_order_events() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = DuckStore::open(&dir.path().join("e.duckdb")).unwrap();
+        let now = OffsetDateTime::now_utc();
+        let (mut events, payments, _) = crate::demo::seed(SITE, now);
+        events.sort_by_key(|e| e.ts);
+        let later = events.split_off(events.len() / 2);
+        store.insert_events(&events).unwrap();
+        store.upsert_payments(&payments).unwrap();
+        store
+            .rebuild_attribution(SITE, "last_non_direct", 90)
+            .unwrap();
+        store.load_index(SITE);
+        // The rest newest first, plus earlier pageviews of stored sessions.
+        let mut early: Vec<Event> = events
+            .iter()
+            .filter(|e| e.kind == "pageview")
+            .step_by(5)
+            .cloned()
+            .collect();
+        for (i, e) in early.iter_mut().enumerate() {
+            e.ts -= Duration::seconds(1 + i as i64 % 3);
+            e.path = ["/", "/pricing", "/early"][i % 3].into();
+        }
+        // Sessions begun before the split, and half the others, arrive in order; the rest out of order.
+        let begun: HashSet<&str> = events.iter().map(|e| e.session_id.as_str()).collect();
+        let (in_order, mut later): (Vec<Event>, Vec<Event>) = later.into_iter().partition(|e| {
+            begun.contains(e.session_id.as_str()) || key(&e.session_id).is_multiple_of(2)
+        });
+        later.reverse();
+        let mut order = later;
+        order.extend(early);
+        let today = now.date();
+        let periods: Vec<Period> = ["UTC", "Asia/Kolkata"]
+            .into_iter()
+            .flat_map(|tz| {
+                [
+                    (today, today),
+                    (today - Duration::days(29), today),
+                    (today - Duration::days(400), today),
+                    (today - Duration::days(45), today - Duration::days(40)),
+                ]
+                .map(|(from, to)| Period {
+                    from,
+                    to,
+                    tz: tz.into(),
+                })
+            })
+            .collect();
+        // Reads before and between the appends, so kept results must follow them.
+        let warm = |store: &DuckStore| {
+            let ix = store.index_for_test(SITE);
+            let ix = ix.read().unwrap();
+            let conn = store.conn_for_test();
+            let z = Zones::default();
+            for p in &periods {
+                let f = Filter::default();
+                read::timeseries(&ix, &z, &conn, p, &f).unwrap();
+                read::breakdown(&ix, &z, &conn, p, Dimension::Channel, &f).unwrap();
+                read::breakdown(&ix, &z, &conn, p, Dimension::Page, &f).unwrap();
+                read::overview(&ix, &z, &conn, p, &f).unwrap();
+                read::channel_sources(&ix, &z, &conn, p, &f).unwrap();
+            }
+        };
+        warm(&store);
+        for (i, chunk) in in_order.chunks(23).enumerate() {
+            store.insert_events(chunk).unwrap();
+            if i % 30 == 0 {
+                warm(&store);
+            }
+        }
+        {
+            let ix = store.index_for_test(SITE);
+            let ix = ix.read().unwrap();
+            let conn = store.conn_for_test();
+            let z = Zones::default();
+            let f = Filter::default();
+            for p in &periods {
+                for d in [Dimension::Channel, Dimension::Page, Dimension::Country] {
+                    check(
+                        &format!("in order {d:?} {p:?}"),
+                        read::breakdown(&ix, &z, &conn, p, d, &f).unwrap(),
+                        stats::breakdown(&conn, SITE, p, d, &f).unwrap(),
+                    );
+                }
+                check(
+                    &format!("in order overview {p:?}"),
+                    read::overview(&ix, &z, &conn, p, &f).unwrap(),
+                    stats::overview(&conn, SITE, p, &f).unwrap(),
+                );
+                check(
+                    &format!("in order channel_sources {p:?}"),
+                    read::channel_sources(&ix, &z, &conn, p, &f).unwrap(),
+                    stats::channel_sources(&conn, SITE, p, &f).unwrap(),
+                );
+                check(
+                    &format!("in order timeseries {p:?}"),
+                    read::timeseries(&ix, &z, &conn, p, &f).unwrap(),
+                    stats::timeseries(&conn, SITE, p, &f).unwrap(),
+                );
+            }
+        }
+        for (i, chunk) in order.chunks(37).enumerate() {
+            store.insert_events(chunk).unwrap();
+            if i % 40 == 0 {
+                warm(&store);
+            }
+        }
+        let ix = store.index_for_test(SITE);
+        let ix = ix.read().unwrap();
+        let conn = store.conn_for_test();
+        let z = Zones::default();
+        for p in &periods {
+            {
+                let p = p.clone();
+                let f = Filter::default();
+                let at = format!("{} {}..{}", p.tz, p.from, p.to);
+                check(
+                    &format!("timeseries {at}"),
+                    read::timeseries(&ix, &z, &conn, &p, &f).unwrap(),
+                    stats::timeseries(&conn, SITE, &p, &f).unwrap(),
+                );
+                for d in [
+                    Dimension::Channel,
+                    Dimension::Referrer,
+                    Dimension::LandingPage,
+                    Dimension::Country,
+                    Dimension::ChannelSource,
+                    Dimension::Page,
+                    Dimension::PageSource,
+                    Dimension::DeviceOs,
+                ] {
+                    check(
+                        &format!("breakdown {d:?} {at}"),
+                        read::breakdown(&ix, &z, &conn, &p, d, &f).unwrap(),
+                        stats::breakdown(&conn, SITE, &p, d, &f).unwrap(),
+                    );
+                }
+                check(
+                    &format!("last_pages {at}"),
+                    read::last_pages(&ix, &z, &conn, &p, &f).unwrap(),
+                    stats::last_pages(&conn, SITE, &p, &f).unwrap(),
+                );
+                check(
+                    &format!("channel_sources {at}"),
+                    read::channel_sources(&ix, &z, &conn, &p, &f).unwrap(),
+                    stats::channel_sources(&conn, SITE, &p, &f).unwrap(),
+                );
+                check(
+                    &format!("overview {at}"),
+                    read::overview(&ix, &z, &conn, &p, &f).unwrap(),
+                    stats::overview(&conn, SITE, &p, &f).unwrap(),
                 );
             }
         }
