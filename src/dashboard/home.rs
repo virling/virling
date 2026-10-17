@@ -549,17 +549,26 @@ fn kpis(
     ]
 }
 
-/// Days before `first` as a share of the period, for the "not tracking yet" hatch.
-fn pre(p: &Period, first: Option<Date>) -> Option<(f64, String)> {
+/// Days before `first` and before any day with data, as a share of the period, for the "not tracking yet" hatch.
+fn pre(p: &Period, first: Option<Date>, days: &[DayPoint]) -> Option<(f64, String)> {
+    let data = days
+        .iter()
+        .find(|d| d.visitors > 0 || d.payments > 0)
+        .map(|d| d.date);
+    let start = first.into_iter().chain(data).min();
     let days = ((p.to - p.from).whole_days() + 1) as f64;
-    match first {
+    match start {
         None => Some((
             1.0,
             "Revenue per day shows up here after the first visit and payment.".into(),
         )),
         Some(f) if f > p.from && f <= p.to => Some((
             (f - p.from).whole_days() as f64 / days,
-            format!("Not tracking yet. Script went live {}.", day(f)),
+            if Some(f) == first {
+                format!("Not tracking yet. Script went live {}.", day(f))
+            } else {
+                format!("Not tracking yet. First payment {}.", day(f))
+            },
         )),
         _ => None,
     }
@@ -1157,7 +1166,7 @@ async fn page(
                 ),
             };
             let show_prev = compare && !young && filters.is_empty();
-            let hatch = pre(&p, since);
+            let hatch = pre(&p, since, &report.days);
             let unit = if hours.is_some() {
                 "hour"
             } else if s.weekly {
@@ -1575,6 +1584,47 @@ mod tests {
             Some((date!(2026 - 10 - 15), date!(2026 - 10 - 15)))
         );
         assert_eq!(preset("all", t, None), None);
+    }
+
+    #[test]
+    fn the_hatch_never_covers_a_day_with_data() {
+        let p = Period {
+            from: date!(2026 - 10 - 12),
+            to: date!(2026 - 10 - 18),
+            tz: "Asia/Kolkata".into(),
+        };
+        let mut days: Vec<DayPoint> = (0..7)
+            .map(|i| DayPoint {
+                date: p.from + time::Duration::days(i),
+                visitors: 0,
+                payments: 0,
+                customers: 0,
+                revenue_usd: 0.0,
+                converted: 0,
+                matched_revenue_usd: 0.0,
+                conversion: None,
+                revenue_per_visitor: None,
+                hour: None,
+                by_channel: Vec::new(),
+            })
+            .collect();
+        let live = Some(date!(2026 - 10 - 18));
+        assert_eq!(
+            pre(&p, live, &days),
+            Some((
+                6.0 / 7.0,
+                "Not tracking yet. Script went live Oct 18.".into()
+            ))
+        );
+        days[2].payments = 2;
+        days[2].revenue_usd = 2.98;
+        assert_eq!(
+            pre(&p, live, &days),
+            Some((2.0 / 7.0, "Not tracking yet. First payment Oct 14.".into()))
+        );
+        assert_eq!(pre(&p, None, &days).unwrap().0, 2.0 / 7.0);
+        days[0].visitors = 1;
+        assert_eq!(pre(&p, live, &days), None);
     }
 
     #[test]
