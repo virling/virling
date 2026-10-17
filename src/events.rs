@@ -1,10 +1,11 @@
 use std::path::Path;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 use duckdb::types::{TimeUnit, Value};
 use duckdb::{Connection, named_params, params};
 use time::{OffsetDateTime, UtcOffset};
 
+use crate::index::{Indexes, SiteIndex, Zones, read};
 use crate::providers::Subscription;
 use crate::retention::{self, Mrr, Retention};
 use crate::stats::{
@@ -220,11 +221,10 @@ pub trait EventStore: Send + Sync {
 /// Sessions as touches (first pageview's fields), then the credited session per payment, then renewal inheritance.
 const REBUILD_ATTRIBUTION: &str = "
 INSERT INTO attribution
-WITH touches AS (
+WITH starts AS (
     SELECT visitor_id, session_id, ts, channel, referrer_host, utm_campaign, path, country, device
-    FROM events
-    WHERE site_id = $site AND kind = 'pageview'
-    QUALIFY row_number() OVER (PARTITION BY session_id ORDER BY ts, path) = 1
+    FROM touches
+    WHERE site_id = $site
 ),
 pays AS (
     SELECT provider, provider_payment_id, ts, visitor_id, customer_id, is_renewal, status
@@ -233,7 +233,7 @@ pays AS (
 own AS (
     SELECT p.provider, p.provider_payment_id, t.*
     FROM pays p
-    JOIN touches t ON t.visitor_id = p.visitor_id
+    JOIN starts t ON t.visitor_id = p.visitor_id
         AND t.ts <= p.ts
         AND epoch_us(t.ts) >= epoch_us(p.ts) - $window_days * 86400000000
     QUALIFY row_number() OVER (
@@ -276,11 +276,146 @@ pub struct LatestPageview {
 
 pub struct DuckStore {
     conn: Mutex<Connection>,
+    index: Arc<Indexes>,
+    zones: Zones,
+    /// Idle read connections, so reads never wait on each other or on writes.
+    readers: Mutex<Vec<Connection>>,
+}
+
+/// A pooled read connection, returned to the pool on drop.
+pub struct Reader<'a> {
+    store: &'a DuckStore,
+    conn: Option<Connection>,
+}
+
+impl std::ops::Deref for Reader<'_> {
+    type Target = Connection;
+
+    fn deref(&self) -> &Connection {
+        self.conn.as_ref().unwrap()
+    }
+}
+
+impl Drop for Reader<'_> {
+    fn drop(&mut self) {
+        if let Some(conn) = self.conn.take() {
+            self.store.readers.lock().unwrap().push(conn);
+        }
+    }
+}
+
+/// Memory budget of session indexes in bytes, from VIRLING_INDEX_MB (default 512; 0 turns them off).
+pub fn index_cap() -> usize {
+    std::env::var("VIRLING_INDEX_MB")
+        .ok()
+        .and_then(|v| v.parse::<usize>().ok())
+        .unwrap_or(512)
+        * 1_000_000
+}
+
+/// Columns of `touches` and `first_touches`: an event's fields without kind and name.
+const TOUCH_COLUMNS: &str =
+    "site_id, session_id, visitor_id, ts, path, referrer_host, utm_source, utm_medium,
+    utm_campaign, utm_content, utm_term, channel, country, device, browser, os, region, city, host,
+    language";
+
+const TOUCH_TABLE: &str = "site_id VARCHAR NOT NULL, session_id VARCHAR NOT NULL,
+    visitor_id VARCHAR NOT NULL, ts TIMESTAMPTZ NOT NULL, path VARCHAR NOT NULL, referrer_host VARCHAR,
+    utm_source VARCHAR, utm_medium VARCHAR, utm_campaign VARCHAR, utm_content VARCHAR, utm_term VARCHAR,
+    channel VARCHAR NOT NULL, country VARCHAR, device VARCHAR NOT NULL, browser VARCHAR NOT NULL,
+    os VARCHAR, region VARCHAR, city VARCHAR, host VARCHAR, language VARCHAR";
+
+/// Keeps the earlier (ts, path) pageview of a key in `touches` or `first_touches`.
+fn upsert_touches(table: &str, key: &str, rows: usize) -> String {
+    let n = TOUCH_COLUMNS.split(',').count();
+    let row = format!("({})", vec!["?"; n].join(", "));
+    let set = TOUCH_COLUMNS
+        .split(',')
+        .map(str::trim)
+        .map(|c| format!("{c} = excluded.{c}"))
+        .collect::<Vec<_>>()
+        .join(", ");
+    format!(
+        "INSERT INTO {table} ({TOUCH_COLUMNS}) VALUES {}
+        ON CONFLICT (site_id, {key}) DO UPDATE SET {set}
+        WHERE excluded.ts < {table}.ts OR (excluded.ts = {table}.ts AND excluded.path < {table}.path)",
+        vec![row; rows].join(", ")
+    )
+}
+
+fn ts_value(ts: OffsetDateTime) -> Value {
+    Value::Timestamp(
+        TimeUnit::Microsecond,
+        (ts.unix_timestamp_nanos() / 1000) as i64,
+    )
+}
+
+/// The earliest pageview, by (ts, path), per key of `events`.
+fn earliest(events: &[Event], key: impl Fn(&Event) -> &str) -> Vec<&Event> {
+    let mut first: std::collections::HashMap<(&str, &str), &Event> = Default::default();
+    for e in events.iter().filter(|e| e.kind == "pageview") {
+        first
+            .entry((e.site_id.as_str(), key(e)))
+            .and_modify(|f| {
+                if (e.ts, &e.path) < (f.ts, &f.path) {
+                    *f = e;
+                }
+            })
+            .or_insert(e);
+    }
+    first.into_values().collect()
+}
+
+/// Upserts `rows` into `table`, a few hundred per statement.
+fn write_touches(
+    tx: &duckdb::Transaction,
+    table: &str,
+    key: &str,
+    rows: &[&Event],
+) -> anyhow::Result<()> {
+    for chunk in rows.chunks(500) {
+        let mut stmt = tx.prepare(&upsert_touches(table, key, chunk.len()))?;
+        let mut values: Vec<Value> = Vec::new();
+        for e in chunk {
+            let text = |v: &str| Value::Text(v.to_string());
+            let opt = |v: &Option<String>| v.as_deref().map_or(Value::Null, text);
+            values.extend([
+                text(&e.site_id),
+                text(&e.session_id),
+                text(&e.visitor_id),
+                ts_value(e.ts),
+                text(&e.path),
+                opt(&e.referrer_host),
+                opt(&e.utm_source),
+                opt(&e.utm_medium),
+                opt(&e.utm_campaign),
+                opt(&e.utm_content),
+                opt(&e.utm_term),
+                text(&e.channel),
+                opt(&e.country),
+                text(&e.device),
+                text(&e.browser),
+                text(&e.os),
+                opt(&e.region),
+                opt(&e.city),
+                opt(&e.host),
+                opt(&e.language),
+            ]);
+        }
+        stmt.execute(duckdb::params_from_iter(values))?;
+    }
+    Ok(())
 }
 
 impl DuckStore {
     pub fn open(path: &Path) -> anyhow::Result<Self> {
         let conn = Connection::open(path)?;
+        let derived: i64 = conn.query_row(
+            "SELECT count(*) FROM duckdb_columns()
+            WHERE table_name IN ('touches', 'first_touches') AND column_name = 'language'",
+            [],
+            |r| r.get(0),
+        )?;
         // Install and load ICU up front (autoloading it mid-query fails that query); keep naive timestamps in UTC.
         conn.execute_batch(
             "INSTALL icu;
@@ -361,8 +496,79 @@ impl DuckStore {
             ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS interval_count INTEGER;
             ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS mrr_usd DOUBLE;",
         )?;
+        if derived < 2 {
+            // First pageview, by (ts, path), of each session and of each visitor; insert_events keeps them current.
+            conn.execute_batch(&format!(
+                "BEGIN;
+                DROP TABLE IF EXISTS touches;
+                DROP TABLE IF EXISTS first_touches;
+                CREATE TABLE touches ({TOUCH_TABLE}, PRIMARY KEY (site_id, session_id));
+                INSERT INTO touches SELECT {TOUCH_COLUMNS} FROM events WHERE kind = 'pageview'
+                    QUALIFY row_number() OVER (PARTITION BY site_id, session_id ORDER BY ts, path) = 1;
+                CREATE TABLE first_touches ({TOUCH_TABLE}, PRIMARY KEY (site_id, visitor_id));
+                INSERT INTO first_touches SELECT {TOUCH_COLUMNS} FROM touches
+                    QUALIFY row_number() OVER (PARTITION BY site_id, visitor_id ORDER BY ts, path) = 1;
+                COMMIT;"
+            ))?;
+        }
         Ok(Self {
             conn: Mutex::new(conn),
+            index: Arc::new(Indexes::new(index_cap())),
+            zones: Zones::default(),
+            readers: Mutex::default(),
+        })
+    }
+
+    /// `read` over the site's session index, when it is loaded and fits the question.
+    fn indexed<T>(
+        &self,
+        site_id: &str,
+        read: impl FnOnce(&SiteIndex, &Zones, &Connection) -> anyhow::Result<Option<T>>,
+    ) -> anyhow::Result<Option<T>> {
+        let Some(ix) = self
+            .index
+            .get(site_id, || Ok(self.conn.lock().unwrap().try_clone()?))?
+        else {
+            return Ok(None);
+        };
+        let conn = self.read()?;
+        let ix = ix.read().unwrap();
+        read(&ix, &self.zones, &conn)
+    }
+
+    /// Reads the site's index now instead of in the background.
+    #[cfg(test)]
+    pub fn load_index(&self, site_id: &str) {
+        let conn = self.conn.lock().unwrap().try_clone().unwrap();
+        self.index.load(site_id, &conn).unwrap();
+    }
+
+    #[cfg(test)]
+    pub fn index_for_test(&self, site_id: &str) -> Arc<std::sync::RwLock<SiteIndex>> {
+        self.index
+            .get(site_id, || Ok(self.conn.lock().unwrap().try_clone()?))
+            .unwrap()
+            .expect("index loaded")
+    }
+
+    #[cfg(test)]
+    pub fn conn_for_test(&self) -> Reader<'_> {
+        self.read().unwrap()
+    }
+
+    fn read(&self) -> anyhow::Result<Reader<'_>> {
+        let pooled = self.readers.lock().unwrap().pop();
+        let conn = match pooled {
+            Some(conn) => conn,
+            None => {
+                let conn = self.conn.lock().unwrap().try_clone()?;
+                conn.execute_batch("SET TimeZone = 'UTC'")?;
+                conn
+            }
+        };
+        Ok(Reader {
+            store: self,
+            conn: Some(conn),
         })
     }
 }
@@ -404,7 +610,21 @@ impl EventStore for DuckStore {
             }
             app.flush()?;
         }
+        write_touches(
+            &tx,
+            "touches",
+            "session_id",
+            &earliest(events, |e| &e.session_id),
+        )?;
+        write_touches(
+            &tx,
+            "first_touches",
+            "visitor_id",
+            &earliest(events, |e| &e.visitor_id),
+        )?;
         tx.commit()?;
+        drop(conn);
+        self.index.apply(events);
         Ok(())
     }
 
@@ -456,7 +676,7 @@ impl EventStore for DuckStore {
         period: &Period,
         now: OffsetDateTime,
     ) -> anyhow::Result<Option<Mrr>> {
-        retention::mrr(&self.conn.lock().unwrap(), site_id, period, now)
+        retention::mrr(&*self.read()?, site_id, period, now)
     }
 
     fn retention(
@@ -465,12 +685,12 @@ impl EventStore for DuckStore {
         period: &Period,
         now: OffsetDateTime,
     ) -> anyhow::Result<Retention> {
-        retention::retention(&self.conn.lock().unwrap(), site_id, period, now)
+        retention::retention(&*self.read()?, site_id, period, now)
     }
 
     #[cfg(test)]
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.read()?;
         let n: i64 = conn.query_row(
             "SELECT count(*) FROM events WHERE site_id = ?",
             params![site_id],
@@ -507,11 +727,14 @@ impl EventStore for DuckStore {
             }
         }
         tx.commit()?;
+        for p in payments {
+            self.index.payments_changed(&p.site_id);
+        }
         Ok(())
     }
 
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.read()?;
         let mut stmt = conn.prepare(
             "SELECT path, country, device, referrer_host FROM events WHERE site_id = ? AND kind = 'pageview' ORDER BY ts DESC LIMIT 1",
         )?;
@@ -527,7 +750,10 @@ impl EventStore for DuckStore {
     }
 
     fn first_event(&self, site_id: &str) -> anyhow::Result<Option<OffsetDateTime>> {
-        let conn = self.conn.lock().unwrap();
+        if let Some(t) = self.indexed(site_id, |ix, _, _| Ok(Some(ix.first_event())))? {
+            return Ok(t.map(stats::from_micros));
+        }
+        let conn = self.read()?;
         let us: Option<i64> = conn.query_row(
             "SELECT epoch_us(min(ts)) FROM events WHERE site_id = ?",
             params![site_id],
@@ -537,7 +763,7 @@ impl EventStore for DuckStore {
     }
 
     fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.read()?;
         let n: i64 = conn.query_row(
             "SELECT count(DISTINCT visitor_id) FROM events WHERE site_id = ? AND kind <> 'leave' AND ts > now() - INTERVAL 5 MINUTE",
             params![site_id],
@@ -547,7 +773,7 @@ impl EventStore for DuckStore {
     }
 
     fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.read()?;
         let secs: i64 = conn.query_row(
             "SELECT (epoch_us(timezone(?, now())) - epoch_us(timezone('UTC', now()))) // 1000000",
             params![tz],
@@ -577,21 +803,20 @@ impl EventStore for DuckStore {
             named_params! { "site": site_id, "model": model, "window_days": window_days },
         )?;
         tx.commit()?;
+        self.index.payments_changed(site_id);
         Ok(())
     }
 
     fn overview_in(&self, site_id: &str, period: &Period, f: &Filter) -> anyhow::Result<Overview> {
-        stats::overview(&self.conn.lock().unwrap(), site_id, period, f)
+        if let Some(o) = self.indexed(site_id, |ix, z, c| read::overview(ix, z, c, period, f))? {
+            return Ok(o);
+        }
+        stats::overview(&*self.read()?, site_id, period, f)
     }
 
     #[cfg(test)]
     fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<stats::DayPoint>> {
-        stats::timeseries(
-            &self.conn.lock().unwrap(),
-            site_id,
-            period,
-            &Filter::default(),
-        )
+        stats::timeseries(&*self.read()?, site_id, period, &Filter::default())
     }
 
     fn breakdown_in(
@@ -601,7 +826,12 @@ impl EventStore for DuckStore {
         dimension: Dimension,
         f: &Filter,
     ) -> anyhow::Result<Vec<BreakdownRow>> {
-        stats::breakdown(&self.conn.lock().unwrap(), site_id, period, dimension, f)
+        if let Some(rows) = self.indexed(site_id, |ix, z, c| {
+            read::breakdown(ix, z, c, period, dimension, f)
+        })? {
+            return Ok(rows);
+        }
+        stats::breakdown(&*self.read()?, site_id, period, dimension, f)
     }
 
     fn last_pages_in(
@@ -610,7 +840,12 @@ impl EventStore for DuckStore {
         period: &Period,
         f: &Filter,
     ) -> anyhow::Result<Vec<BreakdownRow>> {
-        stats::last_pages(&self.conn.lock().unwrap(), site_id, period, f)
+        if let Some(rows) =
+            self.indexed(site_id, |ix, z, c| read::last_pages(ix, z, c, period, f))?
+        {
+            return Ok(rows);
+        }
+        stats::last_pages(&*self.read()?, site_id, period, f)
     }
 
     fn payment_list_in(
@@ -622,15 +857,7 @@ impl EventStore for DuckStore {
         offset: u32,
         f: &Filter,
     ) -> anyhow::Result<PaymentPage> {
-        stats::payment_list(
-            &self.conn.lock().unwrap(),
-            site_id,
-            period,
-            filter,
-            limit,
-            offset,
-            f,
-        )
+        stats::payment_list(&*self.read()?, site_id, period, filter, limit, offset, f)
     }
 
     fn journey(
@@ -641,7 +868,7 @@ impl EventStore for DuckStore {
         window_days: i64,
     ) -> anyhow::Result<Option<Journey>> {
         stats::journey(
-            &self.conn.lock().unwrap(),
+            &*self.read()?,
             site_id,
             provider,
             provider_payment_id,
@@ -650,7 +877,30 @@ impl EventStore for DuckStore {
     }
 
     fn report_in(&self, site_id: &str, period: &Period, f: &Filter) -> anyhow::Result<Report> {
-        stats::report(&self.conn.lock().unwrap(), site_id, period, f)
+        let indexed = self.indexed(site_id, |ix, z, c| {
+            let dims = |d| read::breakdown(ix, z, c, period, d, f);
+            let (Some(days), Some(previous_days)) = (
+                read::timeseries(ix, z, c, period, f)?,
+                read::timeseries(ix, z, c, &period.previous(), f)?,
+            ) else {
+                return Ok(None);
+            };
+            Ok(Some(Report {
+                overview: read::overview(ix, z, c, period, f)?.unwrap(),
+                days,
+                previous_days,
+                channels: dims(Dimension::Channel)?.unwrap(),
+                referrers: dims(Dimension::Referrer)?.unwrap(),
+                landing_pages: dims(Dimension::LandingPage)?.unwrap(),
+                countries: dims(Dimension::Country)?.unwrap(),
+                channel_sources: read::channel_sources(ix, z, c, period, f)?.unwrap(),
+                setup: read::setup(ix),
+            }))
+        })?;
+        if let Some(r) = indexed {
+            return Ok(r);
+        }
+        stats::report(&|| self.read(), site_id, period, f)
     }
 
     fn hourly(
@@ -659,11 +909,17 @@ impl EventStore for DuckStore {
         period: &Period,
         f: &Filter,
     ) -> anyhow::Result<Vec<stats::DayPoint>> {
-        stats::hourly(&self.conn.lock().unwrap(), site_id, period, f)
+        if let Some(h) = self.indexed(site_id, |ix, z, c| read::hourly(ix, z, c, period, f))? {
+            return Ok(h);
+        }
+        stats::hourly(&*self.read()?, site_id, period, f)
     }
 
     fn payment_split(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ProviderSplit>> {
-        stats::payment_split(&self.conn.lock().unwrap(), site_id, period)
+        if let Some(s) = self.indexed(site_id, |ix, z, c| read::payment_split(ix, z, c, period))? {
+            return Ok(s);
+        }
+        stats::payment_split(&*self.read()?, site_id, period)
     }
 
     fn funnel(
@@ -673,7 +929,7 @@ impl EventStore for DuckStore {
         steps: &[Step],
         f: &Filter,
     ) -> anyhow::Result<Vec<StepCount>> {
-        stats::funnel(&self.conn.lock().unwrap(), site_id, period, steps, f)
+        stats::funnel(&*self.read()?, site_id, period, steps, f)
     }
 
     fn goal_table(
@@ -683,19 +939,19 @@ impl EventStore for DuckStore {
         pages: &[String],
         f: &Filter,
     ) -> anyhow::Result<Vec<GoalStat>> {
-        stats::goal_table(&self.conn.lock().unwrap(), site_id, period, pages, f)
+        stats::goal_table(&*self.read()?, site_id, period, pages, f)
     }
 
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary> {
-        stats::payment_summary(&self.conn.lock().unwrap(), site_id, period)
+        stats::payment_summary(&*self.read()?, site_id, period)
     }
 
     fn activity(&self, site_id: &str, tz: &str, who: &[Who]) -> anyhow::Result<Vec<Activity>> {
-        stats::activity(&self.conn.lock().unwrap(), site_id, tz, who)
+        stats::activity(&*self.read()?, site_id, tz, who)
     }
 
     fn goal_counts(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<GoalCount>> {
-        stats::goal_counts(&self.conn.lock().unwrap(), site_id, period)
+        stats::goal_counts(&*self.read()?, site_id, period)
     }
 
     fn goal_list(
@@ -706,14 +962,7 @@ impl EventStore for DuckStore {
         limit: u32,
         offset: u32,
     ) -> anyhow::Result<(u64, Vec<GoalRow>)> {
-        stats::goal_list(
-            &self.conn.lock().unwrap(),
-            site_id,
-            period,
-            goal,
-            limit,
-            offset,
-        )
+        stats::goal_list(&*self.read()?, site_id, period, goal, limit, offset)
     }
 
     fn visitor_list(
@@ -724,22 +973,18 @@ impl EventStore for DuckStore {
         limit: u32,
         offset: u32,
     ) -> anyhow::Result<VisitorPage> {
-        visitors::visitor_list(
-            &self.conn.lock().unwrap(),
-            site_id,
-            period,
-            filter,
-            limit,
-            offset,
-        )
+        visitors::visitor_list(&*self.read()?, site_id, period, filter, limit, offset)
     }
 
     fn visitor_facets(&self, site_id: &str, period: &Period) -> anyhow::Result<Facets> {
-        visitors::facets(&self.conn.lock().unwrap(), site_id, period)
+        if let Some(f) = self.indexed(site_id, |ix, z, c| read::facets(ix, z, c, period))? {
+            return Ok(f);
+        }
+        visitors::facets(&*self.read()?, site_id, period)
     }
 
     fn timeline(&self, site_id: &str, visitor_id: &str) -> anyhow::Result<Option<Timeline>> {
-        visitors::timeline(&self.conn.lock().unwrap(), site_id, visitor_id)
+        visitors::timeline(&*self.read()?, site_id, visitor_id)
     }
 }
 

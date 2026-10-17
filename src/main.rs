@@ -3,6 +3,8 @@ mod animals;
 mod api;
 mod app;
 mod auth;
+mod bench;
+mod cache;
 mod channel;
 mod chart;
 mod crypto;
@@ -13,6 +15,7 @@ mod favicon;
 mod flags;
 mod fx;
 mod icons;
+mod index;
 mod ingest;
 mod links;
 mod mail;
@@ -42,6 +45,7 @@ use sqlx::SqlitePool;
 use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions};
 
 use crate::app::{AppState, Config};
+use crate::cache::Cached;
 use crate::events::DuckStore;
 
 #[derive(Parser)]
@@ -89,6 +93,9 @@ enum Command {
         #[arg(long, default_value = "maya.chen@tallybird.app")]
         email: String,
     },
+    /// Time every page, API endpoint, MCP tool and ingest on the data dir, seeding the demo when empty
+    #[command(hide = true)]
+    Bench(bench::BenchArgs),
 }
 
 #[derive(Parser)]
@@ -149,6 +156,9 @@ async fn main() -> anyhow::Result<()> {
             demo::export(out).await
         };
     }
+    if let Some(Command::Bench(args)) = cli.command {
+        return bench::run(&cli.data_dir, args).await;
+    }
     if let Some(Command::Query(args)) = cli.command {
         match query::run(args).await {
             Ok(out) => print!("{out}"),
@@ -169,7 +179,7 @@ async fn main() -> anyhow::Result<()> {
     };
     match command {
         Command::Serve(args) => {
-            let events = DuckStore::open(&cli.data_dir.join("events.duckdb"))?;
+            let events = Cached::new(DuckStore::open(&cli.data_dir.join("events.duckdb"))?);
             let config = Config {
                 marketing: args.marketing,
                 app: args.app,
@@ -218,7 +228,7 @@ async fn main() -> anyhow::Result<()> {
                 "Added {domain}. Script tag:\n<script defer src=\"https://YOUR-VIRLING-HOST/v.js\" data-site=\"{domain}\"></script>"
             );
         }
-        Command::Demo { .. } | Command::Query(_) => {
+        Command::Demo { .. } | Command::Query(_) | Command::Bench(_) => {
             unreachable!("handled before the data dir is opened")
         }
     }
