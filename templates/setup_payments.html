@@ -13,12 +13,6 @@
       <p class="lead">Virling imports the last 90 days of payments for <b>{{ domain }}</b> and keeps them in sync. Keys are stored encrypted.</p>
     </div>
     <div class="step-body">
-    {% if let Some(error) = error %}
-    <div class="alert" role="alert">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C0262D" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
-      <span>{{ error }}</span>
-    </div>
-    {% endif %}
     {% if let Some(c) = connected %}
     <div class="panel"{% if c.syncing %} data-reload="4000"{% endif %}>
       {% if c.syncing %}<span class="muted small">Importing the last 90 days. This page updates on its own.</span>{% endif %}
@@ -31,12 +25,12 @@
         {% for r in c.rows %}
         <div class="conn" data-connected="{{ r.key }}">
           <div class="grow">
-            <b>{{ r.name }}</b> <span class="badge ok">Connected</span>
+            {{ crate::icons::provider(r.key, 20)|safe }}<b>{{ r.name }}</b> <span class="badge ok">Connected &#10003;</span>
             {% if !r.hint.is_empty() %}<span class="muted small">Key ending <span class="mono">{{ r.hint }}</span></span>{% endif %}
             <span class="muted small">{{ r.synced }}</span>
             {% if !r.error.is_empty() %}<span class="err small">{{ r.error }}</span>{% endif %}
           </div>
-          <a class="btn ghost" href="/app/{{ domain }}/setup/payments?provider={{ r.key }}&amp;replace=1">Replace key</a>
+          <a class="btn ghost" href="/app/{{ domain }}/setup/payments?provider={{ r.key }}&amp;replace=1">Manage</a>
           <form method="post" action="/app/{{ domain }}/settings/disconnect" data-confirm="Disconnect {{ r.name }}? Syncing stops right away. Payments already imported stay in your reports.">
             <input type="hidden" name="provider" value="{{ r.key }}">
             <input type="hidden" name="back" value="setup">
@@ -54,6 +48,7 @@
         {% for c in cards %}
         <label class="card">
           <input type="radio" name="provider" value="{{ c.key }}"{% if c.selected %} checked{% endif %}>
+          {{ crate::icons::provider(c.key, 24)|safe }}
           <b>{{ c.name }}</b>
           <span>{{ c.key_label }}</span>
         </label>
@@ -61,9 +56,10 @@
       </fieldset>
       {% for c in cards %}
       <div class="panel" data-provider="{{ c.key }}"{% if !c.selected %} hidden{% endif %}>
-        <label class="field">{% if replacing && c.selected %}New {{ c.name }} {{ c.key_label|lower }}{% else %}{{ c.name }} {{ c.key_label|lower }}{% endif %}
-          <input class="mono" name="key" value="{% if c.selected %}{{ key }}{% endif %}" placeholder="{{ c.placeholder }}" autocomplete="off" spellcheck="false"{% if !c.selected %} disabled{% endif %}>
+        <label class="field">{{ c.key_label }}
+          <input class="mono" name="key" placeholder="{{ c.placeholder }}" autocomplete="off" spellcheck="false"{% if !c.selected %} disabled{% endif %}{% if c.selected && error.is_some() %} aria-invalid="true" aria-describedby="key-err"{% endif %}>
         </label>
+        {% if c.selected %}{% if let Some(error) = error %}<p class="field-err" id="key-err" role="alert" data-key-err>{{ error }}</p>{% endif %}{% endif %}
         <p class="note">{{ c.note }}</p>
         <a class="help" href="{{ c.help_url }}" target="_blank" rel="noopener">{{ c.help }} &#8599;</a>
       </div>

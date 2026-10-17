@@ -74,7 +74,7 @@ const checkout = await polar.checkouts.create({
 ```js
 // LemonSqueezy: add the visitor ID as checkout custom data.
 // Not attributed yet: LemonSqueezy only returns custom data in
-// webhooks, which Virling does not receive yet (issue #15).
+// webhooks, which Virling does not receive yet.
 // Tag checkouts now and they will match once that ships.
 
 // In the browser, on a checkout URL:
@@ -101,7 +101,7 @@ Virling reads `virling_vid` from the order's `metadata`, its custom field data, 
 
 ## LemonSqueezy
 
-Tag checkouts with `checkout[custom][virling_vid]` now. Matching them is <span class="na">Not available yet</span> and waits on webhook support ([issue #15](https://github.com/virling/virling/issues/15)). See [LemonSqueezy](lemonsqueezy.md).
+Tag checkouts with `checkout[custom][virling_vid]` now. Matching them is <span class="na">Not available yet</span> and waits on webhook support. See [LemonSqueezy](lemonsqueezy.md).
 
 ## Payment links
 

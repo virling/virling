@@ -828,7 +828,15 @@ mod tests {
         let uri = "/app/example.com/setup/payments".to_string();
         let page = call(&state, get(&uri, Some(&cookie))).await;
         assert_eq!(page.status(), StatusCode::OK);
-        assert!(body_text(page).await.contains("Restricted key"));
+        let body = body_text(page).await;
+        assert!(body.contains("Restricted key"));
+        for name in ["Stripe", "Dodo Payments", "Polar", "Lemon Squeezy"] {
+            assert!(
+                body.contains(&format!(r#"aria-label="{name}""#)),
+                "{name} logo"
+            );
+        }
+        assert!(!body.contains(" api key"), "the label reads API key");
         let res = call(
             &state,
             form(
@@ -844,12 +852,28 @@ mod tests {
             body.contains("Use a restricted read-only key"),
             "check_key error is shown"
         );
-        assert!(body.contains("sk_live_abc"), "the key stays in the field");
+        assert!(!body.contains("sk_live_abc"), "the key is never sent back");
+        assert!(
+            body.contains(r#"<p class="field-err" id="key-err" role="alert" data-key-err>"#),
+            "the error sits under the field"
+        );
+        assert!(!body.contains(r#"class="alert""#));
         let n: i64 = sqlx::query_scalar("SELECT count(*) FROM integrations")
             .fetch_one(&state.db)
             .await
             .unwrap();
         assert_eq!(n, 0);
+    }
+
+    #[tokio::test]
+    async fn setup_copy_has_no_issue_references() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        for step in ["script", "payments", "checkout"] {
+            let uri = format!("/app/example.com/setup/{step}");
+            let body = body_text(call(&state, get(&uri, Some(&cookie))).await).await;
+            assert!(!body.to_lowercase().contains("issue #"), "{step}");
+        }
     }
 
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {
@@ -886,7 +910,12 @@ mod tests {
             body.contains("Dodo Payments returned HTTP 400"),
             "last error is shown"
         );
-        assert!(body.contains("Replace key"));
+        assert!(body.contains("Connected &#10003;"));
+        assert!(body.contains(">Manage</a>"));
+        assert!(
+            !body.contains(">Add<"),
+            "a connected provider never shows Add"
+        );
         assert!(
             !body.contains(r#"data-provider="dodo""#),
             "no key form for dodo"
