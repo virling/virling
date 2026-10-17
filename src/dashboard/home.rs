@@ -1166,6 +1166,7 @@ async fn page(
                 "day"
             };
             let total: f64 = s.points.iter().map(|d| d.revenue_usd).sum();
+            let visits: u64 = s.points.iter().map(|d| d.visitors).sum();
             let prev_total: f64 = prev.points.iter().map(|d| d.revenue_usd).sum();
             let best = s
                 .points
@@ -1195,8 +1196,15 @@ async fn page(
                     Kind::Channel => "Revenue by channel",
                     Kind::Total => "Revenue so far this period",
                 };
-                let note = if total <= 0.0 {
+                let note = if total <= 0.0 && visits == 0 {
                     "Nothing to show yet.".into()
+                } else if total <= 0.0 {
+                    match kind {
+                        Kind::Bars => format!(
+                            "No revenue {when}. The dots are visitors per {unit}, on the right axis."
+                        ),
+                        _ => format!("No revenue {when}."),
+                    }
                 } else if hide && matches!(kind, Kind::Bars | Kind::Total) {
                     format!("Amounts are hidden. Hover for each {unit}'s share of the revenue.")
                 } else {
