@@ -286,7 +286,6 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
             Auth::Session,
         ),
         get("page.retention", format!("{app}/retention"), Auth::Session),
-        get("page.links", format!("{app}/links"), Auth::Session),
         get("page.report", format!("{app}/report"), Auth::Session),
         get("page.settings", format!("{app}/settings"), Auth::Session),
         get("page.share", format!("/r/{share}"), Auth::None),
