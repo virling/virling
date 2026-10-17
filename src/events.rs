@@ -750,6 +750,9 @@ impl EventStore for DuckStore {
     }
 
     fn first_event(&self, site_id: &str) -> anyhow::Result<Option<OffsetDateTime>> {
+        if let Some(t) = self.indexed(site_id, |ix, _, _| Ok(Some(ix.first_event())))? {
+            return Ok(t.map(stats::from_micros));
+        }
         let conn = self.read()?;
         let us: Option<i64> = conn.query_row(
             "SELECT epoch_us(min(ts)) FROM events WHERE site_id = ?",
@@ -891,7 +894,7 @@ impl EventStore for DuckStore {
                 landing_pages: dims(Dimension::LandingPage)?.unwrap(),
                 countries: dims(Dimension::Country)?.unwrap(),
                 channel_sources: read::channel_sources(ix, z, c, period, f)?.unwrap(),
-                setup: stats::setup(c, site_id)?,
+                setup: read::setup(ix),
             }))
         })?;
         if let Some(r) = indexed {
@@ -913,6 +916,9 @@ impl EventStore for DuckStore {
     }
 
     fn payment_split(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ProviderSplit>> {
+        if let Some(s) = self.indexed(site_id, |ix, z, c| read::payment_split(ix, z, c, period))? {
+            return Ok(s);
+        }
         stats::payment_split(&*self.read()?, site_id, period)
     }
 
