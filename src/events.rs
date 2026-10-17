@@ -5,7 +5,7 @@ use duckdb::types::{TimeUnit, Value};
 use duckdb::{Connection, named_params, params};
 use time::{OffsetDateTime, UtcOffset};
 
-use crate::index::{Indexes, SiteIndex, Zones, goals, read, rows};
+use crate::index::{self, Indexes, SiteIndex, Zones, goals, read, rows};
 use crate::providers::Subscription;
 use crate::retention::{self, Mrr, Retention};
 use crate::stats::{
@@ -672,6 +672,7 @@ impl EventStore for DuckStore {
             }
         }
         tx.commit()?;
+        self.index.payments_changed(site_id);
         Ok(())
     }
 
@@ -681,6 +682,11 @@ impl EventStore for DuckStore {
         period: &Period,
         now: OffsetDateTime,
     ) -> anyhow::Result<Option<Mrr>> {
+        if let Some(m) = self.indexed(site_id, |ix, z, c| {
+            index::retention::read::mrr(ix, z, c, period, now)
+        })? {
+            return Ok(m);
+        }
         retention::mrr(&*self.read()?, site_id, period, now)
     }
 
@@ -690,6 +696,11 @@ impl EventStore for DuckStore {
         period: &Period,
         now: OffsetDateTime,
     ) -> anyhow::Result<Retention> {
+        if let Some(r) = self.indexed(site_id, |ix, z, c| {
+            index::retention::read::retention(ix, z, c, period, now)
+        })? {
+            return Ok(r);
+        }
         retention::retention(&*self.read()?, site_id, period, now)
     }
 
