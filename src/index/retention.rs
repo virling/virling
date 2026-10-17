@@ -25,11 +25,11 @@ impl SiteIndex {
         conn: &Connection,
         site_id: &str,
     ) -> anyhow::Result<()> {
-        let mut stmt = conn.prepare(
-            "SELECT provider, customer_id, status, live, epoch_us(ends_at), mrr_usd
-            FROM subscriptions WHERE site_id = ?",
-        )?;
-        let mut rows = stmt.query(params![site_id])?;
+        let mut stmt = conn.prepare(&format!(
+            "WITH {} SELECT provider, customer_id, status, live, epoch_us(ends_at), mrr_usd FROM charged",
+            crate::retention::SUBSCRIPTIONS
+        ))?;
+        let mut rows = stmt.query(duckdb::named_params! { "site": site_id })?;
         let mut subs = Vec::new();
         while let Some(r) = rows.next()? {
             subs.push(Sub {

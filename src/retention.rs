@@ -161,6 +161,25 @@ LEFT JOIN attribution a ON a.site_id = $site AND a.provider = f.provider
 WHERE NOT f.is_renewal AND ((f.ts >= b.lo AND f.ts < b.hi) OR f.us > $now - 60 * 86400000000)
 ";
 
+/// A site's subscriptions, with `mrr_usd` from the latest charge of a customer's only live one, else the list price.
+pub(crate) const SUBSCRIPTIONS: &str = "
+charged AS (
+    SELECT s.provider, s.customer_id, s.status, s.live, s.ends_at,
+        CASE WHEN s.mrr_usd IS NOT NULL AND s.live AND count(*) FILTER (WHERE s.live)
+                OVER (PARTITION BY s.provider, s.customer_id) = 1
+            THEN coalesce(c.amount_usd / (greatest(s.interval_count, 1) * CASE s.billing_interval
+                WHEN 'day' THEN 12 / 365 WHEN 'week' THEN 12 / 52 WHEN 'month' THEN 1 WHEN 'year' THEN 12 END),
+                s.mrr_usd)
+            ELSE s.mrr_usd END AS mrr_usd
+    FROM subscriptions s
+    LEFT JOIN (
+        SELECT provider, customer_id, amount_usd FROM payments
+        WHERE site_id = $site AND status <> 'failed' AND refunded < amount AND amount_usd IS NOT NULL
+        QUALIFY row_number() OVER (PARTITION BY provider, customer_id ORDER BY ts DESC, provider_payment_id DESC) = 1
+    ) c USING (provider, customer_id)
+    WHERE s.site_id = $site
+)";
+
 /// Monthly recurring revenue in USD from subscriptions that pay now: live, past any trial and not ended.
 #[derive(Debug, Clone, Default, PartialEq, Serialize)]
 pub struct Mrr {
@@ -179,9 +198,10 @@ pub(crate) fn mrr(
 ) -> anyhow::Result<Option<Mrr>> {
     let sql = format!(
         "WITH {BOUNDS},
+        {SUBSCRIPTIONS},
         subs AS (
-            SELECT provider, customer_id, sum(mrr_usd) AS usd FROM subscriptions
-            WHERE site_id = $site AND live AND status NOT IN ('trialing', 'on_trial')
+            SELECT provider, customer_id, sum(mrr_usd) AS usd FROM charged
+            WHERE live AND status NOT IN ('trialing', 'on_trial')
                 AND (ends_at IS NULL OR epoch_us(ends_at) > $now) AND mrr_usd IS NOT NULL
             GROUP BY ALL
         ),
@@ -872,11 +892,91 @@ mod tests {
             )
             .unwrap();
         let m = store.mrr("s", &period(), NOW).unwrap().unwrap();
-        assert_eq!((m.usd, m.customers), (118.0, 2));
+        assert_eq!(
+            (m.usd, m.customers),
+            (49.0, 2),
+            "cus_old's latest $10 charge, cus_new's two list prices"
+        );
         assert_eq!(
             (m.cohort_usd, m.cohort_customers),
             (39.0, 1),
             "cus_old first paid before the range"
         );
+    }
+
+    #[test]
+    fn mrr_is_what_discounted_inr_subscriptions_are_charged() {
+        let (_d, store) = store();
+        let inr = |id: &str, customer: &str, days_ago: i64, paise: i64, usd: f64| Payment {
+            provider: "dodo".into(),
+            amount: paise,
+            currency: "inr".into(),
+            amount_usd: Some(usd),
+            ..pay(id, customer, None, days_ago, 0)
+        };
+        store
+            .upsert_payments(&[
+                inr("p1", "cus_a", 50, 11750, 1.3352),
+                inr("p2", "cus_a", 5, 14156, 1.4907),
+                inr("p3", "cus_b", 4, 14155, 1.4906),
+                inr("p4", "cus_yearly", 4, 120000, 12.0),
+            ])
+            .unwrap();
+        let sub = |id: &str, customer: &str, status: &str, amount: i64, interval: &str| {
+            let live = status == "active";
+            let months = if interval == "year" { 12.0 } else { 1.0 };
+            Subscription {
+                subscription_id: id.into(),
+                customer_id: customer.into(),
+                status: status.into(),
+                live,
+                ends_at: None,
+                amount: Some(amount),
+                currency: Some("usd".into()),
+                interval: Some(interval.into()),
+                interval_count: 1,
+                mrr_usd: Some(amount as f64 / 100.0 / months),
+            }
+        };
+        store
+            .replace_subscriptions(
+                "s",
+                "dodo",
+                &[
+                    sub("s1", "cus_a", "active", 4700, "month"),
+                    sub("s2", "cus_b", "active", 2900, "month"),
+                    sub("s3", "cus_a", "expired", 300, "month"),
+                    sub("s4", "cus_c", "failed", 600, "month"),
+                    sub("s5", "cus_yearly", "active", 24000, "year"),
+                    sub("s6", "cus_unpaid", "active", 900, "month"),
+                ],
+            )
+            .unwrap();
+        let m = store.mrr("s", &period(), NOW).unwrap().unwrap();
+        assert!(
+            (m.usd - (1.4907 + 1.4906 + 1.0 + 9.0)).abs() < 1e-9,
+            "latest charges, a yearly one per month, the list price without a charge: {}",
+            m.usd
+        );
+        assert_eq!(m.customers, 4);
+        store.load_index("s");
+        let ix = store.index_for_test("s");
+        let conn = store.conn_for_test();
+        let index = crate::index::retention::read::mrr(
+            &ix.read().unwrap(),
+            &Default::default(),
+            &conn,
+            &period(),
+            NOW,
+        )
+        .unwrap()
+        .flatten()
+        .unwrap();
+        let sql = mrr(&conn, "s", &period(), NOW).unwrap().unwrap();
+        assert_eq!(
+            (index.customers, index.cohort_customers),
+            (sql.customers, sql.cohort_customers)
+        );
+        assert!((index.usd - sql.usd).abs() + (index.cohort_usd - sql.cohort_usd).abs() < 1e-9);
     }
 }
