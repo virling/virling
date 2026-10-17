@@ -7,7 +7,7 @@
 <meta name="referrer" content="no-referrer">
 <link rel="icon" href="{% if report.logo.is_empty() %}data:,{% else %}{{ report.logo }}{% endif %}">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/app.css?v={{ crate::app::asset_v() }}">
 <title>{{ report.site }} weekly revenue report{% if !report.agency.is_empty() %} · {{ report.agency }}{% endif %}</title>
 </head>
 <body class="r2-page">
@@ -24,6 +24,6 @@
 <main class="r2-main">
 {% include "_report.html" %}
 </main>
-<script src="/assets/app.js"></script>
+<script src="/assets/app.js?v={{ crate::app::asset_v() }}"></script>
 </body>
 </html>
