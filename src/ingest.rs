@@ -12,9 +12,9 @@ use time::{Date, Duration, OffsetDateTime};
 use url::Url;
 
 use crate::app::AppState;
-use crate::channel;
 use crate::events::Event;
 use crate::ua::{browser, device, is_bot, is_spam_referrer};
+use crate::{channel, crawlers};
 
 const SESSION_IDLE: Duration = Duration::minutes(30);
 const MAX_BATCH: usize = 50;
@@ -116,7 +116,7 @@ pub struct RateLimiter {
 }
 
 impl RateLimiter {
-    fn allow(&self, site_id: &str, limit: u32) -> bool {
+    pub(crate) fn allow(&self, site_id: &str, limit: u32) -> bool {
         let second = OffsetDateTime::now_utc().unix_timestamp();
         let mut w = self.windows.lock().unwrap();
         let entry = w.entry(site_id.to_string()).or_insert((second, 0));
@@ -213,7 +213,7 @@ fn os(user_agent: &str) -> &'static str {
     }
 }
 
-fn host_belongs(host: &str, domain: &str) -> bool {
+pub(crate) fn host_belongs(host: &str, domain: &str) -> bool {
     let host = host.strip_prefix("www.").unwrap_or(host);
     host == domain || host.ends_with(&format!(".{domain}"))
 }
@@ -243,13 +243,27 @@ pub async fn collect(
         .get(header::USER_AGENT)
         .and_then(|v| v.to_str().ok())
         .unwrap_or("");
+    let parse = || -> Option<Vec<Incoming>> {
+        Some(match serde_json::from_slice::<Batch>(&body).ok()? {
+            Batch::One(e) => vec![e],
+            Batch::Many(v) => v.into_iter().take(MAX_BATCH).collect(),
+        })
+    };
     if is_bot(user_agent) {
+        // AI crawlers that run the script count as crawler hits, never as visitors.
+        if let Some(bot) = crawlers::detect(user_agent) {
+            for e in parse()
+                .unwrap_or_default()
+                .iter()
+                .filter(|e| e.n == "pageview")
+            {
+                crawlers::record(&state, bot, &e.s, &e.u).await;
+            }
+        }
         return accepted();
     }
-    let incoming = match serde_json::from_slice::<Batch>(&body) {
-        Ok(Batch::One(e)) => vec![e],
-        Ok(Batch::Many(v)) => v.into_iter().take(MAX_BATCH).collect(),
-        Err(_) => return (StatusCode::BAD_REQUEST, "invalid event").into_response(),
+    let Some(incoming) = parse() else {
+        return (StatusCode::BAD_REQUEST, "invalid event").into_response();
     };
     let ip = client_ip(&headers, peer, state.config.trust_proxy);
     let country = country(&headers);

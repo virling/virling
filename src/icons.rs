@@ -5,6 +5,17 @@ use crate::chart::esc;
 use crate::flags;
 
 const BRANDS: &[(&str, &str, &str)] = &[
+    (
+        "amazon",
+        "Amazon",
+        include_str!("../assets/icons/amazon.svg"),
+    ),
+    (
+        "anthropic",
+        "Anthropic",
+        include_str!("../assets/icons/anthropic.svg"),
+    ),
+    ("apple", "Apple", include_str!("../assets/icons/apple.svg")),
     ("baidu", "Baidu", include_str!("../assets/icons/baidu.svg")),
     ("bing", "Bing", include_str!("../assets/icons/bing.svg")),
     (
@@ -14,6 +25,11 @@ const BRANDS: &[(&str, &str, &str)] = &[
     ),
     ("brave", "Brave", include_str!("../assets/icons/brave.svg")),
     (
+        "bytedance",
+        "ByteDance",
+        include_str!("../assets/icons/bytedance.svg"),
+    ),
+    (
         "chatgpt",
         "ChatGPT",
         include_str!("../assets/icons/chatgpt.svg"),
@@ -22,6 +38,11 @@ const BRANDS: &[(&str, &str, &str)] = &[
         "claude",
         "Claude",
         include_str!("../assets/icons/claude.svg"),
+    ),
+    (
+        "commoncrawl",
+        "Common Crawl",
+        include_str!("../assets/icons/commoncrawl.svg"),
     ),
     (
         "copilot",
@@ -94,6 +115,7 @@ const BRANDS: &[(&str, &str, &str)] = &[
         include_str!("../assets/icons/instagram.svg"),
     ),
     ("kagi", "Kagi", include_str!("../assets/icons/kagi.svg")),
+    ("meta", "Meta", include_str!("../assets/icons/meta.svg")),
     (
         "lemonsqueezy",
         "Lemon Squeezy",
@@ -249,6 +271,12 @@ pub fn brand_slug(source: &str) -> Option<&'static str> {
         "yandex" => "yandex",
         _ if h.starts_with("yandex.") || h.contains(".yandex.") => "yandex",
         "kagi" | "kagi.com" => "kagi",
+        "anthropic" | "anthropic.com" => "anthropic",
+        "meta" | "meta.com" => "meta",
+        "amazon" | "amazon.com" => "amazon",
+        "apple" | "apple.com" => "apple",
+        "bytedance" | "bytedance.com" => "bytedance",
+        "common crawl" | "commoncrawl" | "commoncrawl.org" => "commoncrawl",
         "qwant" | "qwant.com" => "qwant",
         "startpage" | "startpage.com" => "startpage",
         _ => return None,

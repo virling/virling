@@ -8,6 +8,7 @@ mod bench;
 mod cache;
 mod channel;
 mod chart;
+mod crawlers;
 mod crypto;
 mod dashboard;
 mod demo;
@@ -315,6 +316,26 @@ mod tests {
             (rows[0].1.as_str(), rows[0].2.as_deref()),
             ("AI", Some("chatgpt.com"))
         );
+    }
+
+    #[tokio::test]
+    async fn ai_crawlers_count_as_crawler_hits_not_visitors() {
+        let (_dir, state, store) = setup().await;
+        let body =
+            r#"{"n":"pageview","u":"https://example.com/pricing","s":"example.com","w":800}"#;
+        let ua = "Mozilla/5.0 (compatible; ClaudeBot/1.0; +claudebot@anthropic.com)";
+        assert_eq!(post(&state, body, ua).await, StatusCode::ACCEPTED);
+        assert_eq!(
+            post(&state, body, "Googlebot/2.1").await,
+            StatusCode::ACCEPTED
+        );
+        assert!(store.dump().is_empty());
+        let hits: Vec<(String, String, i64)> =
+            sqlx::query_as("SELECT bot, path, hits FROM crawler_pages")
+                .fetch_all(&state.db)
+                .await
+                .unwrap();
+        assert_eq!(hits, [("ClaudeBot".into(), "/pricing".into(), 1)]);
     }
 
     #[tokio::test]

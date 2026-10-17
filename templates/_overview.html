@@ -74,5 +74,19 @@
     {% endif %}
   </div>
   {% endif %}{% endif %}
+  {% if loop.index == 4 %}{% if let Some(cr) = crawlers %}
+  <div class="d3-card d3-bc d3-crawl" id="crawlers">
+    <div class="d3-bc-head"><h2>AI crawlers</h2></div>
+    {% if cr.rows.is_empty() %}
+    <div class="d3-empty"><span class="d3-ai-logos">{% for l in cr.logos %}{{ l|safe }}{% endfor %}</span><b>No AI crawlers seen yet</b><span>GPTBot, ClaudeBot, PerplexityBot and others show up here when they read your pages. Most never run JavaScript, so add the server snippet to count them.</span><a class="d3-link" href="{{ cr.docs }}">Add the snippet</a></div>
+    {% else %}
+    <div class="d3-crow th"><span>Crawler</span><span class="num">Hits</span><span class="num c3">Pages</span><span class="c4">Top page</span><span class="num">Last seen</span></div>
+    {% for r in cr.rows %}
+    <div class="d3-crow"><span class="nm"><span class="ic">{{ r.icon|safe }}</span><span class="tx"><b>{{ r.name }}</b><span class="sub">{{ r.company }}<span class="bdg {{ r.kind_class }}">{{ r.kind }}</span></span></span></span><span class="num strong">{{ r.hits }}</span><span class="num c3 dim">{{ r.pages }}</span><span class="c4 mono" title="{{ r.top }}">{{ r.top }}</span><span class="num dim">{{ r.seen }}</span></div>
+    {% endfor %}
+    <div class="d3-foot"><span>Training collects pages for models, Search builds an AI index, Answer fetches a page for someone asking right now.</span><a href="{{ cr.docs }}">Setup</a></div>
+    {% endif %}
+  </div>
+  {% endif %}{% endif %}
   {% endfor %}
 </section>

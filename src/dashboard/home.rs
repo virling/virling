@@ -209,6 +209,7 @@ struct DashboardPage {
     chart_tabs: Vec<Opt>,
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
+    crawlers: Option<cards::CrawlerCard>,
     goals: Option<goals::GoalsView>,
     visitors: Option<views::VisitorsView>,
     payments: Option<views::PaymentsView>,
@@ -235,6 +236,7 @@ struct PublicPage {
     chart_tabs: Vec<Opt>,
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
+    crawlers: Option<cards::CrawlerCard>,
     retention: Option<views::RetentionView>,
 }
 
@@ -915,6 +917,7 @@ async fn page(
         chart_tabs: Vec::new(),
         cards: Vec::new(),
         ai: None,
+        crawlers: None,
         goals: None,
         visitors: None,
         payments: None,
@@ -1289,6 +1292,16 @@ async fn page(
                 (show_prev).then_some(report.previous_days.as_slice()),
                 &filter_href,
             ));
+            let at = |d: Date| d.midnight().assume_offset(ctx.offset).unix_timestamp();
+            let bots = crate::crawlers::hits(
+                &state.db,
+                &ctx.site.id,
+                at(from),
+                at(to + Duration::days(1)) - 1,
+            )
+            .await
+            .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+            page.crawlers = Some(cards::crawler_card(&bots, now));
         }
         Data::Goals(g) => {
             page.goals = Some(goals::view(
@@ -1371,6 +1384,7 @@ async fn page(
         chart_tabs: page.chart_tabs,
         cards: page.cards,
         ai: page.ai,
+        crawlers: page.crawlers,
         retention: page.retention,
     });
     // Off means gone right away, so nothing may keep a copy.

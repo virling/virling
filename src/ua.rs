@@ -31,6 +31,14 @@ pub fn is_bot(user_agent: &str) -> bool {
             "node-fetch",
             "java/",
             "postman",
+            "chatgpt-user",
+            "claude-user",
+            "perplexity-user",
+            "anthropic-ai",
+            "googleother",
+            "google-extended",
+            "meta-externalagent",
+            "meta-externalfetcher",
         ]
         .iter()
         .any(|m| ua.contains(m))

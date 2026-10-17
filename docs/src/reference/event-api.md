@@ -57,3 +57,7 @@ Returns `200` with the body `ok` while the server runs. Use it for uptime checks
 ## Reading stats
 
 To read totals, breakdowns, payments and visitor timelines, use the [Read API](api.md).
+
+## POST /api/crawl
+
+Counts a page fetch by an AI crawler, sent from your server or edge. The body is JSON with `s` (site domain), `u` (full page URL) and `ua` (the crawler's user agent). Only known AI crawlers on pages of that site are kept; the response is always `202`. See [AI crawlers](../track/ai-crawlers.md).
