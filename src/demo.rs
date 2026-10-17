@@ -702,6 +702,10 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
         .bind("Fieldwork Studio")
         .execute(&db)
         .await?;
+    sqlx::query("UPDATE accounts SET account_type = 'agency' WHERE id = ?")
+        .bind(&account)
+        .execute(&db)
+        .await?;
     let token = auth::random_token();
     sqlx::query(
         "INSERT INTO sessions (token_hash, account_id, created_at, expires_at) VALUES (?, ?, ?, ?)",

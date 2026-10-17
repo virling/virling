@@ -136,6 +136,8 @@ pub(crate) struct Options<'a> {
     pub window_days: i64,
     /// In the app, where an empty note shows a placeholder and can be edited.
     pub editable: bool,
+    /// A personal account's weekly email: Virling branded, without agency header or note.
+    pub personal: bool,
 }
 
 pub struct Kpi {
@@ -213,6 +215,7 @@ pub struct ReportView {
     pub footer: String,
     pub credit: String,
     pub powered_by: bool,
+    pub personal: bool,
 }
 
 /// A credited source: a channel, with the referrer host when there is one.
@@ -890,6 +893,7 @@ pub(crate) fn build(site: &str, monday: Date, d: &Data, o: &Options) -> ReportVi
         pages: page_rows,
         note: o.note.to_string(),
         editable: o.editable,
+        personal: o.personal,
         footer: o.brand.footer.clone(),
         credit,
         powered_by: o.brand.powered_by,
@@ -915,12 +919,24 @@ pub(crate) async fn view(
     monday: Date,
     editable: bool,
 ) -> Result<ReportView, StatusCode> {
-    let brand = settings::brand(&state.db, &site.id)
+    let (agency, _) = schedule::owner(&state.db, &site.id)
         .await
         .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
-    let (_, note) = schedule::load(&state.db, &site.id)
-        .await
-        .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+    let (brand, note) = if agency {
+        let brand = settings::brand(&state.db, &site.id)
+            .await
+            .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+        let (_, note) = schedule::load(&state.db, &site.id)
+            .await
+            .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+        (brand, note)
+    } else {
+        let brand = Brand {
+            powered_by: false,
+            ..Brand::default()
+        };
+        (brand, String::new())
+    };
     let (model, window_days) = attribution(state, &site.id).await?;
     let d = data(state, week_period(monday, &site.timezone), &site.id).await?;
     Ok(build(
@@ -932,7 +948,8 @@ pub(crate) async fn view(
             note: &note,
             model: &model,
             window_days,
-            editable,
+            editable: editable && agency,
+            personal: !agency,
         },
     ))
 }
@@ -972,6 +989,7 @@ struct ReportPage {
     notice: String,
     alert: &'static str,
     branded: bool,
+    agency: bool,
 }
 
 #[derive(Template)]
@@ -1050,6 +1068,7 @@ pub async fn page(
         },
         notice,
         branded: !report.agency.is_empty() || !report.logo.is_empty(),
+        agency: ctx.shell.agency,
         domain: ctx.site.domain.clone(),
         weeks: week_opts(ctx.today, monday, &base),
         week: week_short(monday),
@@ -1176,6 +1195,7 @@ pub async fn save_schedule(
     let week = week_param(input.week.as_deref());
     let on = input.on.is_some();
     let recipients = match schedule::recipients(&input.recipients) {
+        _ if !ctx.shell.agency => vec![ctx.shell.email.clone()],
         Some(r) if !(on && r.is_empty()) => r,
         _ => return back(&ctx.site.domain, &week, "error=recipients").into_response(),
     };
@@ -1213,11 +1233,16 @@ pub async fn send_now(
     let Ok((s, _)) = schedule::load(&state.db, &ctx.site.id).await else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
-    if s.recipients.is_empty() {
+    let to = if ctx.shell.agency {
+        s.recipients
+    } else {
+        vec![ctx.shell.email.clone()]
+    };
+    if to.is_empty() {
         return back(&ctx.site.domain, &week, "error=none").into_response();
     }
     let monday = pick_week(ctx.today, input.week.as_deref());
-    match schedule::send(&state, &ctx.site, monday, &s.recipients).await {
+    match schedule::send(&state, &ctx.site, monday, &to).await {
         Ok(n) => {
             if monday == last_week(ctx.today)
                 && let Err(err) = schedule::record(&state.db, &ctx.site.id, monday, n).await

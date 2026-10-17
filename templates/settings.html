@@ -64,6 +64,21 @@
   {% if connections.is_empty() %}<p class="empty">No payment provider connected yet.</p>{% endif %}
 </div>
 </section>
+<section class="set-sec" id="plan">
+<div class="set-intro"><h2>Plan</h2><p class="muted">Applies to your whole account. There is no billing yet, so you can switch any time.</p></div>
+<form class="card" method="post" action="/app/{{ shell.domain }}/settings/plan">
+  {% if plan_saved %}<div class="notice ok-note" role="status">Saved. You are on the {% if shell.agency %}Agency{% else %}Personal{% endif %} plan.</div>{% endif %}
+  <div class="setting">
+    <div><b>Plan</b><span class="muted">Personal emails the weekly report to you, with Virling branding. Agency adds white-label client reports with your logo, sent to each client.</span></div>
+    <div class="seg">
+      <label><input type="radio" name="account_type" value="personal"{% if !shell.agency %} checked{% endif %}>Personal</label>
+      <label><input type="radio" name="account_type" value="agency"{% if shell.agency %} checked{% endif %}>Agency</label>
+    </div>
+  </div>
+  <div class="actions end"><button class="btn" type="submit">Save plan</button></div>
+</form>
+</section>
+{% if shell.agency %}
 <form class="card" method="post" action="/app/{{ shell.domain }}/settings/report" id="report">
   <div class="card-head"><h2>Client report</h2><a class="btn secondary" href="/app/{{ shell.domain }}/report">Open report</a></div>
   <p class="muted">Your branding on the report for this client. Virling only appears in the small Powered by line, which you can turn off.</p>
@@ -107,6 +122,7 @@
   <form class="actions end" method="post" action="/app/{{ shell.domain }}/settings/share"><button class="btn" type="submit">Create link</button></form>
   {% endif %}
 </section>
+{% endif %}
 <section class="card" id="api">
   <div class="card-head"><h2>API keys</h2><a class="btn secondary" href="https://docs.virling.com/reference/api.html">API docs</a></div>
   <p class="muted">A key lets a script, the CLI or an AI agent read the reports of every site on your account. Keys can't change anything.</p>

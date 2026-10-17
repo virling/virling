@@ -31,7 +31,7 @@
       </details>
     </div>
   </div>
-  <a class="d3-btn" href="{{ report_href }}">Client report</a>
+  <a class="d3-btn" href="{{ report_href }}">{% if shell.agency %}Client report{% else %}Weekly email{% endif %}</a>
 </header>
 <nav class="d3-ptabs" aria-label="Dashboard sections">{% for t in views %}<a href="{{ t.href }}"{% if t.on %} aria-current="page"{% endif %}>{{ t.label }}{% if !t.count.is_empty() %}<span class="c{% if loop.index == 3 %} live{% endif %}">{{ t.count }}</span>{% endif %}</a>{% endfor %}</nav>
 

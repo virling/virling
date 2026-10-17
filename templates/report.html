@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 {% include "_head.html" %}
-<title>Client report · {{ domain }} · Virling</title>
+<title>{% if agency %}Client report{% else %}Weekly email{% endif %} · {{ domain }} · Virling</title>
 </head>
 <body class="r2-page">
 <header class="r2-top noprint">
@@ -12,7 +12,7 @@
     <span class="sl">/</span>
     <a class="r2-crumb" href="/app/{{ domain }}">{{ domain }}</a>
     <span class="sl">/</span>
-    <b>Client report</b>
+    <b>{% if agency %}Client report{% else %}Weekly email{% endif %}</b>
   </nav>
   <div class="r2-actions">
   <div class="menu-wrap r2-week" data-menu>
@@ -22,9 +22,9 @@
       {% endfor %}
     </div>
   </div>
-  <button class="r2-btn" type="button" data-note-edit><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>Edit note</button>
+  {% if agency %}<button class="r2-btn" type="button" data-note-edit><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>Edit note</button>{% endif %}
   <button class="r2-btn" type="button" data-print><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg>Download PDF</button>
-  <form method="post" action="/app/{{ domain }}/report/send"{% if sched.first.is_empty() %}{% else %} data-confirm="Email the report for {{ week }} to {{ sched.first }}{{ sched.more }} now?" data-confirm-ok="Send now"{% endif %}><input type="hidden" name="week" value="{{ week_param }}"><button class="r2-btn dark" type="submit"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"></path></svg>Send to client</button></form>
+  {% if agency %}<form method="post" action="/app/{{ domain }}/report/send"{% if sched.first.is_empty() %}{% else %} data-confirm="Email the report for {{ week }} to {{ sched.first }}{{ sched.more }} now?" data-confirm-ok="Send now"{% endif %}><input type="hidden" name="week" value="{{ week_param }}"><button class="r2-btn dark" type="submit"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"></path></svg>Send to client</button></form>{% endif %}
   </div>
 </div>
 </header>
@@ -32,9 +32,9 @@
 <div class="r2-wrap noprint">
   {% if !notice.is_empty() %}<div class="r2-flash r2-ok" role="status">{{ notice }}</div>{% endif %}
   {% if !alert.is_empty() %}<div class="r2-flash r2-bad" role="alert">{{ alert }}</div>{% endif %}
-  {% if !branded %}<div class="r2-flash r2-hint"><span>Add your agency name, logo and colors so the report carries your brand.</span><a href="/app/{{ domain }}/settings#report">Set up branding</a></div>{% endif %}
+  {% if agency && !branded %}<div class="r2-flash r2-hint"><span>Add your agency name, logo and colors so the report carries your brand.</span><a href="/app/{{ domain }}/settings#report">Set up branding</a></div>{% endif %}
   <div class="r2-sched" data-pop>
-    <span class="r2-sched-line"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{% if sched.on %}#1E7A4C{% else %}#8A909A{% endif %}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg><span>{% if sched.on %}Sent every {{ sched.day }} at {{ sched.time }} to <b>{{ sched.first }}</b>{{ sched.more }}. Next one goes out {{ sched.next }}.{% else %}The weekly email is off. Turn it on to send this report to your client every week.{% endif %}</span></span>
+    <span class="r2-sched-line"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{% if sched.on %}#1E7A4C{% else %}#8A909A{% endif %}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg><span>{% if sched.on %}Sent every {{ sched.day }} at {{ sched.time }} to <b>{{ sched.first }}</b>{{ sched.more }}. Next one goes out {{ sched.next }}.{% else if agency %}The weekly email is off. Turn it on to send this report to your client every week.{% else %}The weekly email is off. Turn it on to get this report in your inbox every week.{% endif %}</span></span>
     <button class="r2-link" type="button" aria-expanded="false" aria-controls="sched-pop" data-pop-toggle>Change schedule</button>
     <form class="r2-pop" id="sched-pop" method="post" action="/app/{{ domain }}/report/schedule" hidden>
       <div class="r2-pop-row"><div><b>Weekly email</b><span class="muted">Sends the past week's report on schedule.</span></div><label class="switch"><input type="checkbox" name="on"{% if sched.on %} checked{% endif %}><span></span><span class="sr">Weekly email</span></label></div>
@@ -47,7 +47,7 @@
         </div>
         <span class="muted">In the site's time zone, {{ sched.tz }}.</span>
       </div>
-      <div class="r2-field"><label for="sched-to"><b>Send to</b></label><textarea class="input" id="sched-to" name="recipients" rows="3" placeholder="client@example.com" spellcheck="false">{{ sched.recipients }}</textarea><span class="muted">Up to 10 addresses, one per line.</span></div>
+      {% if agency %}<div class="r2-field"><label for="sched-to"><b>Send to</b></label><textarea class="input" id="sched-to" name="recipients" rows="3" placeholder="client@example.com" spellcheck="false">{{ sched.recipients }}</textarea><span class="muted">Up to 10 addresses, one per line.</span></div>{% else %}<input type="hidden" name="recipients" value="">{% endif %}
       <input type="hidden" name="week" value="{{ week_param }}">
       <div class="actions end"><button class="btn ghost" type="button" data-pop-close>Cancel</button><button class="btn" type="submit">Save schedule</button></div>
     </form>

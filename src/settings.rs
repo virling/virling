@@ -44,6 +44,7 @@ struct SettingsPage {
     brand: Brand,
     brand_saved: bool,
     brand_error: &'static str,
+    plan_saved: bool,
     share_link: Option<String>,
     api_keys: Vec<KeyView>,
     /// A key just created, shown this once.
@@ -201,6 +202,7 @@ async fn show(
             .collect(),
         new_key,
         brand_saved: q.saved.as_deref() == Some("report"),
+        plan_saved: q.saved.as_deref() == Some("plan"),
         brand_error: match q.error.as_deref() {
             Some("logo") => "The logo URL must start with https://.",
             Some("accent") => "The accent color must be a hex color like #2F5BEA.",
@@ -354,6 +356,41 @@ pub async fn save_brand(
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     }
     Redirect::to(&format!("{settings}?saved=report#report")).into_response()
+}
+
+#[derive(Deserialize)]
+pub struct PlanInput {
+    account_type: String,
+}
+
+/// Sets the account to Personal or Agency.
+pub async fn save_plan(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(input): Form<PlanInput>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "settings").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    if !matches!(input.account_type.as_str(), "personal" | "agency") {
+        return StatusCode::BAD_REQUEST.into_response();
+    }
+    if let Err(err) = sqlx::query("UPDATE accounts SET account_type = ? WHERE id = ?")
+        .bind(&input.account_type)
+        .bind(&account.id)
+        .execute(&state.db)
+        .await
+    {
+        tracing::error!(%err, "saving the plan failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    Redirect::to(&format!(
+        "{}?saved=plan#plan",
+        app_path(&ctx.site.domain, "settings")
+    ))
+    .into_response()
 }
 
 /// Creates or replaces the read-only client link; the old link stops working.

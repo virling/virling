@@ -1,8 +1,8 @@
 <article class="r2" style="--accent:{{ report.accent }}">
   <div class="r2-head">
     <div class="r2-agency">
-      {% if !report.logo.is_empty() %}<img class="r2-mark logo" src="{{ report.logo }}" alt="">{% else if !report.initials.is_empty() %}<span class="r2-mark">{{ report.initials }}</span>{% endif %}
-      <div>{% if !report.agency.is_empty() %}<div class="r2-name">{{ report.agency }}</div>{% endif %}<div class="r2-small">Weekly revenue report</div></div>
+      {% if report.personal %}{% include "_logo.html" %}{% else if !report.logo.is_empty() %}<img class="r2-mark logo" src="{{ report.logo }}" alt="">{% else if !report.initials.is_empty() %}<span class="r2-mark">{{ report.initials }}</span>{% endif %}
+      <div>{% if report.personal %}<div class="r2-name">virling</div>{% else if !report.agency.is_empty() %}<div class="r2-name">{{ report.agency }}</div>{% endif %}<div class="r2-small">Weekly revenue report</div></div>
     </div>
     <div class="r2-for"><div class="r2-small">Prepared for</div><div class="r2-b">{{ report.site }}</div><div class="r2-range">{{ report.week }}</div></div>
   </div>
