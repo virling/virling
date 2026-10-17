@@ -73,5 +73,6 @@ mod tests {
     fn minor_units() {
         assert_eq!(minor_to_major(2900, "usd"), 29.0);
         assert_eq!(minor_to_major(2900, "JPY"), 2900.0);
+        assert_eq!(minor_to_major(14156, "inr"), 141.56);
     }
 }
