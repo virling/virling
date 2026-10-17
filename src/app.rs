@@ -206,16 +206,14 @@ pub fn router(state: AppState) -> Router {
                 get(settings::page).post(settings::save),
             )
             .route("/app/{domain}/settings/report", post(settings::save_brand))
-            .route("/app/{domain}/settings/plan", post(settings::save_plan))
             .route("/app/{domain}/settings/public", post(settings::save_public))
             .route("/app/{domain}/settings/share", post(settings::share))
             .route("/app/{domain}/settings/unshare", post(settings::revoke))
+            .route("/app/{domain}/account", get(settings::account_page))
+            .route("/app/{domain}/account/plan", post(settings::save_plan))
+            .route("/app/{domain}/account/api-keys", post(settings::create_key))
             .route(
-                "/app/{domain}/settings/api-keys",
-                post(settings::create_key),
-            )
-            .route(
-                "/app/{domain}/settings/api-keys/revoke",
+                "/app/{domain}/account/api-keys/revoke",
                 post(settings::revoke_key),
             )
             .route("/api/v1/sites", get(api::sites))

@@ -1019,7 +1019,7 @@ pub(crate) mod tests {
             }
         };
         let (code, html) = send(
-            Request::post("/app/example.com/settings/api-keys"),
+            Request::post("/app/example.com/account/api-keys"),
             "name=Laptop".into(),
         )
         .await;
@@ -1029,10 +1029,10 @@ pub(crate) mod tests {
         let start = html.find(&laptop.prefix).unwrap();
         let shown = &html[start..start + KEY_PREFIX.len() + 64];
         assert!(key_account(&f.state.db, shown).await.is_some());
-        let (_, html) = send(Request::get("/app/example.com/settings"), String::new()).await;
+        let (_, html) = send(Request::get("/app/example.com/account"), String::new()).await;
         assert!(html.contains("Laptop") && !html.contains(shown));
         let (code, _) = send(
-            Request::post("/app/example.com/settings/api-keys/revoke"),
+            Request::post("/app/example.com/account/api-keys/revoke"),
             format!("id={}", laptop.id),
         )
         .await;

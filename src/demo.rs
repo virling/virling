@@ -1100,7 +1100,7 @@ fn target(url: &str) -> Option<String> {
 fn rewrite(html: &str, built: &HashSet<String>) -> String {
     let html = html
         .replace(
-            &format!(r#"<a href="/app/{DOMAIN}/settings">Account settings</a>"#),
+            &format!(r#"<a href="/app/{DOMAIN}/account">Account settings</a>"#),
             r#"<a href="/#join">Account settings</a>"#,
         )
         .replace(

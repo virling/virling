@@ -10,7 +10,7 @@ It is served when the app is on (`--app`). Use your server's public URL, as in `
 
 ## Authentication
 
-Create a key in **Settings > API keys** in the app and send it on every request:
+Create a key in **Account settings > API keys** in the app and send it on every request:
 
 ```http
 Authorization: Bearer vk_...

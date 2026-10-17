@@ -852,6 +852,28 @@ mod tests {
         assert_eq!(n, 0);
     }
 
+    #[tokio::test]
+    async fn account_settings_hold_email_plan_and_keys() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site =
+            body_text(call(&state, get("/app/example.com/settings", Some(&cookie))).await).await;
+        assert!(site.contains(r#"href="/app/example.com/account">Account settings</a>"#));
+        assert!(!site.contains("API keys") && !site.contains("account_type"));
+        let page = call(&state, get("/app/example.com/account", Some(&cookie))).await;
+        assert_eq!(page.status(), StatusCode::OK);
+        let body = body_text(page).await;
+        assert!(body.contains(r#"aria-current="page">Account settings</a>"#));
+        assert!(body.contains(r#"<span class="mono">me@example.com</span>"#));
+        assert!(body.contains(r#"value="personal" checked"#));
+        assert!(
+            body.contains("<span>Personal</span>"),
+            "the menu shows the plan"
+        );
+        assert!(body.contains("API keys") && body.contains("/account/api-keys"));
+        assert!(!body.contains("Self-hosted") && !body.contains("type=\"password\""));
+    }
+
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {
         let (ciphertext, nonce) = state.vault.encrypt(key).unwrap();
         sqlx::query(
@@ -1038,7 +1060,7 @@ mod tests {
         let res = call(
             &state,
             form(
-                "/app/example.com/settings/plan",
+                "/app/example.com/account/plan",
                 "account_type=agency".into(),
                 Some(&cookie),
             ),
@@ -1046,10 +1068,14 @@ mod tests {
         .await;
         assert_eq!(
             res.headers()["location"],
-            "/app/example.com/settings?saved=plan#plan"
+            "/app/example.com/account?saved=plan#plan"
         );
         let body = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
         assert!(body.contains(">Client report</a>") && !body.contains(">Weekly email</a>"));
+        assert!(
+            body.contains("<span>Agency</span>"),
+            "the menu shows the plan"
+        );
         assert!(
             body.contains(r#"aria-current="true"><span>Since tracking started</span>"#),
             "new sites default"
