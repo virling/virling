@@ -676,7 +676,7 @@ impl EventStore for DuckStore {
         period: &Period,
         now: OffsetDateTime,
     ) -> anyhow::Result<Option<Mrr>> {
-        retention::mrr(&self.conn.lock().unwrap(), site_id, period, now)
+        retention::mrr(&*self.read()?, site_id, period, now)
     }
 
     fn retention(

@@ -6,7 +6,7 @@ use time::{OffsetDateTime, UtcOffset};
 
 use crate::events::{Event, EventStore, LatestPageview, Payment};
 use crate::providers::Subscription;
-use crate::retention::Retention;
+use crate::retention::{Mrr, Retention};
 use crate::stats::{
     self, Activity, BreakdownRow, Dimension, Filter, GoalCount, GoalRow, GoalStat, Journey,
     Overview, PaymentFilter, PaymentPage, PaymentSummary, Period, ProviderSplit, Report, Step,
@@ -125,6 +125,15 @@ impl<S: EventStore> EventStore for Cached<S> {
         now: OffsetDateTime,
     ) -> anyhow::Result<Retention> {
         self.inner.retention(site_id, period, now)
+    }
+
+    fn mrr(
+        &self,
+        site_id: &str,
+        period: &Period,
+        now: OffsetDateTime,
+    ) -> anyhow::Result<Option<Mrr>> {
+        self.inner.mrr(site_id, period, now)
     }
 
     #[cfg(test)]

@@ -588,11 +588,20 @@ impl Scope {
 /// Local time buckets of a range: (UTC start, UTC end, label), in time order.
 pub type Pieces = Vec<(i64, i64, i64)>;
 
+type Offsets = Arc<Vec<(i64, i64)>>;
+type PeriodKey = (String, time::Date, time::Date);
+/// Payments, net USD and distinct customers of a row.
+type Agg = (i64, f64, HashSet<u32>);
+/// Payments, distinct customers, net USD and revenue by channel of an hour.
+type HourAgg = (u64, HashSet<u32>, f64, Vec<(Option<String>, f64)>);
+/// Top source names per channel.
+type ChannelSources = Vec<(String, Vec<String>)>;
+
 /// Time zone offsets as (UTC start, offset) segments per zone and year, and period bounds, read from DuckDB once.
 #[derive(Default)]
 pub struct Zones {
-    years: Mutex<HashMap<(String, i32), Arc<Vec<(i64, i64)>>>>,
-    bounds: Mutex<HashMap<(String, time::Date, time::Date), (i64, i64)>>,
+    years: Mutex<HashMap<(String, i32), Offsets>>,
+    bounds: Mutex<HashMap<PeriodKey, (i64, i64)>>,
 }
 
 impl Zones {
@@ -743,20 +752,6 @@ impl SiteIndex {
             }
         }
         Scope(Some(keep), key)
-    }
-
-    /// Sessions with an event in [lo, hi), in order of their first event.
-    fn overlapping(&self, lo: i64, hi: i64) -> impl Iterator<Item = &Session> + '_ {
-        let from = self.by_first.partition_point(|&s| {
-            self.sessions[s as usize].first < lo.saturating_sub(self.longest)
-        });
-        let to = self
-            .by_first
-            .partition_point(|&s| self.sessions[s as usize].first < hi);
-        self.by_first[from..to]
-            .iter()
-            .map(move |&s| &self.sessions[s as usize])
-            .filter(move |s| s.last >= lo)
     }
 
     fn overlapping_ids(&self, lo: i64, hi: i64) -> impl Iterator<Item = u32> + '_ {
@@ -1011,7 +1006,7 @@ impl SiteIndex {
 
     /// Payment rows of a breakdown keyed by column `k` of the credited session's first pageview.
     pub fn touch_payments(&self, lo: i64, hi: i64, scope: &Scope, k: usize) -> Vec<RawRow> {
-        let mut rows: HashMap<(bool, u32), (i64, f64, HashSet<u32>)> = HashMap::new();
+        let mut rows: HashMap<(bool, u32), Agg> = HashMap::new();
         for p in self.pays(lo, hi, scope) {
             let key = self
                 .pay_session(p)
@@ -1089,7 +1084,7 @@ impl SiteIndex {
 
     /// Payment rows of the Page breakdown: one per distinct page of the credited session.
     pub fn page_payments(&self, lo: i64, hi: i64, scope: &Scope) -> Vec<RawRow> {
-        let mut rows: HashMap<(bool, Option<u32>), (i64, f64, HashSet<u32>)> = HashMap::new();
+        let mut rows: HashMap<(bool, Option<u32>), Agg> = HashMap::new();
         for p in self.pays(lo, hi, scope) {
             let mut paths: Vec<u32> = Vec::new();
             if let Some(s) = self.pay_session(p) {
@@ -1506,16 +1501,6 @@ impl Indexes {
             .unwrap()
             .insert(site_id.to_string());
     }
-
-    /// Bytes held by loaded indexes.
-    pub fn bytes(&self) -> usize {
-        self.slots
-            .lock()
-            .unwrap()
-            .values()
-            .map(|(s, _)| if let Slot::Ready(_, b) = s { *b } else { 0 })
-            .sum()
-    }
 }
 
 impl Zones {
@@ -1688,8 +1673,7 @@ pub mod read {
                 }
             }
         }
-        let mut per: [(u64, HashSet<u32>, f64, Vec<(Option<String>, f64)>); 24] =
-            std::array::from_fn(|_| Default::default());
+        let mut per: [HourAgg; 24] = std::array::from_fn(|_| Default::default());
         for p in ix.pays(lo, hi, &scope) {
             let i = pieces.partition_point(|x| x.1 <= p.ts);
             let e = &mut per[hour(pieces[i].2) as usize];
@@ -1796,7 +1780,7 @@ pub mod read {
         conn: &Connection,
         period: &Period,
         f: &Filter,
-    ) -> anyhow::Result<Option<Vec<(String, Vec<String>)>>> {
+    ) -> anyhow::Result<Option<ChannelSources>> {
         let scope = ix.scope(f);
         let (lo, hi) = z.bounds(conn, period)?;
         Ok(Some(top_sources(ix.channel_sources(lo, hi, &scope))))
