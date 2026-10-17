@@ -681,6 +681,19 @@ impl SiteIndex {
         self.visitor_ids.shrink_to_fit();
     }
 
+    /// (time, path) of the first pageview of a session, or of a visitor, as `touches` and `first_touches` keep it.
+    pub fn first_view(&self, by_session: bool, id: &str) -> Option<(i64, &str)> {
+        let s = if by_session {
+            *self.session_ids.get(&key(id))?
+        } else {
+            let v = *self.visitor_ids.get(&key(id))?;
+            self.visitors[v as usize].first_touch
+        };
+        let sess = self.sessions.get(s as usize)?;
+        (sess.touch != i64::MAX)
+            .then(|| (sess.touch, self.strings.name(sess.cols[PATH]).unwrap_or("")))
+    }
+
     pub fn first_event(&self) -> Option<i64> {
         self.by_first
             .first()
@@ -1656,6 +1669,14 @@ impl Indexes {
         }
         for (ix, list) in ready {
             ix.write().unwrap().apply(&list);
+        }
+    }
+
+    /// The site's index when loaded and whole, without starting a load.
+    pub fn ready(&self, site_id: &str) -> Option<Arc<RwLock<SiteIndex>>> {
+        match self.slots.lock().unwrap().get(site_id) {
+            Some((Slot::Ready(ix, _), _)) if !ix.read().unwrap().broken => Some(ix.clone()),
+            _ => None,
         }
     }
 
