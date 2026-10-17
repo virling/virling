@@ -34,7 +34,7 @@ impl SiteIndex {
     }
 
     /// Sessions of visitor `v`, newest first.
-    fn sessions_of(&self, v: u32) -> impl Iterator<Item = u32> + '_ {
+    pub(super) fn sessions_of(&self, v: u32) -> impl Iterator<Item = u32> + '_ {
         let mut s = self.visitors[v as usize].last_session;
         std::iter::from_fn(move || {
             (s != NONE).then(|| {
@@ -45,7 +45,7 @@ impl SiteIndex {
         })
     }
 
-    fn pageviews_of(&self, s: u32) -> impl Iterator<Item = &Pageview> + '_ {
+    pub(super) fn pageviews_of(&self, s: u32) -> impl Iterator<Item = &Pageview> + '_ {
         let mut i = self.sessions[s as usize].pv;
         std::iter::from_fn(move || {
             (i != NONE).then(|| {
@@ -56,7 +56,7 @@ impl SiteIndex {
         })
     }
 
-    fn marks_of(&self, s: u32) -> impl Iterator<Item = &Mark> + '_ {
+    pub(super) fn marks_of(&self, s: u32) -> impl Iterator<Item = &Mark> + '_ {
         let mut i = self.sessions[s as usize].mark;
         std::iter::from_fn(move || {
             (i != NONE).then(|| {
@@ -311,7 +311,7 @@ impl SiteIndex {
         Ok(out)
     }
 
-    fn goals_in(&self, lo: i64, hi: i64) -> impl Iterator<Item = &Mark> + '_ {
+    pub(super) fn goals_in(&self, lo: i64, hi: i64) -> impl Iterator<Item = &Mark> + '_ {
         let from = self
             .goal_by_ts
             .partition_point(|&g| self.marks[g as usize].ts < lo);
