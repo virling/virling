@@ -203,10 +203,12 @@ for (const input of document.querySelectorAll("input[data-swatch]")) {
 }
 
 for (const btn of document.querySelectorAll("[data-copy-text]")) {
-  btn.addEventListener("click", async () => {
+  const label = btn.innerHTML;
+  btn.addEventListener("click", async (e) => {
+    e.preventDefault();
     await navigator.clipboard.writeText(btn.dataset.copyText);
-    btn.textContent = "Copied";
-    setTimeout(() => { btn.textContent = "Copy"; }, 1500);
+    btn.textContent = btn.querySelector("svg") ? "✓" : "Copied";
+    setTimeout(() => { btn.innerHTML = label; }, 1500);
   });
 }
 
@@ -239,4 +241,99 @@ if (noteForm) {
   document.querySelectorAll("[data-note-edit]").forEach((b) => b.addEventListener("click", () => edit(true)));
   text.addEventListener("click", () => edit(true));
   noteForm.querySelector("[data-note-cancel]").addEventListener("click", () => edit(false));
+}
+
+const toggle = (id, open) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.hidden = !(open ?? el.hidden);
+  for (const b of document.querySelectorAll(`[data-toggle="${id}"]`)) b.setAttribute("aria-expanded", String(!el.hidden));
+};
+document.addEventListener("click", (e) => {
+  const tab = e.target.closest("a[data-tab]");
+  if (tab && !(e.metaKey || e.ctrlKey || e.shiftKey)) {
+    e.preventDefault();
+    for (const t of tab.parentElement.querySelectorAll("a[data-tab]")) {
+      const on = t === tab;
+      t.classList.toggle("on", on);
+      on ? t.setAttribute("aria-current", "true") : t.removeAttribute("aria-current");
+      const panel = document.getElementById(t.dataset.tab);
+      panel.hidden = !on;
+      if (on && panel.dataset.title) tab.closest("[data-key]").querySelector("h2").textContent = panel.dataset.title;
+    }
+    const next = new URL(tab.href);
+    const key = tab.closest("[data-key]")?.dataset.key ?? tab.closest("[id]").id;
+    const value = next.searchParams.get(key);
+    for (const a of document.querySelectorAll("a[href]")) {
+      const u = new URL(a.href);
+      if (u.pathname !== location.pathname || a === tab || a.dataset.tab?.startsWith(key + "-")) continue;
+      value ? u.searchParams.set(key, value) : u.searchParams.delete(key);
+      a.setAttribute("href", u.pathname + u.search + u.hash);
+    }
+    history.replaceState(null, "", next.pathname + next.search);
+    return;
+  }
+  const b = e.target.closest("[data-toggle]");
+  if (b) return toggle(b.dataset.toggle);
+  const all = e.target.closest("[data-expand-all]");
+  if (!all) return;
+  const ids = [...all.closest("[data-card]").querySelectorAll(".chev[data-toggle]")].map((c) => c.dataset.toggle);
+  const open = ids.some((id) => document.getElementById(id).hidden);
+  ids.forEach((id) => toggle(id, open));
+  all.textContent = open ? "Collapse all" : "Expand all";
+});
+
+for (const form of document.querySelectorAll("[data-cal]")) {
+  const [from, to] = [form.elements.from, form.elements.to];
+  const max = from.max;
+  const iso = (d) => d.toISOString().slice(0, 10);
+  const parse = (s) => new Date(s + "T00:00:00Z");
+  const fmt = (s) => parse(s).toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: "UTC" });
+  let start = from.value, end = to.value;
+  let view = parse(end || max);
+  view.setUTCDate(1);
+  for (const l of form.querySelectorAll("label")) l.hidden = true;
+  const cal = document.createElement("div");
+  cal.className = "cal";
+  form.insertBefore(cal, form.querySelector("button[type=submit]"));
+  const draw = () => {
+    const y = view.getUTCFullYear(), m = view.getUTCMonth();
+    const first = (new Date(Date.UTC(y, m, 1)).getUTCDay() + 6) % 7;
+    const days = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    const title = view.toLocaleDateString(undefined, { month: "long", year: "numeric", timeZone: "UTC" });
+    let cells = "";
+    for (let i = 0; i < first; i++) cells += "<span></span>";
+    for (let d = 1; d <= days; d++) {
+      const s = iso(new Date(Date.UTC(y, m, d)));
+      const cls = [s === start || s === end ? "on" : "", start && end && s > start && s < end ? "in" : "", s === max ? "today" : ""].join(" ").trim();
+      cells += `<button type="button" data-d="${s}"${cls ? ` class="${cls}"` : ""}${s > max ? " disabled" : ""}>${d}</button>`;
+    }
+    const n = start && end ? Math.round((parse(end) - parse(start)) / 864e5) + 1 : 0;
+    cal.innerHTML = `<div class="cal-head"><button type="button" data-step="-1" aria-label="Previous month">&#8249;</button><b>${title}</b><button type="button" data-step="1" aria-label="Next month"${iso(new Date(Date.UTC(y, m + 1, 1))) > max ? " disabled" : ""}>&#8250;</button></div><div class="cal-dow"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div><div class="cal-grid">${cells}</div><p class="cal-sum">${start && end ? `${fmt(start)} – ${fmt(end)} · ${n} day${n === 1 ? "" : "s"}` : start ? `${fmt(start)} – pick an end date` : "Pick a start date"}</p>`;
+    form.querySelector("button[type=submit]").disabled = !(start && end);
+  };
+  cal.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    e.stopPropagation();
+    if (b.dataset.step) view.setUTCMonth(view.getUTCMonth() + Number(b.dataset.step));
+    else if (!start || end) { start = b.dataset.d; end = ""; }
+    else if (b.dataset.d < start) { end = start; start = b.dataset.d; }
+    else end = b.dataset.d;
+    from.value = start; to.value = end;
+    draw();
+  });
+  draw();
+}
+
+for (const btn of document.querySelectorAll("[data-open]")) {
+  const dlg = document.getElementById(btn.dataset.open);
+  btn.addEventListener("click", () => dlg.showModal());
+  dlg.querySelector("[data-close]")?.addEventListener("click", () => dlg.close());
+  const other = dlg.querySelector(".d3-other");
+  if (other) {
+    const sync = () => { other.hidden = dlg.querySelector("[name=place]:checked")?.value !== "other"; };
+    dlg.addEventListener("change", sync);
+    sync();
+  }
 }
