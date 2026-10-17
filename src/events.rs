@@ -99,6 +99,11 @@ pub trait EventStore: Send + Sync {
     fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64>;
     /// Current UTC offset of IANA zone `tz`.
     fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset>;
+
+    /// Whether reads of the site no longer wait on a background load.
+    fn settled(&self, _site_id: &str) -> bool {
+        true
+    }
     /// Recomputes the credited touch of every payment of a site; unattributed payments get a row with a NULL session.
     fn rebuild_attribution(
         &self,
@@ -770,6 +775,13 @@ impl EventStore for DuckStore {
             |r| r.get(0),
         )?;
         Ok(n as u64)
+    }
+
+    fn settled(&self, site_id: &str) -> bool {
+        let get = self
+            .index
+            .get(site_id, || Ok(self.conn.lock().unwrap().try_clone()?));
+        get.is_ok_and(|ix| ix.is_some()) || self.index.unfit(site_id)
     }
 
     fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset> {

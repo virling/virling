@@ -1643,6 +1643,14 @@ impl Indexes {
         }
     }
 
+    pub fn unfit(&self, site_id: &str) -> bool {
+        self.cap == 0
+            || matches!(
+                self.slots.lock().unwrap().get(site_id),
+                Some((Slot::Unfit, _))
+            )
+    }
+
     pub fn payments_changed(&self, site_id: &str) {
         self.stale_payments
             .lock()
