@@ -206,6 +206,7 @@ pub fn router(state: AppState) -> Router {
             )
             .route("/app/{domain}/settings/report", post(settings::save_brand))
             .route("/app/{domain}/settings/plan", post(settings::save_plan))
+            .route("/app/{domain}/settings/public", post(settings::save_public))
             .route("/app/{domain}/settings/share", post(settings::share))
             .route("/app/{domain}/settings/unshare", post(settings::revoke))
             .route(
@@ -230,6 +231,8 @@ pub fn router(state: AppState) -> Router {
             )
             .route("/mcp", post(mcp::post))
             .route("/r/{token}", get(dashboard::report::shared))
+            .route("/share/{domain}", get(dashboard::public))
+            .route("/share/{domain}/icon", get(dashboard::public_icon))
             .route(
                 "/app/{domain}/settings/disconnect",
                 post(settings::disconnect),
@@ -265,7 +268,7 @@ async fn tracker() -> Response {
         .into_response()
 }
 
-const ART: [(&str, &[u8]); 3] = [
+const ART: [(&str, &[u8]); 4] = [
     (
         "02-empty-waiting.jpg",
         include_bytes!("../assets/art/02-empty-waiting.jpg"),
@@ -278,6 +281,7 @@ const ART: [(&str, &[u8]); 3] = [
         "04-empty-goals.jpg",
         include_bytes!("../assets/art/04-empty-goals.jpg"),
     ),
+    ("og-share.jpg", include_bytes!("../assets/art/og-share.jpg")),
 ];
 
 const FONTS: &[(&str, &[u8])] = &[

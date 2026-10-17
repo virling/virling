@@ -259,6 +259,8 @@ pub struct Base {
     pub avg: Option<f64>,
     /// Rows under `SMALL` visitors get a small-sample note.
     pub warn_small: bool,
+    /// Shows revenue as a share and per visitor as a ratio, for the public page.
+    pub hide: bool,
 }
 
 /// One row before formatting: what it shows and which filter params it sets.
@@ -588,8 +590,14 @@ fn bar(i: &Item, base: &Base, m: f64, kid: bool, href: String, id: String) -> Ba
         mono: i.mono,
         kid,
         visitors: group(r.visitors),
-        revenue: money(r.revenue_usd),
-        per_visitor: if r.visitors == 0 {
+        revenue: if base.hide {
+            format!("{:.0}%", sr * 100.0)
+        } else {
+            money(r.revenue_usd)
+        },
+        per_visitor: if base.hide {
+            x.map_or_else(|| "–".into(), |x| format!("{x:.1}x"))
+        } else if r.visitors == 0 {
             "–".into()
         } else if r.revenue_usd > 0.0 {
             usd(pv)
@@ -602,7 +610,10 @@ fn bar(i: &Item, base: &Base, m: f64, kid: bool, href: String, id: String) -> Ba
             && r.visitors > 0
             && r.visitors < SMALL
             && r.revenue_usd > 0.0,
-        ratio: x.map(|x| format!("{x:.1}x")).unwrap_or_default(),
+        ratio: x
+            .filter(|_| !base.hide)
+            .map(|x| format!("{x:.1}x"))
+            .unwrap_or_default(),
         tone: x.map_or("", tone),
         vw: if m > 0.0 { sv / m * 100.0 } else { 0.0 },
         rw: if m > 0.0 { sr / m * 100.0 } else { 0.0 },
@@ -998,6 +1009,7 @@ mod tests {
             revenue: 400.0,
             avg: Some(1.0),
             warn_small: true,
+            hide: false,
         }
     }
 
@@ -1029,6 +1041,21 @@ mod tests {
         assert_eq!(r[1].kids[0].href, "source=chatgpt.com");
         assert!(c.panels[0].openable && r[0].kids.is_empty());
         assert!(c.panels[0].on && !c.panels[1].on);
+    }
+
+    #[test]
+    fn hidden_amounts_show_shares_and_ratios() {
+        let picks = picks(&HashMap::new());
+        let data = vec![(vec![row("Social", 100, 300.0)], Vec::new()); 4];
+        let hidden = Base {
+            hide: true,
+            ..base()
+        };
+        let r = &card(&picks[0], &data, &hidden, "/x", &[], &href).panels[0].rows[0];
+        assert_eq!(
+            (r.revenue.as_str(), r.per_visitor.as_str(), r.ratio.as_str()),
+            ("75%", "3.0x", "")
+        );
     }
 
     #[test]

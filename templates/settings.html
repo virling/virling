@@ -123,6 +123,27 @@
   {% endif %}
 </section>
 {% endif %}
+<section class="set-sec" id="public">
+<div class="set-intro"><h2>Public dashboard</h2><p class="muted">A read-only page anyone can open without signing in, for building in public. It never shows emails or customer IDs.</p></div>
+<form class="card" method="post" action="/app/{{ shell.domain }}/settings/public">
+  {% if public_saved %}<div class="notice ok-note" role="status">{% if public_on %}Saved. Your public dashboard is live.{% else %}Saved. The public dashboard is off and its link no longer works.{% endif %}</div>{% endif %}
+  <div class="setting">
+    <div><b><label for="public_dashboard">Public dashboard</label></b><span class="muted">Shows the overview, the revenue chart, the cards and Customers who stay. Turn it off and the link stops working right away.</span></div>
+    <label class="switch"><input type="checkbox" id="public_dashboard" name="public_dashboard"{% if public_on %} checked{% endif %}><span></span><span class="sr">Public dashboard</span></label>
+  </div>
+  <div class="setting">
+    <div><b><label for="hide_revenue">Hide revenue amounts</label></b><span class="muted">Shows shares of revenue and ratios against your average instead of dollar amounts.</span></div>
+    <label class="switch"><input type="checkbox" id="hide_revenue" name="hide_revenue"{% if public_hide %} checked{% endif %}><span></span><span class="sr">Hide revenue amounts</span></label>
+  </div>
+  {% if public_on %}
+  <div class="code" data-tabs>
+    <div class="code-head"><span class="code-title">Public link</span><button class="copy" type="button" data-copy>Copy</button></div>
+    <pre class="wrap">{{ public_link }}</pre>
+  </div>
+  {% endif %}
+  <div class="actions end">{% if public_on %}<a class="btn ghost" href="{{ public_link }}" target="_blank" rel="noopener">Open</a>{% endif %}<button class="btn" type="submit">Save</button></div>
+</form>
+</section>
 <section class="card" id="api">
   <div class="card-head"><h2>API keys</h2><a class="btn secondary" href="https://docs.virling.com/reference/api.html">API docs</a></div>
   <p class="muted">A key lets a script, the CLI or an AI agent read the reports of every site on your account. Keys can't change anything.</p>

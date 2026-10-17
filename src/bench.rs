@@ -156,6 +156,10 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         .bind(&share)
         .execute(&db)
         .await?;
+    sqlx::query("UPDATE sites SET public_dashboard = 1 WHERE id = ?")
+        .bind(&site_id)
+        .execute(&db)
+        .await?;
     let config = Config {
         marketing: false,
         app: true,
@@ -295,6 +299,12 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         get("page.report", format!("{app}/report"), Auth::Session),
         get("page.settings", format!("{app}/settings"), Auth::Session),
         get("page.share", format!("/r/{share}"), Auth::None),
+        get("page.public", format!("/share/{domain}"), Auth::None),
+        get(
+            "page.public.90d",
+            format!("/share/{domain}?range=90d"),
+            Auth::None,
+        ),
     ]);
     if let Some(g) = &goal {
         routes.push(get(
@@ -377,6 +387,7 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
             format!("{app}/visitors"),
             Auth::Session,
         ),
+        ("fresh.page.public", format!("/share/{domain}"), Auth::None),
         (
             "fresh.api.overview.30d",
             format!("{api_base}/overview?range=30d"),

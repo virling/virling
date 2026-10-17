@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use askama::Template;
 use axum::extract::{Path, Query, State};
-use axum::http::StatusCode;
+use axum::http::{StatusCode, header};
 use axum::response::{IntoResponse, Response};
 use serde::Deserialize;
 use time::macros::format_description;
@@ -20,6 +20,7 @@ use crate::auth::Account;
 use crate::channel::source_domain;
 use crate::chart::{self, Kind};
 use crate::onboarding::render;
+use crate::sites::Site;
 use crate::stats::{BreakdownRow, DayPoint, Dimension, Filter, Period, ProviderSplit, Totals};
 use crate::{icons, sites};
 
@@ -211,6 +212,29 @@ struct DashboardPage {
     goals: Option<goals::GoalsView>,
     visitors: Option<views::VisitorsView>,
     payments: Option<views::PaymentsView>,
+    retention: Option<views::RetentionView>,
+}
+
+/// The read-only dashboard anyone can open at /share/{domain}.
+#[derive(Template)]
+#[template(path = "public.html")]
+struct PublicPage {
+    domain: String,
+    icon: String,
+    url: String,
+    og_title: String,
+    og_desc: String,
+    og_image: String,
+    live: u64,
+    range_label: String,
+    ranges: Vec<Opt>,
+    insight: Option<(String, String)>,
+    kpis: Vec<Kpi>,
+    earlier: String,
+    charts: Vec<ChartPanel>,
+    chart_tabs: Vec<Opt>,
+    cards: Vec<cards::TabCard>,
+    ai: Option<cards::AiCard>,
     retention: Option<views::RetentionView>,
 }
 
@@ -563,7 +587,7 @@ pub async fn dashboard(
     let (Ok((window_days, dismissed)), Ok(providers)) = (settings, providers) else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
-    page(state, ctx, q, window_days, dismissed, providers)
+    page(state, ctx, q, window_days, dismissed, providers, None)
         .await
         .unwrap_or_else(|code| code.into_response())
 }
@@ -575,6 +599,8 @@ async fn page(
     window_days: i64,
     dismissed: bool,
     providers: Vec<String>,
+    // Some(hide revenue) renders the public page.
+    public: Option<bool>,
 ) -> Result<Response, StatusCode> {
     let today = ctx.today;
     let default = resolve_range(today, ctx.first_day, None).3;
@@ -607,7 +633,7 @@ async fn page(
     let view = VIEWS
         .iter()
         .map(|v| v.0)
-        .find(|v| !v.is_empty() && q.view.as_deref() == Some(*v))
+        .find(|v| !v.is_empty() && public.is_none() && q.view.as_deref() == Some(*v))
         .unwrap_or("");
 
     // Raw params of the current page; links encode them.
@@ -636,10 +662,10 @@ async fn page(
         raw.push((k, v.into()));
     }
     let mut filters: Vec<(&'static str, String)> = Vec::new();
-    for (k, _) in FILTERS {
-        if let Some(v) = q.rest.get(k).filter(|v| !v.is_empty() && v.len() <= 300) {
-            filters.push((k, v.clone()));
-            raw.push((k, v.clone()));
+    for (k, _) in FILTERS.iter().filter(|_| public.is_none()) {
+        if let Some(v) = q.rest.get(*k).filter(|v| !v.is_empty() && v.len() <= 300) {
+            filters.push((*k, v.clone()));
+            raw.push((*k, v.clone()));
         }
     }
     for k in KEEP.iter().skip(3) {
@@ -647,11 +673,17 @@ async fn page(
             raw.push((k, v.clone()));
         }
     }
-    let base = sites::app_path(&ctx.site.domain, "");
+    let base = match public {
+        Some(_) => format!("/share/{}", ctx.site.domain),
+        None => sites::app_path(&ctx.site.domain, ""),
+    };
     let enc: Vec<(&str, String)> = raw.iter().map(|(k, v)| (*k, encode(v))).collect();
     let params: Vec<(&str, &str)> = enc.iter().map(|(k, v)| (*k, v.as_str())).collect();
     let href = |set: &[(&str, &str)]| link(&base, &params, set);
     let filter_href = |set: &[(&'static str, String)]| {
+        if public.is_some() {
+            return String::new();
+        }
         let set: Vec<(&str, String)> = set.iter().map(|(k, v)| (*k, encode(v))).collect();
         let set: Vec<(&str, &str)> = set.iter().map(|(k, v)| (*k, v.as_str())).collect();
         link(&base, &params, &set)
@@ -778,10 +810,15 @@ async fn page(
                 store.mrr(&id, &pq, now)?,
             ),
         };
-        Ok((split, overview, all, data))
+        let ret = match public {
+            Some(_) => Some((store.retention(&id, &pq, now)?, store.mrr(&id, &pq, now)?)),
+            None => None,
+        };
+        Ok((split, overview, all, data, ret))
     })
     .await?;
-    let (split, overview, all, data) = data;
+    let (split, overview, all, data, ret) = data;
+    let hide = public == Some(true);
     let cur = &overview.current;
     let filter_label = filters
         .iter()
@@ -891,7 +928,7 @@ async fn page(
             let age = since.map_or(0, |d| (today - d).whole_days());
             let young = since.is_none() || cur.visitors < 100 && age <= 30;
             let empty = setup.first_event.is_none() && setup.payments == 0;
-            if empty {
+            if empty && public.is_none() {
                 page.waiting = Some(Waiting {
                     domain: ctx.site.domain.clone(),
                     snippet: format!(
@@ -1003,7 +1040,7 @@ async fn page(
                 s.num = i + 1;
             }
             let done = steps.iter().filter(|s| s.done).count();
-            if empty || (age <= 14 && !dismissed && done < steps.len()) {
+            if public.is_none() && (empty || (age <= 14 && !dismissed && done < steps.len())) {
                 page.setup = Some(SetupCard {
                     title: if empty {
                         format!("Get {} tracking", ctx.site.domain)
@@ -1087,7 +1124,7 @@ async fn page(
                 }
             }
             let earlier: f64 = split.iter().map(|s| s.earlier_usd).sum();
-            if earlier > 0.0 && filters.is_empty() {
+            if earlier > 0.0 && filters.is_empty() && !hide {
                 page.earlier = format!(
                     "{} {when} came from visits before {before}. Revenue counts on the payment date.",
                     money(earlier)
@@ -1146,6 +1183,7 @@ async fn page(
                     kind,
                     hatch.as_ref().map(|(f, l)| (*f, l.as_str())),
                     (!filters.is_empty()).then_some(filter_label.as_str()),
+                    hide,
                 );
                 let title = match kind {
                     Kind::Bars if hours.is_some() => "Revenue per hour",
@@ -1156,6 +1194,8 @@ async fn page(
                 };
                 let note = if total <= 0.0 {
                     "Nothing to show yet.".into()
+                } else if hide && matches!(kind, Kind::Bars | Kind::Total) {
+                    format!("Amounts are hidden. Hover for each {unit}'s share of the revenue.")
                 } else {
                     match kind {
                         Kind::Bars => match best {
@@ -1215,6 +1255,7 @@ async fn page(
                 revenue: cur.revenue_usd,
                 avg,
                 warn_small: !young,
+                hide,
             };
             let mut left = tabs.as_slice();
             page.cards = picks
@@ -1233,7 +1274,10 @@ async fn page(
                 &mut page.cards,
                 &links,
                 &state.config.base_url,
-                &crate::sites::app_path(&ctx.site.domain, "links"),
+                &match public {
+                    Some(_) => String::new(),
+                    None => crate::sites::app_path(&ctx.site.domain, "links"),
+                },
                 q.rest.get("new_link").map(String::as_str),
                 q.rest.get("link_error").map(String::as_str),
             );
@@ -1287,7 +1331,196 @@ async fn page(
             page.retention = Some(views::retention_view(&r, mrr.as_ref(), &q.rest, &href));
         }
     }
-    Ok(render(page))
+    if let Some((r, mrr)) = &ret {
+        page.retention = Some(views::retention_view(r, mrr.as_ref(), &q.rest, &href));
+    }
+    if public.is_none() {
+        return Ok(render(page));
+    }
+    if hide {
+        hide_amounts(&mut page, cur, &overview.previous);
+    }
+    // Rows do not filter here, so drop the hints that say they do.
+    for p in page.cards.iter_mut().flat_map(|c| &mut c.panels) {
+        let kept: Vec<&str> = p
+            .foot
+            .split(". ")
+            .filter(|s| !s.starts_with("Click"))
+            .collect();
+        p.foot = match kept.join(". ") {
+            f if f.is_empty() || f.ends_with('.') => f,
+            f => format!("{f}."),
+        };
+    }
+    let url = format!("{}{base}", state.config.base_url);
+    let (og_title, og_desc) = og(&ctx.site.domain, cur, &page.range_label, hide);
+    let mut res = render(PublicPage {
+        domain: ctx.site.domain.clone(),
+        icon: page.shell.icon,
+        og_image: format!("{}/assets/art/og-share.jpg", state.config.base_url),
+        url,
+        og_title,
+        og_desc,
+        live: page.shell.live,
+        range_label: page.range_label,
+        ranges: page.ranges,
+        insight: page.insight,
+        kpis: page.kpis,
+        earlier: page.earlier,
+        charts: page.charts,
+        chart_tabs: page.chart_tabs,
+        cards: page.cards,
+        ai: page.ai,
+        retention: page.retention,
+    });
+    // Off means gone right away, so nothing may keep a copy.
+    res.headers_mut()
+        .insert(header::CACHE_CONTROL, "no-cache".parse().unwrap());
+    Ok(res)
+}
+
+/// Title and description for link previews; amounts only when the owner shows them.
+fn og(domain: &str, cur: &Totals, range: &str, hide: bool) -> (String, String) {
+    let range = range.to_lowercase().replace("last", "in the last");
+    let lead = if hide {
+        format!("{} {range}.", plural(cur.visitors, "visitor"))
+    } else {
+        format!(
+            "{} in revenue from {} {range}.",
+            money(cur.revenue_usd),
+            plural(cur.visitors, "visitor")
+        )
+    };
+    (
+        format!("{domain} revenue dashboard"),
+        format!("{lead} See which channels bring paying customers, live on Virling."),
+    )
+}
+
+/// Swaps revenue amounts for shares and ratios on the public page.
+fn hide_amounts(page: &mut DashboardPage, cur: &Totals, prev: &Totals) {
+    for k in &mut page.kpis {
+        match k.label {
+            "Revenue" => {
+                let (tone, change) = delta(Some(cur.revenue_usd), Some(prev.revenue_usd));
+                *k = if change.is_empty() {
+                    kpi(
+                        "Revenue growth",
+                        "–".into(),
+                        String::new(),
+                        "",
+                        "needs revenue in the previous period".into(),
+                    )
+                } else {
+                    kpi(
+                        "Revenue growth",
+                        change,
+                        String::new(),
+                        tone,
+                        "against the previous period".into(),
+                    )
+                };
+            }
+            "Revenue per visitor" => {
+                *k = kpi(
+                    "Conversion",
+                    cur.conversion
+                        .map_or_else(|| "–".into(), |c| format!("{:.1}%", c * 100.0)),
+                    String::new(),
+                    "",
+                    "of visitors became customers".into(),
+                );
+            }
+            "Visitors" => k.note = String::new(),
+            _ => {}
+        }
+    }
+    page.insight = page.insight.take().and_then(|(lead, fix)| {
+        let lead = match lead.split_once(". ") {
+            Some((first, _)) if lead.contains('$') => format!("{first}."),
+            _ => lead,
+        };
+        (!lead.contains('$')).then_some((lead, fix))
+    });
+    if let Some(rt) = page.retention.as_mut().filter(|rt| !rt.refunds) {
+        rt.col2 = "";
+        for r in &mut rt.rows {
+            r.val2 = String::new();
+        }
+        rt.foot = rt
+            .foot
+            .split(". ")
+            .find(|s| s.starts_with("Average still paying"))
+            .map(|s| format!("{}.", s.trim_end_matches('.')))
+            .unwrap_or_default();
+    }
+}
+
+/// Id, timezone, cookieless, window, hide revenue, and the favicon's fetch time.
+type PublicSite = (String, String, bool, i64, bool, Option<i64>);
+
+/// The read-only dashboard at /share/{domain}; a 404 unless the owner turned it on.
+pub async fn public(
+    State(state): State<AppState>,
+    Path(domain): Path<String>,
+    Query(q): Query<DashboardQuery>,
+) -> Response {
+    let row: Result<Option<PublicSite>, _> = sqlx::query_as(
+        "SELECT s.id, s.timezone, s.cookieless, s.window_days, s.public_hide_revenue, i.fetched_at
+         FROM sites s LEFT JOIN site_icons i ON i.site_id = s.id AND i.body IS NOT NULL
+         WHERE s.domain = ? AND s.public_dashboard = 1",
+    )
+    .bind(&domain)
+    .fetch_optional(&state.db)
+    .await;
+    let (id, timezone, cookieless, window_days, hide, icon) = match row {
+        Ok(Some(r)) => r,
+        Ok(None) => return StatusCode::NOT_FOUND.into_response(),
+        Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
+    };
+    let store = state.events.clone();
+    let (sid, tz) = (id.clone(), timezone.clone());
+    let clock = blocking(move || {
+        Ok((
+            store.utc_offset(&tz)?,
+            store.first_event(&sid)?,
+            store.live_visitors(&sid)?,
+        ))
+    })
+    .await;
+    let (offset, first, live) = match clock {
+        Ok(c) => c,
+        Err(code) => return code.into_response(),
+    };
+    let ctx = Ctx {
+        shell: Shell {
+            domain: domain.clone(),
+            initial: domain[..1].to_ascii_uppercase(),
+            icon: icon
+                .map(|v| format!("/share/{domain}/icon?v={v}"))
+                .unwrap_or_default(),
+            sites: Vec::new(),
+            nav: "dashboard",
+            plan: String::new(),
+            usage: String::new(),
+            email: String::new(),
+            avatar: String::new(),
+            live,
+            agency: false,
+        },
+        site: Site {
+            id,
+            domain,
+            timezone,
+            cookieless,
+        },
+        today: OffsetDateTime::now_utc().to_offset(offset).date(),
+        first_day: first.map(|t| t.to_offset(offset).date()),
+        offset,
+    };
+    page(state, ctx, q, window_days, true, Vec::new(), Some(hide))
+        .await
+        .unwrap_or_else(|code| code.into_response())
 }
 
 enum Data {
@@ -1328,6 +1561,20 @@ mod tests {
             Some((date!(2026 - 10 - 15), date!(2026 - 10 - 15)))
         );
         assert_eq!(preset("all", t, None), None);
+    }
+
+    #[test]
+    fn previews_hide_amounts_when_asked() {
+        let t = Totals {
+            visitors: 1200,
+            revenue_usd: 480.0,
+            ..Default::default()
+        };
+        let (title, desc) = og("x.com", &t, "Last 30 days", false);
+        assert_eq!(title, "x.com revenue dashboard");
+        assert!(desc.starts_with("$480 in revenue from 1,200 visitors in the last 30 days."));
+        let (_, desc) = og("x.com", &t, "Last 30 days", true);
+        assert!(desc.starts_with("1,200 visitors in the last 30 days.") && !desc.contains('$'));
     }
 
     #[test]
