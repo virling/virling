@@ -2,6 +2,7 @@ mod alias;
 mod animals;
 mod api;
 mod app;
+mod assets;
 mod auth;
 mod bench;
 mod cache;
