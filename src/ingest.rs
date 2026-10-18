@@ -128,11 +128,15 @@ impl RateLimiter {
     }
 }
 
-/// Destination of an outbound click as origin and path, without query or fragment; None for same-site or non-web links.
-fn exit_link(raw: &str, domain: &str) -> Option<String> {
+/// Destination of an outbound click as origin and path, without query or fragment; None for same-site, same-visit or non-web links.
+fn exit_link(raw: &str, domain: &str, same_visit: &str) -> Option<String> {
     let url = Url::parse(raw).ok()?;
     let host = url.host_str()?;
-    if !matches!(url.scheme(), "http" | "https") || host_belongs(host, domain) {
+    if !matches!(url.scheme(), "http" | "https")
+        || std::iter::once(domain)
+            .chain(same_visit.split_whitespace())
+            .any(|d| host_belongs(host, d))
+    {
         return None;
     }
     Some(clip(
@@ -317,7 +321,11 @@ pub async fn collect(
                 Some(g) => Some(g),
                 None => continue,
             },
-            "exit" => match e.g.as_deref().and_then(|g| exit_link(g, &site.domain)) {
+            "exit" => match e
+                .g
+                .as_deref()
+                .and_then(|g| exit_link(g, &site.domain, &site.same_visit))
+            {
                 Some(link) => Some(link),
                 None => continue,
             },
@@ -489,6 +497,23 @@ mod tests {
         let a = s.session_for("site", "v1", t);
         assert_eq!(a, s.session_for("site", "v1", t + Duration::minutes(29)));
         assert_ne!(a, s.session_for("site", "v1", t + Duration::minutes(60)));
+    }
+
+    #[test]
+    fn www_and_same_visit_domains_are_not_exits() {
+        let exit = |url: &str| exit_link(url, "example.com", "app.example.net docs.example.org");
+        assert_eq!(exit("https://example.com/pricing"), None);
+        assert_eq!(exit("https://www.example.com/"), None);
+        assert_eq!(exit("https://app.example.net/signup"), None);
+        assert_eq!(exit("https://www.docs.example.org/a"), None);
+        assert_eq!(
+            exit("https://x.com/virling?a=1").as_deref(),
+            Some("x.com/virling")
+        );
+        assert_eq!(
+            exit("https://example.net/").as_deref(),
+            Some("example.net/")
+        );
     }
 
     #[test]

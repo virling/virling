@@ -37,13 +37,14 @@
   on(w, "popstate", pageview);
 
   // Record outbound clicks as exits, and carry the visitor ID into Stripe, Polar and Dodo payment links.
+  var bare = (h) => h.replace(/^www\./, "");
   var pay = { "buy.stripe.com": "client_reference_id", "buy.polar.sh": "custom_field_data.virling_vid", "checkout.dodopayments.com": "metadata_virling_vid" };
   on(d, "click", (e) => {
     var a = e.target.closest && e.target.closest("a[href]"), u, k;
     if (!a) return;
     try {
       u = new URL(a.href);
-      if (/^http/.test(u.protocol) && u.hostname != L.hostname) send("exit", u.origin + u.pathname);
+      if (/^http/.test(u.protocol) && bare(u.hostname) != bare(L.hostname)) send("exit", u.origin + u.pathname);
       k = vid && pay[u.hostname];
       if (k && !u.searchParams.has(k)) u.searchParams.set(k, vid), a.href = u.href;
     } catch (_) {}

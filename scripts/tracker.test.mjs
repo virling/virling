@@ -133,10 +133,18 @@ test("outbound clicks are exits and payment links carry the visitor ID", () => {
   assert.equal(link("https://checkout.dodopayments.com/buy/p"), `https://checkout.dodopayments.com/buy/p?metadata_virling_vid=${vid}`);
   link("https://x.com/virling");
   link("https://example.com/about");
+  link("https://www.example.com/about");
   assert.deepEqual(
     b.sent.filter((e) => e.n == "exit").map((e) => e.g),
     ["https://buy.stripe.com/abc", "https://buy.polar.sh/p", "https://checkout.dodopayments.com/buy/p", "https://x.com/virling"],
   );
+});
+
+test("www and the bare domain are one site", () => {
+  const b = browser("https://www.example.com/");
+  b.fire("d:", "click", { target: { closest: () => ({ href: "https://example.com/pricing" }) } });
+  b.fire("d:", "click", { target: { closest: () => ({ href: "https://blog.example.net/" }) } });
+  assert.deepEqual(b.sent.filter((e) => e.n == "exit").map((e) => e.g), ["https://blog.example.net/"]);
 });
 
 test("pushState and replaceState route changes log pageviews, once per URL", () => {

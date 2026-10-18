@@ -12,7 +12,7 @@ use crate::app::AppState;
 use crate::auth::{Account, random_token};
 use crate::dashboard::{Opt, Shell, ago, load, provider_name};
 use crate::onboarding::render;
-use crate::sites::app_path;
+use crate::sites::{app_path, normalize_domain};
 use crate::sync;
 
 const WINDOWS: [i64; 4] = [30, 60, 90, 365];
@@ -36,6 +36,8 @@ struct SettingsPage {
     title: &'static str,
     script_host: String,
     cookieless: bool,
+    /// Same-visit domains, one per line.
+    same_visit: String,
     model: String,
     window_days: i64,
     windows: Vec<Opt>,
@@ -148,6 +150,7 @@ pub async fn page(
         title: "Site settings",
         script_host: state.config.base_url.clone(),
         cookieless: ctx.site.cookieless,
+        same_visit: ctx.site.same_visit.replace(' ', "\n"),
         windows: WINDOWS
             .iter()
             .map(|d| Opt {
@@ -254,6 +257,22 @@ pub struct SettingsInput {
     model: String,
     window_days: i64,
     cookieless: Option<String>,
+    #[serde(default)]
+    same_visit: String,
+}
+
+/// Up to 20 distinct domains from free text, normalized, without the site's own domain or its subdomains.
+fn same_visit_domains(input: &str, domain: &str) -> String {
+    let mut out: Vec<String> = Vec::new();
+    for d in input
+        .split([' ', ',', '\n', '\r', '\t'])
+        .filter_map(normalize_domain)
+    {
+        if !crate::ingest::host_belongs(&d, domain) && !out.contains(&d) && out.len() < 20 {
+            out.push(d);
+        }
+    }
+    out.join(" ")
 }
 
 pub async fn save(
@@ -270,11 +289,12 @@ pub async fn save(
         return StatusCode::BAD_REQUEST.into_response();
     }
     let updated = sqlx::query(
-        "UPDATE sites SET attribution_model = ?, window_days = ?, cookieless = ? WHERE id = ?",
+        "UPDATE sites SET attribution_model = ?, window_days = ?, cookieless = ?, same_visit = ? WHERE id = ?",
     )
     .bind(&input.model)
     .bind(input.window_days)
     .bind(input.cookieless.is_some())
+    .bind(same_visit_domains(&input.same_visit, &ctx.site.domain))
     .bind(&ctx.site.id)
     .execute(&state.db)
     .await;
@@ -568,6 +588,18 @@ mod tests {
             footer: String::new(),
             powered_by: None,
         }
+    }
+
+    #[test]
+    fn same_visit_domains_are_cleaned() {
+        assert_eq!(
+            same_visit_domains(
+                "https://App.Example.net/x, docs.example.org\nwww.example.com app.example.com\n\nnot a domain app.example.net",
+                "example.com"
+            ),
+            "app.example.net docs.example.org"
+        );
+        assert_eq!(same_visit_domains("", "example.com"), "");
     }
 
     #[test]

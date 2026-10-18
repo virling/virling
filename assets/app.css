@@ -1089,6 +1089,7 @@ body.r2-page { min-height: 100vh; background: #f6f6f3; line-height: normal; }
 .r2-pop .muted { font-size: 13px; }
 .r2-days { display: flex; flex-wrap: wrap; }
 .r2-days label { padding: 0 9px; }
+.set-area { width: 100%; max-width: 320px; padding: 10px 12px; border: 1px solid var(--field); border-radius: 10px; resize: vertical; font-size: 14px; }
 .r2-field textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--field); border-radius: 10px; resize: vertical; font-size: 14px; }
 .r2-main { max-width: 880px; margin: 0 auto; padding: 16px 24px 64px; }
 

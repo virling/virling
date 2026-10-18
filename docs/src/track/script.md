@@ -32,6 +32,10 @@ Each event is sent immediately, with `navigator.sendBeacon` when the browser has
 
 The server adds the country from a proxy header and the browser name from the user agent. See [Event API](../reference/event-api.md) for the full format.
 
+## Outbound links
+
+A click on a link to another site is sent as an exit with the link's origin and path. Links between `www.` and the bare domain, and to subdomains, stay inside the site. Add other domains that belong to the same site, such as a separate app or docs domain, under Same-visit domains in Site settings, and clicks to them are not counted as exits either.
+
 ## UTM tags and ref
 
 These query parameters on the landing URL are stored with the pageview: `utm_source`, `utm_medium`, `utm_campaign`, `utm_content` and `utm_term`. When `utm_source` is missing, `ref` is used instead, so `?ref=producthunt` works. Each value is trimmed and cut to 200 characters. They feed the [channel rules](../attribution/channels.md).
