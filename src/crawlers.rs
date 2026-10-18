@@ -215,7 +215,7 @@ pub async fn record(state: &AppState, bot: &Crawler, domain: &str, page: &str) {
     }
 }
 
-async fn count(
+pub(crate) async fn count(
     db: &SqlitePool,
     site_id: &str,
     bot: &str,

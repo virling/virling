@@ -6,7 +6,7 @@ use time::OffsetDateTime;
 
 use super::{FilterHref, Opt, group, link, money, usd};
 use crate::channel::source_name;
-use crate::crawlers::{BotHits, Kind, by_name};
+use crate::crawlers::{BotHits, by_name};
 use crate::icons;
 use crate::stats::{BreakdownRow, DayPoint, Dimension};
 
@@ -838,17 +838,44 @@ pub fn all_tabs() -> Vec<Tab> {
         .collect()
 }
 
-/// The AI assistants card: share of visitors against share of revenue, and each assistant.
+/// The AI card: share of visitors against share of revenue, and one row per AI company.
 pub struct AiCard {
     pub(super) visitors_share: f64,
     pub(super) revenue_share: f64,
-    pub(super) rows: Vec<BarRow>,
+    pub(super) rows: Vec<AiRow>,
     /// "AI revenue +40% vs previous period", empty without a trend.
     pub(super) trend: String,
     /// SVG path of AI's share of revenue per point, in a 100 by 24 box; empty without revenue.
     pub(super) spark: String,
     /// Greyed logos for the empty state.
     pub(super) logos: Vec<String>,
+    pub(super) docs: &'static str,
+}
+
+/// One AI company: visitors and revenue from its assistants, pages its crawlers read.
+pub struct AiRow {
+    pub(super) bar: BarRow,
+    pub(super) pages: String,
+    /// Each crawler's kind, hits, pages, most read page and last visit.
+    pub(super) pages_title: String,
+}
+
+/// The company behind an assistant source and the name its logo goes by.
+fn ai_company(source: &str) -> (String, String) {
+    let s = source.to_ascii_lowercase();
+    let known: [(&[&str], &str, &str); 6] = [
+        (&["openai", "chatgpt"], "OpenAI", "openai"),
+        (&["claude", "anthropic"], "Anthropic", "anthropic"),
+        (&["perplexity"], "Perplexity", "perplexity"),
+        (&["gemini", "google"], "Google", "google"),
+        (&["copilot", "microsoft"], "Microsoft", "copilot"),
+        (&["deepseek"], "DeepSeek", "deepseek"),
+    ];
+    known
+        .iter()
+        .find(|(keys, _, _)| keys.iter().any(|k| s.contains(k)))
+        .map(|(_, c, l)| (c.to_string(), l.to_string()))
+        .unwrap_or_else(|| (source_name(source), source.to_string()))
 }
 
 fn ai_revenue(days: &[DayPoint]) -> f64 {
@@ -859,30 +886,123 @@ fn ai_revenue(days: &[DayPoint]) -> f64 {
         .sum()
 }
 
-/// Builds the AI assistants card from channel-source rows and the daily series.
+/// A company's assistant hosts and crawlers, summed.
+struct Company {
+    name: String,
+    logo: String,
+    row: BreakdownRow,
+    hosts: Vec<(String, u64)>,
+    bots: Vec<&'static str>,
+    pages: u64,
+    detail: Vec<String>,
+}
+
+/// Builds the AI card from channel-source rows, crawler hits and the daily series.
+#[allow(clippy::too_many_arguments)]
 pub fn ai_card(
     sources: &[BreakdownRow],
     channels: &[BreakdownRow],
+    bots: &[BotHits],
     base: &Base,
     days: &[DayPoint],
     prev: Option<&[DayPoint]>,
     filter_href: &FilterHref,
+    now: OffsetDateTime,
 ) -> AiCard {
-    let items: Vec<Item> = sources
+    let mut companies: Vec<Company> = Vec::new();
+    let mut entry = |name: String, logo: String| -> usize {
+        if let Some(i) = companies.iter().position(|c| c.name == name) {
+            return i;
+        }
+        companies.push(Company {
+            row: BreakdownRow {
+                key: None,
+                label: name.clone(),
+                unattributed: false,
+                visitors: 0,
+                payments: 0,
+                customers: 0,
+                revenue_usd: 0.0,
+                revenue_per_visitor: None,
+            },
+            name,
+            logo,
+            hosts: Vec::new(),
+            bots: Vec::new(),
+            pages: 0,
+            detail: Vec::new(),
+        });
+        companies.len() - 1
+    };
+    let mut placed = Vec::new();
+    for r in sources
         .iter()
         .filter(|r| !r.unattributed && (r.visitors > 0 || r.revenue_usd > 0.0))
-        .filter_map(|r| {
-            let host = r.key.as_deref()?.strip_prefix("AI|")?;
-            (!host.is_empty()).then(|| Item {
-                icon: icons::source(host, 16),
-                name: source_name(host),
-                sub: host.to_string(),
-                mono: false,
-                filter: vec![("source", host.to_string())],
-                row: r.clone(),
-            })
-        })
+    {
+        if let Some(host) = r.key.as_deref().and_then(|k| k.strip_prefix("AI|"))
+            && !host.is_empty()
+        {
+            let (name, logo) = ai_company(host);
+            placed.push((entry(name, logo), r, host));
+        }
+    }
+    let mut found = Vec::new();
+    for b in bots {
+        if let Some(c) = by_name(&b.bot) {
+            let i = entry(c.company.into(), c.logo.into());
+            let seen = OffsetDateTime::from_unix_timestamp(b.last_seen)
+                .map(|t| super::ago(t, now))
+                .unwrap_or_default();
+            let detail = format!(
+                "{} ({}): {} on {}, most read {}, last {seen}",
+                c.name,
+                c.kind.label(),
+                super::plural(b.hits.max(0) as u64, "hit"),
+                super::plural(b.pages.max(0) as u64, "page"),
+                b.top_page
+            );
+            found.push((i, c.name, b.hits.max(0) as u64, detail));
+        }
+    }
+    for (i, r, host) in placed {
+        let c = &mut companies[i];
+        c.row.visitors += r.visitors;
+        c.row.payments += r.payments;
+        c.row.customers += r.customers;
+        c.row.revenue_usd += r.revenue_usd;
+        c.hosts.push((host.to_string(), r.visitors));
+    }
+    for (i, name, hits, detail) in found {
+        companies[i].pages += hits;
+        companies[i].bots.push(name);
+        companies[i].detail.push(detail);
+    }
+    companies.sort_by(|a, b| {
+        (b.row.visitors, b.row.revenue_usd, b.pages)
+            .partial_cmp(&(a.row.visitors, a.row.revenue_usd, a.pages))
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+    let items: Vec<(Item, u64, String)> = companies
+        .into_iter()
         .take(SHOWN)
+        .map(|c| {
+            let top = c.hosts.iter().max_by_key(|h| h.1).map(|h| h.0.clone());
+            let sub = if c.hosts.is_empty() {
+                c.bots.join(", ")
+            } else {
+                let hosts: Vec<&str> = c.hosts.iter().map(|h| h.0.as_str()).collect();
+                hosts.join(", ")
+            };
+            let item = Item {
+                icon: icons::source(&c.logo, 16),
+                name: c.name,
+                sub,
+                mono: false,
+                filter: top.map(|h| vec![("source", h)]).unwrap_or_default(),
+                row: c.row,
+            };
+            (item, c.pages, c.detail.join("; "))
+        })
         .collect();
     // The AI channel row counts each visitor once, even one who came from two assistants.
     let (v, r) = channels
@@ -892,23 +1012,38 @@ pub fn ai_card(
     let share = |n: f64, t: f64| if t > 0.0 { n / t * 100.0 } else { 0.0 };
     let m = items
         .iter()
-        .map(|i| {
+        .map(|(i, _, _)| {
             let (v, r) = shares(&i.row, base);
             v.max(r)
         })
         .fold(0.0, f64::max)
         * 1.04;
-    let mut rows: Vec<BarRow> = items
+    let mut rows: Vec<AiRow> = items
         .iter()
-        .map(|i| bar(i, base, m, false, filter_href(&i.filter), String::new()))
+        .map(|(i, pages, title)| {
+            let href = if i.filter.is_empty() {
+                String::new()
+            } else {
+                filter_href(&i.filter)
+            };
+            AiRow {
+                bar: bar(i, base, m, false, href, String::new()),
+                pages: group(*pages),
+                pages_title: title.clone(),
+            }
+        })
         .collect();
     let pv = |i: &Item| i.row.revenue_usd / i.row.visitors.max(1) as f64;
-    if items.iter().filter(|i| i.row.revenue_usd > 0.0).count() > 1
+    if items
+        .iter()
+        .filter(|(i, _, _)| i.row.revenue_usd > 0.0)
+        .count()
+        > 1
         && let Some(best) = (0..items.len())
-            .filter(|&k| items[k].row.revenue_usd > 0.0 && items[k].row.visitors > 0)
-            .max_by(|&a, &b| pv(&items[a]).total_cmp(&pv(&items[b])))
+            .filter(|&k| items[k].0.row.revenue_usd > 0.0 && items[k].0.row.visitors > 0)
+            .max_by(|&a, &b| pv(&items[a].0).total_cmp(&pv(&items[b].0)))
     {
-        rows[best].tag = "Best value";
+        rows[best].bar.tag = "Best value";
     }
     let now = ai_revenue(days);
     let trend = match prev.map(ai_revenue) {
@@ -956,65 +1091,7 @@ pub fn ai_card(
         rows,
         trend,
         spark,
-        logos: [
-            "chatgpt.com",
-            "claude.ai",
-            "perplexity.ai",
-            "gemini.google.com",
-            "copilot.microsoft.com",
-        ]
-        .iter()
-        .map(|h| icons::source(h, 18))
-        .collect(),
-    }
-}
-
-pub struct CrawlerRow {
-    pub(super) icon: String,
-    pub(super) name: &'static str,
-    pub(super) company: &'static str,
-    pub(super) kind: &'static str,
-    pub(super) kind_class: &'static str,
-    pub(super) hits: String,
-    pub(super) pages: String,
-    pub(super) top: String,
-    pub(super) seen: String,
-}
-
-/// The AI crawlers card: which bots read the site's pages.
-pub struct CrawlerCard {
-    pub(super) rows: Vec<CrawlerRow>,
-    /// Greyed logos for the empty state.
-    pub(super) logos: Vec<String>,
-    pub(super) docs: &'static str,
-}
-
-/// Builds the AI crawlers card from each bot's hits, most hits first.
-pub fn crawler_card(bots: &[BotHits], now: OffsetDateTime) -> CrawlerCard {
-    CrawlerCard {
-        rows: bots
-            .iter()
-            .filter_map(|b| Some((b, by_name(&b.bot)?)))
-            .take(SHOWN)
-            .map(|(b, c)| CrawlerRow {
-                icon: icons::source(c.logo, 16),
-                name: c.name,
-                company: c.company,
-                kind: c.kind.label(),
-                kind_class: match c.kind {
-                    Kind::Training => "",
-                    Kind::Search => "srch",
-                    Kind::Answer => "up",
-                },
-                hits: group(b.hits.max(0) as u64),
-                pages: group(b.pages.max(0) as u64),
-                top: b.top_page.clone(),
-                seen: OffsetDateTime::from_unix_timestamp(b.last_seen)
-                    .map(|t| super::ago(t, now))
-                    .unwrap_or_default(),
-            })
-            .collect(),
-        logos: ["openai", "anthropic", "perplexity", "google", "meta"]
+        logos: ["openai", "anthropic", "perplexity", "google", "copilot"]
             .iter()
             .map(|l| icons::source(l, 18))
             .collect(),
@@ -1097,6 +1174,62 @@ mod tests {
         assert_eq!(r[1].kids[0].href, "source=chatgpt.com");
         assert!(c.panels[0].openable && r[0].kids.is_empty());
         assert!(c.panels[0].on && !c.panels[1].on);
+    }
+
+    #[test]
+    fn ai_card_has_one_row_per_company() {
+        let sources = [
+            row("AI|chatgpt.com", 10, 50.0),
+            row("AI|chat.openai.com", 5, 0.0),
+            row("AI|claude.ai", 3, 30.0),
+        ];
+        let hit = |bot: &str, hits| BotHits {
+            bot: bot.into(),
+            hits,
+            pages: 1,
+            top_page: "/".into(),
+            last_seen: 0,
+        };
+        let bots = [
+            hit("GPTBot", 100),
+            hit("OAI-SearchBot", 20),
+            hit("ClaudeBot", 20),
+            hit("PerplexityBot", 7),
+        ];
+        let channels = [row("AI", 18, 80.0)];
+        let now = OffsetDateTime::from_unix_timestamp(3600).unwrap();
+        let c = ai_card(&sources, &channels, &bots, &base(), &[], None, &href, now);
+        let names: Vec<_> = c.rows.iter().map(|r| r.bar.name.as_str()).collect();
+        assert_eq!(names, ["OpenAI", "Anthropic", "Perplexity"]);
+        let openai = &c.rows[0];
+        assert_eq!(
+            (openai.bar.visitors.as_str(), openai.pages.as_str()),
+            ("15", "120")
+        );
+        assert_eq!(openai.bar.sub, "chatgpt.com, chat.openai.com");
+        assert_eq!(openai.bar.href, "source=chatgpt.com");
+        let perplexity = &c.rows[2];
+        assert_eq!(
+            (
+                perplexity.bar.visitors.as_str(),
+                perplexity.bar.revenue.as_str(),
+                perplexity.bar.per_visitor.as_str(),
+                perplexity.pages.as_str(),
+            ),
+            ("0", "$0", "–", "7")
+        );
+        assert!(perplexity.bar.href.is_empty() && perplexity.bar.sub == "PerplexityBot");
+        assert!(
+            c.rows.iter().all(|r| r.bar.icon.contains("<svg")),
+            "real logos"
+        );
+        assert!(
+            perplexity
+                .pages_title
+                .starts_with("PerplexityBot (Search): 7 hits on 1 page, most read /")
+        );
+        let empty = ai_card(&[], &[], &[], &base(), &[], None, &href, now);
+        assert!(empty.rows.is_empty() && empty.logos.len() == 5);
     }
 
     #[test]
