@@ -7,12 +7,12 @@ use axum::extract::{Path, Query, State};
 use axum::http::{StatusCode, header};
 use axum::response::{IntoResponse, Response};
 use serde::Deserialize;
-use time::macros::format_description;
 use time::{Date, Duration, OffsetDateTime};
 
+use super::daterange::{Picked, RangeMenu};
 use super::{
     Ctx, Opt, Shell, blocking, cards, day, delta, encode, goals, group, insight, link, load, money,
-    plural, provider_name, resolve_range, source_of, usd, views,
+    plural, provider_name, source_of, usd, views,
 };
 use crate::alias::Names;
 use crate::app::AppState;
@@ -36,17 +36,6 @@ pub struct DashboardQuery {
     #[serde(flatten)]
     rest: HashMap<String, String>,
 }
-
-const PRESETS: [(&str, &str); 8] = [
-    ("today", "Today"),
-    ("yesterday", "Yesterday"),
-    ("7d", "Last 7 days"),
-    ("30d", "Last 30 days"),
-    ("90d", "Last 90 days"),
-    ("month", "This month"),
-    ("12m", "Last 12 months"),
-    ("all", "Since tracking started"),
-];
 
 /// Filter params, and the first-pageview column each one matches; "viewed" matches any page of the visit.
 const FILTERS: [(&str, &str); 12] = [
@@ -76,40 +65,6 @@ const VIEWS: [(&str, &str); 5] = [
     ("payments", "Latest payments"),
     ("retention", "Customers who stay"),
 ];
-
-/// "Oct 16", "Oct 9 to 15", "Sep 16 to Oct 15", "Oct 2025 on".
-pub(crate) fn span(from: Date, to: Date) -> String {
-    if from == to {
-        day(from)
-    } else if from.year() != to.year() {
-        from.format(format_description!("[month repr:short] [year] on"))
-            .unwrap_or_default()
-    } else if from.month() == to.month() {
-        format!("{} to {}", day(from), to.day())
-    } else {
-        format!("{} to {}", day(from), day(to))
-    }
-}
-
-/// The preset's local dates, or None when it does not apply yet.
-fn preset(key: &str, today: Date, first: Option<Date>) -> Option<(Date, Date)> {
-    let back = |n: i64| (today - Duration::days(n - 1), today);
-    Some(match key {
-        "today" => (today, today),
-        "yesterday" => (today - Duration::days(1), today - Duration::days(1)),
-        "7d" => back(7),
-        "30d" => back(30),
-        "90d" => back(90),
-        "month" => (today.replace_day(1).ok()?, today),
-        "12m" => back(365),
-        "all" => (first?, today),
-        _ => return None,
-    })
-}
-
-fn ymd(s: Option<&str>) -> Option<Date> {
-    Date::parse(s?, format_description!("[year]-[month]-[day]")).ok()
-}
 
 pub struct Kpi {
     label: &'static str,
@@ -183,19 +138,7 @@ struct DashboardPage {
     views: Vec<Opt>,
     live_href: String,
     matching: Matching,
-    range_label: String,
-    compare: bool,
-    /// Shows "vs previous" on the range button.
-    vs: bool,
-    compare_href: String,
-    ranges: Vec<Opt>,
-    custom: bool,
-    custom_from: String,
-    custom_to: String,
-    today: String,
-    base: String,
-    /// Params a custom range keeps, as raw values.
-    hidden: Vec<(&'static str, String)>,
+    range: RangeMenu,
     report_href: String,
     chips: Vec<FilterChip>,
     privacy: bool,
@@ -607,33 +550,16 @@ async fn page(
     public: Option<bool>,
 ) -> Result<Response, StatusCode> {
     let today = ctx.today;
-    let default = resolve_range(today, ctx.first_day, None).3;
-    let custom = match (ymd(q.from.as_deref()), ymd(q.to.as_deref())) {
-        (Some(f), Some(t)) if f <= t && f <= today => Some((f, t.min(today))),
-        _ => None,
-    };
-    let key = q
-        .range
-        .as_deref()
-        .filter(|k| preset(k, today, ctx.first_day).is_some())
-        .unwrap_or(default);
-    let (rkey, (from, to)) = match custom {
-        Some(c) => ("custom", c),
-        None => match preset(key, today, ctx.first_day) {
-            Some(r) => (key, r),
-            None => ("30d", preset("30d", today, None).unwrap_or((today, today))),
-        },
-    };
-    let range_label = match PRESETS.iter().find(|p| p.0 == rkey) {
-        Some(p) => p.1.to_string(),
-        None => span(from, to),
-    };
-    let p = Period {
-        from,
-        to,
-        tz: ctx.site.timezone.clone(),
-    };
-    let compare = q.compare.as_deref() != Some("off");
+    let picked = Picked::read(
+        today,
+        ctx.first_day,
+        q.range.as_deref(),
+        q.from.as_deref(),
+        q.to.as_deref(),
+        q.compare.as_deref(),
+    );
+    let (rkey, from, to, compare) = (picked.key, picked.from, picked.to, picked.compare);
+    let p = picked.period(&ctx.site.timezone);
     let view = VIEWS
         .iter()
         .map(|v| v.0)
@@ -641,16 +567,7 @@ async fn page(
         .unwrap_or("");
 
     // Raw params of the current page; links encode them.
-    let mut raw: Vec<(&'static str, String)> = Vec::new();
-    if custom.is_some() {
-        raw.push(("from", from.to_string()));
-        raw.push(("to", to.to_string()));
-    } else if rkey != default {
-        raw.push(("range", rkey.to_string()));
-    }
-    if !compare {
-        raw.push(("compare", "off".into()));
-    }
+    let mut raw: Vec<(&'static str, String)> = picked.params();
     if !view.is_empty() {
         raw.push(("view", view.into()));
     }
@@ -847,22 +764,6 @@ async fn page(
             },
         })
         .collect();
-    let ranges: Vec<Opt> = PRESETS
-        .iter()
-        .filter_map(|(k, label)| {
-            let (f, t) = preset(k, today, ctx.first_day)?;
-            Some(Opt {
-                label: label.to_string(),
-                href: href(&[
-                    ("range", if *k == default { "" } else { k }),
-                    ("from", ""),
-                    ("to", ""),
-                ]),
-                on: *k == rkey,
-                count: span(f, t),
-            })
-        })
-        .collect();
     let chips: Vec<FilterChip> = filters
         .iter()
         .map(|(k, v)| {
@@ -875,38 +776,15 @@ async fn page(
         })
         .collect();
     let mut shell = ctx.shell;
-    shell.usage = format!(
-        "{} {}",
-        plural(cur.visitors, "visitor"),
-        match rkey {
-            "today" => "today".to_string(),
-            "yesterday" => "yesterday".to_string(),
-            "all" => "since tracking started".to_string(),
-            "custom" => span(from, to),
-            _ => range_label.to_lowercase().replace("last", "in the last"),
-        }
-    );
+    shell.usage = picked.usage(cur.visitors);
+    shell.keep = picked.query();
     let mut page = DashboardPage {
         title: "Dashboard",
         view,
         views: views_opts,
         live_href: href(&[("view", "visitors"), ("vtab", "")]),
         matching: matching(&split, !providers.is_empty(), &ctx.site.domain, window_days),
-        range_label,
-        compare,
-        vs: compare && rkey != "all",
-        compare_href: href(&[("compare", if compare { "off" } else { "" })]),
-        ranges,
-        custom: custom.is_some(),
-        custom_from: from.to_string(),
-        custom_to: to.to_string(),
-        today: today.to_string(),
-        base: base.clone(),
-        hidden: raw
-            .iter()
-            .filter(|(k, _)| !matches!(*k, "range" | "from" | "to"))
-            .cloned()
-            .collect(),
+        range: picked.menu(today, ctx.first_day, &base, &raw),
         report_href: site_url("report"),
         chips,
         privacy: ctx.site.cookieless,
@@ -1377,7 +1255,7 @@ async fn page(
         };
     }
     let url = format!("{}{base}", state.config.base_url);
-    let (og_title, og_desc) = og(&ctx.site.domain, cur, &page.range_label, hide);
+    let (og_title, og_desc) = og(&ctx.site.domain, cur, &page.range.label, hide);
     let mut res = render(PublicPage {
         domain: ctx.site.domain.clone(),
         icon: page.shell.icon,
@@ -1386,8 +1264,8 @@ async fn page(
         og_title,
         og_desc,
         live: page.shell.live,
-        range_label: page.range_label,
-        ranges: page.ranges,
+        range_label: page.range.label,
+        ranges: page.range.ranges,
         insight: page.insight,
         kpis: page.kpis,
         earlier: page.earlier,
@@ -1528,6 +1406,7 @@ pub async fn public(
             nav: "dashboard",
             plan: String::new(),
             usage: String::new(),
+            keep: String::new(),
             email: String::new(),
             avatar: String::new(),
             live,
@@ -1569,24 +1448,8 @@ enum Data {
 mod tests {
     use time::macros::date;
 
+    use super::super::daterange::preset;
     use super::*;
-
-    #[test]
-    fn spans_and_presets() {
-        let t = date!(2026 - 10 - 16);
-        assert_eq!(span(t, t), "Oct 16");
-        assert_eq!(
-            span(date!(2026 - 10 - 09), date!(2026 - 10 - 15)),
-            "Oct 9 to 15"
-        );
-        assert_eq!(span(date!(2026 - 09 - 16), t), "Sep 16 to Oct 16");
-        assert_eq!(preset("month", t, None), Some((date!(2026 - 10 - 01), t)));
-        assert_eq!(
-            preset("yesterday", t, None),
-            Some((date!(2026 - 10 - 15), date!(2026 - 10 - 15)))
-        );
-        assert_eq!(preset("all", t, None), None);
-    }
 
     #[test]
     fn new_customers_are_counted_since_the_range_start() {

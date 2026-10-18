@@ -10,26 +10,7 @@
   <a class="d3-pill" href="{{ live_href }}" title="Visitors in the last 5 minutes"><i class="d3-dot{% if shell.live == 0 %} idle{% endif %}"></i>{% if shell.live == 0 %}No visitors online{% else %}{{ shell.live }} visitor{% if shell.live != 1 %}s{% endif %} online now{% endif %}</a>
   <button type="button" class="d3-pill d3-match{% if !matching.connected %} off{% endif %}" data-toggle="match" aria-controls="match" aria-expanded="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>{% if !matching.bold.is_empty() %}<b>{{ matching.bold }}</b>{% endif %}{{ matching.label }}</button>
   <span class="grow"></span>
-  <div class="menu-wrap d3-range" data-menu>
-    <button type="button" class="d3-btn" aria-haspopup="true" aria-expanded="false">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>{{ range_label }}{% if vs %}<span class="dim">vs previous</span>{% endif %}
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4B515C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-    </button>
-    <div class="menu right d3-rmenu" hidden>
-      {% for r in ranges %}<a href="{{ r.href }}"{% if r.on %} aria-current="true"{% endif %}><span>{{ r.label }}</span><span class="hint">{{ r.count }}</span></a>{% endfor %}
-      <hr>
-      <a class="d3-switch" role="switch" aria-checked="{{ compare }}" href="{{ compare_href }}"><span>Compare to previous period</span><i></i></a>
-      <details{% if custom %} open{% endif %}>
-        <summary>Custom range…</summary>
-        <form class="d3-custom" method="get" action="{{ base }}" data-cal>
-          {% for (k, v) in hidden %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
-          <label>From<input type="date" name="from" value="{{ custom_from }}" max="{{ today }}" required></label>
-          <label>To<input type="date" name="to" value="{{ custom_to }}" max="{{ today }}" required></label>
-          <button class="d3-btn dark" type="submit">Apply</button>
-        </form>
-      </details>
-    </div>
-  </div>
+  {% include "_range.html" %}
   <a class="d3-btn" href="{{ report_href }}">{% if shell.agency %}Client report{% else %}Weekly email{% endif %}</a>
 </header>
 <nav class="d3-ptabs" aria-label="Dashboard sections">{% for t in views %}<a href="{{ t.href }}"{% if t.on %} aria-current="page"{% endif %}>{{ t.label }}{% if !t.count.is_empty() %}<span class="c{% if loop.index == 3 %} live{% endif %}">{{ t.count }}</span>{% endif %}</a>{% endfor %}</nav>
