@@ -297,7 +297,7 @@ mod tests {
 
     async fn post(state: &AppState, body: &str, ua: &str) -> StatusCode {
         let app = router(state.clone())
-            .layer(MockConnectInfo(SocketAddr::from(([203, 0, 113, 7], 5555))));
+            .layer(MockConnectInfo(SocketAddr::from(([162, 158, 0, 7], 5555))));
         let req = Request::post("/api/event")
             .header("user-agent", ua)
             .header("cf-ipcountry", "de")
