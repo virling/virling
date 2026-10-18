@@ -39,6 +39,8 @@ pub struct Incoming {
     l: Option<String>,
     /// Navigation type of a page load (navigate, reload or back_forward); absent on route changes.
     k: Option<String>,
+    /// Set by the script when the browser is automated or has no languages.
+    b: Option<bool>,
 }
 
 #[derive(Deserialize)]
@@ -370,6 +372,7 @@ pub async fn collect(
     let now = OffsetDateTime::now_utc();
 
     let mut events = Vec::with_capacity(incoming.len());
+    let mut bots = Vec::new();
     for e in incoming {
         let Some(site) = state
             .sites
@@ -460,7 +463,16 @@ pub async fn collect(
             None => state.salt.visitor_id(&site.id, ip, user_agent),
         };
         let path = clip(page.path().to_string(), 500);
-        let (session_id, back) = if matches!(kind, "exit" | "leave") {
+        let bot = if e.b == Some(true) {
+            Some("automated")
+        } else if e.w == Some(0) {
+            Some("no screen")
+        } else {
+            None
+        };
+        let (session_id, back) = if bot.is_some() {
+            (String::new(), false)
+        } else if matches!(kind, "exit" | "leave") {
             // Exits only extend a live session; a late one never starts a new visit.
             match state
                 .sessions
@@ -515,6 +527,10 @@ pub async fn collect(
             host: Some(page_host.to_ascii_lowercase()),
             language: language(e.l.as_deref().unwrap_or(&accept_language), site.cookieless),
         };
+        if let Some(reason) = bot {
+            bots.push((event, reason));
+            continue;
+        }
         if back {
             // A "Came back" row just before the page the visitor returned to.
             events.push(Event {
@@ -527,9 +543,16 @@ pub async fn collect(
         events.push(event);
     }
 
-    if !events.is_empty() {
+    if !events.is_empty() || !bots.is_empty() {
         let store = state.events.clone();
-        let result = tokio::task::spawn_blocking(move || store.insert_events(&events)).await;
+        let result = tokio::task::spawn_blocking(move || {
+            store.insert_bots(&bots)?;
+            if events.is_empty() {
+                return Ok(());
+            }
+            store.insert_events(&events)
+        })
+        .await;
         if !matches!(result, Ok(Ok(()))) {
             tracing::error!(?result, "failed to store events");
             return (StatusCode::SERVICE_UNAVAILABLE, "try again").into_response();

@@ -10,7 +10,7 @@ use time::OffsetDateTime;
 use crate::api;
 use crate::app::AppState;
 use crate::auth::{Account, random_token};
-use crate::dashboard::{Opt, Shell, ago, load, provider_name};
+use crate::dashboard::{Opt, Shell, ago, blocking, load, plural, provider_name};
 use crate::onboarding::render;
 use crate::sites::{app_path, normalize_domain};
 use crate::sync;
@@ -40,6 +40,8 @@ struct SettingsPage {
     /// Same-visit domains, one per line.
     same_visit: String,
     return_minutes: i64,
+    /// Bot visitors filtered in the last 30 days.
+    bots: String,
     model: String,
     window_days: i64,
     windows: Vec<Opt>,
@@ -147,6 +149,12 @@ pub async fn page(
     else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
+    let store = state.events.clone();
+    let id = ctx.site.id.clone();
+    let bots = match blocking(move || store.bots_filtered(&id, 30)).await {
+        Ok(n) => plural(n, "bot visitor"),
+        Err(code) => return code.into_response(),
+    };
     let now = OffsetDateTime::now_utc();
     render(SettingsPage {
         title: "Site settings",
@@ -154,6 +162,7 @@ pub async fn page(
         cookieless: ctx.site.cookieless,
         same_visit: ctx.site.same_visit.replace(' ', "\n"),
         return_minutes: ctx.site.return_minutes,
+        bots,
         windows: WINDOWS
             .iter()
             .map(|d| Opt {
