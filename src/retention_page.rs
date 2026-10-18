@@ -64,6 +64,8 @@ struct RetentionPage {
     rows: Vec<RowView>,
     empty: String,
     no_payments: bool,
+    /// None when no provider is connected, else whether one is still on its first sync.
+    sync: Option<bool>,
     status_note: String,
 }
 
@@ -192,6 +194,10 @@ pub async fn page(
         .into_iter()
         .find(|t| Some(t.0) == q.by.as_deref())
         .unwrap_or(TABS[0]);
+    let Ok((providers, syncing)) = crate::dashboard::providers(&state.db, &ctx.site.id).await
+    else {
+        return axum::http::StatusCode::SERVICE_UNAVAILABLE.into_response();
+    };
     let store = state.events.clone();
     let id = ctx.site.id.clone();
     let r = match blocking(move || store.retention(&id, &p, OffsetDateTime::now_utc())).await {
@@ -255,6 +261,7 @@ pub async fn page(
             }
         ),
         no_payments: r.status_sources.is_empty(),
+        sync: (!providers.is_empty()).then_some(syncing),
         status_note: if missing.is_empty() {
             String::new()
         } else {

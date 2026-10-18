@@ -5,9 +5,14 @@
 <section class="box pay-empty">
   <img src="/assets/art/03-empty-payments.jpg" width="1024" height="687" alt="Pencil drawing: an empty jar on a desk next to a laptop, with one orange coin">
   <div>
-    <h2>No customers yet</h2>
+    {% match sync %}{% when None %}<h2>No customers yet</h2>
     <p>Connect a payment provider and this page shows which channels bring customers who keep paying, not only the ones who pay once.</p>
     <div class="eh-actions"><a class="b" href="/app/{{ shell.domain }}/setup/payments">Connect a provider</a></div>
+    {% when Some(true) %}<h2>Syncing payments…</h2>
+    <p>Importing the last 90 days. This page shows which channels bring customers who keep paying once the payments are in.</p>
+    {% when Some(false) %}<h2>No customers yet</h2>
+    <p>No payments yet. After the first one, this page shows which channels bring customers who keep paying, not only the ones who pay once.</p>
+    {% endmatch %}
   </div>
 </section>
 {% else %}
