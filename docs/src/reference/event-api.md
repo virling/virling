@@ -42,7 +42,7 @@ These are dropped silently, still with `202`:
 - Events whose page host is not the site's domain or a subdomain.
 - Events over the site's rate limit.
 - Goals without a name.
-- Exits to the same site or to a non-web link, and exits or leaves with no visit in the last 30 minutes.
+- Exits to the same site (with or without `www.`, or a subdomain), to a domain on the site's same-visit list in Site settings, or to a non-web link, and exits or leaves with no visit in the last 30 minutes.
 
 CORS is open: responses carry `Access-Control-Allow-Origin: *`, and `OPTIONS /api/event` answers preflight requests.
 

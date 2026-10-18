@@ -1,6 +1,6 @@
 # Add the script
 
-One tag, under 1 KB gzipped. It records pageviews, referrers, UTM tags, route changes in single-page apps and the goals you send.
+One tag, about 1 KB gzipped. It records pageviews, referrers, UTM tags, route changes in single-page apps and the goals you send.
 
 ```html
 <script defer src="https://stats.example.com/v.js"
@@ -32,13 +32,17 @@ Each event is sent immediately, with `navigator.sendBeacon` when the browser has
 
 The server adds the country from a proxy header and the browser name from the user agent. See [Event API](../reference/event-api.md) for the full format.
 
+## Outbound links
+
+A click on a link to another site is sent as an exit with the link's origin and path. Links between `www.` and the bare domain, and to subdomains, stay inside the site. Add other domains that belong to the same site, such as a separate app or docs domain, under Same-visit domains in Site settings, and clicks to them are not counted as exits either.
+
 ## UTM tags and ref
 
 These query parameters on the landing URL are stored with the pageview: `utm_source`, `utm_medium`, `utm_campaign`, `utm_content` and `utm_term`. When `utm_source` is missing, `ref` is used instead, so `?ref=producthunt` works. Each value is trimmed and cut to 200 characters. They feed the [channel rules](../attribution/channels.md).
 
 ## Visitor ID
 
-On the first visit the script creates a random ID such as `vlx3k2a9b7f1c0d4e8` and stores it in the `virling_vid` cookie for one year, with `SameSite=Lax`, and `Secure` on HTTPS. It is first-party: it is set on your domain, not on the Virling server's. This ID is what links a payment back to the visit. See [Link checkout to visits](../payments/checkout.md).
+On the first visit the script creates a random ID such as `vlx3k2a9b7f1c0d4e8` and stores it in the `virling_vid` cookie for one year, with `SameSite=Lax`, and `Secure` on HTTPS. It is first-party: it is set on your registrable domain (`example.com` for `www.example.com` or `shop.example.co.uk` for itself), not on the Virling server's, so subdomains such as `app.example.com` share the same ID. This ID is what links a payment back to the visit. See [Link checkout to visits](../payments/checkout.md).
 
 With [cookieless mode](cookieless.md) no cookie is set.
 

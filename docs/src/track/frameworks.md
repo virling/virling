@@ -13,7 +13,7 @@ Before `</head>` on every page:
 
 ## Next.js
 
-In the App Router, put it in the root layout so it loads on every route. Route changes are tracked through `history.pushState`, so client-side navigation is counted.
+In the App Router, put it in the root layout so it loads on every route. Route changes are tracked through `history.pushState` and `replaceState`, so client-side navigation is counted.
 
 ```jsx,file:app/layout.tsx
 import Script from "next/script";

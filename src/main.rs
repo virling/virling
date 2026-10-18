@@ -2060,12 +2060,13 @@ mod tests {
         make_agency(&state).await;
         let monday = seed_last_week(&store, &site);
         crate::sync::rebuild_attribution(&state, Some(&site)).await;
-        let s: crate::sites::Site =
-            sqlx::query_as("SELECT id, domain, timezone, cookieless FROM sites WHERE id = ?")
-                .bind(&site)
-                .fetch_one(&state.db)
-                .await
-                .unwrap();
+        let s: crate::sites::Site = sqlx::query_as(
+            "SELECT id, domain, timezone, cookieless, same_visit FROM sites WHERE id = ?",
+        )
+        .bind(&site)
+        .fetch_one(&state.db)
+        .await
+        .unwrap();
         let r = crate::dashboard::report::view(&state, &s, monday, false)
             .await
             .unwrap();

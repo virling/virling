@@ -41,6 +41,10 @@
     <div><b>Cookieless mode</b><span class="muted">Virling ignores the visitor cookie and counts visitors with a hash of IP address and browser that changes every day. Returning visitors count again each day, and payments can no longer be linked to visits, so new revenue shows as Unattributed. Add <span class="mono">data-cookieless</span> to the script tag so the cookie is never set.</span></div>
     <label class="switch"><input type="checkbox" name="cookieless"{% if cookieless %} checked{% endif %}><span></span><span class="sr">Cookieless mode</span></label>
   </div>
+  <div class="setting">
+    <div><b id="same-visit-label">Same-visit domains</b><span class="muted">Other domains that are part of {{ shell.domain }}, such as a separate app or docs domain. Clicks to them are not counted as leaving the site. www and subdomains of {{ shell.domain }} are always included.</span></div>
+    <textarea class="input set-area" name="same_visit" rows="3" placeholder="app.example.net" spellcheck="false" aria-labelledby="same-visit-label">{{ same_visit }}</textarea>
+  </div>
   <div class="actions end"><button class="btn" type="submit">Save changes</button></div>
 </form>
 </section>
