@@ -13,7 +13,11 @@ Before `</head>` on every page:
 
 ## Next.js
 
-In the App Router, put it in the root layout so it loads on every route. Route changes are tracked through `history.pushState` and `replaceState`, so client-side navigation is counted.
+Use `next/script` with `strategy="afterInteractive"` and load it once, so it runs on every route. `defer` does nothing on `next/script`, so leave it out. Route changes are tracked through `history.pushState` and `replaceState`, so client-side navigation is counted.
+
+### App Router
+
+In the root layout:
 
 ```jsx,file:app/layout.tsx
 import Script from "next/script";
@@ -21,12 +25,30 @@ import Script from "next/script";
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head>
-        <Script defer src="https://stats.example.com/v.js"
-          data-site="yourdomain.com" />
-      </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Script src="https://stats.example.com/v.js"
+          data-site="yourdomain.com" strategy="afterInteractive" />
+      </body>
     </html>
+  );
+}
+```
+
+### Pages Router
+
+In the custom App:
+
+```jsx,file:pages/_app.tsx
+import Script from "next/script";
+
+export default function App({ Component, pageProps }) {
+  return (
+    <>
+      <Script src="https://stats.example.com/v.js"
+        data-site="yourdomain.com" strategy="afterInteractive" />
+      <Component {...pageProps} />
+    </>
   );
 }
 ```

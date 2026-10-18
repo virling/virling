@@ -58,7 +58,8 @@
       <div class="code-head">
         <div class="tabs" role="tablist" aria-label="Platform">
           <button role="tab" aria-selected="true" aria-controls="p-html">HTML</button>
-          <button role="tab" aria-selected="false" aria-controls="p-next">Next.js</button>
+          <button role="tab" aria-selected="false" aria-controls="p-next">Next.js App Router</button>
+          <button role="tab" aria-selected="false" aria-controls="p-next-pages">Next.js Pages Router</button>
           <button role="tab" aria-selected="false" aria-controls="p-astro">Astro</button>
           <button role="tab" aria-selected="false" aria-controls="p-wp">WordPress</button>
           <button role="tab" aria-selected="false" aria-controls="p-nocode">Framer, Webflow</button>
@@ -67,11 +68,32 @@
       </div>
       <pre id="p-html" role="tabpanel">&lt;script defer src="{{ script_host }}/v.js"
   data-site="{{ domain }}"&gt;&lt;/script&gt;</pre>
-      <pre id="p-next" role="tabpanel" hidden>// app/layout.tsx, inside &lt;head&gt;
+      <pre id="p-next" role="tabpanel" hidden>// app/layout.tsx
 import Script from "next/script";
 
-&lt;Script defer src="{{ script_host }}/v.js"
-  data-site="{{ domain }}" /&gt;</pre>
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+        {children}
+        &lt;Script src="{{ script_host }}/v.js"
+          data-site="{{ domain }}" strategy="afterInteractive" /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</pre>
+      <pre id="p-next-pages" role="tabpanel" hidden>// pages/_app.tsx
+import Script from "next/script";
+
+export default function App({ Component, pageProps }) {
+  return (
+    &lt;&gt;
+      &lt;Script src="{{ script_host }}/v.js"
+        data-site="{{ domain }}" strategy="afterInteractive" /&gt;
+      &lt;Component {...pageProps} /&gt;
+    &lt;/&gt;
+  );
+}</pre>
       <pre id="p-astro" role="tabpanel" hidden>&lt;!-- src/layouts/Layout.astro, inside &lt;head&gt; --&gt;
 &lt;script is:inline defer src="{{ script_host }}/v.js"
   data-site="{{ domain }}"&gt;&lt;/script&gt;</pre>
