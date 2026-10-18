@@ -11,8 +11,8 @@ use crate::app::AppState;
 use crate::auth::Account;
 use crate::channel::{source_domain, source_name};
 use crate::dashboard::{
-    Opt, PER_PAGE, Shell, ago, amount, blocking, day, duration, group, href, link, load, local,
-    money, payer_key, period, plural, provider_short, range, range_opts, status,
+    Opt, PER_PAGE, RangeArgs, RangeMenu, Shell, ago, amount, blocking, day, duration, group, href,
+    link, load, load_ranged, local, money, payer_key, plural, provider_short, status,
 };
 use crate::icons;
 use crate::onboarding::render;
@@ -38,6 +38,9 @@ pub fn visitor_href(domain: &str, visitor_id: &str) -> String {
 #[derive(Deserialize, Default)]
 pub struct VisitorsQuery {
     range: Option<String>,
+    from: Option<String>,
+    to: Option<String>,
+    compare: Option<String>,
     channel: Option<String>,
     source: Option<String>,
     goal: Option<String>,
@@ -80,8 +83,7 @@ pub struct VisitorView {
 struct VisitorsPage {
     shell: Shell,
     title: &'static str,
-    range_label: &'static str,
-    ranges: Vec<Opt>,
+    range: RangeMenu,
     source_label: String,
     all_sources: MenuOpt,
     sources: Vec<MenuOpt>,
@@ -145,12 +147,17 @@ pub async fn list(
     Path(domain): Path<String>,
     Query(q): Query<VisitorsQuery>,
 ) -> Response {
-    let ctx = match load(&state, &account, &domain, "visitors").await {
-        Ok(ctx) => ctx,
+    let args = RangeArgs {
+        range: q.range.clone(),
+        from: q.from.clone(),
+        to: q.to.clone(),
+        compare: q.compare.clone(),
+    };
+    let (ctx, picked) = match load_ranged(&state, &account, &domain, "visitors", args).await {
+        Ok(r) => r,
         Err(code) => return code.into_response(),
     };
-    let (rkey, rlabel, days, rdefault) = range(&ctx, q.range.as_deref());
-    let p = period(&ctx, days);
+    let p = picked.period(&ctx.site.timezone);
     let page = q.page.unwrap_or(1).max(1);
     let nonempty = |v: &Option<String>| v.clone().filter(|s| !s.is_empty());
     let channel = nonempty(&q.channel);
@@ -197,15 +204,16 @@ pub async fn list(
     let base = sites::app_path(&ctx.site.domain, "visitors");
     let enc_opt = |v: &Option<String>| v.as_deref().map(enc).unwrap_or_default();
     let (channel_q, source_q, goal_q) = (enc_opt(&channel), enc_opt(&source), enc_opt(&goal));
-    let range_q = if rkey == rdefault { "" } else { rkey };
-    let params: [(&str, &str); 6] = [
-        ("range", range_q),
-        ("channel", &channel_q),
+    let rq = picked.params();
+    let rp: Vec<(&str, &str)> = rq.iter().map(|(k, v)| (*k, v.as_str())).collect();
+    let mut params = rp.clone();
+    params.extend([
+        ("channel", channel_q.as_str()),
         ("source", &source_q),
         ("goal", &goal_q),
         ("exit", exit.unwrap_or("")),
         ("paid", paid.unwrap_or("")),
-    ];
+    ]);
 
     let mut channels: Vec<(String, u64)> = Vec::new();
     let mut sources: Vec<(String, String, u64)> = Vec::new();
@@ -322,8 +330,18 @@ pub async fn list(
     };
     render(VisitorsPage {
         title: "Visitors",
-        range_label: rlabel,
-        ranges: range_opts(&base, rkey, rdefault, &params[1..]),
+        range: picked.menu(
+            ctx.today,
+            ctx.first_day,
+            &base,
+            &[
+                ("channel", channel.clone().unwrap_or_default()),
+                ("source", source.clone().unwrap_or_default()),
+                ("goal", goal.clone().unwrap_or_default()),
+                ("exit", exit.unwrap_or("").to_string()),
+                ("paid", paid.unwrap_or("").to_string()),
+            ],
+        ),
         source_label,
         all_sources,
         sources: source_opts,
@@ -342,7 +360,7 @@ pub async fn list(
             || goal.is_some()
             || exit.is_some()
             || paid.is_some(),
-        clear_href: href(&base, &[("range", range_q)]),
+        clear_href: href(&base, &rp),
         showing: if shown > 0 {
             format!(
                 "Showing {} to {} of {}",

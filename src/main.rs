@@ -876,6 +876,36 @@ mod tests {
         }
     }
 
+    #[tokio::test]
+    async fn every_page_shares_the_date_range() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        for page in ["", "/visitors", "/payments", "/retention"] {
+            let uri = format!("/app/example.com{page}?range=7d&compare=off");
+            let body = body_text(call(&state, get(&uri, Some(&cookie))).await).await;
+            for want in [
+                ">Yesterday<",
+                ">This month<",
+                "Custom range",
+                "Compare to previous period",
+                r#"aria-checked="false""#,
+                "in the last 7 days",
+                r#"href="/app/example.com/visitors?range=7d&#38;compare=off""#,
+                r#"href="/app/example.com/payments?range=7d&#38;compare=off""#,
+                r#"href="/app/example.com?range=7d&#38;compare=off""#,
+            ] {
+                assert!(body.contains(want), "{page}: {want}");
+            }
+        }
+        let uri = "/app/example.com/payments?from=2026-01-02&to=2026-01-09";
+        let body = body_text(call(&state, get(uri, Some(&cookie))).await).await;
+        assert!(body.contains("Jan 2 to 9"), "custom range label");
+        assert!(
+            body.contains(r#"href="/app/example.com/retention?from=2026-01-02&#38;to=2026-01-09""#)
+        );
+        assert!(body.contains("visitors Jan 2 to 9") || body.contains("visitor Jan 2 to 9"));
+    }
+
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {
         let (ciphertext, nonce) = state.vault.encrypt(key).unwrap();
         sqlx::query(
