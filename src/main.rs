@@ -877,6 +877,27 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn settings_controls_are_switches_and_radio_groups() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site =
+            body_text(call(&state, get("/app/example.com/settings", Some(&cookie))).await).await;
+        assert_eq!(site.matches(r#"type="checkbox" role="switch""#).count(), 3);
+        assert_eq!(site.matches(r#"type="checkbox""#).count(), 3);
+        assert!(
+            site.contains(r#"<div class="seg" role="radiogroup" aria-labelledby="model-label">"#)
+        );
+        let account =
+            body_text(call(&state, get("/app/example.com/account", Some(&cookie))).await).await;
+        assert!(
+            account.contains(r#"<div class="seg" role="radiogroup" aria-labelledby="plan-label">"#)
+        );
+        assert!(
+            !account.contains(r#"<div class="seg">"#) && !site.contains(r#"<div class="seg">"#)
+        );
+    }
+
+    #[tokio::test]
     async fn account_settings_hold_email_plan_and_keys() {
         let (_dir, state, _store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;

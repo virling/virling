@@ -16,8 +16,8 @@
 <div class="set-intro"><h2>Attribution</h2><p class="muted">How a payment is credited to the visit that brought it, and what Virling stores about visitors.</p></div>
 <form class="card" method="post" action="/app/{{ shell.domain }}/settings">
   <div class="setting">
-    <div><b>Model</b><span class="muted">Which visit gets credit for a payment.</span></div>
-    <div class="seg">
+    <div><b id="model-label">Model</b><span class="muted">Which visit gets credit for a payment.</span></div>
+    <div class="seg" role="radiogroup" aria-labelledby="model-label">
       <label><input type="radio" name="model" value="last_non_direct"{% if model == "last_non_direct" %} checked{% endif %}>Last non-direct</label>
       <label><input type="radio" name="model" value="first_touch"{% if model == "first_touch" %} checked{% endif %}>First touch</label>
     </div>
@@ -39,7 +39,7 @@
   </div>
   <div class="setting">
     <div><b>Cookieless mode</b><span class="muted">Virling ignores the visitor cookie and counts visitors with a hash of IP address and browser that changes every day. Returning visitors count again each day, and payments can no longer be linked to visits, so new revenue shows as Unattributed. Add <span class="mono">data-cookieless</span> to the script tag so the cookie is never set.</span></div>
-    <label class="switch"><input type="checkbox" name="cookieless"{% if cookieless %} checked{% endif %}><span></span><span class="sr">Cookieless mode</span></label>
+    <label class="switch"><input type="checkbox" role="switch" name="cookieless"{% if cookieless %} checked{% endif %}><span></span><span class="sr">Cookieless mode</span></label>
   </div>
   <div class="setting">
     <div><b id="same-visit-label">Same-visit domains</b><span class="muted">Other domains that are part of {{ shell.domain }}, such as a separate app or docs domain. Clicks to them are not counted as leaving the site. www and subdomains of {{ shell.domain }} are always included.</span></div>
@@ -92,7 +92,7 @@
   </div>
   <div class="setting">
     <div><b><label for="powered_by">Show Powered by Virling on reports</label></b><span class="muted">A small line at the bottom of the report page, the client link and the weekly email.</span></div>
-    <label class="switch"><input type="checkbox" id="powered_by" name="powered_by"{% if brand.powered_by %} checked{% endif %}><span></span><span class="sr">Show Powered by Virling on reports</span></label>
+    <label class="switch"><input type="checkbox" role="switch" id="powered_by" name="powered_by"{% if brand.powered_by %} checked{% endif %}><span></span><span class="sr">Show Powered by Virling on reports</span></label>
   </div>
   <div class="actions end"><button class="btn" type="submit">Save branding</button></div>
 </form>
@@ -119,11 +119,11 @@
   {% if public_saved %}<div class="notice ok-note" role="status">{% if public_on %}Saved. Your public dashboard is live.{% else %}Saved. The public dashboard is off and its link no longer works.{% endif %}</div>{% endif %}
   <div class="setting">
     <div><b><label for="public_dashboard">Public dashboard</label></b><span class="muted">Shows the overview, the revenue chart, the cards and Customers who stay. Turn it off and the link stops working right away.</span></div>
-    <label class="switch"><input type="checkbox" id="public_dashboard" name="public_dashboard"{% if public_on %} checked{% endif %}><span></span><span class="sr">Public dashboard</span></label>
+    <label class="switch"><input type="checkbox" role="switch" id="public_dashboard" name="public_dashboard"{% if public_on %} checked{% endif %}><span></span><span class="sr">Public dashboard</span></label>
   </div>
   <div class="setting">
     <div><b><label for="hide_revenue">Hide revenue amounts</label></b><span class="muted">Shows shares of revenue and ratios against your average instead of dollar amounts.</span></div>
-    <label class="switch"><input type="checkbox" id="hide_revenue" name="hide_revenue"{% if public_hide %} checked{% endif %}><span></span><span class="sr">Hide revenue amounts</span></label>
+    <label class="switch"><input type="checkbox" role="switch" id="hide_revenue" name="hide_revenue"{% if public_hide %} checked{% endif %}><span></span><span class="sr">Hide revenue amounts</span></label>
   </div>
   {% if public_on %}
   <div class="code" data-tabs>
