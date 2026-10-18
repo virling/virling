@@ -24,6 +24,7 @@ User-Agent: Mozilla/5.0 ...
 | `w` | number | Optional | Screen width in CSS pixels. Below 768 is Mobile, below 1024 Tablet, else Desktop. Missing: Unknown. |
 | `l` | string | Optional | Browser language tag. Kept as `en` or `en-US`; cookieless sites keep only `en`. Missing: the first `Accept-Language` entry. |
 | `k` | string | Optional | Navigation type of a page load: `navigate`, `reload` or `back_forward`. Absent on route changes and other events. With it, a pageview can count as a return to the site; see [Sessions](../attribution/index.md#sessions). |
+| `b` | boolean | Optional | `true` when the browser is automated (`navigator.webdriver`) or reports no languages. The event is kept apart as a bot and left out of every number. |
 | `g` | string | For goals and exits | Goal name, trimmed and cut to 64 bytes, or the link URL for an exit. Goals without one are dropped. |
 
 When a pageview comes back to the visit after a leave, the server also stores a `back` event just before it, shown as "Came back" on the timeline. The server adds the time, the channel, the session, the country from `cf-ipcountry`, `x-vercel-ip-country` or `x-country-code`, and the browser from `User-Agent`.
@@ -39,6 +40,7 @@ When a pageview comes back to the visit after a leave, the server also stores a 
 These are dropped silently, still with `202`:
 
 - Requests whose `User-Agent` looks like a bot, or is empty.
+- Events with `b: true` or a screen width of `0`. They are stored apart in the `bot_events` table for debugging, and Site settings shows how many bot visitors were filtered in the last 30 days.
 - Events for a site that does not exist.
 - Events whose page host is not the site's domain or a subdomain.
 - Events over the site's rate limit.
