@@ -23,9 +23,10 @@ User-Agent: Mozilla/5.0 ...
 | `v` | string or null | Optional | Visitor ID, 8 to 64 letters, digits or dashes. Missing or invalid: a daily hash is used. |
 | `w` | number | Optional | Screen width in CSS pixels. Below 768 is Mobile, below 1024 Tablet, else Desktop. Missing: Unknown. |
 | `l` | string | Optional | Browser language tag. Kept as `en` or `en-US`; cookieless sites keep only `en`. Missing: the first `Accept-Language` entry. |
+| `k` | string | Optional | Navigation type of a page load: `navigate`, `reload` or `back_forward`. Absent on route changes and other events. With it, a pageview can count as a return to the site; see [Sessions](../attribution/index.md#sessions). |
 | `g` | string | For goals and exits | Goal name, trimmed and cut to 64 bytes, or the link URL for an exit. Goals without one are dropped. |
 
-The server adds the time, the channel, the session, the country from `cf-ipcountry`, `x-vercel-ip-country` or `x-country-code`, and the browser from `User-Agent`.
+When a pageview comes back to the visit after a leave, the server also stores a `back` event just before it, shown as "Came back" on the timeline. The server adds the time, the channel, the session, the country from `cf-ipcountry`, `x-vercel-ip-country` or `x-country-code`, and the browser from `User-Agent`.
 
 ## Responses
 
