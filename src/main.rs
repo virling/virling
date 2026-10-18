@@ -928,6 +928,13 @@ mod tests {
         assert!(body.contains("visitors Jan 2 to 9") || body.contains("visitor Jan 2 to 9"));
     }
 
+    #[test]
+    fn card_tabs_reserve_the_tallest_panel() {
+        let css = include_str!("../assets/app.css");
+        assert!(css.contains(".d3-bc > .d3-panel { grid-area: 2 / 1; }"));
+        assert!(css.contains(".d3-bc > .d3-panel[hidden] { display: flex; visibility: hidden; }"));
+    }
+
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {
         let (ciphertext, nonce) = state.vault.encrypt(key).unwrap();
         sqlx::query(
