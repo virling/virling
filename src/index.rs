@@ -125,17 +125,19 @@ struct Pageview {
 pub(crate) const GOAL: u8 = 1;
 pub(crate) const EXIT: u8 = 2;
 pub(crate) const LEAVE: u8 = 3;
+pub(crate) const BACK: u8 = 4;
 
 fn mark_kind(kind: &str) -> Option<u8> {
     match kind {
         "goal" => Some(GOAL),
         "exit" => Some(EXIT),
         "leave" => Some(LEAVE),
+        "back" => Some(BACK),
         _ => None,
     }
 }
 
-/// A goal, exit or leave event.
+/// A goal, exit, leave or back event.
 #[derive(Clone, Copy)]
 struct Mark {
     ts: i64,

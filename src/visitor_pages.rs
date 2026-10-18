@@ -395,6 +395,14 @@ pub enum StepView {
         time: String,
         name: String,
     },
+    Left {
+        time: String,
+        icon: String,
+        domain: String,
+    },
+    Back {
+        time: String,
+    },
     Exit {
         time: String,
         page: String,
@@ -540,6 +548,14 @@ fn timeline_view(t: &Timeline, domain: &str, offset: UtcOffset) -> Vec<EntryView
                             Step::Goal { ts, name } => StepView::Goal {
                                 time: clock(*ts, offset),
                                 name: name.clone(),
+                            },
+                            Step::Left { ts, domain } => StepView::Left {
+                                time: clock(*ts, offset),
+                                icon: icons::source(domain, 16),
+                                domain: domain.clone(),
+                            },
+                            Step::Back { ts } => StepView::Back {
+                                time: clock(*ts, offset),
                             },
                             Step::Exit { ts, page, link } => StepView::Exit {
                                 time: clock(*ts, offset),

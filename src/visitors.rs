@@ -86,6 +86,17 @@ pub enum Step {
         ts: OffsetDateTime,
         name: String,
     },
+    /// A click out to another site in the middle of the visit.
+    Left {
+        #[serde(with = "time::serde::rfc3339")]
+        ts: OffsetDateTime,
+        domain: String,
+    },
+    /// The visitor came back to the visit after leaving the site.
+    Back {
+        #[serde(with = "time::serde::rfc3339")]
+        ts: OffsetDateTime,
+    },
     /// How the visit ended: the last page and the link clicked out, if any.
     Exit {
         #[serde(with = "time::serde::rfc3339")]
@@ -99,7 +110,11 @@ pub enum Step {
 impl Step {
     pub fn ts(&self) -> OffsetDateTime {
         match self {
-            Step::Page { ts, .. } | Step::Goal { ts, .. } | Step::Exit { ts, .. } => *ts,
+            Step::Page { ts, .. }
+            | Step::Goal { ts, .. }
+            | Step::Left { ts, .. }
+            | Step::Back { ts }
+            | Step::Exit { ts, .. } => *ts,
             Step::Payment(p) => p.ts,
         }
     }
@@ -328,6 +343,7 @@ pub(crate) fn facets(conn: &Connection, site_id: &str, period: &Period) -> anyho
 
 pub(crate) struct Ev {
     pub ts: OffsetDateTime,
+    pub session: String,
     pub kind: String,
     pub name: Option<String>,
     pub path: String,
@@ -345,7 +361,10 @@ fn steps(events: &[Ev]) -> Vec<Step> {
     for (n, &i) in pages.iter().enumerate() {
         let e = &events[i];
         let end = match pages.get(n + 1) {
-            Some(&j) => Some(events[j].ts),
+            Some(&j) => events[i..j]
+                .iter()
+                .find(|x| x.kind == "leave")
+                .map_or(Some(events[j].ts), |x| Some(x.ts)),
             None => events[i..]
                 .iter()
                 .filter(|x| matches!(x.kind.as_str(), "leave" | "exit"))
@@ -358,11 +377,25 @@ fn steps(events: &[Ev]) -> Vec<Step> {
             secs: end.map(|t| (t - e.ts).whole_seconds()),
         });
     }
-    for e in events.iter().filter(|e| e.kind == "goal") {
-        out.push(Step::Goal {
-            ts: e.ts,
-            name: e.name.clone().unwrap_or_default(),
-        });
+    let last_page = pages.last().copied().unwrap_or(0);
+    for (i, e) in events.iter().enumerate() {
+        match e.kind.as_str() {
+            "goal" => out.push(Step::Goal {
+                ts: e.ts,
+                name: e.name.clone().unwrap_or_default(),
+            }),
+            "exit" if i < last_page => out.push(Step::Left {
+                ts: e.ts,
+                domain: e
+                    .name
+                    .as_deref()
+                    .and_then(|l| l.split('/').next())
+                    .unwrap_or_default()
+                    .to_string(),
+            }),
+            "back" => out.push(Step::Back { ts: e.ts }),
+            _ => {}
+        }
     }
     if let Some(&last) = pages.last() {
         let after = &events[last..];
@@ -388,7 +421,7 @@ pub(crate) fn timeline(
 ) -> anyhow::Result<Option<Timeline>> {
     let params = named_params! { "site": site_id, "visitor": visitor_id };
     let mut stmt = conn.prepare(
-        "SELECT epoch_us(ts), kind, name, path, channel, referrer_host, utm_campaign
+        "SELECT epoch_us(ts), kind, name, path, channel, referrer_host, utm_campaign, session_id
         FROM events WHERE site_id = $site AND visitor_id = $visitor
         ORDER BY ts, CASE kind WHEN 'pageview' THEN 0 WHEN 'goal' THEN 1 WHEN 'exit' THEN 2 ELSE 3 END, path",
     )?;
@@ -402,6 +435,7 @@ pub(crate) fn timeline(
                 channel: r.get(4)?,
                 referrer_host: r.get(5)?,
                 campaign: r.get(6)?,
+                session: r.get(7)?,
             })
         })?
         .collect::<Result<Vec<_>, _>>()?;
@@ -440,7 +474,7 @@ pub(crate) fn assemble(
     let mut groups: Vec<&[Ev]> = Vec::new();
     let mut start = 0;
     for i in 1..=events.len() {
-        if i == events.len() || events[i].ts - events[i - 1].ts > IDLE {
+        if i == events.len() || events[i].session != events[i - 1].session {
             groups.push(&events[start..i]);
             start = i;
         }
@@ -801,6 +835,8 @@ mod tests {
             .map(|s| match s {
                 Step::Page { .. } => "page",
                 Step::Goal { .. } => "goal",
+                Step::Left { .. } => "left",
+                Step::Back { .. } => "back",
                 Step::Exit { .. } => "exit",
                 Step::Payment(_) => "payment",
             })
