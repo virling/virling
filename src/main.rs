@@ -928,6 +928,25 @@ mod tests {
         assert!(body.contains("visitors Jan 2 to 9") || body.contains("visitor Jan 2 to 9"));
     }
 
+    #[tokio::test]
+    async fn nextjs_snippets_cover_both_routers() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let page =
+            body_text(call(&state, get("/app/example.com/setup/script", Some(&cookie))).await)
+                .await;
+        for id in ["p-next", "p-next-pages"] {
+            let start = page.find(&format!(r#"<pre id="{id}""#)).unwrap();
+            let pre = &page[start..start + page[start..].find("</pre>").unwrap()];
+            assert!(pre.contains(r#"strategy="afterInteractive""#), "{id}");
+            assert!(
+                pre.contains("next/script") && !pre.contains("defer"),
+                "{id}"
+            );
+        }
+        assert!(page.contains("// app/layout.tsx") && page.contains("// pages/_app.tsx"));
+    }
+
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {
         let (ciphertext, nonce) = state.vault.encrypt(key).unwrap();
         sqlx::query(
