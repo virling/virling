@@ -38,6 +38,10 @@
           <li class="st-page"><span class="t">{{ time }}</span><span class="p mono">{{ path }}</span><span class="d">{% if stay.is_empty() %}<span class="na" title="No later page or leave event">n/a</span>{% else %}{{ stay }}{% endif %}</span></li>
           {% when StepView::Goal { time, name } %}
           <li class="st-goal"><span class="t">{{ time }}</span><span class="p"><span class="chip goal">Goal: {{ name }}</span></span><span class="d"></span></li>
+          {% when StepView::Left { time, icon, domain } %}
+          <li class="st-exit out"><span class="t">{{ time }}</span><span class="p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>Left to {{ icon|safe }}<span class="mono lbl">{{ domain }}</span></span><span class="d"></span></li>
+          {% when StepView::Back { time } %}
+          <li class="st-exit"><span class="t">{{ time }}</span><span class="p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3"/></svg>Came back</span><span class="d"></span></li>
           {% when StepView::Exit { time, page, icon, link } %}
           {% if link.is_empty() %}
           <li class="st-exit"><span class="t">{{ time }}</span><span class="p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M9 16l-4-4 4-4M5 12h11"/></svg>Left from <span class="mono">{{ page }}</span></span><span class="d"></span></li>

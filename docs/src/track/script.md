@@ -1,6 +1,6 @@
 # Add the script
 
-One tag, about 1 KB gzipped. It records pageviews, referrers, UTM tags, route changes in single-page apps and the goals you send.
+One tag, about 1.2 KB gzipped. It records pageviews, referrers, UTM tags, route changes in single-page apps and the goals you send.
 
 ```html
 <script defer src="https://stats.example.com/v.js"
@@ -35,6 +35,12 @@ The server adds the country from a proxy header and the browser name from the us
 ## Outbound links
 
 A click on a link to another site is sent as an exit with the link's origin and path. Links between `www.` and the bare domain, and to subdomains, stay inside the site. Add other domains that belong to the same site, such as a separate app or docs domain, under Same-visit domains in Site settings, and clicks to them are not counted as exits either.
+
+## Leaving and coming back
+
+When the page is closed or the visitor navigates away, the script sends a leave, used for time on page and the exit page. Switching tabs is not a leave, and neither is closing one of several open tabs of the site: open tabs find each other with `BroadcastChannel`.
+
+Each page load sends its navigation type (`navigate`, `reload` or `back_forward`). A page restored by Back from the browser's back/forward cache sends a new pageview with `back_forward`. The server uses both to tell a return from a reload; see [Sessions](../attribution/index.md#sessions). A return to the visit shows as "Came back" on the visitor's timeline, after a "Left to" row when the visitor had clicked out.
 
 ## UTM tags and ref
 

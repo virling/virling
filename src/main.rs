@@ -2081,7 +2081,7 @@ mod tests {
         let monday = seed_last_week(&store, &site);
         crate::sync::rebuild_attribution(&state, Some(&site)).await;
         let s: crate::sites::Site = sqlx::query_as(
-            "SELECT id, domain, timezone, cookieless, same_visit FROM sites WHERE id = ?",
+            "SELECT id, domain, timezone, cookieless, same_visit, return_minutes FROM sites WHERE id = ?",
         )
         .bind(&site)
         .fetch_one(&state.db)

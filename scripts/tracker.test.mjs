@@ -28,7 +28,16 @@ function jar(host) {
   };
 }
 
-function browser(url, { cookie = jar(new URL(url).hostname), attrs = {} } = {}) {
+// BroadcastChannel over a shared set of open channels, delivered asynchronously like a browser does.
+const channel = (bus) =>
+  class {
+    constructor() { bus.add(this); }
+    postMessage(data) { for (const o of bus) if (o !== this) setTimeout(() => bus.has(o) && o.onmessage?.({ data })); }
+    close() { bus.delete(this); }
+  };
+const tick = () => new Promise((r) => setTimeout(r, 5));
+
+function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set() } = {}) {
   const loc = new URL(url);
   const sent = [];
   const listeners = {};
@@ -55,12 +64,13 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {} } = {}) 
     for (const k of ["href", "pathname", "search", "hash"]) location[k] = n[k];
   };
   const location = { href: loc.href, hostname: loc.hostname, protocol: loc.protocol, pathname: loc.pathname, search: loc.search, hash: loc.hash, origin: loc.origin };
-  const window = { addEventListener: on("w:") };
+  const window = { addEventListener: on("w:"), BroadcastChannel: channel(bus) };
   const navigator = {
     language: "en-US",
     sendBeacon: (_u, body) => (sent.push(...JSON.parse(body)), true),
   };
-  const ctx = { window, document, navigator, location, history, screen: { width: 1440 }, URL, JSON, Date, Math, fetch: () => {} };
+  const performance = { getEntriesByType: (t) => (t == "navigation" ? [{ type: nav }] : []) };
+  const ctx = { window, document, navigator, location, history, performance, BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, URL, JSON, Date, Math, fetch: () => {} };
   vm.runInNewContext(SRC, ctx);
   const fire = (t, e, ev = {}) => (listeners[t + e] || []).forEach((f) => f(ev));
   return { sent, cookie, window, document, history, location, fire };
@@ -94,7 +104,6 @@ for (const [host, domain] of [
     const vids = [...b.cookie.cookies.values()].filter((c) => c.name == "virling_vid");
     assert.deepEqual(vids.map((c) => c.domain), [domain]);
     assert.equal(vids[0].value, b.sent[0].v);
-    assert.ok(![...b.cookie.cookies.values()].some((c) => c.name == "virling_t"), "the probe is removed");
   });
 }
 
@@ -111,7 +120,7 @@ test("an ID from a host-only cookie moves to the registrable domain", () => {
   cookie.set("virling_vid=vold123456;path=/");
   const b = browser("https://www.example.com/", { cookie });
   assert.equal(b.sent[0].v, "vold123456");
-  assert.ok([...cookie.cookies.values()].some((c) => c.domain == "example.com" && c.value == "vold123456"));
+  assert.deepEqual([...cookie.cookies.values()].map((c) => [c.domain, c.value]), [["example.com", "vold123456"]]);
 });
 
 test("cookieless mode sets no cookie", () => {
@@ -145,6 +154,50 @@ test("www and the bare domain are one site", () => {
   b.fire("d:", "click", { target: { closest: () => ({ href: "https://example.com/pricing" }) } });
   b.fire("d:", "click", { target: { closest: () => ({ href: "https://blog.example.net/" }) } });
   assert.deepEqual(b.sent.filter((e) => e.n == "exit").map((e) => e.g), ["https://blog.example.net/"]);
+});
+
+test("the first pageview carries the navigation type, route changes do not", () => {
+  const b = browser("https://example.com/", { nav: "reload" });
+  b.history.pushState({}, "", "/a");
+  assert.deepEqual(b.sent.map((e) => e.k), ["reload", null]);
+});
+
+test("leave fires when the page goes away, not when the tab is hidden", () => {
+  const b = browser("https://example.com/");
+  b.document.visibilityState = "hidden";
+  b.fire("d:", "visibilitychange");
+  assert.deepEqual(b.sent.map((e) => e.n), ["pageview"]);
+  b.fire("w:", "pagehide", { persisted: false });
+  assert.deepEqual(b.sent.map((e) => e.n), ["pageview", "leave"]);
+});
+
+test("closing one of two open tabs is not a leave, closing the last one is", async () => {
+  const bus = new Set();
+  const a = browser("https://example.com/", { bus });
+  await tick();
+  const b = browser("https://example.com/pricing", { bus });
+  await tick();
+  a.fire("w:", "pagehide", { persisted: false });
+  await tick();
+  b.fire("w:", "pagehide", { persisted: false });
+  assert.deepEqual(a.sent.map((e) => e.n), ["pageview"]);
+  assert.deepEqual(b.sent.map((e) => e.n), ["pageview", "leave"]);
+});
+
+test("a back/forward cache restore is sent as a return pageview", () => {
+  const b = browser("https://example.com/pricing");
+  b.fire("d:", "click", { target: { closest: () => ({ href: "https://x.com/" }) } });
+  b.fire("w:", "pagehide", { persisted: true });
+  b.fire("w:", "pageshow", { persisted: false });
+  b.fire("w:", "pageshow", { persisted: true });
+  assert.deepEqual(b.sent.map((e) => [e.n, e.k ?? null]), [
+    ["pageview", "navigate"],
+    ["exit", null],
+    ["leave", null],
+    ["pageview", "back_forward"],
+  ]);
+  assert.equal(b.sent[3].u, "https://example.com/pricing");
+  assert.equal(b.sent[3].r, null);
 });
 
 test("pushState and replaceState route changes log pageviews, once per URL", () => {

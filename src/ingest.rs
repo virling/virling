@@ -37,6 +37,8 @@ pub struct Incoming {
     g: Option<String>,
     /// navigator.language
     l: Option<String>,
+    /// Navigation type of a page load (navigate, reload or back_forward); absent on route changes.
+    k: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -46,39 +48,123 @@ enum Batch {
     Many(Vec<Incoming>),
 }
 
+/// Away at least this long before a page load counts as coming back.
+const BACK_AFTER: Duration = Duration::seconds(10);
+
+/// A visitor's current visit: its ID, last event, when the visitor last left, its UTM tags and last page.
+struct Live {
+    id: String,
+    last: OffsetDateTime,
+    left: Option<OffsetDateTime>,
+    utm: Option<String>,
+    page: String,
+}
+
+/// How an event arrives, for deciding whether it starts a new visit.
+#[derive(Default)]
+pub struct Arrival {
+    /// A page load with a referrer outside the site, or none; route changes and same-site links are not.
+    pub outside: bool,
+    pub reload: bool,
+    /// From a checkout, sign-in or same-visit domain: never a new visit while the visit is live.
+    pub keep: bool,
+    /// UTM tags of the landing URL.
+    pub utm: Option<String>,
+    /// Path of a pageview.
+    pub page: Option<String>,
+    /// Back or forward navigation: a return only to the visit's last page, else a move within the site.
+    pub back_forward: bool,
+    /// Away at least this long counts as a new visit.
+    pub threshold: Duration,
+}
+
 #[derive(Default)]
 pub struct Sessions {
-    map: Mutex<HashMap<(String, String), (String, OffsetDateTime)>>,
+    map: Mutex<HashMap<(String, String), Live>>,
 }
 
 impl Sessions {
-    fn active(&self, site_id: &str, visitor_id: &str, now: OffsetDateTime) -> Option<String> {
+    /// The live visit an exit or leave belongs to; a leave marks the visitor as gone.
+    fn active(
+        &self,
+        site_id: &str,
+        visitor_id: &str,
+        now: OffsetDateTime,
+        leave: bool,
+    ) -> Option<String> {
         let mut map = self.map.lock().unwrap();
-        let (id, last) = map.get_mut(&(site_id.to_string(), visitor_id.to_string()))?;
-        (now - *last < SESSION_IDLE).then(|| {
-            *last = now;
-            id.clone()
+        let s = map.get_mut(&(site_id.to_string(), visitor_id.to_string()))?;
+        (now - s.last < SESSION_IDLE).then(|| {
+            s.last = now;
+            if leave {
+                s.left = Some(now);
+            }
+            s.id.clone()
         })
     }
 
-    fn session_for(&self, site_id: &str, visitor_id: &str, now: OffsetDateTime) -> String {
+    /// The visit of an event, and whether the visitor came back to it after leaving.
+    fn session_for(
+        &self,
+        site_id: &str,
+        visitor_id: &str,
+        now: OffsetDateTime,
+        a: &Arrival,
+    ) -> (String, bool) {
         let mut map = self.map.lock().unwrap();
         if map.len() > 200_000 {
-            map.retain(|_, (_, last)| now - *last < SESSION_IDLE);
+            map.retain(|_, s| now - s.last < SESSION_IDLE);
         }
         let key = (site_id.to_string(), visitor_id.to_string());
-        match map.get_mut(&key) {
-            Some((id, last)) if now - *last < SESSION_IDLE => {
-                *last = now;
-                id.clone()
-            }
-            _ => {
-                let id = uuid::Uuid::new_v4().to_string();
-                map.insert(key, (id.clone(), now));
-                id
+        if let Some(s) = map.get_mut(&key)
+            && now - s.last < SESSION_IDLE
+            && (a.utm.is_none() || a.utm == s.utm)
+        {
+            let away = s.left.map(|t| now - t).filter(|_| {
+                a.outside && !a.reload && (!a.back_forward || a.page.as_ref() == Some(&s.page))
+            });
+            if a.keep || !away.is_some_and(|d| d >= a.threshold) {
+                s.last = now;
+                s.left = None;
+                if let Some(p) = &a.page {
+                    s.page.clone_from(p);
+                }
+                return (s.id.clone(), away.is_some_and(|d| d >= BACK_AFTER));
             }
         }
+        let id = uuid::Uuid::new_v4().to_string();
+        map.insert(
+            key,
+            Live {
+                id: id.clone(),
+                last: now,
+                left: None,
+                utm: a.utm.clone(),
+                page: a.page.clone().unwrap_or_default(),
+            },
+        );
+        (id, false)
     }
+}
+
+/// Checkout and sign-in pages a visitor returns from in the middle of a visit.
+fn checkout_or_login(host: &str, path: &str) -> bool {
+    matches!(
+        host,
+        "checkout.stripe.com"
+            | "buy.stripe.com"
+            | "checkout.dodopayments.com"
+            | "test.checkout.dodopayments.com"
+            | "buy.polar.sh"
+            | "sandbox.polar.sh"
+            | "checkout.paddle.com"
+            | "buy.paddle.com"
+            | "sandbox-checkout.paddle.com"
+            | "accounts.google.com"
+            | "appleid.apple.com"
+    ) || host.ends_with(".lemonsqueezy.com")
+        || (host == "polar.sh" && path.starts_with("/checkout"))
+        || (host == "github.com" && (path.starts_with("/login") || path.starts_with("/session")))
 }
 
 /// Daily-rotating salt for cookieless visitor IDs; yesterday's salt is dropped, never stored.
@@ -341,12 +427,25 @@ pub async fn collect(
         };
         let (utm_source, utm_medium) =
             (utm("utm_source").or_else(|| utm("ref")), utm("utm_medium"));
-        let referrer_host =
-            e.r.as_deref()
-                .and_then(|r| Url::parse(r).ok())
-                .and_then(|r| r.host_str().map(|h| h.to_ascii_lowercase()))
-                .filter(|h| !host_belongs(h, &site.domain))
-                .or_else(|| utm_source.as_deref().and_then(channel::source_host));
+        let referrer = e.r.as_deref().and_then(|r| Url::parse(r).ok());
+        let from = referrer
+            .as_ref()
+            .and_then(|r| Some((r.host_str()?.to_ascii_lowercase(), r.path())));
+        let same_site = from
+            .as_ref()
+            .is_some_and(|(h, _)| host_belongs(h, &site.domain));
+        // Returns from checkout, sign-in and same-visit domains continue the visit and are never its source.
+        let keep = from.as_ref().is_some_and(|(h, path)| {
+            checkout_or_login(h, path)
+                || site
+                    .same_visit
+                    .split_whitespace()
+                    .any(|d| host_belongs(h, d))
+        });
+        let referrer_host = from
+            .map(|(h, _)| h)
+            .filter(|_| !same_site && !keep)
+            .or_else(|| utm_source.as_deref().and_then(channel::source_host));
         if referrer_host.as_deref().is_some_and(is_spam_referrer) {
             continue;
         }
@@ -360,24 +459,46 @@ pub async fn collect(
             Some(v) => v,
             None => state.salt.visitor_id(&site.id, ip, user_agent),
         };
-        let session_id = if matches!(kind, "exit" | "leave") {
+        let path = clip(page.path().to_string(), 500);
+        let (session_id, back) = if matches!(kind, "exit" | "leave") {
             // Exits only extend a live session; a late one never starts a new visit.
-            match state.sessions.active(&site.id, &visitor_id, now) {
-                Some(id) => id,
+            match state
+                .sessions
+                .active(&site.id, &visitor_id, now, kind == "leave")
+            {
+                Some(id) => (id, false),
                 None => continue,
             }
         } else {
-            state.sessions.session_for(&site.id, &visitor_id, now)
+            let load = kind == "pageview" && e.k.is_some();
+            let arrival = Arrival {
+                outside: load && !same_site,
+                reload: e.k.as_deref() == Some("reload"),
+                back_forward: e.k.as_deref() == Some("back_forward"),
+                page: (kind == "pageview").then(|| path.clone()),
+                keep,
+                utm: (kind == "pageview")
+                    .then(|| {
+                        ["utm_source", "utm_medium", "utm_campaign"]
+                            .map(|k| utm(k).unwrap_or_default())
+                            .join("|")
+                    })
+                    .filter(|u| u != "||"),
+                threshold: Duration::minutes(site.return_minutes),
+            };
+            state
+                .sessions
+                .session_for(&site.id, &visitor_id, now, &arrival)
         };
 
-        events.push(Event {
+        let event = Event {
             site_id: site.id.clone(),
             ts: now,
             visitor_id,
             session_id,
             kind: kind.to_string(),
             name,
-            path: clip(page.path().to_string(), 500),
+            path,
             referrer_host,
             utm_source,
             utm_medium,
@@ -393,7 +514,17 @@ pub async fn collect(
             os: os.to_string(),
             host: Some(page_host.to_ascii_lowercase()),
             language: language(e.l.as_deref().unwrap_or(&accept_language), site.cookieless),
-        });
+        };
+        if back {
+            // A "Came back" row just before the page the visitor returned to.
+            events.push(Event {
+                ts: now - Duration::milliseconds(1),
+                kind: "back".into(),
+                name: None,
+                ..event.clone()
+            });
+        }
+        events.push(event);
     }
 
     if !events.is_empty() {
@@ -494,9 +625,59 @@ mod tests {
     fn sessions_expire_after_idle() {
         let s = Sessions::default();
         let t = OffsetDateTime::now_utc();
-        let a = s.session_for("site", "v1", t);
-        assert_eq!(a, s.session_for("site", "v1", t + Duration::minutes(29)));
-        assert_ne!(a, s.session_for("site", "v1", t + Duration::minutes(60)));
+        let a = Arrival::default();
+        let (id, _) = s.session_for("site", "v1", t, &a);
+        assert_eq!(
+            id,
+            s.session_for("site", "v1", t + Duration::minutes(29), &a).0
+        );
+        assert_ne!(
+            id,
+            s.session_for("site", "v1", t + Duration::minutes(60), &a).0
+        );
+    }
+
+    #[test]
+    fn returns_follow_the_threshold() {
+        let s = Sessions::default();
+        let t = OffsetDateTime::now_utc();
+        let m = Duration::minutes;
+        let load = |page: &str| Arrival {
+            outside: true,
+            page: Some(page.into()),
+            threshold: m(5),
+            ..Default::default()
+        };
+        let (a, _) = s.session_for("site", "v1", t, &load("/"));
+        s.active("site", "v1", t + m(1), true);
+        assert_eq!(
+            s.session_for("site", "v1", t + m(3), &load("/")),
+            (a.clone(), true)
+        );
+        s.active("site", "v1", t + m(4), true);
+        let reload = Arrival {
+            reload: true,
+            ..load("/")
+        };
+        assert_eq!(s.session_for("site", "v1", t + m(12), &reload).0, a);
+        s.active("site", "v1", t + m(13), true);
+        let checkout = Arrival {
+            keep: true,
+            ..load("/welcome")
+        };
+        assert_eq!(s.session_for("site", "v1", t + m(23), &checkout).0, a);
+        s.active("site", "v1", t + m(24), true);
+        let other_page = Arrival {
+            back_forward: true,
+            ..load("/pricing")
+        };
+        assert_eq!(
+            s.session_for("site", "v1", t + m(31), &other_page),
+            (a.clone(), false)
+        );
+        s.active("site", "v1", t + m(32), true);
+        let (b, back) = s.session_for("site", "v1", t + m(38), &load("/"));
+        assert!(b != a && !back, "back after 6 minutes away is a new visit");
     }
 
     #[test]

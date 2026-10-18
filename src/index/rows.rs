@@ -555,15 +555,17 @@ impl SiteIndex {
         let v = self.visitor_of(Some(visitor_id));
         let mut events: Vec<(i64, u8, &str, Ev)> = Vec::new();
         let mut last: Option<&Pageview> = None;
-        let ev = |ts: i64, kind: &str, name: u32, path: u32, channel: u32, referrer, attrs| Ev {
-            ts: from_micros(ts),
-            kind: kind.to_string(),
-            name: self.name_of(name),
-            path: self.path_name(path),
-            channel: self.path_name(channel),
-            referrer_host: self.name_of(referrer),
-            campaign: self.attr(attrs, CAMPAIGN),
-        };
+        let ev =
+            |s: u32, ts: i64, kind: &str, name: u32, path: u32, channel: u32, referrer, attrs| Ev {
+                ts: from_micros(ts),
+                session: self.sessions[s as usize].id.to_string(),
+                kind: kind.to_string(),
+                name: self.name_of(name),
+                path: self.path_name(path),
+                channel: self.path_name(channel),
+                referrer_host: self.name_of(referrer),
+                campaign: self.attr(attrs, CAMPAIGN),
+            };
         for s in v.into_iter().flat_map(|v| self.sessions_of(v)) {
             for pv in self.pageviews_of(s) {
                 if last.is_none_or(|b| {
@@ -573,6 +575,7 @@ impl SiteIndex {
                 }
                 let path = self.strings.name(pv.path).unwrap_or("");
                 let e = ev(
+                    s,
                     pv.ts,
                     "pageview",
                     NULL,
@@ -584,9 +587,11 @@ impl SiteIndex {
                 events.push((pv.ts, 0, path, e));
             }
             for m in self.marks_of(s) {
-                let kind = ["", "goal", "exit", "leave"][m.kind as usize];
+                let kind = ["", "goal", "exit", "leave", "back"][m.kind as usize];
                 let path = self.strings.name(m.path).unwrap_or("");
-                let e = ev(m.ts, kind, m.name, m.path, m.channel, m.referrer, m.attrs);
+                let e = ev(
+                    s, m.ts, kind, m.name, m.path, m.channel, m.referrer, m.attrs,
+                );
                 events.push((m.ts, m.kind.min(3), path, e));
             }
         }
@@ -913,5 +918,110 @@ mod tests {
                 visitors::timeline(&conn, SITE, v).unwrap(),
             );
         }
+    }
+
+    #[test]
+    fn timelines_with_returns_match_sql() {
+        use crate::events::{DuckStore, Event, EventStore};
+        use crate::visitors::{Entry, Step};
+        let dir = tempfile::tempdir().unwrap();
+        let store = DuckStore::open(&dir.path().join("e.duckdb")).unwrap();
+        let t0 = time::OffsetDateTime::now_utc() - Duration::days(1);
+        let ev = |v: &str, s: &str, secs: i64, kind: &str, path: &str, name: Option<&str>| Event {
+            site_id: SITE.into(),
+            ts: t0 + Duration::seconds(secs),
+            visitor_id: v.into(),
+            session_id: s.into(),
+            kind: kind.into(),
+            name: name.map(Into::into),
+            path: path.into(),
+            referrer_host: (secs == 0).then(|| "news.ycombinator.com".into()),
+            utm_source: None,
+            utm_medium: None,
+            utm_campaign: None,
+            utm_content: None,
+            utm_term: None,
+            channel: "Social".into(),
+            country: Some("DE".into()),
+            device: "Desktop".into(),
+            browser: "Firefox".into(),
+            os: "macOS".into(),
+            region: None,
+            city: None,
+            host: None,
+            language: None,
+        };
+        // r1 clicks out to x.com and comes back by Back, then returns 15 minutes later as a new visit.
+        let r1 = |s, secs, kind, path, name| ev("r1", s, secs, kind, path, name);
+        store
+            .insert_events(&[
+                r1("a", 0, "pageview", "/", None),
+                r1("a", 60, "exit", "/", Some("x.com/virling")),
+                r1("a", 60, "leave", "/", None),
+                r1("a", 179, "back", "/", None),
+                r1("a", 180, "pageview", "/", None),
+                r1("a", 240, "pageview", "/pricing", None),
+                r1("a", 300, "leave", "/pricing", None),
+                r1("b", 1200, "pageview", "/", None),
+            ])
+            .unwrap();
+        store.load_index(SITE);
+        // r2 spends 10 minutes on checkout and comes back to the same visit.
+        let r2 = |secs, kind, path| ev("r2", "c", secs, kind, path, None);
+        store
+            .insert_events(&[
+                r2(0, "pageview", "/pricing"),
+                r2(30, "leave", "/pricing"),
+                r2(629, "back", "/welcome"),
+                r2(630, "pageview", "/welcome"),
+            ])
+            .unwrap();
+        let ix = store.index_for_test(SITE);
+        let ix = ix.read().unwrap();
+        let conn = store.conn_for_test();
+        for v in ["r1", "r2"] {
+            check(
+                &format!("timeline {v}"),
+                Some(ix.timeline(v)),
+                visitors::timeline(&conn, SITE, v).unwrap(),
+            );
+        }
+        let kinds = |v: &str| -> Vec<Vec<&'static str>> {
+            let t = ix.timeline(v).unwrap();
+            t.entries
+                .iter()
+                .filter_map(|e| match e {
+                    Entry::Visit(v) => Some(
+                        v.steps
+                            .iter()
+                            .map(|s| match s {
+                                Step::Page { .. } => "page",
+                                Step::Left { domain, .. } if domain == "x.com" => "left x.com",
+                                Step::Back { .. } => "back",
+                                Step::Exit { .. } => "exit",
+                                _ => "other",
+                            })
+                            .collect(),
+                    ),
+                    Entry::Payment(_) => None,
+                })
+                .collect()
+        };
+        assert_eq!(
+            kinds("r1"),
+            vec![
+                vec!["page", "left x.com", "back", "page", "page", "exit"],
+                vec!["page", "exit"],
+            ]
+        );
+        assert_eq!(kinds("r2"), vec![vec!["page", "back", "page", "exit"]]);
+        let t = ix.timeline("r1").unwrap();
+        let Entry::Visit(first) = &t.entries[0] else {
+            unreachable!()
+        };
+        assert!(
+            matches!(first.steps[0], Step::Page { secs: Some(60), .. }),
+            "time away is not time on page"
+        );
     }
 }
