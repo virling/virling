@@ -153,6 +153,7 @@ pub fn router(state: AppState) -> Router {
                 get(onboarding::legacy).post(onboarding::legacy),
             )
             .route("/app/{domain}/setup/script", get(onboarding::script_step))
+            .route("/app/{domain}/setup/stack", get(onboarding::stack))
             .route("/app/{domain}/latest-event", get(onboarding::latest_event))
             .route(
                 "/app/{domain}/setup/payments",

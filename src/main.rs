@@ -29,6 +29,7 @@ mod retention;
 mod retention_page;
 mod settings;
 mod sites;
+mod stack;
 mod stats;
 mod sync;
 mod ua;
