@@ -863,6 +863,7 @@ a.ctl { text-decoration: none; }
 .vt-stats .lbl { overflow: hidden; text-overflow: ellipsis; }
 .vt-stats .s { font-size: 11px; color: var(--ink-3); }
 .vt-rev b { color: var(--revenue-text); }
+.vt-rev b.zero, .rev.zero { color: var(--ink-3); }
 .vt-exit b { font-size: 13px; }
 .vt { padding: 16px 16px 0; }
 .vtl { list-style: none; margin: 0; padding: 0; }

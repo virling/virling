@@ -14,7 +14,7 @@
     <div><span class="k">First source</span><b>{{ first_icon|safe }}<span class="lbl">{{ first_source }}</span></b><span class="s">{% if first_channel.is_empty() %}&nbsp;{% else %}{{ first_channel }}{% endif %}</span></div>
     <div><span class="k">Visits</span><b>{{ visits }}</b><span class="s">{{ pageviews }}</span></div>
     <div><span class="k">Goals</span><b>{{ goals }}</b><span class="s">reached</span></div>
-    <div class="vt-rev"><span class="k">Lifetime revenue</span><b>{% if paid %}{{ revenue }}{% else %}$0{% endif %}</b><span class="s">{{ payments }}</span></div>
+    <div class="vt-rev"><span class="k">Lifetime revenue</span>{% if paid %}<b>{{ revenue }}</b>{% else %}<b class="zero">$0</b>{% endif %}<span class="s">{{ payments }}</span></div>
     <div class="vt-exit"><span class="k">Last exit</span><b><span class="lbl">{% if exit.is_empty() %}n/a{% else %}{{ exit }}{% endif %}</span></b><span class="s">&nbsp;</span></div>
   </div>
 </section>

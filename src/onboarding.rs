@@ -317,6 +317,7 @@ pub struct ConnectedStats {
     rows: Vec<ConnectedRow>,
     payments: String,
     revenue: String,
+    zero: bool,
     attributed: u64,
     syncing: bool,
 }
@@ -442,6 +443,7 @@ async fn connected_stats(
             .collect(),
         payments: group(totals.payments),
         revenue: money(totals.revenue_usd),
+        zero: totals.revenue_usd == 0.0,
         attributed,
     }))
 }
