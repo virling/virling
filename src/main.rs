@@ -939,6 +939,7 @@ mod tests {
             ] {
                 assert!(body.contains(want), "{page}: {want}");
             }
+            assert!(!body.contains("Revenue against the previous period"));
         }
         let uri = "/app/example.com/payments?from=2026-01-02&to=2026-01-09";
         let body = body_text(call(&state, get(uri, Some(&cookie))).await).await;
