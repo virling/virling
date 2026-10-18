@@ -1253,7 +1253,11 @@ mod tests {
             .get("v:v1")
             .name;
         assert!(body.contains(&payer) && body.contains(r#"class="heat""#));
-        assert!(body.contains("Customer") && body.contains("Payment 2"));
+        assert!(body.contains("Customer"));
+        assert!(
+            body.contains(r#"<span class="dim">Goal</span>Payment<svg"#),
+            "the goal label has no count"
+        );
         let q = payer.split(' ').next().unwrap().to_lowercase();
         let found = body_text(
             call(
@@ -1298,7 +1302,8 @@ mod tests {
             .await,
         )
         .await;
-        assert!(goals.contains("trial start 1") && goals.contains(&payer));
+        assert!(goals.contains(r#"<span class="dim">Goal</span>trial start<svg"#));
+        assert!(goals.contains(&payer));
         assert!(goals.contains("Someblog") || goals.contains("someblog.dev"));
         let unattributed = body_text(
             call(
