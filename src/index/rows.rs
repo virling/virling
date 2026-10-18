@@ -171,8 +171,8 @@ impl SiteIndex {
             }
             customers.insert(p.customer);
             s.net_usd += p.net.unwrap_or(0.0);
-            if let Some(usd) = p.row.amount_usd.filter(|_| p.row.amount != 0) {
-                s.refunded_usd += usd * p.row.refunded as f64 / p.row.amount as f64;
+            if let (Some(usd), Some(net)) = (p.row.amount_usd, p.net) {
+                s.refunded_usd += usd - net;
             }
         }
         s.customers = customers.len() as u64;

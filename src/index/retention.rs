@@ -84,8 +84,8 @@ impl SiteIndex {
                 a.first = p;
             }
             a.net += p.net.unwrap_or(0.0);
-            if let Some(usd) = row.amount_usd.filter(|_| row.amount != 0) {
-                a.refunded_usd += usd * row.refunded as f64 / row.amount as f64;
+            if let (Some(usd), Some(net)) = (row.amount_usd, p.net) {
+                a.refunded_usd += usd - net;
             }
             a.any_refund |= row.refunded > 0;
             if row.refunded < row.amount {

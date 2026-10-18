@@ -61,7 +61,7 @@ impl Rates {
         Ok(cache
             .as_ref()
             .and_then(|(_, r)| r.get(&currency))
-            .map(|rate| major / rate))
+            .map(|rate| crate::stats::cents(major / rate)))
     }
 }
 
