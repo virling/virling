@@ -9,7 +9,7 @@
 {{ r.best_day }}
 
 Where the money came from
-{% for s in r.sources %}- {{ s.name }}: {{ s.visitors }} visitors, {{ s.revenue }}, {{ s.per_visitor }} per visitor
+{% for s in r.sources %}- {{ s.name }}: {{ s.visitors }} visitor{% if s.visitors != "1" %}s{% endif %}, {{ s.revenue }}, {{ s.per_visitor }} per visitor
 {% endfor %}{% for i in r.insights %}
 {{ i.kind }}: {{ i.title }}. {{ i.text }}{% endfor %}
 {% if !r.note.is_empty() %}

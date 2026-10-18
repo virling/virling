@@ -654,7 +654,7 @@ pub async fn timeline(
             .map(|v| v.channel.clone())
             .unwrap_or_default(),
         visits: group(visits.len() as u64),
-        pageviews: group(pageviews),
+        pageviews: plural(pageviews, "pageview"),
         goals: group(goals),
         exit: last_exit,
         entries: timeline_view(&t, &ctx.site.domain, ctx.offset),

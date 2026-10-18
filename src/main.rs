@@ -969,6 +969,23 @@ mod tests {
         assert!(!body.contains("<b>No AI activity yet</b>"));
     }
 
+    #[tokio::test]
+    async fn one_pageview_is_singular() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let vid = "0b7c2d1e-aaaa-bbbb-cccc-1234567890ab";
+        let hit = format!(
+            r#"{{"n":"pageview","u":"https://example.com/","s":"example.com","v":"{vid}","w":1280}}"#
+        );
+        assert_eq!(post(&state, &hit, UA).await, StatusCode::ACCEPTED);
+        let uri = format!("/app/example.com/visitors/{vid}");
+        let body = body_text(call(&state, get(&uri, Some(&cookie))).await).await;
+        assert!(
+            body.contains(r#"<span class="s">1 pageview</span>"#),
+            "{body}"
+        );
+    }
+
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {
         let (ciphertext, nonce) = state.vault.encrypt(key).unwrap();
         sqlx::query(

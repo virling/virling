@@ -8,7 +8,7 @@ use axum::response::{IntoResponse, Redirect, Response};
 use sqlx::SqlitePool;
 use time::OffsetDateTime;
 
-use super::{Href, Opt, cards, encode, group, load as load_ctx, since};
+use super::{Href, Opt, cards, encode, group, load as load_ctx, plural, since};
 use crate::app::AppState;
 use crate::auth::Account;
 use crate::events::EventStore;
@@ -350,7 +350,7 @@ fn kids(by: &[(String, u64)], channels: &[BreakdownRow], base: f64) -> Vec<GoalK
                 GoalKid {
                     icon: icons::source(c, 16),
                     name: c.clone(),
-                    of: format!("of {} visitors", group(seen)),
+                    of: format!("of {}", plural(seen, "visitor")),
                     value: group(*n),
                     rate: format!("{:.1}%", r * 100.0),
                     ratio: x.map(|x| format!("{x:.1}x")).unwrap_or_default(),

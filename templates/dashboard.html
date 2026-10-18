@@ -156,7 +156,7 @@
 {% if let Some(pv) = payments %}
 {% if !pv.sum.is_empty() %}<section class="d3-kpis">{% for (l, v, s, neg) in pv.sum %}<div class="d3-card d3-kpi"><span class="k">{{ l }}</span><b{% if neg %} class="neg"{% endif %}>{{ v }}</b><span class="n"><span>{{ s }}</span></span></div>{% endfor %}</section>{% endif %}
 <section class="d3-card d3-pay" data-rows data-total="{{ pv.rows.len() }}" data-offset="0">
-  <div class="d3-sec-head pad"><h2>Latest payments</h2>{% if pv.total > 0 %}<a class="d3-link" href="{{ pv.all_href }}">All {{ pv.total }} payments</a>{% endif %}</div>
+  <div class="d3-sec-head pad"><h2>Latest payments</h2>{% if pv.total > 0 %}<a class="d3-link" href="{{ pv.all_href }}">All {{ crate::dashboard::plural(*pv.total, "payment") }}</a>{% endif %}</div>
   {% if pv.rows.is_empty() %}
   {% if !matching.connected %}<div class="d3-empty line"><b>No payments yet</b><span>Connect a payment provider and Virling backfills the last 90 days, then matches every new payment to the visit that led to it.</span><a class="d3-btn" href="{{ pv.connect_href }}">Connect payments</a></div>
   {% else if matching.syncing %}<div class="d3-empty line"><b>Syncing payments…</b><span>Importing the last 90 days. Payments show up here with the visits that led to them.</span></div>
