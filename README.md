@@ -24,7 +24,7 @@ It runs as one Rust binary with embedded storage. No Postgres, no ClickHouse, no
 
 ## What works today
 
-- **Tracking script** (`/v.js`, under 1 KB gzipped, source in `assets/v.src.js`): pageviews, UTM tags, referrers, single-page-app route changes, custom goals, and a first-party visitor ID. Stripe Payment Links, Polar checkout links and Dodo payment links get the visitor ID added automatically.
+- **Tracking script** (`/v.js`, about 1 KB gzipped, source in `assets/v.src.js`): pageviews, UTM tags, referrers, single-page-app route changes, custom goals, and a first-party visitor ID. Stripe Payment Links, Polar checkout links and Dodo payment links get the visitor ID added automatically.
 - **Cookieless mode**: a daily-rotating salted hash instead of a cookie, for sites that want no consent banner.
 - **Event ingest** into embedded DuckDB, with bot filtering, per-site rate limits and channel rules (Paid, Email, AI, Organic search, Communities, Social, Referral, Direct). Visitor IPs are never stored.
 - **Magic-link sign-in and onboarding** (behind `--app` while the waitlist runs).

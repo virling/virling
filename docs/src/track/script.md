@@ -1,6 +1,6 @@
 # Add the script
 
-One tag, under 1 KB gzipped. It records pageviews, referrers, UTM tags, route changes in single-page apps and the goals you send.
+One tag, about 1 KB gzipped. It records pageviews, referrers, UTM tags, route changes in single-page apps and the goals you send.
 
 ```html
 <script defer src="https://stats.example.com/v.js"
@@ -38,7 +38,7 @@ These query parameters on the landing URL are stored with the pageview: `utm_sou
 
 ## Visitor ID
 
-On the first visit the script creates a random ID such as `vlx3k2a9b7f1c0d4e8` and stores it in the `virling_vid` cookie for one year, with `SameSite=Lax`, and `Secure` on HTTPS. It is first-party: it is set on your domain, not on the Virling server's. This ID is what links a payment back to the visit. See [Link checkout to visits](../payments/checkout.md).
+On the first visit the script creates a random ID such as `vlx3k2a9b7f1c0d4e8` and stores it in the `virling_vid` cookie for one year, with `SameSite=Lax`, and `Secure` on HTTPS. It is first-party: it is set on your registrable domain (`example.com` for `www.example.com` or `shop.example.co.uk` for itself), not on the Virling server's, so subdomains such as `app.example.com` share the same ID. This ID is what links a payment back to the visit. See [Link checkout to visits](../payments/checkout.md).
 
 With [cookieless mode](cookieless.md) no cookie is set.
 

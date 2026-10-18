@@ -7,11 +7,15 @@
   var ref = d.referrer || null, last, vid = null;
 
   if (!has("data-cookieless")) {
-    vid = (d.cookie.match(/(?:^|; )virling_vid=([^;]+)/) || [])[1];
-    if (!vid) {
-      vid = "v" + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
-      d.cookie = "virling_vid=" + vid + ";path=/;max-age=31536000;SameSite=Lax" + (L.protocol == "https:" ? ";Secure" : "");
+    var dom, ck = (k, v, x) => d.cookie = k + "=" + v + ";path=/;SameSite=Lax" + x + (dom ? ";domain=" + dom : "") + (L.protocol == "https:" ? ";Secure" : "");
+    // Walk up the hostname until a cookie sticks, so the ID lives on the registrable domain and its subdomains share it.
+    for (var p = L.hostname.split("."), i = p.length - 1; i-- > 0; dom = 0) {
+      dom = p.slice(i).join(".");
+      ck("virling_t", 1, "");
+      if (/(^|; )virling_t=/.test(d.cookie)) { ck("virling_t", 1, ";max-age=0"); break; }
     }
+    vid = (d.cookie.match(/(?:^|; )virling_vid=([^;]+)/) || [])[1] || "v" + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+    ck("virling_vid", vid, ";max-age=31536000");
   }
 
   var send = (name, goal) => {

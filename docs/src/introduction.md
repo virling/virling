@@ -10,7 +10,7 @@ Virling is open-source revenue analytics. It joins every visit to the payment th
 
 ## What works today
 
-- A tracking script under 1 KB gzipped that records pageviews, referrers, UTM tags, single-page-app route changes and custom goals, with a first-party visitor ID. See [Add the script](track/script.md).
+- A tracking script about 1 KB gzipped that records pageviews, referrers, UTM tags, single-page-app route changes and custom goals, with a first-party visitor ID. See [Add the script](track/script.md).
 - An optional [cookieless mode](track/cookieless.md) that counts visitors with a daily salted hash.
 - Event ingest into embedded DuckDB with bot filtering, a per-site rate limit and [channel rules](attribution/channels.md). Visitor IPs are never stored.
 - Payment sync from [Stripe](payments/stripe.md), [Dodo Payments](payments/dodo.md), [Polar](payments/polar.md) and [LemonSqueezy](payments/lemonsqueezy.md) with a read-only key: a 90-day backfill, then a poll every minute.

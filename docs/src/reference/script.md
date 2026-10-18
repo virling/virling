@@ -1,6 +1,6 @@
 # Script attributes and API
 
-The tracking script is served at `/v.js` by every Virling server. It is under 1 KB gzipped, and its source is [`assets/v.src.js`](https://github.com/virling/virling/blob/main/assets/v.src.js).
+The tracking script is served at `/v.js` by every Virling server. It is about 1 KB gzipped, and its source is [`assets/v.src.js`](https://github.com/virling/virling/blob/main/assets/v.src.js).
 
 ```html
 <script defer src="https://stats.example.com/v.js"
@@ -48,7 +48,7 @@ Calls queued in `window.virling.q` before the script loads are replayed in order
 
 | Name | Value | Lifetime | Flags |
 | --- | --- | --- | --- |
-| `virling_vid` | `v` followed by a timestamp and random characters | 1 year | Path `/`, `SameSite=Lax`, `Secure` on HTTPS |
+| `virling_vid` | `v` followed by a timestamp and random characters | 1 year, renewed on each visit | Domain is the registrable domain, so subdomains share it; Path `/`, `SameSite=Lax`, `Secure` on HTTPS |
 
 The server accepts visitor IDs of 8 to 64 letters, digits and dashes. Anything else is replaced with the daily cookieless hash.
 
