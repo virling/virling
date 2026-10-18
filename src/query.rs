@@ -475,11 +475,11 @@ fn overview_table(body: &Value) -> String {
         &rows,
     );
     out += &format!(
-        "\nPrevious period: {} to {}. {} of {} payments matched a tracked visitor.\n",
+        "\nPrevious period: {} to {}. {} of {} matched a tracked visitor.\n",
         text(&pr["from"]),
         text(&pr["to"]),
         count(&c["matched_payments"]),
-        count(&c["payments"])
+        plural(c["payments"].as_u64().unwrap_or(0), "payment")
     );
     out
 }
