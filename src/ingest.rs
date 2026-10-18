@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::hash::{BuildHasher, Hasher, RandomState};
-use std::net::{IpAddr, SocketAddr};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::sync::Mutex;
 
 use axum::body::Bytes;
@@ -242,8 +242,8 @@ fn place(headers: &HeaderMap, names: &[&str]) -> Option<String> {
     })
 }
 
-fn country(headers: &HeaderMap) -> Option<String> {
-    ["cf-ipcountry", "x-vercel-ip-country", "x-country-code"]
+fn country(headers: &HeaderMap, skip: usize) -> Option<String> {
+    ["cf-ipcountry", "x-vercel-ip-country", "x-country-code"][skip..]
         .iter()
         .find_map(|h| {
             let v = headers.get(*h)?.to_str().ok()?.trim().to_ascii_uppercase();
@@ -267,16 +267,72 @@ fn language(tag: &str, base: bool) -> Option<String> {
     })
 }
 
-fn client_ip(headers: &HeaderMap, peer: SocketAddr, trust_proxy: bool) -> IpAddr {
-    if trust_proxy {
-        let forwarded = headers
-            .get("x-forwarded-for")
+/// Cloudflare's published ranges (cloudflare.com/ips) as address and prefix length.
+const CLOUDFLARE: [(IpAddr, u32); 22] = {
+    const fn v4(a: u8, b: u8, c: u8, d: u8, bits: u32) -> (IpAddr, u32) {
+        (IpAddr::V4(Ipv4Addr::new(a, b, c, d)), bits)
+    }
+    const fn v6(a: u16, b: u16, bits: u32) -> (IpAddr, u32) {
+        (IpAddr::V6(Ipv6Addr::new(a, b, 0, 0, 0, 0, 0, 0)), bits)
+    }
+    [
+        v4(173, 245, 48, 0, 20),
+        v4(103, 21, 244, 0, 22),
+        v4(103, 22, 200, 0, 22),
+        v4(103, 31, 4, 0, 22),
+        v4(141, 101, 64, 0, 18),
+        v4(108, 162, 192, 0, 18),
+        v4(190, 93, 240, 0, 20),
+        v4(188, 114, 96, 0, 20),
+        v4(197, 234, 240, 0, 22),
+        v4(198, 41, 128, 0, 17),
+        v4(162, 158, 0, 0, 15),
+        v4(104, 16, 0, 0, 13),
+        v4(104, 24, 0, 0, 14),
+        v4(172, 64, 0, 0, 13),
+        v4(131, 0, 72, 0, 22),
+        v6(0x2400, 0xcb00, 32),
+        v6(0x2606, 0x4700, 32),
+        v6(0x2803, 0xf800, 32),
+        v6(0x2405, 0xb500, 32),
+        v6(0x2405, 0x8100, 32),
+        v6(0x2a06, 0x98c0, 29),
+        v6(0x2c0f, 0xf248, 32),
+    ]
+};
+
+/// Whether cf-* headers are Cloudflare's: the peer is Cloudflare, or with trust_proxy a proxy on this host or network, such as cloudflared.
+fn via_cloudflare(peer: IpAddr, trust_proxy: bool) -> bool {
+    let peer = peer.to_canonical();
+    let local = match peer {
+        IpAddr::V4(a) => a.is_loopback() || a.is_private(),
+        IpAddr::V6(a) => a.is_loopback() || a.is_unique_local(),
+    };
+    (trust_proxy && local)
+        || CLOUDFLARE.iter().any(|&(net, bits)| match (peer, net) {
+            (IpAddr::V4(a), IpAddr::V4(n)) => {
+                u32::from(a) >> (32 - bits) == u32::from(n) >> (32 - bits)
+            }
+            (IpAddr::V6(a), IpAddr::V6(n)) => {
+                u128::from(a) >> (128 - bits) == u128::from(n) >> (128 - bits)
+            }
+            _ => false,
+        })
+}
+
+fn client_ip(headers: &HeaderMap, peer: SocketAddr, trust_proxy: bool, cf: bool) -> IpAddr {
+    let header = |name: &str| {
+        headers
+            .get(name)
             .and_then(|v| v.to_str().ok())
             .and_then(|v| v.split(',').next())
-            .and_then(|v| v.trim().parse().ok());
-        if let Some(ip) = forwarded {
-            return ip;
-        }
+            .and_then(|v| v.trim().parse().ok())
+    };
+    if cf && let Some(ip) = header("cf-connecting-ip") {
+        return ip;
+    }
+    if trust_proxy && let Some(ip) = header("x-forwarded-for") {
+        return ip;
     }
     peer.ip()
 }
@@ -355,10 +411,16 @@ pub async fn collect(
     let Some(incoming) = parse() else {
         return (StatusCode::BAD_REQUEST, "invalid event").into_response();
     };
-    let ip = client_ip(&headers, peer, state.config.trust_proxy);
-    let country = country(&headers);
-    let region = place(&headers, &["cf-region", "x-vercel-ip-country-region"]);
-    let city = place(&headers, &["cf-ipcity", "x-vercel-ip-city"]);
+    let cf = via_cloudflare(peer.ip(), state.config.trust_proxy);
+    let ip = client_ip(&headers, peer, state.config.trust_proxy, cf);
+    // Each list starts with its cf-* header, skipped unless the request came through Cloudflare.
+    let skip = usize::from(!cf);
+    let country = country(&headers, skip);
+    let region = place(
+        &headers,
+        &["cf-region", "x-vercel-ip-country-region"][skip..],
+    );
+    let city = place(&headers, &["cf-ipcity", "x-vercel-ip-city"][skip..]);
     let browser = browser(user_agent);
     let os = os(user_agent);
     let accept_language = headers
@@ -581,6 +643,29 @@ mod tests {
             place(&h, &["cf-region", "x-vercel-ip-country-region"]).as_deref(),
             Some("Bavaria")
         );
+    }
+
+    #[test]
+    fn trusts_cloudflare_headers_only_from_cloudflare() {
+        let ip = |s: &str| s.parse::<IpAddr>().unwrap();
+        assert!(via_cloudflare(ip("162.158.12.1"), false));
+        assert!(via_cloudflare(ip("::ffff:104.16.0.9"), false));
+        assert!(via_cloudflare(ip("2606:4700:10::1"), false));
+        assert!(!via_cloudflare(ip("203.0.113.7"), false));
+        assert!(!via_cloudflare(ip("127.0.0.1"), false));
+        assert!(via_cloudflare(ip("127.0.0.1"), true));
+        assert!(via_cloudflare(ip("172.17.0.1"), true));
+        assert!(!via_cloudflare(ip("203.0.113.7"), true));
+        let mut h = HeaderMap::new();
+        h.insert("cf-ipcountry", "de".parse().unwrap());
+        h.insert("cf-connecting-ip", "198.51.100.4".parse().unwrap());
+        h.insert("x-forwarded-for", "192.0.2.1".parse().unwrap());
+        let peer = SocketAddr::from(([127, 0, 0, 1], 9));
+        assert_eq!(country(&h, 0).as_deref(), Some("DE"));
+        assert_eq!(country(&h, 1), None);
+        assert_eq!(client_ip(&h, peer, true, true), ip("198.51.100.4"));
+        assert_eq!(client_ip(&h, peer, true, false), ip("192.0.2.1"));
+        assert_eq!(client_ip(&h, peer, false, false), ip("127.0.0.1"));
     }
 
     #[test]
