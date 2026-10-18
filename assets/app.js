@@ -1,3 +1,20 @@
+const tzPick = document.querySelector("[data-tz-auto]");
+const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+if (tzPick && browserTz && tzPick.querySelector("input[type=hidden]").value === "UTC") {
+  const list = tzPick.querySelector("[role=listbox]");
+  let opt = [...list.querySelectorAll("[role=option]")].find((o) => o.dataset.value === browserTz);
+  if (!opt) {
+    opt = document.createElement("button");
+    opt.type = "button";
+    opt.setAttribute("role", "option");
+    opt.dataset.value = opt.textContent = browserTz;
+    list.prepend(opt);
+  }
+  list.querySelectorAll("[role=option]").forEach((o) => o.setAttribute("aria-selected", String(o === opt)));
+  tzPick.querySelector("input[type=hidden]").value = browserTz;
+  tzPick.querySelector("[data-label]").textContent = browserTz;
+}
+
 for (const select of document.querySelectorAll("[data-select]")) {
   const trigger = select.querySelector("button[aria-haspopup]");
   const menu = select.querySelector(".menu");

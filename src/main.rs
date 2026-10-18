@@ -928,6 +928,67 @@ mod tests {
         assert!(body.contains("visitors Jan 2 to 9") || body.contains("visitor Jan 2 to 9"));
     }
 
+    #[tokio::test]
+    async fn timezone_defaults_to_the_browser_and_can_change() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let form_page = body_text(call(&state, get("/app/setup", Some(&cookie))).await).await;
+        assert!(
+            form_page.contains("data-tz-auto"),
+            "the browser zone fills in"
+        );
+        let zone = |domain: &'static str| {
+            let db = state.db.clone();
+            async move {
+                sqlx::query_scalar::<_, String>("SELECT timezone FROM sites WHERE domain = ?")
+                    .bind(domain)
+                    .fetch_one(&db)
+                    .await
+                    .unwrap()
+            }
+        };
+        for (domain, tz, want) in [
+            ("dublin.dev", "Europe%2FDublin", "Europe/Dublin"),
+            ("nowhere.dev", "Not%2FA_Zone", "UTC"),
+            ("dots.dev", "..%2Fetc", "UTC"),
+        ] {
+            let body = format!("domain={domain}&timezone={tz}");
+            call(&state, form("/app/setup", body, Some(&cookie))).await;
+            assert_eq!(zone(domain).await, want, "{domain}");
+        }
+        let page =
+            body_text(call(&state, get("/app/example.com/settings", Some(&cookie))).await).await;
+        assert!(page.contains("re-buckets every chart"));
+        assert!(page.contains(r#"name="timezone" value="UTC""#));
+        let res = call(
+            &state,
+            form(
+                "/app/example.com/settings/timezone",
+                "timezone=Asia%2FKolkata".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            res.headers()["location"],
+            "/app/example.com/settings?saved=timezone#timezone"
+        );
+        assert_eq!(zone("example.com").await, "Asia/Kolkata");
+        let res = call(
+            &state,
+            form(
+                "/app/example.com/settings/timezone",
+                "timezone=Mars%2FOlympus".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(res.status(), StatusCode::BAD_REQUEST);
+        let dublin =
+            body_text(call(&state, get("/app/dublin.dev/settings", Some(&cookie))).await).await;
+        assert!(dublin.contains(r#"data-value="Europe/Dublin" aria-selected="true""#));
+    }
+
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {
         let (ciphertext, nonce) = state.vault.encrypt(key).unwrap();
         sqlx::query(

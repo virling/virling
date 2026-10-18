@@ -43,6 +43,9 @@ struct SettingsPage {
     windows: Vec<Opt>,
     connections: Vec<Connection>,
     saved: bool,
+    timezone: String,
+    timezones: Vec<(String, bool)>,
+    tz_saved: bool,
     brand: Brand,
     brand_saved: bool,
     brand_error: &'static str,
@@ -185,6 +188,9 @@ pub async fn page(
             })
             .collect(),
         saved: q.saved.as_deref() == Some("1"),
+        timezones: crate::onboarding::tz_options(&ctx.site.timezone),
+        timezone: ctx.site.timezone.clone(),
+        tz_saved: q.saved.as_deref() == Some("timezone"),
         brand,
         public_link: format!("{}/share/{}", state.config.base_url, ctx.site.domain),
         public_on,
@@ -306,6 +312,42 @@ pub async fn save(
     sync::rebuild_attribution(&state, Some(&ctx.site.id)).await;
     Redirect::to(&format!(
         "{}?saved=1",
+        app_path(&ctx.site.domain, "settings")
+    ))
+    .into_response()
+}
+
+#[derive(Deserialize)]
+pub struct TimezoneInput {
+    timezone: String,
+}
+
+/// Sets the zone whose midnight starts each day of the site's reports.
+pub async fn save_timezone(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(input): Form<TimezoneInput>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "settings").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    if !crate::onboarding::valid_timezone(&state, &input.timezone).await {
+        return StatusCode::BAD_REQUEST.into_response();
+    }
+    if let Err(err) = sqlx::query("UPDATE sites SET timezone = ? WHERE id = ?")
+        .bind(&input.timezone)
+        .bind(&ctx.site.id)
+        .execute(&state.db)
+        .await
+    {
+        tracing::error!(%err, "saving the timezone failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    state.sites.invalidate(&ctx.site.domain);
+    Redirect::to(&format!(
+        "{}?saved=timezone#timezone",
         app_path(&ctx.site.domain, "settings")
     ))
     .into_response()

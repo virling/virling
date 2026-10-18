@@ -12,6 +12,29 @@
   </div>
 </div>
 </section>
+<section class="set-sec" id="timezone">
+<div class="set-intro"><h2>Timezone</h2><p class="muted">Days in your reports start at midnight in this timezone.</p></div>
+<form class="card" method="post" action="/app/{{ shell.domain }}/settings/timezone">
+  {% if tz_saved %}<div class="notice ok-note" role="status">Saved. Charts now count days from midnight in {{ timezone }}.</div>{% endif %}
+  <div class="setting">
+    <div><b id="tz-label">Timezone</b><span class="muted">Changing it re-buckets every chart and day count by the new midnight. Stored events stay as they are, so you can switch back any time.</span></div>
+    <div class="select compact" data-select data-search>
+      <input type="hidden" name="timezone" value="{{ timezone }}">
+      <button type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="tz-label">
+        <span data-label>{{ timezone }}</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4B515C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="menu" hidden>
+        <input type="search" placeholder="Search timezones" aria-label="Search timezones">
+        <div role="listbox" aria-labelledby="tz-label">
+        {% for (tz, selected) in timezones %}<button type="button" role="option" data-value="{{ tz }}" aria-selected="{{ selected }}">{{ tz }}</button>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="actions end"><button class="btn" type="submit">Save timezone</button></div>
+</form>
+</section>
 <section class="set-sec">
 <div class="set-intro"><h2>Attribution</h2><p class="muted">How a payment is credited to the visit that brought it, and what Virling stores about visitors.</p></div>
 <form class="card" method="post" action="/app/{{ shell.domain }}/settings">
