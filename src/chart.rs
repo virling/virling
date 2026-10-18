@@ -341,7 +341,9 @@ pub fn revenue(
         .copied()
         .fold(0.0, f64::max);
     let (step, top) = nice_ticks(top_val * 1.05, true);
-    let vmax = pts.iter().map(|p| p.visitors).max().unwrap_or(0).max(1) as f64;
+    let vmax = pts.iter().map(|p| p.visitors).max().unwrap_or(0);
+    let dual = kind == Kind::Bars && vmax > 0;
+    let (vstep, vtop) = nice_ticks(vmax as f64 * 1.05, true);
     let best = vals
         .iter()
         .enumerate()
@@ -473,7 +475,7 @@ pub fn revenue(
                 let _ = write!(
                     inner,
                     r#"<span class="vd" style="bottom:{:.1}%"></span>"#,
-                    p.visitors as f64 / vmax * 82.0
+                    p.visitors as f64 / vtop * 100.0
                 );
             }
             Kind::Line | Kind::Total => {
@@ -540,12 +542,20 @@ pub fn revenue(
         ));
     }
     let chart = frame(
-        &format!("rev {}", if kind == Kind::Bars { "bars" } else { "" }),
+        &format!(
+            "rev {}{}",
+            if kind == Kind::Bars { "bars" } else { "" },
+            if dual { " dual" } else { "" }
+        ),
         &format!("Revenue per {unit}"),
         &axis(top, step, |t| {
             if hidden { String::new() } else { tick(t, step) }
         }),
-        "",
+        &if dual {
+            axis(vtop, vstep, |t| group(t as u64))
+        } else {
+            String::new()
+        },
         &svg,
         &cols,
         &x_axis(pts, true),
@@ -620,6 +630,28 @@ mod tests {
         let split: f64 = s.points[1].by_channel.iter().map(|c| c.1).sum();
         assert!((split - s.points[1].revenue_usd).abs() < 1e-6);
         assert!(!series(&days(90)).weekly);
+    }
+
+    #[test]
+    fn visitors_have_their_own_axis() {
+        let s = Series {
+            points: vec![day(0, 3, 0.0), day(1, 1, 0.0), day(2, 0, 0.0)],
+            weekly: false,
+        };
+        let bars = revenue(&s, None, Kind::Bars, None, None, false);
+        assert!(bars.contains(r#"class="chart rev bars dual""#));
+        assert!(bars.contains(r#"<div class="ya r">"#));
+        // Three visitors on a 0..4 count axis, not on the dollar axis.
+        assert!(bars.contains(r#"<span class="vd" style="bottom:75.0%">"#));
+        assert!(bars.contains(r#"<span style="top:25.00%">3</span>"#));
+        assert_eq!(count(&bars, r#"<i class="sw vd"></i>Visitors"#), 3 + 1);
+        let line = revenue(&s, None, Kind::Line, None, None, false);
+        assert!(!line.contains("ya r") && !line.contains("dual"));
+        let empty = Series {
+            points: vec![day(0, 0, 0.0)],
+            weekly: false,
+        };
+        assert!(!revenue(&empty, None, Kind::Bars, None, None, false).contains("dual"));
     }
 
     #[test]
