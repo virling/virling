@@ -42,7 +42,13 @@
     <label class="switch"><input type="checkbox" name="cookieless"{% if cookieless %} checked{% endif %}><span></span><span class="sr">Cookieless mode</span></label>
   </div>
   <div class="setting">
-    <div><b id="same-visit-label">Same-visit domains</b><span class="muted">Other domains that are part of {{ shell.domain }}, such as a separate app or docs domain. Clicks to them are not counted as leaving the site. www and subdomains of {{ shell.domain }} are always included.</span></div>
+    <div><b>Count a return as a new visit after</b><span class="muted">How long a visitor has to be gone, with every tab of {{ shell.domain }} closed, before coming back starts a new visit. A quicker return shows as "Came back" in the same visit. Reloads and returns from checkout or sign-in never start a new visit.</span></div>
+    <div class="seg">
+      {% for m in [1, 5, 30] %}<label><input type="radio" name="return_minutes" value="{{ m }}"{% if *m == return_minutes %} checked{% endif %}>{{ m }} min</label>{% endfor %}
+    </div>
+  </div>
+  <div class="setting">
+    <div><b id="same-visit-label">Same-visit domains</b><span class="muted">Other domains that are part of {{ shell.domain }}, such as a separate app, docs or checkout domain. Clicks to them are not counted as leaving the site, and visitors coming back from them continue the same visit with its original source. www and subdomains of {{ shell.domain }} are always included.</span></div>
     <textarea class="input set-area" name="same_visit" rows="3" placeholder="app.example.net" spellcheck="false" aria-labelledby="same-visit-label">{{ same_visit }}</textarea>
   </div>
   <div class="actions end"><button class="btn" type="submit">Save changes</button></div>

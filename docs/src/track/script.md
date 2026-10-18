@@ -1,6 +1,6 @@
 # Add the script
 
-One tag, about 1 KB gzipped. It records pageviews, referrers, UTM tags, route changes in single-page apps and the goals you send.
+One tag, about 1.2 KB gzipped. It records pageviews, referrers, UTM tags, route changes in single-page apps and the goals you send.
 
 ```html
 <script defer src="https://stats.example.com/v.js"
