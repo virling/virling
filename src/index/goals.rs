@@ -9,8 +9,14 @@ use crate::stats::{GoalStat, Period, Step, StepCount};
 
 impl SiteIndex {
     pub fn goal_table(&self, lo: i64, hi: i64, scope: &Scope, pages: &[String]) -> Vec<GoalStat> {
-        let pages: Vec<u32> = pages.iter().filter_map(|p| self.strings.get(p)).collect();
-        // (is goal, name or path) -> (completions, visitors, visitors by channel)
+        // Path ID -> index in `pages`; earlier pages win.
+        let mut page_of: HashMap<u32, u32> = HashMap::new();
+        for (i, p) in pages.iter().enumerate() {
+            for id in self.strings.matching(p) {
+                page_of.entry(id).or_insert(i as u32);
+            }
+        }
+        // (is goal, name or index in `pages`) -> (completions, visitors, visitors by channel)
         type Done = (u64, HashSet<u32>, HashMap<u32, HashSet<u32>>);
         let mut done: HashMap<(bool, u32), Done> = HashMap::new();
         let mut add = |k: (bool, u32), s: u32, channel: u32| {
@@ -25,7 +31,7 @@ impl SiteIndex {
             e.1.insert(sess.visitor);
             e.2.entry(channel).or_default().insert(sess.visitor);
         };
-        if !pages.is_empty() {
+        if !page_of.is_empty() {
             let from = self
                 .pv_by_ts
                 .partition_point(|&p| self.pageviews[p as usize].ts < lo);
@@ -34,8 +40,10 @@ impl SiteIndex {
                 .partition_point(|&p| self.pageviews[p as usize].ts < hi);
             for &p in &self.pv_by_ts[from..to] {
                 let pv = &self.pageviews[p as usize];
-                if pages.contains(&pv.path) && scope.has(pv.session) {
-                    add((false, pv.path), pv.session, pv.channel);
+                if let Some(&i) = page_of.get(&pv.path)
+                    && scope.has(pv.session)
+                {
+                    add((false, i), pv.session, pv.channel);
                 }
             }
         }
@@ -53,11 +61,11 @@ impl SiteIndex {
                     .collect();
                 channels.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
                 GoalStat {
-                    key: format!(
-                        "{}:{}",
-                        if goal { "goal" } else { "page" },
-                        self.path_name(id)
-                    ),
+                    key: if goal {
+                        format!("goal:{}", self.path_name(id))
+                    } else {
+                        format!("page:{}", pages[id as usize])
+                    },
                     completions,
                     visitors: visitors.len() as u64,
                     channels,
@@ -68,8 +76,8 @@ impl SiteIndex {
         out
     }
 
-    /// Earliest time in [from, hi) visitor `v` reached `step`.
-    fn reached(&self, v: u32, step: &Step, from: i64, hi: i64) -> Option<i64> {
+    /// Earliest time in [from, hi) visitor `v` reached `step`, with `paths` the IDs of a page step.
+    fn reached(&self, v: u32, step: &Step, paths: &[u32], from: i64, hi: i64) -> Option<i64> {
         let mut best: Option<i64> = None;
         let mut see = |t: i64| {
             if t >= from && t < hi && best.is_none_or(|b| t < b) {
@@ -83,17 +91,17 @@ impl SiteIndex {
                 }
             }
             Step::Visit | Step::Page(_) => {
-                let path = match step {
-                    Step::Page(p) => Some(self.strings.get(p)?),
-                    _ => None,
-                };
+                let page = matches!(step, Step::Page(_));
+                if page && paths.is_empty() {
+                    return None;
+                }
                 for s in self.sessions_of(v) {
                     let sess = &self.sessions[s as usize];
                     if sess.last < from || sess.first >= hi {
                         continue;
                     }
                     for pv in self.pageviews_of(s) {
-                        if path.is_none_or(|p| pv.path == p) {
+                        if !page || paths.contains(&pv.path) {
                             see(pv.ts);
                         }
                     }
@@ -137,10 +145,14 @@ impl SiteIndex {
             median_secs: None,
         }];
         for step in steps.iter().skip(1) {
+            let paths = match step {
+                Step::Page(p) => self.strings.matching(p),
+                _ => Vec::new(),
+            };
             let mut next: HashMap<u32, i64> = HashMap::new();
             let mut gaps: Vec<i64> = Vec::new();
             for (&v, &t) in &at {
-                if let Some(r) = self.reached(v, step, t, hi) {
+                if let Some(r) = self.reached(v, step, &paths, t, hi) {
                     next.insert(v, r);
                     gaps.push(r - t);
                 }
@@ -228,7 +240,12 @@ mod tests {
                     .into_iter()
                     .map(|g| g.name)
                     .collect();
-                let pages = ["/pricing".to_string(), "/".to_string(), "/nope".to_string()];
+                let pages = [
+                    "/pricing*".to_string(),
+                    "/pricing".to_string(),
+                    "/".to_string(),
+                    "/nope".to_string(),
+                ];
                 let mut funnels = vec![
                     vec![Step::Visit, Step::Paid],
                     vec![Step::Visit, Step::Visit],
@@ -245,6 +262,7 @@ mod tests {
                         Step::Goal(g.clone()),
                         Step::Page("/".into()),
                     ]);
+                    funnels.push(vec![Step::Visit, Step::Page("/p*".into()), Step::Paid]);
                 }
                 funnels.push(vec![
                     Step::Visit,

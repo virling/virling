@@ -52,6 +52,14 @@ pub(crate) fn lit(s: &str) -> String {
     format!("'{}'", s.replace('\'', "''"))
 }
 
+/// Whether `e.path` is page `p`; a trailing `*` matches every path starting with the rest.
+fn page_is(p: &str) -> String {
+    match p.strip_suffix('*') {
+        Some(prefix) => format!("starts_with(e.path, {})", lit(prefix)),
+        None => format!("e.path = {}", lit(p)),
+    }
+}
+
 impl Filter {
     pub fn is_empty(&self) -> bool {
         self.first.is_empty() && self.viewed.is_none()
@@ -1532,7 +1540,7 @@ pub(crate) fn funnel(
             ),
             _ => {
                 let pred = match step {
-                    Step::Page(path) => format!("e.kind = 'pageview' AND e.path = {}", lit(path)),
+                    Step::Page(path) => format!("e.kind = 'pageview' AND {}", page_is(path)),
                     Step::Goal(name) => format!("e.kind = 'goal' AND e.name = {}", lit(name)),
                     _ => "e.kind = 'pageview'".into(),
                 };
@@ -1593,16 +1601,20 @@ pub(crate) fn goal_table(
     f: &Filter,
 ) -> anyhow::Result<Vec<GoalStat>> {
     let (scope, within) = (f.cte(), f.within("e.session_id"));
-    let pages: Vec<String> = pages.iter().map(|p| lit(p)).collect();
+    let keys: String = pages
+        .iter()
+        .map(|p| format!(" WHEN {} THEN {}", page_is(p), lit(&format!("page:{p}"))))
+        .collect();
     let pages = if pages.is_empty() {
         "false".to_string()
     } else {
-        format!("e.path IN ({})", pages.join(", "))
+        let any: Vec<String> = pages.iter().map(|p| page_is(p)).collect();
+        format!("({})", any.join(" OR "))
     };
     let mut stmt = conn.prepare(&format!(
         "WITH {BOUNDS}{scope},
         done AS (
-            SELECT CASE WHEN e.kind = 'goal' THEN 'goal:' || e.name ELSE 'page:' || e.path END AS key,
+            SELECT CASE WHEN e.kind = 'goal' THEN 'goal:' || e.name{keys} END AS key,
                 e.visitor_id, coalesce(f.channel, e.channel) AS channel
             FROM events e
             JOIN bounds ON e.ts >= lo AND e.ts < hi

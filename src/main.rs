@@ -1425,6 +1425,41 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn viewed_pricing_appears_after_any_pricing_page() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let goals = |tab: &'static str| {
+            let (state, cookie) = (state.clone(), cookie.clone());
+            async move {
+                let uri = format!("/app/example.com?view=goals{tab}");
+                body_text(call(&state, get(&uri, Some(&cookie))).await).await
+            }
+        };
+        let hit = |path: &str| {
+            format!(
+                r#"{{"n":"pageview","u":"https://example.com{path}","s":"example.com","v":"0b7c2d1e-aaaa-bbbb-cccc-1234567890ab","w":1280}}"#
+            )
+        };
+        assert_eq!(post(&state, &hit("/"), UA).await, StatusCode::ACCEPTED);
+        assert!(!goals("&gtab=goals").await.contains("<b>Viewed pricing</b>"));
+        assert_eq!(
+            post(&state, &hit("/pricing/team"), UA).await,
+            StatusCode::ACCEPTED
+        );
+        let list = goals("&gtab=goals").await;
+        assert!(
+            list.contains("Any page under /pricing, automatic"),
+            "in the goals list"
+        );
+        assert!(list.contains("Viewed pricing (any page under /pricing) and Paid are tracked"));
+        let funnel = goals("").await;
+        assert!(
+            funnel.contains("Any page under /pricing<"),
+            "in the default funnel"
+        );
+    }
+
+    #[tokio::test]
     async fn saved_funnels_save_rename_and_delete() {
         let (_dir, state, store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;

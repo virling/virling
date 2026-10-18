@@ -17,6 +17,8 @@ use crate::{icons, sites};
 
 /// Custom goals a default funnel takes, most completed first.
 const DEFAULT_GOALS: usize = 2;
+/// Every pricing page, the automatic "Viewed pricing" goal.
+const PRICING: &str = "/pricing*";
 /// Under this median the step usually happens in the same visit.
 const SAME_VISIT_SECS: f64 = 1800.0;
 
@@ -55,7 +57,7 @@ pub fn load(
     f: &Filter,
     rest: &HashMap<String, String>,
 ) -> anyhow::Result<GoalsData> {
-    let table = store.goal_table(id, p, &["/pricing".to_string()], f)?;
+    let table = store.goal_table(id, p, &[PRICING.to_string()], f)?;
     let channels = store.breakdown_in(id, p, Dimension::Channel, f)?;
     let pages: Vec<String> = store
         .breakdown_in(id, p, Dimension::Page, f)?
@@ -70,8 +72,8 @@ pub fn load(
     let mids = if picked.is_empty() && !["s1", "s2", "s3"].iter().any(|k| rest.contains_key(*k)) {
         let mut m: Vec<Step> = table
             .iter()
-            .filter(|g| g.key == "page:/pricing")
-            .map(|_| Step::Page("/pricing".into()))
+            .filter(|g| g.key == format!("page:{PRICING}"))
+            .map(|_| Step::Page(PRICING.into()))
             .collect();
         m.extend(
             table
@@ -262,6 +264,9 @@ fn humanize(name: &str) -> String {
 fn step_label(s: &Step) -> (String, String) {
     match s {
         Step::Visit => ("Visited the site".into(), "Any page".into()),
+        Step::Page(p) if p == PRICING => {
+            ("Viewed pricing".into(), "Any page under /pricing".into())
+        }
         Step::Page(p) if p == "/pricing" => ("Viewed pricing".into(), format!("Page: {p}")),
         Step::Page(p) => (format!("Viewed {p}"), format!("Page: {p}")),
         Step::Goal(g) => (humanize(g), format!("Goal: {g}")),
@@ -509,7 +514,11 @@ pub fn view(
             let (name, sub) = match s.key.split_once(':') {
                 Some(("page", p)) => (
                     step_label(&Step::Page(p.into())).0,
-                    format!("Page goal: {p}, automatic"),
+                    if p == PRICING {
+                        "Any page under /pricing, automatic".into()
+                    } else {
+                        format!("Page goal: {p}, automatic")
+                    },
                 ),
                 Some((_, n)) => (humanize(n), format!("Custom goal: {n}")),
                 None => (s.key.clone(), String::new()),
@@ -561,7 +570,7 @@ pub fn view(
             add(Step::Goal(n.into()));
         }
     }
-    add(Step::Page("/pricing".into()));
+    add(Step::Page(PRICING.into()));
     for p in &g.pages {
         add(Step::Page(p.clone()));
     }
