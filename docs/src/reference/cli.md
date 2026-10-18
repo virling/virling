@@ -68,7 +68,7 @@ virling query [OPTIONS] <COMMAND>
 | Flag and env | Default | What it does |
 | --- | --- | --- |
 | `--url <URL>`<br>`VIRLING_URL` | `http://localhost:8080` | The Virling server. |
-| `--key <KEY>`<br>`VIRLING_API_KEY` | | An API key from **Settings > API keys** in the app. |
+| `--key <KEY>`<br>`VIRLING_API_KEY` | | An API key from **Account settings > API keys** in the app. |
 | `--site <DOMAIN>`<br>`VIRLING_SITE` | the only site | Which site to read. Needed when the account has more than one. |
 | `--json` | off | Print the API response as JSON instead of a table. Use it from scripts and AI agents. |
 

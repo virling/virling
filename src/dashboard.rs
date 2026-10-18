@@ -122,8 +122,8 @@ pub async fn load(
     let Some(site) = all.iter().find(|s| s.domain == domain).cloned() else {
         return Err(StatusCode::NOT_FOUND);
     };
-    let (plan, email, account_type): (String, String, String) =
-        sqlx::query_as("SELECT plan, email, account_type FROM accounts WHERE id = ?")
+    let (email, account_type): (String, String) =
+        sqlx::query_as("SELECT email, account_type FROM accounts WHERE id = ?")
             .bind(&account.id)
             .fetch_one(&state.db)
             .await
@@ -179,10 +179,7 @@ pub async fn load(
             })
             .collect(),
         nav,
-        plan: match plan.as_str() {
-            "self_hosted" => "Self-hosted".into(),
-            other => other.replace('_', " "),
-        },
+        plan: plan_label(&account_type).into(),
         usage: format!("{} in the last 30 days", plural(visitors, "visitor")),
         avatar: initials(&email),
         email,
@@ -196,6 +193,15 @@ pub async fn load(
         first_day: first.map(|t| t.to_offset(offset).date()),
         offset,
     })
+}
+
+/// The plan name shown everywhere: Personal or Agency.
+pub fn plan_label(account_type: &str) -> &'static str {
+    if account_type == "agency" {
+        "Agency"
+    } else {
+        "Personal"
+    }
 }
 
 /// Up to two initials from the local part of an email ("maya.chen@x.com" -> "MC").

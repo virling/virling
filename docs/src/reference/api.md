@@ -4,7 +4,7 @@ A read-only JSON API over the same numbers as the dashboard: totals, breakdowns 
 
 ## API keys
 
-Create a key in **Settings > API keys** in the app. The key is shown once, so copy it then. Virling stores only a hash of it. A key reads every site of the account that made it and cannot change anything. Revoke it in the same place; requests with it fail right away.
+Create a key in **Account settings > API keys** in the app. The key is shown once, so copy it then. Virling stores only a hash of it. A key reads every site of the account that made it and cannot change anything. Revoke it in the same place; requests with it fail right away.
 
 Send the key as a bearer token:
 

@@ -10,7 +10,7 @@ Then check it with `virling query --help`. Releases older than the CLI do not ha
 
 ## The API key
 
-The user creates it in the Virling app under **Settings > API keys**. It is shown once. It reads every site of their account and cannot change anything. If a command fails with `401`, the key is wrong or was revoked; ask the user for a new one.
+The user creates it in the Virling app under **Account settings > API keys**. It is shown once. It reads every site of their account and cannot change anything. If a command fails with `401`, the key is wrong or was revoked; ask the user for a new one.
 
 ## No CLI?
 
