@@ -15,8 +15,8 @@
 <form class="card" method="post" action="/app/{{ shell.domain }}/account/plan">
   {% if plan_saved %}<div class="notice ok-note" role="status">Saved. You are on the {% if shell.agency %}Agency{% else %}Personal{% endif %} plan.</div>{% endif %}
   <div class="setting">
-    <div><b>Plan</b><span class="muted">Personal emails the weekly report to you, with Virling branding. Agency adds white-label client reports with your logo, sent to each client.</span></div>
-    <div class="seg">
+    <div><b id="plan-label">Plan</b><span class="muted">Personal emails the weekly report to you, with Virling branding. Agency adds white-label client reports with your logo, sent to each client.</span></div>
+    <div class="seg" role="radiogroup" aria-labelledby="plan-label">
       <label><input type="radio" name="account_type" value="personal"{% if !shell.agency %} checked{% endif %}>Personal</label>
       <label><input type="radio" name="account_type" value="agency"{% if shell.agency %} checked{% endif %}>Agency</label>
     </div>
