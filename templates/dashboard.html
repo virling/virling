@@ -87,7 +87,7 @@
     </div>
   </div>
   <div class="d3-howto"{% if !g.empty %} id="goal-howto" hidden{% endif %}>
-    <div class="txt"><b>{% if g.empty %}Goals start with your first visitor{% else %}Track a goal with one line{% endif %}</b><span>Viewed pricing and Paid are tracked for you automatically. Add one line of code after a signup or trial succeeds, and you will see which channels bring them.</span></div>
+    <div class="txt"><b>{% if g.empty %}Goals start with your first visitor{% else %}Track a goal with one line{% endif %}</b><span>Viewed pricing (any page under /pricing) and Paid are tracked for you automatically. Add one line of code after a signup or trial succeeds, and you will see which channels bring them.</span></div>
     <div class="d3-code"><div class="d3-code-head"><span>After a signup succeeds</span><button type="button" data-copy-text="window.virling?.('goal', 'signup')">Copy</button></div><pre class="mono">window.virling?.('goal', 'signup')</pre></div>
   </div>
   {% if !g.empty %}

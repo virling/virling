@@ -84,6 +84,16 @@ impl Strings {
         self.ids.get(s).copied()
     }
 
+    /// IDs of page `p`; a trailing `*` matches every string starting with the rest.
+    fn matching(&self, p: &str) -> Vec<u32> {
+        match p.strip_suffix('*') {
+            Some(prefix) => (1..self.names.len() as u32)
+                .filter(|&i| self.names[i as usize].starts_with(prefix))
+                .collect(),
+            None => self.get(p).into_iter().collect(),
+        }
+    }
+
     fn name(&self, id: u32) -> Option<&str> {
         (id != NULL).then(|| &*self.names[id as usize])
     }
