@@ -1048,6 +1048,29 @@ mod tests {
         assert!(dublin.contains(r#"data-value="Europe/Dublin" aria-selected="true""#));
     }
 
+    #[test]
+    fn api_docs_paths_match_the_router() {
+        let routes = include_str!("app.rs");
+        let docs = include_str!("../docs/src/reference/api.md");
+        let mut documented = Vec::new();
+        for line in docs.lines().filter(|l| l.starts_with("## GET ")) {
+            let path = line.trim_start_matches("## GET ");
+            assert!(
+                path.starts_with('`') && path.ends_with('`'),
+                "{line}: braces at the end of a heading are read as attributes"
+            );
+            let path = path.trim_matches('`');
+            assert!(
+                routes.contains(&format!("\"{path}\"")),
+                "{path} is not routed"
+            );
+            documented.push(path);
+        }
+        for routed in routes.split('"').filter(|s| s.starts_with("/api/v1/")) {
+            assert!(documented.contains(&routed), "{routed} is not documented");
+        }
+    }
+
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {
         let (ciphertext, nonce) = state.vault.encrypt(key).unwrap();
         sqlx::query(
