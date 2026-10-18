@@ -1063,18 +1063,7 @@ pub async fn payments(
                 ("q", search.clone()),
             ],
         ),
-        goal_label: match &goal {
-            Some(g) => format!(
-                "{g} {}",
-                group(
-                    goals
-                        .iter()
-                        .find(|c| &c.name == g)
-                        .map_or(0, |c| c.completions)
-                )
-            ),
-            None => format!("Payment {}", group(s.payments)),
-        },
+        goal_label: goal.clone().unwrap_or_else(|| "Payment".into()),
         goals: std::iter::once(Opt {
             label: "Payment".into(),
             href: with(&[]),
