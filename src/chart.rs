@@ -150,8 +150,12 @@ fn axis(top: f64, step: f64, label: impl Fn(f64) -> String) -> String {
 
 fn x_axis(points: &[DayPoint], centered: bool) -> String {
     let n = points.len();
-    label_indexes(n)
-        .into_iter()
+    let at = if n == 24 && points[0].hour.is_some() {
+        vec![0, 6, 12, 18, 23]
+    } else {
+        label_indexes(n)
+    };
+    at.into_iter()
         .map(|i| {
             let f = if centered {
                 (i as f64 + 0.5) / n as f64
@@ -606,6 +610,21 @@ mod tests {
 
     fn count(html: &str, needle: &str) -> usize {
         html.matches(needle).count()
+    }
+
+    #[test]
+    fn hourly_ticks_are_even() {
+        let pts: Vec<DayPoint> = (0..24)
+            .map(|h| DayPoint {
+                hour: Some(h),
+                ..day(0, 1, 0.0)
+            })
+            .collect();
+        let axis = x_axis(&pts, true);
+        for want in ["00:00", "06:00", "12:00", "18:00", "23:00"] {
+            assert!(axis.contains(want), "{want}");
+        }
+        assert!(!axis.contains("17:00"));
     }
 
     #[test]
