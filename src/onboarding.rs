@@ -49,13 +49,37 @@ struct SetupPage {
     step: u8,
     domain: String,
     timezone: String,
-    timezones: Vec<(&'static str, bool)>,
+    timezones: Vec<(String, bool)>,
     error: Option<&'static str>,
     script_host: String,
 }
 
-fn tz_options(selected: &str) -> Vec<(&'static str, bool)> {
-    TIMEZONES.iter().map(|tz| (*tz, *tz == selected)).collect()
+/// The timezone menu; a zone outside the short list is added at the top.
+pub fn tz_options(selected: &str) -> Vec<(String, bool)> {
+    let extra = (!TIMEZONES.contains(&selected)).then(|| (selected.to_string(), true));
+    extra
+        .into_iter()
+        .chain(TIMEZONES.iter().map(|tz| (tz.to_string(), *tz == selected)))
+        .collect()
+}
+
+/// Whether `tz` is an IANA zone name the event store understands.
+pub async fn valid_timezone(state: &AppState, tz: &str) -> bool {
+    if TIMEZONES.contains(&tz) {
+        return true;
+    }
+    let shaped = !tz.is_empty()
+        && tz.len() <= 64
+        && tz
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"/_+-".contains(&b));
+    if !shaped {
+        return false;
+    }
+    let (store, tz) = (state.events.clone(), tz.to_string());
+    tokio::task::spawn_blocking(move || store.utc_offset(&tz).is_ok())
+        .await
+        .unwrap_or(false)
 }
 
 pub fn render(t: impl Template) -> Response {
@@ -119,7 +143,7 @@ pub async fn create_site(
     account: Account,
     Form(input): Form<SiteInput>,
 ) -> Response {
-    let timezone = if TIMEZONES.contains(&input.timezone.as_str()) {
+    let timezone = if valid_timezone(&state, &input.timezone).await {
         input.timezone
     } else {
         "UTC".into()

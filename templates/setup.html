@@ -27,7 +27,7 @@
         </label>
         <div class="field">
           <span id="tz-label">Timezone</span>
-          <div class="select" data-select data-search>
+          <div class="select" data-select data-search{% if error.is_none() %} data-tz-auto{% endif %}>
             <input type="hidden" name="timezone" value="{{ timezone }}">
             <button type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="tz-label">
               <span data-label>{{ timezone }}</span>
