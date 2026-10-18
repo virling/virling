@@ -231,6 +231,8 @@ pub struct Panel {
     pub(super) foot: String,
     /// Where the "Tracked link" form posts; empty on tabs without one.
     pub(super) new_link: String,
+    /// This tab's empty message, when it differs from the card's.
+    pub(super) empty: Option<(&'static str, &'static str)>,
 }
 
 pub struct TabCard {
@@ -726,6 +728,10 @@ fn panel(
         rows,
         foot,
         new_link: String::new(),
+        empty: matches!(tab, Tab::Before).then_some((
+            "No payments matched to visits yet",
+            "Pages people view before paying will show here.",
+        )),
     }
 }
 
