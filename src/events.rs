@@ -94,6 +94,7 @@ pub trait EventStore: Send + Sync {
     ) -> anyhow::Result<Retention>;
     #[cfg(test)]
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64>;
+    /// The first pageview of the newest visitor, as the dashboard shows that visitor.
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>>;
     /// When the site's first event arrived.
     fn first_event(&self, site_id: &str) -> anyhow::Result<Option<OffsetDateTime>>;
@@ -900,7 +901,7 @@ impl EventStore for DuckStore {
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>> {
         let conn = self.read()?;
         let mut stmt = conn.prepare(
-            "SELECT path, country, device, referrer_host FROM events WHERE site_id = ? AND kind = 'pageview' ORDER BY ts DESC LIMIT 1",
+            "SELECT path, country, device, referrer_host FROM first_touches WHERE site_id = ? ORDER BY ts DESC LIMIT 1",
         )?;
         let mut rows = stmt.query_map(params![site_id], |r| {
             Ok(LatestPageview {
