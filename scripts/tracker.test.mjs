@@ -37,7 +37,7 @@ const channel = (bus) =>
   };
 const tick = () => new Promise((r) => setTimeout(r, 5));
 
-function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set() } = {}) {
+function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set(), agent = {} } = {}) {
   const loc = new URL(url);
   const sent = [];
   const listeners = {};
@@ -67,7 +67,9 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
   const window = { addEventListener: on("w:"), BroadcastChannel: channel(bus) };
   const navigator = {
     language: "en-US",
+    languages: ["en-US"],
     sendBeacon: (_u, body) => (sent.push(...JSON.parse(body)), true),
+    ...agent,
   };
   const performance = { getEntriesByType: (t) => (t == "navigation" ? [{ type: nav }] : []) };
   const ctx = { window, document, navigator, location, history, performance, BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, URL, JSON, Date, Math, fetch: () => {} };
@@ -84,6 +86,12 @@ test("pageview with page, screen and language", () => {
     { n: "pageview", u: "https://example.com/pricing?x=1", s: "example.com", w: 1440, l: "en-US" },
   );
   assert.match(b.sent[0].v, /^v[a-z0-9]+$/);
+});
+
+test("automation and a browser without languages are flagged", () => {
+  assert.equal(browser("https://example.com/").sent[0].b, undefined);
+  assert.equal(browser("https://example.com/", { agent: { webdriver: true } }).sent[0].b, true);
+  assert.equal(browser("https://example.com/", { agent: { languages: [] } }).sent[0].b, true);
 });
 
 test("goals from the queue and from virling()", () => {
