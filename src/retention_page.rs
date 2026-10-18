@@ -7,8 +7,8 @@ use time::OffsetDateTime;
 use crate::app::AppState;
 use crate::auth::Account;
 use crate::dashboard::{
-    Opt, Shell, blocking, group, link, load, money, period, plural, provider_name, range,
-    range_opts,
+    Opt, RangeArgs, RangeMenu, Shell, blocking, group, link, load_ranged, money, plural,
+    provider_name,
 };
 use crate::icons;
 use crate::onboarding::render;
@@ -18,6 +18,9 @@ use crate::sites;
 #[derive(Deserialize, Default)]
 pub struct RetentionQuery {
     range: Option<String>,
+    from: Option<String>,
+    to: Option<String>,
+    compare: Option<String>,
     by: Option<String>,
 }
 
@@ -50,8 +53,7 @@ pub struct RowView {
 struct RetentionPage {
     shell: Shell,
     title: &'static str,
-    range_label: &'static str,
-    ranges: Vec<Opt>,
+    range: RangeMenu,
     headline: String,
     based: String,
     day_one: bool,
@@ -175,12 +177,17 @@ pub async fn page(
     Path(domain): Path<String>,
     Query(q): Query<RetentionQuery>,
 ) -> Response {
-    let ctx = match load(&state, &account, &domain, "retention").await {
-        Ok(ctx) => ctx,
+    let args = RangeArgs {
+        range: q.range.clone(),
+        from: q.from.clone(),
+        to: q.to.clone(),
+        compare: q.compare.clone(),
+    };
+    let (ctx, picked) = match load_ranged(&state, &account, &domain, "retention", args).await {
+        Ok(r) => r,
         Err(code) => return code.into_response(),
     };
-    let (rkey, rlabel, days, rdefault) = range(&ctx, q.range.as_deref());
-    let p = period(&ctx, days);
+    let p = picked.period(&ctx.site.timezone);
     let (tab, head, by) = TABS
         .into_iter()
         .find(|t| Some(t.0) == q.by.as_deref())
@@ -193,8 +200,9 @@ pub async fn page(
     };
     let base = sites::app_path(&ctx.site.domain, "retention");
     let by_q = if tab == "channel" { "" } else { tab };
-    let range_q = if rkey == rdefault { "" } else { rkey };
-    let params = [("range", range_q), ("by", by_q)];
+    let rq = picked.params();
+    let mut params: Vec<(&str, &str)> = rq.iter().map(|(k, v)| (*k, v.as_str())).collect();
+    params.push(("by", by_q));
     let rows = match by {
         By::Channel => &r.channels,
         By::Referrer => &r.referrers,
@@ -210,8 +218,7 @@ pub async fn page(
     let t = &r.total;
     render(RetentionPage {
         title: "Retention",
-        range_label: rlabel,
-        ranges: range_opts(&base, rkey, rdefault, &params[1..]),
+        range: picked.menu(ctx.today, ctx.first_day, &base, &[("by", by_q.to_string())]),
         headline: r.headline.clone().unwrap_or_default(),
         based: format!(
             "{} acquired, {} still paying.",
@@ -241,7 +248,11 @@ pub async fn page(
         rows: rows.iter().map(|x| row_view(x, by, max)).collect(),
         empty: format!(
             "No customers made their first payment in {}.",
-            rlabel.to_lowercase()
+            if picked.key == "custom" {
+                picked.label.clone()
+            } else {
+                picked.label.to_lowercase()
+            }
         ),
         no_payments: r.status_sources.is_empty(),
         status_note: if missing.is_empty() {

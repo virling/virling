@@ -21,6 +21,7 @@ pub(crate) type Href<'a> = dyn Fn(&[(&str, &str)]) -> String + 'a;
 pub(crate) type FilterHref<'a> = dyn Fn(&[(&'static str, String)]) -> String + 'a;
 
 mod cards;
+pub(crate) mod daterange;
 mod goals;
 mod home;
 mod insight;
@@ -28,6 +29,7 @@ pub mod report;
 pub mod schedule;
 mod views;
 
+pub(crate) use daterange::{Picked, RangeMenu};
 pub use goals::{delete as delete_funnel, save as save_funnel};
 pub use home::{dashboard, public};
 
@@ -59,6 +61,8 @@ pub struct Shell {
     pub nav: &'static str,
     pub plan: String,
     pub usage: String,
+    /// The query that keeps the active date range when switching pages, like "?range=7d".
+    pub keep: String,
     pub email: String,
     pub avatar: String,
     pub live: u64,
@@ -116,6 +120,37 @@ pub async fn load(
     domain: &str,
     nav: &'static str,
 ) -> Result<Ctx, StatusCode> {
+    Ok(load_in(state, account, domain, nav, None).await?.0)
+}
+
+/// The ?range=, ?from=, ?to= and ?compare= params of a page.
+#[derive(Deserialize, Default)]
+pub struct RangeArgs {
+    pub range: Option<String>,
+    pub from: Option<String>,
+    pub to: Option<String>,
+    pub compare: Option<String>,
+}
+
+/// `load` for a page with a date range; the sidebar footer and nav links follow the range.
+pub async fn load_ranged(
+    state: &AppState,
+    account: &Account,
+    domain: &str,
+    nav: &'static str,
+    args: RangeArgs,
+) -> Result<(Ctx, Picked), StatusCode> {
+    let (ctx, picked) = load_in(state, account, domain, nav, Some(args)).await?;
+    Ok((ctx, picked.ok_or(StatusCode::SERVICE_UNAVAILABLE)?))
+}
+
+async fn load_in(
+    state: &AppState,
+    account: &Account,
+    domain: &str,
+    nav: &'static str,
+    args: Option<RangeArgs>,
+) -> Result<(Ctx, Option<Picked>), StatusCode> {
     let all = sites::for_account(&state.db, &account.id)
         .await
         .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
@@ -130,21 +165,31 @@ pub async fn load(
             .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
     let store = state.events.clone();
     let (id, tz) = (site.id.clone(), site.timezone.clone());
-    let (offset, live, visitors, first) = blocking(move || {
+    let (offset, live, visitors, first, picked) = blocking(move || {
         let offset = store.utc_offset(&tz)?;
         let today = OffsetDateTime::now_utc().to_offset(offset).date();
-        let period = Period {
-            from: today - Duration::days(29),
-            to: today,
-            tz,
+        let first = store.first_event(&id)?;
+        let picked = args.map(|a| {
+            let first_day = first.map(|t| t.to_offset(offset).date());
+            Picked::read(
+                today,
+                first_day,
+                a.range.as_deref(),
+                a.from.as_deref(),
+                a.to.as_deref(),
+                a.compare.as_deref(),
+            )
+        });
+        let period = match &picked {
+            Some(p) => p.period(&tz),
+            None => Period {
+                from: today - Duration::days(29),
+                to: today,
+                tz,
+            },
         };
         let visitors = store.overview(&id, &period)?.current.visitors;
-        Ok((
-            offset,
-            store.live_visitors(&id)?,
-            visitors,
-            store.first_event(&id)?,
-        ))
+        Ok((offset, store.live_visitors(&id)?, visitors, first, picked))
     })
     .await?;
     let icons: Vec<(String, i64, bool)> = sqlx::query_as(
@@ -183,19 +228,24 @@ pub async fn load(
             "self_hosted" => "Self-hosted".into(),
             other => other.replace('_', " "),
         },
-        usage: format!("{} in the last 30 days", plural(visitors, "visitor")),
+        usage: match &picked {
+            Some(p) => p.usage(visitors),
+            None => format!("{} in the last 30 days", plural(visitors, "visitor")),
+        },
+        keep: picked.as_ref().map(Picked::query).unwrap_or_default(),
         avatar: initials(&email),
         email,
         live,
         agency: account_type == "agency",
     };
-    Ok(Ctx {
+    let ctx = Ctx {
         site,
         shell,
         today: OffsetDateTime::now_utc().to_offset(offset).date(),
         first_day: first.map(|t| t.to_offset(offset).date()),
         offset,
-    })
+    };
+    Ok((ctx, picked))
 }
 
 /// Up to two initials from the local part of an email ("maya.chen@x.com" -> "MC").
@@ -209,14 +259,6 @@ fn initials(email: &str) -> String {
         .take(2)
         .collect::<String>()
         .to_uppercase()
-}
-
-/// The active range as (key, label, days, default key); sites under 30 days old default to "all".
-pub(crate) fn range(
-    ctx: &Ctx,
-    key: Option<&str>,
-) -> (&'static str, &'static str, i64, &'static str) {
-    resolve_range(ctx.today, ctx.first_day, key)
 }
 
 /// `range` for a site whose local today and first tracked day are known.
@@ -245,14 +287,6 @@ pub(crate) fn resolve_range(
     (k, label, days, default)
 }
 
-pub(crate) fn period(ctx: &Ctx, days: i64) -> Period {
-    Period {
-        from: ctx.today - Duration::days(days - 1),
-        to: ctx.today,
-        tz: ctx.site.timezone.clone(),
-    }
-}
-
 /// `base` plus the non-empty query params.
 pub(crate) fn href(base: &str, params: &[(&str, &str)]) -> String {
     let q: Vec<String> = params
@@ -265,27 +299,6 @@ pub(crate) fn href(base: &str, params: &[(&str, &str)]) -> String {
     } else {
         format!("{base}?{}", q.join("&"))
     }
-}
-
-pub(crate) fn range_opts(
-    base: &str,
-    current: &str,
-    default: &str,
-    params: &[(&str, &str)],
-) -> Vec<Opt> {
-    RANGES
-        .iter()
-        .map(|(key, label, _)| Opt {
-            label: label.to_string(),
-            href: link(
-                base,
-                params,
-                &[("range", if *key == default { "" } else { key })],
-            ),
-            on: *key == current,
-            count: String::new(),
-        })
-        .collect()
 }
 
 pub fn group(n: u64) -> String {
@@ -524,6 +537,9 @@ pub struct CustomerView {
 #[derive(Deserialize, Default)]
 pub struct ReportQuery {
     range: Option<String>,
+    from: Option<String>,
+    to: Option<String>,
+    compare: Option<String>,
     filter: Option<String>,
     page: Option<u32>,
     /// A goal name; payments when empty.
@@ -697,8 +713,7 @@ pub struct Summary {
 struct PaymentsPage {
     shell: Shell,
     title: &'static str,
-    range_label: &'static str,
-    ranges: Vec<Opt>,
+    range: RangeMenu,
     summary: Vec<Summary>,
     filters: Vec<Opt>,
     /// Payment plus each goal completed in the range.
@@ -819,12 +834,17 @@ pub async fn payments(
     Path(domain): Path<String>,
     Query(q): Query<ReportQuery>,
 ) -> Response {
-    let ctx = match load(&state, &account, &domain, "payments").await {
-        Ok(ctx) => ctx,
+    let args = RangeArgs {
+        range: q.range.clone(),
+        from: q.from.clone(),
+        to: q.to.clone(),
+        compare: q.compare.clone(),
+    };
+    let (ctx, picked) = match load_ranged(&state, &account, &domain, "payments", args).await {
+        Ok(r) => r,
         Err(code) => return code.into_response(),
     };
-    let (rkey, rlabel, days, rdefault) = range(&ctx, q.range.as_deref());
-    let p = period(&ctx, days);
+    let p = picked.period(&ctx.site.timezone);
     let (fkey, flabel, filter) = FILTERS
         .into_iter()
         .find_map(|(k, label)| {
@@ -943,7 +963,13 @@ pub async fn payments(
     };
     let counts = [s.payments, s.attributed, s.unattributed, s.refunded];
     let base = sites::app_path(&ctx.site.domain, "payments");
-    let range_param = if rkey == rdefault { "" } else { rkey };
+    let rq = picked.params();
+    let rp: Vec<(&str, &str)> = rq.iter().map(|(k, v)| (*k, v.as_str())).collect();
+    let with = |extra: &[(&str, &str)]| {
+        let mut all = rp.clone();
+        all.extend_from_slice(extra);
+        href(&base, &all)
+    };
     let filter_param = if fkey == "all" || goal.is_some() {
         ""
     } else {
@@ -953,16 +979,12 @@ pub async fn payments(
     let q_param = encode(&search);
     let page_href = |n: u32| {
         let n = n.to_string();
-        href(
-            &base,
-            &[
-                ("range", range_param),
-                ("filter", filter_param),
-                ("goal", &goal_param),
-                ("q", &q_param),
-                ("page", if n == "1" { "" } else { &n }),
-            ],
-        )
+        with(&[
+            ("filter", filter_param),
+            ("goal", &goal_param),
+            ("q", &q_param),
+            ("page", if n == "1" { "" } else { &n }),
+        ])
     };
     let shown = customers.len() as u64;
     let first = (page as u64 - 1) * PER_PAGE as u64;
@@ -1010,15 +1032,14 @@ pub async fn payments(
     ];
     render(PaymentsPage {
         title: "Payments",
-        range_label: rlabel,
-        ranges: range_opts(
+        range: picked.menu(
+            ctx.today,
+            ctx.first_day,
             &base,
-            rkey,
-            rdefault,
             &[
-                ("filter", filter_param),
-                ("goal", &goal_param),
-                ("q", &q_param),
+                ("filter", filter_param.to_string()),
+                ("goal", goal.clone().unwrap_or_default()),
+                ("q", search.clone()),
             ],
         ),
         goal_label: match &goal {
@@ -1035,20 +1056,22 @@ pub async fn payments(
         },
         goals: std::iter::once(Opt {
             label: "Payment".into(),
-            href: href(&base, &[("range", range_param)]),
+            href: with(&[]),
             on: goal.is_none(),
             count: group(s.payments),
         })
         .chain(goals.iter().map(|g| Opt {
             label: g.name.clone(),
-            href: href(&base, &[("range", range_param), ("goal", &encode(&g.name))]),
+            href: with(&[("goal", &encode(&g.name))]),
             on: goal.as_deref() == Some(g.name.as_str()),
             count: group(g.completions),
         }))
         .collect(),
         is_goal: goal.is_some(),
-        hidden: [("range", range_param), ("filter", filter_param)]
-            .into_iter()
+        hidden: rq
+            .iter()
+            .map(|(k, v)| (*k, v.as_str()))
+            .chain([("filter", filter_param)])
             .chain(goal.as_deref().map(|g| ("goal", g)))
             .filter(|(_, v)| !v.is_empty())
             .map(|(k, v)| (k, v.to_string()))
@@ -1060,13 +1083,7 @@ pub async fn payments(
             .zip(&counts)
             .map(|((k, label), n)| Opt {
                 label: label.to_string(),
-                href: href(
-                    &base,
-                    &[
-                        ("range", range_param),
-                        ("filter", if *k == "all" { "" } else { k }),
-                    ],
-                ),
+                href: with(&[("filter", if *k == "all" { "" } else { k })]),
                 on: *k == fkey,
                 count: group(*n),
             })
@@ -1360,11 +1377,5 @@ mod tests {
             link(base, &params, &[("range", "")]),
             "/app/virling.com?sort_pages=visitors"
         );
-        let ranges = range_opts(base, "7d", "30d", &params);
-        assert_eq!(
-            ranges[1].href,
-            "/app/virling.com?range=7d&sort_pages=visitors"
-        );
-        assert_eq!(ranges[2].href, "/app/virling.com?sort_pages=visitors");
     }
 }
