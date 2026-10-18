@@ -1048,6 +1048,20 @@ mod tests {
         assert!(dublin.contains(r#"data-value="Europe/Dublin" aria-selected="true""#));
     }
 
+    #[tokio::test]
+    async fn before_paying_has_its_own_empty_message() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let body = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
+        assert!(body.contains(
+            "<b>No payments matched to visits yet</b><span>Pages people view before paying will show here.</span>"
+        ));
+        assert!(
+            body.contains("You will see which pages people land on"),
+            "Landing page keeps its message"
+        );
+    }
+
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {
         let (ciphertext, nonce) = state.vault.encrypt(key).unwrap();
         sqlx::query(
