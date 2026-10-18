@@ -1,6 +1,6 @@
 # AI crawlers
 
-The **AI crawlers** card on the dashboard shows which AI bots read your pages: each bot with its company's logo, its hits, how many pages it read, its most-read page and when it was last seen. Crawler hits are stored apart from visits, so they never count as visitors.
+The **AI** card on the dashboard has one row per AI company, with the pages its crawlers read next to the visitors and revenue its assistants sent. Hover a company's pages read to see each bot's hits, pages, most-read page and when it was last seen. Crawler hits are stored apart from visits, so they never count as visitors.
 
 Each bot has a type:
 

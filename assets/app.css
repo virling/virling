@@ -560,8 +560,8 @@ a.ctl { text-decoration: none; }
 .d3-row .chev + .nm, .d3-row .nmw:has(.chev) .nm { padding-right: 34px; }
 .d3-row .vb { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 9px; background: #eef2fb; }
 .d3-row .rb { position: absolute; left: 0; bottom: 0; height: 3px; border-radius: 2px; background: var(--revenue); }
-.d3-row .ic, .d3-grow .ic, .d3-rrow .ic, .d3-crow .ic { position: relative; width: 28px; height: 28px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; background: #fff; box-shadow: 0 0 0 1px var(--rule); color: var(--ink-2); }
-.d3-row .ic .ico, .d3-rrow .ic .ico, .d3-grow .ic .ico, .d3-crow .ic .ico { width: 16px; height: 16px; }
+.d3-row .ic, .d3-grow .ic, .d3-rrow .ic { position: relative; width: 28px; height: 28px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; background: #fff; box-shadow: 0 0 0 1px var(--rule); color: var(--ink-2); }
+.d3-row .ic .ico, .d3-rrow .ic .ico, .d3-grow .ic .ico { width: 16px; height: 16px; }
 .d3-row .tx { position: relative; display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
 .d3-row .tx b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .d3-row .tx b.mono { font-size: 13px; font-weight: 500; }
@@ -580,21 +580,6 @@ a.ctl { text-decoration: none; }
 .d3 .bdg.up { background: #e3f4ec; color: #1a6b43; }
 .d3 .bdg.down { background: #fbe6de; color: #b0330d; }
 .d3 .bdg.srch { background: #eef2fb; color: #2f5bea; }
-.d3-crow { display: grid; grid-template-columns: minmax(0, 1fr) 52px 44px minmax(0, 130px) 60px; align-items: center; column-gap: 10px; min-height: 48px; padding: 3px 8px; border-bottom: 1px solid #f4f4f0; }
-.d3-crow.th { min-height: 30px; border-bottom-color: var(--rule-2); font-size: 12px; font-weight: 500; color: var(--ink-3); }
-.d3-crow .nm { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.d3-crow .tx { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
-.d3-crow .tx b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.d3-crow .tx .sub { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-.d3-crow .tx .bdg { padding: 0 5px; font-size: 10px; line-height: 16px; }
-.d3-crow .tx > span { font-size: 12px; color: var(--ink-3); }
-.d3-crow .strong { font-weight: 600; }
-.d3-crow .c4 { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--ink-2); }
-.d3-crow:last-of-type { margin-bottom: 6px; }
-@media (max-width: 720px) {
-  .d3-crow { grid-template-columns: minmax(0, 1fr) 52px 64px; }
-  .d3-crow .c3, .d3-crow .c4 { display: none; }
-}
 .d3-row .tx b .best { margin-left: 6px; padding: 1px 6px; border-radius: 5px; background: #e3f4ec; font-size: 11px; font-weight: 600; color: #1a6b43; }
 .d3-ai-cmp { display: grid; grid-template-columns: auto 96px 34px; align-items: center; column-gap: 8px; row-gap: 4px; font-size: 12px; color: var(--ink-2); }
 .d3-ai-cmp .t { height: 6px; border-radius: 3px; background: var(--rule-2); overflow: hidden; }
@@ -604,6 +589,9 @@ a.ctl { text-decoration: none; }
 .d3-spark { display: flex; align-items: center; gap: 10px; padding: 0 8px 8px; font-size: 12px; color: var(--ink-3); }
 .d3-spark svg { flex: 1; height: 24px; }
 .d3-ai-logos { display: flex; gap: 10px; margin-bottom: 4px; filter: grayscale(1); opacity: .45; }
+.d3-row.d3-airow { grid-template-columns: minmax(0, 1fr) 64px 60px 76px 72px; }
+.d3-airow .pg { color: var(--ink-2); font-size: 13px; }
+.d3-ai .d3-foot .d3-spark { flex: 1; padding: 0; }
 .d3-row.kid { min-height: 40px; }
 .d3-row.kid .nm { height: 34px; }
 .d3-row.kid .ic { width: 24px; height: 24px; border-radius: 7px; }
@@ -749,6 +737,7 @@ a.ctl { text-decoration: none; }
   .d3-row { grid-template-columns: minmax(0, 1fr) 60px 64px; column-gap: 8px; padding: 3px 2px; }
   .d3-row .v { display: none; }
   .d3-row .x { display: none; }
+  .d3-row.d3-airow { grid-template-columns: minmax(0, 1fr) 52px 60px 56px; }
   .d3-bc { padding: 12px 10px 8px; }
   .d3-grow { grid-template-columns: minmax(0, 1fr) 72px 96px; }
   .d3-grow .pd { display: none; }

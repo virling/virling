@@ -928,6 +928,26 @@ mod tests {
         assert!(body.contains("visitors Jan 2 to 9") || body.contains("visitor Jan 2 to 9"));
     }
 
+    #[tokio::test]
+    async fn one_ai_card_shows_crawlers_and_assistants() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let empty = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
+        assert!(empty.contains("<b>No AI activity yet</b>"));
+        assert!(
+            !empty.contains("<h2>AI crawlers</h2>") && !empty.contains("<h2>AI assistants</h2>")
+        );
+        let site = site_id(&state).await;
+        let now = time::OffsetDateTime::now_utc().unix_timestamp();
+        crate::crawlers::count(&state.db, &site, "PerplexityBot", "/pricing", now)
+            .await
+            .unwrap();
+        let body = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
+        assert!(body.contains("<span class=\"num pg\">Pages read</span>"));
+        assert!(body.contains("<b>Perplexity</b><span>PerplexityBot</span>"));
+        assert!(!body.contains("<b>No AI activity yet</b>"));
+    }
+
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {
         let (ciphertext, nonce) = state.vault.encrypt(key).unwrap();
         sqlx::query(

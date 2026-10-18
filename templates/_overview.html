@@ -60,31 +60,30 @@
   </div>
   {% if loop.index == 1 %}{% if let Some(a) = ai %}
   <div class="d3-card d3-bc d3-ai" id="ai">
-    <div class="d3-bc-head"><h2>AI assistants</h2>{% if !a.rows.is_empty() %}<div class="d3-ai-cmp" aria-label="AI share of visitors and of revenue">
+    <div class="d3-bc-head"><h2>AI</h2>{% if !a.rows.is_empty() %}<div class="d3-ai-cmp" aria-label="AI share of visitors and of revenue">
       <span class="l">Visitors</span><span class="t"><i style="width:{{ "{:.1}"|format(a.visitors_share) }}%"></i></span><b>{{ "{:.0}"|format(a.visitors_share) }}%</b>
       <span class="l">Revenue</span><span class="t rv"><i style="width:{{ "{:.1}"|format(a.revenue_share) }}%"></i></span><b>{{ "{:.0}"|format(a.revenue_share) }}%</b>
     </div>{% endif %}</div>
     {% if a.rows.is_empty() %}
-    <div class="d3-empty"><span class="d3-ai-logos">{% for l in a.logos %}{{ l|safe }}{% endfor %}</span><b>No visits from AI assistants yet</b><span>Visitors who click through from ChatGPT, Claude, Perplexity and others show up here.</span></div>
+    <div class="d3-empty"><span class="d3-ai-logos">{% for l in a.logos %}{{ l|safe }}{% endfor %}</span><b>No AI activity yet</b><span>Visitors who click through from ChatGPT, Claude, Perplexity and others show up here, with the pages GPTBot, ClaudeBot and other AI crawlers read. Most crawlers never run JavaScript, so add the server snippet to count them.</span><a class="d3-link" href="{{ a.docs }}">Add the snippet</a></div>
     {% else %}
-    {% if !a.spark.is_empty() %}<div class="d3-spark"><span>AI share of revenue</span><svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><path d="{{ a.spark }}" fill="none" stroke="#E8471C" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg></div>{% endif %}
-    <div class="d3-row th"><span>Assistant</span><span class="num v">Visitors</span><span class="num rv">Revenue</span><span class="num pv">Per visitor</span><span class="x"></span></div>
-    {% for r in a.rows %}{% call d3::row(r) %}{% endcall %}{% endfor %}
-    {% if !a.trend.is_empty() %}<div class="d3-foot"><span>{{ a.trend }}</span></div>{% endif %}
-    {% endif %}
-  </div>
-  {% endif %}{% endif %}
-  {% if loop.index == 4 %}{% if let Some(cr) = crawlers %}
-  <div class="d3-card d3-bc d3-crawl" id="crawlers">
-    <div class="d3-bc-head"><h2>AI crawlers</h2></div>
-    {% if cr.rows.is_empty() %}
-    <div class="d3-empty"><span class="d3-ai-logos">{% for l in cr.logos %}{{ l|safe }}{% endfor %}</span><b>No AI crawlers seen yet</b><span>GPTBot, ClaudeBot, PerplexityBot and others show up here when they read your pages. Most never run JavaScript, so add the server snippet to count them.</span><a class="d3-link" href="{{ cr.docs }}">Add the snippet</a></div>
-    {% else %}
-    <div class="d3-crow th"><span>Crawler</span><span class="num">Hits</span><span class="num c3">Pages</span><span class="c4">Top page</span><span class="num">Last seen</span></div>
-    {% for r in cr.rows %}
-    <div class="d3-crow"><span class="nm"><span class="ic">{{ r.icon|safe }}</span><span class="tx"><b>{{ r.name }}</b><span class="sub">{{ r.company }}<span class="bdg {{ r.kind_class }}">{{ r.kind }}</span></span></span></span><span class="num strong">{{ r.hits }}</span><span class="num c3 dim">{{ r.pages }}</span><span class="c4 mono" title="{{ r.top }}">{{ r.top }}</span><span class="num dim">{{ r.seen }}</span></div>
+    <div class="d3-row d3-airow th"><span>Company</span><span class="num pg">Pages read</span><span class="num v">Visitors</span><span class="num rv">Revenue</span><span class="num pv">Per visitor</span></div>
+    {% for r in a.rows %}
+    <div class="d3-row d3-airow">
+      <div class="nmw">
+        {% if r.bar.href.is_empty() %}<span class="nm">{% else %}<a class="nm" href="{{ r.bar.href }}" title="Show only {{ r.bar.name }}">{% endif %}
+          <span class="vb" style="width:{{ "{:.1}"|format(r.bar.vw) }}%"></span><span class="rb" style="width:{{ "{:.1}"|format(r.bar.rw) }}%"></span>
+          <span class="ic">{{ r.bar.icon|safe }}</span>
+          <span class="tx"><b>{{ r.bar.name }}{% if !r.bar.tag.is_empty() %}<span class="best">{{ r.bar.tag }}</span>{% endif %}</b>{% if !r.bar.sub.is_empty() %}<span>{{ r.bar.sub }}</span>{% endif %}</span>
+        {% if r.bar.href.is_empty() %}</span>{% else %}</a>{% endif %}
+      </div>
+      <span class="num pg"{% if !r.pages_title.is_empty() %} title="{{ r.pages_title }}"{% endif %}>{{ r.pages }}</span>
+      <span class="num v">{{ r.bar.visitors }}</span>
+      <span class="num rv">{{ r.bar.revenue }}</span>
+      <span class="num pv">{{ r.bar.per_visitor }}{% if r.bar.small %}<small>small sample</small>{% endif %}</span>
+    </div>
     {% endfor %}
-    <div class="d3-foot"><span>Training collects pages for models, Search builds an AI index, Answer fetches a page for someone asking right now.</span><a href="{{ cr.docs }}">Setup</a></div>
+    <div class="d3-foot">{% if !a.spark.is_empty() %}<div class="d3-spark"><span>AI share of revenue</span><svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><path d="{{ a.spark }}" fill="none" stroke="#E8471C" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg></div>{% endif %}<span>{{ a.trend }}</span><a href="{{ a.docs }}">Setup</a></div>
     {% endif %}
   </div>
   {% endif %}{% endif %}
