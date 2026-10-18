@@ -780,6 +780,10 @@ pub fn card(
                         "No cities for these visits",
                         "Cities come from your proxy's location headers. On Cloudflare, turn on the Add visitor location headers Managed Transform.",
                     ),
+                    Tab::Before => (
+                        "No payments matched to visits yet",
+                        "Pages people view before paying will show here.",
+                    ),
                     _ => spec.empty,
                 };
                 panel(
