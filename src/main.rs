@@ -1876,17 +1876,11 @@ mod tests {
             .execute(&state.db)
             .await
             .unwrap();
-        let now = time::OffsetDateTime::now_utc();
-        let due_at = time::PrimitiveDateTime::new(
+        let at = time::PrimitiveDateTime::new(
             monday + time::Duration::days(7),
-            time::macros::time!(9:00),
+            time::macros::time!(9:01),
         )
         .assume_utc();
-        let at = if now > due_at {
-            now
-        } else {
-            due_at + time::Duration::minutes(1)
-        };
         assert_eq!(schedule::tick(&state, at).await.unwrap(), 1);
         assert_eq!(
             schedule::tick(&state, at).await.unwrap(),
