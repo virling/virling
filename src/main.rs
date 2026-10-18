@@ -1673,6 +1673,10 @@ mod tests {
         assert!(t.contains("Clicked out to") && t.contains("github.com/virling/virling"));
         assert!(t.contains("Left from") && t.contains("/first"));
         assert!(t.contains("Paid $49.00") && t.contains("/payments/stripe/pi_1"));
+        assert!(
+            !t.contains(r#"<b class="zero">$0</b>"#),
+            "a paying visitor keeps the revenue color"
+        );
         assert!(t.contains("2m 00s"), "time on page from the exit click");
         assert_eq!(
             call(

@@ -18,7 +18,7 @@
       {% if c.syncing %}<span class="muted small">Importing the last 90 days. This page updates on its own.</span>{% endif %}
       <div class="stat-row">
         <div><small>Payments found</small><b>{{ c.payments }}</b><span>last 90 days</span></div>
-        <div><small>Net revenue</small><b class="rev">{{ c.revenue }}</b><span>after refunds, in USD</span></div>
+        <div><small>Net revenue</small><b class="rev{% if c.zero %} zero{% endif %}">{{ c.revenue }}</b><span>after refunds, in USD</span></div>
         <div><small>Attributed</small><b>{{ c.attributed }}</b><span>{% if c.attributed == 0 %}0 until tagged checkouts arrive{% else %}matched to a visit{% endif %}</span></div>
       </div>
       <div>
