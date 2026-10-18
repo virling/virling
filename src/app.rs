@@ -207,6 +207,10 @@ pub fn router(state: AppState) -> Router {
             )
             .route("/app/{domain}/settings/report", post(settings::save_brand))
             .route("/app/{domain}/settings/public", post(settings::save_public))
+            .route(
+                "/app/{domain}/settings/timezone",
+                post(settings::save_timezone),
+            )
             .route("/app/{domain}/settings/share", post(settings::share))
             .route("/app/{domain}/settings/unshare", post(settings::revoke))
             .route("/app/{domain}/account", get(settings::account_page))
