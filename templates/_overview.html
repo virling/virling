@@ -33,7 +33,7 @@
     <div class="d3-row th"><span>{{ p.head }}</span><span class="num v">Visitors</span><span class="num rv">Revenue</span><span class="num pv">Per visitor</span><span class="x"></span></div>
     {% if p.rows.is_empty() %}
     <div class="d3-skel"></div><div class="d3-skel s"></div>
-    <div class="d3-empty"><b>{{ c.empty_title }}</b><span>{{ c.empty_text }}</span></div>
+    <div class="d3-empty"><b>{{ p.empty.0 }}</b><span>{{ p.empty.1 }}</span></div>
     {% endif %}
     {% for r in p.rows %}
     {% call d3::row(r) %}{% endcall %}

@@ -231,6 +231,8 @@ pub struct Panel {
     pub(super) foot: String,
     /// Where the "Tracked link" form posts; empty on tabs without one.
     pub(super) new_link: String,
+    /// Title and text shown when the panel has no rows.
+    pub(super) empty: (&'static str, &'static str),
 }
 
 pub struct TabCard {
@@ -239,8 +241,6 @@ pub struct TabCard {
     pub(super) label: &'static str,
     pub(super) tabs: Vec<Opt>,
     pub(super) panels: Vec<Panel>,
-    pub(super) empty_title: &'static str,
-    pub(super) empty_text: &'static str,
 }
 
 /// "up" at 1.15x the average or more, "down" at 0.85x or less.
@@ -635,6 +635,7 @@ fn shares(r: &BreakdownRow, base: &Base) -> (f64, f64) {
     )
 }
 
+#[allow(clippy::too_many_arguments)]
 fn panel(
     key: &str,
     tab: Tab,
@@ -643,6 +644,7 @@ fn panel(
     base: &Base,
     on: bool,
     filter_href: &FilterHref,
+    empty: (&'static str, &'static str),
 ) -> Panel {
     let mut items: Vec<Item> = rows
         .iter()
@@ -726,6 +728,7 @@ fn panel(
         rows,
         foot,
         new_link: String::new(),
+        empty,
     }
 }
 
@@ -768,6 +771,17 @@ pub fn card(
             .zip(data)
             .enumerate()
             .map(|(i, ((k, _, tab), (rows, kids)))| {
+                let empty = match tab {
+                    Tab::Country if base.visitors > 0 => (
+                        "No countries for these visits",
+                        "Countries come from your proxy's country header, such as cf-ipcountry from Cloudflare.",
+                    ),
+                    Tab::City if base.visitors > 0 => (
+                        "No cities for these visits",
+                        "Cities come from your proxy's location headers. On Cloudflare, turn on the Add visitor location headers Managed Transform.",
+                    ),
+                    _ => spec.empty,
+                };
                 panel(
                     &format!("{}-{k}", spec.key),
                     *tab,
@@ -776,11 +790,10 @@ pub fn card(
                     base,
                     i == pick.tab,
                     filter_href,
+                    empty,
                 )
             })
             .collect(),
-        empty_title: spec.empty.0,
-        empty_text: spec.empty.1,
     }
 }
 
@@ -1261,5 +1274,21 @@ mod tests {
         );
         assert_eq!(c.tabs[0].href, "/app/x.com?pages=before#channels");
         assert!(c.panels.is_empty());
+    }
+
+    #[test]
+    fn location_tabs_explain_missing_headers_once_visits_exist() {
+        let picks = picks(&HashMap::new());
+        let loc = picks.iter().find(|p| p.spec.key == "location").unwrap();
+        let data = vec![(Vec::new(), Vec::new()); 3];
+        let c = card(loc, &data, &base(), "/x", &[], &href);
+        assert_eq!(c.panels[1].empty.0, "No cities for these visits");
+        assert_eq!(c.panels[2].empty.0, "No locations yet");
+        let none = Base {
+            visitors: 0,
+            ..base()
+        };
+        let c = card(loc, &data, &none, "/x", &[], &href);
+        assert_eq!(c.panels[1].empty.0, "No locations yet");
     }
 }
