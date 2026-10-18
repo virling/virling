@@ -1,6 +1,6 @@
 # Script attributes and API
 
-The tracking script is served at `/v.js` by every Virling server. It is about 1 KB gzipped, and its source is [`assets/v.src.js`](https://github.com/virling/virling/blob/main/assets/v.src.js).
+The tracking script is served at `/v.js` by every Virling server. It is about 1.2 KB gzipped, and its source is [`assets/v.src.js`](https://github.com/virling/virling/blob/main/assets/v.src.js).
 
 ```html
 <script defer src="https://stats.example.com/v.js"

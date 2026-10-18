@@ -219,6 +219,7 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
             timezone,
             cookieless,
             same_visit: String::new(),
+            return_minutes: 5,
         };
         let s = Schedule {
             on: true,

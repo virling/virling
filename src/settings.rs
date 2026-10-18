@@ -17,6 +17,7 @@ use crate::sync;
 
 const WINDOWS: [i64; 4] = [30, 60, 90, 365];
 const MODELS: [&str; 2] = ["last_non_direct", "first_touch"];
+const RETURNS: [i64; 3] = [1, 5, 30];
 
 type IntegrationRow = (String, Option<i64>, Option<String>);
 
@@ -38,6 +39,7 @@ struct SettingsPage {
     cookieless: bool,
     /// Same-visit domains, one per line.
     same_visit: String,
+    return_minutes: i64,
     model: String,
     window_days: i64,
     windows: Vec<Opt>,
@@ -151,6 +153,7 @@ pub async fn page(
         script_host: state.config.base_url.clone(),
         cookieless: ctx.site.cookieless,
         same_visit: ctx.site.same_visit.replace(' ', "\n"),
+        return_minutes: ctx.site.return_minutes,
         windows: WINDOWS
             .iter()
             .map(|d| Opt {
@@ -259,6 +262,12 @@ pub struct SettingsInput {
     cookieless: Option<String>,
     #[serde(default)]
     same_visit: String,
+    #[serde(default = "default_return")]
+    return_minutes: i64,
+}
+
+fn default_return() -> i64 {
+    5
 }
 
 /// Up to 20 distinct domains from free text, normalized, without the site's own domain or its subdomains.
@@ -285,16 +294,20 @@ pub async fn save(
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
-    if !MODELS.contains(&input.model.as_str()) || !WINDOWS.contains(&input.window_days) {
+    if !MODELS.contains(&input.model.as_str())
+        || !WINDOWS.contains(&input.window_days)
+        || !RETURNS.contains(&input.return_minutes)
+    {
         return StatusCode::BAD_REQUEST.into_response();
     }
     let updated = sqlx::query(
-        "UPDATE sites SET attribution_model = ?, window_days = ?, cookieless = ?, same_visit = ? WHERE id = ?",
+        "UPDATE sites SET attribution_model = ?, window_days = ?, cookieless = ?, same_visit = ?, return_minutes = ? WHERE id = ?",
     )
     .bind(&input.model)
     .bind(input.window_days)
     .bind(input.cookieless.is_some())
     .bind(same_visit_domains(&input.same_visit, &ctx.site.domain))
+    .bind(input.return_minutes)
     .bind(&ctx.site.id)
     .execute(&state.db)
     .await;

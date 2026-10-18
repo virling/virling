@@ -1427,6 +1427,7 @@ pub async fn public(
             timezone,
             cookieless,
             same_visit: String::new(),
+            return_minutes: 5,
         },
         today: OffsetDateTime::now_utc().to_offset(offset).date(),
         first_day: first.map(|t| t.to_offset(offset).date()),
