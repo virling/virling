@@ -1095,7 +1095,8 @@ async fn page(
                 let title = match kind {
                     Kind::Bars if hours.is_some() => "Revenue per hour",
                     Kind::Bars => "Revenue",
-                    Kind::Line => "Revenue against the previous period",
+                    Kind::Line if show_prev => "Revenue against the previous period",
+                    Kind::Line => "Revenue over time",
                     Kind::Channel => "Revenue by channel",
                     Kind::Total => "Revenue so far this period",
                 };
