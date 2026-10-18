@@ -63,6 +63,24 @@ for (const box of document.querySelectorAll("[data-tabs]")) {
   });
 }
 
+for (const box of document.querySelectorAll("[data-stack]")) {
+  const note = box.querySelector("[data-stack-note]");
+  const read = async (picking) => {
+    const res = await fetch(box.dataset.stack, { headers: { accept: "application/json" } }).catch(() => null);
+    const s = res?.ok ? await res.json() : null;
+    if (!s || s.error) return (note.textContent = res?.status === 429 ? "Too many checks. Try again in a minute." : "Couldn't read the live site. Pick your platform below.");
+    const tab = s.platform && document.querySelector(`[role=tab][aria-controls="${s.platform}"]`);
+    if (picking && tab) tab.click();
+    const next = document.querySelector("[data-stack-next]");
+    if (next && s.providers[0]) next.href = next.href.split("?")[0] + "?provider=" + s.providers[0];
+    note.textContent = s.installed
+      ? "The script is on the live page."
+      : picking ? (tab ? `Looks like ${tab.textContent}. The script isn't on the live page yet.` : "The script isn't on the live page yet.") : "The script isn't on the live page yet. Publish your change and check again.";
+  };
+  box.querySelector("[data-stack-check]").addEventListener("click", () => read(false));
+  read(true);
+}
+
 for (const live of document.querySelectorAll("[data-live]")) {
   const check = async () => {
     try {

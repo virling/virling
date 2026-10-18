@@ -62,6 +62,7 @@
           <button role="tab" aria-selected="false" aria-controls="p-astro">Astro</button>
           <button role="tab" aria-selected="false" aria-controls="p-wp">WordPress</button>
           <button role="tab" aria-selected="false" aria-controls="p-nocode">Framer, Webflow</button>
+          <button role="tab" aria-selected="false" aria-controls="p-shopify">Shopify</button>
         </div>
         <button class="copy" type="button" data-copy>Copy</button>
       </div>
@@ -83,6 +84,14 @@ import Script from "next/script";
      Webflow: Site settings → Custom code → Head code --&gt;
 &lt;script defer src="{{ script_host }}/v.js"
   data-site="{{ domain }}"&gt;&lt;/script&gt;</pre>
+      <pre id="p-shopify" role="tabpanel" hidden>&lt;!-- Online Store → Themes → Edit code → theme.liquid,
+     before &lt;/head&gt; --&gt;
+&lt;script defer src="{{ script_host }}/v.js"
+  data-site="{{ domain }}"&gt;&lt;/script&gt;</pre>
+    </div>
+    <div class="stack-check" data-stack="/app/{{ domain }}/setup/stack">
+      <span data-stack-note role="status">Reading {{ domain }} to pick your platform.</span>
+      <button class="btn ghost" type="button" data-stack-check>Check install</button>
     </div>
     <div class="live" data-live="/app/{{ domain }}/latest-event" role="status">
       <span class="pulse" data-waiting></span>
@@ -92,7 +101,7 @@ import Script from "next/script";
     </div>
     <div class="actions">
       <a class="btn ghost" href="/app/setup">Add a different site</a>
-      <a class="btn lg" href="/app/{{ domain }}/setup/payments">Continue</a>
+      <a class="btn lg" href="/app/{{ domain }}/setup/payments" data-stack-next>Continue</a>
     </div>
     </div>
   {% endif %}
