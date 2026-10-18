@@ -1082,6 +1082,23 @@ mod tests {
         );
     }
 
+    #[tokio::test]
+    async fn script_step_shows_the_visit_the_dashboard_shows() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let phone = r#"{"n":"pageview","u":"https://example.com/","s":"example.com","v":"0b7c2d1e-aaaa-bbbb-cccc-1234567890ab","w":390}"#;
+        let turned = r#"{"n":"pageview","u":"https://example.com/pricing","s":"example.com","v":"0b7c2d1e-aaaa-bbbb-cccc-1234567890ab","w":1280}"#;
+        assert_eq!(post(&state, phone, UA).await, StatusCode::ACCEPTED);
+        assert_eq!(post(&state, turned, UA).await, StatusCode::ACCEPTED);
+        let got =
+            body_text(call(&state, get("/app/example.com/latest-event", Some(&cookie))).await)
+                .await;
+        assert!(
+            got.contains(r#""device":"Mobile""#) && got.contains(r#""path":"/""#),
+            "{got}"
+        );
+    }
+
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {
         let (ciphertext, nonce) = state.vault.encrypt(key).unwrap();
         sqlx::query(
