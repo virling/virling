@@ -54,7 +54,7 @@ The server accepts visitor IDs of 8 to 64 letters, digits and dashes. Anything e
 
 ## Automatic behavior
 
-- A pageview on load, and on `history.pushState` and `popstate` when the path or query changes. See [Single-page apps](../track/spa.md).
+- A pageview on load, and on `history.pushState`, `history.replaceState` and `popstate` when the path or query changes. See [Single-page apps](../track/spa.md).
 - Clicks on links to `buy.stripe.com` get `client_reference_id`, links to `buy.polar.sh` get `custom_field_data.virling_vid`, and links to `checkout.dodopayments.com` get `metadata_virling_vid`, set to the visitor ID. See [Payment links](../payments/checkout.md#payment-links).
 
 ## Caching

@@ -139,8 +139,18 @@ test("outbound clicks are exits and payment links carry the visitor ID", () => {
   );
 });
 
-test("pushState route changes log pageviews", () => {
+test("pushState and replaceState route changes log pageviews, once per URL", () => {
   const b = browser("https://example.com/");
   b.history.pushState({}, "", "/a");
-  assert.deepEqual(b.sent.map((e) => e.n), ["pageview", "pageview"]);
+  b.history.replaceState({}, "", "/b?tab=1");
+  b.history.replaceState({}, "", "/b?tab=1");
+  b.history.replaceState({ scroll: 1 }, "", "/b?tab=1#top");
+  b.history.pushState({}, "", "/a");
+  Object.assign(b.location, { href: "https://example.com/c", pathname: "/c", search: "" });
+  b.fire("w:", "popstate");
+  b.fire("w:", "popstate");
+  assert.deepEqual(
+    b.sent.map((e) => new URL(e.u).pathname),
+    ["/", "/a", "/b", "/a", "/c"],
+  );
 });

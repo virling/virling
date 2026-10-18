@@ -29,11 +29,11 @@
     if (path != last) { last = path; send("pageview"); }
   };
 
-  var push = history.pushState;
-  history.pushState = function () {
-    push.apply(this, arguments);
-    pageview();
-  };
+  // Routers navigate with pushState or replaceState; pageview skips a repeat of the same URL.
+  ["pushState", "replaceState"].forEach((k, f) => {
+    f = history[k];
+    history[k] = function () { f.apply(this, arguments); pageview(); };
+  });
   on(w, "popstate", pageview);
 
   // Record outbound clicks as exits, and carry the visitor ID into Stripe, Polar and Dodo payment links.
