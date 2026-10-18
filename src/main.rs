@@ -948,6 +948,40 @@ mod tests {
         assert!(!body.contains("<b>No AI activity yet</b>"));
     }
 
+    #[tokio::test]
+    async fn stepper_links_done_steps_from_saved_data() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let page = |path: &'static str| {
+            let (state, cookie) = (state.clone(), cookie.clone());
+            async move {
+                let uri = format!("/app/example.com/setup/{path}");
+                body_text(call(&state, get(&uri, Some(&cookie))).await).await
+            }
+        };
+        let script = page("script").await;
+        assert!(
+            script.contains(r#"<a href="/app/example.com/settings"><span>&#10003;</span>Site"#)
+        );
+        assert!(script.contains(r#"<li class="on" aria-current="step"><span>2</span>Script"#));
+        assert!(!script.contains(r#"href="/app/example.com/setup/payments"><span>"#));
+        let site = site_id(&state).await;
+        connect_fake(&state, &site, "stripe", "rk_test_abcdefgh1234").await;
+        let checkout = page("checkout").await;
+        assert!(
+            checkout.contains(
+                r#"<a href="/app/example.com/setup/payments"><span>&#10003;</span>Payments"#
+            ),
+            "going back keeps the Payments checkmark"
+        );
+        assert!(checkout.contains("<span>2</span>Script"), "no pageview yet");
+        let payments = page("payments").await;
+        assert!(
+            payments
+                .contains(r#"<li class="on" aria-current="step"><span>&#10003;</span>Payments"#)
+        );
+    }
+
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {
         let (ciphertext, nonce) = state.vault.encrypt(key).unwrap();
         sqlx::query(

@@ -101,6 +101,9 @@ h1, h2, h3 { margin: 0; letter-spacing: -0.03em; }
 .stepper li.done span { background: var(--revenue); color: #fff; }
 .stepper li.on { background: var(--hover); color: var(--ink); }
 .stepper li.on span { background: var(--ink); color: #fff; }
+.stepper li a { display: inline-flex; align-items: center; gap: 8px; height: 100%; color: inherit; text-decoration: none; }
+.stepper li.done:has(a):hover { background: var(--hover); color: var(--ink); }
+.stepper li a span { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
 .step-main { display: flex; padding: 40px 32px; }
 .step-box { width: 100%; display: flex; flex-direction: column; gap: 28px; }
 .step-body { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
