@@ -41,6 +41,10 @@ jobs:
         working-directory: docs
         run: mdbook build
 
+      - name: Add canonical URLs, descriptions and sitemap
+        working-directory: docs
+        run: python3 seo.py book
+
       - name: Check internal links
         working-directory: docs
         run: python3 check-links.py book
