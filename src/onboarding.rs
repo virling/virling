@@ -47,6 +47,7 @@ pub const TIMEZONES: &[&str] = &[
 #[template(path = "setup.html")]
 struct SetupPage {
     step: u8,
+    done: Done,
     domain: String,
     timezone: String,
     timezones: Vec<(String, bool)>,
@@ -124,6 +125,7 @@ pub async fn home(State(state): State<AppState>, account: Account) -> Response {
 pub async fn site_form(_account: Account) -> Response {
     render(SetupPage {
         step: 1,
+        done: Done::default(),
         domain: String::new(),
         timezone: "UTC".into(),
         timezones: tz_options("UTC"),
@@ -151,6 +153,7 @@ pub async fn create_site(
     let retry = |error| {
         render(SetupPage {
             step: 1,
+            done: Done::default(),
             domain: input.domain.clone(),
             timezone: timezone.clone(),
             timezones: tz_options(&timezone),
@@ -175,6 +178,28 @@ pub async fn create_site(
             retry("Something went wrong. Try again.")
         }
     }
+}
+
+/// Which setup steps are done, read from what is stored rather than from navigation.
+#[derive(Default)]
+pub struct Done {
+    script: bool,
+    payments: bool,
+}
+
+async fn done(state: &AppState, site_id: &str) -> Done {
+    let store = state.events.clone();
+    let id = site_id.to_string();
+    let script = tokio::task::spawn_blocking(move || store.latest_pageview(&id))
+        .await
+        .is_ok_and(|r| r.is_ok_and(|e| e.is_some()));
+    let payments =
+        sqlx::query_scalar::<_, i64>("SELECT count(*) FROM integrations WHERE site_id = ?")
+            .bind(site_id)
+            .fetch_one(&state.db)
+            .await
+            .is_ok_and(|n| n > 0);
+    Done { script, payments }
 }
 
 async fn owned_site(state: &AppState, account: &Account, domain: &str) -> Option<Site> {
@@ -214,6 +239,7 @@ pub async fn script_step(
     };
     render(SetupPage {
         step: 2,
+        done: done(&state, &site.id).await,
         domain: site.domain,
         timezone: site.timezone,
         timezones: Vec::new(),
@@ -326,6 +352,7 @@ pub struct ConnectedStats {
 #[template(path = "setup_payments.html")]
 struct PaymentsStep {
     step: u8,
+    done: Done,
     domain: String,
     cards: Vec<ProviderCard>,
     error: Option<String>,
@@ -372,6 +399,7 @@ fn payments_page(
         .or(open.first().copied());
     PaymentsStep {
         step: 3,
+        done: Done::default(),
         domain: site.domain,
         cards: open
             .into_iter()
@@ -463,7 +491,11 @@ pub async fn payments_step(
     };
     let want = q.provider.as_deref().and_then(Provider::parse);
     let replace = want.filter(|_| q.replace.is_some());
-    render(payments_page(site, connected, want, replace, None))
+    let done = done(&state, &site.id).await;
+    render(PaymentsStep {
+        done,
+        ..payments_page(site, connected, want, replace, None)
+    })
 }
 
 #[derive(Deserialize)]
@@ -495,13 +527,17 @@ pub async fn connect_payments(
             Ok(c) => c,
             Err(code) => return code.into_response(),
         };
-        return render(payments_page(
-            site,
-            connected,
-            Some(provider),
-            Some(provider),
-            Some(err.to_string()),
-        ));
+        let done = done(&state, &site.id).await;
+        return render(PaymentsStep {
+            done,
+            ..payments_page(
+                site,
+                connected,
+                Some(provider),
+                Some(provider),
+                Some(err.to_string()),
+            )
+        });
     }
     let bg = state.clone();
     let id = site.id.clone();
@@ -522,6 +558,7 @@ pub async fn connect_payments(
 #[template(path = "setup_checkout.html")]
 struct CheckoutStep {
     step: u8,
+    done: Done,
     domain: String,
     tabs: Vec<(&'static str, &'static str, bool)>,
 }
@@ -548,6 +585,7 @@ pub async fn checkout_step(
         .unwrap_or(Provider::Stripe);
     render(CheckoutStep {
         step: 4,
+        done: done(&state, &site.id).await,
         domain: site.domain,
         tabs: Provider::ALL
             .into_iter()
