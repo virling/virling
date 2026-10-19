@@ -30,7 +30,7 @@
       <div class="hero-copy">
         <div class="chips"><span class="chip">Open source</span><span class="chip">Written in Rust</span><span class="chip">Self-host or hosted</span></div>
         <h1>Traffic is a guess. <em>Revenue is a receipt.</em></h1>
-        <p class="lead">Virling shows you the receipts. It joins every visit to the payment that followed, so you see which channels bring paying customers. One Rust binary on your own server, or let us host it.</p>
+        <p class="lead">Know which channel brings paying customers, and stop spending on the ones that don't. Virling joins every visit to the Stripe, Dodo Payments, Polar or LemonSqueezy payment that followed. Open source: run it on your own server, or let us host it.</p>
         <div class="stack" data-wedge="selfhost" style="margin-top:6px">
           <form class="waitlist" novalidate>
             <label class="sr" for="email">Email</label>
@@ -84,8 +84,8 @@
       <div class="txt"><span class="kicker">02<span>/</span>channels that pay</span><h2>Your busiest channel is not your best one.</h2><p class="p">Visitor counts reward whatever is loud. Put revenue next to traffic and the picture flips: the channel that fills your graph can be the one that pays the least.</p><ul class="facts"><li><i></i><span>Revenue per visitor for every channel, page and country</span></li><li><i></i><span>Stripe, Dodo Payments, Polar and LemonSqueezy</span></li></ul>
         <div class="vs">
           <span class="cap">How it compares</span>
-          <p><b>Plausible</b><span>Counts visits. Open source and self-hostable.</span></p>
-          <p><b>DataFast</b><span>Ties visits to revenue. Hosted only.</span></p>
+          <p><b>Counters</b><span>Count visits. Often open source and self-hostable.</span></p>
+          <p><b>Hosted</b><span>Tie visits to revenue. Your data stays on their servers.</span></p>
           <p class="on"><b>Virling</b><span>Ties visits to payments and runs on your server.</span></p>
         </div>
       </div>
@@ -98,7 +98,7 @@
       <dl class="spec-list">
         <div><dt>Binary</dt><dd>One Rust binary. <span>Linux x86_64 and arm64, macOS, Docker.</span></dd></div>
         <div><dt>Storage</dt><dd>Embedded DuckDB for events, SQLite for settings. <span>No Postgres, no ClickHouse, no Redis.</span></dd></div>
-        <div><dt>Script</dt><dd>Under 1 KB gzipped, one tag in your head.</dd></div>
+        <div><dt>Script</dt><dd>About 1.2 KB gzipped, one tag in your head.</dd></div>
         <div><dt>License</dt><dd>AGPLv3</dd></div>
         <div><dt>Payments</dt><dd>Read-only keys for Stripe, Dodo Payments, Polar and LemonSqueezy. <span>No webhooks.</span></dd></div>
       </dl>
@@ -132,6 +132,21 @@
       <a class="btn light sm" href="https://x.com/rahulbhatix" data-goal="x_profile_click"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" fill="#000000"/></svg>Rahul on X</a>
     </div>
   </div></div></section>
+
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">06<span>/</span>questions</span>
+    <h2>Questions founders ask.</h2>
+    <div class="faq-list">
+      <div><h3>How do I see which marketing channel brings paying customers?</h3><p class="p">Give every visitor an ID, pass that ID into checkout, and join each payment back to the visits before it. Virling does all three. Add one script tag, connect your payment provider with a read-only key, and the dashboard shows revenue and revenue per visitor for every channel, page and country.</p></div>
+      <div><h3>Is there an open-source way to attribute Stripe revenue to traffic sources?</h3><p class="p">Yes. Virling is open source under AGPLv3 and runs on your own server. It reads Stripe with a restricted, read-only key and credits each payment to the visit that led to it. Dodo Payments, Polar and LemonSqueezy work the same way.</p></div>
+      <div><h3>Which traffic source makes money, and which only brings visitors?</h3><p class="p">Compare revenue per visitor, not visitor counts. A channel with a small share of traffic can bring most of the money. Virling puts revenue next to traffic for each source, so a launch, a post or a newsletter is judged by what it earned.</p></div>
+      <div><h3>How does Virling decide which channel gets the credit?</h3><p class="p">By default, the last visit in the lookback window that was not direct. You can switch to first touch, and set the window to 30, 60, 90 or 365 days. Renewals keep the channel of the customer&#x27;s first payment.</p></div>
+      <div><h3>Can I self-host revenue analytics?</h3><p class="p">Yes. Virling is one Rust binary with embedded storage, for Linux, macOS or Docker. There is no Postgres, ClickHouse or Redis to run, and a backup is copying one folder. Self-hosting is free.</p></div>
+      <div><h3>Do I need a cookie banner?</h3><p class="p">That depends on where you and your visitors are. Virling sets one first-party cookie so checkout can carry the visitor ID. Cookieless mode sets none, but then payments can&#x27;t be linked to visits.</p></div>
+      <div><h3>Can I use it today?</h3><p class="p">Virling is in early development. Releases are on GitHub and run on your own server now, with breaking changes possible until a stable release. The hosted plan is not open yet; join the waitlist to hear when it is.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I see which marketing channel brings paying customers?","acceptedAnswer":{"@type":"Answer","text":"Give every visitor an ID, pass that ID into checkout, and join each payment back to the visits before it. Virling does all three. Add one script tag, connect your payment provider with a read-only key, and the dashboard shows revenue and revenue per visitor for every channel, page and country."}},{"@type":"Question","name":"Is there an open-source way to attribute Stripe revenue to traffic sources?","acceptedAnswer":{"@type":"Answer","text":"Yes. Virling is open source under AGPLv3 and runs on your own server. It reads Stripe with a restricted, read-only key and credits each payment to the visit that led to it. Dodo Payments, Polar and LemonSqueezy work the same way."}},{"@type":"Question","name":"Which traffic source makes money, and which only brings visitors?","acceptedAnswer":{"@type":"Answer","text":"Compare revenue per visitor, not visitor counts. A channel with a small share of traffic can bring most of the money. Virling puts revenue next to traffic for each source, so a launch, a post or a newsletter is judged by what it earned."}},{"@type":"Question","name":"How does Virling decide which channel gets the credit?","acceptedAnswer":{"@type":"Answer","text":"By default, the last visit in the lookback window that was not direct. You can switch to first touch, and set the window to 30, 60, 90 or 365 days. Renewals keep the channel of the customer's first payment."}},{"@type":"Question","name":"Can I self-host revenue analytics?","acceptedAnswer":{"@type":"Answer","text":"Yes. Virling is one Rust binary with embedded storage, for Linux, macOS or Docker. There is no Postgres, ClickHouse or Redis to run, and a backup is copying one folder. Self-hosting is free."}},{"@type":"Question","name":"Do I need a cookie banner?","acceptedAnswer":{"@type":"Answer","text":"That depends on where you and your visitors are. Virling sets one first-party cookie so checkout can carry the visitor ID. Cookieless mode sets none, but then payments can't be linked to visits."}},{"@type":"Question","name":"Can I use it today?","acceptedAnswer":{"@type":"Answer","text":"Virling is in early development. Releases are on GitHub and run on your own server now, with breaking changes possible until a stable release. The hosted plan is not open yet; join the waitlist to hear when it is."}}]}</script>
 
   <section class="closer"><div class="wrap" data-wedge="selfhost">
     <h2>Stop posting where it feels busy.<br>Post where buyers come from.</h2>
