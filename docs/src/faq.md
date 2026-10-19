@@ -1,5 +1,15 @@
 # FAQ
 
+Short answers about attribution, payments, privacy and running Virling.
+
+## How do I see which channel brings paying customers?
+
+Add the [script](track/script.md) to your site, connect your payment provider with a read-only key, and [pass the visitor ID into checkout](payments/checkout.md). Virling then credits each payment to the visit that led to it and shows revenue and revenue per visitor for every channel. The [Quickstart](quickstart.md) walks through all three.
+
+## Is Virling free and open source?
+
+Yes. Virling is licensed under AGPL-3.0 and self-hosting is free. The hosted plan is <span class="na">Not available yet</span>.
+
 ## Do ad blockers block Virling?
 
 Some block requests to hosts or paths they know as analytics. Serving the script and `/api/event` from your own domain through a proxy helps, see [Reverse proxy](self-host/reverse-proxy.md#serving-the-script-from-your-own-domain). A tested first-party proxy setup per platform is <span class="na">Not available yet</span>. Payments are imported from your provider either way, so blocked visitors still count toward revenue, as Unattributed.
@@ -34,7 +44,7 @@ It skips `localhost`, `127.*` and `[::1]`. Add `data-dev` to the tag to test loc
 
 ## Is there an API?
 
-Only the [event endpoint](reference/event-api.md) for sending events. A read API is <span class="na">Not available yet</span>.
+Yes. The [Read API](reference/api.md) returns the dashboard's numbers as JSON with a read-only key, the [MCP server](reference/mcp.md) lets AI assistants read the same data, and the [event endpoint](reference/event-api.md) accepts events from your server.
 
 ## How do I report a security problem?
 

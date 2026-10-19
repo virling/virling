@@ -21,7 +21,7 @@ Virling runs as one Rust binary with embedded storage. There is no Postgres, Cli
 
 ## Project status
 
-Virling is in early development. The current release is v0.1.1. Expect breaking changes until a stable release, and read the [changelog](https://github.com/virling/virling/blob/main/CHANGELOG.md) before you upgrade.
+Virling is in early development. Releases are listed on [GitHub](https://github.com/virling/virling/releases). Expect breaking changes until a stable release, and read the [changelog](https://github.com/virling/virling/blob/main/CHANGELOG.md) before you upgrade.
 
 The hosted plan at app.virling.com is <span class="na">Not available yet</span>. Today you run Virling on your own server. See [Hosted plan](hosted.md).
 
