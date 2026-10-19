@@ -7,7 +7,7 @@ rm -rf public && mkdir -p public/assets
 cp ../assets/selfhost.html public/index.html
 cp ../assets/agency.html public/agency.html
 cp ../assets/site.css ../assets/site.js ../assets/app.css ../assets/app.js ../assets/email-logo.png public/assets/
-cp ../assets/favicon.svg ../assets/favicon.ico ../assets/v.js ../assets/robots.txt ../assets/sitemap.xml ../scripts/install.sh public/
+cp ../assets/favicon.svg ../assets/favicon.ico ../assets/v.js ../assets/robots.txt ../assets/sitemap.xml ../assets/llms.txt ../assets/llms-full.txt ../scripts/install.sh public/
 cp -R ../assets/art public/assets/art
 cp -R ../assets/fonts public/assets/fonts
 cp -R ../assets/dia public/assets/dia

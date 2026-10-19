@@ -1,0 +1,85 @@
+# Virling
+
+Virling is open-source, self-hosted revenue attribution for SaaS. It joins every website visit to the payment that followed, so you can see which traffic channel brings paying customers, not just visitors.
+
+- Website: https://virling.com
+- Docs: https://docs.virling.com
+- Source: https://github.com/virling/virling
+- License: AGPLv3. Self-hosting is free.
+- Built by Stacklance Infotech LLP.
+
+## Status
+
+Virling is in early development. Releases are published on GitHub and run on your own server today. Expect breaking changes until a stable release. A hosted plan is planned; it is on a waitlist at virling.com and is not available yet.
+
+## Who it is for
+
+- Indie founders and small SaaS teams who take payments through Stripe, Dodo Payments, Polar or LemonSqueezy (Lemon Squeezy) and want to know which marketing channel actually pays.
+- Teams that want revenue analytics on their own server, with their data next to the binary.
+- Agencies that report to clients and want each client to see revenue by channel every week.
+
+## What it answers
+
+- Which channel brought the most revenue this month, after refunds.
+- What a visitor from each source is worth (revenue per visitor), by channel, page and country.
+- Whether a launch, a post or a newsletter made money or only brought traffic.
+- Which visits a paying customer had before paying, and which one got the credit.
+- How customers from each first channel retain over time.
+
+## How it works
+
+1. Add a tracking script to your site. It is about 1.2 KB gzipped and records pageviews, referrers, UTM tags, single-page-app route changes and custom goals, with a first-party visitor ID.
+2. Connect a payment provider with a read-only key. Virling backfills the last 90 days of payments, then polls every minute. It never creates, changes or refunds anything.
+3. Pass the visitor ID into checkout. Stripe Payment Links, Polar checkout links and Dodo payment links get it added automatically by the script. Payments without it still count toward revenue, as Unattributed.
+4. Virling credits each payment to a session. The default model is last non-direct: the latest session in the lookback window that was not Direct. First touch is the other option. The lookback window is 30, 60, 90 or 365 days, 90 by default. Renewals keep the channel of the customer's first payment.
+
+Every session gets one channel from its first pageview: Paid, Email, AI, Organic search, Communities, Social, Referral or Direct.
+
+## Payment providers
+
+- Stripe: restricted key (rk_live_ or rk_test_) with read access. Secret keys are refused.
+- Dodo Payments: API key, live or test mode.
+- Polar: organization access token with orders:read and refunds:read, plus subscriptions:read for retention.
+- LemonSqueezy: API key. LemonSqueezy keys cannot be limited to read-only.
+
+## Self-hosting
+
+- One Rust binary for Linux x86_64 and arm64 and macOS, plus a Docker image.
+- Embedded DuckDB for events and SQLite for settings. No Postgres, ClickHouse or Redis to run.
+- A backup is copying one data folder.
+
+## Privacy
+
+- Visitor IP addresses are never stored, and neither are full user agents or full referrer URLs.
+- By default Virling sets one first-party cookie, virling_vid, with a random ID, so checkout can carry it.
+- Cookieless mode sets no cookie and counts visitors with a daily-rotating salted hash. The trade-off: new payments cannot be linked to visits, so they show as Unattributed.
+
+## For agencies
+
+One account for every client. Each client can get a weekly report with your branding that shows revenue for the week and which channels brought it.
+
+## For AI assistants and scripts
+
+A read-only JSON API and a read-only MCP server let assistants such as Claude answer questions like "which channel made the most money last month?" from your own Virling server.
+
+## Common questions
+
+### How do I see which marketing channel brings paying customers?
+
+Track visits with a first-party visitor ID, pass that ID into checkout, and join payments back to visits. Virling does this for Stripe, Dodo Payments, Polar and LemonSqueezy and shows revenue and revenue per visitor for each channel.
+
+### Is there an open-source way to attribute Stripe revenue to traffic sources?
+
+Yes. Virling is AGPLv3 and self-hosted. It reads Stripe with a restricted read-only key and credits each payment to the visit that led to it.
+
+### Can I self-host revenue analytics?
+
+Yes. Virling is one binary with embedded storage. Run it with Docker or a release binary on your own server.
+
+### Does Virling need a cookie banner?
+
+That depends on your jurisdiction. In cookieless mode Virling sets no cookie, but payments can then not be linked to visits.
+
+### What does Virling not do yet?
+
+A hosted plan, team members and roles, imports from other analytics tools, and attribution models beyond last non-direct and first touch are not available yet. Windows builds are not available; use Docker.

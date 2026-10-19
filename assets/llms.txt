@@ -1,0 +1,34 @@
+# Virling
+
+> Virling is open-source, self-hosted revenue attribution for SaaS. It joins every website visit to the payment that followed, so founders can see which traffic channel brings paying customers, not just visitors. It reads payments from Stripe, Dodo Payments, Polar and LemonSqueezy (Lemon Squeezy) with a read-only key and runs as one Rust binary under the AGPLv3 license.
+
+Virling answers questions like: which channel brought the most revenue this month, did a launch or a Reddit post make money or just traffic, what is a visitor from each source worth, and which visits did a paying customer have before they paid.
+
+Status: early development. Releases are on GitHub and can be self-hosted today. A hosted plan is on a waitlist at virling.com and is not available yet.
+
+## Product
+
+- [Home](https://virling.com/): what Virling does, how attribution works, and the self-host spec
+- [For agencies](https://virling.com/agency): weekly branded reports that show each client which channels brought paying customers
+- [Live demo](https://virling.com/demo/): a static demo dashboard with made-up data
+- [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
+
+## Docs
+
+- [Introduction](https://docs.virling.com/introduction): what works today
+- [Quickstart](https://docs.virling.com/quickstart): from an empty server to the first attributed payment
+- [How Virling works](https://docs.virling.com/how-it-works)
+- [Payments overview](https://docs.virling.com/payments/): which read-only key each provider needs
+- [Stripe](https://docs.virling.com/payments/stripe), [Dodo Payments](https://docs.virling.com/payments/dodo), [Polar](https://docs.virling.com/payments/polar), [LemonSqueezy](https://docs.virling.com/payments/lemonsqueezy)
+- [Link checkout to visits](https://docs.virling.com/payments/checkout): pass the visitor ID into checkout
+- [How attribution works](https://docs.virling.com/attribution/)
+- [Model and lookback window](https://docs.virling.com/attribution/model)
+- [Channels](https://docs.virling.com/attribution/channels): Paid, Email, AI, Organic search, Communities, Social, Referral, Direct
+- [Cookieless mode](https://docs.virling.com/track/cookieless)
+- [Privacy and consent](https://docs.virling.com/track/privacy)
+- [MCP server](https://docs.virling.com/reference/mcp): read-only access for AI assistants
+- [FAQ](https://docs.virling.com/faq)
+
+## Source
+
+- [GitHub repository](https://github.com/virling/virling): code, releases and changelog, AGPLv3
