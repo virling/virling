@@ -65,13 +65,15 @@
 {% if let Some(s) = setup %}
 <section class="d3-card d3-setup">
   <div class="d3-setup-head"><h2>{{ s.title }}</h2><span class="dim">{{ s.count }}</span>{% if !s.dismiss.is_empty() %}<form method="post" action="{{ s.dismiss }}"><button class="d3-x" type="submit" aria-label="Hide this checklist"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>{% endif %}</div>
+  <div class="d3-steps">
   {% for st in s.steps %}
   <div class="d3-step">
     <span class="mark{% if st.done %} done{% endif %}">{% if st.done %}✓{% else %}{{ st.num }}{% endif %}</span>
-    <span class="txt"><b>{{ st.label }}</b><span>{{ st.sub }}</span></span>
+    <b class="txt" title="{{ st.sub }}">{{ st.label }}</b>
     {% if !st.done && !st.act.is_empty() %}<a class="d3-btn sm" href="{{ st.href }}">{{ st.act }}</a>{% endif %}
   </div>
   {% endfor %}
+  </div>
 </section>
 {% endif %}
 {% include "_overview.html" %}

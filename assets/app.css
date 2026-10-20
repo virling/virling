@@ -478,18 +478,19 @@ a.ctl { text-decoration: none; }
 .d3-code-head { display: flex; justify-content: space-between; align-items: center; min-height: 32px; padding: 8px 12px; border-bottom: 1px solid #23272f; font-size: 12px; color: #b9bcc2; }
 .d3-code-head button { height: 32px; padding: 0 10px; border: 1px solid #2e333c; border-radius: 8px; background: transparent; color: #e6e8eb; font-size: 12px; cursor: pointer; }
 .d3-code pre { margin: 0; padding: 14px 16px; color: #e6e8eb; font-size: 13px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
-.d3-setup { padding: 14px 20px 6px; }
+.d3-setup { padding: 14px 20px 18px; }
+.d3-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px 20px; }
 .d3-setup-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding-bottom: 6px; }
 .d3-setup-head .dim { margin-left: auto; font-size: 13px; }
 .d3-setup-head form { display: contents; }
 .d3-x { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: transparent; color: var(--ink-3); cursor: pointer; }
 .d3-x:hover { background: var(--hover); color: var(--ink); }
-.d3-step { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 6px 0; border-top: 1px solid var(--rule-2); }
+.d3-step { display: flex; align-items: center; gap: 10px; padding-top: 12px; border-top: 3px solid var(--rule-2); }
+.d3-step:has(.mark.done) { border-top-color: var(--up); }
+.d3-step .d3-btn { flex: none; }
 .d3-step .mark { width: 26px; height: 26px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #f0f0eb; color: var(--ink-2); font-size: 13px; font-weight: 700; }
 .d3-step .mark.done { background: var(--up); color: #fff; }
-.d3-step .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.35; }
-.d3-step .txt b { font-weight: 600; }
-.d3-step .txt span { font-size: 13px; color: var(--ink-2); }
+.d3-step .txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
 .d3-insight { padding: 16px 20px; display: flex; gap: 14px; align-items: flex-start; }
 .d3-insight .bulb { width: 32px; height: 32px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px; background: #fdf0ea; color: var(--revenue-text); }
 .d3-insight > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; line-height: 1.45; }
