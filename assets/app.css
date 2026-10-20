@@ -882,7 +882,7 @@ a.ctl { text-decoration: none; }
 .vr-who { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
 .vr-who b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
 .vr .src { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-.vr .src .lbl { flex: 0 1 auto; min-width: 4ch; overflow: hidden; text-overflow: ellipsis; }
+.vr .src .lbl { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .vr .ch { flex: 0 100 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--ink-4); }
 @media (max-width: 1180px) { .vr .ch { display: none; } }
 .vr .na { color: var(--mute); }
