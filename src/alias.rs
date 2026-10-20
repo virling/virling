@@ -27,20 +27,31 @@ pub struct Alias {
 pub fn alias(slot: u32) -> Alias {
     let round = slot / COMBOS;
     let i = (slot % COMBOS * STRIDE + 517) % COMBOS;
-    let (adjective, color) = ADJECTIVES[(i % 32) as usize];
-    let (animal, face) = ANIMALS[(i / 32) as usize];
+    let color = ADJECTIVES[(i % 32) as usize].1;
+    let face = ANIMALS[(i / 32) as usize].1;
     let extra = match round {
         0 => "",
         r => EXTRAS[((r - 1) % 3) as usize],
     };
     Alias {
-        name: match round {
-            0 => format!("{adjective} {animal}"),
-            r => format!("{adjective} {animal} {}", r + 1),
-        },
+        name: name(slot),
         avatar: format!(
             r#"<svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" fill="{color}"/>{face}{extra}</svg>"#
         ),
+    }
+}
+
+/// The name of a slot, without its face.
+fn name(slot: u32) -> String {
+    let round = slot / COMBOS;
+    let i = (slot % COMBOS * STRIDE + 517) % COMBOS;
+    let (adjective, animal) = (
+        ADJECTIVES[(i % 32) as usize].0,
+        ANIMALS[(i / 32) as usize].0,
+    );
+    match round {
+        0 => format!("{adjective} {animal}"),
+        r => format!("{adjective} {animal} {}", r + 1),
     }
 }
 
@@ -53,7 +64,7 @@ impl Names {
         let mut unique = keys;
         let mut seen = std::collections::HashSet::new();
         unique.retain(|k| seen.insert(k.clone()));
-        for chunk in unique.chunks(500) {
+        for chunk in unique.chunks(5000) {
             let sql = format!(
                 "SELECT key, slot FROM aliases WHERE site_id = ? AND key IN ({})",
                 vec!["?"; chunk.len()].join(", ")
@@ -93,6 +104,10 @@ impl Names {
 
     pub fn get(&self, key: &str) -> Alias {
         alias(self.0[key])
+    }
+
+    pub fn name(&self, key: &str) -> String {
+        name(self.0[key])
     }
 }
 

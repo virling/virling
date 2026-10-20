@@ -9,6 +9,12 @@ use super::*;
 use crate::retention::{Customer, Mrr, Retention, StatusSource, summarize};
 use crate::stats::{from_micros, micros_of};
 
+/// A customer's first payment time, latest end of a live subscription (`i64::MIN` with none live), and lifetime.
+pub(crate) type Cohort = (i64, Option<i64>, Customer);
+
+/// Keys, paying-candidate subscriptions as (key, end, usd), and each payment's key.
+pub(crate) type MrrKeys = (usize, Vec<(u32, i64, f64)>, Vec<u32>);
+
 /// A subscription as stored.
 pub(crate) struct Sub {
     provider: u32,
@@ -59,7 +65,8 @@ impl SiteIndex {
         Ok(())
     }
 
-    fn customers(&self, lo: i64, hi: i64, now: i64) -> Vec<Customer> {
+    /// Customers whose first payment is no renewal, by first payment, from payments up to `now`, with the latest end of a live subscription.
+    fn cohorts_until(&self, now: i64) -> Vec<Cohort> {
         struct Acc<'a> {
             first: &'a Pay,
             net: f64,
@@ -92,43 +99,76 @@ impl SiteIndex {
                 a.kept.push(id(p));
             }
         }
-        let mut live: HashMap<(u32, &str), bool> = HashMap::new();
+        let mut ends: HashMap<(u32, &str), i64> = HashMap::new();
         for s in &self.subs {
-            let on = s.live && s.ends_at.is_none_or(|t| t > now);
-            *live.entry((s.provider, &s.customer)).or_default() |= on;
+            let end = ends.entry((s.provider, &s.customer)).or_insert(i64::MIN);
+            if s.live {
+                *end = (*end).max(s.ends_at.unwrap_or(i64::MAX));
+            }
         }
-        let since = now - 60 * DAY_US;
         let mut out = Vec::new();
         for mut a in by.into_values() {
             let (f, row) = (a.first, &a.first.row);
-            let in_range = f.ts >= lo && f.ts < hi;
-            if row.is_renewal || !(in_range || f.ts > since) {
+            if row.is_renewal {
                 continue;
             }
             a.kept.sort_unstable();
             let n = a.kept.len();
             let touch = row.touch.as_ref();
-            out.push(Customer {
-                first: from_micros(f.ts),
-                first_payment_usd: row.amount_usd.unwrap_or(0.0),
-                net_usd: a.net,
-                refunded_usd: a.refunded_usd,
-                any_refund: a.any_refund,
-                last_kept: a.kept.last().map(|k| from_micros(k.0)),
-                gap: (n >= 2).then(|| Duration::microseconds(a.kept[n - 1].0 - a.kept[n - 2].0)),
-                subscribed: row
-                    .customer_id
-                    .as_deref()
-                    .and_then(|c| live.get(&(f.provider, c)).copied()),
-                unattributed: touch.is_none(),
-                channel: touch.map(|t| t.channel.clone()),
-                referrer_host: touch.and_then(|t| t.referrer_host.clone()),
-                campaign: touch.and_then(|t| t.campaign.clone()),
-                in_range,
-            });
+            let end = row
+                .customer_id
+                .as_deref()
+                .and_then(|c| ends.get(&(f.provider, c)).copied());
+            out.push((
+                f.ts,
+                end,
+                Customer {
+                    first: from_micros(f.ts),
+                    first_payment_usd: row.amount_usd.unwrap_or(0.0),
+                    net_usd: a.net,
+                    refunded_usd: a.refunded_usd,
+                    any_refund: a.any_refund,
+                    last_kept: a.kept.last().map(|k| from_micros(k.0)),
+                    gap: (n >= 2)
+                        .then(|| Duration::microseconds(a.kept[n - 1].0 - a.kept[n - 2].0)),
+                    subscribed: None,
+                    unattributed: touch.is_none(),
+                    channel: touch.map(|t| t.channel.clone()),
+                    referrer_host: touch.and_then(|t| t.referrer_host.clone()),
+                    campaign: touch.and_then(|t| t.campaign.clone()),
+                    in_range: false,
+                },
+            ));
         }
-        out.sort_by_key(|c| c.first);
+        out.sort_by_key(|c| c.0);
         out
+    }
+
+    fn customers(&self, lo: i64, hi: i64, now: i64) -> Vec<Customer> {
+        let until;
+        // With no payment after `now`, every read shares one list built from all payments.
+        let all = if self.payments.last().is_none_or(|p| p.ts <= now) {
+            self.cohorts.get_or_init(|| self.cohorts_until(i64::MAX))
+        } else {
+            until = self.cohorts_until(now);
+            &until
+        };
+        let at = |t: i64| all.partition_point(|c| c.0 < t);
+        let (a0, a1, b0) = (at(lo), at(hi).max(at(lo)), at(now - 60 * DAY_US + 1));
+        let spans = if b0 <= a1 {
+            [a0.min(b0)..all.len(), 0..0]
+        } else {
+            [a0..a1, b0..all.len()]
+        };
+        spans
+            .into_iter()
+            .flat_map(|r| &all[r])
+            .map(|(ts, end, c)| Customer {
+                in_range: *ts >= lo && *ts < hi,
+                subscribed: end.map(|e| e > now),
+                ..c.clone()
+            })
+            .collect()
     }
 
     pub fn retention(&self, lo: i64, hi: i64, now: OffsetDateTime) -> Retention {
@@ -140,32 +180,61 @@ impl SiteIndex {
         summarize(&list, now, days_of_data, self.status_sources.clone())
     }
 
-    pub fn mrr(&self, lo: i64, hi: i64, now: OffsetDateTime) -> Option<Mrr> {
-        let now = micros_of(now);
-        let priced = self.subs.iter().filter(|s| s.mrr_usd.is_some()).count();
-        if priced == 0 {
-            return None;
-        }
-        let mut subs: HashMap<(u32, &str), f64> = HashMap::new();
+    /// Paying-candidate subscriptions as (key, end, usd) and each payment's key, NONE without one.
+    fn mrr_keys(&self) -> MrrKeys {
+        let mut keys: HashMap<(u32, &str), u32> = HashMap::new();
+        let mut subs = Vec::new();
         for s in &self.subs {
-            let paying = s.live
-                && !matches!(&*s.status, "trialing" | "on_trial")
-                && s.ends_at.is_none_or(|t| t > now);
-            if let Some(usd) = s.mrr_usd.filter(|_| paying) {
-                *subs.entry((s.provider, &s.customer)).or_default() += usd;
+            if !s.live || matches!(&*s.status, "trialing" | "on_trial") {
+                continue;
+            }
+            if let Some(usd) = s.mrr_usd {
+                let n = keys.len() as u32;
+                let k = *keys.entry((s.provider, &s.customer)).or_insert(n);
+                subs.push((k, s.ends_at.unwrap_or(i64::MAX), usd));
             }
         }
-        let all = Scope(None, String::new());
-        let cohort: HashSet<(u32, &str)> = self
-            .pays(lo, hi, &all)
-            .filter(|p| !p.renewal)
-            .filter_map(|p| Some((p.provider, p.row.customer_id.as_deref()?)))
+        let pays = self
+            .payments
+            .iter()
+            .map(|p| {
+                p.row
+                    .customer_id
+                    .as_deref()
+                    .filter(|_| !p.renewal)
+                    .and_then(|c| keys.get(&(p.provider, c)).copied())
+                    .unwrap_or(NONE)
+            })
             .collect();
+        (keys.len(), subs, pays)
+    }
+
+    pub fn mrr(&self, lo: i64, hi: i64, now: OffsetDateTime) -> Option<Mrr> {
+        let now = micros_of(now);
+        if !self.subs.iter().any(|s| s.mrr_usd.is_some()) {
+            return None;
+        }
+        let (n, subs, pays) = self.mrr_keys.get_or_init(|| self.mrr_keys());
+        let mut usd: Vec<Option<f64>> = vec![None; *n];
+        for &(k, end, u) in subs {
+            if end > now {
+                *usd[k as usize].get_or_insert(0.0) += u;
+            }
+        }
+        let mut cohort = vec![false; *n];
+        let from = self.payments.partition_point(|p| p.ts < lo);
+        let to = self.payments.partition_point(|p| p.ts < hi).max(from);
+        for &k in &pays[from..to] {
+            if k != NONE {
+                cohort[k as usize] = true;
+            }
+        }
         let mut m = Mrr::default();
-        for (k, usd) in subs {
+        for (k, usd) in usd.into_iter().enumerate() {
+            let Some(usd) = usd else { continue };
             m.usd += usd;
             m.customers += 1;
-            if cohort.contains(&k) {
+            if cohort[k] {
                 m.cohort_usd += usd;
                 m.cohort_customers += 1;
             }

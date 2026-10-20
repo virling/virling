@@ -6,7 +6,7 @@ use serde::Deserialize;
 use time::macros::format_description;
 use time::{Date, Duration, OffsetDateTime, UtcOffset};
 
-use crate::alias::Names;
+use crate::alias::{Alias, Names};
 use crate::app::AppState;
 use crate::auth::Account;
 use crate::fx::minor_to_major;
@@ -531,8 +531,6 @@ fn path_chips(j: Option<&Journey>) -> Vec<Chip> {
 }
 
 pub struct CustomerView {
-    /// Looks up the generated name once the page's names are loaded.
-    key: String,
     name: String,
     avatar: String,
     /// Customer, Renewal, or empty for a goal completion.
@@ -593,19 +591,25 @@ fn encode(v: &str) -> String {
 }
 
 impl CustomerView {
-    /// Case-insensitive match on name, source, channel or chip labels; `q` is lowercase.
-    fn named(mut self, names: &Names) -> Self {
-        let alias = names.get(&self.key);
+    fn named(mut self, alias: Alias) -> Self {
         (self.name, self.avatar) = (alias.name, alias.avatar);
         self
     }
+}
 
-    fn matches(&self, q: &str) -> bool {
-        [&self.name, &self.source, &self.channel]
-            .into_iter()
-            .chain(self.chips.iter().map(|c| &c.1))
-            .any(|s| s.to_lowercase().contains(q))
+/// Builds a row's view for the site domain and its UTC offset.
+type View = Box<dyn FnOnce(&str, UtcOffset) -> CustomerView + Send>;
+/// A row's name key, its search text without the name, and its view.
+type Found = (String, String, View);
+
+/// Source, channel when it differs, and chip labels as a row shows them, lowercase; searches match within one.
+fn hay(source: &str, channel: &str, a: &Activity) -> String {
+    let mut out = vec![source.to_string()];
+    if channel != source {
+        out.push(channel.to_string());
     }
+    out.extend(chip_labels(a));
+    out.join("\0").to_lowercase()
 }
 
 /// "<1m", "40m", "3h", "29d"
@@ -616,6 +620,23 @@ fn since(d: Duration) -> String {
         3600..86400 => format!("{}h", d.whole_hours()),
         _ => format!("{}d", d.whole_days()),
     }
+}
+
+/// Labels of `chips`, without their icons.
+fn chip_labels(a: &Activity) -> Vec<String> {
+    let mut out = Vec::new();
+    if let Some(c) = &a.country {
+        out.push(icons::country(c));
+    }
+    if let Some(d) = a.device.as_deref().filter(|d| *d != "Unknown") {
+        out.push(d.to_string());
+    }
+    for name in [&a.os, &a.browser].into_iter().flatten() {
+        if name != "Other" {
+            out.push(name.clone());
+        }
+    }
+    out
 }
 
 fn chips(a: &Activity) -> Vec<(String, String)> {
@@ -661,7 +682,6 @@ pub fn payment_customer(
     let (source, channel) = source_of(p);
     let first = p.first_touch.as_ref().map(|f| f.ts);
     CustomerView {
-        key: payer_key(p),
         name: String::new(),
         avatar: String::new(),
         badge: if p.is_renewal { "Renewal" } else { "Customer" },
@@ -695,13 +715,16 @@ pub fn payment_customer(
     }
 }
 
-fn goal_customer(g: &GoalRow, a: &Activity, domain: &str, offset: UtcOffset) -> CustomerView {
-    let key = match &g.customer {
+/// Stable key for the person behind a goal completion, as `payer_key` keys payments.
+fn goal_key(g: &GoalRow) -> String {
+    match &g.customer {
         Some(c) => format!("c:{c}"),
         None => format!("v:{}", g.visitor_id),
-    };
+    }
+}
+
+fn goal_customer(g: &GoalRow, a: &Activity, domain: &str, offset: UtcOffset) -> CustomerView {
     CustomerView {
-        key,
         name: String::new(),
         avatar: String::new(),
         badge: if g.spent_usd > 0.0 { "Customer" } else { "" },
@@ -894,7 +917,6 @@ pub async fn payments(
     let wanted_goal = q.goal.clone().unwrap_or_default();
     let store = state.events.clone();
     let id = ctx.site.id.clone();
-    let (domain, offset) = (ctx.site.domain.clone(), ctx.offset);
     let query = search.clone();
     let result = blocking(move || {
         let s = store.payment_summary(&id, &p)?;
@@ -908,7 +930,7 @@ pub async fn payments(
         } else {
             (SEARCH_LIMIT, 0)
         };
-        let (total, customers) = match &goal {
+        let (total, customers): (u64, Vec<Found>) = match &goal {
             Some(g) => {
                 let (total, rows) = store.goal_list(&id, &p, g, limit, skip)?;
                 let who: Vec<Who> = rows
@@ -920,22 +942,28 @@ pub async fn payments(
                     })
                     .collect();
                 let activity = store.activity(&id, &p.tz, &who)?;
-                let views = rows
-                    .iter()
-                    .zip(&activity)
-                    .map(|(r, a)| goal_customer(r, a, &domain, offset));
-                (total, views.collect::<Vec<_>>())
+                let found = rows.into_iter().zip(activity).map(|(r, a)| {
+                    let key = goal_key(&r);
+                    let hay = hay(&r.source, &r.channel, &a);
+                    let view: View =
+                        Box::new(move |domain, offset| goal_customer(&r, &a, domain, offset));
+                    (key, hay, view)
+                });
+                (total, found.collect())
             }
             None => {
                 let list = store.payment_list(&id, &p, filter, limit, skip)?;
                 let who: Vec<Who> = list.rows.iter().map(Who::of).collect();
                 let activity = store.activity(&id, &p.tz, &who)?;
-                let views = list
-                    .rows
-                    .iter()
-                    .zip(&activity)
-                    .map(|(r, a)| payment_customer(r, a, &domain, offset));
-                (list.total, views.collect::<Vec<_>>())
+                let found = list.rows.into_iter().zip(activity).map(|(r, a)| {
+                    let (source, channel) = source_of(&r);
+                    let hay = hay(&source, &channel, &a);
+                    let key = payer_key(&r);
+                    let view: View =
+                        Box::new(move |domain, offset| payment_customer(&r, &a, domain, offset));
+                    (key, hay, view)
+                });
+                (list.total, found.collect())
             }
         };
         let ever = if s.payments > 0 {
@@ -965,26 +993,34 @@ pub async fn payments(
     let names = match Names::load(
         &state.db,
         &ctx.site.id,
-        customers.iter().map(|c| c.key.clone()).collect(),
+        customers.iter().map(|c| c.0.clone()).collect(),
     )
     .await
     {
         Ok(n) => n,
         Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
     };
-    let mut customers: Vec<CustomerView> = customers.into_iter().map(|c| c.named(&names)).collect();
-    let total = if search.is_empty() {
-        total
+    let (customers, total) = if search.is_empty() {
+        (customers, total)
     } else {
-        customers.retain(|c| c.matches(&search));
-        let n = customers.len() as u64;
-        customers = customers
+        let hits: Vec<Found> = customers
+            .into_iter()
+            .filter(|(key, hay, _)| {
+                hay.contains(&search) || names.name(key).to_lowercase().contains(&search)
+            })
+            .collect();
+        let n = hits.len() as u64;
+        let hits = hits
             .into_iter()
             .skip(((page - 1) * PER_PAGE) as usize)
             .take(PER_PAGE as usize)
             .collect();
-        n
+        (hits, n)
     };
+    let customers: Vec<CustomerView> = customers
+        .into_iter()
+        .map(|(key, _, view)| view(&ctx.site.domain, ctx.offset).named(names.get(&key)))
+        .collect();
     let counts = [s.payments, s.attributed, s.unattributed, s.refunded];
     let base = sites::app_path(&ctx.site.domain, "payments");
     let rq = picked.params();

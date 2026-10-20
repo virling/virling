@@ -1,7 +1,5 @@
 //! The goal table and funnels read from the index.
 
-use std::collections::{HashMap, HashSet};
-
 use duckdb::Connection;
 
 use super::*;
@@ -10,15 +8,15 @@ use crate::stats::{GoalStat, Period, Step, StepCount};
 impl SiteIndex {
     pub fn goal_table(&self, lo: i64, hi: i64, scope: &Scope, pages: &[String]) -> Vec<GoalStat> {
         // Path ID -> index in `pages`; earlier pages win.
-        let mut page_of: HashMap<u32, u32> = HashMap::new();
+        let mut page_of: FastMap<u32, u32> = FastMap::default();
         for (i, p) in pages.iter().enumerate() {
             for id in self.strings.matching(p) {
                 page_of.entry(id).or_insert(i as u32);
             }
         }
         // (is goal, name or index in `pages`) -> (completions, visitors, visitors by channel)
-        type Done = (u64, HashSet<u32>, HashMap<u32, HashSet<u32>>);
-        let mut done: HashMap<(bool, u32), Done> = HashMap::new();
+        type Done = (u64, FastSet<u32>, FastMap<u32, FastSet<u32>>);
+        let mut done: FastMap<(bool, u32), Done> = FastMap::default();
         let mut add = |k: (bool, u32), s: u32, channel: u32| {
             let sess = &self.sessions[s as usize];
             let channel = if sess.touch != i64::MAX {
@@ -126,7 +124,7 @@ impl SiteIndex {
     }
 
     pub fn funnel(&self, lo: i64, hi: i64, scope: &Scope, steps: &[Step]) -> Vec<StepCount> {
-        let mut at: HashMap<u32, i64> = HashMap::new();
+        let mut at: FastMap<u32, i64> = FastMap::default();
         let from = self
             .pv_by_ts
             .partition_point(|&p| self.pageviews[p as usize].ts < lo);
@@ -149,7 +147,7 @@ impl SiteIndex {
                 Step::Page(p) => self.strings.matching(p),
                 _ => Vec::new(),
             };
-            let mut next: HashMap<u32, i64> = HashMap::new();
+            let mut next: FastMap<u32, i64> = FastMap::default();
             let mut gaps: Vec<i64> = Vec::new();
             for (&v, &t) in &at {
                 if let Some(r) = self.reached(v, step, &paths, t, hi) {

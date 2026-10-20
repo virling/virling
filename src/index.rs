@@ -55,6 +55,35 @@ fn key(s: &str) -> u64 {
     h.finish()
 }
 
+/// Multiply-rotate hashing for internal IDs and `key`s, which no visitor controls.
+#[derive(Default)]
+pub(crate) struct FastHasher(u64);
+
+impl Hasher for FastHasher {
+    fn finish(&self) -> u64 {
+        self.0
+    }
+
+    fn write(&mut self, bytes: &[u8]) {
+        for &b in bytes {
+            self.write_u64(b.into());
+        }
+    }
+
+    fn write_u32(&mut self, n: u32) {
+        self.write_u64(n.into());
+    }
+
+    fn write_u64(&mut self, n: u64) {
+        self.0 = (self.0.rotate_left(5) ^ n).wrapping_mul(0x517c_c1b7_2722_0a95);
+    }
+}
+
+pub(crate) type FastMap<K, V> = HashMap<K, V, std::hash::BuildHasherDefault<FastHasher>>;
+pub(crate) type FastSet<K> = HashSet<K, std::hash::BuildHasherDefault<FastHasher>>;
+/// Map by `key`.
+type Keyed<V> = FastMap<u64, V>;
+
 #[derive(Default)]
 struct Strings {
     ids: HashMap<Box<str>, u32>,
@@ -200,8 +229,8 @@ struct Pay {
 /// Index of one site's sessions, pageviews, goals and payments.
 pub struct SiteIndex {
     strings: Strings,
-    session_ids: HashMap<u64, u32>,
-    visitor_ids: HashMap<u64, u32>,
+    session_ids: Keyed<u32>,
+    visitor_ids: Keyed<u32>,
     sessions: Vec<Session>,
     visitors: Vec<Visitor>,
     pageviews: Vec<Pageview>,
@@ -224,7 +253,7 @@ pub struct SiteIndex {
     /// Payment by key of provider and payment ID.
     pay_ids: HashMap<u64, u32>,
     /// Payments shown with a visitor (their own and their customers'), by visitor key.
-    owned: HashMap<u64, Vec<u32>>,
+    owned: Keyed<Vec<u32>>,
     /// Net USD paid and first "provider:customer" per visitor key.
     spent: HashMap<u64, f64>,
     first_pay: HashMap<u64, Box<str>>,
@@ -232,6 +261,9 @@ pub struct SiteIndex {
     paid_at: HashMap<u64, Vec<i64>>,
     subs: Vec<retention::Sub>,
     status_sources: Vec<crate::retention::StatusSource>,
+    /// Retention's customers from all payments, built on first use.
+    cohorts: std::sync::OnceLock<Vec<retention::Cohort>>,
+    mrr_keys: std::sync::OnceLock<retention::MrrKeys>,
     /// Last page viewed before each payment, filled on first use; UNKNOWN until then.
     last_page_of: Vec<std::sync::atomic::AtomicU32>,
     /// Payments by key of their visitor ID and of their credited session.
@@ -267,8 +299,8 @@ impl SiteIndex {
     fn read(conn: &Connection, site_id: &str) -> anyhow::Result<Option<SiteIndex>> {
         let mut ix = SiteIndex {
             strings: Strings::new(),
-            session_ids: HashMap::new(),
-            visitor_ids: HashMap::new(),
+            session_ids: Keyed::default(),
+            visitor_ids: Keyed::default(),
             sessions: Vec::new(),
             visitors: Vec::new(),
             pageviews: Vec::new(),
@@ -285,12 +317,14 @@ impl SiteIndex {
             broken: false,
             memo: Mutex::default(),
             pay_ids: HashMap::new(),
-            owned: HashMap::new(),
+            owned: Keyed::default(),
             spent: HashMap::new(),
             first_pay: HashMap::new(),
             paid_at: HashMap::new(),
             subs: Vec::new(),
             status_sources: Vec::new(),
+            cohorts: Default::default(),
+            mrr_keys: Default::default(),
             last_page_of: Vec::new(),
             pays_by_visitor: HashMap::new(),
             pays_by_session: HashMap::new(),
@@ -471,7 +505,7 @@ impl SiteIndex {
                 row: Box::new(row),
             });
         }
-        let mut owned: HashMap<u64, Vec<u32>> = HashMap::new();
+        let mut owned: Keyed<Vec<u32>> = Keyed::default();
         let mut stmt = conn.prepare(&format!(
             "WITH {} SELECT visitor_id, provider || ':' || provider_payment_id FROM owned",
             crate::visitors::OWNED
@@ -511,6 +545,8 @@ impl SiteIndex {
         self.spent = spent;
         self.first_pay = first_pay;
         self.load_subscriptions(conn, site_id)?;
+        self.cohorts = Default::default();
+        self.mrr_keys = Default::default();
         self.index_payments();
         self.paid_at.clear();
         for p in &self.payments {
@@ -1048,32 +1084,32 @@ impl SiteIndex {
         scope: &Scope,
         tracked: &[bool],
     ) -> (u64, u64, u64, f64, u64, u64, f64) {
-        let mut seen: HashSet<u32> = HashSet::new();
-        let mut new: HashSet<u32> = HashSet::new();
-        let mut converted: HashSet<u32> = HashSet::new();
+        // Per customer: 1 paid, 2 paid a first payment, 4 converted.
+        let mut flags = vec![0u8; self.customers.names.len()];
         let (mut n, mut revenue, mut matched, mut matched_usd) = (0, 0.0, 0, 0.0);
+        let mut counts = [0u64; 3];
+        let mut mark = |c: u32, bit: usize| {
+            let f = &mut flags[c as usize];
+            if *f & (1 << bit) == 0 {
+                *f |= 1 << bit;
+                counts[bit] += 1;
+            }
+        };
         for p in self.pays(lo, hi, scope) {
             n += 1;
-            seen.insert(p.customer);
+            mark(p.customer, 0);
             if !p.renewal {
-                new.insert(p.customer);
+                mark(p.customer, 1);
             }
             revenue += p.net.unwrap_or(0.0);
             if self.pay_visitor(p).is_some_and(|v| tracked[v as usize]) {
-                converted.insert(p.customer);
+                mark(p.customer, 2);
                 matched += 1;
                 matched_usd += p.net.unwrap_or(0.0);
             }
         }
-        (
-            n,
-            seen.len() as u64,
-            new.len() as u64,
-            revenue,
-            converted.len() as u64,
-            matched,
-            matched_usd,
-        )
+        let [seen, new, converted] = counts;
+        (n, seen, new, revenue, converted, matched, matched_usd)
     }
 
     /// Distinct visitors per bucket label with an event in [lo, hi).
@@ -1415,7 +1451,8 @@ impl SiteIndex {
     /// (path, visitors, payments, revenue, customers) of pages viewed last before paying.
     pub fn last_pages(&self, lo: i64, hi: i64, scope: &Scope) -> Vec<(String, u64, u64, f64, u64)> {
         let seen = self.page_visitors(lo, hi, scope);
-        let mut rows: HashMap<u32, (u64, f64, HashSet<u32>)> = HashMap::new();
+        let mut rows: HashMap<u32, (u64, f64, u64)> = HashMap::new();
+        let mut paid: Vec<(u32, u32)> = Vec::new();
         let from = self.payments.partition_point(|p| p.ts < lo);
         let to = self.payments.partition_point(|p| p.ts < hi);
         for i in from..to {
@@ -1427,8 +1464,13 @@ impl SiteIndex {
                 let e = rows.entry(path).or_default();
                 e.0 += 1;
                 e.1 += p.net.unwrap_or(0.0);
-                e.2.insert(p.customer);
+                paid.push((path, p.customer));
             }
+        }
+        paid.sort_unstable();
+        paid.dedup();
+        for (path, _) in paid {
+            rows.get_mut(&path).unwrap().2 += 1;
         }
         rows.into_iter()
             .map(|(path, (n, r, c))| {
@@ -1437,7 +1479,7 @@ impl SiteIndex {
                     seen.get(&path).copied().unwrap_or(0) as u64,
                     n,
                     r,
-                    c.len() as u64,
+                    c,
                 )
             })
             .collect()
@@ -2106,13 +2148,14 @@ pub mod read {
         let (lo, hi) = z.bounds(conn, period)?;
         let all = Scope(None, String::new());
         let mut out: Vec<crate::stats::ProviderSplit> = Vec::new();
+        let mut ids: Vec<u32> = Vec::new();
         for p in ix.pays(lo, hi, &all) {
-            let provider = ix.path_name(p.provider);
-            let i = match out.iter().position(|x| x.provider == provider) {
+            let i = match ids.iter().position(|&x| x == p.provider) {
                 Some(i) => i,
                 None => {
+                    ids.push(p.provider);
                     out.push(crate::stats::ProviderSplit {
-                        provider,
+                        provider: ix.path_name(p.provider),
                         first_payments: 0,
                         first_usd: 0.0,
                         renewals: 0,
