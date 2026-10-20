@@ -86,7 +86,7 @@ h3 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.025em; }
 .band.art-band { border-top: 1px solid var(--rule-2); }
 .hero { padding: 56px 0 0; }
 .hero .wrap { display: flex; flex-direction: column; gap: 22px; }
-.hero .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 56px; align-items: center; padding-bottom: 88px; }
+.hero .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 56px; align-items: start; padding-bottom: 88px; }
 .hero-copy { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
 .hero-copy h1 { font-size: 56px; }
 .stack { display: flex; flex-direction: column; gap: 8px; }
