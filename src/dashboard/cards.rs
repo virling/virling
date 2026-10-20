@@ -210,14 +210,9 @@ pub struct BarRow {
     /// Per visitor against the site average, "1.4x"; empty without an average.
     pub(super) ratio: String,
     pub(super) tone: &'static str,
-    /// Visitor and revenue shares of the site, scaled so the largest share fills the bar.
-    pub(super) vw: f64,
-    pub(super) rw: f64,
     /// Filters the dashboard to this row; empty when it cannot.
     pub(super) href: String,
     pub(super) kids: Vec<BarRow>,
-    /// A short tag after the name, such as "Best value".
-    pub(super) tag: &'static str,
     /// A tracked link's short URL, with a copy button.
     pub(super) copy: String,
 }
@@ -573,7 +568,7 @@ fn kid_items(tab: Tab, parent: &Item, kids: &[BreakdownRow]) -> Vec<Item> {
     out
 }
 
-fn bar(i: &Item, base: &Base, m: f64, kid: bool, href: String, id: String) -> BarRow {
+fn bar(i: &Item, base: &Base, kid: bool, href: String, id: String) -> BarRow {
     let r = &i.row;
     let pv = if r.visitors > 0 {
         r.revenue_usd / r.visitors as f64
@@ -584,7 +579,7 @@ fn bar(i: &Item, base: &Base, m: f64, kid: bool, href: String, id: String) -> Ba
         .avg
         .filter(|a| *a > 0.0 && r.visitors > 0 && r.revenue_usd > 0.0)
         .map(|a| pv / a);
-    let (sv, sr) = shares(r, base);
+    let (_, sr) = shares(r, base);
     BarRow {
         id,
         icon: i.icon.clone(),
@@ -618,11 +613,8 @@ fn bar(i: &Item, base: &Base, m: f64, kid: bool, href: String, id: String) -> Ba
             .map(|x| format!("{x:.1}x"))
             .unwrap_or_default(),
         tone: x.map_or("", tone),
-        vw: if m > 0.0 { sv / m * 100.0 } else { 0.0 },
-        rw: if m > 0.0 { sr / m * 100.0 } else { 0.0 },
         href,
         kids: Vec::new(),
-        tag: "",
         copy: String::new(),
     }
 }
@@ -668,28 +660,12 @@ fn panel(
             }
         })
         .collect();
-    let m = items
-        .iter()
-        .chain(nested.iter().flatten())
-        .map(|i| {
-            let (v, r) = shares(&i.row, base);
-            v.max(r)
-        })
-        .fold(0.0, f64::max)
-        * 1.04;
     let rows: Vec<BarRow> = items
         .iter()
         .zip(nested)
         .enumerate()
         .map(|(n, (i, ks))| {
-            let mut row = bar(
-                i,
-                base,
-                m,
-                false,
-                filter_href(&i.filter),
-                format!("{key}-{n}"),
-            );
+            let mut row = bar(i, base, false, filter_href(&i.filter), format!("{key}-{n}"));
             if row.sub.is_empty() && !ks.is_empty() {
                 row.sub = match tab {
                     Tab::Country if ks.len() > 1 => format!("{} cities", ks.len()),
@@ -707,7 +683,7 @@ fn panel(
             if ks.len() > 1 || (ks.len() == 1 && ks[0].name != i.name) {
                 row.kids = ks
                     .iter()
-                    .map(|k| bar(k, base, m, true, filter_href(&k.filter), String::new()))
+                    .map(|k| bar(k, base, true, filter_href(&k.filter), String::new()))
                     .collect();
             }
             row
@@ -1027,15 +1003,7 @@ pub fn ai_card(
         .find(|c| c.key.as_deref() == Some("AI"))
         .map_or((0, 0.0), |c| (c.visitors, c.revenue_usd));
     let share = |n: f64, t: f64| if t > 0.0 { n / t * 100.0 } else { 0.0 };
-    let m = items
-        .iter()
-        .map(|(i, _, _)| {
-            let (v, r) = shares(&i.row, base);
-            v.max(r)
-        })
-        .fold(0.0, f64::max)
-        * 1.04;
-    let mut rows: Vec<AiRow> = items
+    let rows: Vec<AiRow> = items
         .iter()
         .map(|(i, pages, title)| {
             let href = if i.filter.is_empty() {
@@ -1044,24 +1012,12 @@ pub fn ai_card(
                 filter_href(&i.filter)
             };
             AiRow {
-                bar: bar(i, base, m, false, href, String::new()),
+                bar: bar(i, base, false, href, String::new()),
                 pages: group(*pages),
                 pages_title: title.clone(),
             }
         })
         .collect();
-    let pv = |i: &Item| i.row.revenue_usd / i.row.visitors.max(1) as f64;
-    if items
-        .iter()
-        .filter(|(i, _, _)| i.row.revenue_usd > 0.0)
-        .count()
-        > 1
-        && let Some(best) = (0..items.len())
-            .filter(|&k| items[k].0.row.revenue_usd > 0.0 && items[k].0.row.visitors > 0)
-            .max_by(|&a, &b| pv(&items[a].0).total_cmp(&pv(&items[b].0)))
-    {
-        rows[best].bar.tag = "Best value";
-    }
     let now = ai_revenue(days);
     let trend = match prev.map(ai_revenue) {
         Some(p) if p > 0.0 && now > 0.0 && ((now - p) / p).abs() >= 0.1 => {
@@ -1183,7 +1139,6 @@ mod tests {
         let c = card(&picks[0], &data, &base(), "/app/x.com", &[], &href);
         let r = &c.panels[0].rows;
         assert_eq!(r[0].name, "Social", "most revenue first");
-        assert_eq!((r[0].rw.round(), r[1].vw.round()), (96.0, 96.0));
         assert_eq!((r[0].ratio.as_str(), r[0].tone), ("3.0x", "up"));
         assert_eq!((r[1].ratio.as_str(), r[1].tone), ("0.3x", "down"));
         assert_eq!(r[1].href, "channel=AI");

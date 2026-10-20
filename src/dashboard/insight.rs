@@ -137,7 +137,11 @@ pub fn summary(
         .map(|(r, x)| {
             format!(
                 "{} gets {} visitors but earns {x:.1}x average. That page is your cheapest fix.",
-                r.label,
+                if r.label == "/" {
+                    "Your home page (/)"
+                } else {
+                    &r.label
+                },
                 group(r.visitors)
             )
         })
@@ -186,6 +190,12 @@ mod tests {
         let t = totals(3167, 6121.0);
         let channels = [row("AI", 844, 1978.0), row("Organic search", 1228, 1717.0)];
         let landing = [row("/pricing", 619, 1200.0), row("/compare", 479, 570.0)];
+        let home = [row("/pricing", 619, 1200.0), row("/", 479, 570.0)];
+        let (_, fix) = summary(&t, t.revenue_per_visitor, &channels, &ai, &home).unwrap();
+        assert!(
+            fix.starts_with("Your home page (/) gets 479 visitors"),
+            "{fix}"
+        );
         let (lead, fix) = summary(&t, t.revenue_per_visitor, &channels, &ai, &landing).unwrap();
         assert_eq!(
             lead,

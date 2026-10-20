@@ -72,9 +72,8 @@
     <div class="d3-row d3-airow">
       <div class="nmw">
         {% if r.bar.href.is_empty() %}<span class="nm">{% else %}<a class="nm" href="{{ r.bar.href }}" title="Show only {{ r.bar.name }}">{% endif %}
-          <span class="vb" style="width:{{ "{:.1}"|format(r.bar.vw) }}%"></span><span class="rb" style="width:{{ "{:.1}"|format(r.bar.rw) }}%"></span>
           <span class="ic">{{ r.bar.icon|safe }}</span>
-          <span class="tx"><b>{{ r.bar.name }}{% if !r.bar.tag.is_empty() %}<span class="best">{{ r.bar.tag }}</span>{% endif %}</b>{% if !r.bar.sub.is_empty() %}<span>{{ r.bar.sub }}</span>{% endif %}</span>
+          <span class="tx"><b>{{ r.bar.name }}</b>{% if !r.bar.sub.is_empty() %}<span>{{ r.bar.sub }}</span>{% endif %}</span>
         {% if r.bar.href.is_empty() %}</span>{% else %}</a>{% endif %}
       </div>
       <span class="num pg"{% if !r.pages_title.is_empty() %} title="{{ r.pages_title }}"{% endif %}>{{ r.pages }}</span>
