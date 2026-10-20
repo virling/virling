@@ -69,7 +69,7 @@
   {% for st in s.steps %}
   <div class="d3-step">
     <span class="mark{% if st.done %} done{% endif %}">{% if st.done %}✓{% else %}{{ st.num }}{% endif %}</span>
-    <span class="txt"><b title="{{ st.label }}">{{ st.label }}</b><span title="{{ st.sub }}">{{ st.sub }}</span></span>
+    <b class="txt" title="{{ st.sub }}">{{ st.label }}</b>
     {% if !st.done && !st.act.is_empty() %}<a class="d3-btn sm" href="{{ st.href }}">{{ st.act }}</a>{% endif %}
   </div>
   {% endfor %}
