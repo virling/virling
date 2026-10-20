@@ -306,11 +306,13 @@ pub fn brand(slug: &str, size: u32) -> String {
 fn glyph_path(name: &str) -> &'static str {
     match name {
         "direct" => r#"<path d="M5 3l14 8-6 2-3 6z"/>"#,
-        "email" => r#"<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>"#,
+        "email" => {
+            r#"<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/>"#
+        }
         "unattributed" => {
             r#"<circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.2M12 17h.01"/>"#
         }
-        "search" => r#"<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>"#,
+        "search" => r#"<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>"#,
         "link" => {
             r#"<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>"#
         }
@@ -321,12 +323,16 @@ fn glyph_path(name: &str) -> &'static str {
             r#"<path d="M14 10a6 6 0 0 1-8.7 5.4L2 16.5l1-3.2A6 6 0 1 1 14 10z"/><path d="M16.5 8.6A6 6 0 0 1 21 18.3l1 3.2-3.3-1.1A6 6 0 0 1 10.6 18"/>"#
         }
         "paid" => r#"<path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/>"#,
-        "ai" => r#"<path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/>"#,
-        "card" => r#"<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>"#,
-        "desktop" => {
-            r#"<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>"#
+        "ai" => {
+            r#"<path d="M12 3l2.2 5.6L20 11l-5.8 2.4L12 19l-2.2-5.6L4 11l5.8-2.4zM19 17v4M17 19h4"/>"#
         }
-        "mobile" => r#"<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>"#,
+        "card" => {
+            r#"<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 14.5h3"/>"#
+        }
+        "desktop" => {
+            r#"<rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M9 20.5h6M12 16.5v4"/>"#
+        }
+        "mobile" => r#"<rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 17.5h2"/>"#,
         "tablet" => r#"<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M11 18h2"/>"#,
         "windows" => r#"<path d="M3 5l8-1v7H3zM13 4l8-1v8h-8zM3 13h8v7l-8-1zM13 13h8v8l-8-1z"/>"#,
         "page" => {
@@ -339,7 +345,7 @@ fn glyph_path(name: &str) -> &'static str {
             r#"<path d="M4 5h9M8.5 3v2M6 5c0 4 3 7 6 8M11 5c0 3-2.5 7-6 9"/><path d="M13 21l4-9 4 9M14.5 18h5"/>"#
         }
         "globe" => {
-            r#"<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>"#
+            r#"<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.4 5.2 3.4 8.5s-1 6.1-3.4 8.5c-2.4-2.4-3.4-5.2-3.4-8.5s1-6.1 3.4-8.5z"/>"#
         }
         _ => "",
     }
@@ -348,7 +354,7 @@ fn glyph_path(name: &str) -> &'static str {
 /// A stroked 24x24 glyph: direct, email, unattributed, search, link, social, community, paid, ai, card, desktop, mobile, tablet, windows, page, pin, language or globe.
 pub fn glyph(name: &str, size: u32, color: &str) -> String {
     format!(
-        r#"<svg class="ico" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{}</svg>"#,
+        r#"<svg class="ico" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:{color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{}</svg>"#,
         glyph_path(name)
     )
 }
@@ -374,12 +380,14 @@ pub fn source(name: &str, size: u32) -> String {
         return brand(slug, size);
     }
     match name {
-        "Unattributed" => return glyph("unattributed", size, "#B9BCC2"),
-        _ if name.eq_ignore_ascii_case("newsletter") => return glyph("email", size, "#6B717C"),
+        "Unattributed" => return glyph("unattributed", size, "var(--ink-4)"),
+        _ if name.eq_ignore_ascii_case("newsletter") => {
+            return glyph("email", size, "var(--ink-2)");
+        }
         _ => {}
     }
     if let Some(g) = channel_glyph(name) {
-        return glyph(g, size, "#6B717C");
+        return glyph(g, size, "var(--ink-2)");
     }
     if let Some(host) = crate::favicon::source_host(name)
         && let Some(v) = crate::favicon::source_icon(&host)
@@ -434,7 +442,7 @@ pub fn file(name: &str) -> Option<String> {
     let path = glyph_path(name.strip_prefix("glyph-")?);
     (!path.is_empty()).then(|| {
         format!(
-            r##"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4B515C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{path}</svg>"##
+            r##"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4B515C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">{path}</svg>"##
         )
     })
 }
@@ -466,8 +474,8 @@ pub fn ua(name: &str) -> String {
         "macOS" | "iOS" => "apple",
         "Android" => "android",
         "Linux" => "linux",
-        "Windows" => return glyph("windows", 12, "#6B717C"),
-        _ => return glyph("globe", 12, "#6B717C"),
+        "Windows" => return glyph("windows", 12, "var(--ink-2)"),
+        _ => return glyph("globe", 12, "var(--ink-2)"),
     };
     format!(r#"<img class="ico" src="/assets/icons/{slug}.svg" width="12" height="12" alt="">"#)
 }
@@ -475,7 +483,7 @@ pub fn ua(name: &str) -> String {
 /// Glyph for Desktop, Mobile or Tablet; nothing when unknown.
 pub fn device(name: &str) -> String {
     match name {
-        "Desktop" | "Mobile" | "Tablet" => glyph(&name.to_ascii_lowercase(), 12, "#6B717C"),
+        "Desktop" | "Mobile" | "Tablet" => glyph(&name.to_ascii_lowercase(), 12, "var(--ink-2)"),
         _ => String::new(),
     }
 }
@@ -483,7 +491,7 @@ pub fn device(name: &str) -> String {
 pub fn provider(provider: &str, size: u32) -> String {
     match provider {
         "stripe" | "lemonsqueezy" | "dodo" | "polar" => brand(provider, size),
-        _ => glyph("card", size, "#0E1116"),
+        _ => glyph("card", size, "var(--ink)"),
     }
 }
 
@@ -565,11 +573,11 @@ mod tests {
     fn sources_fall_back_to_glyphs_and_letters() {
         assert!(source("Hacker News", 14).contains(r#"aria-label="Hacker News""#));
         assert!(source("Direct", 14).contains("M5 3l14 8"));
-        assert!(source("Unattributed", 14).contains("#B9BCC2"));
+        assert!(source("Unattributed", 14).contains("var(--ink-4)"));
         assert!(source("<b>log", 14).contains(">&lt;</span>"));
         assert!(source("someblog.dev", 14).contains(">S</span>"));
         assert!(provider("stripe", 14).contains("Stripe"));
-        assert!(provider("other", 14).contains("M2 10h20"));
+        assert!(provider("other", 14).contains("M3 10h18"));
     }
 
     #[test]

@@ -7,7 +7,7 @@
 {% if !never_paid %}
 <div class="list-bar">
   <div class="menu-wrap goal-pick" data-menu>
-    <button type="button" class="ctl" aria-haspopup="true" aria-expanded="false"><span class="dim">Goal</span>{{ goal_label }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <button type="button" class="ctl" aria-haspopup="true" aria-expanded="false"><span class="dim">Goal</span>{{ goal_label }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
     <div class="menu" hidden>{% for g in goals %}<a href="{{ g.href }}"{% if g.on %} aria-current="true"{% endif %}>{{ g.label }} <span class="count">{{ g.count }}</span></a>{% endfor %}</div>
   </div>
   {% if !is_goal %}<nav class="sg" aria-label="Filter payments">{% for f in filters %}<a href="{{ f.href }}"{% if f.on %} class="on" aria-current="true"{% endif %}>{{ f.label }} <span class="count">{{ f.count }}</span></a>{% endfor %}</nav>{% endif %}

@@ -6,7 +6,7 @@
     <div class="menu-wrap vf" data-menu>
       <button type="button" class="ctl" aria-haspopup="true" aria-expanded="false">
         <span class="vf-k">Source</span><span class="grow">{{ source_label }}</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="menu vf-menu" hidden>
         <a href="{{ all_sources.href }}"{% if all_sources.on %} aria-current="true"{% endif %}><span class="grow">{{ all_sources.label }}</span></a>
@@ -20,7 +20,7 @@
     <div class="menu-wrap vf" data-menu>
       <button type="button" class="ctl" aria-haspopup="true" aria-expanded="false">
         <span class="vf-k">Goal</span><span class="grow">{{ goal_label }}</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="menu vf-menu" hidden>
         {% for o in goals %}<a href="{{ o.href }}"{% if o.on %} aria-current="true"{% endif %}><span class="grow">{{ o.label }}</span><span class="count">{{ o.count }}</span></a>{% endfor %}
@@ -47,7 +47,7 @@
     <span class="num vr-rev">{% if v.paid %}<b>{{ v.revenue }}</b>{% else %}<span class="na">Not paid</span>{% endif %}</span>
     <span class="num dim vr-seen" title="{{ v.last_full }}">{{ v.last_seen }}</span>
     <span class="vr-sum">{% if v.exit_link.is_empty() %}{% if !v.exit_page.is_empty() %}Left from <span class="mono">{{ v.exit_page }}</span>{% endif %}{% else %}{{ v.exit_icon|safe }}Clicked out to <span class="mono">{{ v.exit_link }}</span>{% endif %}<i class="sep"></i>{{ v.last_seen }}</span>
-    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+    <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
   </a>
   {% endfor %}
   {% if rows.is_empty() %}

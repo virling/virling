@@ -295,23 +295,29 @@ fn chip_view(key: &str, value: &str) -> (String, String) {
     let none = value == "(none)";
     match key {
         "channel" | "source" => (icons::source(value, 16), value.to_string()),
-        "campaign" if none => (icons::glyph("paid", 16, "#6B717C"), "No campaign".into()),
-        "campaign" => (icons::glyph("paid", 16, "#6B717C"), value.to_string()),
+        "campaign" if none => (
+            icons::glyph("paid", 16, "var(--ink-2)"),
+            "No campaign".into(),
+        ),
+        "campaign" => (icons::glyph("paid", 16, "var(--ink-2)"), value.to_string()),
         "keyword" if none => (
-            icons::glyph("search", 16, "#6B717C"),
+            icons::glyph("search", 16, "var(--ink-2)"),
             "No search term".into(),
         ),
-        "keyword" => (icons::glyph("search", 16, "#6B717C"), value.to_string()),
+        "keyword" => (
+            icons::glyph("search", 16, "var(--ink-2)"),
+            value.to_string(),
+        ),
         "page" => (
-            icons::glyph("page", 16, "#6B717C"),
+            icons::glyph("page", 16, "var(--ink-2)"),
             format!("Landed on {value}"),
         ),
         "viewed" => (
-            icons::glyph("page", 16, "#6B717C"),
+            icons::glyph("page", 16, "var(--ink-2)"),
             format!("Viewed {value}"),
         ),
         "country" => (icons::flag(value), icons::country(value)),
-        "city" => (icons::glyph("pin", 16, "#6B717C"), value.to_string()),
+        "city" => (icons::glyph("pin", 16, "var(--ink-2)"), value.to_string()),
         "language" => (cards::language_icon(value), cards::language_name(value)),
         "device" => (icons::device(value), value.to_string()),
         _ => (icons::ua(value), value.to_string()),
@@ -928,7 +934,7 @@ async fn page(
                 ),
                 None => step(
                     false,
-                    "Link checkout to visitors",
+                    "Link checkout",
                     "One line so every payment matches a visit".into(),
                     "How it works",
                     site_url("setup/checkout"),

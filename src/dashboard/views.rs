@@ -472,7 +472,7 @@ pub fn payments_view(
                     .into_iter()
                     .map(|mut c| {
                         if c.icon.is_empty() && c.label.starts_with('/') {
-                            c.icon = icons::glyph("page", 14, "#6B717C");
+                            c.icon = icons::glyph("page", 14, "var(--ink-2)");
                         }
                         c
                     })

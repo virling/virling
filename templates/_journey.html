@@ -17,7 +17,7 @@
     <div><span class="k">First touch</span><b>{{ j.first_icon|safe }}<span class="lbl">{{ j.first_touch }}</span></b><span class="s">{{ j.first_date }}</span></div>
     <div><span class="k">Time to pay</span><b>{{ j.time_to_pay }}</b><span class="s">{{ j.visits }}</span></div>
   </div>
-  {% if !j.visitor_href.is_empty() %}<a class="j-visitor" href="{{ j.visitor_href }}"><b>Visitor timeline</b><span class="grow">Every visit, page and exit</span>Open<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>{% endif %}
+  {% if !j.visitor_href.is_empty() %}<a class="j-visitor" href="{{ j.visitor_href }}"><b>Visitor timeline</b><span class="grow">Every visit, page and exit</span>Open<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>{% endif %}
   <div class="j-sec">
     <b class="j-title">Journey</b>
     <ol class="tl">

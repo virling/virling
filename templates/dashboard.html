@@ -4,7 +4,7 @@
 <div class="d3">
 <header class="d3-head">
   <button class="burger" type="button" aria-controls="side" aria-expanded="false" aria-label="Menu" data-burger>
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
   </button>
   <h1>{{ title }}</h1>
   <a class="d3-pill" href="{{ live_href }}" title="Visitors with the site open now" data-poll="/app/{{ shell.domain }}/live"><i class="d3-dot{% if shell.live == 0 %} idle{% endif %}"></i>{% if shell.live == 0 %}No visitors online{% else %}{{ shell.live }} visitor{% if shell.live != 1 %}s{% endif %} online now{% endif %}</a>
@@ -44,7 +44,7 @@
 {% endif %}
 
 {% if privacy && (view == "" || view == "visitors") %}
-<div class="d3-privacy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F5BEA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span><b>Privacy mode is on.</b> <span class="dim">Visitors are counted without a cookie, so a returning visitor counts again each day and new payments cannot be matched to visits.</span></span></div>
+<div class="d3-privacy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F5BEA" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span><b>Privacy mode is on.</b> <span class="dim">Visitors are counted without a cookie, so a returning visitor counts again each day and new payments cannot be matched to visits.</span></span></div>
 {% endif %}
 
 {% if view == "" %}
@@ -64,11 +64,11 @@
 {% endif %}
 {% if let Some(s) = setup %}
 <section class="d3-card d3-setup">
-  <div class="d3-setup-head"><h2>{{ s.title }}</h2><span class="dim">{{ s.count }}</span>{% if !s.dismiss.is_empty() %}<form method="post" action="{{ s.dismiss }}"><button class="d3-x" type="submit" aria-label="Hide this checklist"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>{% endif %}</div>
+  <div class="d3-setup-head"><h2>{{ s.title }}</h2><span class="dim">{{ s.count }}</span>{% if !s.dismiss.is_empty() %}<form method="post" action="{{ s.dismiss }}"><button class="d3-x" type="submit" aria-label="Hide this checklist"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8 8l8 8M16 8l-8 8"/></svg></button></form>{% endif %}</div>
   <div class="d3-steps">
   {% for st in s.steps %}
   <div class="d3-step">
-    <span class="mark{% if st.done %} done{% endif %}">{% if st.done %}✓{% else %}{{ st.num }}{% endif %}</span>
+    <span class="mark{% if st.done %} done{% endif %}">{% if st.done %}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>{% else %}{{ st.num }}{% endif %}</span>
     <b class="txt" title="{{ st.sub }}">{{ st.label }}</b>
     {% if !st.done && !st.act.is_empty() %}<a class="d3-btn sm" href="{{ st.href }}">{{ st.act }}</a>{% endif %}
   </div>
@@ -122,7 +122,7 @@
   <div class="d3-grow th"><span>Goal</span><span class="num">Completions</span><span class="num">Conversion</span><span class="num pd">Per day</span></div>
   {% for r in g.rows %}
   <div class="d3-grow">
-    <span class="nm"><span class="ic{% if r.paid %} paid{% endif %}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg></span><span class="tx"><b>{{ r.name }}</b><span>{{ r.sub }}</span></span>{% if !r.kids.is_empty() %}<button type="button" class="chev" data-toggle="{{ r.id }}" aria-controls="{{ r.id }}" aria-expanded="false" aria-label="Split {{ r.name }} by channel"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>{% endif %}</span>
+    <span class="nm"><span class="ic{% if r.paid %} paid{% endif %}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg></span><span class="tx"><b>{{ r.name }}</b><span>{{ r.sub }}</span></span>{% if !r.kids.is_empty() %}<button type="button" class="chev" data-toggle="{{ r.id }}" aria-controls="{{ r.id }}" aria-expanded="false" aria-label="Split {{ r.name }} by channel"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>{% endif %}</span>
     <span class="num strong">{{ r.value }}</span><span class="num">{{ r.rate }}</span><span class="num pd dim">{{ r.per_day }}</span>
   </div>
   {% if !r.kids.is_empty() %}<div class="d3-kids" id="{{ r.id }}" hidden>{% for k in r.kids %}
