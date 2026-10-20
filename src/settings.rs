@@ -67,6 +67,9 @@ struct AccountPage {
     shell: Shell,
     title: &'static str,
     plan_saved: bool,
+    /// The user's color theme: auto, light or dark.
+    theme: String,
+    theme_saved: bool,
     api_keys: Vec<KeyView>,
     /// A key just created, shown this once.
     new_key: Option<String>,
@@ -261,6 +264,13 @@ async fn show_account(
     ) else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
+    let Ok(theme) = sqlx::query_scalar::<_, String>("SELECT theme FROM accounts WHERE id = ?")
+        .bind(&account.user)
+        .fetch_one(&state.db)
+        .await
+    else {
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    };
     let team_note = match (q.saved.as_deref(), q.team.as_deref(), q.error.as_deref()) {
         (Some("invite"), _, _) => "Invite sent. The link works for 7 days.",
         (_, Some("email"), _) => "Enter a valid email.",
@@ -290,6 +300,8 @@ async fn show_account(
             .collect(),
         new_key,
         plan_saved: q.saved.as_deref() == Some("plan"),
+        theme_saved: q.saved.as_deref() == Some("theme"),
+        theme,
         shell: ctx.shell,
         owner: account.owner,
         team,
@@ -545,6 +557,41 @@ pub async fn save_brand(
 #[derive(Deserialize)]
 pub struct PlanInput {
     account_type: String,
+}
+
+#[derive(Deserialize)]
+pub struct ThemeInput {
+    theme: String,
+}
+
+/// Sets the signed-in user's color theme: auto, light or dark.
+pub async fn save_theme(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(input): Form<ThemeInput>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "account").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    if !matches!(input.theme.as_str(), "auto" | "light" | "dark") {
+        return StatusCode::BAD_REQUEST.into_response();
+    }
+    if let Err(err) = sqlx::query("UPDATE accounts SET theme = ? WHERE id = ?")
+        .bind(&input.theme)
+        .bind(&account.user)
+        .execute(&state.db)
+        .await
+    {
+        tracing::error!(%err, "saving the theme failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    Redirect::to(&format!(
+        "{}?saved=theme#theme",
+        app_path(&ctx.site.domain, "account")
+    ))
+    .into_response()
 }
 
 /// Sets the account to Personal or Agency.

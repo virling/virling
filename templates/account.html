@@ -8,6 +8,15 @@
     <div><b>Email</b><span class="muted">You sign in with a one-time link sent to this address, so there is no password to manage.</span></div>
     <span class="mono">{{ shell.email }}</span>
   </div>
+  <form class="setting" id="theme" method="post" action="/app/{{ shell.domain }}/account/theme">
+    <div><b id="theme-label">Theme</b><span class="muted">{% if theme_saved %}Saved. {% endif %}Auto follows your system setting.</span></div>
+    <div class="actions">
+      <div class="seg" role="radiogroup" aria-labelledby="theme-label">
+        {% for (v, l) in [("auto", "Auto"), ("light", "Light"), ("dark", "Dark")] %}<label><input type="radio" name="theme" value="{{ v }}"{% if theme == *v %} checked{% endif %}>{{ l }}</label>{% endfor %}
+      </div>
+      <button class="btn secondary" type="submit">Save</button>
+    </div>
+  </form>
 </div>
 </section>
 {% if owner %}

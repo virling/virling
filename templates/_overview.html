@@ -82,7 +82,7 @@
       <span class="num pv">{{ r.bar.per_visitor }}{% if r.bar.small %}<small>small sample</small>{% endif %}</span>
     </div>
     {% endfor %}
-    <div class="d3-foot">{% if !a.spark.is_empty() %}<div class="d3-spark"><span>AI share of revenue</span><svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><path d="{{ a.spark }}" fill="none" stroke="#E8471C" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg></div>{% endif %}<span>{{ a.trend }}</span><a href="{{ a.docs }}">Setup</a></div>
+    <div class="d3-foot">{% if !a.spark.is_empty() %}<div class="d3-spark"><span>AI share of revenue</span><svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><path d="{{ a.spark }}" fill="none" stroke="currentColor" style="color:var(--revenue)" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg></div>{% endif %}<span>{{ a.trend }}</span><a href="{{ a.docs }}">Setup</a></div>
     {% endif %}
   </div>
   {% endif %}{% endif %}

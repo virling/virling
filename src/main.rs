@@ -1448,6 +1448,44 @@ mod tests {
         assert_eq!(seats().await, 2);
     }
 
+    #[tokio::test]
+    async fn theme_choice_is_set_on_the_page() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let pick = |theme: &'static str| {
+            let (state, cookie) = (state.clone(), cookie.clone());
+            async move {
+                let body = format!("theme={theme}");
+                call(
+                    &state,
+                    form("/app/example.com/account/theme", body, Some(&cookie)),
+                )
+                .await
+                .status()
+            }
+        };
+        let page = || {
+            let (state, cookie) = (state.clone(), cookie.clone());
+            async move { body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await }
+        };
+        assert!(
+            page().await.contains(r#"<html lang="en">"#),
+            "auto follows the system"
+        );
+        assert_eq!(pick("dark").await, StatusCode::SEE_OTHER);
+        assert!(
+            page()
+                .await
+                .contains(r#"<html lang="en" data-theme="dark">"#)
+        );
+        let account =
+            body_text(call(&state, get("/app/example.com/account", Some(&cookie))).await).await;
+        assert!(account.contains(r#"value="dark" checked"#));
+        assert_eq!(pick("neon").await, StatusCode::BAD_REQUEST);
+        pick("auto").await;
+        assert!(page().await.contains(r#"<html lang="en">"#));
+    }
+
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {
         let (ciphertext, nonce) = state.vault.encrypt(key).unwrap();
         sqlx::query(

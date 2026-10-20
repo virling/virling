@@ -7,8 +7,8 @@ use time::macros::format_description;
 use crate::dashboard::{group, money};
 use crate::stats::DayPoint;
 
-const BLUE: &str = "#2F5BEA";
-const ORANGE: &str = "#E8471C";
+const BLUE: &str = "var(--visitors)";
+const ORANGE: &str = "var(--revenue)";
 const NS: &str = r#" vector-effect="non-scaling-stroke""#;
 
 /// "$1,200" on whole-dollar steps, else "$0.50".
@@ -129,9 +129,15 @@ fn grid(top: f64, step: f64) -> String {
     let mut s = String::new();
     for k in 1..=4 {
         let y = 1000.0 - k as f64 * step / top * 1000.0;
-        let _ = write!(s, r##"<path d="M0,{y:.1}H1000" stroke="#EFEFEB"{NS}/>"##);
+        let _ = write!(
+            s,
+            r##"<path d="M0,{y:.1}H1000" style="stroke:var(--grid)"{NS}/>"##
+        );
     }
-    let _ = write!(s, r##"<path d="M0,1000H1000" stroke="#D6D7D1"{NS}/>"##);
+    let _ = write!(
+        s,
+        r##"<path d="M0,1000H1000" style="stroke:var(--axis)"{NS}/>"##
+    );
     s
 }
 
@@ -279,14 +285,14 @@ pub fn channel_color(channel: Option<&str>) -> &'static str {
     match channel {
         Some("AI") => BLUE,
         Some("Organic search") => "#F2A541",
-        Some("Direct") => "#4B515C",
+        Some("Direct") => "var(--ink-2)",
         Some("Email") => "#1E7A4C",
         Some("Referral") => "#9B6BDB",
         Some("Social") => "#E36F9C",
         Some("Communities") => "#B5622E",
         Some("Paid") => "#0E9AA7",
-        Some(_) => "#B9BCC2",
-        None => "#D6D7D1",
+        Some(_) => "var(--mute)",
+        None => "var(--axis)",
     }
 }
 
@@ -362,10 +368,14 @@ pub fn revenue(
         Kind::Bars => {
             for (i, v) in vals.iter().enumerate() {
                 let h = v / top * 1000.0;
-                let fill = if Some(i) == best { ORANGE } else { "#F4B39C" };
+                let fill = if Some(i) == best {
+                    ORANGE
+                } else {
+                    "var(--revenue-tint)"
+                };
                 let _ = write!(
                     svg,
-                    r#"<rect x="{:.1}" y="{:.1}" width="{bw:.1}" height="{h:.1}" fill="{fill}"/>"#,
+                    r#"<rect x="{:.1}" y="{:.1}" width="{bw:.1}" height="{h:.1}" style="fill:{fill}"/>"#,
                     x0(i),
                     1000.0 - h
                 );
@@ -384,7 +394,7 @@ pub fn revenue(
                     };
                     let _ = write!(
                         svg,
-                        r#"<rect x="{:.1}" y="{base:.1}" width="{bw:.1}" height="{h:.1}" fill="{fill}"/>"#,
+                        r#"<rect x="{:.1}" y="{base:.1}" width="{bw:.1}" height="{h:.1}" style="fill:{fill}"/>"#,
                         x0(i)
                     );
                 }
@@ -409,7 +419,7 @@ pub fn revenue(
             if top_val > 0.0 {
                 let _ = write!(
                     svg,
-                    r##"<path d="{d} L{:.1},1000 L{:.1},1000 Z" fill="#FDECE6"/>"##,
+                    r##"<path d="{d} L{:.1},1000 L{:.1},1000 Z" style="fill:var(--revenue-soft)"/>"##,
                     w * (n as f64 - 0.5),
                     w * 0.5
                 );
@@ -417,13 +427,13 @@ pub fn revenue(
             if let Some(pv) = &prev_vals {
                 let _ = write!(
                     svg,
-                    r##"<path d="{}" fill="none" stroke="#8A909A" stroke-width="2" stroke-dasharray="5 5"{NS}/>"##,
+                    r##"<path d="{}" fill="none" style="stroke:var(--ink-4)" stroke-width="2" stroke-dasharray="5 5"{NS}/>"##,
                     path(&pv[..pv.len().min(n)])
                 );
             }
             let _ = write!(
                 svg,
-                r#"<path d="{d}" fill="none" stroke="{ORANGE}" stroke-width="2.5" stroke-linejoin="round"{NS}/>"#
+                r#"<path d="{d}" fill="none" style="stroke:{ORANGE}" stroke-width="2.5" stroke-linejoin="round"{NS}/>"#
             );
         }
     }
@@ -452,7 +462,7 @@ pub fn revenue(
         }];
         if let Some(pv) = prev_vals.as_ref().and_then(|v| v.get(i)) {
             rows.push(Row {
-                swatch: swatch("#8A909A", "ln"),
+                swatch: swatch("var(--ink-4)", "ln"),
                 name: "Previous period".into(),
                 value: amount(*pv),
             });

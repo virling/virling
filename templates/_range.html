@@ -1,7 +1,7 @@
   <div class="menu-wrap d3-range" data-menu>
     <button type="button" class="d3-btn" aria-haspopup="true" aria-expanded="false">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>{{ range.label }}{% if range.vs %}<span class="dim">vs previous</span>{% endif %}
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4B515C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
     </button>
     <div class="menu right d3-rmenu" hidden>
       {% for r in range.ranges %}<a href="{{ r.href }}"{% if r.on %} aria-current="true"{% endif %}><span>{{ r.label }}</span><span class="hint">{{ r.count }}</span></a>{% endfor %}
