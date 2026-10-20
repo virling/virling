@@ -20,6 +20,8 @@ id = "bf5404416e494ede813918d007d4bc4d"
 [vars]
 BASE_URL = "https://virling.com"
 WAITLIST_FROM = "Rahul at Virling <hello@virling.com>"
+# Shown as "Applications close {BETA_CLOSES}." on the landing pages, such as "November 15"; empty hides the line.
+BETA_CLOSES = ""
 
 [[ratelimits]]
 name = "PREORDER_LIMIT"
