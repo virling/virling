@@ -484,7 +484,7 @@ impl SiteIndex {
         limit: u32,
         offset: u32,
     ) -> VisitorPage {
-        let mut last: HashMap<u32, i64> = HashMap::new();
+        let mut last: FastMap<u32, i64> = FastMap::default();
         for s in self.overlapping_ids(lo, hi) {
             if let Some(t) = self.last_before(s, hi).filter(|&t| t >= lo) {
                 let e = last.entry(self.sessions[s as usize].visitor).or_insert(t);
@@ -497,7 +497,7 @@ impl SiteIndex {
             .as_ref()
             .map(|h| h.iter().filter_map(|h| self.strings.get(h)).collect());
         let detailed = filter.goal.is_some() || filter.clicked_out.is_some();
-        let mut list: Vec<(i64, u32, Option<VisitorRow>)> = Vec::new();
+        let mut list: Vec<(i64, u32, Option<Box<VisitorRow>>)> = Vec::new();
         for (v, t) in last {
             let ft = self.visitors[v as usize].first_touch;
             let cols = (ft != NONE).then(|| &self.sessions[ft as usize].cols);
@@ -520,7 +520,7 @@ impl SiteIndex {
                     continue;
                 }
             }
-            let row = detailed.then(|| self.visitor_row(v, lo, hi, t));
+            let row = detailed.then(|| Box::new(self.visitor_row(v, lo, hi, t)));
             if let Some(r) = &row {
                 if filter.goal.as_ref().is_some_and(|g| !r.goals.contains(g)) {
                     continue;
@@ -534,19 +534,26 @@ impl SiteIndex {
             }
             list.push((t, v, row));
         }
-        list.sort_by(|a, b| {
+        let order = |a: &(i64, u32, _), b: &(i64, u32, _)| {
             b.0.cmp(&a.0).then_with(|| {
                 self.visitors[a.1 as usize]
                     .id
                     .cmp(&self.visitors[b.1 as usize].id)
             })
-        });
+        };
         let total = list.len() as u64;
+        // Only the rows up to the end of the page need their order.
+        let end = (offset as usize).saturating_add(limit as usize);
+        if end < list.len() {
+            list.select_nth_unstable_by(end, order);
+            list.truncate(end);
+        }
+        list.sort_by(order);
         let rows = list
             .into_iter()
             .skip(offset as usize)
             .take(limit as usize)
-            .map(|(t, v, row)| row.unwrap_or_else(|| self.visitor_row(v, lo, hi, t)))
+            .map(|(t, v, row)| row.map_or_else(|| self.visitor_row(v, lo, hi, t), |r| *r))
             .collect();
         VisitorPage { total, rows }
     }
