@@ -84,7 +84,7 @@ impl SiteIndex {
         };
         match step {
             Step::Paid => {
-                for &t in self.paid_at.get(&key(&self.visitors[v as usize].id))? {
+                for &t in self.paid_at.get(&self.visitors[v as usize].id.key())? {
                     see(t);
                 }
             }
