@@ -5,7 +5,7 @@
 <h1 align="center">Virling</h1>
 
 <p align="center">
-  Open-source revenue analytics. See which channels make you money, not just traffic.<br>
+  Open-source revenue attribution. See which traffic channel brings paying customers, not just visitors.<br>
   <a href="https://virling.com">virling.com</a> · <a href="https://docs.virling.com">Docs</a> · <a href="https://virling.com/agency">For agencies</a>
 </p>
 
@@ -20,18 +20,22 @@ Virling joins every visit to the payment that followed. It answers the questions
 
 It runs as one Rust binary with embedded storage. No Postgres, no ClickHouse, no Redis.
 
-> **Status:** early development. The waitlist is open at [virling.com](https://virling.com). Expect breaking changes until the first release.
+> **Status:** early development. Releases are on the [releases page](https://github.com/virling/virling/releases) and run on your own server today. Expect breaking changes until a stable release. A hosted plan is on a waitlist at [virling.com](https://virling.com).
 
 ## What works today
 
 - **Tracking script** (`/v.js`, about 1.2 KB gzipped, source in `assets/v.src.js`): pageviews, UTM tags, referrers, single-page-app route changes, custom goals, and a first-party visitor ID. Stripe Payment Links, Polar checkout links and Dodo payment links get the visitor ID added automatically.
-- **Cookieless mode**: a daily-rotating salted hash instead of a cookie, for sites that want no consent banner.
+- **Cookieless mode**: a daily-rotating salted hash instead of a cookie, for sites that want no consent banner, at the cost of payment attribution.
 - **Event ingest** into embedded DuckDB, with bot filtering, per-site rate limits and channel rules (Paid, Email, AI, Organic search, Communities, Social, Referral, Direct). Visitor IPs are never stored.
-- **Magic-link sign-in and onboarding** (behind `--app` while the waitlist runs).
+- **Payment sync** from Stripe, Dodo Payments, Polar and LemonSqueezy with a read-only key (LemonSqueezy keys cannot be limited): a 90-day backfill, then a poll every minute. Virling never creates, changes or refunds anything. LemonSqueezy payments count toward revenue, but linking them to visits waits on webhook support.
+- **Attribution**: last non-direct or first touch, with a 30, 60, 90 or 365 day lookback. Renewals keep the channel of the customer's first payment. Payments without a visitor ID count as Unattributed.
+- **Revenue dashboard**: revenue, revenue per visitor and conversion by channel, referrer, campaign, page and country, payment journeys, a Visitors page, retention by first channel, tracked short links, and AI assistant visits next to AI crawler hits.
+- **Reports and sharing**: weekly email reports with agency branding, and an optional public dashboard.
+- **Read API, MCP server and CLI**: read-only access with API keys, so `virling query` and AI assistants can answer revenue questions. An agent skill is in `skills/virling`.
+- **WordPress plugin** in `integrations/wordpress`.
+- **Magic-link sign-in and onboarding** (behind `--app`).
 
-## Coming next
-
-Stripe, Dodo Payments, Polar and LemonSqueezy sync from a read-only key, the attribution job, the revenue dashboard and payment journeys.
+Not available yet: attribution for LemonSqueezy payments, the hosted plan, team members, imports from other tools, other attribution models and Windows builds.
 
 ## Run it
 
