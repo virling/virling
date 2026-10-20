@@ -1,6 +1,6 @@
 # Virling
 
-> Virling is open-source, self-hosted revenue attribution for SaaS. It joins every website visit to the payment that followed, so founders can see which traffic channel brings paying customers, not just visitors. It reads payments from Stripe, Dodo Payments, Polar and LemonSqueezy (Lemon Squeezy) with a read-only key and runs as one Rust binary under the AGPLv3 license.
+> Virling is open-source, self-hosted revenue attribution for SaaS. It joins every website visit to the payment that followed, so founders can see which traffic channel brings paying customers, not just visitors. It reads payments from Stripe, Dodo Payments and Polar with a read-only key and runs as one Rust binary under the AGPLv3 license. LemonSqueezy (Lemon Squeezy) payments import too, but linking them to visits is not available yet.
 
 Virling answers questions like: which channel brought the most revenue this month, did a launch or a Reddit post make money or just traffic, what is a visitor from each source worth, and which visits did a paying customer have before they paid.
 
