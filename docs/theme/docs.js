@@ -2,6 +2,9 @@
   "use strict";
   var d = document, root = d.documentElement, doc = d.querySelector(".doc");
   var REPO = "https://github.com/virling/virling";
+  // Queue goals until the deferred tracker loads; it replays window.virling.q.
+  var virling = window.virling = window.virling || function () { (virling.q = virling.q || []).push(arguments); };
+  function goal(name) { window.virling("goal", name); }
 
   function svg(paths, size, sw) {
     return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 1.9) +
@@ -107,6 +110,7 @@
     b.innerHTML = '<span class="i-copy">' + svg(I.copy, 14) + '</span><span class="i-ok">' + svg(I.check, 14, 2.2) + "</span><span>Copy</span>";
     var text = b.lastChild, timer;
     b.addEventListener("click", function () {
+      goal("docs_copy_command");
       var done = function () {
         b.classList.add("ok");
         text.textContent = "Copied";
@@ -467,5 +471,18 @@
       it.addEventListener("click", function () { if (it.pathname === location.pathname) closeSearch(); });
     });
     mark(items);
+  }
+
+  d.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a[href]");
+    if (a && a.hostname === "github.com") goal("docs_github_click");
+  }, true);
+
+  var end = /\/quickstart(\.html)?$/.test(location.pathname) && d.querySelector("[data-help]");
+  if (end && window.IntersectionObserver) {
+    var seen = new IntersectionObserver(function (es) {
+      if (es[0].isIntersecting) { seen.disconnect(); goal("quickstart_done"); }
+    });
+    seen.observe(end);
   }
 })();
