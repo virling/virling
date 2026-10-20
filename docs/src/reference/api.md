@@ -36,7 +36,7 @@ Responses echo the range they used, as `{"from": "2026-09-17", "to": "2026-10-16
 
 Money is net of refunds, in USD (`*_usd` fields) or in the payment's currency minor unit (`amount`, `refunded`). Times are RFC 3339 in UTC.
 
-## GET /api/v1/sites
+## GET `/api/v1/sites`
 
 The account's sites.
 
@@ -44,7 +44,7 @@ The account's sites.
 {"sites": [{"domain": "example.com", "timezone": "Europe/Berlin"}]}
 ```
 
-## GET /api/v1/sites/{domain}/overview
+## GET `/api/v1/sites/{domain}/overview`
 
 Totals for the range and for the period of the same length just before it.
 
@@ -72,7 +72,7 @@ Totals for the range and for the period of the same length just before it.
 | `revenue_per_visitor` | `matched_revenue_usd / visitors`. `null` until a payment is matched. |
 | `change` | Relative change from `previous`, `0.25` meaning 25% more. `null` when the previous value is zero or missing. |
 
-## GET /api/v1/sites/{domain}/breakdown/{dimension}
+## GET `/api/v1/sites/{domain}/breakdown/{dimension}`
 
 Visitors and credited revenue per value of a dimension, most revenue first, then most visitors.
 
@@ -108,7 +108,7 @@ It takes the range parameters and `limit` (default 100, up to 1000).
 
 Visitors count visits that started in the range. A payment is credited to one visit by the site's [attribution model](../attribution/model.md). Payments with no credited visit are in the `Unattributed` row. `key` is `null` for that row and for visits without a value, labelled `(none)`. `total` is the number of rows before `limit`.
 
-## GET /api/v1/sites/{domain}/payments
+## GET `/api/v1/sites/{domain}/payments`
 
 Payments in the range, newest first, with the visit credited for each.
 
@@ -140,7 +140,7 @@ Payments in the range, newest first, with the visit credited for each.
 
 `touch` is the credited visit, `null` when the payment is unattributed. `first_touch` is the payer's first visit. `visitor` is the visitor whose timeline shows the payment; pass it to the visitor endpoint.
 
-## GET /api/v1/sites/{domain}/retention
+## GET `/api/v1/sites/{domain}/retention`
 
 Customers whose first payment is in the range, grouped by the channel, referrer and campaign credited for that first payment, with how many still pay. Takes the range parameters. See [Retention by channel](../attribution/retention.md) for every definition.
 
@@ -165,7 +165,7 @@ Customers whose first payment is in the range, grouped by the channel, referrer 
 
 `still_paying` uses the provider's subscription status, else payment recency. `churn_30d` looks at customers whose first payment was 30 to 60 days ago, whatever the range; `null` when there are none. `day_one` is true under 60 days of payments, when LTV is not meaningful yet. `headline` is `null` when the data is thin. `status_sources` says, per provider, whether subscription status was available.
 
-## GET /api/v1/sites/{domain}/visitors/{visitor_id}
+## GET `/api/v1/sites/{domain}/visitors/{visitor_id}`
 
 Everything one visitor did, oldest first: each visit with its pages, goals, how it ended and payments made during it, plus payments outside a visit such as renewals.
 
