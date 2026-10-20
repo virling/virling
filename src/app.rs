@@ -234,6 +234,7 @@ pub fn router(state: AppState) -> Router {
                 "/invite",
                 get(crate::team::confirm).post(crate::team::accept),
             )
+            .route("/app/{domain}/account/theme", post(settings::save_theme))
             .route("/app/{domain}/account/api-keys", post(settings::create_key))
             .route(
                 "/app/{domain}/account/api-keys/revoke",
@@ -275,7 +276,47 @@ pub fn router(state: AppState) -> Router {
     } else if state.config.app {
         app = app.route("/", get(|| async { Redirect::temporary("/app") }));
     }
-    app.with_state(state)
+    app.layer(axum::middleware::from_fn_with_state(state.clone(), theme))
+        .with_state(state)
+}
+
+/// Marks a signed-in user's pages with their Light or Dark choice, so they render in it without a flash.
+async fn theme(
+    State(state): State<AppState>,
+    req: axum::extract::Request,
+    next: axum::middleware::Next,
+) -> Response {
+    let token = auth::cookie(req.headers(), auth::SESSION_COOKIE);
+    let res = next.run(req).await;
+    let html = res
+        .headers()
+        .get(header::CONTENT_TYPE)
+        .is_some_and(|v| v.as_bytes().starts_with(b"text/html"));
+    let Some(token) = token.filter(|_| html) else {
+        return res;
+    };
+    let theme: Option<String> = sqlx::query_scalar(
+        "SELECT a.theme FROM sessions s JOIN accounts a ON a.id = s.account_id WHERE s.token_hash = ?",
+    )
+    .bind(auth::hash_token(&token))
+    .fetch_optional(&state.db)
+    .await
+    .ok()
+    .flatten();
+    let Some(theme) = theme.filter(|t| t == "light" || t == "dark") else {
+        return res;
+    };
+    let (mut parts, body) = res.into_parts();
+    let Ok(bytes) = axum::body::to_bytes(body, usize::MAX).await else {
+        return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+    };
+    let page = String::from_utf8_lossy(&bytes).replacen(
+        r#"<html lang="en">"#,
+        &format!(r#"<html lang="en" data-theme="{theme}">"#),
+        1,
+    );
+    parts.headers.remove(header::CONTENT_LENGTH);
+    Response::from_parts(parts, axum::body::Body::from(page))
 }
 
 async fn tracker(State(state): State<AppState>, headers: HeaderMap) -> Response {

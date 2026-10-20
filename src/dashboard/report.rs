@@ -670,8 +670,9 @@ fn chart(days: &[DayPoint], monday: Date, accent: &str) -> (String, Vec<DayBar>,
         .flatten();
     let col = 760.0 / 7.0;
     let cx = |i: usize| col / 2.0 + col * i as f64;
-    let mut svg =
-        String::from(r##"<path d="M0 206H760" stroke="#E4E4DF" stroke-width="1"></path>"##);
+    let mut svg = String::from(
+        r##"<path d="M0 206H760" style="stroke:var(--rule)" stroke-width="1"></path>"##,
+    );
     let mut bars = Vec::new();
     for (i, d) in week.iter().enumerate() {
         let h = if rmax > 0.0 { d.1 / rmax * 148.3 } else { 0.0 };
@@ -685,7 +686,7 @@ fn chart(days: &[DayPoint], monday: Date, accent: &str) -> (String, Vec<DayBar>,
             ));
         }
         svg.push_str(&format!(
-            r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" font-size="13" font-weight="600" fill="#0E1116" font-family="Schibsted Grotesk, sans-serif">{}</text>"##,
+            r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" font-size="13" font-weight="600" style="fill:var(--ink)" font-family="Schibsted Grotesk, sans-serif">{}</text>"##,
             cx(i),
             198.0 - h,
             whole(d.1)
@@ -706,12 +707,12 @@ fn chart(days: &[DayPoint], monday: Date, accent: &str) -> (String, Vec<DayBar>,
             .map(|(i, d)| format!("{:.1} {:.1}", cx(i), y(d.2)))
             .collect();
         svg.push_str(&format!(
-            r##"<path d="M{}" fill="none" stroke="#2F5BEA" stroke-width="1.6" stroke-dasharray="4 4"></path>"##,
+            r##"<path d="M{}" fill="none" style="stroke:var(--visitors)" stroke-width="1.6" stroke-dasharray="4 4"></path>"##,
             points.join(" L")
         ));
         for (i, d) in week.iter().enumerate() {
             svg.push_str(&format!(
-                r##"<circle cx="{:.1}" cy="{:.1}" r="3" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="1.6"></circle>"##,
+                r##"<circle cx="{:.1}" cy="{:.1}" r="3" style="fill:var(--paper);stroke:var(--visitors)" stroke-width="1.6"></circle>"##,
                 cx(i),
                 y(d.2)
             ));
@@ -719,7 +720,7 @@ fn chart(days: &[DayPoint], monday: Date, accent: &str) -> (String, Vec<DayBar>,
     }
     for (i, d) in week.iter().enumerate() {
         svg.push_str(&format!(
-            r##"<text x="{x:.1}" y="226" text-anchor="middle" font-size="12" fill="#4B515C" font-family="Schibsted Grotesk, sans-serif">{}</text><text x="{x:.1}" y="242" text-anchor="middle" font-size="11" fill="#8A909A" font-family="Geist Mono, monospace">{}</text>"##,
+            r##"<text x="{x:.1}" y="226" text-anchor="middle" font-size="12" style="fill:var(--ink-2)" font-family="Schibsted Grotesk, sans-serif">{}</text><text x="{x:.1}" y="242" text-anchor="middle" font-size="11" fill="#8A909A" font-family="Geist Mono, monospace">{}</text>"##,
             NAMES[i].0,
             super::day(d.0),
             x = cx(i)
