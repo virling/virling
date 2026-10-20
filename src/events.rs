@@ -355,13 +355,42 @@ impl Drop for Reader<'_> {
     }
 }
 
-/// Memory budget of session indexes in bytes, from VIRLING_INDEX_MB (default 512; 0 turns them off).
+/// Memory budget of session indexes in bytes, from VIRLING_INDEX_MB (0 turns them off), else a quarter of memory and at least 512 MB.
 pub fn index_cap() -> usize {
-    std::env::var("VIRLING_INDEX_MB")
+    match std::env::var("VIRLING_INDEX_MB")
         .ok()
         .and_then(|v| v.parse::<usize>().ok())
-        .unwrap_or(512)
-        * 1_000_000
+    {
+        Some(mb) => mb * 1_000_000,
+        None => (memory_bytes().unwrap_or(0) / 4).max(512_000_000),
+    }
+}
+
+/// Memory this process may use: the machine's (Linux, else macOS sysctl), or its container's limit when lower.
+fn memory_bytes() -> Option<usize> {
+    let total = match std::fs::read_to_string("/proc/meminfo") {
+        Ok(info) => {
+            info.lines()
+                .find_map(|l| l.strip_prefix("MemTotal:"))?
+                .trim()
+                .trim_end_matches("kB")
+                .trim()
+                .parse::<usize>()
+                .ok()?
+                * 1024
+        }
+        Err(_) => {
+            let out = std::process::Command::new("sysctl")
+                .args(["-n", "hw.memsize"])
+                .output()
+                .ok()?;
+            String::from_utf8(out.stdout).ok()?.trim().parse().ok()?
+        }
+    };
+    let limit = std::fs::read_to_string("/sys/fs/cgroup/memory.max")
+        .ok()
+        .and_then(|v| v.trim().parse::<usize>().ok());
+    Some(limit.map_or(total, |l| l.min(total)))
 }
 
 /// A stored utm_medium, utm_source or referrer host.
