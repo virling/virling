@@ -16,7 +16,7 @@ User-Agent: Mozilla/5.0 ...
 
 | Field | Type | | Meaning |
 | --- | --- | --- | --- |
-| `n` | string | Required | `"pageview"`, `"goal"`, `"exit"` or `"leave"`. Other values are dropped. |
+| `n` | string | Required | `"pageview"`, `"goal"`, `"exit"`, `"leave"` or `"ping"`. A ping only keeps the visitor live and is not stored. Other values are dropped. |
 | `u` | string | Required | Full page URL. Its host must be the site's domain or a subdomain. |
 | `s` | string | Required | The site's domain, as in `data-site`. |
 | `r` | string or null | Optional | Referrer URL. Only its host is kept, and only when it is another site. |

@@ -26,7 +26,7 @@
 <header class="d3-head">
   {% if !icon.is_empty() %}<img class="favicon" src="{{ icon }}" width="24" height="24" alt="">{% endif %}
   <h1>{{ domain }}</h1>
-  <span class="d3-pill" title="Visitors in the last 5 minutes"><i class="d3-dot{% if live == 0 %} idle{% endif %}"></i>{% if live == 0 %}No visitors online{% else %}{{ live }} visitor{% if live != 1 %}s{% endif %} online now{% endif %}</span>
+  <span class="d3-pill" title="Visitors with the site open now"><i class="d3-dot{% if live == 0 %} idle{% endif %}"></i>{% if live == 0 %}No visitors online{% else %}{{ live }} visitor{% if live != 1 %}s{% endif %} online now{% endif %}</span>
   <span class="grow"></span>
   <div class="menu-wrap d3-range" data-menu>
     <button type="button" class="d3-btn" aria-haspopup="true" aria-expanded="false">

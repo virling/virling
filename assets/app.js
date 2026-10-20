@@ -98,6 +98,39 @@ for (const box of document.querySelectorAll("[data-stack]")) {
   read(true);
 }
 
+const poll = document.querySelector("[data-poll]");
+if (poll) {
+  // On each change, swap in the online pill, section counts, KPIs and the visitors and payments lists from a fresh render.
+  const parts = ["[data-poll]", ".d3-ptabs", ".d3-kpis", "#live", ".d3-pay"];
+  const drawer = document.getElementById("drawer");
+  let v = "", fails = 0, last = 0;
+  const refresh = async () => {
+    const res = await fetch(location.href);
+    if (!res.ok) throw res.status;
+    const doc = new DOMParser().parseFromString(await res.text(), "text/html");
+    for (const sel of parts) {
+      const now = document.querySelector(sel), next = doc.querySelector(sel);
+      if (now && next) now.replaceWith(next);
+    }
+  };
+  const loop = async () => {
+    await new Promise((r) => setTimeout(r, Math.max(0, last + 1000 - Date.now())));
+    last = Date.now();
+    try {
+      const res = await fetch(poll.dataset.poll + "?since=" + encodeURIComponent(v));
+      if (!res.ok) throw res.status;
+      const next = (await res.json()).v;
+      if (v && next != v && drawer?.hidden !== false) await refresh();
+      if (drawer?.hidden !== false) v = next;
+      fails = 0;
+      loop();
+    } catch {
+      setTimeout(loop, Math.min(60000, 2000 * 2 ** fails++));
+    }
+  };
+  loop();
+}
+
 for (const live of document.querySelectorAll("[data-live]")) {
   const check = async () => {
     try {

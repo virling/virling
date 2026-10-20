@@ -3,7 +3,7 @@
   var s = d.currentScript, has = (a) => s.hasAttribute(a), on = (t, e, f, c) => t.addEventListener(e, f, c),
     site = s && s.getAttribute("data-site");
   if (!site || (/^(localhost|127\.|\[::1\])/.test(L.hostname) && !has("data-dev")) || (has("data-respect-gpc") && n.globalPrivacyControl)) return;
-  var endpoint = s.getAttribute("data-api") || new URL(s.src).origin + "/api/event";
+  var endpoint = s.getAttribute("data-api") || new URL("/api/event", s.src);
   var ref = d.referrer, last, vid = null, nav = performance.getEntriesByType("navigation")[0]?.type;
 
   if (!has("data-cookieless")) {
@@ -44,7 +44,7 @@
       if (/^http/.test(u.protocol) && bare(u.hostname) != bare(L.hostname)) send("exit", u.origin + u.pathname);
       k = vid && pay[u.hostname];
       if (k && !u.searchParams.has(k)) u.searchParams.set(k, vid), a.href = u.href;
-    } catch (_) {}
+    } catch {}
   }, true);
   // Count the site's other open tabs, so closing one of several tabs or switching tabs is not a leave.
   var me = Math.random(), peers, bc, tabs = () => {
@@ -56,6 +56,8 @@
       bc.postMessage(me);
     }
   };
+  // While the tab is visible, a ping every 30 s keeps the visitor counted as live.
+  setInterval(() => d.hidden || send("ping"), 3e4);
   tabs();
   // Leave only when the page itself goes away; the channel closes so the page can still enter the back/forward cache.
   on(w, "pagehide", () => { bc && (bc.postMessage(0), bc.close()); peers > 0 || send("leave"); });

@@ -30,7 +30,7 @@ cargo test
 
 ## The tracker
 
-The tracker's source is `assets/v.src.js`. After editing it, run `scripts/build-tracker.sh`, which writes the minified `assets/v.js`. It must stay under 1.3 KB gzipped, and CI checks that. `node --test scripts/tracker.test.mjs` runs the built script in a fake browser.
+The tracker's source is `assets/v.src.js`. After editing it, run `scripts/build-tracker.sh`, which writes the minified `assets/v.js`. It must stay at or under 1,310 bytes with `gzip -9`, and CI checks that. `node --test scripts/tracker.test.mjs` runs the built script in a fake browser.
 
 ## Payment providers
 

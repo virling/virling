@@ -40,6 +40,8 @@ const tick = () => new Promise((r) => setTimeout(r, 5));
 function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set(), agent = {} } = {}) {
   const loc = new URL(url);
   const sent = [];
+  const urls = [];
+  const timers = [];
   const listeners = {};
   const on = (t) => (e, f) => (listeners[t + e] ||= []).push(f);
   const script = {
@@ -51,6 +53,7 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
     currentScript: script,
     referrer: "",
     visibilityState: "visible",
+    hidden: false,
     addEventListener: on("d:"),
     get cookie() { return cookie.get(); },
     set cookie(v) { cookie.set(v); },
@@ -68,14 +71,14 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
   const navigator = {
     language: "en-US",
     languages: ["en-US"],
-    sendBeacon: (_u, body) => (sent.push(...JSON.parse(body)), true),
+    sendBeacon: (u, body) => (urls.push(String(u)), sent.push(...JSON.parse(body)), true),
     ...agent,
   };
   const performance = { getEntriesByType: (t) => (t == "navigation" ? [{ type: nav }] : []) };
-  const ctx = { window, document, navigator, location, history, performance, BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, URL, JSON, Date, Math, fetch: () => {} };
+  const ctx = { window, document, navigator, location, history, performance, BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, URL, JSON, Date, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]) };
   vm.runInNewContext(SRC, ctx);
   const fire = (t, e, ev = {}) => (listeners[t + e] || []).forEach((f) => f(ev));
-  return { sent, cookie, window, document, history, location, fire };
+  return { sent, urls, timers, cookie, window, document, history, location, fire };
 }
 
 test("pageview with page, screen and language", () => {
@@ -168,6 +171,16 @@ test("the first pageview carries the navigation type, route changes do not", () 
   const b = browser("https://example.com/", { nav: "reload" });
   b.history.pushState({}, "", "/a");
   assert.deepEqual(b.sent.map((e) => e.k), ["reload", null]);
+});
+
+test("a visible tab pings every 30 s, a hidden one does not", () => {
+  const b = browser("https://example.com/");
+  assert.deepEqual(b.timers.map(([, ms]) => ms), [30000]);
+  b.timers[0][0]();
+  b.document.hidden = true;
+  b.timers[0][0]();
+  assert.deepEqual(b.sent.map((e) => e.n), ["pageview", "ping"]);
+  assert.deepEqual([...new Set(b.urls)], ["https://virling.test/api/event"]);
 });
 
 test("leave fires when the page goes away, not when the tab is hidden", () => {

@@ -20,6 +20,7 @@ mod icons;
 mod index;
 mod ingest;
 mod links;
+mod live;
 mod mail;
 mod mcp;
 mod onboarding;
@@ -1192,6 +1193,58 @@ mod tests {
             body.contains("You will see which pages people land on"),
             "Landing page keeps its message"
         );
+    }
+
+    #[tokio::test]
+    async fn live_counts_open_tabs_and_wakes_the_dashboard() {
+        let (dir, state, _store) = setup().await;
+        let cached =
+            crate::cache::Cached::new(DuckStore::open(&dir.path().join("c.duckdb")).unwrap());
+        let state = AppState {
+            events: Arc::new(cached),
+            ..state
+        };
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let hit = |n: &str| {
+            format!(
+                r#"{{"n":"{n}","u":"https://example.com/","s":"example.com","v":"0b7c2d1e-aaaa-bbbb-cccc-1234567890ab","w":1280}}"#
+            )
+        };
+        let version = |since: String| {
+            let (state, cookie) = (state.clone(), cookie.clone());
+            async move {
+                let uri = format!("/app/example.com/live?since={since}");
+                let body = body_text(call(&state, get(&uri, Some(&cookie))).await).await;
+                serde_json::from_str::<serde_json::Value>(&body).unwrap()["v"]
+                    .as_str()
+                    .unwrap()
+                    .to_string()
+            }
+        };
+        let v0 = version(String::new()).await;
+        let waiting = tokio::spawn(version(v0.clone()));
+        tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+        assert!(!waiting.is_finished(), "waits for a change");
+        assert_eq!(
+            post(&state, &hit("pageview"), UA).await,
+            StatusCode::ACCEPTED
+        );
+        let v1 = tokio::time::timeout(std::time::Duration::from_secs(2), waiting)
+            .await
+            .expect("a pageview wakes the poll")
+            .unwrap();
+        assert_ne!(v1, v0);
+        let pill = || {
+            let (state, cookie) = (state.clone(), cookie.clone());
+            async move { body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await }
+        };
+        assert!(pill().await.contains("1 visitor online now"));
+        assert_eq!(post(&state, &hit("ping"), UA).await, StatusCode::ACCEPTED);
+        assert_eq!(version(String::new()).await, v1, "a ping is not stored");
+        assert_eq!(post(&state, &hit("leave"), UA).await, StatusCode::ACCEPTED);
+        assert!(pill().await.contains("No visitors online"));
+        let other = call(&state, get("/app/other.com/live", Some(&cookie))).await;
+        assert_eq!(other.status(), StatusCode::NOT_FOUND);
     }
 
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {

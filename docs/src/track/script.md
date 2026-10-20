@@ -41,6 +41,8 @@ A click on a link to another site is sent as an exit with the link's origin and 
 
 When the page is closed or the visitor navigates away, the script sends a leave, used for time on page and the exit page. Switching tabs is not a leave, and neither is closing one of several open tabs of the site: open tabs find each other with `BroadcastChannel`.
 
+While the tab is visible, the script sends a ping every 30 seconds. A visitor counts as live, in "online now" and the Live visitors list, while their tab is visible: from their last event or ping for 75 seconds, or until they leave. Pings are not stored.
+
 Each page load sends its navigation type (`navigate`, `reload` or `back_forward`). A page restored by Back from the browser's back/forward cache sends a new pageview with `back_forward`. The server uses both to tell a return from a reload; see [Sessions](../attribution/index.md#sessions). A return to the visit shows as "Came back" on the visitor's timeline, after a "Left to" row when the visitor had clicked out.
 
 ## UTM tags and ref

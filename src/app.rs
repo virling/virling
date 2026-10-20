@@ -48,6 +48,7 @@ pub struct AppState {
     /// Fetches site favicons from public hosts only.
     pub favicons: reqwest::Client,
     pub rates: Arc<Rates>,
+    pub presence: Arc<crate::live::Presence>,
 }
 
 impl AppState {
@@ -76,6 +77,7 @@ impl AppState {
             salt: Arc::default(),
             limiter: Arc::default(),
             mailer: Arc::new(mailer),
+            presence: Arc::default(),
         }
     }
 }
@@ -164,6 +166,7 @@ pub fn router(state: AppState) -> Router {
                 get(onboarding::checkout_step),
             )
             .route("/app/{domain}/icon", get(dashboard::icon))
+            .route("/app/{domain}/live", get(crate::live::poll))
             .route("/source-icons/{host}", get(dashboard::source_icon))
             .route(
                 "/app/{domain}/setup/dismiss",
