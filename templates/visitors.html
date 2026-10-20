@@ -34,15 +34,15 @@
   <span class="dim">{{ showing }}</span>
 </div>
 <section class="box vis-list">
-  <div class="vr th"><span>Visitor</span><span>First source</span><span class="num">Visits</span><span class="num vr-pv">Pages</span><span>Exit page</span><span>Exit link</span><span class="vr-goals">Goals</span><span class="num">Revenue</span><span class="num">Last seen</span><span></span></div>
+  <div class="vr th"><span>Visitor</span><span>First source</span><span class="num">Visits</span><span class="num vr-pv">Pages</span><span>Exit page</span><span class="vr-out">Exit link</span><span class="vr-goals">Goals</span><span class="num">Revenue</span><span class="num">Last seen</span><span></span></div>
   {% for v in rows %}
   <a class="vr prow" href="{{ v.href }}">
-    <span class="vr-who"><span class="av">{{ v.avatar|safe }}</span><b>{{ v.name }}</b></span>
-    <span class="src">{{ v.icon|safe }}<span class="lbl">{{ v.source }}</span>{% if !v.channel.is_empty() %}<span class="ch">{{ v.channel }}</span>{% endif %}</span>
+    <span class="vr-who"><span class="av">{{ v.avatar|safe }}</span><b title="{{ v.name }}">{{ v.name }}</b></span>
+    <span class="src" title="{{ v.source }}">{{ v.icon|safe }}<span class="lbl">{{ v.source }}</span>{% if !v.channel.is_empty() %}<span class="ch">{{ v.channel }}</span>{% endif %}</span>
     <span class="num">{{ v.visits }}</span>
     <span class="num vr-pv">{{ v.pageviews }}</span>
-    <span class="vr-exit">{% if v.exit_page.is_empty() %}<span class="na">n/a</span>{% else %}<span class="mono">{{ v.exit_page }}</span>{% endif %}</span>
-    <span class="vr-out src">{% if !v.exit_link.is_empty() %}{{ v.exit_icon|safe }}<span class="lbl mono">{{ v.exit_link }}</span>{% endif %}</span>
+    <span class="vr-exit">{% if v.exit_page.is_empty() %}<span class="na">n/a</span>{% else %}<span class="mono" title="{{ v.exit_page }}">{{ v.exit_page }}</span>{% endif %}</span>
+    <span class="vr-out src">{% if !v.exit_link.is_empty() %}{{ v.exit_icon|safe }}<span class="lbl mono" title="{{ v.exit_link }}">{{ v.exit_link }}</span>{% endif %}</span>
     <span class="vr-goals">{% for g in v.goals %}<span class="chip goal">{{ g }}</span>{% endfor %}{% if v.more_goals > 0 %}<span class="chip">+{{ v.more_goals }}</span>{% endif %}</span>
     <span class="num vr-rev">{% if v.paid %}<b>{{ v.revenue }}</b>{% else %}<span class="na">Not paid</span>{% endif %}</span>
     <span class="num dim vr-seen" title="{{ v.last_full }}">{{ v.last_seen }}</span>
