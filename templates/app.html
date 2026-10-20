@@ -34,9 +34,9 @@
     <a href="/app/{{ shell.domain }}/settings"{% if shell.nav == "settings" %} aria-current="page"{% endif %}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/><circle cx="12" cy="12" r="3"/></svg>Site settings</a>
   </nav>
-  <div class="usage">
+  {% if !shell.usage.is_empty() %}<div class="usage">
     <span>{{ shell.usage }}</span>
-  </div>
+  </div>{% endif %}
   <div class="menu-wrap account" data-menu>
     <button type="button" aria-haspopup="true" aria-expanded="false">
       <span class="favicon avatar">{{ shell.avatar }}</span>

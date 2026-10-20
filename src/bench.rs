@@ -295,6 +295,16 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
             Auth::Session,
         ),
         get(
+            "page.visitors.sorted",
+            format!("{app}/visitors?sort=visits"),
+            Auth::Session,
+        ),
+        get(
+            "page.visitors.search",
+            format!("{app}/visitors?q=pricing"),
+            Auth::Session,
+        ),
+        get(
             "page.visitor",
             format!("{app}/visitors/{}", enc(&visitor)),
             Auth::Session,
