@@ -24,3 +24,9 @@
 
 /favicon.ico
   Cache-Control: public, max-age=604800
+
+/demo/
+  X-Robots-Tag: noindex
+
+/demo/*
+  X-Robots-Tag: noindex
