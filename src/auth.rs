@@ -50,7 +50,7 @@ struct LoginEmailHtml<'a> {
     link: &'a str,
 }
 
-fn page(p: LoginPage) -> Response {
+pub fn page(p: LoginPage) -> Response {
     match p.render() {
         Ok(html) => Html(html).into_response(),
         Err(err) => {
@@ -201,28 +201,37 @@ pub async fn verify(State(state): State<AppState>, Form(input): Form<TokenInput>
             error: Some(EXPIRED),
         });
     };
-    let session = random_token();
-    let created = async {
+    let started = async {
         let account = sites::find_or_create_account(&state.db, &email).await?;
-        sqlx::query("INSERT INTO sessions (token_hash, account_id, created_at, expires_at) VALUES (?, ?, ?, ?)")
-            .bind(hash_token(&session))
-            .bind(&account)
-            .bind(now())
-            .bind(now() + SESSION_TTL_SECS)
-            .execute(&state.db)
-            .await?;
-        anyhow::Ok(())
+        start_session(&state, &account).await
     }
     .await;
-    if let Err(err) = created {
-        tracing::error!(%err, "creating session failed");
-        return page(LoginPage {
-            view: "enter",
-            email,
-            token: String::new(),
-            error: Some("Something went wrong. Try again."),
-        });
+    match started {
+        Ok(res) => res,
+        Err(err) => {
+            tracing::error!(%err, "creating session failed");
+            page(LoginPage {
+                view: "enter",
+                email,
+                token: String::new(),
+                error: Some("Something went wrong. Try again."),
+            })
+        }
     }
+}
+
+/// Signs `account_id` in and sends them to the app.
+pub async fn start_session(state: &AppState, account_id: &str) -> anyhow::Result<Response> {
+    let session = random_token();
+    sqlx::query(
+        "INSERT INTO sessions (token_hash, account_id, created_at, expires_at) VALUES (?, ?, ?, ?)",
+    )
+    .bind(hash_token(&session))
+    .bind(account_id)
+    .bind(now())
+    .bind(now() + SESSION_TTL_SECS)
+    .execute(&state.db)
+    .await?;
     let secure = if state.config.base_url.starts_with("https://") {
         "; Secure"
     } else {
@@ -236,7 +245,7 @@ pub async fn verify(State(state): State<AppState>, Form(input): Form<TokenInput>
         header::SET_COOKIE,
         HeaderValue::from_str(&cookie).expect("ascii cookie"),
     );
-    res
+    Ok(res)
 }
 
 pub async fn logout(State(state): State<AppState>, headers: HeaderMap) -> Response {
@@ -265,10 +274,15 @@ pub fn cookie(headers: &HeaderMap, name: &str) -> Option<String> {
         .map(|(_, v)| v.to_string())
 }
 
-/// The signed-in account; redirects to /login when there is no valid session.
+/// The signed-in user's account; redirects to /login when there is no valid session.
 #[derive(Debug, Clone)]
 pub struct Account {
+    /// The account that owns the sites: the user's own, or the team they are a member of.
     pub id: String,
+    /// The signed-in user.
+    pub user: String,
+    /// False for team members, who can't change the plan, API keys or the team.
+    pub owner: bool,
 }
 
 impl FromRequestParts<AppState> for Account {
@@ -279,8 +293,8 @@ impl FromRequestParts<AppState> for Account {
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
         let token = cookie(&parts.headers, SESSION_COOKIE).ok_or(Redirect::to("/login"))?;
-        let id: Option<String> = sqlx::query_scalar(
-            "SELECT a.id FROM sessions s JOIN accounts a ON a.id = s.account_id WHERE s.token_hash = ? AND s.expires_at > ?",
+        let row: Option<(String, Option<String>)> = sqlx::query_as(
+            "SELECT s.account_id, m.org_id FROM sessions s LEFT JOIN members m ON m.account_id = s.account_id WHERE s.token_hash = ? AND s.expires_at > ?",
         )
         .bind(hash_token(&token))
         .bind(now())
@@ -288,7 +302,12 @@ impl FromRequestParts<AppState> for Account {
         .await
         .ok()
         .flatten();
-        id.map(|id| Account { id }).ok_or(Redirect::to("/login"))
+        let (user, org) = row.ok_or(Redirect::to("/login"))?;
+        Ok(Account {
+            id: org.clone().unwrap_or_else(|| user.clone()),
+            owner: org.is_none(),
+            user,
+        })
     }
 }
 

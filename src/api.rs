@@ -675,6 +675,7 @@ pub(crate) mod tests {
             events_per_second: 200,
             base_url: "http://localhost:8080".into(),
             waitlist_from: "Virling <hello@virling.com>".into(),
+            hosted: false,
         };
         let state = AppState::new(
             config,

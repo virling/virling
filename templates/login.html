@@ -22,6 +22,15 @@
       <button class="btn secondary" type="submit">Send it again</button>
     </form>
     <a class="link-quiet" href="/login">Use a different email</a>
+  {% else if view == "invite" %}
+    <div class="auth-copy">
+      <h1>Join the team as {{ email }}</h1>
+      <p>You were invited to a team on Virling. Joining signs you in and shows the team's sites.</p>
+    </div>
+    <form method="post" action="/invite">
+      <input type="hidden" name="token" value="{{ token }}">
+      <button class="btn lg block" type="submit">Join and sign in</button>
+    </form>
   {% else if view == "confirm" %}
     <div class="auth-copy">
       <h1>Continue as {{ email }}</h1>

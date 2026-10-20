@@ -172,12 +172,14 @@ async fn load_in(
     let Some(site) = all.iter().find(|s| s.domain == domain).cloned() else {
         return Err(StatusCode::NOT_FOUND);
     };
-    let (email, account_type): (String, String) =
-        sqlx::query_as("SELECT email, account_type FROM accounts WHERE id = ?")
-            .bind(&account.id)
-            .fetch_one(&state.db)
-            .await
-            .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+    let (email, account_type): (String, String) = sqlx::query_as(
+        "SELECT u.email, a.account_type FROM accounts a, accounts u WHERE a.id = ? AND u.id = ?",
+    )
+    .bind(&account.id)
+    .bind(&account.user)
+    .fetch_one(&state.db)
+    .await
+    .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
     let store = state.events.clone();
     let (id, tz) = (site.id.clone(), site.timezone.clone());
     let live = state.presence.count(&id);

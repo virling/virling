@@ -33,6 +33,7 @@ mod sites;
 mod stack;
 mod stats;
 mod sync;
+mod team;
 mod ua;
 mod visitor_pages;
 mod visitors;
@@ -112,6 +113,9 @@ struct ServeArgs {
     /// Serve sign-in and the app (off during the waitlist phase)
     #[arg(long, env = "VIRLING_APP")]
     app: bool,
+    /// Run as the hosted service: Agency teams can add seats past the 3 included
+    #[arg(long, env = "VIRLING_HOSTED")]
+    hosted: bool,
     /// 64 hex chars used to encrypt payment-provider keys. Unset: a key file is created in the data dir.
     #[arg(long, env = "VIRLING_SECRET_KEY", hide_env_values = true)]
     secret_key: Option<String>,
@@ -191,6 +195,7 @@ async fn main() -> anyhow::Result<()> {
                 events_per_second: args.events_per_second,
                 base_url: args.base_url.trim_end_matches('/').to_string(),
                 waitlist_from: args.waitlist_from,
+                hosted: args.hosted,
             };
             let mailer = mail::Mailer::new(args.smtp_url.as_deref(), &args.mail_from)?;
             let vault = crypto::Vault::load(&cli.data_dir, args.secret_key.as_deref())?;
@@ -286,6 +291,7 @@ mod tests {
             events_per_second: 200,
             base_url: "http://localhost:8080".into(),
             waitlist_from: "Rahul at Virling <hello@virling.com>".into(),
+            hosted: false,
         };
         let state = AppState::new(
             config,
@@ -1245,6 +1251,201 @@ mod tests {
         assert!(pill().await.contains("No visitors online"));
         let other = call(&state, get("/app/other.com/live", Some(&cookie))).await;
         assert_eq!(other.status(), StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
+    async fn team_seats_follow_the_plan() {
+        let (_dir, state, _store) = setup().await;
+        let owner = sign_in(&state, "me%40example.com").await;
+        let invite = |email: &str, confirm: bool| {
+            let (state, owner) = (state.clone(), owner.clone());
+            let body = format!("email={email}{}", if confirm { "&confirm=1" } else { "" });
+            async move {
+                let res = call(
+                    &state,
+                    form("/app/example.com/account/team", body, Some(&owner)),
+                )
+                .await;
+                res.headers()["location"].to_str().unwrap().to_string()
+            }
+        };
+        let page = |cookie: String| {
+            let state = state.clone();
+            async move {
+                body_text(call(&state, get("/app/example.com/account", Some(&cookie))).await).await
+            }
+        };
+        assert!(
+            page(owner.clone())
+                .await
+                .contains("Teams are part of the Agency plan.")
+        );
+        assert!(
+            invite("a%40team.io", false)
+                .await
+                .ends_with("team=limit#team"),
+            "personal is owner only"
+        );
+
+        make_agency(&state).await;
+        assert!(
+            invite("a%40team.io", false)
+                .await
+                .ends_with("saved=invite#team")
+        );
+        assert!(
+            invite("a%40team.io", false)
+                .await
+                .ends_with("team=taken#team")
+        );
+        assert!(
+            invite("b%40team.io", false)
+                .await
+                .ends_with("saved=invite#team")
+        );
+        let full = page(owner.clone()).await;
+        assert!(full.contains("3 of 3 included"));
+        assert!(full.contains("Teams larger than 3 use the hosted Agency plan."));
+        assert!(
+            invite("c%40team.io", false)
+                .await
+                .ends_with("team=limit#team"),
+            "self-hosted caps at 3"
+        );
+
+        let hosted = AppState {
+            config: Arc::new(Config {
+                hosted: true,
+                ..(*state.config).clone()
+            }),
+            ..state.clone()
+        };
+        let res = call(
+            &hosted,
+            form(
+                "/app/example.com/account/team",
+                "email=c%40team.io".into(),
+                Some(&owner),
+            ),
+        )
+        .await;
+        let ask = res.headers()["location"].to_str().unwrap().to_string();
+        assert!(ask.ends_with("add=c%40team.io#team"), "{ask}");
+        let confirm = body_text(call(&hosted, get(&ask, Some(&owner))).await).await;
+        assert!(confirm.contains("Each extra seat is $9/month."));
+        let res = call(
+            &hosted,
+            form(
+                "/app/example.com/account/team",
+                "email=c%40team.io&confirm=1".into(),
+                Some(&owner),
+            ),
+        )
+        .await;
+        assert!(
+            res.headers()["location"]
+                .to_str()
+                .unwrap()
+                .ends_with("saved=invite#team")
+        );
+        let seats = || async {
+            sqlx::query_scalar::<_, i64>(
+                "SELECT seats FROM accounts WHERE email = 'me@example.com'",
+            )
+            .fetch_one(&state.db)
+            .await
+            .unwrap()
+        };
+        assert_eq!(seats().await, 4);
+        assert!(
+            page(owner.clone())
+                .await
+                .contains("4 users: 3 included, 1 extra at $9/month each")
+        );
+
+        let mails = sent(&state);
+        let (_, subject, text) = mails.iter().find(|(to, _, _)| to == "a@team.io").unwrap();
+        assert_eq!(subject, "You're invited to a Virling team");
+        let token = link_in(text, "http://localhost:8080/invite?token=")
+            .split("token=")
+            .nth(1)
+            .unwrap()
+            .to_string();
+        let join =
+            body_text(call(&state, get(&format!("/invite?token={token}"), None)).await).await;
+        assert!(join.contains("Join the team as a@team.io"));
+        let res = call(&state, form("/invite", format!("token={token}"), None)).await;
+        let member = res.headers()["set-cookie"]
+            .to_str()
+            .unwrap()
+            .split(';')
+            .next()
+            .unwrap()
+            .to_string();
+        let dash = call(&state, get("/app/example.com", Some(&member))).await;
+        assert_eq!(
+            dash.status(),
+            StatusCode::OK,
+            "members see the team's sites"
+        );
+        let mine = page(member.clone()).await;
+        assert!(
+            mine.contains("a@team.io")
+                && !mine.contains("id=\"plan\"")
+                && !mine.contains("id=\"api\"")
+        );
+        let plan = call(
+            &state,
+            form(
+                "/app/example.com/account/plan",
+                "account_type=personal".into(),
+                Some(&member),
+            ),
+        )
+        .await;
+        assert_eq!(plan.status(), StatusCode::FORBIDDEN);
+        let again = call(&state, form("/invite", format!("token={token}"), None)).await;
+        assert!(
+            body_text(again).await.contains("expired or was revoked"),
+            "an invite works once"
+        );
+        assert_eq!(seats().await, 4, "a joined invite is still one seat");
+
+        let id: String = sqlx::query_scalar("SELECT account_id FROM members")
+            .fetch_one(&state.db)
+            .await
+            .unwrap();
+        call(
+            &state,
+            form(
+                "/app/example.com/account/team/remove",
+                format!("id={id}"),
+                Some(&owner),
+            ),
+        )
+        .await;
+        let out = call(&state, get("/app/example.com", Some(&member))).await;
+        assert_eq!(
+            out.headers()["location"],
+            "/login",
+            "removal ends their sessions"
+        );
+        assert_eq!(seats().await, 3);
+        let invite_id: String =
+            sqlx::query_scalar("SELECT id FROM invites WHERE email = 'b@team.io'")
+                .fetch_one(&state.db)
+                .await
+                .unwrap();
+        call(
+            &state,
+            form(
+                "/app/example.com/account/team/revoke",
+                format!("id={invite_id}"),
+                Some(&owner),
+            ),
+        )
+        .await;
+        assert_eq!(seats().await, 2);
     }
 
     async fn connect_fake(state: &AppState, site: &str, provider: &str, key: &str) {

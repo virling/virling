@@ -24,6 +24,7 @@ virling serve [OPTIONS]
 | --- | --- | --- |
 | `--addr <ADDR>`<br>`VIRLING_ADDR` | `0.0.0.0:8080` | Address and port to listen on. |
 | `--app`<br>`VIRLING_APP` | off | Serve sign-in and the app, and run payment sync. |
+| `--hosted`<br>`VIRLING_HOSTED` | off | Run as the hosted service, where Agency teams can add seats past the 3 included. Off, a team is capped at 3 users. |
 | `--base-url <URL>`<br>`VIRLING_BASE_URL` | `http://localhost:8080` | Public URL of this server, used in sign-in links and script snippets. |
 | `--secret-key <HEX>`<br>`VIRLING_SECRET_KEY` | unset | 64 hex characters used to encrypt provider keys. Unset: `secret.key` in the data folder. |
 | `--trust-proxy`<br>`VIRLING_TRUST_PROXY` | off | Read the client IP from `X-Forwarded-For`. |
