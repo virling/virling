@@ -1,3 +1,3 @@
 # p95 budgets in ms for `virling bench`, one "route ms" per line; a trailing * matches a prefix.
-# The target is 10 ms on a laptop; GitHub-hosted runners get 2.5x headroom.
-* 25
+# Every route answers in 10 ms, on GitHub-hosted runners too.
+* 10
