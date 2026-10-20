@@ -6,6 +6,7 @@
 
 - [Introduction](introduction.md)
 - [Quickstart](quickstart.md)
+- [Find which channel pays](guides/channel-revenue.md)
 - [Install](install/index.md)
   - [Docker](install/docker.md)
   - [Release binary](install/binary.md)
