@@ -871,6 +871,8 @@ a.ctl { text-decoration: none; }
 .vt-stats .s { font-size: 11px; color: var(--ink-3); }
 .vt-rev b { color: var(--revenue-text); }
 .vt-rev b.zero, .rev.zero { color: var(--ink-3); }
+.stack-check { display: flex; align-items: center; gap: 12px; margin-top: 12px; font-size: 13px; color: var(--ink-2); }
+.stack-check span { flex: 1; }
 .vt-exit b { font-size: 13px; }
 .vt { padding: 16px 16px 0; }
 .vtl { list-style: none; margin: 0; padding: 0; }

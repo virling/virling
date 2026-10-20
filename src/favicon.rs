@@ -59,7 +59,7 @@ pub fn is_public(ip: IpAddr) -> bool {
 }
 
 /// Resolves names with the system resolver and keeps only public addresses.
-struct PublicOnly;
+pub(crate) struct PublicOnly;
 
 impl Resolve for PublicOnly {
     fn resolve(&self, name: Name) -> Resolving {

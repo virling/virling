@@ -248,6 +248,32 @@ pub async fn script_step(
     })
 }
 
+/// The framework, payment providers and install status read from the site's live homepage.
+pub async fn stack(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+) -> Response {
+    let Some(site) = owned_site(&state, &account, &domain).await else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    if !crate::stack::take(&account.id) {
+        return StatusCode::TOO_MANY_REQUESTS.into_response();
+    }
+    match crate::stack::homepage(&crate::stack::client(), &site.domain).await {
+        Ok(html) => {
+            let s = crate::stack::detect(&html, &state.config.base_url);
+            Json(json!({
+                "platform": s.platform,
+                "providers": s.providers.iter().map(|p| p.as_str()).collect::<Vec<_>>(),
+                "installed": s.installed,
+            }))
+            .into_response()
+        }
+        Err(_) => Json(json!({ "error": "unreachable" })).into_response(),
+    }
+}
+
 pub async fn latest_event(
     State(state): State<AppState>,
     account: Account,
