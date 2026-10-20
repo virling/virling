@@ -44,14 +44,16 @@
         <h1>Traffic is a guess. <em>Revenue is a receipt.</em></h1>
         <p class="lead">Know which channel brings paying customers, and stop spending on the ones that don't. Virling joins every visit to the Stripe, Dodo Payments or Polar payment that followed. Open source: run it on your own server, or let us host it.</p>
         <div class="stack" data-wedge="selfhost" style="margin-top:6px">
+          <h2 class="apply-h">Apply for the beta. We're taking the first 100 teams.</h2>
+          <p class="muted" data-closes hidden>Applications close <span></span>.</p>
           <form class="waitlist" novalidate>
             <label class="sr" for="email">Email</label>
-            <div class="field"><input id="email" type="email" name="email" placeholder="you@company.com" autocomplete="email" required><button class="btn" type="submit">Join the waitlist</button></div>
+            <div class="field"><input id="email" type="email" name="email" placeholder="you@company.com" autocomplete="email" required><button class="btn" type="submit">Apply</button></div>
             <p class="form-error" role="alert"></p>
           </form>
           <div class="joined" role="status">
             <span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>
-            <span><b>You're in.</b> <span class="muted">We'll email you when the first build is ready.</span></span>
+            <span><b>Thanks.</b> <span class="muted">We read every application and reply personally within 2 days.</span></span>
           </div>
           <div><a class="btn light sm" href="/demo/" data-goal="demo_open">Live demo</a></div>
           <p class="muted">Self-hosting is free forever. Hosted is $19/month; the first 50 customers get 40% off for life ($11.40/month).</p>
@@ -162,14 +164,16 @@
 
   <section class="closer"><div class="wrap" data-wedge="selfhost">
     <h2>Stop posting where it feels busy.<br>Post where buyers come from.</h2>
+    <h2 class="apply-h">Apply for the beta. We're taking the first 100 teams.</h2>
+    <p class="muted" data-closes hidden>Applications close <span></span>.</p>
     <form class="waitlist" novalidate>
           <label class="sr" for="email-end">Email</label>
-          <div class="field"><input id="email-end" type="email" name="email" placeholder="you@company.com" autocomplete="email" required><button class="btn" type="submit">Join the waitlist</button></div>
+          <div class="field"><input id="email-end" type="email" name="email" placeholder="you@company.com" autocomplete="email" required><button class="btn" type="submit">Apply</button></div>
           <p class="form-error" role="alert"></p>
         </form>
         <div class="joined" role="status">
           <span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>
-          <span><b>You're in.</b> <span class="muted">We'll email you when the first build is ready.</span></span>
+          <span><b>Thanks.</b> <span class="muted">We read every application and reply personally within 2 days.</span></span>
         </div>
     <p class="muted">Self-hosting is free forever.</p>
   </div></section>
@@ -179,6 +183,32 @@
   <div class="links"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><span class="grow"></span><a href="/#how">How it works</a><a href="/#self-host">Self-host</a><a href="/agency" data-goal="agency_click">Agencies</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a></div>
   <div class="fine"><span>Open source under AGPLv3. Built by Stacklance Infotech LLP.</span><span>In development. Not launched yet.</span></div>
 </div></footer>
+<template id="apply-more">
+  <form class="apply-more" novalidate>
+    <p class="apply-ask"><b>Four quick questions.</b> <span class="muted">All optional. They help us pick the first teams.</span></p>
+    <label class="q"><span>Your site</span><input type="url" name="site" placeholder="https://yoursite.com" autocomplete="url"></label>
+    <fieldset class="q"><legend>Payments</legend><div class="opts">
+      <label><input type="radio" name="payments" value="stripe"><span>Stripe</span></label>
+      <label><input type="radio" name="payments" value="dodo"><span>Dodo</span></label>
+      <label><input type="radio" name="payments" value="polar"><span>Polar</span></label>
+      <label><input type="radio" name="payments" value="lemonsqueezy"><span>Lemon Squeezy</span></label>
+      <label><input type="radio" name="payments" value="other"><span>Other</span></label>
+    </div></fieldset>
+    <fieldset class="q"><legend>Monthly revenue</legend><div class="opts">
+      <label><input type="radio" name="revenue" value="none"><span>None yet</span></label>
+      <label><input type="radio" name="revenue" value="under_1k"><span>Under $1k</span></label>
+      <label><input type="radio" name="revenue" value="1k_10k"><span>$1k&ndash;10k</span></label>
+      <label><input type="radio" name="revenue" value="10k_plus"><span>$10k+</span></label>
+    </div></fieldset>
+    <fieldset class="q"><legend>Who's it for</legend><div class="opts">
+      <label><input type="radio" name="audience" value="self"><span>Myself</span></label>
+      <label><input type="radio" name="audience" value="company"><span>My company</span></label>
+      <label><input type="radio" name="audience" value="clients"><span>My clients (agency)</span></label>
+    </div></fieldset>
+    <div class="apply-actions"><button class="btn" type="submit">Send</button><button class="btn light" type="button" data-skip>Skip</button></div>
+    <p class="form-error" role="alert"></p>
+  </form>
+</template>
 <script defer src="/assets/site.js"></script>
 </body>
 </html>

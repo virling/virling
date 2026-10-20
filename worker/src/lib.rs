@@ -79,7 +79,7 @@ struct Signup {
     visitor_id: Option<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 struct Entry {
     email: String,
     wedge: String,
@@ -152,8 +152,8 @@ async fn join(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
     let kv = ctx.kv("WAITLIST")?;
     let key = format!("signup:{}:{email}", input.wedge);
     let visitor_id = visitor(input.visitor_id);
-    if kv.get(&key).text().await?.is_some() {
-        return json_status(json!({ "ok": true }), 200);
+    if let Some(entry) = kv.get(&key).json::<Entry>().await? {
+        return json_status(json!({ "ok": true, "token": entry.leave_token }), 200);
     }
     let leave_token = format!(
         "{}{}",
@@ -177,6 +177,23 @@ async fn join(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
         .await?;
     if let Some(kind) = analytics::waitlist_kind(&input.wedge) {
         record_conversion(&ctx, kind, visitor_id.as_deref(), None, None).await;
+    }
+    let added = async {
+        ctx.d1("DB")?
+            .prepare(
+                "INSERT OR IGNORE INTO applications (email, wedge, created_at) VALUES (?1, ?2, ?3)",
+            )
+            .bind(&[
+                JsValue::from_str(&email),
+                JsValue::from_str(&input.wedge),
+                JsValue::from_f64(Date::now().as_millis() as f64),
+            ])?
+            .run()
+            .await
+    }
+    .await;
+    if let Err(err) = added {
+        console_error!("application row not stored: {err}");
     }
 
     let copy = if input.wedge == "agency" {
@@ -210,7 +227,74 @@ async fn join(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
     if let Err(err) = sent {
         console_error!("waitlist confirmation email failed: {err}");
     }
+    json_status(json!({ "ok": true, "token": leave_token }), 200)
+}
+
+#[derive(Deserialize)]
+struct Answers {
+    token: String,
+    site: Option<String>,
+    payments: Option<String>,
+    revenue: Option<String>,
+    audience: Option<String>,
+}
+
+/// `value` when it is one of `allowed`, else None.
+fn one_of(value: Option<String>, allowed: &[&str]) -> Option<String> {
+    value.filter(|v| allowed.contains(&v.as_str()))
+}
+
+/// Wedge and email of a stored signup key, "signup:{wedge}:{email}".
+fn signup_of(key: &str) -> Option<(&str, &str)> {
+    key.strip_prefix("signup:")?.split_once(':')
+}
+
+/// The optional second step of a beta application, saved with its waitlist row.
+async fn apply(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
+    let Ok(input) = req.json::<Answers>().await else {
+        return json_status(json!({ "error": "Invalid request" }), 400);
+    };
+    let kv = ctx.kv("WAITLIST")?;
+    let key = match kv.get(&format!("leave:{}", input.token)).text().await? {
+        Some(key) if !input.token.is_empty() => key,
+        _ => return json_status(json!({ "error": "Apply with your email first." }), 404),
+    };
+    let Some((wedge, email)) = signup_of(&key) else {
+        return json_status(json!({ "error": "Apply with your email first." }), 404);
+    };
+    let text = |v: Option<String>| v.map_or(JsValue::NULL, |v| JsValue::from_str(&v));
+    ctx.d1("DB")?
+        .prepare(
+            "INSERT INTO applications (email, wedge, created_at, site, payments, revenue, audience)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+            ON CONFLICT (email, wedge) DO UPDATE SET site = excluded.site, payments = excluded.payments,
+                revenue = excluded.revenue, audience = excluded.audience",
+        )
+        .bind(&[
+            JsValue::from_str(email),
+            JsValue::from_str(wedge),
+            JsValue::from_f64(Date::now().as_millis() as f64),
+            text(clip(input.site.map(|s| s.trim().to_string()).filter(|s| !s.is_empty()), 200)),
+            text(one_of(input.payments, &["stripe", "dodo", "polar", "lemonsqueezy", "other"])),
+            text(one_of(input.revenue, &["none", "under_1k", "1k_10k", "10k_plus"])),
+            text(one_of(input.audience, &["self", "company", "clients"])),
+        ])?
+        .run()
+        .await?;
     json_status(json!({ "ok": true }), 200)
+}
+
+/// When beta applications close, from BETA_CLOSES; null hides the line.
+fn beta(_: Request, ctx: RouteContext<()>) -> Result<Response> {
+    let closes = ctx
+        .var("BETA_CLOSES")
+        .map(|v| v.to_string())
+        .ok()
+        .filter(|v| !v.trim().is_empty());
+    let mut res = Response::from_json(&json!({ "closes": closes }))?;
+    res.headers_mut()
+        .set("Cache-Control", "public, max-age=300")?;
+    Ok(res)
 }
 
 async fn send_email(api_key: &str, body: &serde_json::Value) -> Result<()> {
@@ -251,6 +335,13 @@ async fn leave(req: Request, ctx: RouteContext<()>) -> Result<Response> {
     {
         kv.delete(&key).await?;
         kv.delete(&format!("leave:{token}")).await?;
+        if let Some((wedge, email)) = signup_of(&key) {
+            ctx.d1("DB")?
+                .prepare("DELETE FROM applications WHERE email = ?1 AND wedge = ?2")
+                .bind(&[JsValue::from_str(email), JsValue::from_str(wedge)])?
+                .run()
+                .await?;
+        }
         removed = true;
     }
     let html = LeftPage { removed }
@@ -606,10 +697,31 @@ async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         .post_async("/api/event", collect)
         .options("/api/event", event_preflight)
         .post_async("/api/waitlist", join)
+        .post_async("/api/waitlist/apply", apply)
+        .get("/api/beta", beta)
         .get_async("/waitlist/leave", leave)
         .post_async("/api/preorder/session", preorder_session)
         .get_async("/api/preorder/status", preorder_status)
         .post_async("/api/dodo/webhook", dodo_webhook)
         .run(req, env)
         .await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn reads_applications_from_signup_keys() {
+        assert_eq!(
+            signup_of("signup:agency:a@b.co"),
+            Some(("agency", "a@b.co"))
+        );
+        assert_eq!(signup_of("leave:x"), None);
+        assert_eq!(
+            one_of(Some("stripe".into()), &["stripe"]).as_deref(),
+            Some("stripe")
+        );
+        assert_eq!(one_of(Some("paypal".into()), &["stripe"]), None);
+    }
 }
