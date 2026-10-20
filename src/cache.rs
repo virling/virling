@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use time::{OffsetDateTime, UtcOffset};
+use tokio::sync::broadcast;
 
 use crate::events::{Event, EventStore, LatestPageview, Payment};
 use crate::providers::Subscription;
@@ -30,6 +31,8 @@ struct State {
 pub struct Cached<S> {
     inner: S,
     state: Mutex<State>,
+    /// Announces each site whose data changed.
+    changes: broadcast::Sender<String>,
 }
 
 impl<S: EventStore> Cached<S> {
@@ -37,6 +40,7 @@ impl<S: EventStore> Cached<S> {
         Self {
             inner,
             state: Mutex::default(),
+            changes: broadcast::channel(256).0,
         }
     }
 
@@ -77,6 +81,7 @@ impl<S: EventStore> Cached<S> {
         for site in sites {
             *state.generations.entry(site.to_string()).or_default() += 1;
             state.entries.retain(|(s, _), _| s != site);
+            self.changes.send(site.to_string()).ok();
         }
     }
 }
@@ -157,8 +162,13 @@ impl<S: EventStore> EventStore for Cached<S> {
         self.inner.settled(site_id)
     }
 
-    fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64> {
-        self.inner.live_visitors(site_id)
+    fn generation(&self, site_id: &str) -> u64 {
+        let state = self.state.lock().unwrap();
+        state.generations.get(site_id).copied().unwrap_or(0)
+    }
+
+    fn subscribe(&self) -> Option<broadcast::Receiver<String>> {
+        Some(self.changes.subscribe())
     }
 
     fn insert_bots(&self, bots: &[(Event, &str)]) -> anyhow::Result<()> {

@@ -461,6 +461,7 @@ pub async fn collect(
             "goal" => "goal",
             "exit" => "exit",
             "leave" => "leave",
+            "ping" => "ping",
             _ => continue,
         };
         let name = match kind {
@@ -532,6 +533,14 @@ pub async fn collect(
         } else {
             None
         };
+        if bot.is_none() && kind == "leave" {
+            state.presence.gone(&site.id, &visitor_id);
+        } else if bot.is_none() {
+            state.presence.seen(&site.id, &visitor_id);
+        }
+        if kind == "ping" {
+            continue;
+        }
         let (session_id, back) = if bot.is_some() {
             (String::new(), false)
         } else if matches!(kind, "exit" | "leave") {

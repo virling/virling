@@ -1,6 +1,6 @@
 //! The Visitors, Latest payments and Customers who stay views.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use time::{Duration, OffsetDateTime, UtcOffset};
 
@@ -18,9 +18,8 @@ use crate::stats::{
 use crate::visitors::{VisitorFilter, VisitorRow};
 use crate::{icons, sites};
 
-/// Rows each list shows; live visitors are those seen in the last five minutes.
+/// Rows each list shows.
 const ROWS: usize = 6;
-const LIVE_SECS: i64 = 300;
 
 pub struct VisitorsData {
     pub(super) live: Vec<(VisitorRow, Activity)>,
@@ -31,6 +30,8 @@ pub struct VisitorsData {
     pub(super) paying: u64,
     /// When the lists were read.
     pub(super) now: OffsetDateTime,
+    /// Visitors with a visible tab of the site open.
+    pub(super) online: HashSet<String>,
 }
 
 fn with_activity(
@@ -59,7 +60,7 @@ pub fn load_visitors(
     p: &Period,
     tz: &str,
     now: OffsetDateTime,
-    _f: &Filter,
+    online: HashSet<String>,
 ) -> anyhow::Result<VisitorsData> {
     let offset = store.utc_offset(tz)?;
     let today = now.to_offset(offset).date();
@@ -72,7 +73,7 @@ pub fn load_visitors(
     let live: Vec<VisitorRow> = all
         .rows
         .iter()
-        .filter(|r| (now - r.last_seen).whole_seconds() <= LIVE_SECS)
+        .filter(|r| online.contains(&r.visitor_id))
         .take(ROWS)
         .cloned()
         .collect();
@@ -99,6 +100,7 @@ pub fn load_visitors(
             .map(|g| g.completions)
             .sum(),
         now,
+        online,
     })
 }
 
@@ -134,6 +136,7 @@ pub struct VisitorsView {
     pub(super) all_href: String,
 }
 
+#[allow(clippy::too_many_arguments)]
 fn vrow(
     r: &VisitorRow,
     a: &Activity,
@@ -142,9 +145,9 @@ fn vrow(
     domain: &str,
     now: OffsetDateTime,
     offset: UtcOffset,
+    online: bool,
 ) -> VRow {
     let who = names.get(&r.who);
-    let online = (now - r.last_seen).whole_seconds() <= LIVE_SECS;
     let (tag, tag_class) = if r.payments > 0 {
         (
             if tab == "customers" && online {
@@ -248,7 +251,18 @@ pub fn visitors_view(
     };
     let rows: Vec<VRow> = list
         .iter()
-        .map(|(r, a)| vrow(r, a, names, tab, domain, now, offset))
+        .map(|(r, a)| {
+            vrow(
+                r,
+                a,
+                names,
+                tab,
+                domain,
+                now,
+                offset,
+                v.online.contains(&r.visitor_id),
+            )
+        })
         .collect();
     let on_pricing = v
         .live

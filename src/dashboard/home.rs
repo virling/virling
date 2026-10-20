@@ -642,6 +642,7 @@ async fn page(
     goals::apply_saved(&mut rest, &funnels);
     let now = OffsetDateTime::now_utc();
     let tz = ctx.site.timezone.clone();
+    let online = state.presence.ids(&ctx.site.id);
     let data = blocking(move || {
         let mut f = Filter::default();
         for (k, v) in &wanted {
@@ -734,7 +735,9 @@ async fn page(
                 Data::Overview(Box::new(report), tabs, hours, avg, sources)
             }
             "goals" => Data::Goals(goals::load(&*store, &id, &pq, &f, &rest)?),
-            "visitors" => Data::Visitors(views::load_visitors(&*store, &id, &pq, &tz, now, &f)?),
+            "visitors" => {
+                Data::Visitors(views::load_visitors(&*store, &id, &pq, &tz, now, online)?)
+            }
             "payments" => Data::Payments(views::load_payments(
                 &*store,
                 &id,
@@ -1407,14 +1410,9 @@ pub async fn public(
     };
     let store = state.events.clone();
     let (sid, tz) = (id.clone(), timezone.clone());
-    let clock = blocking(move || {
-        Ok((
-            store.utc_offset(&tz)?,
-            store.first_event(&sid)?,
-            store.live_visitors(&sid)?,
-        ))
-    })
-    .await;
+    let live = state.presence.count(&id);
+    let clock =
+        blocking(move || Ok((store.utc_offset(&tz)?, store.first_event(&sid)?, live))).await;
     let (offset, first, live) = match clock {
         Ok(c) => c,
         Err(code) => return code.into_response(),

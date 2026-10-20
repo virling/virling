@@ -180,6 +180,7 @@ async fn load_in(
             .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
     let store = state.events.clone();
     let (id, tz) = (site.id.clone(), site.timezone.clone());
+    let live = state.presence.count(&id);
     let (offset, live, visitors, first, picked) = blocking(move || {
         let offset = store.utc_offset(&tz)?;
         let today = OffsetDateTime::now_utc().to_offset(offset).date();
@@ -204,7 +205,7 @@ async fn load_in(
             },
         };
         let visitors = store.overview(&id, &period)?.current.visitors;
-        Ok((offset, store.live_visitors(&id)?, visitors, first, picked))
+        Ok((offset, live, visitors, first, picked))
     })
     .await?;
     let icons: Vec<(String, i64, bool)> = sqlx::query_as(

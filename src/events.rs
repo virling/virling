@@ -98,8 +98,14 @@ pub trait EventStore: Send + Sync {
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>>;
     /// When the site's first event arrived.
     fn first_event(&self, site_id: &str) -> anyhow::Result<Option<OffsetDateTime>>;
-    /// Distinct visitors seen in the last five minutes.
-    fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64>;
+    /// Bumped on every write to the site; 0 for stores that do not count writes.
+    fn generation(&self, _site_id: &str) -> u64 {
+        0
+    }
+    /// Site ids as their data changes; None for stores that do not announce writes.
+    fn subscribe(&self) -> Option<tokio::sync::broadcast::Receiver<String>> {
+        None
+    }
     /// Stores events flagged as bots, with why, apart from visits and every metric.
     fn insert_bots(&self, bots: &[(Event, &str)]) -> anyhow::Result<()>;
     /// Bot visitors filtered in the last `days` days.
@@ -979,16 +985,6 @@ impl EventStore for DuckStore {
         let n: i64 = conn.query_row(
             "SELECT count(DISTINCT visitor_id) FROM bot_events WHERE site_id = ? AND ts > now() - to_days(CAST(? AS INTEGER))",
             params![site_id, days],
-            |r| r.get(0),
-        )?;
-        Ok(n as u64)
-    }
-
-    fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64> {
-        let conn = self.read()?;
-        let n: i64 = conn.query_row(
-            "SELECT count(DISTINCT visitor_id) FROM events WHERE site_id = ? AND kind <> 'leave' AND ts > now() - INTERVAL 5 MINUTE",
-            params![site_id],
             |r| r.get(0),
         )?;
         Ok(n as u64)
