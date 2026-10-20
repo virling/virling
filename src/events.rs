@@ -909,9 +909,8 @@ impl DuckStore {
 
     /// A reader that sees every first pageview written so far.
     fn read(&self) -> anyhow::Result<Reader<'_>> {
-        if self.pending.lock().unwrap().len() > 0 {
-            flush_touches(&mut self.touch_conn.lock().unwrap(), &self.pending)?;
-        }
+        // Taking the lock also waits for a background flush that already took the pending rows.
+        flush_touches(&mut self.touch_conn.lock().unwrap(), &self.pending)?;
         self.reader()
     }
 
