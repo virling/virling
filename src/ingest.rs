@@ -149,8 +149,8 @@ impl Sessions {
     }
 }
 
-/// Checkout and sign-in pages a visitor returns from in the middle of a visit.
-fn checkout_or_login(host: &str, path: &str) -> bool {
+/// Payment provider checkout pages.
+pub fn checkout(host: &str, path: &str) -> bool {
     matches!(
         host,
         "checkout.stripe.com"
@@ -162,10 +162,14 @@ fn checkout_or_login(host: &str, path: &str) -> bool {
             | "checkout.paddle.com"
             | "buy.paddle.com"
             | "sandbox-checkout.paddle.com"
-            | "accounts.google.com"
-            | "appleid.apple.com"
     ) || host.ends_with(".lemonsqueezy.com")
         || (host == "polar.sh" && path.starts_with("/checkout"))
+}
+
+/// Checkout and sign-in pages a visitor returns from in the middle of a visit.
+fn checkout_or_login(host: &str, path: &str) -> bool {
+    checkout(host, path)
+        || matches!(host, "accounts.google.com" | "appleid.apple.com")
         || (host == "github.com" && (path.starts_with("/login") || path.starts_with("/session")))
 }
 
