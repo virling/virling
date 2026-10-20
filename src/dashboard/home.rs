@@ -934,7 +934,7 @@ async fn page(
                 ),
                 None => step(
                     false,
-                    "Link checkout to visitors",
+                    "Link checkout",
                     "One line so every payment matches a visit".into(),
                     "How it works",
                     site_url("setup/checkout"),
