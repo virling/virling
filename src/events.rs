@@ -100,6 +100,10 @@ pub trait EventStore: Send + Sync {
     fn first_event(&self, site_id: &str) -> anyhow::Result<Option<OffsetDateTime>>;
     /// Distinct visitors seen in the last five minutes.
     fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64>;
+    /// Stores events flagged as bots, with why, apart from visits and every metric.
+    fn insert_bots(&self, bots: &[(Event, &str)]) -> anyhow::Result<()>;
+    /// Bot visitors filtered in the last `days` days.
+    fn bots_filtered(&self, site_id: &str, days: i64) -> anyhow::Result<u64>;
     /// Current UTC offset of IANA zone `tz`.
     fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset>;
 
@@ -519,6 +523,20 @@ impl DuckStore {
             ALTER TABLE events ADD COLUMN IF NOT EXISTS city VARCHAR;
             ALTER TABLE events ADD COLUMN IF NOT EXISTS host VARCHAR;
             ALTER TABLE events ADD COLUMN IF NOT EXISTS language VARCHAR;
+            CREATE TABLE IF NOT EXISTS bot_events (
+                site_id VARCHAR NOT NULL,
+                ts TIMESTAMPTZ NOT NULL,
+                visitor_id VARCHAR NOT NULL,
+                kind VARCHAR NOT NULL,
+                path VARCHAR NOT NULL,
+                referrer_host VARCHAR,
+                country VARCHAR,
+                device VARCHAR NOT NULL,
+                browser VARCHAR NOT NULL,
+                os VARCHAR,
+                language VARCHAR,
+                reason VARCHAR NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS payments (
                 site_id VARCHAR NOT NULL,
                 provider VARCHAR NOT NULL,
@@ -925,6 +943,45 @@ impl EventStore for DuckStore {
             |r| r.get(0),
         )?;
         Ok(us.map(stats::from_micros))
+    }
+
+    fn insert_bots(&self, bots: &[(Event, &str)]) -> anyhow::Result<()> {
+        if bots.is_empty() {
+            return Ok(());
+        }
+        let conn = self.conn.lock().unwrap();
+        let mut app = conn.appender("bot_events")?;
+        for (e, reason) in bots {
+            app.append_row(params![
+                e.site_id,
+                Value::Timestamp(
+                    TimeUnit::Microsecond,
+                    (e.ts.unix_timestamp_nanos() / 1000) as i64
+                ),
+                e.visitor_id,
+                e.kind,
+                e.path,
+                e.referrer_host,
+                e.country,
+                e.device,
+                e.browser,
+                e.os,
+                e.language,
+                reason,
+            ])?;
+        }
+        app.flush()?;
+        Ok(())
+    }
+
+    fn bots_filtered(&self, site_id: &str, days: i64) -> anyhow::Result<u64> {
+        let conn = self.read()?;
+        let n: i64 = conn.query_row(
+            "SELECT count(DISTINCT visitor_id) FROM bot_events WHERE site_id = ? AND ts > now() - to_days(CAST(? AS INTEGER))",
+            params![site_id, days],
+            |r| r.get(0),
+        )?;
+        Ok(n as u64)
     }
 
     fn live_visitors(&self, site_id: &str) -> anyhow::Result<u64> {

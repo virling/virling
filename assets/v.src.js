@@ -16,7 +16,7 @@
   }
 
   var send = (name, goal) => {
-    var body = JSON.stringify([{ n: name, u: L.href, r: ref, s: site, v: vid, w: screen.width, g: goal, l: n.language, k: nav }]);
+    var body = JSON.stringify([{ n: name, u: L.href, r: ref, s: site, v: vid, w: screen.width, g: goal, l: n.language, k: nav, b: n.webdriver || !n.languages?.length || void 0 }]);
     ref = nav = null;
     n.sendBeacon?.(endpoint, body) || fetch(endpoint, { method: "POST", body, keepalive: true });
   };

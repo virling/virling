@@ -307,6 +307,37 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn automated_browsers_are_kept_out_of_visits() {
+        let (_dir, state, store) = setup().await;
+        let linux = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
+        let page = |extra: &str, v: &str| {
+            format!(
+                r#"{{"n":"pageview","u":"https://example.com/","s":"example.com","v":"{v}"{extra}}}"#
+            )
+        };
+        for (extra, v) in [
+            (r#","w":1280,"b":true"#, "vplaywright1"),
+            (r#","w":0"#, "vnoscreen01"),
+        ] {
+            assert_eq!(
+                post(&state, &page(extra, v), linux).await,
+                StatusCode::ACCEPTED
+            );
+        }
+        assert!(store.dump().is_empty(), "flagged visits are not events");
+        let site: String = sqlx::query_scalar("SELECT id FROM sites WHERE domain = 'example.com'")
+            .fetch_one(&state.db)
+            .await
+            .unwrap();
+        assert_eq!(store.bots_filtered(&site, 30).unwrap(), 2);
+        assert_eq!(
+            post(&state, &page(r#","w":1280"#, "vlinuxdesk1"), linux).await,
+            StatusCode::ACCEPTED
+        );
+        assert_eq!(store.dump().len(), 1, "a normal Linux desktop visit counts");
+    }
+
+    #[tokio::test]
     async fn tagged_ai_source_stands_in_for_missing_referrer() {
         let (_dir, state, store) = setup().await;
         let body = r#"{"n":"pageview","u":"https://example.com/?utm_source=chatgpt.com","s":"example.com","w":800}"#;

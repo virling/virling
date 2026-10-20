@@ -161,6 +161,14 @@ impl<S: EventStore> EventStore for Cached<S> {
         self.inner.live_visitors(site_id)
     }
 
+    fn insert_bots(&self, bots: &[(Event, &str)]) -> anyhow::Result<()> {
+        self.inner.insert_bots(bots)
+    }
+
+    fn bots_filtered(&self, site_id: &str, days: i64) -> anyhow::Result<u64> {
+        self.inner.bots_filtered(site_id, days)
+    }
+
     fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset> {
         self.inner.utc_offset(tz)
     }
