@@ -84,6 +84,112 @@ pub(crate) type FastSet<K> = HashSet<K, std::hash::BuildHasherDefault<FastHasher
 /// Map by `key`.
 type Keyed<V> = FastMap<u64, V>;
 
+/// A session or visitor ID: a lowercase UUID packed in 16 bytes, a short ID inline, or a longer one on the heap.
+#[derive(Clone)]
+enum Id {
+    Uuid([u8; 16]),
+    Short(u8, [u8; 22]),
+    Long(Box<str>),
+}
+
+impl From<&str> for Id {
+    fn from(s: &str) -> Self {
+        if let Some(u) = pack_uuid(s) {
+            return Id::Uuid(u);
+        }
+        if s.len() <= 22 {
+            let mut b = [0; 22];
+            b[..s.len()].copy_from_slice(s.as_bytes());
+            return Id::Short(s.len() as u8, b);
+        }
+        Id::Long(s.into())
+    }
+}
+
+/// The 16 bytes of a lowercase, hyphenated UUID, or None for any other string.
+fn pack_uuid(s: &str) -> Option<[u8; 16]> {
+    let b = s.as_bytes();
+    if b.len() != 36 {
+        return None;
+    }
+    let (mut out, mut n) = ([0u8; 16], 0);
+    for (i, &c) in b.iter().enumerate() {
+        if matches!(i, 8 | 13 | 18 | 23) {
+            if c != b'-' {
+                return None;
+            }
+            continue;
+        }
+        let v = match c {
+            b'0'..=b'9' => c - b'0',
+            b'a'..=b'f' => c - b'a' + 10,
+            _ => return None,
+        };
+        out[n / 2] |= if n % 2 == 0 { v << 4 } else { v };
+        n += 1;
+    }
+    Some(out)
+}
+
+impl Id {
+    /// `f` of the ID as the string it was made from.
+    fn with<T>(&self, f: impl FnOnce(&str) -> T) -> T {
+        match self {
+            Id::Long(s) => f(s),
+            Id::Short(n, b) => f(std::str::from_utf8(&b[..*n as usize]).unwrap_or_default()),
+            Id::Uuid(u) => {
+                const HEX: &[u8; 16] = b"0123456789abcdef";
+                let (mut buf, mut j) = ([0u8; 36], 0);
+                for (i, byte) in u.iter().enumerate() {
+                    if matches!(i, 4 | 6 | 8 | 10) {
+                        buf[j] = b'-';
+                        j += 1;
+                    }
+                    buf[j] = HEX[(byte >> 4) as usize];
+                    buf[j + 1] = HEX[(byte & 15) as usize];
+                    j += 2;
+                }
+                f(std::str::from_utf8(&buf).unwrap_or_default())
+            }
+        }
+    }
+
+    fn key(&self) -> u64 {
+        self.with(key)
+    }
+}
+
+impl std::fmt::Display for Id {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.with(|s| f.write_str(s))
+    }
+}
+
+impl PartialEq for Id {
+    fn eq(&self, other: &Self) -> bool {
+        self.cmp(other).is_eq()
+    }
+}
+
+impl Eq for Id {}
+
+impl PartialOrd for Id {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Id {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match (self, other) {
+            // Packed bytes sort like the lowercase hex they came from.
+            (Id::Uuid(a), Id::Uuid(b)) => a.cmp(b),
+            (Id::Short(n, a), Id::Short(m, b)) => a[..*n as usize].cmp(&b[..*m as usize]),
+            _ => self.with(|a| other.with(|b| a.cmp(b))),
+        }
+    }
+}
+
 #[derive(Default)]
 struct Strings {
     ids: HashMap<Box<str>, u32>,
@@ -142,7 +248,7 @@ struct Session {
     pv: u32,
     /// Latest added goal, exit or leave of this session, or NONE.
     mark: u32,
-    id: Box<str>,
+    id: Id,
     /// Per column, `secs` of the visitor's touched session before this one with the same value, or 0.
     same: [u32; 15],
 }
@@ -200,7 +306,7 @@ pub(crate) const BROWSER: usize = 4;
 
 #[derive(Clone)]
 struct Visitor {
-    id: Box<str>,
+    id: Id,
     last_session: u32,
     /// Session holding the visitor's first pageview, or NONE.
     first_touch: u32,
@@ -732,7 +838,17 @@ impl SiteIndex {
                 * 4
             + (self.session_ids.capacity() + self.visitor_ids.capacity()) * 24
             + self.payments.capacity() * (std::mem::size_of::<Pay>() + 400)
-            + (self.sessions.len() + self.visitors.len()) * 48
+            + (self
+                .sessions
+                .iter()
+                .filter(|s| matches!(s.id, Id::Long(_)))
+                .count()
+                + self
+                    .visitors
+                    .iter()
+                    .filter(|v| matches!(v.id, Id::Long(_)))
+                    .count())
+                * 48
             + self
                 .strings
                 .names
@@ -2318,6 +2434,30 @@ pub(crate) mod tests {
             },
             one("channel", Some("no such channel")),
         ]
+    }
+
+    #[test]
+    fn ids_keep_their_strings_and_order() {
+        let ids = [
+            "4f9c2e1a-0b7d-4c3e-9a8f-1e2d3c4b5a69",
+            "4F9C2E1A-0B7D-4C3E-9A8F-1E2D3C4B5A69",
+            "vmh3k2x9a8b7c6d5e4f",
+            "a-visitor-id-that-is-longer-than-22",
+            "",
+        ];
+        for s in ids {
+            let id = Id::from(s);
+            assert_eq!(id.to_string(), s);
+            assert_eq!(id.key(), key(s));
+        }
+        assert!(matches!(Id::from(ids[0]), Id::Uuid(_)));
+        assert!(matches!(Id::from(ids[2]), Id::Short(..)));
+        let mut sorted: Vec<Id> = ids.iter().map(|s| Id::from(*s)).collect();
+        sorted.sort();
+        let mut want = ids.to_vec();
+        want.sort();
+        assert_eq!(sorted.iter().map(Id::to_string).collect::<Vec<_>>(), want);
+        assert_eq!(std::mem::size_of::<Id>(), 24);
     }
 
     #[test]

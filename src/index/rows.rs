@@ -376,7 +376,7 @@ impl SiteIndex {
                 let visitor = &self.visitors[sess.visitor as usize];
                 let channel = self.path_name(channel);
                 let referrer_host = self.name_of(referrer);
-                let vk = key(&visitor.id);
+                let vk = visitor.id.key();
                 GoalRow {
                     visitor_id: visitor.id.to_string(),
                     session_id: sess.id.to_string(),
@@ -450,7 +450,7 @@ impl SiteIndex {
             .then(|| &self.sessions[visitor.first_touch as usize].cols);
         let channel = first.map_or_else(|| "Direct".into(), |c| self.path_name(c[CHANNEL]));
         let referrer_host = first.and_then(|c| self.name_of(c[REFERRER]));
-        let owned = self.owned.get(&key(&visitor.id));
+        let owned = self.owned.get(&visitor.id.key());
         let pays = owned.map_or(&[][..], |o| &o[..]);
         let payer = pays.first().map(|&i| {
             let p = &self.payments[i as usize];
@@ -514,7 +514,7 @@ impl SiteIndex {
             if let Some(paid) = filter.paid {
                 let n = self
                     .owned
-                    .get(&key(&self.visitors[v as usize].id))
+                    .get(&self.visitors[v as usize].id.key())
                     .map_or(0, Vec::len);
                 if (n > 0) != paid {
                     continue;

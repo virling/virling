@@ -115,7 +115,7 @@ impl SiteIndex {
         let kept = self.kept.get_mut().unwrap();
         if self
             .pays_by_session
-            .contains_key(&key(&self.sessions[s as usize].id))
+            .contains_key(&self.sessions[s as usize].id.key())
         {
             kept.tpay.clear();
         }
@@ -207,9 +207,9 @@ impl SiteIndex {
     pub(super) fn page_viewed(&mut self, v: u32, s: u32) {
         let keys = [
             self.pays_by_visitor
-                .get(&key(&self.visitors[v as usize].id)),
+                .get(&self.visitors[v as usize].id.key()),
             self.pays_by_session
-                .get(&key(&self.sessions[s as usize].id)),
+                .get(&self.sessions[s as usize].id.key()),
         ];
         for i in keys.into_iter().flatten().flatten() {
             self.last_page_of[*i as usize].store(UNKNOWN, Ordering::Relaxed);
