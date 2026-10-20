@@ -1747,6 +1747,14 @@ impl Indexes {
             return Ok(());
         };
         let bytes = ix.bytes();
+        if bytes > self.cap / 5 * 4 {
+            tracing::warn!(
+                site_id,
+                mb = bytes / 1_000_000,
+                budget_mb = self.cap / 1_000_000,
+                "site index is over 80% of VIRLING_INDEX_MB; past it, reads fall back to SQL"
+            );
+        }
         let mut used: usize = slots
             .values()
             .map(|(s, _)| if let Slot::Ready(_, b) = s { *b } else { 0 })
