@@ -70,6 +70,12 @@ struct AccountPage {
     api_keys: Vec<KeyView>,
     /// A key just created, shown this once.
     new_key: Option<String>,
+    owner: bool,
+    team: crate::team::Team,
+    /// A message about the last team change, if any.
+    team_note: &'static str,
+    /// An email waiting for the owner to confirm a paid seat.
+    adding: String,
 }
 
 pub struct KeyView {
@@ -84,6 +90,8 @@ pub struct KeyView {
 pub struct SavedQuery {
     saved: Option<String>,
     error: Option<String>,
+    team: Option<String>,
+    add: Option<String>,
 }
 
 /// Agency branding on a site's client report; empty fields are left off.
@@ -242,8 +250,24 @@ async fn show_account(
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
-    let Ok(keys) = api::list_keys(&state.db, &account.id).await else {
+    let keys = if account.owner {
+        api::list_keys(&state.db, &account.id).await
+    } else {
+        Ok(Vec::new())
+    };
+    let (Ok(keys), Ok(team)) = (
+        keys,
+        crate::team::load(&state.db, &account.id, state.config.hosted).await,
+    ) else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    };
+    let team_note = match (q.saved.as_deref(), q.team.as_deref(), q.error.as_deref()) {
+        (Some("invite"), _, _) => "Invite sent. The link works for 7 days.",
+        (_, Some("email"), _) => "Enter a valid email.",
+        (_, Some("taken"), _) => "That person is already on the team or invited.",
+        (_, Some("limit"), _) => "The team is full on this plan.",
+        (_, _, Some("team")) => "Remove team members and invites before switching to Personal.",
+        _ => "",
     };
     let now = OffsetDateTime::now_utc();
     render(AccountPage {
@@ -267,6 +291,10 @@ async fn show_account(
         new_key,
         plan_saved: q.saved.as_deref() == Some("plan"),
         shell: ctx.shell,
+        owner: account.owner,
+        team,
+        team_note,
+        adding: q.add.unwrap_or_default(),
     })
 }
 
@@ -530,8 +558,27 @@ pub async fn save_plan(
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
+    if !account.owner {
+        return StatusCode::FORBIDDEN.into_response();
+    }
     if !matches!(input.account_type.as_str(), "personal" | "agency") {
         return StatusCode::BAD_REQUEST.into_response();
+    }
+    if input.account_type == "personal" {
+        let others: i64 = sqlx::query_scalar(
+            "SELECT (SELECT count(*) FROM members WHERE org_id = ?1) + (SELECT count(*) FROM invites WHERE org_id = ?1)",
+        )
+        .bind(&account.id)
+        .fetch_one(&state.db)
+        .await
+        .unwrap_or(1);
+        if others > 0 {
+            return Redirect::to(&format!(
+                "{}?error=team#team",
+                app_path(&ctx.site.domain, "account")
+            ))
+            .into_response();
+        }
     }
     if let Err(err) = sqlx::query("UPDATE accounts SET account_type = ? WHERE id = ?")
         .bind(&input.account_type)
@@ -606,6 +653,9 @@ pub async fn create_key(
     Path(domain): Path<String>,
     Form(input): Form<KeyInput>,
 ) -> Response {
+    if !account.owner {
+        return StatusCode::FORBIDDEN.into_response();
+    }
     if let Err(code) = load(&state, &account, &domain, "account").await {
         return code.into_response();
     }
@@ -629,6 +679,9 @@ pub async fn revoke_key(
     Path(domain): Path<String>,
     Form(input): Form<RevokeKeyInput>,
 ) -> Response {
+    if !account.owner {
+        return StatusCode::FORBIDDEN.into_response();
+    }
     let ctx = match load(&state, &account, &domain, "account").await {
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),

@@ -841,6 +841,7 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
         events_per_second: 200,
         base_url: "https://go.tallybird.app".into(),
         waitlist_from: String::new(),
+        hosted: false,
     };
     let state = AppState::new(
         config,

@@ -31,6 +31,8 @@ pub struct Config {
     pub base_url: String,
     /// Sender for waitlist emails; replies go to this address.
     pub waitlist_from: String,
+    /// The hosted service, where Agency teams can buy seats past the 3 included.
+    pub hosted: bool,
 }
 
 #[derive(Clone)]
@@ -219,6 +221,19 @@ pub fn router(state: AppState) -> Router {
             .route("/app/{domain}/settings/unshare", post(settings::revoke))
             .route("/app/{domain}/account", get(settings::account_page))
             .route("/app/{domain}/account/plan", post(settings::save_plan))
+            .route("/app/{domain}/account/team", post(crate::team::invite))
+            .route(
+                "/app/{domain}/account/team/revoke",
+                post(crate::team::revoke),
+            )
+            .route(
+                "/app/{domain}/account/team/remove",
+                post(crate::team::remove),
+            )
+            .route(
+                "/invite",
+                get(crate::team::confirm).post(crate::team::accept),
+            )
             .route("/app/{domain}/account/api-keys", post(settings::create_key))
             .route(
                 "/app/{domain}/account/api-keys/revoke",

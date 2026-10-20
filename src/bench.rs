@@ -170,6 +170,7 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         events_per_second: u32::MAX,
         base_url: "http://localhost".into(),
         waitlist_from: String::new(),
+        hosted: false,
     };
     let state = AppState::new(
         config,

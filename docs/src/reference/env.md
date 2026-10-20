@@ -7,6 +7,7 @@ Every setting can be given as a flag or an environment variable. See [CLI](cli.m
 | `VIRLING_DATA` | `./virling-data` | Folder for `virling.sqlite`, `events.duckdb` and `secret.key`. `/data` in the Docker image. |
 | `VIRLING_ADDR` | `0.0.0.0:8080` | Address and port to listen on. |
 | `VIRLING_APP` | `false` | Serve sign-in and the app, and run payment sync. |
+| `VIRLING_HOSTED` | `false` | Run as the hosted service, where Agency teams can add seats past the 3 included. Off, a team is capped at 3 users. |
 | `VIRLING_BASE_URL` | `http://localhost:8080` | Public URL, used in sign-in links and script snippets. No trailing slash needed. |
 | `VIRLING_SECRET_KEY` | unset | 64 hex characters that encrypt provider keys. Unset: `secret.key` in the data folder is used, and created if missing. |
 | `VIRLING_TRUST_PROXY` | `false` | Read the client IP from `X-Forwarded-For`, and trust Cloudflare's `cf-*` headers from a proxy on this host or a private network, such as `cloudflared`. Only behind a proxy you control. |

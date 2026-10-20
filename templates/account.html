@@ -10,6 +10,7 @@
   </div>
 </div>
 </section>
+{% if owner %}
 <section class="set-sec" id="plan">
 <div class="set-intro"><h2>Plan</h2><p class="muted">Applies to every site on your account. There is no billing yet, so you can switch any time.</p></div>
 <form class="card" method="post" action="/app/{{ shell.domain }}/account/plan">
@@ -24,6 +25,43 @@
   <div class="actions end"><button class="btn" type="submit">Save plan</button></div>
 </form>
 </section>
+{% endif %}
+<section class="set-sec" id="team">
+<div class="set-intro"><h2>Team</h2><p class="muted">Members see and manage every site on this account, except the plan, API keys and the team.</p></div>
+<div class="card">
+  <div class="card-head"><span class="muted">{{ team.seats }}</span></div>
+  {% if !team_note.is_empty() %}<div class="notice ok-note" role="status">{{ team_note }}</div>{% endif %}
+  {% for p in team.people %}
+  <div class="conn">
+    <div class="grow"><b>{{ p.email }}</b> <span class="muted small">{{ p.role }}</span></div>
+    {% if owner && !p.action.is_empty() %}
+    <form method="post" action="/app/{{ shell.domain }}/account/team/{{ p.action }}" data-confirm="{% if p.action == "remove" %}Remove {{ p.email }}? They are signed out right away.{% else %}Revoke the invite to {{ p.email }}?{% endif %}" data-confirm-ok="{% if p.action == "remove" %}Remove{% else %}Revoke invite{% endif %}">
+      <input type="hidden" name="id" value="{{ p.id }}">
+      <button class="btn ghost" type="submit">{% if p.action == "remove" %}Remove{% else %}Revoke{% endif %}</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endfor %}
+  {% if owner %}
+  {% if !adding.is_empty() %}
+  <form class="setting" method="post" action="/app/{{ shell.domain }}/account/team">
+    <div><b>Add a seat for {{ adding }}</b><span class="muted">Your plan includes {{ crate::team::INCLUDED }} users. Each extra seat is {{ crate::team::SEAT_PRICE }}. Nothing is charged yet.</span></div>
+    <div class="actions"><input type="hidden" name="email" value="{{ adding }}"><input type="hidden" name="confirm" value="1"><a class="btn ghost" href="/app/{{ shell.domain }}/account#team">Cancel</a><button class="btn" type="submit">Add seat and invite</button></div>
+  </form>
+  {% else if team.next == "upgrade" %}
+  <div class="setting"><div><b>Invite people</b><span class="muted">Teams are part of the Agency plan.</span></div><a class="btn secondary" href="#plan">Switch to Agency</a></div>
+  {% else if team.next == "capped" %}
+  <div class="setting"><div><b>Invite people</b><span class="muted">Teams larger than {{ crate::team::INCLUDED }} use the hosted Agency plan.</span></div><a class="btn secondary" href="https://virling.com/agency">Hosted Agency</a></div>
+  {% else %}
+  <form class="setting" method="post" action="/app/{{ shell.domain }}/account/team">
+    <div><b><label for="invite_email">Invite people</label></b><span class="muted">They get a sign-in link that works for 7 days.{% if team.next == "paid" %} Each seat past {{ crate::team::INCLUDED }} is {{ crate::team::SEAT_PRICE }}.{% endif %}</span></div>
+    <div class="actions"><input class="input" id="invite_email" name="email" type="email" maxlength="254" placeholder="name@agency.com" required><button class="btn" type="submit">Invite</button></div>
+  </form>
+  {% endif %}
+  {% endif %}
+</div>
+</section>
+{% if owner %}
 <section class="set-sec" id="api">
 <div class="set-intro"><h2>API keys</h2><p class="muted">A key lets a script, the CLI or an AI agent read the reports of every site on your account. Keys can't change anything.</p></div>
 <div class="card">
@@ -50,6 +88,7 @@
   </form>
 </div>
 </section>
+{% endif %}
 </div>
 <dialog class="confirm" id="confirm">
   <p data-confirm-text></p>
