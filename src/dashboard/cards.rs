@@ -295,7 +295,7 @@ pub fn language_icon(tag: &str) -> String {
     tag.split_once('-')
         .map(|(_, region)| icons::flag(region))
         .filter(|f| !f.is_empty())
-        .unwrap_or_else(|| icons::glyph("language", 16, "#6B717C"))
+        .unwrap_or_else(|| icons::glyph("language", 16, "var(--ink-2)"))
 }
 
 /// ISO 639-1 codes of common browser languages and their English names.
@@ -404,7 +404,7 @@ fn item(tab: Tab, r: &BreakdownRow) -> Item {
                                 "search"
                             },
                             16,
-                            "#6B717C",
+                            "var(--ink-2)",
                         ),
                         k.clone(),
                         String::new(),
@@ -412,7 +412,7 @@ fn item(tab: Tab, r: &BreakdownRow) -> Item {
                         vec![(param, k.clone())],
                     ),
                     None => (
-                        icons::glyph("globe", 16, "#6B717C"),
+                        icons::glyph("globe", 16, "var(--ink-2)"),
                         none.into(),
                         none_sub.into(),
                         false,
@@ -429,7 +429,7 @@ fn item(tab: Tab, r: &BreakdownRow) -> Item {
                 };
                 let param = if tab == Tab::Before { "viewed" } else { "page" };
                 (
-                    icons::glyph("page", 16, "#6B717C"),
+                    icons::glyph("page", 16, "var(--ink-2)"),
                     path.clone(),
                     sub,
                     true,
@@ -528,7 +528,7 @@ fn kid_items(tab: Tab, parent: &Item, kids: &[BreakdownRow]) -> Vec<Item> {
                     }
                 }
                 Tab::Country if !rest.is_empty() => (
-                    icons::glyph("pin", 16, "#6B717C"),
+                    icons::glyph("pin", 16, "var(--ink-2)"),
                     rest.to_string(),
                     vec![("city", rest.to_string())],
                 ),

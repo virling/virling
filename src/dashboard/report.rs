@@ -270,7 +270,7 @@ impl Src {
     fn icon(&self, size: u32) -> (String, String) {
         if self.folded > 0 {
             return (
-                icons::glyph("globe", size, "#4B515C"),
+                icons::glyph("globe", size, "var(--ink-2)"),
                 "/assets/icons/glyph-globe.svg".into(),
             );
         }
@@ -278,7 +278,7 @@ impl Src {
             Some(h) => (icons::source(h, size), icons::source_src(h)),
             None => (
                 icons::channel_glyph(&self.channel)
-                    .map(|g| icons::glyph(g, size, "#4B515C"))
+                    .map(|g| icons::glyph(g, size, "var(--ink-2)"))
                     .unwrap_or_else(|| icons::source(&self.channel, size)),
                 icons::source_src(&self.channel),
             ),

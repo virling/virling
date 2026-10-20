@@ -1,7 +1,7 @@
 {% import "_d3.html" as d3 %}
 {% if let Some((lead, fix)) = insight %}
 <section class="d3-card d3-insight">
-  <span class="bulb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span>
+  <span class="bulb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span>
   <div><b>{{ lead }}</b>{% if !fix.is_empty() %}<span>{{ fix }}</span>{% endif %}</div>
 </section>
 {% endif %}

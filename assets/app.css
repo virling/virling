@@ -488,8 +488,8 @@ a.ctl { text-decoration: none; }
 .d3-step { display: flex; align-items: center; gap: 10px; padding-top: 12px; border-top: 3px solid var(--rule-2); }
 .d3-step:has(.mark.done) { border-top-color: var(--up); }
 .d3-step .d3-btn { flex: none; }
-.d3-step .mark { width: 26px; height: 26px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #f0f0eb; color: var(--ink-2); font-size: 13px; font-weight: 700; }
-.d3-step .mark.done { background: var(--up); color: #fff; }
+.d3-step .mark { width: 22px; height: 22px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 1.6px solid var(--ink-3); color: var(--ink-2); font-size: 12px; font-weight: 600; }
+.d3-step .mark.done { border-color: var(--up); color: var(--up); }
 .d3-step .txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
 .d3-insight { padding: 16px 20px; display: flex; gap: 14px; align-items: flex-start; }
 .d3-insight .bulb { width: 32px; height: 32px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px; background: #fdf0ea; color: var(--revenue-text); }
