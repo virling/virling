@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 use std::path::Path;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Condvar, Mutex};
 
 use duckdb::types::{TimeUnit, Value};
 use duckdb::{Connection, named_params, params};
-use time::{OffsetDateTime, UtcOffset};
+use time::{Duration, OffsetDateTime, UtcOffset};
 
 use crate::channel::Channel;
 use crate::index::{self, Indexes, SiteIndex, Zones, goals, read, rows};
@@ -307,6 +308,11 @@ pub struct LatestPageview {
 
 pub struct DuckStore {
     conn: Mutex<Connection>,
+    /// Writes `touches` and `first_touches` apart from events; writes that include touch rows hold it too.
+    touch_conn: Arc<Mutex<Connection>>,
+    pending: Arc<Mutex<Pending>>,
+    /// Set while a flush of `pending` is scheduled.
+    flush_queued: Arc<AtomicBool>,
     index: Arc<Indexes>,
     zones: Zones,
     /// Idle read connections, so reads never wait on each other or on writes.
@@ -402,10 +408,12 @@ const TOUCH_TABLE: &str = "site_id VARCHAR NOT NULL, session_id VARCHAR NOT NULL
     channel VARCHAR NOT NULL, country VARCHAR, device VARCHAR NOT NULL, browser VARCHAR NOT NULL,
     os VARCHAR, region VARCHAR, city VARCHAR, host VARCHAR, language VARCHAR";
 
+/// The touch tables and their keys.
+const TOUCH_TABLES: [(&str, &str); 2] =
+    [("touches", "session_id"), ("first_touches", "visitor_id")];
+
 /// Keeps the earlier (ts, path) pageview of a key in `touches` or `first_touches`.
-fn upsert_touches(table: &str, key: &str, rows: usize) -> String {
-    let n = TOUCH_COLUMNS.split(',').count();
-    let row = format!("({})", vec!["?"; n].join(", "));
+fn keep_earlier(table: &str, key: &str) -> String {
     let set = TOUCH_COLUMNS
         .split(',')
         .map(str::trim)
@@ -413,10 +421,18 @@ fn upsert_touches(table: &str, key: &str, rows: usize) -> String {
         .collect::<Vec<_>>()
         .join(", ");
     format!(
-        "INSERT INTO {table} ({TOUCH_COLUMNS}) VALUES {}
-        ON CONFLICT (site_id, {key}) DO UPDATE SET {set}
-        WHERE excluded.ts < {table}.ts OR (excluded.ts = {table}.ts AND excluded.path < {table}.path)",
-        vec![row; rows].join(", ")
+        "ON CONFLICT (site_id, {key}) DO UPDATE SET {set}
+        WHERE excluded.ts < {table}.ts OR (excluded.ts = {table}.ts AND excluded.path < {table}.path)"
+    )
+}
+
+fn upsert_touches(table: &str, key: &str, rows: usize) -> String {
+    let n = TOUCH_COLUMNS.split(',').count();
+    let row = format!("({})", vec!["?"; n].join(", "));
+    format!(
+        "INSERT INTO {table} ({TOUCH_COLUMNS}) VALUES {} {}",
+        vec![row; rows].join(", "),
+        keep_earlier(table, key)
     )
 }
 
@@ -485,6 +501,68 @@ fn write_touches(
     }
     Ok(())
 }
+
+/// First pageviews stored in `events` but not yet in `touches` and `first_touches`, per table: new keys, then earlier ones.
+#[derive(Default, Clone)]
+struct Pending {
+    new: [Vec<Event>; 2],
+    earlier: [Vec<Event>; 2],
+}
+
+impl Pending {
+    fn len(&self) -> usize {
+        self.new.iter().chain(&self.earlier).map(Vec::len).sum()
+    }
+
+    fn extend(&mut self, other: Pending) {
+        for (t, (new, earlier)) in other.new.into_iter().zip(other.earlier).enumerate() {
+            self.new[t].extend(new);
+            self.earlier[t].extend(earlier);
+        }
+    }
+
+    /// Appends the new keys, then upserts the earliest of the earlier pageviews per key.
+    fn write(&self, tx: &duckdb::Transaction) -> anyhow::Result<()> {
+        for (t, (table, key)) in TOUCH_TABLES.into_iter().enumerate() {
+            if !self.new[t].is_empty() {
+                let mut app = tx.appender(table)?;
+                for e in &self.new[t] {
+                    app.append_row(touch_values(e))?;
+                }
+                app.flush()?;
+            }
+            let earlier = if t == 0 {
+                earliest(&self.earlier[t], |e| &e.session_id)
+            } else {
+                earliest(&self.earlier[t], |e| &e.visitor_id)
+            };
+            write_touches(tx, table, key, &earlier)?;
+        }
+        Ok(())
+    }
+}
+
+/// Writes the pending first pageviews on `conn`, the store's touch connection, while events keep arriving.
+fn flush_touches(conn: &mut Connection, pending: &Mutex<Pending>) -> anyhow::Result<()> {
+    let batch = std::mem::take(&mut *pending.lock().unwrap());
+    if batch.len() == 0 {
+        return Ok(());
+    }
+    let written = (|| {
+        let tx = conn.transaction()?;
+        batch.write(&tx)?;
+        Ok(tx.commit()?)
+    })();
+    if written.is_err() {
+        pending.lock().unwrap().extend(batch);
+    }
+    written
+}
+
+/// Live writes leave first pageviews pending this long, so a burst of events shares one write of them.
+const FLUSH_AFTER: std::time::Duration = std::time::Duration::from_millis(20);
+/// Most first pageviews left pending before a write includes them.
+const MAX_PENDING: usize = 1000;
 
 impl DuckStore {
     pub fn open(path: &Path) -> anyhow::Result<Self> {
@@ -604,6 +682,17 @@ impl DuckStore {
                 COMMIT;"
             ))?;
         }
+        // Live writes leave their newest first pageviews pending in memory; fold the last two days back in.
+        for (table, key) in TOUCH_TABLES {
+            conn.execute_batch(&format!(
+                "INSERT INTO {table} ({TOUCH_COLUMNS}) SELECT * FROM (
+                    SELECT {TOUCH_COLUMNS} FROM events WHERE kind = 'pageview'
+                        AND ts >= (SELECT max(ts) FROM events) - INTERVAL 2 DAY
+                    QUALIFY row_number() OVER (PARTITION BY site_id, {key} ORDER BY ts, path) = 1
+                ) {}",
+                keep_earlier(table, key)
+            ))?;
+        }
         conn.execute(MARK_RENEWALS, params![None::<&str>])?;
         conn.execute(
             "UPDATE payments SET amount_usd = round(amount_usd, 2) WHERE amount_usd <> round(amount_usd, 2)",
@@ -614,7 +703,10 @@ impl DuckStore {
             tracing::info!(changed, "moved stored visits to their current channel");
         }
         Ok(Self {
+            touch_conn: Arc::new(Mutex::new(conn.try_clone()?)),
             conn: Mutex::new(conn),
+            pending: Arc::default(),
+            flush_queued: Arc::default(),
             index: Arc::new(Indexes::new(index_cap())),
             zones: Zones::default(),
             readers: Mutex::default(),
@@ -632,13 +724,10 @@ impl DuckStore {
         site_id: &str,
         read: impl FnOnce(&SiteIndex, &Zones, &Connection) -> anyhow::Result<Option<T>>,
     ) -> anyhow::Result<Option<T>> {
-        let Some(ix) = self
-            .index
-            .get(site_id, || Ok(self.conn.lock().unwrap().try_clone()?))?
-        else {
+        let Some(ix) = self.index.get(site_id, || self.snapshot_conn())? else {
             return Ok(None);
         };
-        let conn = self.read()?;
+        let conn = self.reader()?;
         let ix = ix.read().unwrap();
         read(&ix, &self.zones, &conn)
     }
@@ -646,14 +735,14 @@ impl DuckStore {
     /// Reads the site's index now instead of in the background.
     #[cfg(test)]
     pub fn load_index(&self, site_id: &str) {
-        let conn = self.conn.lock().unwrap().try_clone().unwrap();
+        let conn = self.snapshot_conn().unwrap();
         self.index.load(site_id, &conn).unwrap();
     }
 
     #[cfg(test)]
     pub fn index_for_test(&self, site_id: &str) -> Arc<std::sync::RwLock<SiteIndex>> {
         self.index
-            .get(site_id, || Ok(self.conn.lock().unwrap().try_clone()?))
+            .get(site_id, || self.snapshot_conn())
             .unwrap()
             .expect("index loaded")
     }
@@ -663,10 +752,81 @@ impl DuckStore {
         self.read().unwrap()
     }
 
-    /// Writes events and their first pageviews in one transaction, then adds them to loaded indexes.
-    fn write_events(&self, events: &[Event]) -> anyhow::Result<()> {
+    /// A connection for reading the index from, after pending first pageviews are written so its snapshot has them.
+    fn snapshot_conn(&self) -> anyhow::Result<Connection> {
+        let conn = self.conn.lock().unwrap();
+        flush_touches(&mut self.touch_conn.lock().unwrap(), &self.pending)?;
+        Ok(conn.try_clone()?)
+    }
+
+    /// Writes the pending first pageviews soon, once a burst of events is likely over.
+    fn flush_later(&self) {
+        if self.flush_queued.swap(true, Ordering::AcqRel) {
+            return;
+        }
+        // Weak, so a dropped store closes its database; reopening it folds anything pending back in.
+        let (conn, pending, queued) = (
+            Arc::downgrade(&self.touch_conn),
+            Arc::downgrade(&self.pending),
+            self.flush_queued.clone(),
+        );
+        std::thread::spawn(move || {
+            std::thread::sleep(FLUSH_AFTER);
+            queued.store(false, Ordering::Release);
+            let (Some(conn), Some(pending)) = (conn.upgrade(), pending.upgrade()) else {
+                return;
+            };
+            if let Err(err) = flush_touches(&mut conn.lock().unwrap(), &pending) {
+                tracing::error!(%err, "writing first pageviews failed");
+            }
+        });
+    }
+
+    /// Writes events in one transaction, then adds them to loaded indexes; returns whether their first pageviews were left pending.
+    fn write_events(&self, events: &[Event]) -> anyhow::Result<bool> {
         let _gate = self.index.gate();
         let mut conn = self.conn.lock().unwrap();
+        // A loaded index knows every stored first pageview: append new keys, upsert only earlier ones.
+        let mut ready: HashMap<&str, Option<Arc<std::sync::RwLock<SiteIndex>>>> = HashMap::new();
+        let mut fresh = Pending::default();
+        for (t, by_session) in [true, false].into_iter().enumerate() {
+            let rows = if by_session {
+                earliest(events, |e| &e.session_id)
+            } else {
+                earliest(events, |e| &e.visitor_id)
+            };
+            for e in rows {
+                let ix = ready
+                    .entry(&e.site_id)
+                    .or_insert_with(|| self.index.ready(&e.site_id));
+                let Some(ix) = ix else {
+                    fresh.earlier[t].push(e.clone());
+                    continue;
+                };
+                let ix = ix.read().unwrap();
+                let id = if by_session {
+                    &e.session_id
+                } else {
+                    &e.visitor_id
+                };
+                match ix.first_view(by_session, id) {
+                    None => fresh.new[t].push(e.clone()),
+                    Some((ts, path))
+                        if (e.ts, e.path.as_str()) < (stats::from_micros(ts), path) =>
+                    {
+                        fresh.earlier[t].push(e.clone())
+                    }
+                    Some(_) => {}
+                }
+            }
+        }
+        // Live events leave their first pageviews pending unless an index is being read from a snapshot.
+        let live = OffsetDateTime::now_utc() - Duration::hours(1);
+        let defer = events.iter().all(|e| e.ts > live)
+            && self.pending.lock().unwrap().len() + fresh.len() <= MAX_PENDING
+            && !self.index.loading();
+        // Writing touch rows here waits out a flush, so both never write the same key.
+        let touches = (!defer).then(|| self.touch_conn.lock().unwrap());
         let tx = conn.transaction()?;
         {
             let mut app = tx.appender("events")?;
@@ -701,58 +861,33 @@ impl DuckStore {
             }
             app.flush()?;
         }
-        // A loaded index knows every stored first pageview: append new keys, upsert only earlier ones.
-        let mut ready: HashMap<&str, Option<Arc<std::sync::RwLock<SiteIndex>>>> = HashMap::new();
-        for (table, key, by_session) in [
-            ("touches", "session_id", true),
-            ("first_touches", "visitor_id", false),
-        ] {
-            let rows = if by_session {
-                earliest(events, |e| &e.session_id)
-            } else {
-                earliest(events, |e| &e.visitor_id)
-            };
-            let (mut new, mut earlier) = (Vec::new(), Vec::new());
-            for e in rows {
-                let ix = ready
-                    .entry(&e.site_id)
-                    .or_insert_with(|| self.index.ready(&e.site_id));
-                let Some(ix) = ix else {
-                    earlier.push(e);
-                    continue;
-                };
-                let ix = ix.read().unwrap();
-                let id = if by_session {
-                    &e.session_id
-                } else {
-                    &e.visitor_id
-                };
-                match ix.first_view(by_session, id) {
-                    None => new.push(e),
-                    Some((ts, path))
-                        if (e.ts, e.path.as_str()) < (stats::from_micros(ts), path) =>
-                    {
-                        earlier.push(e)
-                    }
-                    Some(_) => {}
-                }
-            }
-            if !new.is_empty() {
-                let mut app = tx.appender(table)?;
-                for e in new {
-                    app.append_row(touch_values(e))?;
-                }
-                app.flush()?;
-            }
-            write_touches(&tx, table, key, &earlier)?;
+        if defer {
+            tx.commit()?;
+            self.pending.lock().unwrap().extend(fresh);
+        } else {
+            let mut pending = self.pending.lock().unwrap();
+            let mut all = pending.clone();
+            all.extend(fresh);
+            all.write(&tx)?;
+            tx.commit()?;
+            *pending = Pending::default();
         }
-        tx.commit()?;
+        drop(touches);
         self.index.apply(events);
         drop(conn);
-        Ok(())
+        Ok(defer)
     }
 
+    /// A reader that sees every first pageview written so far.
     fn read(&self) -> anyhow::Result<Reader<'_>> {
+        if self.pending.lock().unwrap().len() > 0 {
+            flush_touches(&mut self.touch_conn.lock().unwrap(), &self.pending)?;
+        }
+        self.reader()
+    }
+
+    /// A reader for queries that do not read `touches` or `first_touches`.
+    fn reader(&self) -> anyhow::Result<Reader<'_>> {
         let pooled = self.readers.lock().unwrap().pop();
         let conn = match pooled {
             Some(conn) => conn,
@@ -787,6 +922,10 @@ impl EventStore for DuckStore {
                 q.next += 1;
                 drop(q);
                 let result = self.write_events(&batch);
+                if matches!(result, Ok(true)) {
+                    self.flush_later();
+                }
+                let result = result.map(|_| ());
                 q = self.queue.lock().unwrap();
                 q.writing = false;
                 q.done = mine;
@@ -991,14 +1130,12 @@ impl EventStore for DuckStore {
     }
 
     fn settled(&self, site_id: &str) -> bool {
-        let get = self
-            .index
-            .get(site_id, || Ok(self.conn.lock().unwrap().try_clone()?));
+        let get = self.index.get(site_id, || self.snapshot_conn());
         get.is_ok_and(|ix| ix.is_some()) || self.index.unfit(site_id)
     }
 
     fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset> {
-        let conn = self.read()?;
+        let conn = self.reader()?;
         let secs: i64 = conn.query_row(
             "SELECT (epoch_us(timezone(?, now())) - epoch_us(timezone('UTC', now()))) // 1000000",
             params![tz],
@@ -1018,6 +1155,7 @@ impl EventStore for DuckStore {
             "unknown attribution model {model}"
         );
         let mut conn = self.conn.lock().unwrap();
+        flush_touches(&mut self.touch_conn.lock().unwrap(), &self.pending)?;
         let tx = conn.transaction()?;
         tx.execute(
             "DELETE FROM attribution WHERE site_id = ?",
@@ -1659,5 +1797,35 @@ mod channel_tests {
             )
             .unwrap();
         assert_eq!(touched, "Communities");
+    }
+
+    #[test]
+    fn pending_first_pageviews_are_read_and_survive_a_restart() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("e.duckdb");
+        let now = OffsetDateTime::now_utc();
+        let mut events = crate::demo::seed("s", now).0;
+        events.retain(|e| e.ts > now - Duration::minutes(30));
+        let sessions: std::collections::HashSet<_> = events
+            .iter()
+            .filter(|e| e.kind == "pageview")
+            .map(|e| &e.session_id)
+            .collect();
+        assert!(!sessions.is_empty());
+        let touches = |conn: &Connection| -> usize {
+            conn.query_row("SELECT count(*) FROM touches", [], |r| r.get::<_, i64>(0))
+                .unwrap() as usize
+        };
+        let store = DuckStore::open(&path).unwrap();
+        store.insert_events(&events).unwrap();
+        assert_eq!(touches(&store.read().unwrap()), sessions.len());
+        drop(store);
+        let other = dir.path().join("f.duckdb");
+        let store = DuckStore::open(&other).unwrap();
+        store.insert_events(&events).unwrap();
+        assert!(store.pending.lock().unwrap().len() > 0);
+        drop(store);
+        let store = DuckStore::open(&other).unwrap();
+        assert_eq!(touches(&store.conn.lock().unwrap()), sessions.len());
     }
 }

@@ -1828,6 +1828,15 @@ impl Indexes {
         }
     }
 
+    /// Whether any site's index is being read from a snapshot.
+    pub fn loading(&self) -> bool {
+        self.slots
+            .lock()
+            .unwrap()
+            .values()
+            .any(|(s, _)| matches!(s, Slot::Loading(_)))
+    }
+
     pub fn unfit(&self, site_id: &str) -> bool {
         self.cap == 0
             || matches!(
