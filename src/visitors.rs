@@ -32,6 +32,10 @@ pub struct VisitorFilter {
     /// Some(true) clicked out to another site, Some(false) left from a page.
     pub clicked_out: Option<bool>,
     pub paid: Option<bool>,
+    /// Lowercase text found in the landing or exit page, the first referrer or the channel.
+    pub search: Option<String>,
+    /// "visits", "pages" or "revenue", most first; otherwise most recently seen first.
+    pub sort: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -44,11 +48,15 @@ pub struct VisitorRow {
     pub visits: u64,
     pub pageviews: u64,
     pub last_seen: OffsetDateTime,
-    /// Last page seen in the range.
+    /// First and last page seen in the range.
+    pub landing_page: Option<String>,
     pub exit_page: Option<String>,
     /// Outbound link clicked after that page, as host and path.
     pub exit_link: Option<String>,
     pub goals: Vec<String>,
+    /// Viewed a /pricing page, or clicked out to a payment checkout, in the range.
+    pub pricing: bool,
+    pub checkout: bool,
     /// Lifetime payments and net USD.
     pub payments: u64,
     pub revenue_usd: f64,
@@ -173,6 +181,12 @@ impl Timeline {
     }
 }
 
+/// True when an exit link, stored as host and path, opens a payment checkout.
+pub(crate) fn checkout_link(link: &str) -> bool {
+    let (host, path) = link.split_once('/').unwrap_or((link, ""));
+    crate::ingest::checkout(host, &format!("/{path}"))
+}
+
 pub(crate) fn visitor_list(
     conn: &Connection,
     site_id: &str,
@@ -201,6 +215,18 @@ pub(crate) fn visitor_list(
         Some(false) => wheres.push("coalesce(pd.n, 0) = 0"),
         None => {}
     }
+    if filter.search.is_some() {
+        wheres.push(
+            "(contains(lower(coalesce(per.landing_page, '')), $q) OR contains(lower(coalesce(per.exit_page, '')), $q)
+             OR contains(lower(coalesce(f.referrer_host, '')), $q) OR contains(lower(coalesce(f.channel, 'Direct')), $q))",
+        );
+    }
+    let order = match filter.sort.as_deref() {
+        Some("visits") => "visits DESC, ",
+        Some("pages") => "pageviews DESC, ",
+        Some("revenue") => "round(revenue, 2) DESC, ",
+        _ => "",
+    };
     let with = format!(
         "WITH {BOUNDS},
         ev AS (
@@ -212,6 +238,9 @@ pub(crate) fn visitor_list(
                 max(ts) AS last_seen,
                 max(ts) FILTER (WHERE kind = 'pageview') AS last_pv,
                 arg_max(path, ts) FILTER (WHERE kind = 'pageview') AS exit_page,
+                first(path ORDER BY ts, path) FILTER (WHERE kind = 'pageview') AS landing_page,
+                coalesce(bool_or(kind = 'pageview' AND starts_with(path, '/pricing')), false) AS pricing,
+                to_json(coalesce(list(name) FILTER (WHERE kind = 'exit'), []))::VARCHAR AS exits,
                 list_sort(list_distinct(list(name) FILTER (WHERE kind = 'goal'))) AS goals
             FROM ev GROUP BY visitor_id
         ),
@@ -240,7 +269,8 @@ pub(crate) fn visitor_list(
                 epoch_us(per.last_seen) AS last_us, per.exit_page, o.exit_link,
                 to_json(coalesce(per.goals, []))::VARCHAR AS goals,
                 coalesce(pd.n, 0) AS n, coalesce(pd.revenue, 0) AS revenue,
-                coalesce(pd.payer, 'v:' || per.visitor_id) AS who
+                coalesce(pd.payer, 'v:' || per.visitor_id) AS who,
+                per.landing_page, per.pricing, per.exits
             FROM per
             LEFT JOIN firsts f USING (visitor_id)
             LEFT JOIN outs o USING (visitor_id)
@@ -267,6 +297,9 @@ pub(crate) fn visitor_list(
     if let Some(g) = &filter.goal {
         params.push(("goal", g));
     }
+    if let Some(q) = &filter.search {
+        params.push(("q", q));
+    }
     let total: i64 = conn.query_row(
         &format!("{with} SELECT count(*) FROM vis"),
         params.as_slice(),
@@ -275,13 +308,15 @@ pub(crate) fn visitor_list(
     params.push(("limit", &limit));
     params.push(("offset", &offset));
     let mut stmt = conn.prepare(&format!(
-        "{with} SELECT * FROM vis ORDER BY last_us DESC, visitor_id LIMIT $limit OFFSET $offset"
+        "{with} SELECT * FROM vis ORDER BY {order}last_us DESC, visitor_id LIMIT $limit OFFSET $offset"
     ))?;
     let rows = stmt.query_map(params.as_slice(), |r| {
         let channel: Option<String> = r.get(1)?;
         let channel = channel.unwrap_or_else(|| "Direct".into());
         let referrer_host: Option<String> = r.get(2)?;
         let goals: String = r.get(8)?;
+        let exits: String = r.get(14)?;
+        let exits: Vec<String> = serde_json::from_str(&exits).unwrap_or_default();
         Ok(VisitorRow {
             visitor_id: r.get(0)?,
             source: source(referrer_host.as_deref(), &channel),
@@ -290,9 +325,12 @@ pub(crate) fn visitor_list(
             visits: r.get::<_, i64>(3)? as u64,
             pageviews: r.get::<_, i64>(4)? as u64,
             last_seen: from_micros(r.get(5)?),
+            landing_page: r.get(12)?,
             exit_page: r.get(6)?,
             exit_link: r.get(7)?,
             goals: serde_json::from_str(&goals).unwrap_or_default(),
+            pricing: r.get(13)?,
+            checkout: exits.iter().any(|l| checkout_link(l)),
             payments: r.get::<_, i64>(9)? as u64,
             revenue_usd: r.get(10)?,
             who: r.get(11)?,
@@ -618,6 +656,48 @@ mod tests {
             .visitor_list("s", &period(), &filter, 50, 0)
             .unwrap()
             .rows
+    }
+
+    #[test]
+    fn landing_intent_search_and_sort() {
+        let (_dir, store) = store();
+        seed(&store);
+        store
+            .insert_events(&[
+                ev("v3", "s3", 20, "pageview", "/blog/x"),
+                ev("v3", "s3", 21, "pageview", "/blog/y"),
+                ev("v3", "s3", 22, "exit", "buy.stripe.com/abc"),
+            ])
+            .unwrap();
+        let rows = list(&store, VisitorFilter::default());
+        let v1 = rows.iter().find(|r| r.visitor_id == "v1").unwrap();
+        assert_eq!(v1.landing_page.as_deref(), Some("/"));
+        assert!(v1.pricing && !v1.checkout);
+        let v3 = rows.iter().find(|r| r.visitor_id == "v3").unwrap();
+        assert!(v3.checkout && !v3.pricing);
+        let find = |q: &str| {
+            list(
+                &store,
+                VisitorFilter {
+                    search: Some(q.into()),
+                    ..Default::default()
+                },
+            )
+            .into_iter()
+            .map(|r| r.visitor_id)
+            .collect::<Vec<_>>()
+        };
+        assert_eq!(find("/docs"), ["v2"]);
+        assert_eq!(find("ycombinator"), ["v1"]);
+        let by_pages = list(
+            &store,
+            VisitorFilter {
+                sort: Some("pages".into()),
+                ..Default::default()
+            },
+        );
+        assert_eq!(by_pages[0].pageviews, 2);
+        assert_eq!(by_pages[2].visitor_id, "v2");
     }
 
     #[test]

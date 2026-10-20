@@ -17,7 +17,7 @@ use crate::dashboard::{
 use crate::icons;
 use crate::onboarding::render;
 use crate::sites;
-use crate::stats::PaymentRow;
+use crate::stats::{Activity, PaymentRow, Who};
 use crate::visitors::{Entry, Step, Timeline, VisitorFilter, VisitorRow};
 
 /// Percent-encodes a query value or path segment.
@@ -46,6 +46,8 @@ pub struct VisitorsQuery {
     goal: Option<String>,
     exit: Option<String>,
     paid: Option<String>,
+    q: Option<String>,
+    sort: Option<String>,
     page: Option<u32>,
 }
 
@@ -63,6 +65,17 @@ pub struct VisitorView {
     name: String,
     avatar: String,
     paid: bool,
+    /// Flag, browser and OS logos, each with its name for the tooltip.
+    flag: String,
+    place: String,
+    browser_icon: String,
+    browser: String,
+    os_icon: String,
+    os: String,
+    /// "/pricing", or "/blog/x → /pricing" when the visit ended elsewhere.
+    pages: String,
+    /// "Started checkout" or "Viewed pricing" for visitors who haven't paid.
+    intent: &'static str,
     icon: String,
     source: String,
     channel: String,
@@ -70,12 +83,18 @@ pub struct VisitorView {
     pageviews: String,
     last_seen: String,
     last_full: String,
-    exit_page: String,
     exit_icon: String,
     exit_link: String,
     goals: Vec<String>,
     more_goals: usize,
     revenue: String,
+}
+
+/// A sortable column header.
+pub struct SortHead {
+    label: &'static str,
+    href: String,
+    on: bool,
 }
 
 #[derive(Template)]
@@ -92,6 +111,14 @@ struct VisitorsPage {
     goals: Vec<MenuOpt>,
     exits: Vec<Opt>,
     paid: Vec<Opt>,
+    search: String,
+    /// Range and filter params kept by the search form.
+    keep: Vec<(String, String)>,
+    heads: Vec<SortHead>,
+    /// Columns with no data in this view are left out.
+    events: bool,
+    revenue: bool,
+    cols: String,
     rows: Vec<VisitorView>,
     filtered: bool,
     clear_href: String,
@@ -102,17 +129,46 @@ struct VisitorsPage {
 
 fn visitor_view(
     v: &VisitorRow,
+    a: &Activity,
     names: &Names,
     domain: &str,
     offset: UtcOffset,
     now: OffsetDateTime,
 ) -> VisitorView {
     let alias = names.get(&v.who);
+    let known = |s: &Option<String>| s.clone().filter(|s| s != "Unknown").unwrap_or_default();
+    let (browser, os) = (known(&a.browser), known(&a.os));
+    let landing = v.landing_page.clone().unwrap_or_default();
+    let exit = v.exit_page.clone().unwrap_or_default();
     VisitorView {
         href: visitor_href(domain, &v.visitor_id),
         name: alias.name,
         avatar: alias.avatar,
         paid: v.payments > 0,
+        flag: a.country.as_deref().map(icons::flag).unwrap_or_default(),
+        place: a.country.as_deref().map(icons::country).unwrap_or_default(),
+        browser_icon: if browser.is_empty() {
+            String::new()
+        } else {
+            icons::ua(&browser)
+        },
+        os_icon: if os.is_empty() {
+            String::new()
+        } else {
+            icons::ua(&os)
+        },
+        browser,
+        os,
+        pages: if exit.is_empty() || exit == landing {
+            landing
+        } else {
+            format!("{landing} → {exit}")
+        },
+        intent: match (v.payments > 0, v.checkout, v.pricing) {
+            (false, true, _) => "Started checkout",
+            (false, false, true) => "Viewed pricing",
+            _ => "",
+        },
         icon: icons::source(&v.source, 16),
         channel: if v.channel == v.source {
             String::new()
@@ -124,7 +180,6 @@ fn visitor_view(
         pageviews: group(v.pageviews),
         last_seen: ago(v.last_seen, now),
         last_full: local(v.last_seen, offset),
-        exit_page: v.exit_page.clone().unwrap_or_default(),
         exit_icon: v
             .exit_link
             .as_deref()
@@ -165,11 +220,19 @@ pub async fn list(
     let goal = nonempty(&q.goal);
     let exit = q.exit.as_deref().filter(|e| matches!(*e, "link" | "page"));
     let paid = q.paid.as_deref().filter(|e| matches!(*e, "yes" | "no"));
+    let search = q.q.as_deref().map(str::trim).unwrap_or("").to_string();
+    let sort = q
+        .sort
+        .as_deref()
+        .filter(|s| matches!(*s, "visits" | "pages" | "revenue"));
 
     let store = state.events.clone();
     let id = ctx.site.id.clone();
     let (want_source, want_channel, want_goal) = (source.clone(), channel.clone(), goal.clone());
     let (clicked_out, want_paid) = (exit.map(|e| e == "link"), paid.map(|e| e == "yes"));
+    let want_search = Some(search.to_lowercase()).filter(|s| !s.is_empty());
+    let want_sort = sort.map(str::to_string);
+    let tz = ctx.site.timezone.clone();
     let result = blocking(move || {
         let facets = store.visitor_facets(&id, &p)?;
         let hosts = want_source.map(|s| {
@@ -191,12 +254,24 @@ pub async fn list(
             goal: want_goal,
             clicked_out,
             paid: want_paid,
+            search: want_search,
+            sort: want_sort,
         };
         let list = store.visitor_list(&id, &p, &filter, PER_PAGE, (page - 1) * PER_PAGE)?;
-        Ok((facets, list))
+        let who: Vec<Who> = list
+            .rows
+            .iter()
+            .map(|r| Who {
+                visitor_id: Some(r.visitor_id.clone()),
+                session_id: None,
+                ts: r.last_seen,
+            })
+            .collect();
+        let activity = store.activity(&id, &tz, &who)?;
+        Ok((facets, list, activity))
     })
     .await;
-    let (facets, list) = match result {
+    let (facets, list, activity) = match result {
         Ok(r) => r,
         Err(code) => return code.into_response(),
     };
@@ -214,6 +289,27 @@ pub async fn list(
         ("exit", exit.unwrap_or("")),
         ("paid", paid.unwrap_or("")),
     ]);
+    let search_q = enc(&search);
+    let mut params_all = params.clone();
+    params_all.extend([("q", search_q.as_str()), ("sort", sort.unwrap_or(""))]);
+    let keep: Vec<(String, String)> = rq
+        .iter()
+        .map(|(k, v)| (k.to_string(), v.clone()))
+        .chain(
+            [
+                ("channel", channel.clone()),
+                ("source", source.clone()),
+                ("goal", goal.clone()),
+                ("exit", exit.map(str::to_string)),
+                ("paid", paid.map(str::to_string)),
+                ("sort", sort.map(str::to_string)),
+            ]
+            .into_iter()
+            .filter_map(|(k, v)| Some((k.to_string(), v?))),
+        )
+        .filter(|(_, v)| !v.is_empty())
+        .collect();
+    let params = params_all;
 
     let mut channels: Vec<(String, u64)> = Vec::new();
     let mut sources: Vec<(String, String, u64)> = Vec::new();
@@ -300,9 +396,9 @@ pub async fn list(
         "exit",
         exit,
         &[
-            ("", "Any exit"),
-            ("link", "Clicked out"),
-            ("page", "Left on a page"),
+            ("", "All"),
+            ("link", "Clicked a link"),
+            ("page", "Closed or bounced"),
         ],
     );
     let paid_opts = seg(
@@ -328,6 +424,47 @@ pub async fn list(
         Ok(n) => n,
         Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
     };
+    let rows: Vec<VisitorView> = list
+        .rows
+        .iter()
+        .zip(&activity)
+        .map(|(v, a)| visitor_view(v, a, &names, &ctx.site.domain, ctx.offset, now))
+        .collect();
+    let events = rows
+        .iter()
+        .any(|r| !r.goals.is_empty() || !r.exit_link.is_empty() || !r.intent.is_empty());
+    let revenue = rows.iter().any(|r| r.paid);
+    let heads = [
+        ("Visits", "visits"),
+        ("Pages", "pages"),
+        ("Revenue", "revenue"),
+        ("Last seen", ""),
+    ]
+    .into_iter()
+    .filter(|(_, k)| revenue || *k != "revenue")
+    .map(|(label, k)| SortHead {
+        label,
+        href: link(&base, &params, &[("sort", k), ("page", "")]),
+        on: sort.unwrap_or("") == k,
+    })
+    .collect();
+    let text = "minmax(0, auto)";
+    let mut cols = vec![
+        "minmax(150px, auto)",
+        "minmax(150px, auto)",
+        "auto",
+        "auto",
+        text,
+    ];
+    if events {
+        cols.push(text);
+    }
+    if revenue {
+        cols.push("auto");
+    }
+    cols.extend(["auto", "16px"]);
+    let mut shell = ctx.shell;
+    shell.usage = String::new();
     render(VisitorsPage {
         title: "Visitors",
         range: picked.menu(
@@ -340,6 +477,8 @@ pub async fn list(
                 ("goal", goal.clone().unwrap_or_default()),
                 ("exit", exit.unwrap_or("").to_string()),
                 ("paid", paid.unwrap_or("").to_string()),
+                ("q", search.clone()),
+                ("sort", sort.unwrap_or("").to_string()),
             ],
         ),
         source_label,
@@ -350,16 +489,19 @@ pub async fn list(
         goals: goal_opts,
         exits,
         paid: paid_opts,
-        rows: list
-            .rows
-            .iter()
-            .map(|v| visitor_view(v, &names, &ctx.site.domain, ctx.offset, now))
-            .collect(),
+        search,
+        keep,
+        heads,
+        events,
+        revenue,
+        cols: cols.join(" "),
+        rows,
         filtered: channel.is_some()
             || source.is_some()
             || goal.is_some()
             || exit.is_some()
-            || paid.is_some(),
+            || paid.is_some()
+            || q.q.as_deref().is_some_and(|s| !s.trim().is_empty()),
         clear_href: href(&base, &rp),
         showing: if shown > 0 {
             format!(
@@ -381,7 +523,7 @@ pub async fn list(
         } else {
             String::new()
         },
-        shell: ctx.shell,
+        shell,
     })
 }
 

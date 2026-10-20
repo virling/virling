@@ -411,6 +411,8 @@ impl SiteIndex {
         let visitor = &self.visitors[v as usize];
         let (mut visits, mut pageviews) = (0, 0);
         let mut last_pv: Option<&Pageview> = None;
+        let mut first_pv: Option<&Pageview> = None;
+        let (mut pricing, mut checkout) = (false, false);
         let mut goals: Vec<&str> = Vec::new();
         let mut exits: Vec<(i64, u32)> = Vec::new();
         for s in self.sessions_of(v) {
@@ -428,12 +430,28 @@ impl SiteIndex {
                 if last_pv.is_none_or(later) {
                     last_pv = Some(pv);
                 }
+                let earlier = |b: &Pageview| {
+                    (pv.ts, self.strings.name(pv.path)) < (b.ts, self.strings.name(b.path))
+                };
+                if first_pv.is_none_or(earlier) {
+                    first_pv = Some(pv);
+                }
+                pricing |= self
+                    .strings
+                    .name(pv.path)
+                    .is_some_and(|p| p.starts_with("/pricing"));
             }
             for m in self.marks_of(s).filter(|m| m.ts >= lo && m.ts < hi) {
                 any = true;
                 match m.kind {
                     GOAL => goals.push(self.strings.name(m.name).unwrap_or("")),
-                    EXIT => exits.push((m.ts, m.name)),
+                    EXIT => {
+                        checkout |= self
+                            .strings
+                            .name(m.name)
+                            .is_some_and(crate::visitors::checkout_link);
+                        exits.push((m.ts, m.name));
+                    }
                     _ => {}
                 }
             }
@@ -464,9 +482,12 @@ impl SiteIndex {
             visits,
             pageviews,
             last_seen: from_micros(last_seen),
+            landing_page: first_pv.map(|pv| self.path_name(pv.path)),
             exit_page: last_pv.map(|pv| self.path_name(pv.path)),
             exit_link,
             goals: goals.into_iter().map(str::to_string).collect(),
+            pricing,
+            checkout,
             payments: pays.len() as u64,
             revenue_usd: pays
                 .iter()
@@ -496,7 +517,10 @@ impl SiteIndex {
             .hosts
             .as_ref()
             .map(|h| h.iter().filter_map(|h| self.strings.get(h)).collect());
-        let detailed = filter.goal.is_some() || filter.clicked_out.is_some();
+        let detailed = filter.goal.is_some()
+            || filter.clicked_out.is_some()
+            || filter.search.is_some()
+            || filter.sort.is_some();
         let mut list: Vec<(i64, u32, Option<Box<VisitorRow>>)> = Vec::new();
         for (v, t) in last {
             let ft = self.visitors[v as usize].first_touch;
@@ -531,11 +555,30 @@ impl SiteIndex {
                 {
                     continue;
                 }
+                if let Some(q) = &filter.search {
+                    let has = |s: Option<&str>| s.is_some_and(|s| s.to_lowercase().contains(q));
+                    if !(has(r.landing_page.as_deref())
+                        || has(r.exit_page.as_deref())
+                        || has(r.referrer_host.as_deref())
+                        || has(Some(&r.channel)))
+                    {
+                        continue;
+                    }
+                }
             }
             list.push((t, v, row));
         }
-        let order = |a: &(i64, u32, _), b: &(i64, u32, _)| {
-            b.0.cmp(&a.0).then_with(|| {
+        let key = |r: &Option<Box<VisitorRow>>| -> i64 {
+            r.as_ref().map_or(0, |r| match filter.sort.as_deref() {
+                Some("visits") => r.visits as i64,
+                Some("pages") => r.pageviews as i64,
+                Some("revenue") => (r.revenue_usd * 100.0).round() as i64,
+                _ => 0,
+            })
+        };
+        let order = |a: &(i64, u32, Option<Box<VisitorRow>>),
+                     b: &(i64, u32, Option<Box<VisitorRow>>)| {
+            key(&b.2).cmp(&key(&a.2)).then(b.0.cmp(&a.0)).then_with(|| {
                 self.visitors[a.1 as usize]
                     .id
                     .cmp(&self.visitors[b.1 as usize].id)
@@ -815,6 +858,19 @@ mod tests {
                     .collect();
                 for vf in [
                     VisitorFilter::default(),
+                    VisitorFilter {
+                        sort: Some("pages".into()),
+                        ..Default::default()
+                    },
+                    VisitorFilter {
+                        sort: Some("revenue".into()),
+                        ..Default::default()
+                    },
+                    VisitorFilter {
+                        search: Some("pricing".into()),
+                        sort: Some("visits".into()),
+                        ..Default::default()
+                    },
                     VisitorFilter {
                         paid: Some(true),
                         ..Default::default()
