@@ -1,11 +1,11 @@
 {% import "_d3.html" as d3 %}
 {% if let Some((lead, fix)) = insight %}
-<section class="d3-card d3-insight">
+<section class="d3-card d3-insight" id="insight" data-sync>
   <span class="bulb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span>
   <div><b>{{ lead }}</b>{% if !fix.is_empty() %}<span>{{ fix }}</span>{% endif %}</div>
 </section>
 {% endif %}
-<section class="d3-kpis">
+<section class="d3-kpis" id="kpis" data-sync>
   {% for k in kpis %}
   <div class="d3-card d3-kpi">
     <span class="k">{{ k.label }}</span>
@@ -14,8 +14,8 @@
   </div>
   {% endfor %}
 </section>
-{% if !earlier.is_empty() %}<p class="d3-earlier">{{ earlier }}</p>{% endif %}
-<section class="d3-card d3-chart" id="revenue">
+{% if !earlier.is_empty() %}<p class="d3-earlier" id="earlier" data-sync>{{ earlier }}</p>{% endif %}
+<section class="d3-card d3-chart" id="revenue" data-sync>
   <div class="d3-ch-head" data-key="chart"><h2>{% for c in charts %}{% if c.on %}{{ c.title }}{% endif %}{% endfor %}</h2><nav class="d3-tabs" aria-label="Chart type">{% for t in chart_tabs %}<a href="{{ t.href }}" data-tab="chart-p{{ loop.index0 }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
   {% for c in charts %}
   <div id="chart-p{{ loop.index0 }}" data-title="{{ c.title }}"{% if !c.on %} hidden{% endif %}>
@@ -24,7 +24,7 @@
   </div>
   {% endfor %}
 </section>
-<section class="d3-cards">
+<section class="d3-cards" id="cards" data-sync>
   {% for c in cards %}
   <div class="d3-card d3-bc" id="{{ c.key }}">
     <div class="d3-bc-head"><h2>{{ c.title }}</h2><nav class="d3-tabs" aria-label="{{ c.label }}">{% for t in c.tabs %}<a href="{{ t.href }}" data-tab="{{ c.key }}-p{{ loop.index0 }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
@@ -48,7 +48,7 @@
         <fieldset class="d3-places"><legend>Where will you share it?</legend>
           {% for (value, label, _) in crate::links::PLACES %}<label><input type="radio" name="place" value="{{ value }}" required>{{ label }}</label>{% endfor %}
         </fieldset>
-        <label class="d3-field d3-other">Other source<input name="other" maxlength="80" placeholder="e.g. indiehackers.com"></label>
+        <label class="d3-field d3-other" hidden>Other source<input name="other" maxlength="80" placeholder="e.g. indiehackers.com"></label>
         <label class="d3-field">Page<input name="destination" value="/" required></label>
         <label class="d3-field"><span>Name <span class="muted">(optional)</span></span><input name="name" maxlength="80" placeholder="Launch post"></label>
         <div class="d3-dlg-actions"><button type="button" class="d3-btn" data-close>Cancel</button><button type="submit" class="d3-btn dark">Create link</button></div>

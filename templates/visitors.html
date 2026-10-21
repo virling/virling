@@ -36,9 +36,9 @@
     </form>
     {% if filtered %}<a class="vf-clear" href="{{ clear_href }}">Clear filters</a>{% endif %}
   </div>
-  <span class="dim">{{ showing }}</span>
+  <span class="dim" id="showing" data-sync>{{ showing }}</span>
 </div>
-<section class="box vis-list" style="grid-template-columns: {{ cols }}">
+<section class="box vis-list"{% if live_rows %} id="vis-rows" data-sync{% endif %} style="grid-template-columns: {{ cols }}">
   <div class="vr th"><span>Visitor</span><span>First source</span>{% for h in heads %}{% if loop.index == 3 %}<span>Landing → exit</span>{% if events %}<span class="vr-ev">Events</span>{% endif %}{% endif %}<a class="num sort{% if h.on %} on{% endif %}" href="{{ h.href }}"{% if h.on %} aria-sort="descending"{% endif %}>{{ h.label }}</a>{% endfor %}<span></span></div>
   {% for v in rows %}
   <a class="vr prow{% if v.paid %} paid{% endif %}" href="{{ v.href }}">
@@ -60,7 +60,7 @@
 </section>
 {% if !prev.is_empty() || !next.is_empty() %}
 <div class="pager">
-  <span class="dim">{{ showing }}</span>
+  <span class="dim" id="showing-pager" data-sync>{{ showing }}</span>
   <span class="eh-actions">
     {% if !prev.is_empty() %}<a class="b sec" href="{{ prev }}">Previous</a>{% endif %}
     {% if !next.is_empty() %}<a class="b sec" href="{{ next }}">Next</a>{% endif %}
