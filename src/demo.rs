@@ -64,6 +64,7 @@ const CRAWLS: &[(&str, usize)] = &[
     ("ChatGPT-User", 6),
     ("Amazonbot", 5),
     ("Claude-User", 3),
+    ("Perplexity-User", 4),
     ("CCBot", 2),
 ];
 /// Pages the crawlers read.
@@ -77,6 +78,124 @@ const CRAWLED: &[&str] = &[
     "/blog/we-stopped-chasing-invoices",
     "/changelog",
 ];
+/// Buyer questions the demo asks the assistants.
+const QUESTIONS: &[&str] = &[
+    "What is the best invoicing app for freelancers?",
+    "Which invoicing tool sends automatic payment reminders?",
+    "How do I get clients to pay invoices on time?",
+    "Best Stripe invoicing tool for a small agency?",
+    "What is a cheap alternative to FreshBooks?",
+    "Which invoicing software handles net 30 terms well?",
+    "What app do freelancers use to chase late payments?",
+    "Best recurring invoice software for consultants?",
+];
+/// Other products the demo answers name, with a short reason.
+const RIVALS: &[(&str, &str)] = &[
+    ("FreshBooks", "the most complete option, with time tracking and expenses"),
+    ("Wave", "free invoicing and bookkeeping for very small businesses"),
+    ("Bonsai", "contracts, proposals and invoices in one place"),
+    ("Zoho Invoice", "free for up to 1,000 invoices a year"),
+    ("Invoice Ninja", "open source and can be self-hosted"),
+    ("HoneyBook", "client portals and payments for creative businesses"),
+];
+/// Pages of the demo site the answers cite.
+const CITED: &[&str] = &[
+    "/pricing",
+    "/compare",
+    "/blog/net-30-explained",
+    "/features/payment-reminders",
+    "/",
+];
+
+/// Daily answers to the demo questions from each assistant over the last 60 days, read like a real run.
+async fn seed_answers(
+    db: &sqlx::SqlitePool,
+    site: &str,
+    now: OffsetDateTime,
+    vault: &crypto::Vault,
+) -> anyhow::Result<()> {
+    use crate::answers::{self, Assistant, Reply};
+    let questions: Vec<String> = QUESTIONS.iter().map(|q| q.to_string()).collect();
+    answers::save_settings(db, site, &questions, "Tallybird").await?;
+    // A run day far ahead keeps a served demo from ever calling a provider.
+    sqlx::query("UPDATE ai_settings SET last_run_at = ?, run_day = 1000000, manual_runs = 99 WHERE site_id = ?")
+        .bind((now - Duration::hours(3)).unix_timestamp())
+        .bind(site)
+        .execute(db)
+        .await?;
+    for (a, key) in [
+        (Assistant::ChatGpt, "sk-proj-demo00000000000000004f2a"),
+        (Assistant::Claude, "sk-ant-demo0000000000000000c81e"),
+        (Assistant::Perplexity, "pplx-demo000000000000000000977b"),
+        (Assistant::Gemini, "AIzaDemo00000000000000000000e05d"),
+    ] {
+        let (ciphertext, nonce) = vault.encrypt(key)?;
+        sqlx::query("INSERT INTO ai_keys (site_id, provider, key_ciphertext, key_nonce, created_at) VALUES (?, ?, ?, ?, ?)")
+            .bind(site)
+            .bind(a.as_str())
+            .bind(ciphertext)
+            .bind(nonce)
+            .bind((now - Duration::days(60)).unix_timestamp())
+            .execute(db)
+            .await?;
+    }
+    let names = answers::names("Tallybird", DOMAIN);
+    let today = now.unix_timestamp().div_euclid(86400);
+    let mut rng = Rng(0x5eed_a15e_0340);
+    let mut tx = db.begin().await?;
+    for back in 0..60 {
+        for (a, base) in [
+            (Assistant::ChatGpt, 0.32),
+            (Assistant::Claude, 0.5),
+            (Assistant::Perplexity, 0.22),
+            (Assistant::Gemini, 0.3),
+        ] {
+            // Mentions grow over the period, as if the site's content is being picked up.
+            let p = base + 0.2 * (1.0 - back as f64 / 60.0);
+            for q in QUESTIONS {
+                let mut rivals: Vec<(&str, &str)> = Vec::new();
+                while rivals.len() < 4 {
+                    let r = RIVALS[rng.below(RIVALS.len())];
+                    if !rivals.contains(&r) {
+                        rivals.push(r);
+                    }
+                }
+                let ours = rng.f() < p;
+                if ours {
+                    let at = rng.pick(&[(0, 0.35), (1, 0.3), (2, 0.2), (3, 0.15)]);
+                    rivals.insert(
+                        at,
+                        (
+                            "Tallybird",
+                            "built around getting paid on time, with automatic reminders and Stripe payouts",
+                        ),
+                    );
+                }
+                let mut text = "Here are good options for this:\n\n".to_string();
+                for (i, (name, why)) in rivals.iter().enumerate() {
+                    text.push_str(&format!("{}. **{name}**: {why}.\n", i + 1));
+                }
+                text.push_str(&format!(
+                    "\nIf you mostly want faster payments, start with {}.",
+                    if ours { "Tallybird" } else { rivals[0].0 }
+                ));
+                let mut urls = Vec::new();
+                if ours && rng.f() < 0.6 {
+                    urls.push(match a {
+                        Assistant::Gemini => DOMAIN.to_string(),
+                        _ => format!("https://{DOMAIN}{}", CITED[rng.below(CITED.len())]),
+                    });
+                }
+                let reply = Reply { text, urls };
+                let found = answers::analyze(&reply, &names, DOMAIN);
+                answers::save(&mut tx, site, today - back, a, q, &found, &reply.text).await?;
+            }
+        }
+    }
+    tx.commit().await?;
+    Ok(())
+}
+
 /// Tracked short links as (slug, name, source, channel, destination path).
 const LINKS: &[(&str, &str, &str, &str, &str)] = &[
     (
@@ -732,7 +851,7 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
     let site = sites::create_site(&db, &account, DOMAIN, "UTC").await?;
     let now = OffsetDateTime::now_utc();
     sqlx::query(
-        "INSERT INTO site_icons (site_id, content_type, body, fetched_at) VALUES (?, 'image/svg+xml', ?, ?)",
+        "INSERT INTO site_icons (site_id, content_type, body, fetched_at, title) VALUES (?, 'image/svg+xml', ?, ?, 'Tallybird | Invoicing for freelancers')",
     )
     .bind(&site)
     .bind(SITE_ICON.as_bytes())
@@ -834,6 +953,8 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
             .await?;
     }
     tx.commit().await?;
+    let vault = crypto::Vault::load(dir, None)?;
+    seed_answers(&db, &site, now, &vault).await?;
     let config = Config {
         marketing: false,
         app: true,
@@ -848,7 +969,7 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
         db.clone(),
         store,
         mail::Mailer::Log,
-        crypto::Vault::load(dir, None)?,
+        vault,
     );
     sync::rebuild_attribution(&state, Some(&site)).await;
     Ok((state, token))

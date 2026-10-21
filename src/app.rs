@@ -176,6 +176,10 @@ pub fn router(state: AppState) -> Router {
             )
             .route("/app/{domain}", get(dashboard::dashboard))
             .route("/app/{domain}/payments", get(dashboard::payments))
+            .route(
+                "/app/{domain}/answers/{assistant}",
+                get(dashboard::answers::page),
+            )
             .route("/app/{domain}/visitors", get(visitor_pages::list))
             .route("/app/{domain}/retention", get(retention_page::page))
             .route("/app/{domain}/links", get(links::page).post(links::create))

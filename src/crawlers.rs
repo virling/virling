@@ -333,6 +333,28 @@ pub async fn hits(
         .collect())
 }
 
+/// Pages each answer-time fetcher, such as ChatGPT-User, read between two unix times, most read first.
+pub async fn answer_pages(
+    db: &SqlitePool,
+    site_id: &str,
+    from: i64,
+    to: i64,
+) -> sqlx::Result<Vec<(String, String, i64)>> {
+    let rows: Vec<(String, String, i64)> = sqlx::query_as(
+        "SELECT bot, path, hits FROM crawler_pages WHERE site_id = ? AND last_seen BETWEEN ? AND ?
+         ORDER BY hits DESC, path",
+    )
+    .bind(site_id)
+    .bind(from)
+    .bind(to)
+    .fetch_all(db)
+    .await?;
+    Ok(rows
+        .into_iter()
+        .filter(|r| by_name(&r.0).is_some_and(|c| c.kind == Kind::Answer))
+        .collect())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
