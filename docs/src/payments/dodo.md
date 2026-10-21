@@ -13,7 +13,7 @@ Live mode and test mode keys both work. Virling tries the key against `live.dodo
 
 - **Payments** from the last 90 days on the first run, then new ones every minute. Listing walks one day at a time and re-reads the last 30 minutes on each round, so payments that succeed late are not missed.
 - **Refunds and disputes.** Refunds update the payment they belong to. Lost or accepted disputes count as refunded, since the money went back to the customer.
-- **Renewals.** For a subscription payment, Virling looks up the subscription. A payment made more than 12 hours after the subscription started is marked as a renewal.
+- **Renewals.** For a subscription payment, Virling looks up the subscription's paid payments. Every payment after the first paid one is marked as a renewal, so the first charge after a free trial counts as the first payment.
 
 To stay inside Dodo's limit of 240 requests per minute, Virling makes at most a couple of extra lookups per round and continues on the next round. A large backfill can take a few minutes to finish.
 
