@@ -80,7 +80,7 @@
   <div class="actions end"><button class="btn" type="submit">Save changes</button></div>
 </form>
 </section>
-<section class="set-sec">
+<section class="set-sec" id="payments">
 <div class="set-intro"><h2>Payment connections</h2><p class="muted">Providers Virling syncs payments from with a read-only key.</p></div>
 <div class="card">
   <div class="card-head"><span class="muted">{% if connections.is_empty() %}Nothing connected{% else %}{{ connections.len() }} connected{% endif %}</span><a class="btn secondary" href="/app/{{ shell.domain }}/setup/payments">Connect a provider</a></div>
@@ -91,6 +91,7 @@
       <span class="muted small">{{ c.synced }}</span>
       {% if !c.error.is_empty() %}<span class="err small">{{ c.error }}</span>{% endif %}
     </div>
+    <a class="btn ghost" href="/app/{{ shell.domain }}/setup/payments?provider={{ c.provider }}&amp;replace=1">Replace key</a>
     <form method="post" action="/app/{{ shell.domain }}/settings/disconnect" data-confirm="Disconnect {{ c.name }}? Syncing stops right away. Payments already imported stay in your reports.">
       <input type="hidden" name="provider" value="{{ c.provider }}">
       <button class="btn ghost" type="submit">Disconnect</button>

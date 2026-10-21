@@ -25,7 +25,7 @@
         {% for r in c.rows %}
         <div class="conn" data-connected="{{ r.key }}">
           <div class="grow">
-            {{ crate::icons::provider(r.key, 20)|safe }}<b>{{ r.name }}</b> <span class="badge ok">Connected &#10003;</span>
+            {{ crate::icons::provider(r.key, 20)|safe }}<b>{{ r.name }}</b> {% if r.error.is_empty() %}<span class="badge ok">Connected &#10003;</span>{% else %}<span class="badge bad">Error</span>{% endif %}
             {% if !r.hint.is_empty() %}<span class="muted small">Key ending <span class="mono">{{ r.hint }}</span></span>{% endif %}
             <span class="muted small">{{ r.synced }}</span>
             {% if !r.error.is_empty() %}<span class="err small">{{ r.error }}</span>{% endif %}

@@ -1523,7 +1523,10 @@ mod tests {
             body.contains("Dodo Payments returned HTTP 400"),
             "last error is shown"
         );
-        assert!(body.contains("Connected &#10003;"));
+        assert!(
+            body.contains(r#"<span class="badge bad">Error</span>"#),
+            "a failing key is not shown as connected"
+        );
         assert!(body.contains(">Manage</a>"));
         assert!(
             !body.contains(">Add<"),
@@ -1583,6 +1586,26 @@ mod tests {
         assert!(
             body.contains(r#"data-provider="dodo""#),
             "a disconnected provider gets its form back"
+        );
+
+        let settings = "/app/example.com/settings";
+        let body = body_text(call(&state, get(settings, Some(&cookie))).await).await;
+        assert!(
+            body.contains(r#"href="/app/example.com/setup/payments?provider=stripe&amp;replace=1">Replace key</a>"#),
+            "settings links each connection to replacing its key"
+        );
+        let res = call(
+            &state,
+            form(
+                "/app/example.com/settings/disconnect",
+                "provider=stripe".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            res.headers()["location"],
+            "/app/example.com/settings#payments"
         );
     }
 
