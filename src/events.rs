@@ -577,11 +577,13 @@ fn flush_touches(conn: &mut Connection, pending: &Mutex<Pending>) -> anyhow::Res
     if batch.len() == 0 {
         return Ok(());
     }
+    let t = std::time::Instant::now();
     let written = (|| {
         let tx = conn.transaction()?;
         batch.write(&tx)?;
         Ok(tx.commit()?)
     })();
+    eprintln!("PROF flush_touches {:.3} rows {}", t.elapsed().as_secs_f64()*1e3, batch.len());
     if written.is_err() {
         pending.lock().unwrap().extend(batch);
     }
@@ -856,6 +858,7 @@ impl DuckStore {
             && !self.index.loading();
         // Writing touch rows here waits out a flush, so both never write the same key.
         let touches = (!defer).then(|| self.touch_conn.lock().unwrap());
+        let tw = std::time::Instant::now();
         let tx = conn.transaction()?;
         {
             let mut app = tx.appender("events")?;
@@ -890,8 +893,10 @@ impl DuckStore {
             }
             app.flush()?;
         }
+        eprintln!("PROF append {:.3}", tw.elapsed().as_secs_f64()*1e3);
         if defer {
             tx.commit()?;
+            eprintln!("PROF commit {:.3}", tw.elapsed().as_secs_f64()*1e3);
             self.pending.lock().unwrap().extend(fresh);
         } else {
             let mut pending = self.pending.lock().unwrap();
@@ -910,7 +915,9 @@ impl DuckStore {
     /// A reader that sees every first pageview written so far.
     fn read(&self) -> anyhow::Result<Reader<'_>> {
         // Taking the lock also waits for a background flush that already took the pending rows.
+        let t = std::time::Instant::now();
         flush_touches(&mut self.touch_conn.lock().unwrap(), &self.pending)?;
+        eprintln!("PROF read_lock {:.3}", t.elapsed().as_secs_f64()*1e3);
         self.reader()
     }
 
@@ -949,7 +956,9 @@ impl EventStore for DuckStore {
                 q.writing = true;
                 q.next += 1;
                 drop(q);
+                let t = std::time::Instant::now();
                 let result = self.write_events(&batch);
+                eprintln!("PROF write_events {:.3} n {}", t.elapsed().as_secs_f64()*1e3, batch.len());
                 if matches!(result, Ok(true)) {
                     self.flush_later();
                 }

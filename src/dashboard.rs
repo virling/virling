@@ -184,7 +184,9 @@ async fn load_in(
     let (id, tz) = (site.id.clone(), site.timezone.clone());
     let live = state.presence.count(&id);
     let (offset, live, visitors, first, picked) = blocking(move || {
+        let t = std::time::Instant::now();
         let offset = store.utc_offset(&tz)?;
+        eprintln!("PROF utc_offset {:.3}", t.elapsed().as_secs_f64()*1e3);
         let today = OffsetDateTime::now_utc().to_offset(offset).date();
         let first = store.first_event(&id)?;
         let picked = args.map(|a| {
@@ -206,7 +208,9 @@ async fn load_in(
                 tz,
             },
         };
+        let t = std::time::Instant::now();
         let visitors = store.overview(&id, &period)?.current.visitors;
+        eprintln!("PROF load_overview {:.3}", t.elapsed().as_secs_f64()*1e3);
         Ok((offset, live, visitors, first, picked))
     })
     .await?;

@@ -446,7 +446,17 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
     tokio::spawn(
         axum::serve(
             listener,
-            app::router(state).into_make_service_with_connect_info::<std::net::SocketAddr>(),
+            app::router(state)
+                .layer(axum::middleware::from_fn(
+                    async |req: axum::extract::Request, next: axum::middleware::Next| {
+                        let uri = req.uri().path().to_string();
+                        let t = Instant::now();
+                        let r = next.run(req).await;
+                        eprintln!("SRV {uri} {:.3}", ms(t.elapsed()));
+                        r
+                    },
+                ))
+                .into_make_service_with_connect_info::<std::net::SocketAddr>(),
         )
         .into_future(),
     );
@@ -509,7 +519,9 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
                     "ingest answered {}",
                     res.status()
                 );
-                Ok(ms(started.elapsed()))
+                let took = ms(started.elapsed());
+                eprintln!("CLI burst {took:.3}");
+                Ok(took)
             });
         }
         let mut out = Vec::new();
@@ -548,7 +560,9 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
             if r.fresh {
                 send(&nudge).await?;
             }
-            runs.push(ms(send(r).await?));
+            let took = ms(send(r).await?);
+            eprintln!("CLI {} {took:.3}", r.name);
+            runs.push(took);
         }
         runs.sort_by(f64::total_cmp);
         let at = |q: f64| runs[((runs.len() as f64 * q).ceil() as usize).clamp(1, runs.len()) - 1];

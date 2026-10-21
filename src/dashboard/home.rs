@@ -544,10 +544,12 @@ pub async fn dashboard(
     Path(domain): Path<String>,
     Query(q): Query<DashboardQuery>,
 ) -> Response {
+    let t0 = std::time::Instant::now();
     let ctx = match load(&state, &account, &domain, "dashboard").await {
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
+    eprintln!("PROF pre_load {:.3}", t0.elapsed().as_secs_f64()*1e3);
     let settings: Result<(i64, bool), _> =
         sqlx::query_as("SELECT window_days, setup_dismissed FROM sites WHERE id = ?")
             .bind(&ctx.site.id)
@@ -557,9 +559,12 @@ pub async fn dashboard(
     let (Ok((window_days, dismissed)), Ok(providers)) = (settings, providers) else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
-    page(state, ctx, q, window_days, dismissed, providers, None)
+    eprintln!("PROF pre {:.3}", t0.elapsed().as_secs_f64()*1e3);
+    let r = page(state, ctx, q, window_days, dismissed, providers, None)
         .await
-        .unwrap_or_else(|code| code.into_response())
+        .unwrap_or_else(|code| code.into_response());
+    eprintln!("PROF total {:.3}", t0.elapsed().as_secs_f64()*1e3);
+    r
 }
 
 async fn page(
@@ -649,7 +654,9 @@ async fn page(
     let now = OffsetDateTime::now_utc();
     let tz = ctx.site.timezone.clone();
     let online = state.presence.ids(&ctx.site.id);
+    let tb = std::time::Instant::now();
     let data = blocking(move || {
+        let tb = std::time::Instant::now();
         let mut f = Filter::default();
         for (k, v) in &wanted {
             let col = FILTERS
@@ -682,8 +689,8 @@ async fn page(
             };
             f.first.push((col, vals));
         }
-        let split = store.payment_split(&id, &pq)?;
-        let overview = store.overview_in(&id, &pq, &f)?;
+        let split = { let t = std::time::Instant::now(); let r = store.payment_split(&id, &pq)?; eprintln!("PROF store.payment_split {:.3}", t.elapsed().as_secs_f64()*1e3); r };
+        let overview = { let t = std::time::Instant::now(); let r = store.overview_in(&id, &pq, &f)?; eprintln!("PROF store.overview_in {:.3}", t.elapsed().as_secs_f64()*1e3); r };
         let all = if f.is_empty() {
             None
         } else {
@@ -691,7 +698,7 @@ async fn page(
         };
         let data = match view {
             "" => {
-                let report = store.report_in(&id, &pq, &f)?;
+                let report = { let t = std::time::Instant::now(); let r = store.report_in(&id, &pq, &f)?; eprintln!("PROF store.report_in {:.3}", t.elapsed().as_secs_f64()*1e3); r };
                 let mut cache: Vec<(Option<Dimension>, Vec<BreakdownRow>)> = vec![
                     (Some(Dimension::Channel), report.channels.clone()),
                     (Some(Dimension::LandingPage), report.landing_pages.clone()),
@@ -702,8 +709,8 @@ async fn page(
                         return Ok(c.1.clone());
                     }
                     let rows = match d {
-                        Some(d) => store.breakdown_in(&id, &pq, d, &f)?,
-                        None => store.last_pages_in(&id, &pq, &f)?,
+                        Some(d) => { let t = std::time::Instant::now(); let r = store.breakdown_in(&id, &pq, d, &f)?; eprintln!("PROF store.breakdown_in {:.3}", t.elapsed().as_secs_f64()*1e3); r },
+                        None => { let t = std::time::Instant::now(); let r = store.last_pages_in(&id, &pq, &f)?; eprintln!("PROF store.last_pages_in {:.3}", t.elapsed().as_secs_f64()*1e3); r },
                     };
                     cache.push((d, rows.clone()));
                     Ok(rows)
@@ -740,7 +747,7 @@ async fn page(
                 let avg = (visitors > 0 && attributed > 0.0).then(|| attributed / visitors as f64);
                 Data::Overview(Box::new(report), tabs, hours, avg, sources)
             }
-            "goals" => Data::Goals(goals::load(&*store, &id, &pq, &f, &rest)?),
+            "goals" => Data::Goals({ let t = std::time::Instant::now(); let r = goals::load(&*store, &id, &pq, &f, &rest)?; eprintln!("PROF goals::load {:.3}", t.elapsed().as_secs_f64()*1e3); r }),
             "visitors" => {
                 Data::Visitors(views::load_visitors(&*store, &id, &pq, &tz, now, online)?)
             }
@@ -761,9 +768,12 @@ async fn page(
             Some(_) => Some((store.retention(&id, &pq, now)?, store.mrr(&id, &pq, now)?)),
             None => None,
         };
+        eprintln!("PROF blockin {:.3}", tb.elapsed().as_secs_f64()*1e3);
         Ok((split, overview, all, data, ret))
     })
     .await?;
+    eprintln!("PROF blockout {:.3}", tb.elapsed().as_secs_f64()*1e3);
+    let tr = std::time::Instant::now();
     let (split, overview, all, data, ret) = data;
     let hide = public == Some(true);
     let cur = &overview.current;
@@ -1046,6 +1056,7 @@ async fn page(
                 );
             }
 
+            eprintln!("PROF p_pre_chart {:.3}", tr.elapsed().as_secs_f64()*1e3);
             let picked = match q.chart.as_deref() {
                 Some("line") => 1,
                 Some("channel") => 2,
@@ -1181,6 +1192,7 @@ async fn page(
                 warn_small: !young,
                 hide,
             };
+            eprintln!("PROF p_charts {:.3}", tr.elapsed().as_secs_f64()*1e3);
             let mut left = tabs.as_slice();
             page.cards = picks
                 .iter()
@@ -1191,6 +1203,7 @@ async fn page(
                     cards::card(pick, mine, &base_numbers, &base, &params, &filter_href)
                 })
                 .collect();
+            eprintln!("PROF p_cards {:.3}", tr.elapsed().as_secs_f64()*1e3);
             let links = crate::links::site_links(&state.db, &ctx.site.id)
                 .await
                 .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
@@ -1205,6 +1218,7 @@ async fn page(
                 q.rest.get("new_link").map(String::as_str),
                 q.rest.get("link_error").map(String::as_str),
             );
+            eprintln!("PROF p_links {:.3}", tr.elapsed().as_secs_f64()*1e3);
             let at = |d: Date| d.midnight().assume_offset(ctx.offset).unix_timestamp();
             let bots = crate::crawlers::hits(
                 &state.db,
@@ -1214,6 +1228,7 @@ async fn page(
             )
             .await
             .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+            eprintln!("PROF p_bots {:.3}", tr.elapsed().as_secs_f64()*1e3);
             page.ai = Some(cards::ai_card(
                 &sources,
                 &tabs[0].0,
@@ -1271,7 +1286,10 @@ async fn page(
         page.retention = Some(views::retention_view(r, mrr.as_ref(), &q.rest, &href));
     }
     if public.is_none() {
-        return Ok(render(page));
+        eprintln!("PROF post {:.3}", tr.elapsed().as_secs_f64()*1e3);
+        let r = render(page);
+        eprintln!("PROF render {:.3}", tr.elapsed().as_secs_f64()*1e3);
+        return Ok(r);
     }
     if hide {
         hide_amounts(&mut page, cur, &overview.previous);
