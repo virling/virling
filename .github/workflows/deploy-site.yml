@@ -7,9 +7,9 @@ on:
       - "worker/**"
       - "assets/**"
       - "templates/**"
-      - "src/waitlist_copy.rs"
-      - "src/channel.rs"
-      - "src/ua.rs"
+      - "src/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
       - "scripts/install.sh"
       - ".github/workflows/deploy-site.yml"
   workflow_dispatch:
@@ -36,7 +36,13 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: worker
+          workspaces: |
+            .
+            worker
+
+      # Rebuild the public demo from this commit so it always shows the current UI.
+      - name: Regenerate the demo
+        run: cargo run --release --locked -- demo worker/demo
 
       # No-op when the cached binary already matches this version.
       - name: Install worker-build
