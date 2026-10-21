@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::hash::{BuildHasher, Hasher, RandomState};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 
 use axum::body::Bytes;
 use axum::extract::{ConnectInfo, State};
@@ -41,12 +41,14 @@ pub struct Incoming {
     k: Option<String>,
     /// Set by the script when the browser is automated or has no languages.
     b: Option<bool>,
+    /// Browser time zone, such as Europe/Berlin.
+    z: Option<String>,
 }
 
 #[derive(Deserialize)]
 #[serde(untagged)]
 enum Batch {
-    One(Incoming),
+    One(Box<Incoming>),
     Many(Vec<Incoming>),
 }
 
@@ -257,6 +259,18 @@ fn country(headers: &HeaderMap, skip: usize) -> Option<String> {
         })
 }
 
+/// Country of a browser time zone, for requests without a country header.
+fn zone_country(zone: &str) -> Option<String> {
+    static ZONES: LazyLock<HashMap<&str, &str>> = LazyLock::new(|| {
+        include_str!("tz_countries.txt")
+            .lines()
+            .filter(|l| !l.starts_with('#'))
+            .filter_map(|l| l.split_once(' '))
+            .collect()
+    });
+    ZONES.get(zone).map(|c| c.to_string())
+}
+
 /// "en" or "en-US" from a language tag such as "en-us" or "zh-Hans-CN"; `base` drops the region.
 fn language(tag: &str, base: bool) -> Option<String> {
     let mut parts = tag.trim().split(['-', '_']);
@@ -397,7 +411,7 @@ pub async fn collect(
         .unwrap_or("");
     let parse = || -> Option<Vec<Incoming>> {
         Some(match serde_json::from_slice::<Batch>(&body).ok()? {
-            Batch::One(e) => vec![e],
+            Batch::One(e) => vec![*e],
             Batch::Many(v) => v.into_iter().take(MAX_BATCH).collect(),
         })
     };
@@ -593,7 +607,9 @@ pub async fn collect(
             utm_content: utm("utm_content"),
             utm_term: utm("utm_term"),
             channel: channel.as_str().to_string(),
-            country: country.clone(),
+            country: country
+                .clone()
+                .or_else(|| e.z.as_deref().and_then(zone_country)),
             region: region.clone(),
             city: city.clone(),
             device: device(e.w).to_string(),
@@ -702,6 +718,17 @@ mod tests {
         assert_eq!(client_ip(&h, peer, true, true), ip("198.51.100.4"));
         assert_eq!(client_ip(&h, peer, true, false), ip("192.0.2.1"));
         assert_eq!(client_ip(&h, peer, false, false), ip("127.0.0.1"));
+    }
+
+    #[test]
+    fn time_zones_map_to_countries() {
+        assert_eq!(zone_country("Europe/Berlin").as_deref(), Some("DE"));
+        assert_eq!(zone_country("America/Sao_Paulo").as_deref(), Some("BR"));
+        assert_eq!(zone_country("Asia/Kolkata").as_deref(), Some("IN"));
+        assert_eq!(zone_country("Asia/Calcutta").as_deref(), Some("IN"));
+        assert_eq!(zone_country("Europe/Kiev").as_deref(), Some("UA"));
+        assert_eq!(zone_country("UTC"), None);
+        assert_eq!(zone_country(""), None);
     }
 
     #[test]

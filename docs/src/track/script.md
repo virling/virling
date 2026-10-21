@@ -31,7 +31,7 @@ On load, and on each route change, the script sends one pageview to `/api/event`
 
 Each event is sent immediately, with `navigator.sendBeacon` when the browser has it and `fetch` with `keepalive` otherwise. Nothing is batched or held back, so an event still arrives when the visitor leaves right after.
 
-The server adds the country from a proxy header and the browser name from the user agent. See [Event API](../reference/event-api.md) for the full format.
+The server adds the country from a proxy header or the browser's time zone and the browser name from the user agent. See [Event API](../reference/event-api.md) for the full format.
 
 ## Outbound links
 
