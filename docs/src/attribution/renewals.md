@@ -7,7 +7,7 @@ A subscription renewal takes the attribution of the customer's first payment. If
 | Provider | A payment is a renewal when |
 | --- | --- |
 | Stripe | Its invoice's billing reason is `subscription_cycle`. |
-| Dodo Payments | It belongs to a subscription and was made more than 12 hours after the subscription started. |
+| Dodo Payments | It belongs to a subscription that already had a paid payment before it. |
 | Polar | The order's billing reason is `subscription_cycle`. |
 | LemonSqueezy | It is a subscription invoice with billing reason `renewal`. |
 

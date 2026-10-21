@@ -1,0 +1,116 @@
+{
+  "items": [
+    {
+      "brand_id": "bus_Kpa8zN3bW2Yq",
+      "created_at": "2026-10-15T09:00:05Z",
+      "currency": "USD",
+      "customer": {
+        "customer_id": "cus_Wn4cTb6Jk1Ps",
+        "email": "alan@example.com",
+        "name": "Alan Turing"
+      },
+      "digital_products_delivered": false,
+      "dispute_status": null,
+      "has_license_key": false,
+      "is_multi_subscription": false,
+      "metadata": {},
+      "payment_id": "pay_Rn8vW2xJ5kL9mQ3pS6tU1",
+      "payment_provider": "dodo",
+      "refund_status": null,
+      "status": "succeeded",
+      "subscription_id": "sub_Hq3nK8wZ2xV5bM",
+      "subscription_ids": [
+        "sub_Hq3nK8wZ2xV5bM"
+      ],
+      "total_amount": 1500,
+      "charge_type": "renewal",
+      "retry_attempt": 0,
+      "includes_usage": false,
+      "service_periods": [
+        {
+          "subscription_id": "sub_Hq3nK8wZ2xV5bM",
+          "starts_at": "2026-10-15T09:00:00Z",
+          "ends_at": "2026-11-15T09:00:00Z",
+          "proration_factor": "1"
+        }
+      ],
+      "invoice_id": "inv_Rn8vW2xJ"
+    },
+    {
+      "brand_id": "bus_Kpa8zN3bW2Yq",
+      "created_at": "2026-09-15T09:00:04Z",
+      "currency": "USD",
+      "customer": {
+        "customer_id": "cus_Wn4cTb6Jk1Ps",
+        "email": "alan@example.com",
+        "name": "Alan Turing"
+      },
+      "digital_products_delivered": false,
+      "dispute_status": null,
+      "has_license_key": false,
+      "is_multi_subscription": false,
+      "metadata": {
+        "virling_vid": "v_77be02"
+      },
+      "payment_id": "pay_Fz2kT7bN4wQ8vC1mX5rL9",
+      "payment_provider": "dodo",
+      "refund_status": null,
+      "status": "succeeded",
+      "subscription_id": "sub_Hq3nK8wZ2xV5bM",
+      "subscription_ids": [
+        "sub_Hq3nK8wZ2xV5bM"
+      ],
+      "total_amount": 1500,
+      "charge_type": "renewal",
+      "retry_attempt": 0,
+      "includes_usage": false,
+      "service_periods": [
+        {
+          "subscription_id": "sub_Hq3nK8wZ2xV5bM",
+          "starts_at": "2026-09-15T09:00:00Z",
+          "ends_at": "2026-10-15T09:00:00Z",
+          "proration_factor": "1"
+        }
+      ],
+      "invoice_id": "inv_Fz2kT7bN"
+    },
+    {
+      "brand_id": "bus_Kpa8zN3bW2Yq",
+      "created_at": "2026-09-01T09:00:02Z",
+      "currency": "USD",
+      "customer": {
+        "customer_id": "cus_Wn4cTb6Jk1Ps",
+        "email": "alan@example.com",
+        "name": "Alan Turing"
+      },
+      "digital_products_delivered": false,
+      "dispute_status": null,
+      "has_license_key": false,
+      "is_multi_subscription": false,
+      "metadata": {
+        "virling_vid": "v_77be02"
+      },
+      "payment_id": "pay_Tr1aL0zE6yH3nB9pK2dW4",
+      "payment_provider": "dodo",
+      "refund_status": null,
+      "status": "succeeded",
+      "subscription_id": "sub_Hq3nK8wZ2xV5bM",
+      "subscription_ids": [
+        "sub_Hq3nK8wZ2xV5bM"
+      ],
+      "total_amount": 0,
+      "charge_type": "new",
+      "retry_attempt": 0,
+      "includes_usage": false,
+      "service_periods": [
+        {
+          "subscription_id": "sub_Hq3nK8wZ2xV5bM",
+          "starts_at": "2026-09-01T09:00:00Z",
+          "ends_at": "2026-09-15T09:00:00Z",
+          "proration_factor": "1"
+        }
+      ],
+      "invoice_id": "inv_Tr1aL0zE"
+    }
+  ]
+}

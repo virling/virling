@@ -21,8 +21,6 @@ const PAGE_SIZE: usize = 20;
 const MAX_PAGE: u32 = 1000;
 /// Extra GETs per fetch before ending the round, keeping a round under Dodo's 240 requests/minute.
 const LOOKUP_BUDGET: usize = 2;
-/// A subscription payment made this long after the subscription started is a renewal.
-const RENEWAL_GAP: Duration = Duration::hours(12);
 const SUBSCRIPTION_PAGE: usize = 100;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -217,12 +215,6 @@ struct DodoDispute {
 }
 
 #[derive(Debug, Deserialize)]
-struct DodoSubscription {
-    #[serde(with = "time::serde::rfc3339")]
-    created_at: OffsetDateTime,
-}
-
-#[derive(Debug, Deserialize)]
 struct DodoSubscriptionRow {
     subscription_id: String,
     status: String,
@@ -317,8 +309,18 @@ impl DodoPayment {
     }
 }
 
-fn is_renewal(payment: OffsetDateTime, subscription_created: OffsetDateTime) -> bool {
-    payment - subscription_created > RENEWAL_GAP
+/// The earliest paid payment of a subscription, by time then id; a free trial's $0 start does not count.
+fn first_paid(payments: &[DodoPayment]) -> Option<(OffsetDateTime, String)> {
+    payments
+        .iter()
+        .filter(|p| p.total_amount > 0)
+        .map(|p| (p.created_at, p.payment_id.clone()))
+        .min()
+}
+
+/// A subscription payment is a renewal when the subscription was paid before it.
+fn is_renewal(p: &DodoPayment, first: Option<&(OffsetDateTime, String)>) -> bool {
+    first.is_some_and(|(at, id)| (p.created_at, &p.payment_id) > (*at, id))
 }
 
 /// Distinct payments touched by a page of refunds, in first-seen order.
@@ -394,7 +396,7 @@ struct Api<'a> {
     key: &'a str,
     base: &'static str,
     lookups: usize,
-    subscriptions: HashMap<String, OffsetDateTime>,
+    first_paid: HashMap<String, Option<(OffsetDateTime, String)>>,
 }
 
 impl Api<'_> {
@@ -426,16 +428,27 @@ impl Api<'_> {
         let Some(sub) = &p.subscription_id else {
             return Ok(false);
         };
-        let created = match self.subscriptions.get(sub) {
-            Some(t) => *t,
-            None => {
+        if !self.first_paid.contains_key(sub) {
+            let mut firsts = Vec::new();
+            for page in 0..MAX_SUBSCRIPTION_PAGES {
                 self.lookups += 1;
-                let s: DodoSubscription = self.get(&format!("/subscriptions/{sub}"), &[]).await?;
-                self.subscriptions.insert(sub.clone(), s.created_at);
-                s.created_at
+                let query = [
+                    ("subscription_id", sub.clone()),
+                    ("status", "succeeded".into()),
+                    ("page_size", SUBSCRIPTION_PAGE.to_string()),
+                    ("page_number", page.to_string()),
+                ];
+                let list: List<DodoPayment> = self.get("/payments", &query).await?;
+                let done = list.items.len() < SUBSCRIPTION_PAGE;
+                firsts.extend(first_paid(&list.items));
+                if done {
+                    break;
+                }
             }
-        };
-        Ok(is_renewal(p.created_at, created))
+            self.first_paid
+                .insert(sub.clone(), firsts.into_iter().min());
+        }
+        Ok(is_renewal(p, self.first_paid[sub].as_ref()))
     }
 
     async fn payments_page(&mut self, w: Window) -> anyhow::Result<(usize, Vec<Fetched>)> {
@@ -550,7 +563,7 @@ pub async fn fetch(
         key,
         base: cursor.mode.base(),
         lookups: 0,
-        subscriptions: HashMap::new(),
+        first_paid: HashMap::new(),
     };
     let (n, payments) = match cursor.phase {
         Phase::Payments => api.payments_page(w).await?,
@@ -670,36 +683,47 @@ mod tests {
         assert_eq!(p.refunded_from_detail(), 1500);
     }
 
+    fn subscription_payments() -> Vec<DodoPayment> {
+        let list: List<DodoPayment> =
+            serde_json::from_str(include_str!("fixtures/dodo_subscription_payments.json")).unwrap();
+        list.items
+    }
+
     #[test]
-    fn subscription_renewal() {
-        let p = &payments()[3];
-        let sub: DodoSubscription =
+    fn first_charge_after_a_free_trial_is_not_a_renewal() {
+        let sub: serde_json::Value =
             serde_json::from_str(include_str!("fixtures/dodo_subscription.json")).unwrap();
-        assert_eq!(p.subscription_id.as_deref(), Some("sub_Hq3nK8wZ2xV5bM"));
-        assert!(is_renewal(p.created_at, sub.created_at));
-        assert!(!is_renewal(
-            sub.created_at + Duration::minutes(3),
-            sub.created_at
-        ));
-        let f = p.to_fetched(0, true);
+        assert_eq!(sub["trial_period_days"], 14);
+        let paid = subscription_payments();
+        let first = first_paid(&paid);
+        assert_eq!(
+            first,
+            Some((
+                datetime!(2026-09-15 09:00:04 UTC),
+                "pay_Fz2kT7bN4wQ8vC1mX5rL9".into()
+            )),
+            "the $0 trial start is not the first payment"
+        );
+        let flags: Vec<_> = paid.iter().map(|p| is_renewal(p, first.as_ref())).collect();
+        assert_eq!(flags, [true, false, false]);
+        assert!(!is_renewal(&paid[0], None), "no earlier payment found");
+        let f = paid[0].to_fetched(0, true);
         assert!(f.is_renewal);
         assert_eq!(f.customer_id.as_deref(), Some("cus_Wn4cTb6Jk1Ps"));
     }
 
     #[test]
     fn renewals_and_plan_changes_keep_the_first_channel() {
-        let sub: DodoSubscription =
-            serde_json::from_str(include_str!("fixtures/dodo_subscription.json")).unwrap();
-        let mut first = payments().remove(3);
-        first.payment_id = "pay_first".into();
-        first.created_at = sub.created_at + Duration::minutes(2);
+        let paid = subscription_payments();
+        let mut first = subscription_payments().remove(1);
         first.metadata.insert("virling_vid".into(), "v_sub".into());
-        let mut upgrade = payments().remove(3);
+        let mut upgrade = subscription_payments().remove(0);
         upgrade.payment_id = "pay_upgrade".into();
-        upgrade.created_at = datetime!(2026-09-15 14:00 UTC);
-        let fetched: Vec<Fetched> = [first, upgrade, payments().remove(3)]
+        upgrade.created_at = datetime!(2026-09-20 14:00 UTC);
+        let anchor = first_paid(&paid);
+        let fetched: Vec<Fetched> = [first, upgrade, subscription_payments().remove(0)]
             .iter()
-            .map(|p| p.to_fetched(0, is_renewal(p.created_at, sub.created_at)))
+            .map(|p| p.to_fetched(0, is_renewal(p, anchor.as_ref())))
             .collect();
         let flags: Vec<_> = fetched.iter().map(|f| f.is_renewal).collect();
         assert_eq!(flags, [false, true, true]);

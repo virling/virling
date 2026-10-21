@@ -27,5 +27,5 @@
   "subscription_period_count": 10,
   "subscription_period_interval": "Year",
   "tax_inclusive": false,
-  "trial_period_days": 0
+  "trial_period_days": 14
 }
