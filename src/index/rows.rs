@@ -497,6 +497,42 @@ impl SiteIndex {
         }
     }
 
+    /// The visits, pages or revenue `visitor_row` gives `v`, to sort `visitor_list` by.
+    fn sort_key(&self, v: u32, lo: i64, hi: i64, sort: Option<&str>) -> i64 {
+        match sort {
+            Some("visits" | "pages") => {
+                let (mut visits, mut pages) = (0, 0);
+                for s in self.sessions_of(v) {
+                    let sess = &self.sessions[s as usize];
+                    if sess.first >= hi || sess.last < lo {
+                        continue;
+                    }
+                    let n = self
+                        .pageviews_of(s)
+                        .filter(|pv| pv.ts >= lo && pv.ts < hi)
+                        .count() as i64;
+                    pages += n;
+                    visits += (n > 0 || self.marks_of(s).any(|m| m.ts >= lo && m.ts < hi)) as i64;
+                }
+                if sort == Some("visits") {
+                    visits
+                } else {
+                    pages
+                }
+            }
+            Some("revenue") => {
+                let owned = self.owned.get(&self.visitors[v as usize].id.key());
+                let revenue: f64 = owned
+                    .map_or(&[][..], |o| &o[..])
+                    .iter()
+                    .map(|&i| self.payments[i as usize].net.unwrap_or(0.0))
+                    .sum();
+                (revenue * 100.0).round() as i64
+            }
+            _ => 0,
+        }
+    }
+
     pub fn visitor_list(
         &self,
         lo: i64,
@@ -517,11 +553,10 @@ impl SiteIndex {
             .hosts
             .as_ref()
             .map(|h| h.iter().filter_map(|h| self.strings.get(h)).collect());
-        let detailed = filter.goal.is_some()
-            || filter.clicked_out.is_some()
-            || filter.search.is_some()
-            || filter.sort.is_some();
-        let mut list: Vec<(i64, u32, Option<Box<VisitorRow>>)> = Vec::new();
+        let detailed =
+            filter.goal.is_some() || filter.clicked_out.is_some() || filter.search.is_some();
+        let sort = filter.sort.as_deref();
+        let mut list: Vec<(i64, i64, u32, Option<Box<VisitorRow>>)> = Vec::new();
         for (v, t) in last {
             let ft = self.visitors[v as usize].first_touch;
             let cols = (ft != NONE).then(|| &self.sessions[ft as usize].cols);
@@ -566,22 +601,14 @@ impl SiteIndex {
                     }
                 }
             }
-            list.push((t, v, row));
+            list.push((self.sort_key(v, lo, hi, sort), t, v, row));
         }
-        let key = |r: &Option<Box<VisitorRow>>| -> i64 {
-            r.as_ref().map_or(0, |r| match filter.sort.as_deref() {
-                Some("visits") => r.visits as i64,
-                Some("pages") => r.pageviews as i64,
-                Some("revenue") => (r.revenue_usd * 100.0).round() as i64,
-                _ => 0,
-            })
-        };
-        let order = |a: &(i64, u32, Option<Box<VisitorRow>>),
-                     b: &(i64, u32, Option<Box<VisitorRow>>)| {
-            key(&b.2).cmp(&key(&a.2)).then(b.0.cmp(&a.0)).then_with(|| {
-                self.visitors[a.1 as usize]
+        let order = |a: &(i64, i64, u32, Option<Box<VisitorRow>>),
+                     b: &(i64, i64, u32, Option<Box<VisitorRow>>)| {
+            b.0.cmp(&a.0).then(b.1.cmp(&a.1)).then_with(|| {
+                self.visitors[a.2 as usize]
                     .id
-                    .cmp(&self.visitors[b.1 as usize].id)
+                    .cmp(&self.visitors[b.2 as usize].id)
             })
         };
         let total = list.len() as u64;
@@ -596,7 +623,7 @@ impl SiteIndex {
             .into_iter()
             .skip(offset as usize)
             .take(limit as usize)
-            .map(|(t, v, row)| row.map_or_else(|| self.visitor_row(v, lo, hi, t), |r| *r))
+            .map(|(_, t, v, row)| row.map_or_else(|| self.visitor_row(v, lo, hi, t), |r| *r))
             .collect();
         VisitorPage { total, rows }
     }
