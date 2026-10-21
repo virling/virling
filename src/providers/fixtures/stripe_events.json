@@ -312,6 +312,40 @@
         "idempotency_key": null
       },
       "type": "charge.dispute.closed"
+    },
+    {
+      "id": "evt_1NtrialCheckout0000000",
+      "object": "event",
+      "api_version": "2025-02-24.acacia",
+      "created": 1691469270,
+      "data": {
+        "object": {
+          "id": "cs_test_a1TrialStart0000000000000000000000000000000000",
+          "object": "checkout.session",
+          "amount_subtotal": 0,
+          "amount_total": 0,
+          "client_reference_id": "v_4f2a9c1e",
+          "created": 1691469267,
+          "currency": "usd",
+          "customer": "cus_NffrFeUfNV2Hib",
+          "livemode": false,
+          "metadata": {},
+          "mode": "subscription",
+          "payment_intent": null,
+          "payment_status": "no_payment_required",
+          "status": "complete",
+          "subscription": "sub_1MowQVLkdIwHu7ixeRlqHVzs",
+          "success_url": "https://example.com/welcome",
+          "url": null
+        }
+      },
+      "livemode": false,
+      "pending_webhooks": 0,
+      "request": {
+        "id": null,
+        "idempotency_key": null
+      },
+      "type": "checkout.session.completed"
     }
   ]
 }

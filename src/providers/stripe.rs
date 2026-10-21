@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
 use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription, months};
+use crate::events::TRIAL;
 
 const API: &str = "https://api.stripe.com/v1";
 // Last version where Charge.invoice exists, so one expanded list call yields billing_reason.
@@ -16,13 +17,14 @@ const OVERLAP_SECS: i64 = 60;
 const VID_KEY: &str = "virling_vid";
 const REJECTED: &str =
     "Stripe rejected this key. Check it was copied in full and has not been deleted or rolled.";
-const EVENT_TYPES: [&str; 6] = [
+const EVENT_TYPES: [&str; 7] = [
     "charge.succeeded",
     "charge.failed",
     "charge.captured",
     "charge.refunded",
     "charge.refund.updated",
     "charge.dispute.closed",
+    "checkout.session.completed",
 ];
 
 pub async fn check_key(client: &reqwest::Client, key: &str) -> anyhow::Result<()> {
@@ -148,6 +150,7 @@ pub async fn fetch(
             query.extend(page_query(cur.events.after.as_deref()));
             query.extend(EVENT_TYPES.iter().map(|t| ("types[]", t.to_string())));
             let list: List<Event> = get(client, key, "/events", &query).await?;
+            payments.extend(trial_starts(&list.data));
             for (id, lost) in charges_to_refetch(&list.data, cur.charges.floor) {
                 let path = format!("/charges/{id}");
                 let expand = [
@@ -268,6 +271,30 @@ fn charges_to_refetch(events: &[Event], charge_floor: i64) -> BTreeMap<String, i
         *entry = (*entry).max(lost);
     }
     out
+}
+
+/// Subscription checkouts that charged nothing, like a free trial, as anchors for the subscription's later charges.
+fn trial_starts(events: &[Event]) -> Vec<Fetched> {
+    events
+        .iter()
+        .map(|e| &e.data.object)
+        .filter(|o| o.object == "checkout.session" && o.mode.as_deref() == Some("subscription"))
+        .filter(|o| o.amount_total == Some(0))
+        .filter_map(|o| {
+            Some(Fetched {
+                provider_payment_id: o.id.clone(),
+                ts: OffsetDateTime::from_unix_timestamp(o.created?).ok()?,
+                amount: 0,
+                currency: o.currency.clone().unwrap_or_default(),
+                refunded: 0,
+                status: TRIAL.into(),
+                visitor_id: non_empty(o.metadata.get(VID_KEY))
+                    .or_else(|| non_empty(o.client_reference_id.as_ref())),
+                customer_id: o.customer.clone(),
+                is_renewal: false,
+            })
+        })
+        .collect()
 }
 
 /// Looks up the Checkout Session only when the charge itself carries no visitor ID.
@@ -512,7 +539,7 @@ struct EventData {
     object: EventObject,
 }
 
-/// Fields shared by the charge, refund and dispute objects these events carry.
+/// Fields of the charge, refund, dispute and checkout session objects these events carry.
 #[derive(Debug, Deserialize)]
 struct EventObject {
     id: String,
@@ -522,6 +549,13 @@ struct EventObject {
     #[serde(default)]
     amount: i64,
     status: Option<String>,
+    mode: Option<String>,
+    amount_total: Option<i64>,
+    currency: Option<String>,
+    customer: Option<String>,
+    client_reference_id: Option<String>,
+    #[serde(default)]
+    metadata: HashMap<String, String>,
 }
 
 #[cfg(test)]
@@ -683,6 +717,28 @@ mod tests {
         let site = e2e::site(Provider::Stripe, payments, "v_4f2a9c1e");
         assert!(site.touch("ch_3NsubCreate00000000000").is_some());
         assert_eq!(site.touch("ch_3NrenewalCycle00000000"), None);
+    }
+
+    #[test]
+    fn free_trial_checkout_credits_the_first_charge() {
+        let list: List<Event> =
+            serde_json::from_str(include_str!("fixtures/stripe_events.json")).unwrap();
+        let trials = trial_starts(&list.data);
+        assert_eq!(trials.len(), 1);
+        assert_eq!(
+            (
+                trials[0].status.as_str(),
+                trials[0].amount,
+                trials[0].visitor_id.as_deref()
+            ),
+            (TRIAL, 0, Some("v_4f2a9c1e"))
+        );
+        let first = to_fetched(&charge("ch_3NrenewalCycle00000000"), None, 0).unwrap();
+        assert!(first.is_renewal && first.visitor_id.is_none());
+        let payments = trials.into_iter().chain([first]).collect();
+        let site = e2e::site(Provider::Stripe, payments, "v_4f2a9c1e");
+        site.assert_all_reddit();
+        assert_eq!(site.payments(), 1, "the trial start is not a payment");
     }
 
     #[test]
