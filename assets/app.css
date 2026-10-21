@@ -299,8 +299,8 @@ img.favicon { background: none; object-fit: contain; }
 .switch input:checked + span { background: var(--ink); }
 .switch input:checked + span::after { transform: translateX(18px); }
 .switch input:focus-visible + span { box-shadow: 0 0 0 3px var(--visitors-tint); }
-.conn { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--rule-2); }
-.conn .grow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.conn { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--rule-2); }
+.conn .grow { display: flex; flex: 1 1 280px; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 .conn .err { flex-basis: 100%; color: var(--error-text); }
 .setting > .input, .setting .actions > .input { flex: none; width: 280px; height: 40px; font-size: 14px; }
 .affix.compact { flex: none; width: 160px; height: 40px; }

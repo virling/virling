@@ -477,7 +477,7 @@ pub async fn disconnect(
     }
     let back = match input.back.as_deref() {
         Some("setup") => "setup/payments",
-        _ => "settings",
+        _ => "settings#payments",
     };
     Redirect::to(&app_path(&ctx.site.domain, back)).into_response()
 }
