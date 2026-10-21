@@ -74,55 +74,6 @@ impl SiteIndex {
         out
     }
 
-    /// Earliest time in [from, hi) visitor `v` reached `step`, with `paths` the IDs of a page step.
-    fn reached(&self, v: u32, step: &Step, paths: &[u32], from: i64, hi: i64) -> Option<i64> {
-        let mut best: Option<i64> = None;
-        let mut see = |t: i64| {
-            if t >= from && t < hi && best.is_none_or(|b| t < b) {
-                best = Some(t);
-            }
-        };
-        match step {
-            Step::Paid => {
-                for &t in self.paid_at.get(&self.visitors[v as usize].id.key())? {
-                    see(t);
-                }
-            }
-            Step::Visit | Step::Page(_) => {
-                let page = matches!(step, Step::Page(_));
-                if page && paths.is_empty() {
-                    return None;
-                }
-                for s in self.sessions_of(v) {
-                    let sess = &self.sessions[s as usize];
-                    if sess.last < from || sess.first >= hi {
-                        continue;
-                    }
-                    for pv in self.pageviews_of(s) {
-                        if !page || paths.contains(&pv.path) {
-                            see(pv.ts);
-                        }
-                    }
-                }
-            }
-            Step::Goal(name) => {
-                let name = self.strings.get(name)?;
-                for s in self.sessions_of(v) {
-                    let sess = &self.sessions[s as usize];
-                    if sess.last < from || sess.first >= hi {
-                        continue;
-                    }
-                    for m in self.marks_of(s) {
-                        if m.kind == GOAL && m.name == name {
-                            see(m.ts);
-                        }
-                    }
-                }
-            }
-        }
-        best
-    }
-
     pub fn funnel(&self, lo: i64, hi: i64, scope: &Scope, steps: &[Step]) -> Vec<StepCount> {
         let mut at: FastMap<u32, i64> = FastMap::default();
         let from = self
@@ -143,18 +94,46 @@ impl SiteIndex {
             median_secs: None,
         }];
         for step in steps.iter().skip(1) {
-            let paths = match step {
-                Step::Page(p) => self.strings.matching(p),
-                _ => Vec::new(),
-            };
+            // Earliest time in [time of the step before, hi) each visitor reached this step.
             let mut next: FastMap<u32, i64> = FastMap::default();
-            let mut gaps: Vec<i64> = Vec::new();
-            for (&v, &t) in &at {
-                if let Some(r) = self.reached(v, step, &paths, t, hi) {
-                    next.insert(v, r);
-                    gaps.push(r - t);
+            let mut see = |v: u32, t: i64| {
+                if t < hi && at.get(&v).is_some_and(|&from| t >= from) {
+                    let e = next.entry(v).or_insert(t);
+                    *e = (*e).min(t);
+                }
+            };
+            match step {
+                Step::Paid => {
+                    for &v in at.keys() {
+                        let paid = self.paid_at.get(&self.visitors[v as usize].id.key());
+                        for &t in paid.into_iter().flatten() {
+                            see(v, t);
+                        }
+                    }
+                }
+                Step::Goal(name) => {
+                    if let Some(name) = self.strings.get(name) {
+                        for g in self.goals_in(lo, hi) {
+                            if g.name == name {
+                                see(self.sessions[g.session as usize].visitor, g.ts);
+                            }
+                        }
+                    }
+                }
+                Step::Visit | Step::Page(_) => {
+                    let paths = match step {
+                        Step::Page(p) => Some(self.strings.matching(p)),
+                        _ => None,
+                    };
+                    for &p in &self.pv_by_ts[from..to] {
+                        let pv = &self.pageviews[p as usize];
+                        if paths.as_ref().is_none_or(|ps| ps.contains(&pv.path)) {
+                            see(self.sessions[pv.session as usize].visitor, pv.ts);
+                        }
+                    }
                 }
             }
+            let mut gaps: Vec<i64> = next.iter().map(|(v, &r)| r - at[v]).collect();
             gaps.sort_unstable();
             let n = gaps.len();
             let median = (n > 0).then(|| {
