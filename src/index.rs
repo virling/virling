@@ -992,7 +992,12 @@ pub struct Zones {
 }
 
 impl Zones {
-    fn year(&self, conn: &Connection, tz: &str, year: i32) -> anyhow::Result<Arc<Vec<(i64, i64)>>> {
+    pub(crate) fn year(
+        &self,
+        conn: &Connection,
+        tz: &str,
+        year: i32,
+    ) -> anyhow::Result<Arc<Vec<(i64, i64)>>> {
         if let Some(z) = self.years.lock().unwrap().get(&(tz.to_string(), year)) {
             return Ok(z.clone());
         }
