@@ -39,4 +39,4 @@ jobs:
           budgets=""
           if [ "${{ matrix.scale }}" -le 10 ]; then budgets="--budgets .github/perf-budgets.txt"; fi
           ./target/release/virling --data-dir "$RUNNER_TEMP/bench" bench \
-            --scale ${{ matrix.scale }} --no-cache $budgets
+            --scale ${{ matrix.scale }} --no-cache --runs 60 $budgets
