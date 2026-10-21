@@ -214,7 +214,7 @@ pub fn pivot(visitors: Vec<LabelCount>, conversions: Vec<LabelConversion>) -> Ve
         match c.kind.as_str() {
             "waitlist_selfhost" => rows[i].waitlist_selfhost += c.count,
             "waitlist_agency" => rows[i].waitlist_agency += c.count,
-            "preorder" => rows[i].preorder += c.count,
+            "preorder" | "preorder_personal" => rows[i].preorder += c.count,
             _ => {}
         }
     }
@@ -400,6 +400,11 @@ mod tests {
                 count: 1,
             },
             LabelConversion {
+                label: "Social".into(),
+                kind: "preorder_personal".into(),
+                count: 1,
+            },
+            LabelConversion {
                 label: "Email".into(),
                 kind: "waitlist_selfhost".into(),
                 count: 3,
@@ -414,7 +419,7 @@ mod tests {
                 visitors: 10,
                 waitlist_selfhost: 0,
                 waitlist_agency: 2,
-                preorder: 1
+                preorder: 2
             }
         );
         assert_eq!(rows[1].visitors, 4);

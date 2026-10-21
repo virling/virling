@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self-host Virling: one binary on your server</title>
+<meta name="description" content="Run Virling on your own server: one Rust binary with embedded storage for Linux, macOS or Docker. Free under AGPLv3, with no Postgres, ClickHouse or Redis.">
+<link rel="canonical" href="https://virling.com/self-host">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/self-host">
+<meta property="og:title" content="Self-host Virling: one binary on your server">
+<meta property="og:description" content="Run Virling on your own server: one Rust binary with embedded storage for Linux, macOS or Docker. Free under AGPLv3, with no Postgres, ClickHouse or Redis.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Self-host","item":"https://virling.com/self-host"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://beta.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host" aria-current="page">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="/#join" data-goal="join_click">Get early access</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">self-host</span>
+      <h1>One binary. Your server.<br>Your data stays put.</h1>
+      <p class="lead">Virling is open source under AGPLv3 and free to run yourself. Download it, start it, add one tag to your site and connect a payment provider.</p>
+    </div>
+  </div></section>
+
+  <section class="band"><div class="wrap">
+    <div class="split even">
+      <div class="txt">
+        <h2>What you get</h2>
+        <ul class="facts">
+            <li><i></i><span>Revenue and revenue per visitor for every channel, page and country</span></li>
+            <li><i></i><span>The visits before each payment, from the payment provider back to the first click</span></li>
+            <li><i></i><span>Last non-direct or first-touch attribution, with a 30, 60, 90 or 365 day lookback</span></li>
+            <li><i></i><span>A tracking script of about 1.3 KB gzipped, with an optional cookieless mode</span></li>
+            <li><i></i><span>A read API, an MCP server and a CLI for your own tools</span></li>
+        </ul>
+      </div>
+      <div class="txt">
+        <h2>What it needs</h2>
+        <ul class="facts">
+            <li><i></i><span>Linux on x86_64 or arm64, macOS on Intel or Apple silicon, or Docker</span></li>
+            <li><i></i><span>A domain pointing at the server, behind your reverse proxy for HTTPS</span></li>
+            <li><i></i><span>Port 8080, and one data folder: SQLite for settings, DuckDB for events</span></li>
+            <li><i></i><span>No Postgres, no ClickHouse, no Redis</span></li>
+        </ul>
+      </div>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt">
+      <h2>Install</h2>
+      <p class="p">The install script picks the right build for your machine and checks its checksum. Then start the server with the app turned on.</p>
+      <div class="code block"><pre>curl -fsSL https://virling.com/install.sh | sh
+VIRLING_BASE_URL=https://stats.example.com virling serve --app</pre></div>
+      <p class="p">Or run the container:</p>
+      <div class="code block"><pre>docker run -d --name virling -p 8080:8080 -v virling-data:/data \
+  -e VIRLING_BASE_URL=https://stats.example.com \
+  ghcr.io/virling/virling:latest serve --app</pre></div>
+      <p class="p">The <a href="https://docs.virling.com/quickstart">quickstart</a> walks through adding your site, the script and a payment provider.</p>
+    </div>
+  </div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="links"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><span class="grow"></span><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/self-host">Self-host</a><a href="/demo">Demo</a><a href="/changelog">Changelog</a><a href="/agency" data-goal="agency_click">Agencies</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a></div>
+  <div class="fine"><span>Open source under AGPLv3. Built by Stacklance Infotech LLP.</span><span>In development. Not launched yet.</span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

@@ -6,15 +6,88 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use sha2::Sha256;
 
-pub const PRODUCT_ID: &str = "pdt_0NpivoyuFRZUf0fvEylOg";
+pub const AGENCY_PRODUCT_ID: &str = "pdt_0NpivoyuFRZUf0fvEylOg";
+pub const PERSONAL_PRODUCT_ID: &str = "pdt_0NqDoRZUoz8LY0PbCgNu8";
 pub const FOUNDING_SPOTS: u64 = 50;
 const TOLERANCE_SECS: i64 = 5 * 60;
 
-pub fn session_body(email: Option<&str>, visitor_id: Option<&str>, code: Option<&str>) -> Value {
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Plan {
+    #[default]
+    Agency,
+    Personal,
+}
+
+impl Plan {
+    pub fn parse(s: &str) -> Option<Plan> {
+        match s {
+            "agency" => Some(Plan::Agency),
+            "personal" => Some(Plan::Personal),
+            _ => None,
+        }
+    }
+
+    pub fn product_id(self) -> &'static str {
+        match self {
+            Plan::Agency => AGENCY_PRODUCT_ID,
+            Plan::Personal => PERSONAL_PRODUCT_ID,
+        }
+    }
+
+    fn from_product(id: &str) -> Option<Plan> {
+        [Plan::Agency, Plan::Personal]
+            .into_iter()
+            .find(|p| p.product_id() == id)
+    }
+
+    fn return_url(self) -> &'static str {
+        match self {
+            Plan::Agency => "https://virling.com/agency?preorder=done",
+            Plan::Personal => "https://virling.com/pricing?preorder=done",
+        }
+    }
+
+    fn source(self) -> &'static str {
+        match self {
+            Plan::Agency => "virling.com/agency",
+            Plan::Personal => "virling.com/pricing",
+        }
+    }
+
+    /// KV key of the founder counter; the agency key predates plans and stays as it was.
+    pub fn count_key(self) -> &'static str {
+        match self {
+            Plan::Agency => "founders:count",
+            Plan::Personal => "founders:personal:count",
+        }
+    }
+
+    pub fn founder_key(self, payment_id: &str) -> String {
+        match self {
+            Plan::Agency => format!("founder:{payment_id}"),
+            Plan::Personal => format!("founder:personal:{payment_id}"),
+        }
+    }
+
+    pub fn conversion(self) -> &'static str {
+        match self {
+            Plan::Agency => "preorder",
+            Plan::Personal => "preorder_personal",
+        }
+    }
+}
+
+pub fn session_body(
+    plan: Plan,
+    email: Option<&str>,
+    visitor_id: Option<&str>,
+    code: Option<&str>,
+) -> Value {
     let mut body = json!({
-        "product_cart": [{ "product_id": PRODUCT_ID, "quantity": 1 }],
-        "return_url": "https://virling.com/agency?preorder=done",
-        "metadata": { "source": "virling.com/agency" },
+        "product_cart": [{ "product_id": plan.product_id(), "quantity": 1 }],
+        "return_url": plan.return_url(),
+        "metadata": { "source": plan.source() },
         "feature_flags": {
             "redirect_immediately": true,
             "allow_discount_code": true,
@@ -96,6 +169,7 @@ pub fn verify_signature(
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Founder {
+    pub plan: Plan,
     pub payment_id: String,
     pub email: String,
     pub name: Option<String>,
@@ -131,20 +205,20 @@ struct Customer {
     name: Option<String>,
 }
 
-/// Returns the new founder when the event is a succeeded payment for the founding spot.
+/// Returns the new founder when the event is a succeeded payment for a founding spot.
 pub fn founder_from_event(body: &str) -> Option<Founder> {
     let event: Event = serde_json::from_str(body).ok()?;
-    if event.kind != "payment.succeeded"
-        || !event
-            .data
-            .product_cart
-            .iter()
-            .any(|i| i.product_id == PRODUCT_ID)
-    {
+    if event.kind != "payment.succeeded" {
         return None;
     }
+    let plan = event
+        .data
+        .product_cart
+        .iter()
+        .find_map(|i| Plan::from_product(&i.product_id))?;
     let customer = event.data.customer?;
     Some(Founder {
+        plan,
         payment_id: event.data.payment_id?,
         email: customer.email,
         name: customer.name.filter(|n| !n.is_empty()),
@@ -275,8 +349,9 @@ mod tests {
     #[test]
     fn picks_succeeded_payment_for_founding_product() {
         assert_eq!(
-            founder_from_event(&event("payment.succeeded", PRODUCT_ID)),
+            founder_from_event(&event("payment.succeeded", AGENCY_PRODUCT_ID)),
             Some(Founder {
+                plan: Plan::Agency,
                 payment_id: "pay_123".into(),
                 email: "a@agency.com".into(),
                 name: Some("Ann".into()),
@@ -287,13 +362,27 @@ mod tests {
     }
 
     #[test]
+    fn picks_the_plan_from_the_product() {
+        let founder = founder_from_event(&event("payment.succeeded", PERSONAL_PRODUCT_ID)).unwrap();
+        assert_eq!(founder.plan, Plan::Personal);
+        assert_eq!(founder.payment_id, "pay_123");
+        assert_eq!(
+            founder_from_event(&event("payment.succeeded", AGENCY_PRODUCT_ID))
+                .unwrap()
+                .plan,
+            Plan::Agency
+        );
+        assert_ne!(AGENCY_PRODUCT_ID, PERSONAL_PRODUCT_ID);
+    }
+
+    #[test]
     fn ignores_other_events_and_products() {
         assert_eq!(
-            founder_from_event(&event("payment.failed", PRODUCT_ID)),
+            founder_from_event(&event("payment.failed", PERSONAL_PRODUCT_ID)),
             None
         );
         assert_eq!(
-            founder_from_event(&event("subscription.active", PRODUCT_ID)),
+            founder_from_event(&event("subscription.active", AGENCY_PRODUCT_ID)),
             None
         );
         assert_eq!(
@@ -310,21 +399,70 @@ mod tests {
     #[test]
     fn session_body_prefills_email_only_when_given() {
         let body = session_body(
+            Plan::Agency,
             Some("a@agency.com"),
             Some("vid-12345678"),
             Some("VIRLINGTEST96"),
         );
-        assert_eq!(body["product_cart"][0]["product_id"], PRODUCT_ID);
+        assert_eq!(body["product_cart"][0]["product_id"], AGENCY_PRODUCT_ID);
         assert_eq!(body["product_cart"][0]["quantity"], 1);
         assert_eq!(body["customer"]["email"], "a@agency.com");
         assert_eq!(body["metadata"]["source"], "virling.com/agency");
         assert_eq!(body["metadata"]["virling_vid"], "vid-12345678");
         assert_eq!(body["discount_codes"][0], "VIRLINGTEST96");
         assert_eq!(body["feature_flags"]["allow_discount_code"], true);
-        let bare = session_body(None, None, None);
+        let bare = session_body(Plan::Agency, None, None, None);
         assert!(bare.get("customer").is_none());
         assert!(bare["metadata"].get("virling_vid").is_none());
         assert!(bare.get("discount_codes").is_none());
+    }
+
+    #[test]
+    fn session_body_follows_the_plan() {
+        let agency = session_body(Plan::Agency, None, None, None);
+        assert_eq!(
+            agency["return_url"],
+            "https://virling.com/agency?preorder=done"
+        );
+        let personal = session_body(Plan::Personal, Some("a@me.com"), Some("vid-12345678"), None);
+        assert_eq!(
+            personal["product_cart"][0]["product_id"],
+            PERSONAL_PRODUCT_ID
+        );
+        assert_eq!(personal["product_cart"][0]["quantity"], 1);
+        assert_eq!(
+            personal["return_url"],
+            "https://virling.com/pricing?preorder=done"
+        );
+        assert_eq!(personal["metadata"]["source"], "virling.com/pricing");
+        assert_eq!(personal["metadata"]["virling_vid"], "vid-12345678");
+        assert_eq!(personal["customer"]["email"], "a@me.com");
+    }
+
+    #[test]
+    fn plans_parse_and_default_to_agency() {
+        assert_eq!(Plan::default(), Plan::Agency);
+        assert_eq!(Plan::parse("agency"), Some(Plan::Agency));
+        assert_eq!(Plan::parse("personal"), Some(Plan::Personal));
+        assert_eq!(Plan::parse("team"), None);
+        assert_eq!(
+            serde_json::from_str::<Plan>(r#""personal""#).unwrap(),
+            Plan::Personal
+        );
+        assert!(serde_json::from_str::<Plan>(r#""team""#).is_err());
+    }
+
+    #[test]
+    fn each_plan_keeps_its_own_counter_and_records() {
+        assert_eq!(Plan::Agency.count_key(), "founders:count");
+        assert_eq!(Plan::Agency.founder_key("pay_1"), "founder:pay_1");
+        assert_eq!(Plan::Personal.count_key(), "founders:personal:count");
+        assert_eq!(
+            Plan::Personal.founder_key("pay_1"),
+            "founder:personal:pay_1"
+        );
+        assert_eq!(Plan::Agency.conversion(), "preorder");
+        assert_eq!(Plan::Personal.conversion(), "preorder_personal");
     }
 
     #[test]
@@ -341,5 +479,6 @@ mod tests {
         assert_eq!(spots_left(0), 50);
         assert_eq!(spots_left(49), 1);
         assert_eq!(spots_left(60), 0);
+        assert_eq!(spots_left(FOUNDING_SPOTS), 0);
     }
 }

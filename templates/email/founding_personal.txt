@@ -1,0 +1,15 @@
+Thank you. You're founding customer #{{ number }}.
+
+Your spot is held. The $11.40 you paid today covers your first month after launch, and nothing more is charged until then. After that the Personal plan is $11.40 a month for life, instead of $19. Dodo Payments sends your receipt separately.
+
+What happens next
+01  We'll email you before the hosted version opens, with a date.
+
+One favor: reply with the site you'd track first and how you measure it today. It shapes what we build next.
+
+Changed your mind? Reply "refund" any time before launch and you get every payment back.
+
+Deven and Rahul
+Building Virling
+
+You got this because you pre-ordered the Virling Personal plan at virling.com. Virling by Stacklance Infotech LLP.

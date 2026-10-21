@@ -39,6 +39,18 @@ struct FoundingText {
     number: u64,
 }
 
+#[derive(Template)]
+#[template(path = "email/founding_personal.html")]
+struct FoundingPersonalHtml {
+    number: u64,
+}
+
+#[derive(Template)]
+#[template(path = "email/founding_personal.txt")]
+struct FoundingPersonalText {
+    number: u64,
+}
+
 #[derive(Serialize, Deserialize)]
 struct ConversionTotal {
     kind: String,
@@ -261,6 +273,8 @@ async fn leave(req: Request, ctx: RouteContext<()>) -> Result<Response> {
 
 #[derive(Deserialize, Default)]
 struct SessionInput {
+    #[serde(default)]
+    plan: preorder::Plan,
     email: Option<String>,
     visitor_id: Option<String>,
     code: Option<String>,
@@ -275,11 +289,9 @@ struct FounderRecord {
     emailed: bool,
 }
 
-const FOUNDER_COUNT: &str = "founders:count";
-
-async fn founder_count(kv: &kv::KvStore) -> Result<u64> {
+async fn founder_count(kv: &kv::KvStore, plan: preorder::Plan) -> Result<u64> {
     Ok(kv
-        .get(FOUNDER_COUNT)
+        .get(plan.count_key())
         .text()
         .await?
         .and_then(|n| n.parse().ok())
@@ -325,6 +337,7 @@ async fn preorder_session(mut req: Request, ctx: RouteContext<()>) -> Result<Res
         .with_headers(headers)
         .with_body(Some(
             preorder::session_body(
+                input.plan,
                 email.as_deref(),
                 visitor(input.visitor_id)
                     .or_else(|| visitor(preorder::cookie_visitor(&cookie)))
@@ -352,17 +365,26 @@ async fn preorder_session(mut req: Request, ctx: RouteContext<()>) -> Result<Res
 }
 
 async fn preorder_status(req: Request, ctx: RouteContext<()>) -> Result<Response> {
+    let url = req.url()?;
+    let query = |key: &str| {
+        url.query_pairs()
+            .find(|(k, _)| k == key)
+            .map(|(_, v)| v.into_owned())
+    };
+    let plan = match query("plan") {
+        None => preorder::Plan::Agency,
+        Some(p) => match preorder::Plan::parse(&p) {
+            Some(plan) => plan,
+            None => return json_status(json!({ "error": "Unknown plan" }), 400),
+        },
+    };
     let kv = ctx.kv("WAITLIST")?;
-    let founders = founder_count(&kv).await?;
-    let payment = req
-        .url()?
-        .query_pairs()
-        .find(|(k, _)| k == "payment_id")
-        .map(|(_, v)| v.into_owned())
+    let founders = founder_count(&kv, plan).await?;
+    let payment = query("payment_id")
         .filter(|s| s.len() <= 64 && s.chars().all(|c| c.is_ascii_alphanumeric() || c == '_'));
     let number = match payment {
         Some(id) => kv
-            .get(&format!("founder:{id}"))
+            .get(&plan.founder_key(&id))
             .json::<FounderRecord>()
             .await?
             .map(|r| r.number),
@@ -396,19 +418,21 @@ async fn dodo_webhook(mut req: Request, ctx: RouteContext<()>) -> Result<Respons
     };
     record_conversion(
         &ctx,
-        "preorder",
+        founder.plan.conversion(),
         visitor(founder.visitor_id.clone()).as_deref(),
         founder.amount_cents,
         Some(&founder.payment_id),
     )
     .await;
     let kv = ctx.kv("WAITLIST")?;
-    let key = format!("founder:{}", founder.payment_id);
+    let key = founder.plan.founder_key(&founder.payment_id);
     let mut record = match kv.get(&key).json::<FounderRecord>().await? {
         Some(record) => record,
         None => {
-            let number = founder_count(&kv).await? + 1;
-            kv.put(FOUNDER_COUNT, number.to_string())?.execute().await?;
+            let number = founder_count(&kv, founder.plan).await? + 1;
+            kv.put(founder.plan.count_key(), number.to_string())?
+                .execute()
+                .await?;
             let record = FounderRecord {
                 number,
                 email: founder.email,
@@ -425,13 +449,26 @@ async fn dodo_webhook(mut req: Request, ctx: RouteContext<()>) -> Result<Respons
     if !record.emailed {
         let render = |e: askama::Error| Error::RustError(e.to_string());
         let from = ctx.var("WAITLIST_FROM")?.to_string();
+        let number = record.number;
+        let (subject, html, text) = match founder.plan {
+            preorder::Plan::Agency => (
+                format!("You\u{2019}re founding agency #{number}"),
+                FoundingHtml { number }.render().map_err(render)?,
+                FoundingText { number }.render().map_err(render)?,
+            ),
+            preorder::Plan::Personal => (
+                format!("You\u{2019}re founding customer #{number}"),
+                FoundingPersonalHtml { number }.render().map_err(render)?,
+                FoundingPersonalText { number }.render().map_err(render)?,
+            ),
+        };
         let email = json!({
             "from": from,
             "reply_to": from,
             "to": [record.email],
-            "subject": format!("You\u{2019}re founding agency #{}", record.number),
-            "html": FoundingHtml { number: record.number }.render().map_err(render)?,
-            "text": FoundingText { number: record.number }.render().map_err(render)?,
+            "subject": subject,
+            "html": html,
+            "text": text,
         });
         send_email(&ctx.secret("RESEND_API_KEY")?.to_string(), &email).await?;
         record.emailed = true;
