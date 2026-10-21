@@ -100,7 +100,10 @@ h3 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.025em; }
 .code.block pre { white-space: pre; overflow-x: auto; text-overflow: clip; line-height: 1.6; }
 .sub-hero { max-width: 760px; padding: 32px 0 8px; }
 .top .lk[aria-current] { color: var(--ink); }
-.plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.plans .plan { display: grid; grid-row: span 2; grid-template-rows: subgrid; gap: 0; }
+.plans .plan-top > p.muted { min-height: 3.2em; }
+.plans .plan-steps .btn { width: 100%; justify-content: center; }
 .plans .plan-top .muted { font-size: 15px; }
 .shots { display: grid; gap: 40px; }
 .shots figure { margin: 0; display: flex; flex-direction: column; gap: 12px; }
