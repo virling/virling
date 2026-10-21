@@ -1163,13 +1163,15 @@ impl EventStore for DuckStore {
     }
 
     fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset> {
-        let conn = self.reader()?;
-        let secs: i64 = conn.query_row(
-            "SELECT (epoch_us(timezone(?, now())) - epoch_us(timezone('UTC', now()))) // 1000000",
-            params![tz],
-            |r| r.get(0),
-        )?;
-        Ok(UtcOffset::from_whole_seconds(secs as i32)?)
+        let now = OffsetDateTime::now_utc();
+        let us = (now.unix_timestamp_nanos() / 1000) as i64;
+        let year = self.zones.year(&*self.reader()?, tz, now.year())?;
+        let off = year
+            .iter()
+            .take_while(|s| s.0 <= us)
+            .last()
+            .map_or(0, |s| s.1);
+        Ok(UtcOffset::from_whole_seconds((off / 1_000_000) as i32)?)
     }
 
     fn rebuild_attribution(
@@ -1855,5 +1857,34 @@ mod channel_tests {
         drop(store);
         let store = DuckStore::open(&other).unwrap();
         assert_eq!(touches(&store.conn.lock().unwrap()), sessions.len());
+    }
+
+    #[test]
+    fn utc_offsets_match_duckdb() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = DuckStore::open(&dir.path().join("e.duckdb")).unwrap();
+        for tz in [
+            "UTC",
+            "America/New_York",
+            "Asia/Kolkata",
+            "Asia/Kathmandu",
+            "Australia/Lord_Howe",
+        ] {
+            let secs: i64 = store
+                .read()
+                .unwrap()
+                .query_row(
+                    "SELECT (epoch_us(timezone(?, now())) - epoch_us(timezone('UTC', now()))) // 1000000",
+                    params![tz],
+                    |r| r.get(0),
+                )
+                .unwrap();
+            assert_eq!(
+                store.utc_offset(tz).unwrap().whole_seconds() as i64,
+                secs,
+                "{tz}"
+            );
+        }
+        assert!(store.utc_offset("Not/AZone").is_err());
     }
 }
