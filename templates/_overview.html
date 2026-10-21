@@ -63,7 +63,8 @@
     <div class="d3-bc-head"><h2>AI</h2>{% if !a.rows.is_empty() %}<div class="d3-ai-cmp" aria-label="AI share of visitors and of revenue">
       <span class="l">Visitors</span><span class="t"><i style="width:{{ "{:.1}"|format(a.visitors_share) }}%"></i></span><b>{{ "{:.0}"|format(a.visitors_share) }}%</b>
       <span class="l">Revenue</span><span class="t rv"><i style="width:{{ "{:.1}"|format(a.revenue_share) }}%"></i></span><b>{{ "{:.0}"|format(a.revenue_share) }}%</b>
-    </div>{% endif %}</div>
+    </div>{% endif %}{% if let Some(n) = a.answers %}<nav class="d3-tabs" aria-label="AI view"><a href="{{ n.tabs.0 }}" data-tab="ai-p0"{% if !n.on %} class="on" aria-current="true"{% endif %}>Visits</a><a href="{{ n.tabs.1 }}" data-tab="ai-p1"{% if n.on %} class="on" aria-current="true"{% endif %}>Answers</a></nav>{% endif %}</div>
+    <div class="d3-panel" id="ai-p0"{% if let Some(n) = a.answers %}{% if n.on %} hidden{% endif %}{% endif %}>
     {% if a.rows.is_empty() %}
     <div class="d3-empty"><span class="d3-ai-logos">{% for l in a.logos %}{{ l|safe }}{% endfor %}</span><b>No AI activity yet</b><span>Visitors who click through from ChatGPT, Claude, Perplexity and others show up here, with the pages GPTBot, ClaudeBot and other AI crawlers read. Most crawlers never run JavaScript, so add the server snippet to count them.</span><a class="d3-link" href="{{ a.docs }}">Add the snippet</a></div>
     {% else %}
@@ -83,6 +84,29 @@
     </div>
     {% endfor %}
     <div class="d3-foot">{% if !a.spark.is_empty() %}<div class="d3-spark"><span>AI share of revenue</span><svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><path d="{{ a.spark }}" fill="none" stroke="currentColor" style="color:var(--revenue)" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg></div>{% endif %}<span>{{ a.trend }}</span><a href="{{ a.docs }}">Setup</a></div>
+    {% endif %}
+    </div>
+    {% if let Some(n) = a.answers %}
+    <div class="d3-panel" id="ai-p1"{% if !n.on %} hidden{% endif %}>
+    {% if n.rows.is_empty() %}
+    <div class="d3-empty"><span class="d3-ai-logos">{% for l in a.logos %}{{ l|safe }}{% endfor %}</span><b>No AI answers yet</b><span>When ChatGPT, Claude or Perplexity open your pages to answer someone, it shows here. They never run JavaScript, so add the server snippet to count them. To see how often each assistant names you, add your API keys.</span><span><a class="d3-link" href="{{ a.docs }}">Add the snippet</a><a class="d3-link" href="{{ n.settings }}">Add keys</a></span></div>
+    {% else %}
+    <div class="d3-row d3-ansrow th"><span>Assistant</span><span class="num pg">Used in</span><span class="num mt">Mentioned</span><span class="num v">Visitors</span><span class="num rv">Revenue</span></div>
+    {% for r in n.rows %}
+    <div class="d3-row d3-ansrow">
+      <div class="nmw"><a class="nm" href="{{ r.href }}" data-drawer title="See {{ r.name }} answers">
+        <span class="ic">{{ r.icon|safe }}</span>
+        <span class="tx"><b>{{ r.name }}</b>{% if !r.sub.is_empty() %}<span>{{ r.sub }}</span>{% endif %}</span>
+      </a></div>
+      <span class="num pg" title="{{ r.reads_title }}">{{ r.reads }}</span>
+      <span class="num mt">{{ r.mentioned }}{% if !r.was.is_empty() %}<small class="{{ r.tone }}">{{ r.was }}</small>{% endif %}</span>
+      <span class="num v">{{ r.visitors }}</span>
+      <span class="num rv">{{ r.revenue }}</span>
+    </div>
+    {% endfor %}
+    <div class="d3-foot"><span>{{ n.foot }}</span><a href="{{ n.settings }}">{% if n.keyed %}Questions{% else %}Add keys{% endif %}</a></div>
+    {% endif %}
+    </div>
     {% endif %}
   </div>
   {% endif %}{% endif %}

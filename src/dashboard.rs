@@ -20,6 +20,7 @@ pub(crate) type Href<'a> = dyn Fn(&[(&str, &str)]) -> String + 'a;
 /// Builds a link that filters the dashboard by owned params.
 pub(crate) type FilterHref<'a> = dyn Fn(&[(&'static str, String)]) -> String + 'a;
 
+pub mod answers;
 mod cards;
 pub(crate) mod daterange;
 mod goals;

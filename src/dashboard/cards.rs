@@ -843,6 +843,8 @@ pub struct AiCard {
     /// Greyed logos for the empty state.
     pub(super) logos: Vec<String>,
     pub(super) docs: &'static str,
+    /// The Answers tab, signed in only.
+    pub(super) answers: Option<super::answers::AnswersTab>,
 }
 
 /// One AI company: visitors and revenue from its assistants, pages its crawlers read.
@@ -854,7 +856,7 @@ pub struct AiRow {
 }
 
 /// The company behind an assistant source and the name its logo goes by.
-fn ai_company(source: &str) -> (String, String) {
+pub(super) fn ai_company(source: &str) -> (String, String) {
     let s = source.to_ascii_lowercase();
     let known: [(&[&str], &str, &str); 6] = [
         (&["openai", "chatgpt"], "OpenAI", "openai"),
@@ -1069,6 +1071,7 @@ pub fn ai_card(
             .map(|l| icons::source(l, 18))
             .collect(),
         docs: "https://docs.virling.com/track/ai-crawlers.html",
+        answers: None,
     }
 }
 

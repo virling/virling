@@ -5,7 +5,7 @@ use std::sync::Mutex;
 use std::time::Duration;
 
 use serde_json::{Value, json};
-use sqlx::SqlitePool;
+use sqlx::{Connection, SqlitePool};
 use time::OffsetDateTime;
 use url::Url;
 
@@ -598,7 +598,8 @@ async fn ask_all(
             match a.ask(&state.http, &base(a), &key, &q).await {
                 Ok(reply) => {
                     let found = analyze(&reply, &names, &domain);
-                    save(&state.db, site_id, day, a, &q, &found, &reply.text).await?;
+                    let mut conn = state.db.acquire().await?;
+                    save(&mut conn, site_id, day, a, &q, &found, &reply.text).await?;
                 }
                 Err(err) => {
                     tracing::warn!(provider = %provider, site = %site_id, %err, "AI answer failed");
@@ -619,7 +620,7 @@ async fn ask_all(
 
 /// Stores one answer, replacing an earlier one for the same day, assistant and question.
 pub async fn save(
-    db: &SqlitePool,
+    db: &mut sqlx::SqliteConnection,
     site_id: &str,
     day: i64,
     a: Assistant,
