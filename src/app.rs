@@ -217,6 +217,13 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/settings/timezone",
                 post(settings::save_timezone),
             )
+            .route("/app/{domain}/settings/ai", post(settings::save_ai))
+            .route("/app/{domain}/settings/ai/key", post(settings::save_ai_key))
+            .route(
+                "/app/{domain}/settings/ai/remove",
+                post(settings::remove_ai_key),
+            )
+            .route("/app/{domain}/settings/ai/run", post(settings::run_ai))
             .route("/app/{domain}/settings/share", post(settings::share))
             .route("/app/{domain}/settings/unshare", post(settings::revoke))
             .route("/app/{domain}/account", get(settings::account_page))

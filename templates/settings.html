@@ -101,6 +101,58 @@
   {% if connections.is_empty() %}<p class="empty">No payment provider connected yet.</p>{% endif %}
 </div>
 </section>
+<section class="set-sec" id="ai-answers">
+<div class="set-intro"><h2>AI answers</h2><p class="muted">Once a day, Virling asks your buyer questions to ChatGPT, Claude, Perplexity and Gemini with web search on, and counts how often they name {{ shell.domain }}. It uses your own API keys. Pages assistants open while answering are counted without any key.</p></div>
+<div class="card">
+  {% if !ai.note.is_empty() %}<div class="notice ok-note" role="status">{{ ai.note }}</div>{% endif %}
+  {% if !ai.error.is_empty() %}<div class="alert" role="alert">{{ ai.error }}</div>{% endif %}
+  {% for k in ai.keys %}
+  {% if k.connected && !k.replacing %}
+  <div class="conn">
+    <div class="grow">
+      {{ k.icon|safe }}<b>{{ k.name }}</b> {% if k.error.is_empty() %}<span class="badge ok">Connected</span>{% else %}<span class="badge bad">Error</span>{% endif %}
+      {% if !k.hint.is_empty() %}<span class="muted small">Key ending <span class="mono">{{ k.hint }}</span></span>{% endif %}
+      <span class="muted small">{{ k.about }}</span>
+      {% if !k.error.is_empty() %}<span class="err small">{{ k.error }}</span>{% endif %}
+    </div>
+    <a class="btn ghost" href="/app/{{ shell.domain }}/settings?replace={{ k.key }}#ai-answers">Replace key</a>
+    <form method="post" action="/app/{{ shell.domain }}/settings/ai/remove" data-confirm="Remove the {{ k.name }} key? Daily questions to it stop. Past answers stay in your reports." data-confirm-ok="Remove key">
+      <input type="hidden" name="provider" value="{{ k.key }}">
+      <button class="btn ghost" type="submit">Remove</button>
+    </form>
+  </div>
+  {% else %}
+  <form class="conn" method="post" action="/app/{{ shell.domain }}/settings/ai/key">
+    <div class="grow">
+      {{ k.icon|safe }}<b>{{ k.name }}</b>
+      <span class="muted small">{{ k.about }}</span>
+      <a class="help small" href="{{ k.help_url }}" target="_blank" rel="noopener">Get a key &#8599;</a>
+    </div>
+    <input type="hidden" name="provider" value="{{ k.key }}">
+    <input class="input mono ai-key" type="password" name="key" placeholder="{{ k.placeholder }}" autocomplete="off" spellcheck="false" aria-label="{{ k.name }} API key">
+    {% if k.replacing %}<a class="btn ghost" href="/app/{{ shell.domain }}/settings#ai-answers">Cancel</a>{% endif %}
+    <button class="btn secondary" type="submit">{% if k.replacing %}Save new key{% else %}Add key{% endif %}</button>
+  </form>
+  {% endif %}
+  {% endfor %}
+  <form method="post" action="/app/{{ shell.domain }}/settings/ai">
+    <div class="setting stacked">
+      <div><b><label for="ai-questions">Buyer questions</label></b><span class="muted">5 to 20, one per line. Write what a buyer would ask, without your name.{% if ai.suggested %} These three are suggestions; edit them and add at least two more.{% endif %}</span></div>
+      <textarea class="input set-area" id="ai-questions" name="questions" rows="7" spellcheck="true">{{ ai.questions }}</textarea>
+    </div>
+    <div class="setting">
+      <div><b><label for="ai-names">Names to look for</label></b><span class="muted">An answer counts as a mention when it names any of these or {{ shell.domain }}. Separate with commas.</span></div>
+      <input class="input" id="ai-names" name="names" value="{{ ai.names }}" placeholder="{{ ai.brand }}" maxlength="300">
+    </div>
+    <p class="muted small">{{ ai.cost }} Gemini's free tier includes Google Search grounding for up to 500 requests a day.</p>
+    <p class="muted small">{{ ai.run }}</p>
+    <div class="actions end">
+      <button class="btn ghost" type="submit" formaction="/app/{{ shell.domain }}/settings/ai/run"{% if !ai.can_run %} disabled{% endif %}>Run now</button>
+      <button class="btn" type="submit">Save questions</button>
+    </div>
+  </form>
+</div>
+</section>
 {% if shell.agency %}
 <form class="card" method="post" action="/app/{{ shell.domain }}/settings/report" id="report">
   <div class="card-head"><h2>Client report</h2><a class="btn secondary" href="/app/{{ shell.domain }}/report">Open report</a></div>
