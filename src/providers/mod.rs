@@ -219,6 +219,14 @@ pub(crate) mod e2e {
     }
 
     impl Site {
+        pub fn payments(&self) -> usize {
+            self.store
+                .payment_list("s", &self.period, PaymentFilter::All, 100, 0)
+                .unwrap()
+                .rows
+                .len()
+        }
+
         pub fn touch(&self, id: &str) -> Option<Touch> {
             self.store
                 .payment_list("s", &self.period, PaymentFilter::All, 100, 0)

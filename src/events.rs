@@ -46,6 +46,9 @@ pub struct Event {
     pub language: Option<String>,
 }
 
+/// Status of a free trial start; stored apart from payments, only to credit the trial's later charges.
+pub const TRIAL: &str = "trial";
+
 /// A payment as stored, one row per provider payment ID so re-syncs never double count.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Payment {
@@ -59,7 +62,7 @@ pub struct Payment {
     pub amount_usd: Option<f64>,
     /// Refunded and charged-back amount in minor units; net revenue is amount minus this.
     pub refunded: i64,
-    /// paid, refunded, partially_refunded, failed
+    /// paid, refunded, partially_refunded, failed, or trial for a free trial start
     pub status: String,
     pub visitor_id: Option<String>,
     /// Provider's opaque customer ID, used so renewals inherit the first payment's source.
@@ -238,6 +241,7 @@ pub trait EventStore: Send + Sync {
 }
 
 /// Sessions as touches (first pageview's fields), then the credited session per payment, then renewal inheritance.
+/// A payment without a visitor ID is credited from the customer's latest free trial start before it.
 const REBUILD_ATTRIBUTION: &str = "
 INSERT INTO attribution
 WITH starts AS (
@@ -246,15 +250,20 @@ WITH starts AS (
     WHERE site_id = $site
 ),
 pays AS (
-    SELECT provider, provider_payment_id, ts, visitor_id, customer_id, is_renewal, status
-    FROM payments WHERE site_id = $site
+    SELECT p.provider, p.provider_payment_id, p.ts, coalesce(p.visitor_id, tr.visitor_id) AS visitor_id,
+        coalesce(tr.ts, p.ts) AS touch_by, p.customer_id, p.is_renewal, p.status
+    FROM payments p
+    LEFT JOIN trials tr ON p.visitor_id IS NULL AND tr.site_id = p.site_id AND tr.provider = p.provider
+        AND tr.customer_id = p.customer_id AND tr.ts <= p.ts
+    WHERE p.site_id = $site
+    QUALIFY row_number() OVER (PARTITION BY p.provider, p.provider_payment_id ORDER BY tr.ts DESC NULLS LAST) = 1
 ),
 own AS (
     SELECT p.provider, p.provider_payment_id, t.*
     FROM pays p
     JOIN starts t ON t.visitor_id = p.visitor_id
-        AND t.ts <= p.ts
-        AND epoch_us(t.ts) >= epoch_us(p.ts) - $window_days * 86400000000
+        AND t.ts <= p.touch_by
+        AND epoch_us(t.ts) >= epoch_us(p.touch_by) - $window_days * 86400000000
     QUALIFY row_number() OVER (
         PARTITION BY p.provider, p.provider_payment_id
         ORDER BY
@@ -665,6 +674,15 @@ impl DuckStore {
                 is_renewal BOOLEAN NOT NULL,
                 PRIMARY KEY (site_id, provider, provider_payment_id)
             );
+            CREATE TABLE IF NOT EXISTS trials (
+                site_id VARCHAR NOT NULL,
+                provider VARCHAR NOT NULL,
+                trial_id VARCHAR NOT NULL,
+                ts TIMESTAMPTZ NOT NULL,
+                visitor_id VARCHAR,
+                customer_id VARCHAR,
+                PRIMARY KEY (site_id, provider, trial_id)
+            );
             CREATE TABLE IF NOT EXISTS attribution (
                 site_id VARCHAR NOT NULL,
                 provider VARCHAR NOT NULL,
@@ -1064,15 +1082,29 @@ impl EventStore for DuckStore {
                    visitor_id = coalesce(excluded.visitor_id, payments.visitor_id),
                    customer_id = excluded.customer_id, is_renewal = excluded.is_renewal",
             )?;
+            let mut trial =
+                tx.prepare("INSERT OR REPLACE INTO trials VALUES (?, ?, ?, ?, ?, ?)")?;
             for p in payments {
+                let ts = Value::Timestamp(
+                    TimeUnit::Microsecond,
+                    (p.ts.unix_timestamp_nanos() / 1000) as i64,
+                );
+                if p.status == TRIAL {
+                    trial.execute(params![
+                        p.site_id,
+                        p.provider,
+                        p.provider_payment_id,
+                        ts,
+                        p.visitor_id,
+                        p.customer_id,
+                    ])?;
+                    continue;
+                }
                 stmt.execute(params![
                     p.site_id,
                     p.provider,
                     p.provider_payment_id,
-                    Value::Timestamp(
-                        TimeUnit::Microsecond,
-                        (p.ts.unix_timestamp_nanos() / 1000) as i64
-                    ),
+                    ts,
                     p.amount,
                     p.currency,
                     p.amount_usd,
