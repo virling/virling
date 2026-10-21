@@ -890,6 +890,7 @@ impl DuckStore {
             }
             app.flush()?;
         }
+        let left = defer && fresh.len() > 0;
         if defer {
             tx.commit()?;
             self.pending.lock().unwrap().extend(fresh);
@@ -904,7 +905,7 @@ impl DuckStore {
         drop(touches);
         self.index.apply(events);
         drop(conn);
-        Ok(defer)
+        Ok(left)
     }
 
     /// A reader that sees every first pageview written so far.
