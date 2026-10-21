@@ -7,8 +7,7 @@ use time::OffsetDateTime;
 use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription, months};
 
 const API: &str = "https://api.stripe.com/v1";
-// Last version where Charge.invoice exists, so one expanded list call yields billing_reason.
-const API_VERSION: &str = "2025-02-24.acacia";
+const API_VERSION: &str = "2026-09-30.endive";
 const PAGE_SIZE: &str = "100";
 const BACKFILL_SECS: i64 = 90 * 86_400;
 // Re-read this many seconds below the newest object seen, in case Stripe lists one late.
@@ -127,7 +126,6 @@ pub async fn fetch(
         Phase::Charges => {
             let mut query = vec![("created[gte]", cur.charges.floor.to_string())];
             query.extend(page_query(cur.charges.after.as_deref()));
-            query.push(("expand[]", "data.invoice".into()));
             query.push(("expand[]", "data.payment_intent".into()));
             let list: List<Charge> = get(client, key, "/charges", &query).await?;
             for charge in &list.data {
@@ -150,10 +148,7 @@ pub async fn fetch(
             let list: List<Event> = get(client, key, "/events", &query).await?;
             for (id, lost) in charges_to_refetch(&list.data, cur.charges.floor) {
                 let path = format!("/charges/{id}");
-                let expand = [
-                    ("expand[]", "invoice".into()),
-                    ("expand[]", "payment_intent".into()),
-                ];
+                let expand = [("expand[]", "payment_intent".into())];
                 let charge: Charge = get(client, key, &path, &expand).await?;
                 payments.extend(resolve(client, key, &charge, lost).await?);
             }
@@ -270,6 +265,25 @@ fn charges_to_refetch(events: &[Event], charge_floor: i64) -> BTreeMap<String, i
     out
 }
 
+/// The invoice a charge paid, through its PaymentIntent's invoice payment.
+async fn invoice_of(
+    client: &reqwest::Client,
+    key: &str,
+    charge: &Charge,
+) -> anyhow::Result<Option<Invoice>> {
+    let Some(pi) = &charge.payment_intent else {
+        return Ok(None);
+    };
+    let query = [
+        ("payment[type]", "payment_intent".into()),
+        ("payment[payment_intent]", pi.id()),
+        ("expand[]", "data.invoice".into()),
+        ("limit", "1".into()),
+    ];
+    let list: List<InvoicePayment> = get(client, key, "/invoice_payments", &query).await?;
+    Ok(list.data.into_iter().next().map(|p| p.invoice))
+}
+
 /// Looks up the Checkout Session only when the charge itself carries no visitor ID.
 async fn resolve(
     client: &reqwest::Client,
@@ -277,7 +291,11 @@ async fn resolve(
     charge: &Charge,
     lost: i64,
 ) -> anyhow::Result<Option<Fetched>> {
-    let Some(fetched) = to_fetched(charge, None, lost) else {
+    if to_fetched(charge, None, None, lost).is_none() {
+        return Ok(None);
+    }
+    let invoice = invoice_of(client, key, charge).await?;
+    let Some(fetched) = to_fetched(charge, invoice.as_ref(), None, lost) else {
         return Ok(None);
     };
     if non_empty(charge.metadata.get(VID_KEY)).is_some()
@@ -286,9 +304,9 @@ async fn resolve(
     {
         return Ok(Some(fetched));
     }
-    let filter = match &charge.invoice {
+    let filter = match &invoice {
         Some(inv) if inv.billing_reason.as_deref() == Some("subscription_create") => {
-            inv.subscription.clone().map(|s| ("subscription", s))
+            inv.subscription().map(|s| ("subscription", s))
         }
         Some(_) => None,
         None => charge
@@ -301,11 +319,21 @@ async fn resolve(
     };
     let query = [filter, ("limit", "1".into())];
     let list: List<Session> = get(client, key, "/checkout/sessions", &query).await?;
-    Ok(to_fetched(charge, list.data.first(), lost))
+    Ok(to_fetched(
+        charge,
+        invoice.as_ref(),
+        list.data.first(),
+        lost,
+    ))
 }
 
 /// Maps a charge to a payment; None while it is pending or uncaptured.
-fn to_fetched(charge: &Charge, session: Option<&Session>, lost: i64) -> Option<Fetched> {
+fn to_fetched(
+    charge: &Charge,
+    invoice: Option<&Invoice>,
+    session: Option<&Session>,
+    lost: i64,
+) -> Option<Fetched> {
     let status = match charge.status.as_str() {
         "failed" => "failed",
         "succeeded" if charge.captured => "paid",
@@ -314,17 +342,15 @@ fn to_fetched(charge: &Charge, session: Option<&Session>, lost: i64) -> Option<F
     let refunded = if status == "failed" {
         0
     } else {
-        (charge.amount_refunded + lost).min(charge.amount)
+        // A partial capture leaves the uncaptured rest out of amount_refunded.
+        (charge.amount - charge.amount_captured + charge.amount_refunded + lost).min(charge.amount)
     };
     let status = match refunded {
         0 => status,
         r if r >= charge.amount => "refunded",
         _ => "partially_refunded",
     };
-    let billing_reason = charge
-        .invoice
-        .as_ref()
-        .and_then(|i| i.billing_reason.as_deref());
+    let billing_reason = invoice.and_then(|i| i.billing_reason.as_deref());
     Some(Fetched {
         provider_payment_id: charge.id.clone(),
         ts: OffsetDateTime::from_unix_timestamp(charge.created).ok()?,
@@ -420,6 +446,7 @@ struct List<T> {
 struct Charge {
     id: String,
     amount: i64,
+    amount_captured: i64,
     amount_refunded: i64,
     currency: String,
     created: i64,
@@ -429,7 +456,6 @@ struct Charge {
     #[serde(default)]
     metadata: HashMap<String, String>,
     payment_intent: Option<IntentRef>,
-    invoice: Option<Invoice>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -456,9 +482,35 @@ struct PaymentIntent {
 }
 
 #[derive(Debug, Deserialize)]
+struct InvoicePayment {
+    invoice: Invoice,
+}
+
+#[derive(Debug, Deserialize)]
 struct Invoice {
     billing_reason: Option<String>,
+    parent: Option<InvoiceParent>,
+}
+
+#[derive(Debug, Deserialize)]
+struct InvoiceParent {
+    subscription_details: Option<SubscriptionDetails>,
+}
+
+#[derive(Debug, Deserialize)]
+struct SubscriptionDetails {
     subscription: Option<String>,
+}
+
+impl Invoice {
+    fn subscription(&self) -> Option<String> {
+        self.parent
+            .as_ref()?
+            .subscription_details
+            .as_ref()?
+            .subscription
+            .clone()
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -536,6 +588,27 @@ mod tests {
         list.data.into_iter().find(|c| c.id == id).unwrap()
     }
 
+    /// The invoice the fixture invoice payments link to the charge's PaymentIntent.
+    fn invoice(c: &Charge) -> Option<Invoice> {
+        let pi = c.payment_intent.as_ref()?.id();
+        let list: serde_json::Value =
+            serde_json::from_str(include_str!("fixtures/stripe_invoice_payments.json")).unwrap();
+        let item = list["data"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|p| p["payment"]["payment_intent"] == pi.as_str())?;
+        Some(
+            serde_json::from_value::<InvoicePayment>(item.clone())
+                .unwrap()
+                .invoice,
+        )
+    }
+
+    fn fetched(c: &Charge, session: Option<&Session>, lost: i64) -> Option<Fetched> {
+        to_fetched(c, invoice(c).as_ref(), session, lost)
+    }
+
     fn sessions() -> Vec<Session> {
         let list: List<Session> =
             serde_json::from_str(include_str!("fixtures/stripe_checkout_sessions.json")).unwrap();
@@ -544,7 +617,7 @@ mod tests {
 
     #[test]
     fn plain_charge() {
-        let f = to_fetched(&charge("ch_3MmlLrLkdIwHu7ix0snN0B15"), None, 0).unwrap();
+        let f = fetched(&charge("ch_3MmlLrLkdIwHu7ix0snN0B15"), None, 0).unwrap();
         assert_eq!(f.provider_payment_id, "ch_3MmlLrLkdIwHu7ix0snN0B15");
         assert_eq!(f.ts.unix_timestamp(), 1679090539);
         assert_eq!(f.amount, 1099);
@@ -558,26 +631,31 @@ mod tests {
 
     #[test]
     fn refunded_charges() {
-        let full = to_fetched(&charge("ch_3NrefundFull0000000000"), None, 0).unwrap();
+        let full = fetched(&charge("ch_3NrefundFull0000000000"), None, 0).unwrap();
         assert_eq!((full.refunded, full.status.as_str()), (2000, "refunded"));
-        let part = to_fetched(&charge("ch_3NrefundPart0000000000"), None, 0).unwrap();
+        let part = fetched(&charge("ch_3NrefundPart0000000000"), None, 0).unwrap();
         assert_eq!(
             (part.refunded, part.status.as_str()),
             (500, "partially_refunded")
         );
         assert_eq!(part.currency, "eur");
+        let capture = fetched(&charge("ch_3NpartialCapture00000"), None, 0).unwrap();
+        assert_eq!(
+            (capture.amount, capture.refunded, capture.status.as_str()),
+            (2000, 500, "partially_refunded")
+        );
     }
 
     #[test]
     fn lost_dispute_counts_as_refunded() {
-        let f = to_fetched(&charge("ch_3MmlLrLkdIwHu7ix0snN0B15"), None, 1099).unwrap();
+        let f = fetched(&charge("ch_3MmlLrLkdIwHu7ix0snN0B15"), None, 1099).unwrap();
         assert_eq!((f.refunded, f.status.as_str()), (1099, "refunded"));
     }
 
     #[test]
     fn client_reference_id_from_checkout_session() {
         let c = charge("ch_3NcheckoutLink00000000");
-        let f = to_fetched(&c, sessions().first(), 0).unwrap();
+        let f = fetched(&c, sessions().first(), 0).unwrap();
         assert_eq!(f.visitor_id.as_deref(), Some("v_4f2a9c1e"));
         assert_eq!(f.customer_id.as_deref(), Some("cus_NffrFeUfNV2Hib"));
         assert_eq!(
@@ -595,7 +673,7 @@ mod tests {
     #[test]
     fn metadata_virling_vid_on_charge() {
         let c = charge("ch_3NmetadataVid000000000");
-        let f = to_fetched(&c, sessions().first(), 0).unwrap();
+        let f = fetched(&c, sessions().first(), 0).unwrap();
         assert_eq!(f.visitor_id.as_deref(), Some("v_from_charge_meta"));
     }
 
@@ -606,40 +684,42 @@ mod tests {
             c.payment_intent.as_ref().unwrap().id(),
             "pi_3NintentMeta0000000000"
         );
-        let f = to_fetched(&c, None, 0).unwrap();
+        let f = fetched(&c, None, 0).unwrap();
         assert_eq!(f.visitor_id.as_deref(), Some("v_from_intent_meta"));
-        let f = to_fetched(&c, sessions().first(), 0).unwrap();
+        let f = fetched(&c, sessions().first(), 0).unwrap();
         assert_eq!(f.visitor_id.as_deref(), Some("v_4f2a9c1e"));
     }
 
     #[test]
     fn renewal_invoice() {
-        let renewal = to_fetched(&charge("ch_3NrenewalCycle00000000"), None, 0).unwrap();
+        let renewal = fetched(&charge("ch_3NrenewalCycle00000000"), None, 0).unwrap();
         assert!(renewal.is_renewal);
         assert_eq!(renewal.customer_id.as_deref(), Some("cus_NffrFeUfNV2Hib"));
         let first = charge("ch_3NsubCreate00000000000");
-        assert!(!to_fetched(&first, None, 0).unwrap().is_renewal);
+        assert!(!fetched(&first, None, 0).unwrap().is_renewal);
         assert_eq!(
-            first.invoice.unwrap().subscription.as_deref(),
+            invoice(&first).unwrap().subscription().as_deref(),
             Some("sub_1MowQVLkdIwHu7ixeRlqHVzs")
         );
+        assert!(invoice(&charge("ch_3NcheckoutLink00000000")).is_none());
     }
 
-    fn upgrade() -> Charge {
+    fn upgrade() -> Fetched {
         let mut c = charge("ch_3NrenewalCycle00000000");
         c.id = "ch_3NsubUpdate00000000000".into();
         c.created -= 30 * 86_400;
-        c.invoice.as_mut().unwrap().billing_reason = Some("subscription_update".into());
-        c
+        let mut inv = invoice(&c).unwrap();
+        inv.billing_reason = Some("subscription_update".into());
+        to_fetched(&c, Some(&inv), None, 0).unwrap()
     }
 
     #[test]
     fn renewals_and_upgrades_keep_the_first_channel() {
         let first = charge("ch_3NsubCreate00000000000");
         let payments = vec![
-            to_fetched(&first, sessions().first(), 0).unwrap(),
-            to_fetched(&upgrade(), None, 0).unwrap(),
-            to_fetched(&charge("ch_3NrenewalCycle00000000"), None, 0).unwrap(),
+            fetched(&first, sessions().first(), 0).unwrap(),
+            upgrade(),
+            fetched(&charge("ch_3NrenewalCycle00000000"), None, 0).unwrap(),
         ];
         assert_eq!(payments[0].visitor_id.as_deref(), Some("v_4f2a9c1e"));
         assert!(payments[1..].iter().all(|p| p.visitor_id.is_none()));
@@ -653,9 +733,9 @@ mod tests {
         failed.status = "failed".into();
         failed.created -= 3600;
         let payments = vec![
-            to_fetched(&failed, None, 0).unwrap(),
-            to_fetched(&charge("ch_3NsubCreate00000000000"), sessions().first(), 0).unwrap(),
-            to_fetched(&charge("ch_3NrenewalCycle00000000"), None, 0).unwrap(),
+            fetched(&failed, None, 0).unwrap(),
+            fetched(&charge("ch_3NsubCreate00000000000"), sessions().first(), 0).unwrap(),
+            fetched(&charge("ch_3NrenewalCycle00000000"), None, 0).unwrap(),
         ];
         let site = e2e::site(Provider::Stripe, payments, "v_4f2a9c1e");
         let renewal = site.touch("ch_3NrenewalCycle00000000");
@@ -667,8 +747,8 @@ mod tests {
         let first = charge("ch_3NsubCreate00000000000");
         let renewal = charge("ch_3NrenewalCycle00000000");
         let payments = vec![
-            to_fetched(&first, None, 0).unwrap(),
-            to_fetched(&renewal, None, 0).unwrap(),
+            fetched(&first, None, 0).unwrap(),
+            fetched(&renewal, None, 0).unwrap(),
         ];
         let site = e2e::site(Provider::Stripe, payments, "v_4f2a9c1e");
         assert_eq!(site.touch("ch_3NsubCreate00000000000"), None);
@@ -677,8 +757,8 @@ mod tests {
         let mut orphan = charge("ch_3NrenewalCycle00000000");
         orphan.customer = None;
         let payments = vec![
-            to_fetched(&first, sessions().first(), 0).unwrap(),
-            to_fetched(&orphan, None, 0).unwrap(),
+            fetched(&first, sessions().first(), 0).unwrap(),
+            fetched(&orphan, None, 0).unwrap(),
         ];
         let site = e2e::site(Provider::Stripe, payments, "v_4f2a9c1e");
         assert!(site.touch("ch_3NsubCreate00000000000").is_some());
@@ -687,10 +767,10 @@ mod tests {
 
     #[test]
     fn failed_pending_and_uncaptured() {
-        let failed = to_fetched(&charge("ch_3Nfailed000000000000000"), None, 0).unwrap();
+        let failed = fetched(&charge("ch_3Nfailed000000000000000"), None, 0).unwrap();
         assert_eq!((failed.status.as_str(), failed.refunded), ("failed", 0));
-        assert!(to_fetched(&charge("ch_3Npending00000000000000"), None, 0).is_none());
-        assert!(to_fetched(&charge("ch_3Nuncaptured0000000000"), None, 0).is_none());
+        assert!(fetched(&charge("ch_3Npending00000000000000"), None, 0).is_none());
+        assert!(fetched(&charge("ch_3Nuncaptured0000000000"), None, 0).is_none());
     }
 
     #[test]

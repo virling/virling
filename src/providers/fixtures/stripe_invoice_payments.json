@@ -1,0 +1,127 @@
+{
+  "object": "list",
+  "url": "/v1/invoice_payments",
+  "has_more": false,
+  "data": [
+    {
+      "id": "inpay_1NrenewalCycle000",
+      "object": "invoice_payment",
+      "amount_paid": 1500,
+      "amount_requested": 1500,
+      "created": 1680644467,
+      "currency": "usd",
+      "invoice": {
+        "id": "in_1NrenewalCycle00000000",
+        "object": "invoice",
+        "account_country": "US",
+        "account_name": "Stripe Docs",
+        "amount_due": 1500,
+        "amount_paid": 1500,
+        "amount_overpaid": 0,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "attempted": true,
+        "billing_reason": "subscription_cycle",
+        "collection_method": "charge_automatically",
+        "created": 1680644467,
+        "currency": "usd",
+        "customer": "cus_NffrFeUfNV2Hib",
+        "customer_email": "jennyrosen@example.com",
+        "customer_name": "Jenny Rosen",
+        "livemode": false,
+        "metadata": {},
+        "parent": {
+          "quote_details": null,
+          "subscription_details": {
+            "metadata": {},
+            "subscription": "sub_1MowQVLkdIwHu7ixeRlqHVzs",
+            "subscription_proration_date": null
+          },
+          "type": "subscription_details"
+        },
+        "period_end": 1680644467,
+        "period_start": 1678225267,
+        "status": "paid",
+        "status_transitions": {
+          "finalized_at": 1680644467,
+          "marked_uncollectible_at": null,
+          "paid_at": 1680644467,
+          "voided_at": null
+        },
+        "subtotal": 1500,
+        "total": 1500
+      },
+      "is_default": true,
+      "livemode": false,
+      "payment": {
+        "type": "payment_intent",
+        "payment_intent": "pi_3NrenewalCycle00000000"
+      },
+      "status": "paid",
+      "status_transitions": {
+        "canceled_at": null,
+        "paid_at": 1680644467
+      }
+    },
+    {
+      "id": "inpay_1NsubCreate000000",
+      "object": "invoice_payment",
+      "amount_paid": 1500,
+      "amount_requested": 1500,
+      "created": 1680644467,
+      "currency": "usd",
+      "invoice": {
+        "id": "in_1NsubCreate00000000000",
+        "object": "invoice",
+        "account_country": "US",
+        "account_name": "Stripe Docs",
+        "amount_due": 1500,
+        "amount_paid": 1500,
+        "amount_overpaid": 0,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "attempted": true,
+        "billing_reason": "subscription_create",
+        "collection_method": "charge_automatically",
+        "created": 1680644467,
+        "currency": "usd",
+        "customer": "cus_NffrFeUfNV2Hib",
+        "customer_email": "jennyrosen@example.com",
+        "customer_name": "Jenny Rosen",
+        "livemode": false,
+        "metadata": {},
+        "parent": {
+          "quote_details": null,
+          "subscription_details": {
+            "metadata": {},
+            "subscription": "sub_1MowQVLkdIwHu7ixeRlqHVzs",
+            "subscription_proration_date": null
+          },
+          "type": "subscription_details"
+        },
+        "period_end": 1680644467,
+        "period_start": 1678225267,
+        "status": "paid",
+        "status_transitions": {
+          "finalized_at": 1680644467,
+          "marked_uncollectible_at": null,
+          "paid_at": 1680644467,
+          "voided_at": null
+        },
+        "subtotal": 1500,
+        "total": 1500
+      },
+      "is_default": true,
+      "livemode": false,
+      "payment": {
+        "type": "payment_intent",
+        "payment_intent": "pi_3NsubCreate00000000000"
+      },
+      "status": "paid",
+      "status_transitions": {
+        "canceled_at": null,
+        "paid_at": 1680644467
+      }
+    }
+  ]
+}

@@ -24,7 +24,7 @@ Secret keys (`sk_live_`, `sk_test_`) are refused: Virling asks for a key that ca
 - **Events** of type `charge.succeeded`, `charge.failed`, `charge.captured`, `charge.refunded`, `charge.refund.updated` and `charge.dispute.closed`, so refunds, lost disputes and late settlements update payments that were already imported.
 - **Renewals.** A charge whose invoice has billing reason `subscription_cycle` is marked as a renewal. See [Renewals](../attribution/renewals.md).
 
-Virling uses Stripe API version `2025-02-24.acacia` for its requests, whatever your account's default version is.
+Virling uses Stripe API version `2026-09-30.endive` for its requests, whatever your account's default version is. It finds the invoice a charge paid through Invoice Payments.
 
 ## How a payment finds its visitor
 
