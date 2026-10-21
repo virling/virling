@@ -395,7 +395,7 @@ pub struct ProviderQuery {
 type ConnectedDbRow = (String, Option<i64>, Option<String>, Vec<u8>, Vec<u8>);
 
 /// The last four characters of a key, never more.
-fn key_hint(key: &str) -> String {
+pub(crate) fn key_hint(key: &str) -> String {
     let chars: Vec<char> = key.trim().chars().collect();
     if chars.len() < 8 {
         return String::new();
