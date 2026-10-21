@@ -66,6 +66,9 @@ pub fn series(days: &[DayPoint]) -> Series {
 }
 
 pub fn esc(s: &str) -> String {
+    if !s.contains(['&', '<', '>', '"']) {
+        return s.to_string();
+    }
     s.replace('&', "&amp;")
         .replace('<', "&lt;")
         .replace('>', "&gt;")
@@ -189,44 +192,8 @@ fn x_axis(points: &[DayPoint], centered: bool) -> String {
         .collect()
 }
 
-struct Row {
-    swatch: String,
-    name: String,
-    value: String,
-}
-
 fn swatch(color: &str, kind: &str) -> String {
     format!(r#"<i class="sw {kind}" style="--c:{color}"></i>"#)
-}
-
-fn tip(xf: f64, date: &str, rows: &[Row], foot: &str) -> String {
-    let side = if xf < 0.6 { "" } else { " l" };
-    let mut s = format!(
-        r#"<div class="tip{side}"><span class="d">{}</span>"#,
-        esc(date)
-    );
-    for r in rows {
-        let _ = write!(
-            s,
-            r#"<div class="row"><span>{}{}</span><b>{}</b></div>"#,
-            r.swatch,
-            r.name,
-            esc(&r.value)
-        );
-    }
-    if !foot.is_empty() {
-        let _ = write!(s, r#"<div class="foot">{}</div>"#, esc(foot));
-    }
-    s.push_str("</div>");
-    s
-}
-
-fn column(left: f64, width: f64, inner: &str) -> String {
-    format!(
-        r#"<div class="hov bar" style="left:{:.3}%;width:{:.3}%">{inner}</div>"#,
-        left * 100.0,
-        width * 100.0
-    )
 }
 
 fn marker(yf: f64, color: &str) -> String {
@@ -444,7 +411,7 @@ pub fn revenue(
     } else {
         "day"
     };
-    let mut cols = String::new();
+    let mut cols = String::with_capacity(pts.len() * 600);
     if let Some((f, label)) = pre {
         let _ = write!(
             cols,
@@ -453,51 +420,74 @@ pub fn revenue(
             esc(label)
         );
     }
+    let row = |s: &mut String, swatch: &str, name: &str, value: &str| {
+        let _ = write!(
+            s,
+            r#"<div class="row"><span>{swatch}{name}</span><b>{}</b></div>"#,
+            esc(value)
+        );
+    };
     for (i, p) in pts.iter().enumerate() {
         let xf = (i as f64 + 0.5) / n as f64;
-        let mut rows = vec![Row {
-            swatch: swatch(ORANGE, if total { "ln" } else { "" }),
-            name: if total { "So far" } else { "Revenue" }.into(),
-            value: amount(vals[i]),
-        }];
+        let _ = write!(
+            cols,
+            r#"<div class="hov bar" style="left:{:.3}%;width:{:.3}%"><div class="tip{}"><span class="d">{}</span>"#,
+            i as f64 / n as f64 * 100.0,
+            1.0 / n as f64 * 100.0,
+            if xf < 0.6 { "" } else { " l" },
+            esc(&tip_date(p, cur.weekly))
+        );
+        row(
+            &mut cols,
+            &swatch(ORANGE, if total { "ln" } else { "" }),
+            if total { "So far" } else { "Revenue" },
+            &amount(vals[i]),
+        );
         if let Some(pv) = prev_vals.as_ref().and_then(|v| v.get(i)) {
-            rows.push(Row {
-                swatch: swatch("var(--ink-4)", "ln"),
-                name: "Previous period".into(),
-                value: amount(*pv),
-            });
+            row(
+                &mut cols,
+                &swatch("var(--ink-4)", "ln"),
+                "Previous period",
+                &amount(*pv),
+            );
         }
         if kind == Kind::Channel && only.is_none() {
             for (c, v) in p.by_channel.iter().take(3) {
-                rows.push(Row {
-                    swatch: swatch(channel_color(c.as_deref()), ""),
-                    name: esc(c.as_deref().unwrap_or("Unmatched")),
-                    value: amount(*v),
-                });
+                row(
+                    &mut cols,
+                    &swatch(channel_color(c.as_deref()), ""),
+                    &esc(c.as_deref().unwrap_or("Unmatched")),
+                    &amount(*v),
+                );
             }
         }
         if kind == Kind::Bars {
-            rows.push(Row {
-                swatch: r#"<i class="sw vd"></i>"#.to_string(),
-                name: "Visitors".into(),
-                value: group(p.visitors),
-            });
+            row(
+                &mut cols,
+                r#"<i class="sw vd"></i>"#,
+                "Visitors",
+                &group(p.visitors),
+            );
         }
-        let mut inner = tip(xf, &tip_date(p, cur.weekly), &rows, &top_channel(p));
+        let foot = top_channel(p);
+        if !foot.is_empty() {
+            let _ = write!(cols, r#"<div class="foot">{}</div>"#, esc(&foot));
+        }
+        cols.push_str("</div>");
         match kind {
             Kind::Bars if p.visitors > 0 => {
                 let _ = write!(
-                    inner,
+                    cols,
                     r#"<span class="vd" style="bottom:{:.1}%"></span>"#,
                     p.visitors as f64 / vtop * 100.0
                 );
             }
             Kind::Line | Kind::Total => {
-                inner.push_str(&marker(vals[i] / top, ORANGE));
+                cols.push_str(&marker(vals[i] / top, ORANGE));
             }
             _ => {}
         }
-        cols.push_str(&column(i as f64 / n as f64, 1.0 / n as f64, &inner));
+        cols.push_str("</div>");
     }
     if matches!(kind, Kind::Line | Kind::Total) && top_val > 0.0 {
         let last = *vals.last().unwrap_or(&0.0);
