@@ -589,7 +589,7 @@ fn flush_touches(conn: &mut Connection, pending: &Mutex<Pending>) -> anyhow::Res
 }
 
 /// Live writes leave first pageviews pending this long, so a burst of events shares one write of them.
-const FLUSH_AFTER: std::time::Duration = std::time::Duration::from_millis(20);
+const FLUSH_AFTER: std::time::Duration = std::time::Duration::from_secs(1);
 /// Most first pageviews left pending before a write includes them.
 const MAX_PENDING: usize = 1000;
 
