@@ -89,6 +89,11 @@ for (const mini of document.querySelectorAll("[data-mini]")) {
   });
 }
 
+const visitorId = async () => {
+  for (let i = 0; i < 20 && !window.virling?.vid; i++) await new Promise((r) => setTimeout(r, 100));
+  return window.virling?.vid?.() || null;
+};
+
 for (const card of document.querySelectorAll("[data-preorder]")) {
   const SDK = "https://cdn.jsdelivr.net/npm/dodopayments-checkout@2.0.0/dist/index.js";
   const spots = document.querySelector("[data-spots]");
@@ -97,10 +102,6 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
   let started = false;
   let timer = null;
 
-  const visitorId = async () => {
-    for (let i = 0; i < 20 && !window.virling?.vid; i++) await new Promise((r) => setTimeout(r, 100));
-    return window.virling?.vid?.() || null;
-  };
   const status = async (payment) => {
     const res = await fetch("/api/preorder/status" + (payment ? "?payment_id=" + encodeURIComponent(payment) : ""), { cache: "no-store" });
     if (!res.ok) throw new Error("status " + res.status);
@@ -217,6 +218,70 @@ for (const card of document.querySelectorAll("[data-preorder]")) {
     for (const link of document.querySelectorAll('a[href="#pricing"]')) link.addEventListener("click", start);
   } else {
     start();
+  }
+}
+
+// Personal founding spots go to Dodo's hosted checkout and come back to /pricing.
+for (const box of document.querySelectorAll("[data-claim]")) {
+  const plan = box.dataset.claim;
+  const button = box.querySelector("[data-claim-start]");
+  const error = box.querySelector("[data-claim-error]");
+  const spots = box.querySelector("[data-claim-spots]");
+  const failed = "Checkout couldn't load. Nothing was charged.";
+  const status = async (payment) => {
+    const res = await fetch("/api/preorder/status?plan=" + plan + (payment ? "&payment_id=" + encodeURIComponent(payment) : ""), { cache: "no-store" });
+    if (!res.ok) throw new Error("status " + res.status);
+    return res.json();
+  };
+  const showSpots = (body) => {
+    if (typeof body.spots_left !== "number") return;
+    spots.querySelector("b").textContent = body.spots_left;
+    spots.hidden = false;
+  };
+  status().then(showSpots).catch(() => {});
+
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    error.textContent = "";
+    window.virling && virling("goal", "checkout_started");
+    try {
+      const visitor_id = await visitorId();
+      const res = await fetch("/api/preorder/session", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ plan, visitor_id, code: new URLSearchParams(location.search).get("code") }) });
+      const body = await res.json();
+      if (!res.ok || !body.checkout_url) throw new Error(body.error || "session");
+      location.href = body.checkout_url;
+    } catch {
+      error.textContent = failed;
+      button.disabled = false;
+    }
+  });
+
+  const query = new URLSearchParams(location.search);
+  const paid = box.querySelector(".joined");
+  if (paid && (query.get("preorder") === "done" || query.get("payment_id"))) {
+    history.replaceState(null, "", location.pathname);
+    const state = query.get("status");
+    if (state && !["active", "succeeded"].includes(state)) {
+      error.textContent = failed;
+    } else {
+      box.classList.add("is-paid");
+      paid.focus();
+      window.virling && virling("goal", "preorder_" + plan);
+      (async () => {
+        const payment = query.get("payment_id");
+        const until = Date.now() + 20000;
+        while (payment && Date.now() < until) {
+          try {
+            const body = await status(payment);
+            if (body.number) {
+              box.querySelector("[data-claim-title]").textContent = "You're founding customer #" + body.number + ".";
+              return;
+            }
+          } catch {}
+          await new Promise((r) => setTimeout(r, 2000));
+        }
+      })();
+    }
   }
 }
 

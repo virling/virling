@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pricing: Virling</title>
-<meta name="description" content="Self-host Virling free under AGPLv3, or join the waitlist for hosted Personal and Agency plans with founding prices for the first 50 customers.">
+<meta name="description" content="Self-host Virling free under AGPLv3, or pre-order a hosted Personal or Agency plan at a founding price for the first 50 customers.">
 <link rel="canonical" href="https://virling.com/pricing">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Virling">
 <meta property="og:url" content="https://virling.com/pricing">
 <meta property="og:title" content="Pricing: Virling">
-<meta property="og:description" content="Self-host Virling free under AGPLv3, or join the waitlist for hosted Personal and Agency plans with founding prices for the first 50 customers.">
+<meta property="og:description" content="Self-host Virling free under AGPLv3, or pre-order a hosted Personal or Agency plan at a founding price for the first 50 customers.">
 <meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Pricing","item":"https://virling.com/pricing"}]}]}</script>
@@ -40,7 +40,7 @@
     <div class="txt sub-hero">
       <span class="kicker">pricing</span>
       <h1>Free to self-host.<br>Hosted when it opens.</h1>
-      <p class="lead">Self-hosting is free forever. The hosted plans are not open yet, and nothing is charged until they are, except an optional Agency founding pre-order.</p>
+      <p class="lead">Self-hosting is free forever. The hosted plans are not open yet, and nothing is charged until they are, except an optional founding pre-order for Personal or Agency.</p>
     </div>
   </div></section>
 
@@ -70,7 +70,16 @@
             <li><i></i><span>A weekly email report to you</span></li>
           </ul>
         </div>
-        <div class="plan-steps"><a class="btn light" href="/#join" data-goal="join_click">Join the waitlist</a></div>
+        <div class="plan-steps claim" data-claim="personal">
+          <button class="btn" type="button" data-claim-start>Claim a founding spot $11.40/mo</button>
+          <span class="muted" data-claim-spots hidden><b></b> of 50 founding spots left</span>
+          <p class="form-error" role="alert" data-claim-error></p>
+          <a class="claim-alt" href="/#join" data-goal="join_click">Or join the waitlist</a>
+          <div class="joined" role="status" tabindex="-1">
+            <span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>
+            <span><b data-claim-title>You're a founding customer.</b> <span class="muted">Your spot is held and your first month after launch is paid. A welcome email is on its way.</span></span>
+          </div>
+        </div>
       </div>
       <div class="card plan">
         <div class="plan-top">
@@ -94,11 +103,11 @@
     <div class="faq-list">
       <div><h3>Is the self-hosted version limited?</h3><p class="p">No. It is the same open-source code as the hosted plans, with every feature. You run it on your own server and pay nothing.</p></div>
       <div><h3>When do the hosted plans open?</h3><p class="p">There is no date yet. Join the waitlist and we'll email you when the hosted plan opens.</p></div>
-      <div><h3>What does the Agency founding pre-order cost?</h3><p class="p">$29 today holds one of 50 founding spots. Your first month after launch is already paid, then $29 a month, locked for life. You can cancel and get a full refund any time before launch.</p></div>
+      <div><h3>What do the founding pre-orders cost?</h3><p class="p">Personal is $11.40 today and Agency is $29 today, each holding one of 50 founding spots for that plan. Your first month after launch is already paid, then the same price every month, locked for life. You can cancel and get a full refund any time before launch.</p></div>
       <div><h3>Which payment providers work?</h3><p class="p">Stripe, Dodo Payments, Polar and LemonSqueezy, with read-only keys where the provider supports them. LemonSqueezy payments import, but linking them to visits is not available yet.</p></div>
     </div>
   </div></div></section>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is the self-hosted version limited?","acceptedAnswer":{"@type":"Answer","text":"No. It is the same open-source code as the hosted plans, with every feature. You run it on your own server and pay nothing."}},{"@type":"Question","name":"When do the hosted plans open?","acceptedAnswer":{"@type":"Answer","text":"There is no date yet. Join the waitlist and we'll email you when the hosted plan opens."}},{"@type":"Question","name":"What does the Agency founding pre-order cost?","acceptedAnswer":{"@type":"Answer","text":"$29 today holds one of 50 founding spots. Your first month after launch is already paid, then $29 a month, locked for life. You can cancel and get a full refund any time before launch."}},{"@type":"Question","name":"Which payment providers work?","acceptedAnswer":{"@type":"Answer","text":"Stripe, Dodo Payments, Polar and LemonSqueezy, with read-only keys where the provider supports them. LemonSqueezy payments import, but linking them to visits is not available yet."}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is the self-hosted version limited?","acceptedAnswer":{"@type":"Answer","text":"No. It is the same open-source code as the hosted plans, with every feature. You run it on your own server and pay nothing."}},{"@type":"Question","name":"When do the hosted plans open?","acceptedAnswer":{"@type":"Answer","text":"There is no date yet. Join the waitlist and we'll email you when the hosted plan opens."}},{"@type":"Question","name":"What do the founding pre-orders cost?","acceptedAnswer":{"@type":"Answer","text":"Personal is $11.40 today and Agency is $29 today, each holding one of 50 founding spots for that plan. Your first month after launch is already paid, then the same price every month, locked for life. You can cancel and get a full refund any time before launch."}},{"@type":"Question","name":"Which payment providers work?","acceptedAnswer":{"@type":"Answer","text":"Stripe, Dodo Payments, Polar and LemonSqueezy, with read-only keys where the provider supports them. LemonSqueezy payments import, but linking them to visits is not available yet."}}]}</script>
 </main>
 
 <footer class="foot"><div class="wrap">
