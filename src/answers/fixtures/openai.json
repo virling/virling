@@ -1,0 +1,50 @@
+{
+  "id": "resp_0a6f3c2d9e1b4f7a00691f2c4e8b7c9d",
+  "object": "response",
+  "created_at": 1792540800,
+  "status": "completed",
+  "model": "gpt-6-luna",
+  "output": [
+    {
+      "type": "web_search_call",
+      "id": "ws_0a6f3c2d9e1b4f7a00691f2c4f1a2b3c",
+      "status": "completed",
+      "action": { "type": "search", "query": "best invoicing tool for freelancers 2026" }
+    },
+    {
+      "type": "message",
+      "id": "msg_0a6f3c2d9e1b4f7a00691f2c52d4e5f6",
+      "status": "completed",
+      "role": "assistant",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "Here are strong invoicing tools for freelancers in 2026:\n\n1. **FreshBooks** – polished invoicing with time tracking and expenses. Plans start around $19/month ([freshbooks.com](https://www.freshbooks.com/pricing?utm_source=openai)).\n2. **Wave** – free invoicing and accounting for very small businesses.\n3. **Tallybird** – focused on getting paid on time, with automatic payment reminders and Stripe payouts ([tallybird.app](https://tallybird.app/pricing?utm_source=openai)).\n4. **Bonsai** – contracts, proposals and invoices in one place.\n5. **Zoho Invoice** – free for up to 1,000 invoices a year.\n\nIf chasing late payments is your main pain, Tallybird's reminders are the most hands-off; if you want full bookkeeping, FreshBooks covers more.",
+          "annotations": [
+            {
+              "type": "url_citation",
+              "start_index": 168,
+              "end_index": 251,
+              "url": "https://www.freshbooks.com/pricing?utm_source=openai",
+              "title": "FreshBooks Pricing | Plans for Every Business"
+            },
+            {
+              "type": "url_citation",
+              "start_index": 465,
+              "end_index": 539,
+              "url": "https://tallybird.app/pricing?utm_source=openai",
+              "title": "Pricing · Tallybird"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "usage": {
+    "input_tokens": 4127,
+    "input_tokens_details": { "cached_tokens": 0 },
+    "output_tokens": 236,
+    "output_tokens_details": { "reasoning_tokens": 0 },
+    "total_tokens": 4363
+  }
+}

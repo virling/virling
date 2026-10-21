@@ -1,0 +1,44 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "role": "model",
+        "parts": [
+          {
+            "text": "For freelancers, a few invoicing tools stand out:\n\n* **FreshBooks:** Best overall for features and support.\n* **Tallybird:** Best for getting paid on time, thanks to automatic reminders.\n* **Wave:** Best free option.\n* **Square Invoices:** Good if you already take card payments in person.\n\nPick based on whether you need accounting (FreshBooks) or faster payments (Tallybird)."
+          }
+        ]
+      },
+      "finishReason": "STOP",
+      "groundingMetadata": {
+        "webSearchQueries": ["best invoicing tool for freelancers"],
+        "searchEntryPoint": { "renderedContent": "<style>.container{}</style><div class=\"container\"></div>" },
+        "groundingChunks": [
+          { "web": { "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFm1x2y3z", "title": "freshbooks.com" } },
+          { "web": { "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHa4b5c6d", "title": "tallybird.app" } },
+          { "web": { "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQJe7f8g9h", "title": "nerdwallet.com" } }
+        ],
+        "groundingSupports": [
+          {
+            "segment": { "startIndex": 52, "endIndex": 107, "text": "**FreshBooks:** Best overall for features and support." },
+            "groundingChunkIndices": [0, 2],
+            "confidenceScores": [0.93, 0.81]
+          },
+          {
+            "segment": { "startIndex": 110, "endIndex": 186, "text": "**Tallybird:** Best for getting paid on time, thanks to automatic reminders." },
+            "groundingChunkIndices": [1],
+            "confidenceScores": [0.9]
+          }
+        ]
+      }
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "candidatesTokenCount": 88,
+    "toolUsePromptTokenCount": 131,
+    "totalTokenCount": 228
+  },
+  "modelVersion": "gemini-2.5-flash-lite",
+  "responseId": "kN0YaPq3Lf2Uz7IP1oG4uQs"
+}
