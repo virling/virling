@@ -1,5 +1,6 @@
 mod alias;
 mod animals;
+mod answers;
 mod api;
 mod app;
 mod assets;
@@ -203,6 +204,7 @@ async fn main() -> anyhow::Result<()> {
             let state = AppState::new(config, db, Arc::new(events), mailer, vault);
             if app_enabled {
                 tokio::spawn(sync::run(state.clone()));
+                tokio::spawn(answers::run(state.clone()));
                 favicon::spawn_sources(state.clone());
                 tokio::spawn(dashboard::schedule::run(state.clone()));
             }
