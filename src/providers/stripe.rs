@@ -14,6 +14,8 @@ const BACKFILL_SECS: i64 = 90 * 86_400;
 // Re-read this many seconds below the newest object seen, in case Stripe lists one late.
 const OVERLAP_SECS: i64 = 60;
 const VID_KEY: &str = "virling_vid";
+const REJECTED: &str =
+    "Stripe rejected this key. Check it was copied in full and has not been deleted or rolled.";
 const EVENT_TYPES: [&str; 6] = [
     "charge.succeeded",
     "charge.failed",
@@ -34,9 +36,7 @@ pub async fn check_key(client: &reqwest::Client, key: &str) -> anyhow::Result<()
     let resp = request(client, key, "/charges", &query).await?;
     match resp.status().as_u16() {
         200..=299 => Ok(()),
-        401 => anyhow::bail!(
-            "Stripe rejected this key. Check it was copied in full and has not been deleted or rolled."
-        ),
+        401 => anyhow::bail!(REJECTED),
         403 => anyhow::bail!(
             "This key cannot read Charges or PaymentIntents. Give it read access to Events, Checkout Sessions, Charges, PaymentIntents, Invoices, Subscriptions and Customers."
         ),
@@ -383,14 +383,21 @@ async fn get<T: DeserializeOwned>(
     let resp = request(client, key, path, query).await?;
     let status = resp.status();
     if !status.is_success() {
-        let body = resp.text().await?;
-        let message = serde_json::from_str::<ErrorBody>(&body)
-            .ok()
-            .and_then(|b| b.error.message)
-            .unwrap_or(body);
-        anyhow::bail!("Stripe {path} returned {status}: {message}");
+        anyhow::bail!(failure(path, status, resp.text().await?));
     }
     Ok(resp.json().await?)
+}
+
+/// Readable error for a failed Stripe call.
+fn failure(path: &str, status: reqwest::StatusCode, body: String) -> String {
+    if status == reqwest::StatusCode::UNAUTHORIZED {
+        return REJECTED.into();
+    }
+    let message = serde_json::from_str::<ErrorBody>(&body)
+        .ok()
+        .and_then(|b| b.error.message)
+        .unwrap_or(body);
+    format!("Stripe {path} returned {status}: {message}")
 }
 
 #[derive(Deserialize)]
@@ -781,5 +788,22 @@ mod tests {
         assert!(key_format_error("pk_live_abc").is_some());
         assert!(key_format_error("rk_live_abc").is_none());
         assert!(key_format_error("rk_test_abc").is_none());
+    }
+
+    #[test]
+    fn revoked_key_reads_like_connect() {
+        let body = r#"{"error":{"message":"Invalid API Key provided: rk_test_****9X2b"}}"#;
+        assert_eq!(
+            failure("/charges", reqwest::StatusCode::UNAUTHORIZED, body.into()),
+            REJECTED
+        );
+        assert_eq!(
+            failure(
+                "/charges",
+                reqwest::StatusCode::TOO_MANY_REQUESTS,
+                r#"{"error":{"message":"Slow down"}}"#.into()
+            ),
+            "Stripe /charges returned 429 Too Many Requests: Slow down"
+        );
     }
 }
