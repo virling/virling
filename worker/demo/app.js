@@ -1,3 +1,20 @@
+const tzPick = document.querySelector("[data-tz-auto]");
+const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+if (tzPick && browserTz && tzPick.querySelector("input[type=hidden]").value === "UTC") {
+  const list = tzPick.querySelector("[role=listbox]");
+  let opt = [...list.querySelectorAll("[role=option]")].find((o) => o.dataset.value === browserTz);
+  if (!opt) {
+    opt = document.createElement("button");
+    opt.type = "button";
+    opt.setAttribute("role", "option");
+    opt.dataset.value = opt.textContent = browserTz;
+    list.prepend(opt);
+  }
+  list.querySelectorAll("[role=option]").forEach((o) => o.setAttribute("aria-selected", String(o === opt)));
+  tzPick.querySelector("input[type=hidden]").value = browserTz;
+  tzPick.querySelector("[data-label]").textContent = browserTz;
+}
+
 for (const select of document.querySelectorAll("[data-select]")) {
   const trigger = select.querySelector("button[aria-haspopup]");
   const menu = select.querySelector(".menu");
@@ -63,6 +80,57 @@ for (const box of document.querySelectorAll("[data-tabs]")) {
   });
 }
 
+for (const box of document.querySelectorAll("[data-stack]")) {
+  const note = box.querySelector("[data-stack-note]");
+  const read = async (picking) => {
+    const res = await fetch(box.dataset.stack, { headers: { accept: "application/json" } }).catch(() => null);
+    const s = res?.ok ? await res.json() : null;
+    if (!s || s.error) return (note.textContent = res?.status === 429 ? "Too many checks. Try again in a minute." : "Couldn't read the live site. Pick your platform below.");
+    const tab = s.platform && document.querySelector(`[role=tab][aria-controls="${s.platform}"]`);
+    if (picking && tab) tab.click();
+    const next = document.querySelector("[data-stack-next]");
+    if (next && s.providers[0]) next.href = next.href.split("?")[0] + "?provider=" + s.providers[0];
+    note.textContent = s.installed
+      ? "The script is on the live page."
+      : picking ? (tab ? `Looks like ${tab.textContent}. The script isn't on the live page yet.` : "The script isn't on the live page yet.") : "The script isn't on the live page yet. Publish your change and check again.";
+  };
+  box.querySelector("[data-stack-check]").addEventListener("click", () => read(false));
+  read(true);
+}
+
+const poll = document.querySelector("[data-poll]");
+if (poll) {
+  // On each change, swap in the online pill, section counts, KPIs and the visitors and payments lists from a fresh render.
+  const parts = ["[data-poll]", ".d3-ptabs", ".d3-kpis", "#live", ".d3-pay"];
+  const drawer = document.getElementById("drawer");
+  let v = "", fails = 0, last = 0;
+  const refresh = async () => {
+    const res = await fetch(location.href);
+    if (!res.ok) throw res.status;
+    const doc = new DOMParser().parseFromString(await res.text(), "text/html");
+    for (const sel of parts) {
+      const now = document.querySelector(sel), next = doc.querySelector(sel);
+      if (now && next) now.replaceWith(next);
+    }
+  };
+  const loop = async () => {
+    await new Promise((r) => setTimeout(r, Math.max(0, last + 1000 - Date.now())));
+    last = Date.now();
+    try {
+      const res = await fetch(poll.dataset.poll + "?since=" + encodeURIComponent(v));
+      if (!res.ok) throw res.status;
+      const next = (await res.json()).v;
+      if (v && next != v && drawer?.hidden !== false) await refresh();
+      if (drawer?.hidden !== false) v = next;
+      fails = 0;
+      loop();
+    } catch {
+      setTimeout(loop, Math.min(60000, 2000 * 2 ** fails++));
+    }
+  };
+  loop();
+}
+
 for (const live of document.querySelectorAll("[data-live]")) {
   const check = async () => {
     try {
@@ -109,6 +177,8 @@ document.querySelector("[data-burger]")?.addEventListener("click", (e) => {
 for (const form of document.querySelectorAll("[data-providers]")) {
   form.addEventListener("change", (e) => {
     if (e.target.name !== "provider") return;
+    form.querySelectorAll("[data-key-err]").forEach((el) => el.remove());
+    form.querySelectorAll("[aria-invalid]").forEach((el) => el.removeAttribute("aria-invalid"));
     for (const panel of form.querySelectorAll("[data-provider]")) {
       const on = panel.dataset.provider === e.target.value;
       panel.hidden = !on;
