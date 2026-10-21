@@ -36,10 +36,21 @@ for (const select of document.querySelectorAll("[data-select]")) {
   });
 }
 
+fetch("/api/beta").then((r) => r.json()).then(({ closes }) => {
+  if (!closes) return;
+  for (const line of document.querySelectorAll("[data-closes]")) {
+    line.querySelector("span").textContent = closes;
+    line.hidden = false;
+  }
+}).catch(() => {});
+
 for (const root of document.querySelectorAll("[data-wedge]")) {
   const form = root.querySelector("form.waitlist");
   const error = form.querySelector(".form-error");
   const button = form.querySelector("button[type=submit]");
+  const more = document.getElementById("apply-more").content.firstElementChild.cloneNode(true);
+  form.after(more);
+  let token = null;
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = form.email.value.trim();
@@ -59,13 +70,44 @@ for (const root of document.querySelectorAll("[data-wedge]")) {
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "Something went wrong. Try again.");
-      root.classList.add("is-joined");
+      token = body.token;
+      if (token) {
+        root.classList.add("is-applying");
+        more.querySelector("input").focus();
+      } else {
+        root.classList.add("is-joined");
+      }
       window.virling && virling("goal", "waitlist_" + root.dataset.wedge);
       window.virling && virling("goal", "signup");
+      window.virling && virling("goal", "beta_apply");
     } catch (err) {
       error.textContent = err.message;
     } finally {
       button.disabled = false;
+    }
+  });
+  const done = () => {
+    root.classList.remove("is-applying");
+    root.classList.add("is-joined");
+  };
+  more.querySelector("[data-skip]").addEventListener("click", done);
+  more.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const send = more.querySelector("button[type=submit]");
+    const picked = (name) => more.querySelector(`input[name=${name}]:checked`)?.value || null;
+    send.disabled = true;
+    try {
+      const res = await fetch("/api/waitlist/apply", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ token, site: more.site.value.trim() || null, payments: picked("payments"), revenue: picked("revenue"), audience: picked("audience") }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || "Something went wrong. Try again.");
+      done();
+    } catch (err) {
+      more.querySelector(".form-error").textContent = err.message;
+    } finally {
+      send.disabled = false;
     }
   });
 }
