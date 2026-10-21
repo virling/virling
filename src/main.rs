@@ -346,6 +346,48 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn time_zone_gives_the_country_when_no_header_does() {
+        let (_dir, state, store) = setup().await;
+        let hit = |path: &str, zone: &str| {
+            format!(
+                r#"{{"n":"pageview","u":"https://example.com/{path}","s":"example.com","w":1280,"z":"{zone}"}}"#
+            )
+        };
+        assert_eq!(
+            post(&state, &hit("a", "Asia/Calcutta"), UA).await,
+            StatusCode::ACCEPTED
+        );
+        let direct = |body: String| {
+            let app = router(state.clone())
+                .layer(MockConnectInfo(SocketAddr::from(([203, 0, 113, 9], 5555))));
+            let req = Request::post("/api/event")
+                .header("user-agent", UA)
+                .body(Body::from(body))
+                .unwrap();
+            async move { app.oneshot(req).await.unwrap().status() }
+        };
+        for (path, zone) in [
+            ("b", "Asia/Calcutta"),
+            ("c", "Europe/Copenhagen"),
+            ("d", "Mars/Base"),
+        ] {
+            assert_eq!(direct(hit(path, zone)).await, StatusCode::ACCEPTED);
+        }
+        let countries: Vec<(String, Option<String>)> =
+            store.dump().into_iter().map(|r| (r.0, r.5)).collect();
+        assert_eq!(
+            countries,
+            [
+                ("/a".to_string(), Some("DE".to_string())),
+                ("/b".to_string(), Some("IN".to_string())),
+                ("/c".to_string(), Some("DK".to_string())),
+                ("/d".to_string(), None),
+            ],
+            "the header wins, then the time zone, and an unknown zone gives none"
+        );
+    }
+
+    #[tokio::test]
     async fn tagged_ai_source_stands_in_for_missing_referrer() {
         let (_dir, state, store) = setup().await;
         let body = r#"{"n":"pageview","u":"https://example.com/?utm_source=chatgpt.com","s":"example.com","w":800}"#;

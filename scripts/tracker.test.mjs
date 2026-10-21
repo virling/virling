@@ -37,7 +37,7 @@ const channel = (bus) =>
   };
 const tick = () => new Promise((r) => setTimeout(r, 5));
 
-function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set(), agent = {} } = {}) {
+function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set(), agent = {}, zone = "Europe/Berlin" } = {}) {
   const loc = new URL(url);
   const sent = [];
   const urls = [];
@@ -75,7 +75,7 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
     ...agent,
   };
   const performance = { getEntriesByType: (t) => (t == "navigation" ? [{ type: nav }] : []) };
-  const ctx = { window, document, navigator, location, history, performance, BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, URL, JSON, Date, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]) };
+  const ctx = { window, document, navigator, location, history, performance, BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: zone }) }) }, URL, JSON, Date, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]) };
   vm.runInNewContext(SRC, ctx);
   const fire = (t, e, ev = {}) => (listeners[t + e] || []).forEach((f) => f(ev));
   return { sent, urls, timers, cookie, window, document, history, location, fire };
@@ -89,6 +89,11 @@ test("pageview with page, screen and language", () => {
     { n: "pageview", u: "https://example.com/pricing?x=1", s: "example.com", w: 1440, l: "en-US" },
   );
   assert.match(b.sent[0].v, /^v[a-z0-9]+$/);
+});
+
+test("time zone is sent only when the browser has one", () => {
+  assert.equal(browser("https://example.com/").sent[0].z, "Europe/Berlin");
+  assert.equal("z" in browser("https://example.com/", { zone: "" }).sent[0], false);
 });
 
 test("automation and a browser without languages are flagged", () => {

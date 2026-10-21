@@ -750,7 +750,7 @@ pub fn card(
                 let empty = match tab {
                     Tab::Country if base.visitors > 0 => (
                         "No countries for these visits",
-                        "Countries come from your proxy's country header, such as cf-ipcountry from Cloudflare.",
+                        "Countries come from your proxy's country header, such as cf-ipcountry from Cloudflare, or the browser's time zone.",
                     ),
                     Tab::City if base.visitors > 0 => (
                         "No cities for these visits",

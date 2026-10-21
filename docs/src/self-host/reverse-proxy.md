@@ -8,12 +8,10 @@ Virling serves plain HTTP. Put a reverse proxy in front for HTTPS. Built-in TLS 
 | --- | --- |
 | `VIRLING_BASE_URL` | The public URL, such as `https://stats.example.com`. Used in sign-in links and the script snippets the app shows. Without a trailing slash. |
 | `VIRLING_TRUST_PROXY=true` | Read the client IP from the first address in `X-Forwarded-For` instead of the TCP peer. Needed for the cookieless hash to tell visitors apart. Set it only when a proxy you control sets that header. |
-| Country header | Virling reads the visitor's country from `cf-ipcountry`, `x-vercel-ip-country` or `x-country-code`, in that order. Without one, country is empty. |
+| Country header | Virling reads the visitor's country from `cf-ipcountry`, `x-vercel-ip-country` or `x-country-code`, in that order. Without one, the country comes from the browser's time zone, using a built-in table of IANA time zones. |
 | Region and city | Read from `cf-region` and `cf-ipcity` (Cloudflare visitor location headers) or `x-vercel-ip-country-region` and `x-vercel-ip-city`. They appear only when the proxy sends them. |
 
 Cloudflare's `cf-*` headers count only when the request really came through Cloudflare: the TCP peer is in [Cloudflare's IP ranges](https://www.cloudflare.com/ips/), or `VIRLING_TRUST_PROXY=true` is set and the peer is on this host or a private network, such as `cloudflared` or a proxy in front of a Docker container. Otherwise they are ignored, so nobody can fake a location by sending them.
-
-Country from a built-in GeoIP database, without a proxy header, is <span class="na">Not available yet</span>.
 
 ## Caddy
 
