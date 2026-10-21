@@ -1257,6 +1257,61 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn app_pages_mark_the_parts_the_poll_refreshes() {
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        seed(&store, &site);
+        crate::sync::rebuild_attribution(&state, Some(&site)).await;
+        let page = |uri: &'static str| {
+            let (state, cookie) = (state.clone(), cookie.clone());
+            async move {
+                let body = body_text(call(&state, get(uri, Some(&cookie))).await).await;
+                let mut ids: Vec<&str> = body
+                    .split(" id=\"")
+                    .skip(1)
+                    .filter_map(|s| s.split('"').next())
+                    .collect();
+                let n = ids.len();
+                ids.sort_unstable();
+                ids.dedup();
+                assert_eq!(ids.len(), n, "{uri} repeats an id");
+                assert!(body.contains(r#"<body class="app" data-poll="/app/example.com/live">"#));
+                body
+            }
+        };
+        let dash = page("/app/example.com").await;
+        for part in ["d3-live", "ptabs", "kpis", "revenue", "cards", "usage"] {
+            assert!(
+                dash.contains(&format!(r#"id="{part}" data-sync"#)),
+                "dashboard refreshes {part}"
+            );
+        }
+        let visitors = page("/app/example.com/visitors").await;
+        assert!(visitors.contains(r#"id="live-pill" data-sync"#));
+        assert!(visitors.contains(r#"id="showing" data-sync"#));
+        assert!(visitors.contains(r#"id="vis-rows" data-sync"#));
+        for uri in [
+            "/app/example.com/visitors?sort=visits",
+            "/app/example.com/visitors?page=2",
+        ] {
+            let body = page(uri).await;
+            assert!(
+                !body.contains(r#"id="vis-rows""#),
+                "{uri} keeps its rows in place"
+            );
+        }
+        let payments = page("/app/example.com/payments").await;
+        assert!(payments.contains(r#"id="pay-sum" data-sync"#));
+        assert!(payments.contains(r#"id="pay-rows" data-sync"#));
+        assert!(
+            !page("/app/example.com/payments?page=2")
+                .await
+                .contains(r#"id="pay-rows""#)
+        );
+    }
+
+    #[tokio::test]
     async fn team_seats_follow_the_plan() {
         let (_dir, state, _store) = setup().await;
         let owner = sign_in(&state, "me%40example.com").await;

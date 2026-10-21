@@ -98,30 +98,44 @@ for (const box of document.querySelectorAll("[data-stack]")) {
   read(true);
 }
 
-const poll = document.querySelector("[data-poll]");
+const poll = document.body.dataset.poll;
 if (poll) {
-  // On each change, swap in the online pill, section counts, KPIs and the visitors and payments lists from a fresh render.
-  const parts = ["[data-poll]", ".d3-ptabs", ".d3-kpis", "#live", ".d3-pay"];
+  // On each change, swap every [data-sync] part from a fresh render, keeping open rows, focus and what is on screen.
   const drawer = document.getElementById("drawer");
+  const busy = () => drawer?.hidden === false || document.querySelector("dialog[open]");
+  const links = () => [...document.querySelectorAll("[data-sync] a[href]")];
   let v = "", fails = 0, last = 0;
   const refresh = async () => {
     const res = await fetch(location.href);
     if (!res.ok) throw res.status;
     const doc = new DOMParser().parseFromString(await res.text(), "text/html");
-    for (const sel of parts) {
-      const now = document.querySelector(sel), next = doc.querySelector(sel);
-      if (now && next) now.replaceWith(next);
+    const open = [...document.querySelectorAll("[data-sync] .d3-kids:not([hidden])")].map((el) => el.id);
+    const focus = document.activeElement?.closest("[data-sync]") && document.activeElement.getAttribute("href");
+    const anchor = links().find((a) => a.closest("[data-sync]").getBoundingClientRect().top < 0 && a.getBoundingClientRect().top >= 0);
+    const top = anchor?.getBoundingClientRect().top;
+    for (const now of document.querySelectorAll("[data-sync]")) {
+      const next = doc.getElementById(now.id);
+      if (next?.hasAttribute("data-sync")) now.replaceWith(document.adoptNode(next));
     }
+    open.forEach((id) => toggle(id, true));
+    for (const all of document.querySelectorAll("[data-sync] [data-expand-all]")) {
+      if (all.closest("[data-card]").querySelector(".chev[aria-expanded=true]")) all.textContent = "Collapse all";
+    }
+    if (focus) links().find((a) => a.getAttribute("href") === focus)?.focus({ preventScroll: true });
+    const same = anchor && links().find((a) => a.getAttribute("href") === anchor.getAttribute("href"));
+    if (same) scrollBy(0, same.getBoundingClientRect().top - top);
   };
   const loop = async () => {
     await new Promise((r) => setTimeout(r, Math.max(0, last + 1000 - Date.now())));
     last = Date.now();
     try {
-      const res = await fetch(poll.dataset.poll + "?since=" + encodeURIComponent(v));
+      const res = await fetch(poll + "?since=" + encodeURIComponent(v));
       if (!res.ok) throw res.status;
       const next = (await res.json()).v;
-      if (v && next != v && drawer?.hidden !== false) await refresh();
-      if (drawer?.hidden !== false) v = next;
+      if (!busy()) {
+        if (v && next != v) await refresh();
+        v = next;
+      }
       fails = 0;
       loop();
     } catch {
@@ -396,14 +410,13 @@ for (const form of document.querySelectorAll("[data-cal]")) {
   draw();
 }
 
-for (const btn of document.querySelectorAll("[data-open]")) {
-  const dlg = document.getElementById(btn.dataset.open);
-  btn.addEventListener("click", () => dlg.showModal());
-  dlg.querySelector("[data-close]")?.addEventListener("click", () => dlg.close());
-  const other = dlg.querySelector(".d3-other");
-  if (other) {
-    const sync = () => { other.hidden = dlg.querySelector("[name=place]:checked")?.value !== "other"; };
-    dlg.addEventListener("change", sync);
-    sync();
-  }
-}
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-open]");
+  if (btn) document.getElementById(btn.dataset.open).showModal();
+  e.target.closest("dialog [data-close]")?.closest("dialog").close();
+});
+document.addEventListener("change", (e) => {
+  const dlg = e.target.closest("dialog");
+  const other = dlg?.querySelector(".d3-other");
+  if (other) other.hidden = dlg.querySelector("[name=place]:checked")?.value !== "other";
+});

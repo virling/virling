@@ -7,13 +7,13 @@
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
   </button>
   <h1>{{ title }}</h1>
-  <a class="d3-pill" href="{{ live_href }}" title="Visitors with the site open now" data-poll="/app/{{ shell.domain }}/live"><i class="d3-dot{% if shell.live == 0 %} idle{% endif %}"></i>{% if shell.live == 0 %}No visitors online{% else %}{{ shell.live }} visitor{% if shell.live != 1 %}s{% endif %} online now{% endif %}</a>
+  <a class="d3-pill" href="{{ live_href }}" title="Visitors with the site open now" id="d3-live" data-sync><i class="d3-dot{% if shell.live == 0 %} idle{% endif %}"></i>{% if shell.live == 0 %}No visitors online{% else %}{{ shell.live }} visitor{% if shell.live != 1 %}s{% endif %} online now{% endif %}</a>
   <button type="button" class="d3-pill d3-match{% if !matching.connected %} off{% endif %}" data-toggle="match" aria-controls="match" aria-expanded="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>{% if !matching.bold.is_empty() %}<b>{{ matching.bold }}</b>{% endif %}{{ matching.label }}</button>
   <span class="grow"></span>
   {% include "_range.html" %}
   <a class="d3-btn" href="{{ report_href }}">{% if shell.agency %}Client report{% else %}Weekly email{% endif %}</a>
 </header>
-<nav class="d3-ptabs" aria-label="Dashboard sections">{% for t in views %}<a href="{{ t.href }}"{% if t.on %} aria-current="page"{% endif %}>{{ t.label }}{% if !t.count.is_empty() %}<span class="c{% if loop.index == 3 %} live{% endif %}">{{ t.count }}</span>{% endif %}</a>{% endfor %}</nav>
+<nav class="d3-ptabs" id="ptabs" data-sync aria-label="Dashboard sections">{% for t in views %}<a href="{{ t.href }}"{% if t.on %} aria-current="page"{% endif %}>{{ t.label }}{% if !t.count.is_empty() %}<span class="c{% if loop.index == 3 %} live{% endif %}">{{ t.count }}</span>{% endif %}</a>{% endfor %}</nav>
 
 <div class="d3-body">
 <section class="d3-card d3-mp" id="match" hidden>
@@ -137,7 +137,7 @@
 {% endif %}
 
 {% if let Some(v) = visitors %}
-<section class="d3-card d3-vis" id="live">
+<section class="d3-card d3-vis" id="live" data-sync>
   <div class="d3-sec-head pad"><div class="ttl"><h2>Visitors</h2><span class="dim">{{ v.sub }}</span></div><nav class="d3-tabs" aria-label="Visitor list">{% for t in v.tabs %}<a href="{{ t.href }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
   {% if !v.stats.is_empty() %}<div class="d3-stats">{% for (n, l) in v.stats %}<span><b>{{ n }}</b>{{ l }}</span>{% endfor %}</div>{% endif %}
   {% if let Some((t, x)) = v.empty %}<div class="d3-empty line"><b>{{ t }}</b><span>{{ x }}</span></div>{% else %}
@@ -156,8 +156,8 @@
 {% endif %}
 
 {% if let Some(pv) = payments %}
-{% if !pv.sum.is_empty() %}<section class="d3-kpis">{% for (l, v, s, neg) in pv.sum %}<div class="d3-card d3-kpi"><span class="k">{{ l }}</span><b{% if neg %} class="neg"{% endif %}>{{ v }}</b><span class="n"><span>{{ s }}</span></span></div>{% endfor %}</section>{% endif %}
-<section class="d3-card d3-pay" data-rows data-total="{{ pv.rows.len() }}" data-offset="0">
+{% if !pv.sum.is_empty() %}<section class="d3-kpis" id="kpis" data-sync>{% for (l, v, s, neg) in pv.sum %}<div class="d3-card d3-kpi"><span class="k">{{ l }}</span><b{% if neg %} class="neg"{% endif %}>{{ v }}</b><span class="n"><span>{{ s }}</span></span></div>{% endfor %}</section>{% endif %}
+<section class="d3-card d3-pay" id="pay" data-sync data-rows data-total="{{ pv.rows.len() }}" data-offset="0">
   <div class="d3-sec-head pad"><h2>Latest payments</h2>{% if pv.total > 0 %}<a class="d3-link" href="{{ pv.all_href }}">All {{ crate::dashboard::plural(*pv.total, "payment") }}</a>{% endif %}</div>
   {% if pv.rows.is_empty() %}
   {% if !matching.connected %}<div class="d3-empty line"><b>No payments yet</b><span>Connect a payment provider and Virling backfills the last 90 days, then matches every new payment to the visit that led to it.</span><a class="d3-btn" href="{{ pv.connect_href }}">Connect payments</a></div>

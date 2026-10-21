@@ -1,7 +1,7 @@
 {% extends "app.html" %}
 {% block tools %}{% include "_range.html" %}{% endblock %}
 {% block content %}
-<section class="box summary{% if never_paid %} muted-sum{% endif %}">
+<section class="box summary{% if never_paid %} muted-sum{% endif %}" id="pay-sum" data-sync>
   {% for s in summary %}<div><span class="sn">{{ s.name }}</span><b>{{ s.value }}</b><span class="dim">{{ s.sub }}</span></div>{% endfor %}
 </section>
 {% if !never_paid %}
@@ -12,10 +12,10 @@
   </div>
   {% if !is_goal %}<nav class="sg" aria-label="Filter payments">{% for f in filters %}<a href="{{ f.href }}"{% if f.on %} class="on" aria-current="true"{% endif %}>{{ f.label }} <span class="count">{{ f.count }}</span></a>{% endfor %}</nav>{% endif %}
   <form class="search" method="get" role="search">{% for (k, v) in hidden %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}<input type="search" name="q" value="{{ search }}" placeholder="Search names, sources, countries" aria-label="Search"></form>
-  <span class="dim">{{ showing }}</span>
+  <span class="dim" id="showing" data-sync>{{ showing }}</span>
 </div>
 {% endif %}
-<section class="box pay-list" data-rows data-total="{{ total }}" data-offset="{{ offset }}">
+<section class="box pay-list"{% if offset == 0 %} id="pay-rows" data-sync{% endif %} data-rows data-total="{{ total }}" data-offset="{{ offset }}">
   {% if !customers.is_empty() %}{% include "_customers.html" %}{% endif %}
   {% if never_paid %}
   <div class="pay-empty">
@@ -33,7 +33,7 @@
 </section>
 {% if !prev.is_empty() || !next.is_empty() %}
 <div class="pager">
-  <span class="dim">{{ showing }}</span>
+  <span class="dim" id="showing-pager" data-sync>{{ showing }}</span>
   <span class="eh-actions">
     {% if !prev.is_empty() %}<a class="b sec" href="{{ prev }}">Previous</a>{% endif %}
     {% if !next.is_empty() %}<a class="b sec" href="{{ next }}">Next</a>{% endif %}

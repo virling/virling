@@ -120,6 +120,8 @@ struct VisitorsPage {
     revenue: bool,
     cols: String,
     rows: Vec<VisitorView>,
+    /// Rows refresh live only on the first page in the default order.
+    live_rows: bool,
     filtered: bool,
     clear_href: String,
     showing: String,
@@ -496,6 +498,7 @@ pub async fn list(
         revenue,
         cols: cols.join(" "),
         rows,
+        live_rows: page == 1 && sort.is_none(),
         filtered: channel.is_some()
             || source.is_some()
             || goal.is_some()
