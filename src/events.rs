@@ -1109,7 +1109,7 @@ impl EventStore for DuckStore {
         if let Some(t) = self.indexed(site_id, |ix, _, _| Ok(Some(ix.first_event())))? {
             return Ok(t.map(stats::from_micros));
         }
-        let conn = self.read()?;
+        let conn = self.reader()?;
         let us: Option<i64> = conn.query_row(
             "SELECT epoch_us(min(ts)) FROM events WHERE site_id = ?",
             params![site_id],
@@ -1148,7 +1148,7 @@ impl EventStore for DuckStore {
     }
 
     fn bots_filtered(&self, site_id: &str, days: i64) -> anyhow::Result<u64> {
-        let conn = self.read()?;
+        let conn = self.reader()?;
         let n: i64 = conn.query_row(
             "SELECT count(DISTINCT visitor_id) FROM bot_events WHERE site_id = ? AND ts > now() - to_days(CAST(? AS INTEGER))",
             params![site_id, days],
