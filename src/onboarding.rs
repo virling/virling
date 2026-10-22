@@ -342,7 +342,7 @@ fn provider_card(p: Provider, selected: bool) -> ProviderCard {
             "eyJ0eXAiOiJKV1QiLCJhbGciOi...",
             "How to create an API key, 1 minute",
             "https://docs.lemonsqueezy.com/guides/developer-guide/getting-started",
-            "LemonSqueezy API keys cannot be made read-only and cover every store on your account. Virling only reads orders and subscription invoices, and stores the key encrypted. Delete it in LemonSqueezy at any time to revoke access.",
+            "LemonSqueezy API keys cannot be made read-only and cover every store on your account. Virling reads orders and subscription invoices, adds a webhook to each store so payments link to visits, and stores the key encrypted. Delete it in LemonSqueezy at any time to revoke access.",
         ),
     };
     ProviderCard {

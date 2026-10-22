@@ -39,7 +39,7 @@ It runs as one Rust binary with embedded storage. No Postgres, no ClickHouse, no
 - **WordPress plugin** in `integrations/wordpress`.
 - **Magic-link sign-in and onboarding** (behind `--app`).
 
-Not available yet: attribution for LemonSqueezy payments, the hosted plan, team members, imports from other tools, other attribution models and Windows builds.
+Not available yet: the hosted plan, team members, imports from other tools, other attribution models and Windows builds.
 
 ## Run it
 

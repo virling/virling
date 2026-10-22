@@ -1,5 +1,5 @@
 mod dodo;
-mod lemonsqueezy;
+pub mod lemonsqueezy;
 mod polar;
 mod stripe;
 
