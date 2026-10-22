@@ -51,6 +51,17 @@ For Claude Code, the [CLI](cli.md) with `--json` works too, and uses less contex
 
 Request headers are in beta in claude.ai and not every account has them yet. Virling does not offer OAuth sign-in yet, so without request headers the connector cannot authenticate.
 
+## Claude Code plugin
+
+This repository is also a Claude Code plugin marketplace. The `virling` plugin bundles the [agent skill](https://github.com/virling/virling/tree/main/skills/virling) and the MCP server:
+
+```sh
+claude plugin marketplace add virling/virling
+claude plugin install virling@virling
+```
+
+In a session, `/plugin marketplace add virling/virling` and `/plugin install virling@virling` do the same. Claude Code asks for your server's URL, such as `https://stats.example.com`. Then run `/mcp`, choose **virling** and sign in. The plugin uses OAuth sign-in, so the server needs `https`. On `http`, add the server with an API key as above.
+
 ## Other clients
 
 Any client that speaks the Streamable HTTP transport and can send a header works. Point it at `/mcp` with the `Authorization` header above. Virling answers each request with one JSON response; it does not open event streams or keep sessions, and `GET /mcp` returns `405`.

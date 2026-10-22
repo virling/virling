@@ -1,0 +1,16 @@
+{
+  "name": "virling",
+  "owner": {
+    "name": "Virling",
+    "url": "https://virling.com"
+  },
+  "description": "Virling plugins for Claude Code.",
+  "plugins": [
+    {
+      "name": "virling",
+      "source": ".",
+      "description": "Ask which channels, referrers, campaigns and pages make money, from your Virling server.",
+      "category": "analytics"
+    }
+  ]
+}
