@@ -6,6 +6,7 @@ use serde_json::{Map, Value};
 use time::{Duration, OffsetDateTime};
 
 use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription};
+use crate::events::TRIAL;
 
 const LIMIT: u32 = 100;
 const RECHECK_PER_CALL: usize = 10;
@@ -384,12 +385,25 @@ fn map_order(order: Order) -> Mapped {
         "draft" | "pending" => return Mapped::Pending,
         _ => return Mapped::Skip,
     };
-    if order.net_amount == 0 {
-        return Mapped::Skip;
-    }
     let visitor_id = vid(&order.metadata)
         .or_else(|| order.custom_field_data.as_ref().and_then(vid))
         .or_else(|| order.customer.as_ref().and_then(|c| vid(&c.metadata)));
+    if order.net_amount == 0 {
+        if status != "paid" || order.billing_reason != "subscription_create" {
+            return Mapped::Skip;
+        }
+        return Mapped::Payment(Fetched {
+            provider_payment_id: order.id,
+            ts: order.created_at,
+            amount: 0,
+            currency: order.currency.to_ascii_lowercase(),
+            refunded: 0,
+            status: TRIAL.into(),
+            visitor_id,
+            customer_id: Some(order.customer_id),
+            is_renewal: false,
+        });
+    }
     Mapped::Payment(Fetched {
         provider_payment_id: order.id,
         ts: order.created_at,
@@ -557,7 +571,7 @@ mod tests {
         let mut cur = cursor(now);
         let (payments, more) = cur.orders_step(orders(), now);
         assert!(more);
-        assert_eq!(payments.len(), 4);
+        assert_eq!(payments.len(), 5);
 
         let plain = &payments[0];
         assert_eq!(
@@ -590,6 +604,16 @@ mod tests {
         assert!(renewal.is_renewal);
         assert_eq!(renewal.amount, 2000);
         assert_eq!(renewal.visitor_id.as_deref(), Some("vid_customer"));
+
+        let trial = &payments[4];
+        assert_eq!(
+            (
+                trial.status.as_str(),
+                trial.amount,
+                trial.visitor_id.as_deref()
+            ),
+            (TRIAL, 0, Some("vid_trial"))
+        );
     }
 
     #[test]
@@ -660,6 +684,23 @@ mod tests {
                 .all(|p| p.is_renewal && p.visitor_id.is_none())
         );
         e2e::site(Provider::Polar, payments, "vid_trial").assert_all_reddit();
+    }
+
+    #[test]
+    fn free_trial_start_credits_the_later_orders() {
+        let trial = match map_order(serde_json::from_value(orders_json_items()[5].clone()).unwrap())
+        {
+            Mapped::Payment(f) => f,
+            _ => panic!("the trial start is kept"),
+        };
+        let payments = vec![
+            trial,
+            subscription_order("first", "2026-09-21T00:00:00Z", "subscription_cycle"),
+            subscription_order("renewal", "2026-10-21T00:00:00Z", "subscription_cycle"),
+        ];
+        let site = e2e::site(Provider::Polar, payments, "vid_trial");
+        site.assert_all_reddit();
+        assert_eq!(site.payments(), 2, "the trial start is not a payment");
     }
 
     #[test]

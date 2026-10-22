@@ -8,6 +8,7 @@ use time::format_description::well_known::Rfc3339;
 use time::{Duration, OffsetDateTime};
 
 use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription};
+use crate::events::TRIAL;
 
 const LIVE_URL: &str = "https://live.dodopayments.com";
 const TEST_URL: &str = "https://test.dodopayments.com";
@@ -323,6 +324,14 @@ fn is_renewal(p: &DodoPayment, first: Option<&(OffsetDateTime, String)>) -> bool
     first.is_some_and(|(at, id)| (p.created_at, &p.payment_id) > (*at, id))
 }
 
+/// A subscription's $0 payment, such as a free trial start, kept only to credit the subscription's later payments.
+fn trial_start(p: &DodoPayment) -> Option<Fetched> {
+    (p.total_amount == 0 && p.subscription_id.is_some()).then(|| Fetched {
+        status: TRIAL.into(),
+        ..p.to_fetched(0, false)
+    })
+}
+
 /// Distinct payments touched by a page of refunds, in first-seen order.
 fn refunded_payment_ids(refunds: &[DodoRefund]) -> Vec<String> {
     let mut ids: Vec<String> = Vec::new();
@@ -455,6 +464,7 @@ impl Api<'_> {
         let items: Vec<DodoPayment> = self.list("/payments", w).await?;
         let mut out = Vec::with_capacity(items.len());
         for item in &items {
+            out.extend(trial_start(item));
             if item.total_amount <= 0 {
                 continue;
             }
@@ -729,6 +739,32 @@ mod tests {
         assert_eq!(flags, [false, true, true]);
         assert!(fetched[1..].iter().all(|f| f.visitor_id.is_none()));
         e2e::site(Provider::Dodo, fetched, "v_sub").assert_all_reddit();
+    }
+
+    #[test]
+    fn free_trial_start_credits_the_later_payments() {
+        assert!(
+            trial_start(&payments()[0]).is_none(),
+            "one-time payments are not trials"
+        );
+        let mut start = payments().remove(3);
+        start.payment_id = "pay_trial".into();
+        start.total_amount = 0;
+        start.created_at = datetime!(2026-09-01 09:00 UTC);
+        start.metadata.insert("virling_vid".into(), "v_sub".into());
+        let trial = trial_start(&start).unwrap();
+        assert_eq!((trial.status.as_str(), trial.amount), (TRIAL, 0));
+        let mut first = payments().remove(3);
+        first.payment_id = "pay_first".into();
+        first.created_at = datetime!(2026-09-15 09:00 UTC);
+        let fetched = vec![
+            trial,
+            first.to_fetched(0, false),
+            payments()[3].to_fetched(0, true),
+        ];
+        let site = e2e::site(Provider::Dodo, fetched, "v_sub");
+        site.assert_all_reddit();
+        assert_eq!(site.payments(), 2, "the trial start is not a payment");
     }
 
     #[test]
