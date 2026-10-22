@@ -20,6 +20,7 @@
 - [Goals](track/goals.md)
 - [Tracked links](track/links.md)
 - [AI crawlers](track/ai-crawlers.md)
+- [AI answers](track/ai-answers.md)
 - [Single-page apps](track/spa.md)
 - [Cookieless mode](track/cookieless.md)
 - [Privacy and consent](track/privacy.md)
