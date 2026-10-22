@@ -1056,7 +1056,13 @@ impl EventStore for DuckStore {
         let tx = conn.transaction()?;
         {
             let mut stmt = tx.prepare(
-                "INSERT OR REPLACE INTO payments VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                // A sync without the visitor ID keeps the one a webhook stored.
+                "INSERT INTO payments VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 ON CONFLICT (site_id, provider, provider_payment_id) DO UPDATE SET ts = excluded.ts,
+                   amount = excluded.amount, currency = excluded.currency, amount_usd = excluded.amount_usd,
+                   refunded = excluded.refunded, status = excluded.status,
+                   visitor_id = coalesce(excluded.visitor_id, payments.visitor_id),
+                   customer_id = excluded.customer_id, is_renewal = excluded.is_renewal",
             )?;
             for p in payments {
                 stmt.execute(params![

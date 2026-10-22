@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
+use sha2::{Digest, Sha256};
 use time::{Duration, OffsetDateTime};
 
 use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription};
@@ -13,6 +15,8 @@ const BACKFILL: Duration = Duration::days(90);
 const REFUND_WINDOW: Duration = Duration::days(60);
 const REFUND_SCAN_EVERY: Duration = Duration::hours(6);
 const OVERLAP: Duration = Duration::minutes(10);
+/// Events whose payloads carry the checkout's custom data, and with it the visitor ID.
+const WEBHOOK_EVENTS: [&str; 2] = ["order_created", "subscription_payment_success"];
 
 pub async fn check_key(client: &reqwest::Client, key: &str) -> anyhow::Result<()> {
     get(client, key, "users/me", &[]).await?;
@@ -148,6 +152,88 @@ async fn get(
         }
         s => anyhow::bail!("LemonSqueezy returned HTTP {s}. Try again in a minute."),
     }
+}
+
+/// Points a webhook of every store the key can see at `url`, creating it or giving the existing one `secret`.
+pub async fn register_webhook(
+    client: &reqwest::Client,
+    key: &str,
+    url: &str,
+    secret: &str,
+) -> anyhow::Result<()> {
+    let me: Me = serde_json::from_str(&get(client, key, "users/me", &[]).await?)?;
+    let stores: Ids = serde_json::from_str(&get(client, key, "stores", &[]).await?)?;
+    for store in stores.data {
+        let path = format!("webhooks?filter[store_id]={}", store.id);
+        let hooks: Hooks = serde_json::from_str(&get(client, key, &path, &[]).await?)?;
+        let mut attributes = json!({ "url": url, "events": WEBHOOK_EVENTS, "secret": secret });
+        let (method, path, body) = match hooks.data.iter().find(|h| h.attributes.url == url) {
+            Some(h) => (
+                reqwest::Method::PATCH,
+                format!("webhooks/{}", h.id),
+                json!({ "data": { "type": "webhooks", "id": h.id, "attributes": attributes } }),
+            ),
+            None => {
+                attributes["test_mode"] = me.meta.test_mode.into();
+                (
+                    reqwest::Method::POST,
+                    "webhooks".to_string(),
+                    json!({ "data": { "type": "webhooks", "attributes": attributes,
+                        "relationships": { "store": { "data": { "type": "stores", "id": store.id } } } } }),
+                )
+            }
+        };
+        let resp = client
+            .request(method, format!("{API}/{path}"))
+            .bearer_auth(key)
+            .header(reqwest::header::ACCEPT, "application/vnd.api+json")
+            .header(reqwest::header::CONTENT_TYPE, "application/vnd.api+json")
+            .body(body.to_string())
+            .send()
+            .await?;
+        if !resp.status().is_success() {
+            anyhow::bail!(
+                "LemonSqueezy did not accept the webhook (HTTP {}). Virling needs a public https address to receive it.",
+                resp.status()
+            );
+        }
+    }
+    Ok(())
+}
+
+/// HMAC-SHA256 of a webhook body with its signing secret, in lowercase hex as `X-Signature` carries it.
+pub fn signature(secret: &str, body: &[u8]) -> String {
+    let mut key = [0u8; 64];
+    if secret.len() > key.len() {
+        key[..32].copy_from_slice(&Sha256::digest(secret.as_bytes()));
+    } else {
+        key[..secret.len()].copy_from_slice(secret.as_bytes());
+    }
+    let inner = Sha256::new()
+        .chain_update(key.map(|b| b ^ 0x36))
+        .chain_update(body)
+        .finalize();
+    let outer = Sha256::new()
+        .chain_update(key.map(|b| b ^ 0x5c))
+        .chain_update(inner)
+        .finalize();
+    outer.iter().map(|b| format!("{b:02x}")).collect()
+}
+
+/// The order or subscription invoice a webhook reports, with the visitor ID from its custom data.
+pub fn webhook_payment(body: &[u8]) -> anyhow::Result<Option<Fetched>> {
+    let hook: Webhook = serde_json::from_slice(body)?;
+    let invoice = match hook.data.kind.as_str() {
+        "orders" => false,
+        "subscription-invoices" => true,
+        _ => return Ok(None),
+    };
+    let resource = Resource {
+        id: hook.data.id,
+        attributes: serde_json::from_value(hook.data.attributes)?,
+        meta: Some(hook.meta),
+    };
+    Ok(to_fetched(resource, invoice))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -331,6 +417,57 @@ struct StoreAttributes {
 }
 
 #[derive(Deserialize)]
+struct Me {
+    meta: MeMeta,
+}
+
+#[derive(Deserialize)]
+struct MeMeta {
+    #[serde(default)]
+    test_mode: bool,
+}
+
+#[derive(Deserialize)]
+struct Ids {
+    data: Vec<Id>,
+}
+
+#[derive(Deserialize)]
+struct Id {
+    id: String,
+}
+
+#[derive(Deserialize)]
+struct Hooks {
+    data: Vec<Hook>,
+}
+
+#[derive(Deserialize)]
+struct Hook {
+    id: String,
+    attributes: HookAttributes,
+}
+
+#[derive(Deserialize)]
+struct HookAttributes {
+    url: String,
+}
+
+#[derive(Deserialize)]
+struct Webhook {
+    meta: ResourceMeta,
+    data: WebhookData,
+}
+
+#[derive(Deserialize)]
+struct WebhookData {
+    #[serde(rename = "type")]
+    kind: String,
+    id: String,
+    attributes: serde_json::Value,
+}
+
+#[derive(Deserialize)]
 struct Resource {
     id: String,
     attributes: Attributes,
@@ -359,6 +496,28 @@ struct Attributes {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn signature_is_hmac_sha256_hex() {
+        // RFC 4231 test case 2.
+        assert_eq!(
+            signature("Jefe", b"what do ya want for nothing?"),
+            "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843"
+        );
+        let long = "k".repeat(100);
+        assert_eq!(signature(&long, b"x").len(), 64);
+    }
+
+    #[test]
+    fn webhook_order_carries_the_visitor() {
+        let body = include_bytes!("fixtures/lemonsqueezy_webhook_order.json");
+        let f = webhook_payment(body).unwrap().unwrap();
+        assert_eq!(f.provider_payment_id, "order_104");
+        assert_eq!(f.visitor_id.as_deref(), Some("v_8c1f2e"));
+        assert_eq!((f.amount, f.status.as_str()), (2460, "paid"));
+        let other = br#"{"meta":{"event_name":"subscription_updated"},"data":{"type":"subscriptions","id":"9","attributes":{}}}"#;
+        assert!(webhook_payment(other).unwrap().is_none());
+    }
 
     #[test]
     fn subscription_status_decides_live() {

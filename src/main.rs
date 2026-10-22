@@ -388,6 +388,95 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn lemonsqueezy_webhook_attaches_the_visitor() {
+        let (_dir, state, store) = setup().await;
+        let site = site_id(&state).await;
+        let secret = "whsec_fixture_1234";
+        let (key, key_nonce) = state.vault.encrypt("ls_fixture_key").unwrap();
+        let (hook, hook_nonce) = state.vault.encrypt(secret).unwrap();
+        sqlx::query(
+            "INSERT INTO integrations (id, site_id, provider, key_ciphertext, key_nonce, created_at, webhook_ciphertext, webhook_nonce)
+             VALUES ('ls', ?, 'lemonsqueezy', ?, ?, 1, ?, ?)",
+        )
+        .bind(&site)
+        .bind(key)
+        .bind(key_nonce)
+        .bind(hook)
+        .bind(hook_nonce)
+        .execute(&state.db)
+        .await
+        .unwrap();
+        let body = include_str!("providers/fixtures/lemonsqueezy_webhook_order.json");
+        let send = |site: String, signature: String| {
+            let app = router(state.clone())
+                .layer(MockConnectInfo(SocketAddr::from(([203, 0, 113, 9], 5555))));
+            let req = Request::post(format!("/api/webhooks/lemonsqueezy/{site}"))
+                .header("x-signature", signature)
+                .body(Body::from(body))
+                .unwrap();
+            async move { app.oneshot(req).await.unwrap().status() }
+        };
+        let signed = crate::providers::lemonsqueezy::signature(secret, body.as_bytes());
+        assert_eq!(
+            send(site.clone(), "0".repeat(64)).await,
+            StatusCode::UNAUTHORIZED
+        );
+        assert_eq!(
+            send("other".into(), signed.clone()).await,
+            StatusCode::NOT_FOUND
+        );
+        assert_eq!(send(site.clone(), signed).await, StatusCode::NO_CONTENT);
+
+        let period = Period {
+            from: time::macros::date!(2026 - 10 - 01),
+            to: time::macros::date!(2026 - 10 - 31),
+            tz: "UTC".into(),
+        };
+        let visitor = || {
+            store
+                .payment_list(&site, &period, PaymentFilter::All, 10, 0)
+                .unwrap()
+                .rows
+                .into_iter()
+                .map(|p| (p.provider_payment_id, p.visitor_id))
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(
+            visitor(),
+            [("order_104".to_string(), Some("v_8c1f2e".to_string()))]
+        );
+        let body: serde_json::Value = serde_json::from_str(body).unwrap();
+        let without_custom_data = serde_json::json!({ "meta": {}, "data": body["data"] });
+        let polled = crate::providers::lemonsqueezy::webhook_payment(
+            without_custom_data.to_string().as_bytes(),
+        )
+        .unwrap()
+        .unwrap();
+        assert_eq!(polled.visitor_id, None);
+        store
+            .upsert_payments(&[Payment {
+                site_id: site.clone(),
+                provider: "lemonsqueezy".into(),
+                provider_payment_id: polled.provider_payment_id,
+                ts: polled.ts,
+                amount: polled.amount,
+                currency: polled.currency,
+                amount_usd: None,
+                refunded: polled.refunded,
+                status: polled.status,
+                visitor_id: polled.visitor_id,
+                customer_id: polled.customer_id,
+                is_renewal: polled.is_renewal,
+            }])
+            .unwrap();
+        assert_eq!(
+            visitor(),
+            [("order_104".to_string(), Some("v_8c1f2e".to_string()))],
+            "a poll without custom data keeps the webhook's visitor"
+        );
+    }
+
+    #[tokio::test]
     async fn tagged_ai_source_stands_in_for_missing_referrer() {
         let (_dir, state, store) = setup().await;
         let body = r#"{"n":"pageview","u":"https://example.com/?utm_source=chatgpt.com","s":"example.com","w":800}"#;

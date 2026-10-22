@@ -253,6 +253,10 @@ pub fn router(state: AppState) -> Router {
                 get(api::visitor),
             )
             .route("/mcp", post(mcp::post))
+            .route(
+                "/api/webhooks/lemonsqueezy/{site_id}",
+                post(crate::sync::lemonsqueezy_webhook),
+            )
             .route("/r/{token}", get(dashboard::report::shared))
             .route("/share/{domain}", get(dashboard::public))
             .route("/share/{domain}/icon", get(dashboard::public_icon))
