@@ -367,8 +367,10 @@ async fn ai_settings(
             }
         })
         .collect();
+    let paid = answers::paid(state, site_id).await?;
     let usable: Vec<Assistant> = Assistant::ALL
         .into_iter()
+        .filter(|_| paid)
         .filter(|a| server.get(*a).is_some() || keys.iter().any(|k| k.0 == a.as_str()))
         .collect();
     let n = questions.len();
@@ -395,6 +397,7 @@ async fn ai_settings(
     let now = OffsetDateTime::now_utc();
     let next = (run_day + answers::EVERY_DAYS - today).max(0);
     let run = match last_run.and_then(|t| OffsetDateTime::from_unix_timestamp(t).ok()) {
+        _ if !paid => "Mentions are included on paid plans.".into(),
         _ if usable.is_empty() && hosted => "AI answers are not set up on this server.".into(),
         _ if usable.is_empty() => "Add a key to start. Questions run once a week.".into(),
         Some(t) if next > 0 && next <= answers::EVERY_DAYS => format!(
