@@ -22,6 +22,7 @@ User-Agent: Mozilla/5.0 ...
 | `r` | string or null | Optional | Referrer URL. Only its host is kept, and only when it is another site. |
 | `v` | string or null | Optional | Visitor ID, 8 to 64 letters, digits or dashes. Missing or invalid: a daily hash is used. |
 | `w` | number | Optional | Screen width in CSS pixels. Below 768 is Mobile, below 1024 Tablet, else Desktop. Missing: Unknown. |
+| `d` | number | Optional | `devicePixelRatio`. Only used with `w` to spot a browser that claims to be a Mac on a screen no Mac has. Not stored. |
 | `l` | string | Optional | Browser language tag. Kept as `en` or `en-US`; cookieless sites keep only `en`. Missing: the first `Accept-Language` entry. |
 | `k` | string | Optional | Navigation type of a page load: `navigate`, `reload` or `back_forward`. Absent on route changes and other events. With it, a pageview can count as a return to the site; see [Sessions](../attribution/index.md#sessions). |
 | `z` | string | Optional | Browser time zone, such as `Europe/Berlin`. Gives the country when no country header does. Not stored. |
@@ -41,7 +42,7 @@ When a pageview comes back to the visit after a leave, the server also stores a 
 These are dropped silently, still with `202`:
 
 - Requests whose `User-Agent` looks like a bot, or is empty.
-- Events with `b: true` or a screen width of `0`. They are stored apart in the `bot_events` table for debugging, and Site settings shows how many bot visitors were filtered in the last 30 days.
+- Events with `b: true`, a screen width of `0`, or a Chrome user agent on macOS with a screen under 1,024 device pixels (`w` times `d`), which no Mac has but headless browsers posing as Macs report. They are stored apart in the `bot_events` table for debugging, and Site settings shows how many bot visitors were filtered in the last 30 days.
 - Events for a site that does not exist.
 - Events whose page host is not the site's domain or a subdomain.
 - Events over the site's rate limit.
