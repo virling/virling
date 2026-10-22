@@ -518,6 +518,31 @@ pub async fn visitor_for(
 }
 
 #[derive(Debug, Serialize)]
+pub struct AiAnswersOut {
+    pub site: String,
+    pub range: RangeOut,
+    /// The range `previous` counts are from.
+    pub previous_range: RangeOut,
+    pub assistants: Vec<crate::dashboard::answers::AssistantOut>,
+}
+
+pub async fn ai_answers_for(
+    state: &AppState,
+    account: &str,
+    domain: &str,
+    q: &RangeQuery,
+) -> Result<AiAnswersOut, ApiError> {
+    let (site, period) = site_period(state, account, domain, q).await?;
+    let assistants = crate::dashboard::answers::report(state, &site.id, &period).await?;
+    Ok(AiAnswersOut {
+        site: site.domain,
+        range: RangeOut::of(&period),
+        previous_range: RangeOut::of(&period.previous()),
+        assistants,
+    })
+}
+
+#[derive(Debug, Serialize)]
 pub struct SitesOut {
     pub sites: Vec<SiteOut>,
 }
@@ -564,6 +589,15 @@ pub async fn retention(
     Query(q): Query<RangeQuery>,
 ) -> ApiResult<RetentionOut> {
     Ok(Json(retention_for(&state, &key.id, &domain, &q).await?))
+}
+
+pub async fn ai_answers(
+    State(state): State<AppState>,
+    key: KeyAccount,
+    Path(domain): Path<String>,
+    Query(q): Query<RangeQuery>,
+) -> ApiResult<AiAnswersOut> {
+    Ok(Json(ai_answers_for(&state, &key.id, &domain, &q).await?))
 }
 
 pub async fn visitor(
@@ -676,6 +710,8 @@ pub(crate) mod tests {
             base_url: "http://localhost:8080".into(),
             waitlist_from: "Virling <hello@virling.com>".into(),
             hosted: false,
+            ai_keys: Default::default(),
+            ai_budget_usd: None,
         };
         let state = AppState::new(
             config,
@@ -710,6 +746,79 @@ pub(crate) mod tests {
             status,
             serde_json::from_slice(&bytes).unwrap_or(Value::Null),
         )
+    }
+
+    #[tokio::test]
+    async fn ai_answers_join_mentions_live_reads_and_revenue() {
+        use crate::answers::{self, Assistant, Found};
+        let f = fixture().await;
+        let db = &f.state.db;
+        let site: String = sqlx::query_scalar("SELECT id FROM sites WHERE domain = 'example.com'")
+            .fetch_one(db)
+            .await
+            .unwrap();
+        let today = OffsetDateTime::now_utc().unix_timestamp().div_euclid(86400);
+        let mut conn = db.acquire().await.unwrap();
+        for (q, mentioned) in [("Best tool?", true), ("Cheapest tool?", false)] {
+            let found = Found {
+                mentioned,
+                position: mentioned.then_some(2),
+                named: 4,
+                cited: if mentioned {
+                    vec!["/pricing".into()]
+                } else {
+                    Vec::new()
+                },
+            };
+            answers::save(
+                &mut conn,
+                &site,
+                today,
+                Assistant::ChatGpt,
+                q,
+                &found,
+                "Acme, then Example",
+            )
+            .await
+            .unwrap();
+        }
+        drop(conn);
+        answers::save_key(&f.state, &site, Assistant::ChatGpt, "sk-test")
+            .await
+            .unwrap();
+        crate::crawlers::count(
+            db,
+            &site,
+            "ChatGPT-User",
+            "/pricing",
+            OffsetDateTime::now_utc().unix_timestamp(),
+        )
+        .await
+        .unwrap();
+        let (code, body) = get(
+            &f.state,
+            "/api/v1/sites/example.com/ai-answers?range=7d",
+            Some(&f.key),
+        )
+        .await;
+        assert_eq!(code, StatusCode::OK);
+        let gpt = &body["assistants"][0];
+        assert_eq!(gpt["assistant"], "ChatGPT");
+        assert_eq!(gpt["keyed"], true);
+        assert_eq!(
+            (gpt["answers"].as_i64(), gpt["mentioned"].as_i64()),
+            (Some(2), Some(1))
+        );
+        assert_eq!(gpt["mention_rate"], 0.5);
+        assert_eq!(gpt["used_in_answers"], 1);
+        assert_eq!(gpt["cited_pages"][0]["page"], "/pricing");
+        assert_eq!(gpt["opened_pages"][0], "/pricing");
+        assert_eq!(gpt["questions"][0]["question"], "Best tool?");
+        assert_eq!(gpt["questions"][0]["latest"]["position"], 2);
+        assert_eq!(body["assistants"][3]["answers"], 0);
+        assert!(body["assistants"][3]["mention_rate"].is_null());
+        let (code, _) = get(&f.state, "/api/v1/sites/other.com/ai-answers", Some(&f.key)).await;
+        assert_eq!(code, StatusCode::NOT_FOUND);
     }
 
     #[tokio::test]
