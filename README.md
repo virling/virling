@@ -35,7 +35,7 @@ It runs as one Rust binary with embedded storage. No Postgres, no ClickHouse, no
 - **Attribution**: last non-direct or first touch, with a 30, 60, 90 or 365 day lookback. Renewals keep the channel of the customer's first payment. Payments without a visitor ID count as Unattributed.
 - **Revenue dashboard**: revenue, revenue per visitor and conversion by channel, referrer, campaign, page and country, payment journeys, a Visitors page, retention by first channel, tracked short links, and AI assistant visits next to AI crawler hits.
 - **Reports and sharing**: weekly email reports with agency branding, and an optional public dashboard.
-- **Read API, MCP server and CLI**: read-only access with API keys or OAuth sign-in, so `virling query` and AI assistants such as Claude and ChatGPT can answer revenue questions. An agent skill is in `skills/virling`.
+- **Read API, MCP server and CLI**: read-only access with API keys or OAuth sign-in, so `virling query` and AI assistants such as Claude and ChatGPT can answer revenue questions. An agent skill is in `skills/virling`, and `claude plugin marketplace add virling/virling` installs it with the MCP server as a Claude Code plugin.
 - **WordPress plugin** in `integrations/wordpress`.
 - **Magic-link sign-in and onboarding** (behind `--app`).
 
