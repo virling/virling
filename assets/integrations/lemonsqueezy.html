@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LemonSqueezy analytics: see which channel brought each order</title>
+<meta name="description" content="Join every LemonSqueezy order to the visit before it through a signed webhook. Revenue per channel, renewals and refunds.">
+<link rel="canonical" href="https://virling.com/integrations/lemonsqueezy">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/lemonsqueezy">
+<meta property="og:title" content="LemonSqueezy analytics: see which channel brought each order">
+<meta property="og:description" content="Join every LemonSqueezy order to the visit before it through a signed webhook. Revenue per channel, renewals and refunds.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"LemonSqueezy","item":"https://virling.com/integrations/lemonsqueezy"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://beta.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="/#join" data-goal="join_click">Apply for beta</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / lemonsqueezy</span>
+      <h1>LemonSqueezy revenue, joined to the visits behind it.</h1>
+      <p class="lead">Virling ties each LemonSqueezy payment to the visit that came before it, so you see which channel, referrer and page bring paying customers, not just visitors. Open source, one Rust binary, or hosted.</p>
+      <p><a class="btn" href="/#join" data-goal="join_click">Apply for beta</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">Virling imports LemonSqueezy orders and subscription invoices, so they count toward revenue, and links them to visits through a webhook.</p>
+<h2>Create an API key</h2>
+<ol class="post-list"><li>In LemonSqueezy, open Settings, API, and create a key. LemonSqueezy's guide: <a href="https://docs.lemonsqueezy.com/guides/developer-guide/getting-started">getting started</a>.</li><li>Paste it into Virling.</li></ol>
+<p class="p"><b>The key has full access.</b> LemonSqueezy API keys cannot be made read-only and cover every store on your account. Virling reads orders, subscriptions with their prices and store currency, and subscription invoices, adds the webhook described below to each store, and stores the key encrypted. Delete the key in LemonSqueezy at any time to revoke access.</p>
+<h2>What is imported</h2>
+<ul class="post-list"><li><b>Orders</b> and <b>subscription invoices</b> from the last 90 days on the first run, then new ones every minute. A subscription's first charge is imported once, as its order.</li><li><b>Refunds.</b> Refunds do not change an order's creation time, so Virling rescans the last 60 days for refunds every 6 hours.</li><li><b>Renewals.</b> An invoice with billing reason <code>renewal</code> is marked as a renewal.</li></ul>
+<h2>Checkout attribution</h2>
+<p class="p">LemonSqueezy only returns checkout custom data in webhooks. When you connect LemonSqueezy, Virling registers a webhook on each of your stores for <code>order_created</code> and <code>subscription_payment_success</code>, pointing at <code>/api/webhooks/lemonsqueezy/</code> on your Virling address, with a signing secret it stores encrypted. Each webhook is checked against its <code>X-Signature</code> before the visitor ID is attached to the order or invoice. Connecting again with a new key updates the same webhook.</p>
+<p class="p">The webhook needs <code>VIRLING_BASE_URL</code> to be a public <code>https://</code> address that LemonSqueezy can reach. Without one, no webhook is registered and LemonSqueezy payments show as Unattributed.</p>
+<p class="p">Pass the visitor ID into checkout as custom data. In the browser:</p>
+<div class="code block"><pre>const url = new URL(&quot;https://STORE.lemonsqueezy.com/checkout/buy/VARIANT_ID&quot;);
+const vid = window.virling?.vid?.();
+if (vid) url.searchParams.set(&quot;checkoutcustomvirling_vid&quot;, vid);
+location.href = url.href;</pre></div>
+<p class="p">Or on your server, when you create a checkout with <code>POST /v1/checkouts</code>, set <code>data.attributes.checkout_data.custom</code> to <code>{ "virling_vid": "&lt;the visitor's virling_vid cookie&gt;" }</code>.</p>
+      <p class="p">Full reference: <a href="https://docs.virling.com/payments/lemonsqueezy.html">LemonSqueezy in the docs</a>.</p>
+    </div>
+  </div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="links"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><span class="grow"></span><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/self-host">Self-host</a><a href="/demo">Demo</a><a href="/changelog">Changelog</a><a href="/integrations">Integrations</a><a href="/blog">Blog</a><a href="/agency" data-goal="agency_click">Agencies</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a></div>
+  <div class="fine"><span>Open source under AGPLv3. Built by Stacklance Infotech LLP.</span><span>In development. Not launched yet.</span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

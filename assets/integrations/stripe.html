@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stripe revenue attribution: see which channel brought each payment</title>
+<meta name="description" content="Join every Stripe charge to the visit before it. See revenue and revenue per visitor by channel, referrer and page, with a read-only restricted key.">
+<link rel="canonical" href="https://virling.com/integrations/stripe">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/stripe">
+<meta property="og:title" content="Stripe revenue attribution: see which channel brought each payment">
+<meta property="og:description" content="Join every Stripe charge to the visit before it. See revenue and revenue per visitor by channel, referrer and page, with a read-only restricted key.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"Stripe","item":"https://virling.com/integrations/stripe"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://beta.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="/#join" data-goal="join_click">Apply for beta</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / stripe</span>
+      <h1>Stripe revenue, joined to the visits behind it.</h1>
+      <p class="lead">Virling ties each Stripe payment to the visit that came before it, so you see which channel, referrer and page bring paying customers, not just visitors. Open source, one Rust binary, or hosted.</p>
+      <p><a class="btn" href="/#join" data-goal="join_click">Apply for beta</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">Virling reads Stripe charges with a restricted key and attributes them through Checkout Sessions, PaymentIntents and Payment Links.</p>
+<h2>Create a restricted key</h2>
+<ol class="post-list"><li>In the Stripe Dashboard, open Developers, API keys, then <b>Create restricted key</b>. Stripe's guide: <a href="https://docs.stripe.com/keys/restricted-api-keys">restricted API keys</a>.</li><li>Give it a name such as "Virling".</li><li>Set <b>Read</b> on these resources and leave everything else at None:<ul class="post-list sub"><li>Charges</li><li>Checkout Sessions</li><li>Customers</li><li>Events</li><li>Invoices</li><li>Subscriptions</li><li>PaymentIntents</li></ul></li><li>Create the key and paste it into Virling. It starts with <code>rk_live_</code>, or <code>rk_test_</code> for test mode.</li></ol>
+<p class="p">Secret keys (<code>sk_live_</code>, <code>sk_test_</code>) are refused: Virling asks for a key that cannot write. If the key cannot read Charges or PaymentIntents, connecting fails with a message listing the resources it needs.</p>
+<h2>What is imported</h2>
+<ul class="post-list"><li><b>Charges</b>, newest first, back 90 days on the first run. Pending and uncaptured charges are skipped until they settle.</li><li><b>Events</b> of type <code>charge.succeeded</code>, <code>charge.failed</code>, <code>charge.captured</code>, <code>charge.refunded</code>, <code>charge.refund.updated</code> and <code>charge.dispute.closed</code>, so refunds, lost disputes and late settlements update payments that were already imported.</li><li><b>Renewals.</b> A charge whose invoice has billing reason <code>subscription_cycle</code> is marked as a renewal. See Renewals.</li></ul>
+<p class="p">Virling uses Stripe API version <code>2026-09-30.endive</code> for its requests, whatever your account's default version is. It finds the invoice a charge paid through Invoice Payments.</p>
+<h2>How a payment finds its visitor</h2>
+<p class="p">Virling looks for the visitor ID in this order:</p>
+<ol class="post-list"><li><code>metadata.virling_vid</code> on the charge.</li><li><code>metadata.virling_vid</code> on its PaymentIntent.</li><li><code>metadata.virling_vid</code> or <code>client_reference_id</code> on the Checkout Session that created it.</li></ol>
+<p class="p">So any of these works:</p>
+<div class="code block"><pre>// Stripe Checkout
+await stripe.checkout.sessions.create({
+  client_reference_id: req.cookies.virling_vid,
+  // ...
+});
+
+// Your own PaymentIntent (Elements)
+await stripe.paymentIntents.create({
+  amount: 4900,
+  currency: &quot;usd&quot;,
+  metadata: { virling_vid: req.cookies.virling_vid },
+});</pre></div>
+<p class="p">If you already use <code>client_reference_id</code> for something else, put the ID in the session's <code>metadata.virling_vid</code> instead.</p>
+<h2>Payment Links</h2>
+<p class="p">Payment Links on <code>buy.stripe.com</code> need no code. When a visitor clicks one, the script adds <code>client_reference_id=&lt;visitor ID&gt;</code> to the link, unless the link already has one. Stripe copies it onto the Checkout Session.</p>
+<p class="p">The link must be a normal <code>&lt;a href&gt;</code> on a page that runs the script. Links opened from emails, QR codes or other sites carry no visitor ID and show as Unattributed.</p>
+<p class="p">See Link checkout to visits for all providers.</p>
+      <p class="p">Full reference: <a href="https://docs.virling.com/payments/stripe.html">Stripe in the docs</a>.</p>
+    </div>
+  </div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="links"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><span class="grow"></span><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/self-host">Self-host</a><a href="/demo">Demo</a><a href="/changelog">Changelog</a><a href="/integrations">Integrations</a><a href="/blog">Blog</a><a href="/agency" data-goal="agency_click">Agencies</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a></div>
+  <div class="fine"><span>Open source under AGPLv3. Built by Stacklance Infotech LLP.</span><span>In development. Not launched yet.</span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
