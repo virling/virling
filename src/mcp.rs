@@ -17,7 +17,7 @@ const VERSIONS: [&str; 3] = ["2025-11-25", "2025-06-18", "2025-03-26"];
 
 const INSTRUCTIONS: &str = "Virling links website visits to payments, so every report shows revenue, not only traffic. \
 Start with list_sites. Use get_overview for totals and change, get_breakdown for revenue by channel, referrer, campaign, page, country or device, \
-get_retention for which channels bring customers who keep paying, list_payments for payments with the visit credited for each, and get_visitor_timeline with a payment's visitor to see what that person did before paying. \
+get_retention for which channels bring customers who keep paying, get_ai_answers for how often AI assistants use and name the site, list_payments for payments with the visit credited for each, and get_visitor_timeline with a payment's visitor to see what that person did before paying. \
 Money is USD net of refunds. Ranges are local dates in the site's timezone: a preset range or from and to.";
 
 /// Answers MCP JSON-RPC over Streamable HTTP with plain JSON responses; no sessions or server-sent streams.
@@ -179,6 +179,10 @@ async fn run(state: &AppState, account: &str, name: &str, a: &Value) -> Result<V
             let q: RangeQuery = args(a)?;
             to_value(api::retention_for(state, account, &site, &q).await?)
         }
+        "get_ai_answers" => {
+            let q: RangeQuery = args(a)?;
+            to_value(api::ai_answers_for(state, account, &site, &q).await?)
+        }
         "list_payments" => {
             let q: PaymentsQuery = args(a)?;
             to_value(api::payments_for(state, account, &site, &q).await?)
@@ -251,6 +255,13 @@ fn tools() -> Vec<Value> {
             "name": "get_retention",
             "title": "Get retention by channel",
             "description": "Which channels bring customers who stay. Customers are grouped by the channel, referrer and campaign credited for their first payment; renewals keep that first channel. The range picks customers whose first payment falls in it. Per row: customers, still_paying (a live subscription per the provider, else a payment not fully refunded within the last billing interval plus 7 days), first_payment_usd, refunded_usd, net_ltv_usd (all their payments so far, net of refunds), avg_ltv_usd, refund_rate (share of customers with any refund), churn_30d (of customers who first paid 30 to 60 days ago, whatever the range, the share with no payment and no live subscription in the last 30 days), share_customers and share_still_paying. day_one is true under 60 days of payments, when LTV is not meaningful yet. headline is the most striking statement, null when data is thin.",
+            "inputSchema": with(json!({}), &[]),
+            "annotations": read_only,
+        }),
+        json!({
+            "name": "get_ai_answers",
+            "title": "Get AI answers",
+            "description": "How AI assistants answer about the site, per assistant (ChatGPT, Claude, Perplexity, Gemini): used_in_answers (times its live fetcher, such as ChatGPT-User, opened a site page while answering someone; needs the server snippet), answers and mentioned (of the site's buyer questions asked once a week with web search, how many answers named the site; only for assistants set up on the server, see keyed), mention_rate, previous (the same counts for the period before), cited_pages (site pages cited, with answer counts), opened_pages, visitors and revenue_usd (referral visits credited to that assistant), and per question the latest answer with position (1 = the first product named), named (products named) and the answer text.",
             "inputSchema": with(json!({}), &[]),
             "annotations": read_only,
         }),
@@ -353,6 +364,7 @@ mod tests {
                 "get_overview",
                 "get_breakdown",
                 "get_retention",
+                "get_ai_answers",
                 "list_payments",
                 "get_visitor_timeline"
             ]
