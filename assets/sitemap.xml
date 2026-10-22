@@ -6,4 +6,12 @@
   <url><loc>https://virling.com/self-host</loc></url>
   <url><loc>https://virling.com/demo</loc></url>
   <url><loc>https://virling.com/changelog</loc></url>
+  <url><loc>https://virling.com/integrations</loc></url>
+  <url><loc>https://virling.com/integrations/stripe</loc></url>
+  <url><loc>https://virling.com/integrations/dodo-payments</loc></url>
+  <url><loc>https://virling.com/integrations/polar</loc></url>
+  <url><loc>https://virling.com/integrations/lemonsqueezy</loc></url>
+  <url><loc>https://virling.com/blog</loc></url>
+  <url><loc>https://virling.com/blog/find-which-channel-pays</loc></url>
+  <url><loc>https://virling.com/blog/ask-claude-which-channel-pays</loc></url>
 </urlset>

@@ -410,3 +410,15 @@ a.more:hover svg { transform: translateX(2px); }
   .pm-name .pm-t { gap: 6px; }
   .pm-insight { padding: 12px; font-size: 13px; }
 }
+.post { max-width: 760px; }
+.post h2 { margin: 24px 0 0; font-size: 24px; letter-spacing: -0.02em; }
+.post code { font: 0.9em var(--mono); background: var(--ground); border: 1px solid var(--rule-2); border-radius: 6px; padding: 1px 5px; }
+.band.alt .post code { background: #fff; }
+.post-list { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: 17px; line-height: 1.6; color: var(--ink-2); }
+.link-cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; }
+.link-cards li { display: flex; flex-direction: column; gap: 6px; padding: 22px; background: #fff; border: 1px solid var(--rule); border-radius: 14px; }
+.link-cards a { color: var(--ink); text-decoration: none; font-size: 18px; }
+.link-cards a:hover { text-decoration: underline; }
+.link-cards span { font-size: 15px; line-height: 1.5; color: var(--ink-2); }
+.post-list.sub { margin-top: 8px; gap: 4px; font-size: 16px; }
+.link-cards a { display: flex; align-items: center; gap: 10px; }

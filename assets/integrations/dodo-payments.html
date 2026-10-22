@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dodo Payments analytics: see which channel brought each payment</title>
+<meta name="description" content="Join every Dodo Payments payment to the visit before it. Revenue per channel, renewals and refunds, with payment links that need no code.">
+<link rel="canonical" href="https://virling.com/integrations/dodo-payments">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/dodo-payments">
+<meta property="og:title" content="Dodo Payments analytics: see which channel brought each payment">
+<meta property="og:description" content="Join every Dodo Payments payment to the visit before it. Revenue per channel, renewals and refunds, with payment links that need no code.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"Dodo Payments","item":"https://virling.com/integrations/dodo-payments"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://beta.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="/#join" data-goal="join_click">Apply for beta</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / dodo-payments</span>
+      <h1>Dodo Payments revenue, joined to the visits behind it.</h1>
+      <p class="lead">Virling ties each Dodo Payments payment to the visit that came before it, so you see which channel, referrer and page bring paying customers, not just visitors. Open source, one Rust binary, or hosted.</p>
+      <p><a class="btn" href="/#join" data-goal="join_click">Apply for beta</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">Virling reads Dodo Payments payments, refunds and subscriptions with an API key.</p>
+<h2>Create an API key</h2>
+<ol class="post-list"><li>Create an API key in the Dodo Payments dashboard. Dodo's guide: <a href="https://docs.dodopayments.com/api-reference/introduction">API reference introduction</a>.</li><li>Paste it into Virling.</li></ol>
+<p class="p">Live mode and test mode keys both work. Virling tries the key against <code>live.dodopayments.com</code> first and <code>test.dodopayments.com</code> second, and remembers which one accepted it.</p>
+<h2>What is imported</h2>
+<ul class="post-list"><li><b>Payments</b> from the last 90 days on the first run, then new ones every minute. Listing walks one day at a time and re-reads the last 30 minutes on each round, so payments that succeed late are not missed.</li><li><b>Refunds and disputes.</b> Refunds update the payment they belong to. Lost or accepted disputes count as refunded, since the money went back to the customer.</li><li><b>Renewals.</b> For a subscription payment, Virling looks up the subscription's paid payments. Every payment after the first paid one is marked as a renewal, so the first charge after a free trial counts as the first payment.</li></ul>
+<p class="p">To stay inside Dodo's limit of 240 requests per minute, Virling makes at most a couple of extra lookups per round and continues on the next round. A large backfill can take a few minutes to finish.</p>
+<h2>How a payment finds its visitor</h2>
+<p class="p">Virling reads <code>metadata.virling_vid</code> on the payment.</p>
+<p class="p">### Payment links</p>
+<p class="p">Static payment links on <code>checkout.dodopayments.com/buy/...</code> need no code. When a visitor clicks one, the script adds <code>metadata_virling_vid=&lt;visitor ID&gt;</code> to the link, unless it is already there, and Dodo stores it as the payment's <code>metadata.virling_vid</code>. The link must be a normal <code>&lt;a href&gt;</code> on a page that runs the script.</p>
+<p class="p">### Checkout sessions</p>
+<p class="p">For a checkout session you create on your server, set it in <code>metadata</code> from the <code>virling_vid</code> cookie:</p>
+<div class="code block"><pre>const session = await client.checkoutSessions.create({
+  product_cart: { product_id: &quot;pdt_...&quot;, quantity: 1 },
+  return_url: &quot;https://yourdomain.com/thanks&quot;,
+  metadata: { virling_vid: req.cookies.virling_vid },
+});
+// Send the customer to session.checkout_url</pre></div>
+<p class="p">If you build a payment link URL in your own code instead of an <code>&lt;a href&gt;</code>, add the parameter yourself:</p>
+<div class="code block"><pre>const url = new URL(&quot;https://checkout.dodopayments.com/buy/pdt_...&quot;);
+const vid = window.virling?.vid?.();
+if (vid) url.searchParams.set(&quot;metadata_virling_vid&quot;, vid);
+location.href = url.href;</pre></div>
+      <p class="p">Full reference: <a href="https://docs.virling.com/payments/dodo.html">Dodo Payments in the docs</a>.</p>
+    </div>
+  </div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="links"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><span class="grow"></span><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/self-host">Self-host</a><a href="/demo">Demo</a><a href="/changelog">Changelog</a><a href="/integrations">Integrations</a><a href="/blog">Blog</a><a href="/agency" data-goal="agency_click">Agencies</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a></div>
+  <div class="fine"><span>Open source under AGPLv3. Built by Stacklance Infotech LLP.</span><span>In development. Not launched yet.</span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
