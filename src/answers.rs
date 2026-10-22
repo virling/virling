@@ -1,4 +1,4 @@
-//! AI answers: asks the site's buyer questions to assistants with web search once a day, with the user's own keys.
+//! AI answers: asks the site's buyer questions to assistants with web search once a week.
 
 use std::collections::HashSet;
 use std::sync::Mutex;
@@ -11,11 +11,16 @@ use url::Url;
 
 use crate::app::AppState;
 use crate::ingest::host_belongs;
+use crate::stats::{Dimension, Period};
 
 const EVERY: Duration = Duration::from_secs(3600);
+/// Days between scheduled runs of a site.
+pub const EVERY_DAYS: i64 = 7;
 /// Runs a user may start by hand per site and UTC day.
-pub const MANUAL_PER_DAY: i64 = 3;
+pub const MANUAL_PER_DAY: i64 = 1;
 pub const MIN_QUESTIONS: usize = 5;
+/// Questions suggested for a new site.
+pub const DEFAULT_QUESTIONS: usize = 8;
 pub const MAX_QUESTIONS: usize = 20;
 /// Characters of each answer kept for the drill-down.
 const KEEP_CHARS: usize = 4000;
@@ -190,7 +195,7 @@ impl Assistant {
                 .as_str()
                 .map(str::to_string)
                 .unwrap_or_else(|| format!("{} answered HTTP {status}", self.provider_name()));
-            anyhow::bail!(msg);
+            anyhow::bail!(msg.replace(key, "[key]"));
         }
         Ok(self.reply(&body))
     }
@@ -219,7 +224,10 @@ impl Assistant {
                 }
             }
             Assistant::Claude => {
-                for c in list(&v["content"]).into_iter().filter(|c| c["type"] == "text") {
+                for c in list(&v["content"])
+                    .into_iter()
+                    .filter(|c| c["type"] == "text")
+                {
                     r.text.push_str(c["text"].as_str().unwrap_or_default());
                     for cite in list(&c["citations"]) {
                         r.push(&cite["url"]);
@@ -272,7 +280,11 @@ pub struct Found {
 
 /// The site's brand from its domain: "tallybird.app" is "Tallybird".
 pub fn brand(domain: &str) -> String {
-    let label = domain.trim_start_matches("www.").split('.').next().unwrap_or(domain);
+    let label = domain
+        .trim_start_matches("www.")
+        .split('.')
+        .next()
+        .unwrap_or(domain);
     let mut c = label.chars();
     c.next()
         .map(|f| f.to_uppercase().chain(c).collect())
@@ -295,45 +307,131 @@ pub fn names(saved: &str, domain: &str) -> Vec<String> {
     out
 }
 
-/// Three starter questions from the homepage title, else from the domain.
-pub fn default_questions(domain: &str, title: Option<&str>) -> Vec<String> {
-    let brand = brand(domain);
-    let topic = title.and_then(|t| {
-        t.split([':', '|', '\u{2013}', '\u{2014}'])
-            .flat_map(|p| p.split(" - "))
-            .map(str::trim)
-            .filter(|p| p.len() > 3 && !p.to_lowercase().contains(&brand.to_lowercase()))
-            .max_by_key(|p| p.len())
-            .map(|p| {
-                let mut c = p.chars();
-                let first = c.next().unwrap_or_default();
-                let lower = c.clone().next().is_some_and(char::is_lowercase);
-                let first = if lower {
-                    first.to_lowercase().collect::<String>()
-                } else {
-                    first.to_string()
-                };
-                format!("{first}{}", c.as_str()).trim_end_matches('.').to_string()
-            })
-    });
-    match topic {
-        Some(t) => vec![
-            format!("What is the best tool for {t}?"),
-            format!("Which tools do you recommend for {t}, and why?"),
-            format!("What are the cheapest good options for {t}?"),
-        ],
-        None => vec![
-            format!("What are the best alternatives to {brand}?"),
-            format!("Who are the main competitors of {domain}?"),
-            format!("Is {brand} worth paying for?"),
-        ],
+/// The phrase of a page title that says what the site does: "Tallybird | Invoicing for freelancers" gives "invoicing for freelancers".
+fn topic(domain: &str, title: Option<&str>) -> Option<String> {
+    let brand = brand(domain).to_lowercase();
+    let t = title?
+        .split([':', '|', '\u{2013}', '\u{2014}'])
+        .flat_map(|p| p.split(" - "))
+        .map(str::trim)
+        .filter(|p| p.len() > 3 && !p.to_lowercase().replace(' ', "").contains(&brand))
+        .max_by_key(|p| p.len())?;
+    let mut c = t.chars();
+    let first = c.next()?;
+    let lower = c.clone().next().is_some_and(char::is_lowercase);
+    let first = if lower {
+        first.to_lowercase().collect::<String>()
+    } else {
+        first.to_string()
+    };
+    Some(
+        format!("{first}{}", c.as_str())
+            .trim_end_matches('.')
+            .to_string(),
+    )
+}
+
+/// Path segments that name a feature, such as /features/payment-reminders.
+const FEATURE_DIRS: &[&str] = &[
+    "features",
+    "feature",
+    "product",
+    "solutions",
+    "use-cases",
+    "for",
+];
+
+/// Up to eight buyer questions from the homepage title, the top landing pages and search keywords; never the brand.
+pub fn suggest(
+    domain: &str,
+    title: Option<&str>,
+    pages: &[String],
+    keywords: &[String],
+) -> Vec<String> {
+    let ours = brand(domain).to_lowercase();
+    let mut out: Vec<String> = Vec::new();
+    let mut add = |q: String| {
+        if !out.contains(&q) && !q.to_lowercase().contains(&ours) && out.len() < DEFAULT_QUESTIONS {
+            out.push(q);
+        }
+    };
+    let topic = topic(domain, title);
+    if let Some(t) = &topic {
+        add(format!("What is the best tool for {t}?"));
+        add(format!("Which tools do you recommend for {t}, and why?"));
     }
+    for k in keywords
+        .iter()
+        .filter(|k| k.split_whitespace().count() >= 2)
+        .take(2)
+    {
+        add(format!(
+            "What do you recommend for {}?",
+            k.trim().to_lowercase()
+        ));
+    }
+    for p in pages {
+        let mut parts = p.trim_matches('/').split('/');
+        if let (Some(dir), Some(slug), None) = (parts.next(), parts.next(), parts.next())
+            && FEATURE_DIRS.contains(&dir)
+            && !slug.is_empty()
+        {
+            let feature = slug.replace(['-', '_'], " ");
+            match &topic {
+                Some(t) => add(format!("Which tools for {t} handle {feature} well?")),
+                None => add(format!("What is the best tool for {feature}?")),
+            }
+        }
+    }
+    match &topic {
+        Some(t) => {
+            add(format!("What are the cheapest good options for {t}?"));
+            add(format!(
+                "What is the easiest option for {t} for a small team?"
+            ));
+            add(format!(
+                "What are the main alternatives for {t} in {}?",
+                OffsetDateTime::now_utc().year()
+            ));
+            add(format!("Which option for {t} has the best reviews?"));
+        }
+        None => {
+            let b = brand(domain);
+            out.extend([
+                format!("What are the best alternatives to {b}?"),
+                format!("Who are the main competitors of {domain}?"),
+                format!("Is {b} worth paying for?"),
+            ]);
+        }
+    }
+    out
+}
+
+/// Names that count as a mention: the brand from the domain, its spelling in the title if different, and the domain.
+pub fn auto_names(domain: &str, title: Option<&str>) -> String {
+    let b = brand(domain);
+    let mut out = vec![b.clone()];
+    let spelled = title.and_then(|t| {
+        t.split([':', '|', '\u{2013}', '\u{2014}', '-'])
+            .map(str::trim)
+            .find(|p| p.to_lowercase().replace(' ', "") == b.to_lowercase())
+    });
+    if let Some(s) = spelled
+        && s != b
+    {
+        out.push(s.to_string());
+    }
+    out.push(domain.to_string());
+    out.join(", ")
 }
 
 /// Up to 20 distinct questions, one per line.
 pub fn clean_questions(input: &str) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
-    for q in input.lines().map(|l| l.trim().chars().take(300).collect::<String>()) {
+    for q in input
+        .lines()
+        .map(|l| l.trim().chars().take(300).collect::<String>())
+    {
         if !q.is_empty() && !out.contains(&q) && out.len() < MAX_QUESTIONS {
             out.push(q);
         }
@@ -341,10 +439,13 @@ pub fn clean_questions(input: &str) -> Vec<String> {
     out
 }
 
-/// USD a day for asking `questions` to each of `assistants` once.
-pub fn daily_cost(questions: usize, assistants: &[Assistant]) -> f64 {
+/// USD for asking `questions` to each of `assistants` once.
+pub fn run_cost(questions: usize, assistants: &[Assistant]) -> f64 {
     questions as f64 * assistants.iter().map(|a| a.cost()).sum::<f64>()
 }
+
+/// Weekly runs in an average month.
+pub const RUNS_PER_MONTH: f64 = 52.0 / 12.0;
 
 /// Byte offset of `needle` in `hay` as a whole word, both lowercase.
 fn find_word(hay: &str, needle: &str) -> Option<usize> {
@@ -369,30 +470,72 @@ fn find_word(hay: &str, needle: &str) -> Option<usize> {
 fn product_key(name: &str) -> String {
     let n = name.to_lowercase();
     let n = n.trim_start_matches("www.");
-    let n = if n.contains(' ') { n } else { n.split('.').next().unwrap_or(n) };
+    let n = if n.contains(' ') {
+        n
+    } else {
+        n.split('.').next().unwrap_or(n)
+    };
     n.chars().filter(|c| c.is_alphanumeric()).collect()
 }
 
 const NOT_PRODUCTS: &[&str] = &[
-    "pros", "cons", "pricing", "price", "features", "key features", "summary", "conclusion",
-    "note", "overview", "best for", "why", "bottom line", "verdict", "sources", "free", "paid",
-    "tip", "tips", "option", "options", "recommendation", "recommendations", "alternatives",
-    "example", "examples", "ease of use", "integrations", "support",
+    "pros",
+    "cons",
+    "pricing",
+    "price",
+    "features",
+    "key features",
+    "summary",
+    "conclusion",
+    "note",
+    "overview",
+    "best for",
+    "why",
+    "bottom line",
+    "verdict",
+    "sources",
+    "free",
+    "paid",
+    "tip",
+    "tips",
+    "option",
+    "options",
+    "recommendation",
+    "recommendations",
+    "alternatives",
+    "example",
+    "examples",
+    "ease of use",
+    "integrations",
+    "support",
 ];
 
 /// A list item, heading or bold phrase that reads like a product name.
 fn product_name(s: &str) -> Option<String> {
     let s = s.trim().trim_start_matches("**").trim_start_matches('[');
-    let end = ["**", ":", " - ", " \u{2013} ", " \u{2014} ", " (", ",", "|", "]", "\u{2014}"]
-        .iter()
-        .filter_map(|c| s.find(c))
-        .min()
-        .unwrap_or(s.len());
+    let end = [
+        "**",
+        ":",
+        " - ",
+        " \u{2013} ",
+        " \u{2014} ",
+        " (",
+        ",",
+        "|",
+        "]",
+        "\u{2014}",
+    ]
+    .iter()
+    .filter_map(|c| s.find(c))
+    .min()
+    .unwrap_or(s.len());
     let s = s[..end].trim().trim_end_matches(['.', '!', '?']);
     let words = s.split_whitespace().count();
     let first = s.chars().next()?;
     let lower = s.to_lowercase();
-    let starts = ["best ", "top ", "how ", "what ", "why ", "if ", "for ", "when ", "the best"];
+    let starts = [
+        "best ", "top ", "how ", "what ", "why ", "if ", "for ", "when ", "the best",
+    ];
     ((1..=4).contains(&words)
         && (2..=40).contains(&s.len())
         && (first.is_uppercase() || first.is_ascii_digit())
@@ -453,7 +596,10 @@ pub fn analyze(reply: &Reply, names: &[String], domain: &str) -> Found {
     for name in products(&reply.text) {
         let key = product_key(&name);
         let n = name.to_lowercase();
-        let ours = keys.contains(&key) || names.iter().any(|b| find_word(&n, &b.to_lowercase()).is_some());
+        let ours = keys.contains(&key)
+            || names
+                .iter()
+                .any(|b| find_word(&n, &b.to_lowercase()).is_some());
         let Some(at) = find_word(&lower, &n) else {
             continue;
         };
@@ -505,9 +651,73 @@ fn today() -> i64 {
     OffsetDateTime::now_utc().unix_timestamp().div_euclid(86400)
 }
 
-/// Asks every due site's questions once a day, forever.
+/// Server-wide assistant keys from the environment; Debug only says which are set.
+#[derive(Clone, Default)]
+pub struct ServerKeys(pub [Option<String>; 4]);
+
+impl ServerKeys {
+    pub fn get(&self, a: Assistant) -> Option<&str> {
+        let i = Assistant::ALL.iter().position(|x| *x == a)?;
+        self.0[i].as_deref().filter(|k| !k.is_empty())
+    }
+}
+
+impl std::fmt::Debug for ServerKeys {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let set: Vec<&str> = Assistant::ALL
+            .iter()
+            .filter(|a| self.get(**a).is_some())
+            .map(|a| a.as_str())
+            .collect();
+        write!(f, "ServerKeys([{}])", set.join(", "))
+    }
+}
+
+type KeyRow = (String, Vec<u8>, Vec<u8>);
+
+/// The key each assistant asks with: the server's, else the site's own on a self-hosted server.
+async fn keys_for(state: &AppState, site_id: &str) -> anyhow::Result<Vec<(Assistant, String)>> {
+    let rows: Vec<KeyRow> = if state.config.hosted {
+        Vec::new()
+    } else {
+        sqlx::query_as("SELECT provider, key_ciphertext, key_nonce FROM ai_keys WHERE site_id = ?")
+            .bind(site_id)
+            .fetch_all(&state.db)
+            .await?
+    };
+    let mut out = Vec::new();
+    for a in Assistant::ALL {
+        if let Some(k) = state.config.ai_keys.get(a) {
+            out.push((a, k.to_string()));
+        } else if let Some(r) = rows.iter().find(|r| r.0 == a.as_str()) {
+            out.push((a, state.vault.decrypt(&r.1, &r.2)?));
+        }
+    }
+    Ok(out)
+}
+
+/// Assistants a site's questions go to.
+pub async fn usable(state: &AppState, site_id: &str) -> sqlx::Result<Vec<Assistant>> {
+    let own: Vec<String> = if state.config.hosted {
+        Vec::new()
+    } else {
+        sqlx::query_scalar("SELECT provider FROM ai_keys WHERE site_id = ?")
+            .bind(site_id)
+            .fetch_all(&state.db)
+            .await?
+    };
+    Ok(Assistant::ALL
+        .into_iter()
+        .filter(|a| state.config.ai_keys.get(*a).is_some() || own.iter().any(|o| o == a.as_str()))
+        .collect())
+}
+
+/// Suggests questions for new sites with visits and asks every due site's questions once a week, forever.
 pub async fn run(state: AppState) {
     loop {
+        if let Err(err) = prepare(&state).await {
+            tracing::error!(%err, "suggesting AI answer questions failed");
+        }
         if let Err(err) = run_due(&state).await {
             tracing::error!(%err, "AI answers round failed");
         }
@@ -515,42 +725,127 @@ pub async fn run(state: AppState) {
     }
 }
 
-async fn run_due(state: &AppState) -> anyhow::Result<()> {
-    let due: Vec<String> = sqlx::query_scalar(
-        "SELECT site_id FROM ai_settings s WHERE questions != '' AND run_day < ?
-         AND EXISTS (SELECT 1 FROM ai_keys k WHERE k.site_id = s.site_id)",
+/// Saves suggested questions and names for sites with visits and none saved yet.
+async fn prepare(state: &AppState) -> anyhow::Result<()> {
+    let sites: Vec<(String, String, Option<String>)> = sqlx::query_as(
+        "SELECT s.id, s.domain, i.title FROM sites s LEFT JOIN site_icons i ON i.site_id = s.id
+         LEFT JOIN ai_settings a ON a.site_id = s.id WHERE a.questions IS NULL OR a.questions = ''",
     )
-    .bind(today())
+    .fetch_all(&state.db)
+    .await?;
+    for (id, domain, title) in sites {
+        let store = state.events.clone();
+        let site = id.clone();
+        let top = tokio::task::spawn_blocking(move || -> anyhow::Result<_> {
+            if store.first_event(&site)?.is_none() {
+                return Ok(None);
+            }
+            let to = OffsetDateTime::now_utc().date();
+            let period = Period {
+                from: to - time::Duration::days(29),
+                to,
+                tz: "UTC".into(),
+            };
+            let keys = |d| -> anyhow::Result<Vec<String>> {
+                Ok(store
+                    .breakdown(&site, &period, d)?
+                    .into_iter()
+                    .filter_map(|r| r.key)
+                    .take(10)
+                    .collect())
+            };
+            Ok(Some((
+                keys(Dimension::LandingPage)?,
+                keys(Dimension::Keyword)?,
+            )))
+        })
+        .await??;
+        let Some((pages, keywords)) = top else {
+            continue;
+        };
+        let questions = suggest(&domain, title.as_deref(), &pages, &keywords);
+        save_settings(
+            &state.db,
+            &id,
+            &questions,
+            &auto_names(&domain, title.as_deref()),
+        )
+        .await?;
+    }
+    Ok(())
+}
+
+async fn run_due(state: &AppState) -> anyhow::Result<()> {
+    sqlx::query("DELETE FROM ai_replies WHERE day < ?")
+        .bind(today() - 1)
+        .execute(&state.db)
+        .await?;
+    let due: Vec<String> = sqlx::query_scalar(
+        "SELECT site_id FROM ai_settings WHERE questions != '' AND run_day <= ?",
+    )
+    .bind(today() - EVERY_DAYS)
     .fetch_all(&state.db)
     .await?;
     for site in due {
-        if claim(&state.db, &site, false).await? {
+        if !usable(state, &site).await?.is_empty() && claim(&state.db, &site, false).await? {
             run_site(state, &site, &|a| a.base().to_string()).await;
         }
     }
     Ok(())
 }
 
-/// Takes today's run for a site; a manual run fails past the daily limit.
+/// Takes a run for a site: a scheduled one a week after the last, a manual one once a day.
 pub async fn claim(db: &SqlitePool, site_id: &str, manual: bool) -> sqlx::Result<bool> {
     let manual = i64::from(manual);
     let done = sqlx::query(
         "UPDATE ai_settings SET manual_runs = CASE WHEN run_day = ?1 THEN manual_runs + ?2 ELSE ?2 END,
            run_day = ?1, last_run_at = ?3
-         WHERE site_id = ?4 AND (run_day < ?1 OR (?2 = 1 AND manual_runs < ?5))",
+         WHERE site_id = ?4 AND (run_day <= ?1 - ?6 OR (?2 = 1 AND (run_day < ?1 OR manual_runs < ?5)))",
     )
     .bind(today())
     .bind(manual)
     .bind(OffsetDateTime::now_utc().unix_timestamp())
     .bind(site_id)
     .bind(MANUAL_PER_DAY)
+    .bind(EVERY_DAYS)
     .execute(db)
     .await?;
     Ok(done.rows_affected() == 1)
 }
 
-/// Asks each question to each assistant with a key and stores today's answers; a failing key stops at its first error.
-pub async fn run_site(state: &AppState, site_id: &str, base: &(dyn Fn(Assistant) -> String + Sync)) {
+fn month() -> String {
+    let d = OffsetDateTime::now_utc().date();
+    format!("{}-{:02}", d.year(), u8::from(d.month()))
+}
+
+/// Estimated USD spent on AI answers this month, server-wide.
+pub async fn spent(db: &SqlitePool) -> sqlx::Result<f64> {
+    Ok(
+        sqlx::query_scalar("SELECT usd FROM ai_spend WHERE month = ?")
+            .bind(month())
+            .fetch_optional(db)
+            .await?
+            .unwrap_or(0.0),
+    )
+}
+
+async fn add_spend(db: &SqlitePool, usd: f64) -> sqlx::Result<()> {
+    sqlx::query(
+        "INSERT INTO ai_spend (month, usd) VALUES (?, ?) ON CONFLICT (month) DO UPDATE SET usd = usd + excluded.usd",
+    )
+    .bind(month())
+    .bind(usd)
+    .execute(db)
+    .await?;
+    Ok(())
+}
+
+/// Asks each question to each assistant with a key and stores the answers; a failing key stops at its first error.
+pub async fn run_site(
+    state: &AppState,
+    site_id: &str,
+    base: &(dyn Fn(Assistant) -> String + Sync),
+) {
     if !RUNNING
         .lock()
         .unwrap()
@@ -567,7 +862,21 @@ pub async fn run_site(state: &AppState, site_id: &str, base: &(dyn Fn(Assistant)
     }
 }
 
-type KeyRow = (String, Vec<u8>, Vec<u8>);
+/// Today's reply to a question from another site's run, so an identical question is asked once a day.
+async fn cached(db: &SqlitePool, day: i64, a: Assistant, q: &str) -> sqlx::Result<Option<Reply>> {
+    let row: Option<(String, String)> = sqlx::query_as(
+        "SELECT text, urls FROM ai_replies WHERE day = ? AND provider = ? AND question = ?",
+    )
+    .bind(day)
+    .bind(a.as_str())
+    .bind(q)
+    .fetch_optional(db)
+    .await?;
+    Ok(row.map(|(text, urls)| Reply {
+        text,
+        urls: serde_json::from_str(&urls).unwrap_or_default(),
+    }))
+}
 
 async fn ask_all(
     state: &AppState,
@@ -580,41 +889,69 @@ async fn ask_all(
     .bind(site_id)
     .fetch_one(&state.db)
     .await?;
-    let keys: Vec<KeyRow> = sqlx::query_as(
-        "SELECT provider, key_ciphertext, key_nonce FROM ai_keys WHERE site_id = ? ORDER BY provider",
-    )
-    .bind(site_id)
-    .fetch_all(&state.db)
-    .await?;
     let names = names(&saved, &domain);
     let day = today();
-    for (provider, ciphertext, nonce) in keys {
-        let Some(a) = Assistant::parse(&provider) else {
-            continue;
-        };
-        let key = state.vault.decrypt(&ciphertext, &nonce)?;
+    let (mut asked, mut reused, mut cost) = (0, 0, 0.0);
+    'keys: for (a, key) in keys_for(state, site_id).await? {
         let mut error = None;
         for q in clean_questions(&questions) {
-            match a.ask(&state.http, &base(a), &key, &q).await {
-                Ok(reply) => {
-                    let found = analyze(&reply, &names, &domain);
-                    let mut conn = state.db.acquire().await?;
-                    save(&mut conn, site_id, day, a, &q, &found, &reply.text).await?;
+            let reply = match cached(&state.db, day, a, &q).await? {
+                Some(r) => {
+                    reused += 1;
+                    r
                 }
-                Err(err) => {
-                    tracing::warn!(provider = %provider, site = %site_id, %err, "AI answer failed");
-                    error = Some(err.to_string());
-                    break;
+                None => {
+                    if let Some(budget) = state.config.ai_budget_usd
+                        && spent(&state.db).await? + a.cost() > budget
+                    {
+                        tracing::warn!(budget, "AI answers paused: this month's budget is used");
+                        break 'keys;
+                    }
+                    match a.ask(&state.http, &base(a), &key, &q).await {
+                        Ok(r) => {
+                            asked += 1;
+                            cost += a.cost();
+                            add_spend(&state.db, a.cost()).await?;
+                            sqlx::query(
+                                "INSERT OR REPLACE INTO ai_replies (day, provider, question, text, urls) VALUES (?, ?, ?, ?, ?)",
+                            )
+                            .bind(day)
+                            .bind(a.as_str())
+                            .bind(&q)
+                            .bind(&r.text)
+                            .bind(serde_json::to_string(&r.urls).unwrap_or_default())
+                            .execute(&state.db)
+                            .await?;
+                            r
+                        }
+                        Err(err) => {
+                            tracing::warn!(provider = a.as_str(), site = %site_id, %err, "AI answer failed");
+                            error = Some(err.to_string());
+                            break;
+                        }
+                    }
                 }
-            }
+            };
+            let found = analyze(&reply, &names, &domain);
+            let mut conn = state.db.acquire().await?;
+            save(&mut conn, site_id, day, a, &q, &found, &reply.text).await?;
         }
         sqlx::query("UPDATE ai_keys SET last_error = ? WHERE site_id = ? AND provider = ?")
             .bind(error)
             .bind(site_id)
-            .bind(&provider)
+            .bind(a.as_str())
             .execute(&state.db)
             .await?;
     }
+    let month_usd = spent(&state.db).await?;
+    tracing::info!(
+        site = %site_id,
+        asked,
+        reused,
+        est_usd = cost,
+        month_usd,
+        "AI answers run done"
+    );
     Ok(())
 }
 
@@ -645,28 +982,37 @@ pub async fn save(
     .bind(text.chars().take(KEEP_CHARS).collect::<String>())
     .execute(&mut *tx)
     .await?;
-    sqlx::query("DELETE FROM ai_cited WHERE site_id = ? AND day = ? AND provider = ? AND question = ?")
+    sqlx::query(
+        "DELETE FROM ai_cited WHERE site_id = ? AND day = ? AND provider = ? AND question = ?",
+    )
+    .bind(site_id)
+    .bind(day)
+    .bind(a.as_str())
+    .bind(question)
+    .execute(&mut *tx)
+    .await?;
+    for page in &found.cited {
+        sqlx::query(
+            "INSERT INTO ai_cited (site_id, day, provider, question, page) VALUES (?, ?, ?, ?, ?)",
+        )
         .bind(site_id)
         .bind(day)
         .bind(a.as_str())
         .bind(question)
+        .bind(page)
         .execute(&mut *tx)
         .await?;
-    for page in &found.cited {
-        sqlx::query("INSERT INTO ai_cited (site_id, day, provider, question, page) VALUES (?, ?, ?, ?, ?)")
-            .bind(site_id)
-            .bind(day)
-            .bind(a.as_str())
-            .bind(question)
-            .bind(page)
-            .execute(&mut *tx)
-            .await?;
     }
     tx.commit().await
 }
 
 /// Encrypts and stores an assistant key, replacing an older one and its error.
-pub async fn save_key(state: &AppState, site_id: &str, a: Assistant, key: &str) -> anyhow::Result<()> {
+pub async fn save_key(
+    state: &AppState,
+    site_id: &str,
+    a: Assistant,
+    key: &str,
+) -> anyhow::Result<()> {
     let (ciphertext, nonce) = state.vault.encrypt(key)?;
     sqlx::query(
         "INSERT INTO ai_keys (site_id, provider, key_ciphertext, key_nonce, created_at) VALUES (?, ?, ?, ?, ?)
@@ -684,7 +1030,12 @@ pub async fn save_key(state: &AppState, site_id: &str, a: Assistant, key: &str) 
 }
 
 /// Saves the questions and names to look for.
-pub async fn save_settings(db: &SqlitePool, site_id: &str, questions: &[String], names: &str) -> sqlx::Result<()> {
+pub async fn save_settings(
+    db: &SqlitePool,
+    site_id: &str,
+    questions: &[String],
+    names: &str,
+) -> sqlx::Result<()> {
     sqlx::query(
         "INSERT INTO ai_settings (site_id, questions, names) VALUES (?, ?, ?)
          ON CONFLICT (site_id) DO UPDATE SET questions = excluded.questions, names = excluded.names",
@@ -741,18 +1092,6 @@ pub async fn cited(
     .bind(to_day)
     .fetch_all(db)
     .await
-}
-
-/// Assistants with a saved key.
-pub async fn keyed(db: &SqlitePool, site_id: &str) -> sqlx::Result<Vec<Assistant>> {
-    let rows: Vec<String> = sqlx::query_scalar("SELECT provider FROM ai_keys WHERE site_id = ?")
-        .bind(site_id)
-        .fetch_all(db)
-        .await?;
-    Ok(Assistant::ALL
-        .into_iter()
-        .filter(|a| rows.iter().any(|r| r == a.as_str()))
-        .collect())
 }
 
 /// One question's latest answer in a range, with how often it named the site.
@@ -845,7 +1184,10 @@ mod tests {
     const DOMAIN: &str = "tallybird.app";
 
     fn fixture(name: &str) -> Value {
-        let path = format!("{}/src/answers/fixtures/{name}.json", env!("CARGO_MANIFEST_DIR"));
+        let path = format!(
+            "{}/src/answers/fixtures/{name}.json",
+            env!("CARGO_MANIFEST_DIR")
+        );
         serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap()
     }
 
@@ -879,7 +1221,11 @@ mod tests {
         assert!(!f.mentioned);
         assert_eq!(f.position, None);
         assert_eq!(f.named, 4);
-        assert_eq!(f.cited, ["/compare"], "a source can be cited without a mention");
+        assert_eq!(
+            f.cited,
+            ["/compare"],
+            "a source can be cited without a mention"
+        );
     }
 
     #[test]
@@ -916,24 +1262,42 @@ mod tests {
     #[test]
     fn questions_and_costs() {
         assert_eq!(brand("www.tallybird.app"), "Tallybird");
-        assert_eq!(
-            default_questions(DOMAIN, Some("Tallybird | Invoicing for freelancers")),
-            [
-                "What is the best tool for invoicing for freelancers?",
-                "Which tools do you recommend for invoicing for freelancers, and why?",
-                "What are the cheapest good options for invoicing for freelancers?"
-            ]
+        let q = suggest(
+            DOMAIN,
+            Some("Tallybird | Invoicing for freelancers"),
+            &[
+                "/".into(),
+                "/features/payment-reminders".into(),
+                "/blog/a/b".into(),
+            ],
+            &["invoice reminder app".into(), "tallybird".into()],
         );
+        assert_eq!(q.len(), DEFAULT_QUESTIONS);
+        assert_eq!(q[0], "What is the best tool for invoicing for freelancers?");
+        assert_eq!(q[2], "What do you recommend for invoice reminder app?");
         assert_eq!(
-            default_questions(DOMAIN, None)[0],
+            q[3],
+            "Which tools for invoicing for freelancers handle payment reminders well?"
+        );
+        assert!(q.iter().all(|q| !q.to_lowercase().contains("tallybird")));
+        assert_eq!(
+            suggest(DOMAIN, None, &[], &[])[0],
             "What are the best alternatives to Tallybird?"
         );
+        assert_eq!(
+            auto_names(DOMAIN, Some("Tally Bird | Invoicing")),
+            "Tallybird, Tally Bird, tallybird.app"
+        );
+        assert_eq!(auto_names(DOMAIN, None), "Tallybird, tallybird.app");
         let q = clean_questions(" a \n\nb\na\n");
         assert_eq!(q, ["a", "b"]);
         let many: String = (0..30).map(|i| format!("q{i}\n")).collect();
         assert_eq!(clean_questions(&many).len(), MAX_QUESTIONS);
-        let cost = daily_cost(20, &Assistant::ALL);
-        assert!((cost - 0.484).abs() < 1e-9, "{cost}");
+        let cost = run_cost(8, &Assistant::ALL);
+        assert!((cost - 0.1936).abs() < 1e-9, "{cost}");
+        let keys = ServerKeys([Some("sk-secret".into()), None, Some(String::new()), None]);
+        assert_eq!(format!("{keys:?}"), "ServerKeys([openai])");
+        assert_eq!(keys.get(Assistant::Perplexity), None);
     }
 
     /// Serves the recorded replies; the Perplexity key is refused.
@@ -957,10 +1321,22 @@ mod tests {
             })
         };
         let app = axum::Router::new()
-            .route("/v1/responses", reply("openai", "authorization", "Bearer sk-test-openai"))
-            .route("/v1/messages", reply("anthropic", "x-api-key", "sk-ant-test"))
-            .route("/v1/agent", reply("perplexity", "authorization", "Bearer pplx-right"))
-            .route("/v1beta/models/{model}", reply("gemini", "x-goog-api-key", "AIza-test"));
+            .route(
+                "/v1/responses",
+                reply("openai", "authorization", "Bearer sk-test-openai"),
+            )
+            .route(
+                "/v1/messages",
+                reply("anthropic", "x-api-key", "sk-ant-test"),
+            )
+            .route(
+                "/v1/agent",
+                reply("perplexity", "authorization", "Bearer pplx-right"),
+            )
+            .route(
+                "/v1beta/models/{model}",
+                reply("gemini", "x-goog-api-key", "AIza-test"),
+            );
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
         let addr = listener.local_addr().unwrap();
         tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
@@ -976,7 +1352,9 @@ mod tests {
             .await
             .unwrap();
         let questions: Vec<String> = (1..=5).map(|i| format!("Question {i}?")).collect();
-        save_settings(db, &site, &questions, "Tallybird").await.unwrap();
+        save_settings(db, &site, &questions, "Tallybird")
+            .await
+            .unwrap();
         for (a, key) in [
             (Assistant::ChatGpt, "sk-test-openai"),
             (Assistant::Claude, "sk-ant-test"),
@@ -990,11 +1368,14 @@ mod tests {
                 .fetch_one(db)
                 .await
                 .unwrap();
-        assert!(!String::from_utf8_lossy(&stored).contains("sk-test"), "keys are encrypted");
+        assert!(
+            !String::from_utf8_lossy(&stored).contains("sk-test"),
+            "keys are encrypted"
+        );
 
         let (base, calls) = mock().await;
         assert!(claim(db, &site, false).await.unwrap());
-        assert!(!claim(db, &site, false).await.unwrap(), "once a day");
+        assert!(!claim(db, &site, false).await.unwrap(), "once a week");
         run_site(state, &site, &|_| base.clone()).await;
         assert_eq!(
             calls.load(std::sync::atomic::Ordering::Relaxed),
@@ -1005,7 +1386,10 @@ mod tests {
         let today = today();
         let t = tallies(db, &site, today, today).await.unwrap();
         let get = |p: &str| t.iter().find(|r| r.0 == p).map(|r| r.1.clone());
-        let all = Some(Tally { answers: 5, mentioned: 5 });
+        let all = Some(Tally {
+            answers: 5,
+            mentioned: 5,
+        });
         assert_eq!(get("openai"), all);
         assert_eq!(get("anthropic"), all);
         assert_eq!(get("gemini"), all);
@@ -1019,7 +1403,12 @@ mod tests {
             errors[3],
             ("perplexity".into(), Some("Invalid API key".into()))
         );
-        assert!(errors.iter().filter(|e| e.0 != "perplexity").all(|e| e.1.is_none()));
+        assert!(
+            errors
+                .iter()
+                .filter(|e| e.0 != "perplexity")
+                .all(|e| e.1.is_none())
+        );
 
         let rows = latest(db, &site, Assistant::ChatGpt, today - 29, today)
             .await
@@ -1029,8 +1418,14 @@ mod tests {
             (rows[0].answers, rows[0].mentioned, rows[0].position),
             (1, 1, Some(3))
         );
-        assert!(rows[0].answer.starts_with("Here are strong invoicing tools"));
+        assert!(
+            rows[0]
+                .answer
+                .starts_with("Here are strong invoicing tools")
+        );
 
+        let spent_once = spent(db).await.unwrap();
+        assert!((spent_once - 0.111).abs() < 1e-9, "{spent_once}");
         run_site(state, &site, &|_| base.clone()).await;
         let t = tallies(db, &site, today, today).await.unwrap();
         assert_eq!(
@@ -1038,9 +1433,38 @@ mod tests {
             15,
             "a rerun replaces the day's answers"
         );
+        assert_eq!(
+            calls.load(std::sync::atomic::Ordering::Relaxed),
+            17,
+            "the same question is asked once a day"
+        );
+        assert_eq!(spent(db).await.unwrap(), spent_once);
+
+        // On the hosted service only server keys count, and the budget pauses runs.
+        let hosted = AppState {
+            config: std::sync::Arc::new(crate::app::Config {
+                hosted: true,
+                ai_keys: ServerKeys([Some("sk-test-openai".into()), None, None, None]),
+                ai_budget_usd: Some(spent_once + 0.025),
+                ..(*state.config).clone()
+            }),
+            ..state.clone()
+        };
+        assert_eq!(usable(&hosted, &site).await.unwrap(), [Assistant::ChatGpt]);
+        let fresh: Vec<String> = (1..=5).map(|i| format!("Another {i}?")).collect();
+        save_settings(db, &site, &fresh, "").await.unwrap();
+        run_site(&hosted, &site, &|_| base.clone()).await;
+        assert_eq!(
+            calls.load(std::sync::atomic::Ordering::Relaxed),
+            19,
+            "two questions fit the budget"
+        );
         for _ in 0..MANUAL_PER_DAY {
             assert!(claim(db, &site, true).await.unwrap());
         }
-        assert!(!claim(db, &site, true).await.unwrap(), "manual runs are limited");
+        assert!(
+            !claim(db, &site, true).await.unwrap(),
+            "manual runs are limited"
+        );
     }
 }

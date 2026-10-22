@@ -31,6 +31,11 @@ virling serve [OPTIONS]
 | `--events-per-second <N>`<br>`VIRLING_EVENTS_PER_SECOND` | `200` | Ingest limit per site. Events over it are dropped. |
 | `--smtp-url <URL>`<br>`VIRLING_SMTP_URL` | unset | SMTP server for sign-in emails. Unset: emails are logged. |
 | `--mail-from <ADDR>`<br>`VIRLING_MAIL_FROM` | `Virling <login@virling.com>` | Sender for sign-in emails. |
+| `--openai-key <KEY>`<br>`VIRLING_OPENAI_KEY` | unset | OpenAI key for every site's [AI answers](../track/ai-answers.md). |
+| `--anthropic-key <KEY>`<br>`VIRLING_ANTHROPIC_KEY` | unset | Anthropic key for AI answers. |
+| `--perplexity-key <KEY>`<br>`VIRLING_PERPLEXITY_KEY` | unset | Perplexity key for AI answers. |
+| `--gemini-key <KEY>`<br>`VIRLING_GEMINI_KEY` | unset | Google Gemini key for AI answers. |
+| `--ai-answers-budget-usd <USD>`<br>`VIRLING_AI_ANSWERS_BUDGET_USD` | unset | Estimated monthly spend after which AI answer runs pause. |
 | `--marketing`<br>`VIRLING_MARKETING` | off | Serve the virling.com landing pages and waitlist. Not needed when self-hosting. |
 | `--waitlist-from <ADDR>`<br>`VIRLING_WAITLIST_FROM` | `Rahul at Virling <hello@virling.com>` | Sender for waitlist emails. Only used with `--marketing`. |
 

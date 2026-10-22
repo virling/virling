@@ -4,8 +4,7 @@ use askama::Template;
 use axum::extract::{Path, Query, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
-use serde::Deserialize;
-use sqlx::SqlitePool;
+use serde::{Deserialize, Serialize};
 use time::macros::format_description;
 use time::{Date, Duration};
 
@@ -38,15 +37,16 @@ pub struct Inputs {
 impl Inputs {
     /// Local dates `from` to `to`, and the same range as unix times for crawler hits.
     pub async fn load(
-        db: &SqlitePool,
+        state: &AppState,
         site_id: &str,
         (from, to): (Date, Date),
         (from_ts, to_ts): (i64, i64),
     ) -> sqlx::Result<Self> {
         let (a, b) = (day(from), day(to));
         let len = b - a + 1;
+        let db = &state.db;
         Ok(Inputs {
-            keyed: answers::keyed(db, site_id).await?,
+            keyed: answers::usable(state, site_id).await?,
             now: answers::tallies(db, site_id, a, b).await?,
             prev: answers::tallies(db, site_id, a - len, a - 1).await?,
             cited: answers::cited(db, site_id, a, b).await?,
@@ -164,8 +164,11 @@ pub struct AnswerRow {
 /// The AI card's Answers tab: per assistant, answers that used the site, mentions and what it sent.
 pub struct AnswersTab {
     pub(super) rows: Vec<AnswerRow>,
-    pub(super) keyed: bool,
     pub(super) foot: &'static str,
+    /// The footer link to settings, empty for none.
+    pub(super) link: &'static str,
+    /// The empty state's last sentence about mentions.
+    pub(super) note: &'static str,
     pub(super) settings: String,
     pub(super) on: bool,
     /// Links to the Visits and Answers tabs.
@@ -179,6 +182,7 @@ pub fn tab(
     href: impl Fn(Assistant) -> String,
     settings: String,
     on: bool,
+    hosted: bool,
 ) -> AnswersTab {
     let rows = Assistant::ALL
         .into_iter()
@@ -214,11 +218,24 @@ pub fn tab(
     let keyed = !i.keyed.is_empty();
     AnswersTab {
         rows,
-        keyed,
-        foot: if keyed {
-            "Used in: answers that opened your pages. Mentioned: answers that name you."
-        } else {
-            "Add your own API keys to see how often each assistant names you."
+        foot: match (keyed, hosted) {
+            (true, _) => {
+                "Used in: answers that opened your pages. Mentioned: answers that name you."
+            }
+            (false, false) => "Add API keys in Settings to see how often each assistant names you.",
+            (false, true) => "Used in: answers that opened your pages.",
+        },
+        link: match (keyed, hosted) {
+            (true, _) => "Questions",
+            (false, false) => "Add keys",
+            (false, true) => "",
+        },
+        note: match (keyed, hosted) {
+            (true, _) => "Mentions of your site show after the first weekly run.",
+            (false, false) => {
+                "To see how often each assistant names you, add API keys in Settings."
+            }
+            (false, true) => "",
         },
         settings,
         on,
@@ -247,6 +264,7 @@ struct AnswersView {
     cited: Vec<(String, String)>,
     opened: Vec<String>,
     keyed: bool,
+    hosted: bool,
     provider: &'static str,
     settings: String,
     questions: Vec<QuestionView>,
@@ -309,7 +327,7 @@ pub async fn page(
     let (from_ts, to_ts) = (at(from), at(to + Duration::days(1)) - 1);
     let site = &ctx.site.id;
     let loaded = async {
-        let inputs = Inputs::load(&state.db, site, (from, to), (from_ts, to_ts)).await?;
+        let inputs = Inputs::load(&state, site, (from, to), (from_ts, to_ts)).await?;
         let bots = crawlers::hits(&state.db, site, from_ts, to_ts).await?;
         let latest = answers::latest(&state.db, site, a, day(from), day(to)).await?;
         let saved: Option<String> =
@@ -329,11 +347,11 @@ pub async fn page(
         tz: ctx.site.timezone.clone(),
     };
     let id = ctx.site.id.clone();
-    let sources = match blocking(move || store.breakdown(&id, &period, Dimension::ChannelSource)).await
-    {
-        Ok(s) => s,
-        Err(code) => return code.into_response(),
-    };
+    let sources =
+        match blocking(move || store.breakdown(&id, &period, Dimension::ChannelSource)).await {
+            Ok(s) => s,
+            Err(code) => return code.into_response(),
+        };
     let n = numbers(a, &inputs, &bots, &sources);
     let names = answers::names(&saved, &ctx.site.domain);
     let short = format_description!("[month repr:short] [day padding:none]");
@@ -364,13 +382,9 @@ pub async fn page(
             .take(5)
             .map(|(p, c)| (p.clone(), plural(*c as u64, "answer")))
             .collect(),
-        opened: n
-            .opened
-            .iter()
-            .take(8)
-            .map(|(p, _)| p.clone())
-            .collect(),
+        opened: n.opened.iter().take(8).map(|(p, _)| p.clone()).collect(),
         keyed: inputs.keyed.contains(&a),
+        hosted: state.config.hosted,
         provider: a.provider_name(),
         settings: format!("{}#ai-answers", app_path(&ctx.site.domain, "settings")),
         questions: latest
@@ -381,11 +395,9 @@ pub async fn page(
                     .unwrap_or_default();
                 let mut latest = format!("Latest answer, {when}: ");
                 match l.position.filter(|_| l.latest_mentioned) {
-                    Some(p) => latest.push_str(&format!(
-                        "named {} of {} products",
-                        ordinal(p),
-                        l.named
-                    )),
+                    Some(p) => {
+                        latest.push_str(&format!("named {} of {} products", ordinal(p), l.named))
+                    }
                     None if l.latest_mentioned => latest.push_str("named"),
                     None => latest.push_str("not named"),
                 }
@@ -412,6 +424,124 @@ pub async fn page(
         v,
         shell: ctx.shell,
     })
+}
+
+/// One assistant in the read API and MCP: answers that read the site, mentions and what it sent.
+#[derive(Debug, Serialize)]
+pub struct AssistantOut {
+    pub assistant: &'static str,
+    /// Whose API key asks the questions: openai, anthropic, perplexity or gemini.
+    pub provider: &'static str,
+    pub keyed: bool,
+    pub used_in_answers: i64,
+    pub answers: i64,
+    pub mentioned: i64,
+    pub mention_rate: Option<f64>,
+    pub previous: Tally,
+    pub cited_pages: Vec<CitedOut>,
+    pub opened_pages: Vec<String>,
+    pub visitors: u64,
+    pub revenue_usd: f64,
+    pub questions: Vec<QuestionOut>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CitedOut {
+    pub page: String,
+    pub answers: i64,
+}
+
+#[derive(Debug, Serialize)]
+pub struct QuestionOut {
+    pub question: String,
+    pub answers: i64,
+    pub mentioned: i64,
+    pub latest: LatestOut,
+}
+
+#[derive(Debug, Serialize)]
+pub struct LatestOut {
+    pub date: String,
+    pub mentioned: bool,
+    pub position: Option<i64>,
+    pub named: i64,
+    pub cited: Vec<String>,
+    /// The answer, cut to 1,000 characters.
+    pub answer: String,
+}
+
+/// Every assistant's numbers for a period, from stored answers, crawler hits and referral revenue.
+pub async fn report(
+    state: &AppState,
+    site_id: &str,
+    period: &Period,
+) -> Result<Vec<AssistantOut>, StatusCode> {
+    let store = state.events.clone();
+    let (id, p) = (site_id.to_string(), period.clone());
+    let (offset, sources) = blocking(move || {
+        Ok((
+            store.utc_offset(&p.tz)?,
+            store.breakdown(&id, &p, Dimension::ChannelSource)?,
+        ))
+    })
+    .await?;
+    let at = |d: Date| d.midnight().assume_offset(offset).unix_timestamp();
+    let range = (at(period.from), at(period.to + Duration::days(1)) - 1);
+    let (from, to) = (period.from, period.to);
+    let loaded = async {
+        let inputs = Inputs::load(state, site_id, (from, to), range).await?;
+        let bots = crawlers::hits(&state.db, site_id, range.0, range.1).await?;
+        let mut latest = Vec::new();
+        for a in Assistant::ALL {
+            latest.push(answers::latest(&state.db, site_id, a, day(from), day(to)).await?);
+        }
+        Ok::<_, sqlx::Error>((inputs, bots, latest))
+    };
+    let (inputs, bots, latest) = loaded.await.map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+    Ok(Assistant::ALL
+        .into_iter()
+        .zip(latest)
+        .map(|(a, latest)| {
+            let n = numbers(a, &inputs, &bots, &sources);
+            AssistantOut {
+                assistant: a.name(),
+                provider: a.as_str(),
+                keyed: inputs.keyed.contains(&a),
+                used_in_answers: n.reads,
+                answers: n.now.answers,
+                mentioned: n.now.mentioned,
+                mention_rate: (n.now.answers > 0)
+                    .then(|| n.now.mentioned as f64 / n.now.answers as f64),
+                previous: n.prev,
+                cited_pages: n
+                    .cited
+                    .into_iter()
+                    .map(|(page, answers)| CitedOut { page, answers })
+                    .collect(),
+                opened_pages: n.opened.into_iter().take(20).map(|o| o.0).collect(),
+                visitors: n.visitors,
+                revenue_usd: n.revenue,
+                questions: latest
+                    .into_iter()
+                    .map(|l| QuestionOut {
+                        latest: LatestOut {
+                            date: Date::from_julian_day((l.day + 2_440_588) as i32)
+                                .map(|d| d.to_string())
+                                .unwrap_or_default(),
+                            mentioned: l.latest_mentioned,
+                            position: l.position,
+                            named: l.named,
+                            cited: l.cited_pages(),
+                            answer: l.answer.chars().take(1000).collect(),
+                        },
+                        question: l.question,
+                        answers: l.answers,
+                        mentioned: l.mentioned,
+                    })
+                    .collect(),
+            }
+        })
+        .collect())
 }
 
 #[cfg(test)]
@@ -452,8 +582,15 @@ mod tests {
             top_page: "/".into(),
             last_seen: 0,
         };
-        let bots = [hit("ChatGPT-User", 12), hit("GPTBot", 90), hit("Claude-User", 4)];
-        let sources = [row("AI|chatgpt.com", 30, 120.0), row("AI|claude.ai", 5, 0.0)];
+        let bots = [
+            hit("ChatGPT-User", 12),
+            hit("GPTBot", 90),
+            hit("Claude-User", 4),
+        ];
+        let sources = [
+            row("AI|chatgpt.com", 30, 120.0),
+            row("AI|claude.ai", 5, 0.0),
+        ];
         let tab = tab(
             &inputs,
             &bots,
@@ -461,24 +598,38 @@ mod tests {
             |a| format!("/a/{}", a.as_str()),
             "/s".into(),
             true,
+            false,
         );
         let names: Vec<_> = tab.rows.iter().map(|r| r.name).collect();
         assert_eq!(names, ["ChatGPT", "Claude"]);
         let gpt = &tab.rows[0];
         assert_eq!(
-            (gpt.reads.as_str(), gpt.mentioned.as_str(), gpt.was.as_str(), gpt.tone),
+            (
+                gpt.reads.as_str(),
+                gpt.mentioned.as_str(),
+                gpt.was.as_str(),
+                gpt.tone
+            ),
             ("12", "7 of 20", "was 4 of 20", "up")
         );
         assert_eq!(
-            (gpt.visitors.as_str(), gpt.revenue.as_str(), gpt.sub.as_str()),
+            (
+                gpt.visitors.as_str(),
+                gpt.revenue.as_str(),
+                gpt.sub.as_str()
+            ),
             ("30", "$120", "Cites /pricing")
         );
         let claude = &tab.rows[1];
         assert_eq!(
-            (claude.reads.as_str(), claude.mentioned.as_str(), claude.sub.as_str()),
+            (
+                claude.reads.as_str(),
+                claude.mentioned.as_str(),
+                claude.sub.as_str()
+            ),
             ("4", "\u{2013}", "Opened /docs")
         );
-        assert!(tab.keyed && gpt.href == "/a/openai");
+        assert!(tab.link == "Questions" && gpt.href == "/a/openai");
         let none = super::tab(
             &Inputs {
                 keyed: Vec::new(),
@@ -492,10 +643,14 @@ mod tests {
             |_| String::new(),
             String::new(),
             false,
+            true,
         );
-        assert!(none.rows.is_empty() && !none.keyed);
+        assert!(none.rows.is_empty() && none.link.is_empty());
         assert_eq!(ordinal(2), "2nd");
         assert_eq!(ordinal(11), "11th");
-        assert_eq!(day(Date::from_calendar_date(1970, time::Month::January, 2).unwrap()), 1);
+        assert_eq!(
+            day(Date::from_calendar_date(1970, time::Month::January, 2).unwrap()),
+            1
+        );
     }
 }

@@ -33,6 +33,10 @@ pub struct Config {
     pub waitlist_from: String,
     /// The hosted service, where Agency teams can buy seats past the 3 included.
     pub hosted: bool,
+    /// Assistant keys every site's AI answers use; a site may add its own only when self-hosted.
+    pub ai_keys: crate::answers::ServerKeys,
+    /// Monthly USD after which AI answer runs pause, server-wide.
+    pub ai_budget_usd: Option<f64>,
 }
 
 #[derive(Clone)]
@@ -259,6 +263,7 @@ pub fn router(state: AppState) -> Router {
             )
             .route("/api/v1/sites/{domain}/payments", get(api::payments))
             .route("/api/v1/sites/{domain}/retention", get(api::retention))
+            .route("/api/v1/sites/{domain}/ai-answers", get(api::ai_answers))
             .route(
                 "/api/v1/sites/{domain}/visitors/{visitor_id}",
                 get(api::visitor),

@@ -407,3 +407,27 @@ for (const btn of document.querySelectorAll("[data-open]")) {
     sync();
   }
 }
+
+for (const list of document.querySelectorAll("[data-qlist]")) {
+  const rows = list.querySelector("[data-qrows]");
+  const add = list.querySelector("[data-qadd]");
+  const count = list.querySelector("[data-qcount]");
+  const sync = () => {
+    const all = [...rows.children];
+    count.textContent = `${all.length} of 20`;
+    add.hidden = all.length >= 20;
+    all.forEach((r, i) => r.querySelector("input").setAttribute("aria-label", `Question ${i + 1}`));
+  };
+  list.addEventListener("click", (e) => {
+    const x = e.target.closest("[data-qremove]");
+    if (x) {
+      x.parentElement.remove();
+      return sync();
+    }
+    if (!e.target.closest("[data-qadd]")) return;
+    rows.append(list.querySelector("[data-qnew]").content.cloneNode(true));
+    sync();
+    rows.lastElementChild.querySelector("input").focus();
+  });
+  sync();
+}

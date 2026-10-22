@@ -91,12 +91,21 @@ const QUESTIONS: &[&str] = &[
 ];
 /// Other products the demo answers name, with a short reason.
 const RIVALS: &[(&str, &str)] = &[
-    ("FreshBooks", "the most complete option, with time tracking and expenses"),
-    ("Wave", "free invoicing and bookkeeping for very small businesses"),
+    (
+        "FreshBooks",
+        "the most complete option, with time tracking and expenses",
+    ),
+    (
+        "Wave",
+        "free invoicing and bookkeeping for very small businesses",
+    ),
     ("Bonsai", "contracts, proposals and invoices in one place"),
     ("Zoho Invoice", "free for up to 1,000 invoices a year"),
     ("Invoice Ninja", "open source and can be self-hosted"),
-    ("HoneyBook", "client portals and payments for creative businesses"),
+    (
+        "HoneyBook",
+        "client portals and payments for creative businesses",
+    ),
 ];
 /// Pages of the demo site the answers cite.
 const CITED: &[&str] = &[
@@ -107,7 +116,7 @@ const CITED: &[&str] = &[
     "/",
 ];
 
-/// Daily answers to the demo questions from each assistant over the last 60 days, read like a real run.
+/// Weekly answers to the demo questions from each assistant over the last 60 days, read like a real run.
 async fn seed_answers(
     db: &sqlx::SqlitePool,
     site: &str,
@@ -143,7 +152,7 @@ async fn seed_answers(
     let today = now.unix_timestamp().div_euclid(86400);
     let mut rng = Rng(0x5eed_a15e_0340);
     let mut tx = db.begin().await?;
-    for back in 0..60 {
+    for back in (0..60).step_by(7) {
         for (a, base) in [
             (Assistant::ChatGpt, 0.32),
             (Assistant::Claude, 0.5),
@@ -963,14 +972,10 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
         base_url: "https://go.tallybird.app".into(),
         waitlist_from: String::new(),
         hosted: false,
+        ai_keys: Default::default(),
+        ai_budget_usd: None,
     };
-    let state = AppState::new(
-        config,
-        db.clone(),
-        store,
-        mail::Mailer::Log,
-        vault,
-    );
+    let state = AppState::new(config, db.clone(), store, mail::Mailer::Log, vault);
     sync::rebuild_attribution(&state, Some(&site)).await;
     Ok((state, token))
 }
@@ -1013,7 +1018,9 @@ async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
             }
         }
         let path = target(&url).expect("queued urls have a target");
-        if path.starts_with("/demo/payments/") && path.matches('/').count() == 5 {
+        if path.starts_with("/demo/answers/")
+            || path.starts_with("/demo/payments/") && path.matches('/').count() == 5
+        {
             pages.push((path.clone(), "drawer.html", fetch(&url, true).await?));
         }
         pages.push((path, "index.html", page));
@@ -1181,6 +1188,11 @@ fn target(url: &str) -> Option<String> {
             let ok =
                 query.is_empty() && !id.is_empty() && id.chars().all(|c| c.is_ascii_alphanumeric());
             return ok.then(|| format!("/demo/visitors/{id}/"));
+        }
+        p if p.starts_with("/answers/") => {
+            let id = &p["/answers/".len()..];
+            let ok = !id.is_empty() && id.chars().all(|c| c.is_ascii_lowercase());
+            return ok.then(|| format!("/demo/answers/{id}/"));
         }
         p => {
             let id = p.strip_prefix("/payments/")?;

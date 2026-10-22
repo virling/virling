@@ -1,4 +1,4 @@
--- AI answers: the user's own assistant API keys, buyer questions, and each day's answer per question and assistant.
+-- AI answers: per-site assistant keys on self-hosted servers, buyer questions, and each run's answer per question and assistant.
 CREATE TABLE ai_keys (
     site_id TEXT NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
     provider TEXT NOT NULL,
@@ -38,4 +38,17 @@ CREATE TABLE ai_cited (
     page TEXT NOT NULL,
     PRIMARY KEY (site_id, day, provider, question, page)
 ) WITHOUT ROWID;
+-- Raw replies shared by sites asking the same question the same day, and the month's estimated spend.
+CREATE TABLE ai_replies (
+    day INTEGER NOT NULL,
+    provider TEXT NOT NULL,
+    question TEXT NOT NULL,
+    text TEXT NOT NULL,
+    urls TEXT NOT NULL,
+    PRIMARY KEY (day, provider, question)
+);
+CREATE TABLE ai_spend (
+    month TEXT PRIMARY KEY,
+    usd REAL NOT NULL
+);
 ALTER TABLE site_icons ADD COLUMN title TEXT;

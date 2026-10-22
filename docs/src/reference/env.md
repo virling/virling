@@ -16,6 +16,11 @@ Every setting can be given as a flag or an environment variable. See [CLI](cli.m
 | `VIRLING_MAIL_FROM` | `Virling <login@virling.com>` | Sender for sign-in emails. |
 | `VIRLING_MARKETING` | `false` | Serve the virling.com landing pages and waitlist. |
 | `VIRLING_WAITLIST_FROM` | `Rahul at Virling <hello@virling.com>` | Sender for waitlist emails. |
+| `VIRLING_OPENAI_KEY` | unset | OpenAI key every site's [AI answers](../track/ai-answers.md) ask ChatGPT with. |
+| `VIRLING_ANTHROPIC_KEY` | unset | Anthropic key for Claude in AI answers. |
+| `VIRLING_PERPLEXITY_KEY` | unset | Perplexity key for AI answers. |
+| `VIRLING_GEMINI_KEY` | unset | Google Gemini key for AI answers. |
+| `VIRLING_AI_ANSWERS_BUDGET_USD` | unset | Estimated USD a month after which AI answer runs pause until the next month. Unset: no cap. |
 | `RUST_LOG` | `info` | Log level and filter, such as `debug` or `virling=debug`. |
 
 `VIRLING_MARKETING` and `VIRLING_WAITLIST_FROM` exist for virling.com itself. A self-hosted server does not need them.
