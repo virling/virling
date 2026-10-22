@@ -1,0 +1,27 @@
+{
+  "serverInfo": {
+    "name": "virling",
+    "title": "Virling",
+    "version": "0.2.0"
+  },
+  "description": "Read-only revenue analytics: which channels, referrers, pages and AI assistants bring paying customers. Tools: list_sites, get_overview, get_breakdown, get_retention, list_payments, get_visitor_timeline, get_ai_answers.",
+  "websiteUrl": "https://virling.com/",
+  "repository": {
+    "url": "https://github.com/virling/virling",
+    "source": "github"
+  },
+  "transport": {
+    "type": "streamable-http",
+    "endpoint": "https://beta.virling.com/mcp"
+  },
+  "authentication": {
+    "required": true,
+    "schemes": [
+      "bearer"
+    ]
+  },
+  "capabilities": {
+    "tools": {}
+  },
+  "documentation": "https://docs.virling.com/reference/mcp.html"
+}

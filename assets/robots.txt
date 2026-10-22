@@ -2,6 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /waitlist/
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 
 User-agent: GPTBot
 User-agent: OAI-SearchBot
@@ -16,5 +17,6 @@ User-agent: Applebot-Extended
 Allow: /
 Disallow: /api/
 Disallow: /waitlist/
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 
 Sitemap: https://virling.com/sitemap.xml
