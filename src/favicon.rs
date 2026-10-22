@@ -193,7 +193,10 @@ async fn body(mut res: reqwest::Response) -> anyhow::Result<Vec<u8>> {
 }
 
 /// The icon of `domain` as (content type, bytes), and the homepage title.
-pub async fn fetch(client: &Client, domain: &str) -> anyhow::Result<(String, Vec<u8>, Option<String>)> {
+pub async fn fetch(
+    client: &Client,
+    domain: &str,
+) -> anyhow::Result<(String, Vec<u8>, Option<String>)> {
     fetch_from(client, Url::parse(&format!("https://{domain}/"))?).await
 }
 
@@ -415,7 +418,8 @@ mod tests {
     #[test]
     fn titles_are_read_from_the_page() {
         assert_eq!(
-            page_title("<html><head><TITLE>\n  Tallybird &amp; co |\n Invoicing</title>").as_deref(),
+            page_title("<html><head><TITLE>\n  Tallybird &amp; co |\n Invoicing</title>")
+                .as_deref(),
             Some("Tallybird & co | Invoicing")
         );
         assert_eq!(page_title("<title></title>"), None);

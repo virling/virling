@@ -190,7 +190,7 @@ How AI assistants use and name the site, per assistant, with the visitors and re
 }
 ```
 
-There is one entry each for ChatGPT, Claude, Perplexity and Gemini, in that order. `used_in_answers` counts the times the assistant's live fetcher, such as ChatGPT-User, opened a page of the site while answering someone; it needs the [server snippet](../track/ai-crawlers.md). `answers` and `mentioned` count the daily answers to the site's buyer questions, only for assistants with a key (`keyed`); `mention_rate` is `null` without answers. `previous` has the same counts for the period before. `position` is 1 when the site is the first product named, `null` when the latest answer does not name it. `answer` is cut to 1,000 characters.
+There is one entry each for ChatGPT, Claude, Perplexity and Gemini, in that order. `used_in_answers` counts the times the assistant's live fetcher, such as ChatGPT-User, opened a page of the site while answering someone; it needs the [server snippet](../track/ai-crawlers.md). `answers` and `mentioned` count the weekly answers to the site's buyer questions, only for assistants set up on the server (`keyed`); `mention_rate` is `null` without answers. `previous` has the same counts for the period before. `position` is 1 when the site is the first product named, `null` when the latest answer does not name it. `answer` is cut to 1,000 characters.
 
 ## GET `/api/v1/sites/{domain}/visitors/{visitor_id}`
 

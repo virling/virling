@@ -11,8 +11,8 @@ use time::{Date, Duration, OffsetDateTime};
 
 use super::daterange::{Picked, RangeMenu};
 use super::{
-    Ctx, Opt, Shell, answers, blocking, cards, day, delta, encode, goals, group, insight, link, load, money,
-    plural, provider_name, source_of, usd, views,
+    Ctx, Opt, Shell, answers, blocking, cards, day, delta, encode, goals, group, insight, link,
+    load, money, plural, provider_name, source_of, usd, views,
 };
 use crate::alias::Names;
 use crate::app::AppState;
@@ -1226,7 +1226,7 @@ async fn page(
             );
             if public.is_none() {
                 let range = (at(from), at(to + Duration::days(1)) - 1);
-                let inputs = answers::Inputs::load(&state.db, &ctx.site.id, (from, to), range)
+                let inputs = answers::Inputs::load(&state, &ctx.site.id, (from, to), range)
                     .await
                     .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
                 let drawer = |a: crate::answers::Assistant| {
@@ -1242,6 +1242,7 @@ async fn page(
                     drawer,
                     format!("{}#ai-answers", site_url("settings")),
                     q.rest.get("ai").is_some_and(|v| v == "answers"),
+                    state.config.hosted,
                 ));
                 if let Some(n) = ai.answers.as_mut() {
                     n.tabs = (
