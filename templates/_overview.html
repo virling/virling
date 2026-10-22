@@ -89,7 +89,7 @@
     {% if let Some(n) = a.answers %}
     <div class="d3-panel" id="ai-p1"{% if !n.on %} hidden{% endif %}>
     {% if n.rows.is_empty() %}
-    <div class="d3-empty"><span class="d3-ai-logos">{% for l in a.logos %}{{ l|safe }}{% endfor %}</span><b>No AI answers yet</b><span>When ChatGPT, Claude or Perplexity open your pages to answer someone, it shows here. They never run JavaScript, so add the server snippet to count them.{% if !n.note.is_empty() %} {{ n.note }}{% endif %}</span><a class="d3-link" href="{{ a.docs }}">Add the snippet</a></div>
+    <div class="d3-empty"><b>No AI answers yet</b><span>When ChatGPT, Claude or Perplexity open your pages to answer someone, it shows here. They never run JavaScript, so add the server snippet to count them.{% if !n.note.is_empty() %} {{ n.note }}{% endif %}</span><a class="d3-link" href="{{ a.docs }}">Add the snippet</a></div>
     {% else %}
     <div class="d3-row d3-ansrow th"><span>Assistant</span><span class="num pg">Used in</span><span class="num mt">Mentioned</span><span class="num v">Visitors</span><span class="num rv">Revenue</span></div>
     {% for r in n.rows %}
