@@ -41,6 +41,7 @@ pub struct BenchArgs {
 enum Auth {
     Session,
     Key,
+    Token,
     None,
 }
 
@@ -153,6 +154,27 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
     .execute(&db)
     .await?;
     let key = api::create_key(&db, &account, "bench").await?;
+    let client = uuid::Uuid::new_v4().to_string();
+    sqlx::query("INSERT INTO oauth_clients (id, name, redirect_uris, created_at) VALUES (?, 'Bench', 'https://claude.ai/api/mcp/auth_callback', ?)")
+        .bind(&client)
+        .bind(now)
+        .execute(&db)
+        .await?;
+    let access = format!("{}{}", crate::oauth::ACCESS_PREFIX, auth::random_token());
+    sqlx::query(
+        "INSERT INTO oauth_grants (id, account_id, client_id, resource, access_hash, access_expires_at, refresh_hash, refresh_expires_at, created_at)
+         VALUES (?, ?, ?, 'https://localhost/mcp', ?, ?, ?, ?, ?)",
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind(&account)
+    .bind(&client)
+    .bind(auth::hash_token(&access))
+    .bind(now + 3600)
+    .bind(auth::hash_token(&auth::random_token()))
+    .bind(now + 3600)
+    .bind(now)
+    .execute(&db)
+    .await?;
     let share = auth::random_token();
     sqlx::query("INSERT INTO report_brands (site_id, share_token) VALUES (?, ?) ON CONFLICT (site_id) DO UPDATE SET share_token = excluded.share_token")
         .bind(&site_id)
@@ -168,7 +190,7 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         app: true,
         trust_proxy: false,
         events_per_second: u32::MAX,
-        base_url: "http://localhost".into(),
+        base_url: "https://localhost".into(),
         waitlist_from: String::new(),
         hosted: false,
         ai_keys: Default::default(),
@@ -327,6 +349,22 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
                 Auth::Session,
             )
         },
+        get("page.account", format!("{app}/account"), Auth::Session),
+        get(
+            "page.consent",
+            format!("/oauth/authorize?response_type=code&client_id={client}&redirect_uri=https%3A%2F%2Fclaude.ai%2Fapi%2Fmcp%2Fauth_callback&code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM&code_challenge_method=S256&state=bench"),
+            Auth::Session,
+        ),
+        get(
+            "oauth.resource_metadata",
+            "/.well-known/oauth-protected-resource/mcp".into(),
+            Auth::None,
+        ),
+        get(
+            "oauth.server_metadata",
+            "/.well-known/oauth-authorization-server".into(),
+            Auth::None,
+        ),
         get("page.share", format!("/r/{share}"), Auth::None),
         get("page.public", format!("/share/{domain}"), Auth::None),
         get(
@@ -399,6 +437,11 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
             ..get(&format!("mcp.{tool}"), "/mcp".into(), Auth::Key)
         });
     }
+    routes.push(Route {
+        body: Some(json!({ "jsonrpc": "2.0", "id": 0, "method": "tools/call",
+            "params": { "name": "list_sites", "arguments": {} } })),
+        ..get("mcp.oauth.list_sites", "/mcp".into(), Auth::Token)
+    });
     let pageview = json!({ "n": "pageview", "u": format!("https://{domain}/pricing"), "s": domain,
         "v": "benchvisitor0001", "w": 1280 });
     routes.push(Route {
@@ -485,6 +528,7 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         req = match r.auth {
             Auth::Session => req.header("cookie", &cookie),
             Auth::Key => req.bearer_auth(&key),
+            Auth::Token => req.bearer_auth(&access),
             Auth::None => req,
         };
         if r.drawer {

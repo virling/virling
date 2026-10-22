@@ -182,7 +182,11 @@ pub async fn confirm(State(state): State<AppState>, Query(input): Query<TokenInp
     }
 }
 
-pub async fn verify(State(state): State<AppState>, Form(input): Form<TokenInput>) -> Response {
+pub async fn verify(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Form(input): Form<TokenInput>,
+) -> Response {
     let email: Option<String> = sqlx::query_scalar(
         "UPDATE login_tokens SET used_at = ? WHERE token_hash = ? AND used_at IS NULL AND expires_at > ? RETURNING email",
     )
@@ -207,7 +211,7 @@ pub async fn verify(State(state): State<AppState>, Form(input): Form<TokenInput>
     }
     .await;
     match started {
-        Ok(res) => res,
+        Ok(res) => crate::oauth::resume(&headers, res),
         Err(err) => {
             tracing::error!(%err, "creating session failed");
             page(LoginPage {

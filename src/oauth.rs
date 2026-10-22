@@ -1,0 +1,1366 @@
+use askama::Template;
+use axum::extract::{FromRequestParts, Query, State};
+use axum::http::request::Parts;
+use axum::http::{HeaderMap, HeaderValue, StatusCode, Uri, header};
+use axum::response::{IntoResponse, Redirect, Response};
+use axum::{Form, Json};
+use serde::Deserialize;
+use serde_json::{Value, json};
+use sha2::{Digest, Sha256};
+use sqlx::SqlitePool;
+use time::OffsetDateTime;
+use url::Url;
+
+use crate::api;
+use crate::app::{AppState, Config};
+use crate::auth::{self, Account, hash_token, random_token};
+use crate::onboarding::render;
+
+const CODE_TTL_SECS: i64 = 5 * 60;
+const ACCESS_TTL_SECS: i64 = 3600;
+const REFRESH_TTL_SECS: i64 = 30 * 24 * 3600;
+pub const ACCESS_PREFIX: &str = "vo_";
+const REFRESH_PREFIX: &str = "vr_";
+/// The one scope: read every site of the account, like an API key.
+const SCOPE: &str = "read";
+const NEXT_COOKIE: &str = "virling_next";
+const DOCS: &str = "https://docs.virling.com/reference/mcp.html";
+
+fn now() -> i64 {
+    OffsetDateTime::now_utc().unix_timestamp()
+}
+
+/// OAuth sign-in needs a public https base URL.
+pub fn enabled(config: &Config) -> bool {
+    config.base_url.starts_with("https://")
+}
+
+/// The MCP endpoint's canonical URI, which every token is bound to.
+fn resource(config: &Config) -> String {
+    format!("{}/mcp", config.base_url)
+}
+
+fn same_resource(config: &Config, asked: &str) -> bool {
+    asked.trim_end_matches('/') == resource(config)
+}
+
+/// RFC 9728 metadata of the MCP endpoint, at the root and path-suffixed well-known URIs.
+pub async fn protected_resource(State(state): State<AppState>) -> Json<Value> {
+    Json(json!({
+        "resource": resource(&state.config),
+        "authorization_servers": [state.config.base_url],
+        "scopes_supported": [SCOPE],
+        "bearer_methods_supported": ["header"],
+        "resource_name": "Virling",
+        "resource_documentation": DOCS,
+    }))
+}
+
+/// RFC 8414 metadata; this server is its own authorization server.
+pub async fn authorization_server(State(state): State<AppState>) -> Json<Value> {
+    let base = &state.config.base_url;
+    Json(json!({
+        "issuer": base,
+        "authorization_endpoint": format!("{base}/oauth/authorize"),
+        "token_endpoint": format!("{base}/oauth/token"),
+        "registration_endpoint": format!("{base}/oauth/register"),
+        "scopes_supported": [SCOPE],
+        "response_types_supported": ["code"],
+        "grant_types_supported": ["authorization_code", "refresh_token"],
+        "code_challenge_methods_supported": ["S256"],
+        "token_endpoint_auth_methods_supported": ["none"],
+        "authorization_response_iss_parameter_supported": true,
+        "service_documentation": DOCS,
+    }))
+}
+
+fn loopback(u: &Url) -> bool {
+    matches!(u.host_str(), Some("localhost" | "127.0.0.1" | "[::1]"))
+}
+
+/// https, or http on a loopback host for apps on the user's machine; never a fragment.
+fn valid_redirect(uri: &str) -> bool {
+    let Ok(u) = Url::parse(uri) else {
+        return false;
+    };
+    uri.len() <= 2000
+        && u.fragment().is_none()
+        && match u.scheme() {
+            "https" => u.host().is_some(),
+            "http" => loopback(&u),
+            _ => false,
+        }
+}
+
+/// Exact match, except that a loopback redirect may use any port (RFC 8252).
+fn redirect_matches(registered: &str, asked: &str) -> bool {
+    if registered == asked {
+        return true;
+    }
+    let (Ok(mut r), Ok(mut a)) = (Url::parse(registered), Url::parse(asked)) else {
+        return false;
+    };
+    if r.scheme() != "http" || !loopback(&r) {
+        return false;
+    }
+    let _ = (r.set_port(None), a.set_port(None));
+    r == a
+}
+
+fn client_error(code: &str, description: &str) -> Response {
+    (
+        StatusCode::BAD_REQUEST,
+        Json(json!({ "error": code, "error_description": description })),
+    )
+        .into_response()
+}
+
+/// RFC 7591 registration of a public client; it gets no secret and uses PKCE.
+pub async fn register(State(state): State<AppState>, body: axum::body::Bytes) -> Response {
+    let Ok(meta) = serde_json::from_slice::<Value>(&body) else {
+        return client_error("invalid_client_metadata", "send the metadata as JSON");
+    };
+    let uris: Vec<String> = meta["redirect_uris"]
+        .as_array()
+        .map(|a| {
+            a.iter()
+                .filter_map(|u| u.as_str().map(String::from))
+                .collect()
+        })
+        .unwrap_or_default();
+    if uris.is_empty() || uris.len() > 10 || !uris.iter().all(|u| valid_redirect(u)) {
+        return client_error(
+            "invalid_redirect_uri",
+            "redirect_uris must be https, or http on localhost",
+        );
+    }
+    let mut name: String = meta["client_name"]
+        .as_str()
+        .unwrap_or_default()
+        .trim()
+        .chars()
+        .take(60)
+        .collect();
+    if name.is_empty() {
+        name = host(&uris[0]);
+    }
+    let id = uuid::Uuid::new_v4().to_string();
+    let issued = now();
+    let saved = sqlx::query(
+        "INSERT INTO oauth_clients (id, name, redirect_uris, created_at) VALUES (?, ?, ?, ?)",
+    )
+    .bind(&id)
+    .bind(&name)
+    .bind(uris.join("\n"))
+    .bind(issued)
+    .execute(&state.db)
+    .await;
+    if let Err(err) = saved {
+        tracing::error!(%err, "registering an OAuth client failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    (
+        StatusCode::CREATED,
+        Json(json!({
+            "client_id": id,
+            "client_id_issued_at": issued,
+            "client_name": name,
+            "redirect_uris": uris,
+            "grant_types": ["authorization_code", "refresh_token"],
+            "response_types": ["code"],
+            "token_endpoint_auth_method": "none",
+            "scope": SCOPE,
+        })),
+    )
+        .into_response()
+}
+
+fn host(uri: &str) -> String {
+    Url::parse(uri)
+        .ok()
+        .and_then(|u| u.host_str().map(String::from))
+        .unwrap_or_default()
+}
+
+#[derive(Deserialize, Default)]
+pub struct AuthorizeParams {
+    response_type: Option<String>,
+    client_id: Option<String>,
+    redirect_uri: Option<String>,
+    code_challenge: Option<String>,
+    code_challenge_method: Option<String>,
+    state: Option<String>,
+    scope: Option<String>,
+    resource: Option<String>,
+    decision: Option<String>,
+}
+
+impl AuthorizeParams {
+    /// The request's parameters, carried through the consent form.
+    fn fields(&self) -> Vec<(&'static str, String)> {
+        [
+            ("response_type", &self.response_type),
+            ("client_id", &self.client_id),
+            ("redirect_uri", &self.redirect_uri),
+            ("code_challenge", &self.code_challenge),
+            ("code_challenge_method", &self.code_challenge_method),
+            ("state", &self.state),
+            ("scope", &self.scope),
+            ("resource", &self.resource),
+        ]
+        .into_iter()
+        .filter_map(|(k, v)| v.clone().map(|v| (k, v)))
+        .collect()
+    }
+}
+
+#[derive(Template)]
+#[template(path = "consent.html")]
+struct ConsentPage {
+    /// ask, member or invalid
+    view: &'static str,
+    client: String,
+    host: String,
+    email: String,
+    message: &'static str,
+    fields: Vec<(&'static str, String)>,
+}
+
+fn invalid(message: &'static str) -> Response {
+    let mut res = render(ConsentPage {
+        view: "invalid",
+        client: String::new(),
+        host: String::new(),
+        email: String::new(),
+        message,
+        fields: Vec::new(),
+    });
+    *res.status_mut() = StatusCode::BAD_REQUEST;
+    res
+}
+
+/// Back to the app's redirect URI with `pairs`, the state and the issuer (RFC 9207).
+fn back(config: &Config, redirect: &str, p: &AuthorizeParams, pairs: &[(&str, &str)]) -> Response {
+    let mut url = Url::parse(redirect).expect("redirect URIs are checked at registration");
+    {
+        let mut q = url.query_pairs_mut();
+        for (k, v) in pairs {
+            q.append_pair(k, v);
+        }
+        if let Some(s) = &p.state {
+            q.append_pair("state", s);
+        }
+        q.append_pair("iss", &config.base_url);
+    }
+    Redirect::to(url.as_str()).into_response()
+}
+
+fn valid_challenge(c: &str) -> bool {
+    c.len() == 43
+        && c.bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
+}
+
+/// The client's name and redirect URI; an error page when either is wrong, else an error sent back to the app.
+async fn check(state: &AppState, p: &AuthorizeParams) -> Result<(String, String), Box<Response>> {
+    let client: Option<(String, String)> =
+        sqlx::query_as("SELECT name, redirect_uris FROM oauth_clients WHERE id = ?")
+            .bind(p.client_id.as_deref().unwrap_or_default())
+            .fetch_optional(&state.db)
+            .await
+            .map_err(|_| Box::new(StatusCode::SERVICE_UNAVAILABLE.into_response()))?;
+    let Some((name, uris)) = client else {
+        return Err(Box::new(invalid(
+            "This app is not registered with Virling.",
+        )));
+    };
+    let redirect = match &p.redirect_uri {
+        Some(r) => uris
+            .lines()
+            .any(|u| redirect_matches(u, r))
+            .then(|| r.clone()),
+        None => match uris.lines().collect::<Vec<_>>()[..] {
+            [one] => Some(one.to_string()),
+            _ => None,
+        },
+    };
+    let Some(redirect) = redirect else {
+        return Err(Box::new(invalid(
+            "The return address does not match the app.",
+        )));
+    };
+    let error = |code| {
+        Err(Box::new(back(
+            &state.config,
+            &redirect,
+            p,
+            &[("error", code)],
+        )))
+    };
+    if p.response_type.as_deref() != Some("code") {
+        return error("unsupported_response_type");
+    }
+    if p.code_challenge_method.as_deref() != Some("S256")
+        || !p.code_challenge.as_deref().is_some_and(valid_challenge)
+    {
+        return error("invalid_request");
+    }
+    if !p
+        .resource
+        .as_deref()
+        .is_none_or(|r| same_resource(&state.config, r))
+    {
+        return error("invalid_target");
+    }
+    Ok((name, redirect))
+}
+
+/// Sends a visitor who is not signed in to the login, and back here after it.
+fn to_login(uri: &Uri) -> Response {
+    let next: String = uri
+        .to_string()
+        .bytes()
+        .map(|b| format!("{b:02x}"))
+        .collect();
+    let cookie =
+        format!("{NEXT_COOKIE}={next}; Path=/; HttpOnly; SameSite=Lax; Max-Age=3600; Secure");
+    ([(header::SET_COOKIE, cookie)], Redirect::to("/login")).into_response()
+}
+
+/// After sign-in, returns to the consent page that sent the user to log in.
+pub fn resume(headers: &HeaderMap, mut res: Response) -> Response {
+    let Some(next) = auth::cookie(headers, NEXT_COOKIE) else {
+        return res;
+    };
+    let bytes: Option<Vec<u8>> = (0..next.len())
+        .step_by(2)
+        .map(|i| {
+            next.get(i..i + 2)
+                .and_then(|h| u8::from_str_radix(h, 16).ok())
+        })
+        .collect();
+    if let Some(location) = bytes
+        .and_then(|b| String::from_utf8(b).ok())
+        .filter(|n| n.starts_with("/oauth/authorize?"))
+        .and_then(|n| HeaderValue::from_str(&n).ok())
+    {
+        res.headers_mut().insert(header::LOCATION, location);
+    }
+    res.headers_mut().append(
+        header::SET_COOKIE,
+        HeaderValue::from_static("virling_next=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0"),
+    );
+    res
+}
+
+/// The consent page for a signed-in owner.
+pub async fn authorize(
+    State(state): State<AppState>,
+    account: Result<Account, Redirect>,
+    uri: Uri,
+    Query(p): Query<AuthorizeParams>,
+) -> Response {
+    let (client, redirect) = match check(&state, &p).await {
+        Ok(c) => c,
+        Err(res) => return *res,
+    };
+    let Ok(account) = account else {
+        return to_login(&uri);
+    };
+    let email: String = sqlx::query_scalar("SELECT email FROM accounts WHERE id = ?")
+        .bind(&account.user)
+        .fetch_one(&state.db)
+        .await
+        .unwrap_or_default();
+    render(ConsentPage {
+        view: if account.owner { "ask" } else { "member" },
+        client,
+        host: host(&redirect),
+        email,
+        message: "",
+        fields: p.fields(),
+    })
+}
+
+/// Allow or Cancel on the consent page.
+pub async fn consent(
+    State(state): State<AppState>,
+    account: Result<Account, Redirect>,
+    Form(p): Form<AuthorizeParams>,
+) -> Response {
+    let (_, redirect) = match check(&state, &p).await {
+        Ok(c) => c,
+        Err(res) => return *res,
+    };
+    let account = match account {
+        Ok(a) if a.owner && p.decision.as_deref() == Some("allow") => a,
+        Ok(_) => return back(&state.config, &redirect, &p, &[("error", "access_denied")]),
+        Err(r) => return r.into_response(),
+    };
+    let code = random_token();
+    let _ = sqlx::query("DELETE FROM oauth_codes WHERE expires_at < ?")
+        .bind(now())
+        .execute(&state.db)
+        .await;
+    let saved = sqlx::query(
+        "INSERT INTO oauth_codes (code_hash, client_id, account_id, redirect_uri, challenge, resource, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    )
+    .bind(hash_token(&code))
+    .bind(p.client_id.as_deref().unwrap_or_default())
+    .bind(&account.id)
+    .bind(&redirect)
+    .bind(p.code_challenge.as_deref().unwrap_or_default())
+    .bind(resource(&state.config))
+    .bind(now() + CODE_TTL_SECS)
+    .execute(&state.db)
+    .await;
+    if let Err(err) = saved {
+        tracing::error!(%err, "storing an OAuth code failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    back(&state.config, &redirect, &p, &[("code", &code)])
+}
+
+/// Unpadded base64url, as PKCE uses.
+fn base64url(bytes: &[u8]) -> String {
+    const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    let mut out = String::new();
+    for chunk in bytes.chunks(3) {
+        let n = chunk
+            .iter()
+            .enumerate()
+            .fold(0u32, |n, (i, b)| n | (*b as u32) << (16 - 8 * i));
+        for i in 0..=chunk.len() {
+            out.push(ALPHABET[(n >> (18 - 6 * i) & 63) as usize] as char);
+        }
+    }
+    out
+}
+
+/// RFC 7636 S256: the challenge is base64url(sha256(verifier)).
+fn pkce_ok(verifier: &str, challenge: &str) -> bool {
+    (43..=128).contains(&verifier.len())
+        && verifier
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"-._~".contains(&b))
+        && base64url(&Sha256::digest(verifier.as_bytes())) == challenge
+}
+
+#[derive(Deserialize)]
+pub struct TokenParams {
+    grant_type: Option<String>,
+    code: Option<String>,
+    redirect_uri: Option<String>,
+    client_id: Option<String>,
+    code_verifier: Option<String>,
+    refresh_token: Option<String>,
+    resource: Option<String>,
+}
+
+fn token_error(code: &'static str) -> Response {
+    let status = match code {
+        "invalid_client" => StatusCode::UNAUTHORIZED,
+        "server_error" => StatusCode::SERVICE_UNAVAILABLE,
+        _ => StatusCode::BAD_REQUEST,
+    };
+    (
+        status,
+        [(header::CACHE_CONTROL, "no-store")],
+        Json(json!({ "error": code })),
+    )
+        .into_response()
+}
+
+fn new_tokens() -> (String, String) {
+    (
+        format!("{ACCESS_PREFIX}{}", random_token()),
+        format!("{REFRESH_PREFIX}{}", random_token()),
+    )
+}
+
+/// Code exchange and refresh; refresh tokens rotate, and reusing an old one revokes the grant.
+pub async fn token(State(state): State<AppState>, Form(p): Form<TokenParams>) -> Response {
+    if !p
+        .resource
+        .as_deref()
+        .is_none_or(|r| same_resource(&state.config, r))
+    {
+        return token_error("invalid_target");
+    }
+    let client = p.client_id.as_deref().unwrap_or_default();
+    let issued = match p.grant_type.as_deref() {
+        Some("authorization_code") => exchange(&state.db, client, &p).await,
+        Some("refresh_token") => refresh(&state.db, client, &p).await,
+        _ => Err("unsupported_grant_type"),
+    };
+    match issued {
+        Ok((access, refresh)) => (
+            [(header::CACHE_CONTROL, "no-store")],
+            Json(json!({
+                "access_token": access,
+                "token_type": "Bearer",
+                "expires_in": ACCESS_TTL_SECS,
+                "refresh_token": refresh,
+                "scope": SCOPE,
+            })),
+        )
+            .into_response(),
+        Err(code) => token_error(code),
+    }
+}
+
+type Issued = Result<(String, String), &'static str>;
+
+async fn exchange(db: &SqlitePool, client: &str, p: &TokenParams) -> Issued {
+    let row: Option<(String, String, String, String, String)> = sqlx::query_as(
+        "DELETE FROM oauth_codes WHERE code_hash = ? AND expires_at > ? RETURNING client_id, account_id, redirect_uri, challenge, resource",
+    )
+    .bind(hash_token(p.code.as_deref().unwrap_or_default()))
+    .bind(now())
+    .fetch_optional(db)
+    .await
+    .map_err(|_| "server_error")?;
+    let Some((code_client, account, redirect, challenge, resource)) = row else {
+        return Err("invalid_grant");
+    };
+    if code_client != client
+        || p.redirect_uri.as_ref().is_some_and(|r| *r != redirect)
+        || !pkce_ok(p.code_verifier.as_deref().unwrap_or_default(), &challenge)
+    {
+        return Err("invalid_grant");
+    }
+    let (access, refresh) = new_tokens();
+    sqlx::query(
+        "INSERT INTO oauth_grants (id, account_id, client_id, resource, access_hash, access_expires_at, refresh_hash, refresh_expires_at, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind(&account)
+    .bind(client)
+    .bind(&resource)
+    .bind(hash_token(&access))
+    .bind(now() + ACCESS_TTL_SECS)
+    .bind(hash_token(&refresh))
+    .bind(now() + REFRESH_TTL_SECS)
+    .bind(now())
+    .execute(db)
+    .await
+    .map_err(|_| "server_error")?;
+    Ok((access, refresh))
+}
+
+async fn refresh(db: &SqlitePool, client: &str, p: &TokenParams) -> Issued {
+    let old = hash_token(p.refresh_token.as_deref().unwrap_or_default());
+    let (access, refresh) = new_tokens();
+    let rotated: Option<String> = sqlx::query_scalar(
+        "UPDATE oauth_grants SET access_hash = ?, access_expires_at = ?, refresh_hash = ?, refresh_expires_at = ?, old_refresh_hash = refresh_hash
+         WHERE refresh_hash = ? AND client_id = ? AND revoked_at IS NULL AND refresh_expires_at > ? RETURNING id",
+    )
+    .bind(hash_token(&access))
+    .bind(now() + ACCESS_TTL_SECS)
+    .bind(hash_token(&refresh))
+    .bind(now() + REFRESH_TTL_SECS)
+    .bind(&old)
+    .bind(client)
+    .bind(now())
+    .fetch_optional(db)
+    .await
+    .map_err(|_| "server_error")?;
+    if rotated.is_none() {
+        let _ = sqlx::query(
+            "UPDATE oauth_grants SET revoked_at = ? WHERE old_refresh_hash = ? AND revoked_at IS NULL",
+        )
+        .bind(now())
+        .bind(&old)
+        .execute(db)
+        .await;
+        return Err("invalid_grant");
+    }
+    Ok((access, refresh))
+}
+
+/// The account of a live access token issued for this server's MCP endpoint.
+async fn token_account(state: &AppState, token: &str) -> Option<String> {
+    let row: Option<(String, String, String, Option<i64>)> = sqlx::query_as(
+        "SELECT id, account_id, resource, last_used_at FROM oauth_grants WHERE access_hash = ? AND access_expires_at > ? AND revoked_at IS NULL",
+    )
+    .bind(hash_token(token))
+    .bind(now())
+    .fetch_optional(&state.db)
+    .await
+    .ok()
+    .flatten();
+    let (id, account, aud, used) = row?;
+    if aud != resource(&state.config) {
+        return None;
+    }
+    if used.is_none_or(|t| t < now() - 60) {
+        let _ = sqlx::query("UPDATE oauth_grants SET last_used_at = ? WHERE id = ?")
+            .bind(now())
+            .bind(&id)
+            .execute(&state.db)
+            .await;
+    }
+    Some(account)
+}
+
+/// The account behind an MCP request's API key or OAuth access token.
+pub struct McpAccount {
+    pub id: String,
+}
+
+impl FromRequestParts<AppState> for McpAccount {
+    type Rejection = Response;
+
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &AppState,
+    ) -> Result<Self, Self::Rejection> {
+        let token = api::bearer(parts);
+        let id = match token {
+            Some(t) if t.starts_with(ACCESS_PREFIX) => token_account(state, t).await,
+            Some(t) => api::key_account(&state.db, t).await,
+            None => None,
+        };
+        id.map(|id| McpAccount { id })
+            .ok_or_else(|| challenge(&state.config, token.is_some()))
+    }
+}
+
+/// 401 that points clients at the resource metadata, so they can start OAuth sign-in.
+fn challenge(config: &Config, sent_token: bool) -> Response {
+    let mut value = "Bearer".to_string();
+    if enabled(config) {
+        value = format!(
+            r#"Bearer resource_metadata="{}/.well-known/oauth-protected-resource/mcp", scope="{SCOPE}""#,
+            config.base_url
+        );
+        if sent_token {
+            value.push_str(r#", error="invalid_token""#);
+        }
+    }
+    (
+        StatusCode::UNAUTHORIZED,
+        [(header::WWW_AUTHENTICATE, value)],
+        Json(json!({ "error": "missing or invalid API key or token; send Authorization: Bearer <key>" })),
+    )
+        .into_response()
+}
+
+#[derive(Debug, sqlx::FromRow)]
+pub struct GrantRow {
+    pub id: String,
+    pub name: String,
+    pub redirect_uris: String,
+    pub created_at: i64,
+    pub last_used_at: Option<i64>,
+}
+
+impl GrantRow {
+    /// Where the app sends users back to, such as claude.ai.
+    pub fn host(&self) -> String {
+        host(self.redirect_uris.lines().next().unwrap_or_default())
+    }
+}
+
+/// Apps the account allowed that can still refresh their access.
+pub async fn list_grants(db: &SqlitePool, account_id: &str) -> sqlx::Result<Vec<GrantRow>> {
+    sqlx::query_as(
+        "SELECT g.id, c.name, c.redirect_uris, g.created_at, g.last_used_at FROM oauth_grants g
+         JOIN oauth_clients c ON c.id = g.client_id
+         WHERE g.account_id = ? AND g.revoked_at IS NULL AND g.refresh_expires_at > ? ORDER BY g.created_at, g.id",
+    )
+    .bind(account_id)
+    .bind(now())
+    .fetch_all(db)
+    .await
+}
+
+pub async fn revoke_grant(db: &SqlitePool, account_id: &str, id: &str) -> sqlx::Result<()> {
+    sqlx::query(
+        "UPDATE oauth_grants SET revoked_at = ? WHERE id = ? AND account_id = ? AND revoked_at IS NULL",
+    )
+    .bind(now())
+    .bind(id)
+    .bind(account_id)
+    .execute(db)
+    .await?;
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Arc;
+
+    use axum::body::Body;
+    use axum::http::Request;
+    use tower::ServiceExt;
+
+    use super::*;
+    use crate::api::tests::{Fixture, fixture};
+    use crate::app::router;
+
+    const VERIFIER: &str = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
+    const CHALLENGE: &str = "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM";
+    const CALLBACK: &str = "https://claude.ai/api/mcp/auth_callback";
+    const RESOURCE: &str = "https://stats.example.com/mcp";
+    const METADATA: &str = "https://stats.example.com/.well-known/oauth-protected-resource/mcp";
+
+    async fn https() -> Fixture {
+        let mut f = fixture().await;
+        f.state.config = Arc::new(Config {
+            base_url: "https://stats.example.com".into(),
+            ..(*f.state.config).clone()
+        });
+        f
+    }
+
+    async fn send(state: &AppState, req: Request<Body>) -> Response {
+        router(state.clone()).oneshot(req).await.unwrap()
+    }
+
+    async fn body(res: Response) -> String {
+        let bytes = axum::body::to_bytes(res.into_body(), 1 << 20)
+            .await
+            .unwrap();
+        String::from_utf8(bytes.to_vec()).unwrap()
+    }
+
+    async fn json_of(res: Response) -> (StatusCode, Value) {
+        let status = res.status();
+        (status, serde_json::from_str(&body(res).await).unwrap())
+    }
+
+    fn form(uri: &str, body: String, cookie: Option<&str>) -> Request<Body> {
+        let mut b = Request::post(uri).header("content-type", "application/x-www-form-urlencoded");
+        if let Some(c) = cookie {
+            b = b.header("cookie", c);
+        }
+        b.body(Body::from(body)).unwrap()
+    }
+
+    fn get(uri: &str, cookie: Option<&str>) -> Request<Body> {
+        let mut b = Request::get(uri);
+        if let Some(c) = cookie {
+            b = b.header("cookie", c);
+        }
+        b.body(Body::empty()).unwrap()
+    }
+
+    fn enc(v: &str) -> String {
+        url::form_urlencoded::byte_serialize(v.as_bytes()).collect()
+    }
+
+    fn location(res: &Response) -> String {
+        res.headers()[header::LOCATION]
+            .to_str()
+            .unwrap()
+            .to_string()
+    }
+
+    fn param(location: &str, name: &str) -> Option<String> {
+        Url::parse(location)
+            .unwrap()
+            .query_pairs()
+            .find(|(k, _)| k == name)
+            .map(|(_, v)| v.into_owned())
+    }
+
+    async fn register_client(state: &AppState, redirects: Value) -> (StatusCode, Value) {
+        let req = Request::post("/oauth/register")
+            .header("content-type", "application/json")
+            .body(Body::from(
+                json!({ "client_name": "Claude", "redirect_uris": redirects, "token_endpoint_auth_method": "none" })
+                    .to_string(),
+            ))
+            .unwrap();
+        json_of(send(state, req).await).await
+    }
+
+    async fn client(state: &AppState) -> String {
+        let (code, c) = register_client(state, json!([CALLBACK])).await;
+        assert_eq!(code, StatusCode::CREATED);
+        c["client_id"].as_str().unwrap().to_string()
+    }
+
+    async fn session(state: &AppState, account: &str) -> String {
+        let res = auth::start_session(state, account).await.unwrap();
+        let c = res.headers()[header::SET_COOKIE].to_str().unwrap();
+        c.split(';').next().unwrap().to_string()
+    }
+
+    fn query(client: &str, extra: &str) -> String {
+        format!(
+            "response_type=code&client_id={client}&redirect_uri={}&code_challenge={CHALLENGE}&code_challenge_method=S256&state=xyz&scope=read&resource={}{extra}",
+            enc(CALLBACK),
+            enc(RESOURCE)
+        )
+    }
+
+    /// Allows the app on the consent form and returns the code.
+    async fn allow(state: &AppState, cookie: &str, client: &str) -> String {
+        let res = send(
+            state,
+            form(
+                "/oauth/authorize",
+                query(client, "&decision=allow"),
+                Some(cookie),
+            ),
+        )
+        .await;
+        assert_eq!(res.status(), StatusCode::SEE_OTHER);
+        let to = location(&res);
+        assert!(to.starts_with(CALLBACK), "{to}");
+        assert_eq!(param(&to, "state").as_deref(), Some("xyz"));
+        assert_eq!(
+            param(&to, "iss").as_deref(),
+            Some("https://stats.example.com")
+        );
+        param(&to, "code").unwrap()
+    }
+
+    async fn token_req(state: &AppState, body: String) -> (StatusCode, Value) {
+        json_of(send(state, form("/oauth/token", body, None)).await).await
+    }
+
+    fn exchange_body(client: &str, code: &str, verifier: &str) -> String {
+        format!(
+            "grant_type=authorization_code&client_id={client}&code={code}&code_verifier={verifier}&redirect_uri={}&resource={}",
+            enc(CALLBACK),
+            enc(RESOURCE)
+        )
+    }
+
+    fn refresh_body(client: &str, refresh: &str) -> String {
+        format!(
+            "grant_type=refresh_token&client_id={client}&refresh_token={refresh}&resource={}",
+            enc(RESOURCE)
+        )
+    }
+
+    /// Tokens for a new grant: (client, access, refresh).
+    async fn tokens(f: &Fixture) -> (String, String, String) {
+        let client = client(&f.state).await;
+        let cookie = session(&f.state, &f.account).await;
+        let code = allow(&f.state, &cookie, &client).await;
+        let (status, t) = token_req(&f.state, exchange_body(&client, &code, VERIFIER)).await;
+        assert_eq!(status, StatusCode::OK, "{t}");
+        let s = |k: &str| t[k].as_str().unwrap().to_string();
+        (client, s("access_token"), s("refresh_token"))
+    }
+
+    async fn mcp(state: &AppState, token: Option<&str>) -> Response {
+        let mut req = Request::post("/mcp").header("content-type", "application/json");
+        if let Some(t) = token {
+            req = req.header("authorization", format!("Bearer {t}"));
+        }
+        let call = json!({ "jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": { "name": "list_sites", "arguments": {} } });
+        send(state, req.body(Body::from(call.to_string())).unwrap()).await
+    }
+
+    fn www_authenticate(res: &Response) -> &str {
+        res.headers()[header::WWW_AUTHENTICATE].to_str().unwrap()
+    }
+
+    #[test]
+    fn pkce_uses_s256_and_base64url() {
+        assert_eq!(base64url(b""), "");
+        assert_eq!(base64url(b"f"), "Zg");
+        assert_eq!(base64url(b"fo"), "Zm8");
+        assert_eq!(base64url(b"foo"), "Zm9v");
+        assert_eq!(base64url(&[0xfb, 0xff]), "-_8");
+        assert!(pkce_ok(VERIFIER, CHALLENGE), "RFC 7636 appendix B");
+        assert!(!pkce_ok(VERIFIER, VERIFIER), "plain is not accepted");
+        assert!(!pkce_ok("short", &base64url(&Sha256::digest(b"short"))));
+        assert!(valid_challenge(CHALLENGE) && !valid_challenge("abc"));
+    }
+
+    #[test]
+    fn redirect_uris_match_exactly_except_loopback_ports() {
+        assert!(redirect_matches(CALLBACK, CALLBACK));
+        for other in [
+            "https://claude.ai/api/mcp/auth_callback/",
+            "https://claude.ai/api/mcp/auth_callback?x=1",
+            "https://claude.ai:8443/api/mcp/auth_callback",
+            "https://evil.example/api/mcp/auth_callback",
+            "HTTPS://claude.ai/api/mcp/auth_callback",
+        ] {
+            assert!(!redirect_matches(CALLBACK, other), "{other}");
+        }
+        assert!(redirect_matches(
+            "http://localhost:3118/callback",
+            "http://localhost:50123/callback"
+        ));
+        assert!(redirect_matches(
+            "http://127.0.0.1/callback",
+            "http://127.0.0.1:50123/callback"
+        ));
+        assert!(!redirect_matches(
+            "http://localhost:3118/callback",
+            "http://localhost:3118/other"
+        ));
+        assert!(valid_redirect(CALLBACK) && valid_redirect("http://localhost:1/cb"));
+        for bad in [
+            "http://claude.ai/cb",
+            "https://claude.ai/cb#frag",
+            "myapp://cb",
+            "javascript:alert(1)",
+            "not a url",
+        ] {
+            assert!(!valid_redirect(bad), "{bad}");
+        }
+    }
+
+    #[tokio::test]
+    async fn serves_metadata_only_on_https() {
+        let f = https().await;
+        for path in [
+            "/.well-known/oauth-protected-resource",
+            "/.well-known/oauth-protected-resource/mcp",
+        ] {
+            let (code, m) = json_of(send(&f.state, get(path, None)).await).await;
+            assert_eq!(code, StatusCode::OK);
+            assert_eq!(m["resource"], RESOURCE);
+            assert_eq!(
+                m["authorization_servers"],
+                json!(["https://stats.example.com"])
+            );
+            assert_eq!(m["scopes_supported"], json!(["read"]));
+        }
+        let (_, m) = json_of(
+            send(
+                &f.state,
+                get("/.well-known/oauth-authorization-server", None),
+            )
+            .await,
+        )
+        .await;
+        assert_eq!(m["issuer"], "https://stats.example.com");
+        assert_eq!(
+            m["authorization_endpoint"],
+            "https://stats.example.com/oauth/authorize"
+        );
+        assert_eq!(m["token_endpoint"], "https://stats.example.com/oauth/token");
+        assert_eq!(
+            m["registration_endpoint"],
+            "https://stats.example.com/oauth/register"
+        );
+        assert_eq!(m["code_challenge_methods_supported"], json!(["S256"]));
+        assert_eq!(m["token_endpoint_auth_methods_supported"], json!(["none"]));
+        assert_eq!(m["authorization_response_iss_parameter_supported"], true);
+
+        let plain = fixture().await;
+        for path in [
+            "/.well-known/oauth-protected-resource/mcp",
+            "/.well-known/oauth-authorization-server",
+            "/oauth/authorize",
+        ] {
+            let res = send(&plain.state, get(path, None)).await;
+            assert_eq!(res.status(), StatusCode::NOT_FOUND, "{path}");
+        }
+        let res = mcp(&plain.state, None).await;
+        assert_eq!(res.status(), StatusCode::UNAUTHORIZED);
+        assert_eq!(www_authenticate(&res), "Bearer");
+    }
+
+    #[tokio::test]
+    async fn registration_checks_redirect_uris() {
+        let f = https().await;
+        let (code, c) = register_client(
+            &f.state,
+            json!([CALLBACK, "http://localhost:4000/callback"]),
+        )
+        .await;
+        assert_eq!(code, StatusCode::CREATED);
+        assert_eq!(c["client_name"], "Claude");
+        assert_eq!(c["token_endpoint_auth_method"], "none");
+        assert!(
+            c.get("client_secret").is_none(),
+            "public clients get no secret"
+        );
+        for bad in [
+            json!([]),
+            json!(["http://claude.ai/cb"]),
+            json!(["myapp://cb"]),
+            json!([CALLBACK, "https://claude.ai/cb#x"]),
+            json!("https://claude.ai/cb"),
+        ] {
+            let (code, e) = register_client(&f.state, bad.clone()).await;
+            assert_eq!(code, StatusCode::BAD_REQUEST, "{bad}");
+            assert_eq!(e["error"], "invalid_redirect_uri");
+        }
+        let req = Request::post("/oauth/register")
+            .body(Body::from("not json"))
+            .unwrap();
+        let (code, e) = json_of(send(&f.state, req).await).await;
+        assert_eq!(code, StatusCode::BAD_REQUEST);
+        assert_eq!(e["error"], "invalid_client_metadata");
+    }
+
+    #[tokio::test]
+    async fn authorize_rejects_bad_requests() {
+        let f = https().await;
+        let client = client(&f.state).await;
+        let cookie = session(&f.state, &f.account).await;
+        let page = |q: String| {
+            let state = f.state.clone();
+            let cookie = cookie.clone();
+            async move { send(&state, get(&format!("/oauth/authorize?{q}"), Some(&cookie))).await }
+        };
+
+        let res = page(query("unknown", "")).await;
+        assert_eq!(res.status(), StatusCode::BAD_REQUEST, "unknown client");
+        assert!(body(res).await.contains("not registered"));
+        let wrong = query(&client, "").replace(&enc(CALLBACK), &enc("https://evil.example/cb"));
+        let res = page(wrong).await;
+        assert_eq!(
+            res.status(),
+            StatusCode::BAD_REQUEST,
+            "wrong redirect is never followed"
+        );
+        assert!(res.headers().get(header::LOCATION).is_none());
+        assert!(body(res).await.contains("return address"));
+
+        for (q, error) in [
+            (
+                query(&client, "").replace("response_type=code", "response_type=token"),
+                "unsupported_response_type",
+            ),
+            (
+                query(&client, "").replace("S256", "plain"),
+                "invalid_request",
+            ),
+            (query(&client, "").replace(CHALLENGE, ""), "invalid_request"),
+            (
+                query(&client, "").replace(&enc(RESOURCE), &enc("https://other.example/mcp")),
+                "invalid_target",
+            ),
+        ] {
+            let res = page(q).await;
+            assert_eq!(res.status(), StatusCode::SEE_OTHER);
+            let to = location(&res);
+            assert!(to.starts_with(CALLBACK));
+            assert_eq!(param(&to, "error").as_deref(), Some(error));
+            assert_eq!(param(&to, "state").as_deref(), Some("xyz"));
+        }
+
+        let res = page(query(&client, "")).await;
+        assert_eq!(res.status(), StatusCode::OK);
+        let html = body(res).await;
+        assert!(html.contains("Claude wants read-only access to your Virling sites"));
+        assert!(
+            html.contains("<b>claude.ai</b>"),
+            "the redirect host is shown"
+        );
+        assert!(html.contains("me@example.com"));
+        assert!(html.contains(r#"value="allow">Allow</button>"#));
+        assert!(html.contains(r#"value="cancel">Cancel</button>"#));
+
+        let res = send(
+            &f.state,
+            form(
+                "/oauth/authorize",
+                query(&client, "&decision=cancel"),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            param(&location(&res), "error").as_deref(),
+            Some("access_denied")
+        );
+        assert!(param(&location(&res), "code").is_none());
+    }
+
+    #[tokio::test]
+    async fn team_members_cannot_allow() {
+        let f = https().await;
+        let client = client(&f.state).await;
+        let member = crate::sites::find_or_create_account(&f.state.db, "member@example.com")
+            .await
+            .unwrap();
+        sqlx::query("INSERT INTO members (account_id, org_id, created_at) VALUES (?, ?, 0)")
+            .bind(&member)
+            .bind(&f.account)
+            .execute(&f.state.db)
+            .await
+            .unwrap();
+        let cookie = session(&f.state, &member).await;
+        let uri = format!("/oauth/authorize?{}", query(&client, ""));
+        let html = body(send(&f.state, get(&uri, Some(&cookie))).await).await;
+        assert!(html.contains("Ask the account owner") && !html.contains(">Allow<"));
+        let res = send(
+            &f.state,
+            form(
+                "/oauth/authorize",
+                query(&client, "&decision=allow"),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            param(&location(&res), "error").as_deref(),
+            Some("access_denied")
+        );
+    }
+
+    #[tokio::test]
+    async fn code_exchange_needs_the_verifier_client_and_redirect() {
+        let f = https().await;
+        let client = client(&f.state).await;
+        let other = self::client(&f.state).await;
+        let cookie = session(&f.state, &f.account).await;
+        let wrong_verifier = "x".repeat(43);
+        for body in [
+            exchange_body(&client, "CODE", &wrong_verifier),
+            exchange_body(&other, "CODE", VERIFIER),
+            exchange_body(&client, "CODE", VERIFIER)
+                .replace(&enc(CALLBACK), &enc("https://claude.ai/other")),
+        ] {
+            let code = allow(&f.state, &cookie, &client).await;
+            let (status, e) = token_req(&f.state, body.replace("CODE", &code)).await;
+            assert_eq!(status, StatusCode::BAD_REQUEST, "{body}");
+            assert_eq!(e["error"], "invalid_grant");
+            let (status, _) = token_req(&f.state, exchange_body(&client, &code, VERIFIER)).await;
+            assert_eq!(status, StatusCode::BAD_REQUEST, "a failed code is used up");
+        }
+
+        let code = allow(&f.state, &cookie, &client).await;
+        sqlx::query("UPDATE oauth_codes SET expires_at = 0")
+            .execute(&f.state.db)
+            .await
+            .unwrap();
+        let (_, e) = token_req(&f.state, exchange_body(&client, &code, VERIFIER)).await;
+        assert_eq!(e["error"], "invalid_grant", "expired code");
+
+        let code = allow(&f.state, &cookie, &client).await;
+        let body = exchange_body(&client, &code, VERIFIER);
+        let (_, e) = token_req(
+            &f.state,
+            body.replace(&enc(RESOURCE), &enc("https://other.example/mcp")),
+        )
+        .await;
+        assert_eq!(e["error"], "invalid_target");
+        let (_, e) = token_req(&f.state, body.replace("authorization_code", "password")).await;
+        assert_eq!(e["error"], "unsupported_grant_type");
+        let (status, t) = token_req(&f.state, body.clone()).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(t["token_type"], "Bearer");
+        assert_eq!(t["expires_in"], 3600);
+        assert_eq!(t["scope"], "read");
+        assert!(t["access_token"].as_str().unwrap().starts_with("vo_"));
+        assert!(t["refresh_token"].as_str().unwrap().starts_with("vr_"));
+        let (_, e) = token_req(&f.state, body).await;
+        assert_eq!(e["error"], "invalid_grant", "a code works once");
+
+        let stored: Vec<(String, String)> =
+            sqlx::query_as("SELECT access_hash, refresh_hash FROM oauth_grants")
+                .fetch_all(&f.state.db)
+                .await
+                .unwrap();
+        assert_eq!(
+            stored,
+            [(
+                hash_token(t["access_token"].as_str().unwrap()),
+                hash_token(t["refresh_token"].as_str().unwrap())
+            )],
+            "only hashes are stored"
+        );
+    }
+
+    #[tokio::test]
+    async fn refresh_tokens_rotate_and_reuse_revokes() {
+        let f = https().await;
+        let (client, access, refresh) = tokens(&f).await;
+        let (status, t) = token_req(&f.state, refresh_body(&client, &refresh)).await;
+        assert_eq!(status, StatusCode::OK);
+        let (access2, refresh2) = (
+            t["access_token"].as_str().unwrap().to_string(),
+            t["refresh_token"].as_str().unwrap().to_string(),
+        );
+        assert_ne!(refresh2, refresh);
+        assert_eq!(mcp(&f.state, Some(&access2)).await.status(), StatusCode::OK);
+        assert_eq!(
+            mcp(&f.state, Some(&access)).await.status(),
+            StatusCode::UNAUTHORIZED,
+            "the old access token is replaced"
+        );
+        let (_, e) = token_req(&f.state, refresh_body("someone-else", &refresh2)).await;
+        assert_eq!(
+            e["error"], "invalid_grant",
+            "another client's refresh token"
+        );
+
+        let (status, e) = token_req(&f.state, refresh_body(&client, &refresh)).await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(
+            e["error"], "invalid_grant",
+            "a rotated refresh token is dead"
+        );
+        assert_eq!(
+            mcp(&f.state, Some(&access2)).await.status(),
+            StatusCode::UNAUTHORIZED,
+            "reusing it revokes the grant"
+        );
+        let (_, e) = token_req(&f.state, refresh_body(&client, &refresh2)).await;
+        assert_eq!(e["error"], "invalid_grant");
+
+        let (client, _, refresh) = tokens(&f).await;
+        sqlx::query("UPDATE oauth_grants SET refresh_expires_at = 0 WHERE revoked_at IS NULL")
+            .execute(&f.state.db)
+            .await
+            .unwrap();
+        let (_, e) = token_req(&f.state, refresh_body(&client, &refresh)).await;
+        assert_eq!(e["error"], "invalid_grant", "expired refresh token");
+    }
+
+    #[tokio::test]
+    async fn mcp_answers_401_with_the_metadata_pointer() {
+        let f = https().await;
+        let res = mcp(&f.state, None).await;
+        assert_eq!(res.status(), StatusCode::UNAUTHORIZED);
+        assert_eq!(
+            www_authenticate(&res),
+            format!(r#"Bearer resource_metadata="{METADATA}", scope="read""#)
+        );
+        for bad in ["vo_nope", "vk_nope", "garbage"] {
+            let res = mcp(&f.state, Some(bad)).await;
+            assert_eq!(res.status(), StatusCode::UNAUTHORIZED);
+            assert_eq!(
+                www_authenticate(&res),
+                format!(
+                    r#"Bearer resource_metadata="{METADATA}", scope="read", error="invalid_token""#
+                )
+            );
+        }
+        assert_eq!(
+            mcp(&f.state, Some(&f.key)).await.status(),
+            StatusCode::OK,
+            "API keys still work"
+        );
+
+        let (_, access, _) = tokens(&f).await;
+        assert_eq!(mcp(&f.state, Some(&access)).await.status(), StatusCode::OK);
+        let req = Request::get("/api/v1/sites")
+            .header("authorization", format!("Bearer {access}"))
+            .body(Body::empty())
+            .unwrap();
+        assert_eq!(
+            send(&f.state, req).await.status(),
+            StatusCode::UNAUTHORIZED,
+            "OAuth tokens are only for the MCP endpoint"
+        );
+
+        sqlx::query("UPDATE oauth_grants SET resource = 'https://other.example/mcp'")
+            .execute(&f.state.db)
+            .await
+            .unwrap();
+        assert_eq!(
+            mcp(&f.state, Some(&access)).await.status(),
+            StatusCode::UNAUTHORIZED,
+            "wrong audience"
+        );
+        sqlx::query("UPDATE oauth_grants SET resource = ?, access_expires_at = 0")
+            .bind(RESOURCE)
+            .execute(&f.state.db)
+            .await
+            .unwrap();
+        assert_eq!(
+            mcp(&f.state, Some(&access)).await.status(),
+            StatusCode::UNAUTHORIZED,
+            "expired access token"
+        );
+    }
+
+    #[tokio::test]
+    async fn full_flow_from_sign_in_to_revoke() {
+        let f = https().await;
+        let client = client(&f.state).await;
+        let authorize = format!("/oauth/authorize?{}", query(&client, ""));
+
+        let res = send(&f.state, get(&authorize, None)).await;
+        assert_eq!(res.status(), StatusCode::SEE_OTHER);
+        assert_eq!(location(&res), "/login");
+        let next = res.headers()[header::SET_COOKIE].to_str().unwrap();
+        assert!(next.contains("HttpOnly") && next.contains("Secure"));
+        let next = next.split(';').next().unwrap().to_string();
+
+        send(
+            &f.state,
+            form("/login", "email=me%40example.com".into(), None),
+        )
+        .await;
+        let mail = match &*f.state.mailer {
+            crate::mail::Mailer::Capture(m) => m.lock().unwrap().last().unwrap().2.clone(),
+            _ => unreachable!(),
+        };
+        let token = mail
+            .split("https://stats.example.com/auth/verify?token=")
+            .nth(1)
+            .unwrap()
+            .split_whitespace()
+            .next()
+            .unwrap()
+            .to_string();
+        let res = send(
+            &f.state,
+            form("/auth/verify", format!("token={token}"), Some(&next)),
+        )
+        .await;
+        assert_eq!(location(&res), authorize, "back to the consent page");
+        let cookies: Vec<&str> = res
+            .headers()
+            .get_all(header::SET_COOKIE)
+            .iter()
+            .map(|v| v.to_str().unwrap())
+            .collect();
+        assert!(cookies.iter().any(|c| c.starts_with("virling_next=;")));
+        let cookie = cookies
+            .iter()
+            .find(|c| c.starts_with(auth::SESSION_COOKIE))
+            .unwrap()
+            .split(';')
+            .next()
+            .unwrap()
+            .to_string();
+
+        let res = send(&f.state, get(&authorize, Some(&cookie))).await;
+        assert_eq!(res.status(), StatusCode::OK);
+        assert!(body(res).await.contains("Claude wants read-only access"));
+        let code = allow(&f.state, &cookie, &client).await;
+        let (_, t) = token_req(&f.state, exchange_body(&client, &code, VERIFIER)).await;
+        let access = t["access_token"].as_str().unwrap();
+
+        let res = mcp(&f.state, Some(access)).await;
+        assert_eq!(res.status(), StatusCode::OK);
+        let (_, r) = json_of(res).await;
+        assert_eq!(
+            r["result"]["structuredContent"]["sites"][0]["domain"],
+            "example.com"
+        );
+
+        let page = body(send(&f.state, get("/app/example.com/account", Some(&cookie))).await).await;
+        assert!(page.contains("Connected apps") && page.contains("1 connected"));
+        assert!(page.contains("<b>Claude</b> <span class=\"mono small\">claude.ai</span>"));
+        assert!(page.contains("Connected just now. Used just now."));
+        let id: String = sqlx::query_scalar("SELECT id FROM oauth_grants")
+            .fetch_one(&f.state.db)
+            .await
+            .unwrap();
+        let res = send(
+            &f.state,
+            form(
+                "/app/example.com/account/apps/revoke",
+                format!("id={id}"),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(location(&res), "/app/example.com/account#apps");
+        let res = mcp(&f.state, Some(access)).await;
+        assert_eq!(res.status(), StatusCode::UNAUTHORIZED, "revoked");
+        assert!(www_authenticate(&res).contains(r#"error="invalid_token""#));
+        let page = body(send(&f.state, get("/app/example.com/account", Some(&cookie))).await).await;
+        assert!(page.contains("No apps yet"));
+    }
+}

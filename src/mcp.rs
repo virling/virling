@@ -7,8 +7,7 @@ use serde::Serialize;
 use serde_json::{Value, json};
 
 use crate::api::{
-    self, ApiError, BreakdownQuery, DIMENSIONS, KeyAccount, MAX_PAYMENTS, MAX_ROWS, PaymentsQuery,
-    RangeQuery,
+    self, ApiError, BreakdownQuery, DIMENSIONS, MAX_PAYMENTS, MAX_ROWS, PaymentsQuery, RangeQuery,
 };
 use crate::app::AppState;
 
@@ -23,7 +22,7 @@ Money is USD net of refunds. Ranges are local dates in the site's timezone: a pr
 /// Answers MCP JSON-RPC over Streamable HTTP with plain JSON responses; no sessions or server-sent streams.
 pub async fn post(
     State(state): State<AppState>,
-    key: KeyAccount,
+    key: crate::oauth::McpAccount,
     headers: HeaderMap,
     body: Bytes,
 ) -> Response {

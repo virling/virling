@@ -14,7 +14,7 @@ use crate::ingest::{self, DailySalt, RateLimiter, Sessions};
 use crate::mail::Mailer;
 use crate::sites::SiteCache;
 use crate::{
-    api, auth, crawlers, dashboard, flags, links, mcp, onboarding, retention_page, settings,
+    api, auth, crawlers, dashboard, flags, links, mcp, oauth, onboarding, retention_page, settings,
     visitor_pages, waitlist,
 };
 
@@ -280,6 +280,31 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/settings/disconnect",
                 post(settings::disconnect),
             );
+        if oauth::enabled(&state.config) {
+            app = app
+                .route(
+                    "/.well-known/oauth-protected-resource",
+                    get(oauth::protected_resource),
+                )
+                .route(
+                    "/.well-known/oauth-protected-resource/mcp",
+                    get(oauth::protected_resource),
+                )
+                .route(
+                    "/.well-known/oauth-authorization-server",
+                    get(oauth::authorization_server),
+                )
+                .route("/oauth/register", post(oauth::register))
+                .route(
+                    "/oauth/authorize",
+                    get(oauth::authorize).post(oauth::consent),
+                )
+                .route("/oauth/token", post(oauth::token))
+                .route(
+                    "/app/{domain}/account/apps/revoke",
+                    post(settings::revoke_app),
+                );
+        }
     }
     if state.config.marketing {
         app = app
