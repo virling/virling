@@ -1,6 +1,6 @@
 # Read API
 
-A read-only JSON API over the same numbers as the dashboard: totals, breakdowns with revenue, retention by channel, payments and visitor timelines. The [CLI](cli.md) and AI agents use it, and assistants such as claude.ai can read the same data through the [MCP server](mcp.md). It is served when the app is on (`--app`).
+A read-only JSON API over the same numbers as the dashboard: totals, breakdowns with revenue, retention by channel, AI answers, payments and visitor timelines. The [CLI](cli.md) and AI agents use it, and assistants such as claude.ai can read the same data through the [MCP server](mcp.md). It is served when the app is on (`--app`).
 
 ## API keys
 
@@ -164,6 +164,33 @@ Customers whose first payment is in the range, grouped by the channel, referrer 
 ```
 
 `still_paying` uses the provider's subscription status, else payment recency. `churn_30d` looks at customers whose first payment was 30 to 60 days ago, whatever the range; `null` when there are none. `day_one` is true under 60 days of payments, when LTV is not meaningful yet. `headline` is `null` when the data is thin. `status_sources` says, per provider, whether subscription status was available.
+
+## GET `/api/v1/sites/{domain}/ai-answers`
+
+How AI assistants use and name the site, per assistant, with the visitors and revenue each one sent. Takes the range parameters. See [AI answers](../track/ai-answers.md) for every definition.
+
+```json
+{
+  "site": "example.com", "range": {"...": "..."}, "previous_range": {"...": "..."},
+  "assistants": [{
+    "assistant": "ChatGPT", "provider": "openai", "keyed": true,
+    "used_in_answers": 180,
+    "answers": 240, "mentioned": 117, "mention_rate": 0.4875,
+    "previous": {"answers": 240, "mentioned": 93},
+    "cited_pages": [{"page": "/pricing", "answers": 18}],
+    "opened_pages": ["/pricing", "/compare"],
+    "visitors": 509, "revenue_usd": 1626.0,
+    "questions": [{
+      "question": "Which invoicing tool sends automatic payment reminders?",
+      "answers": 30, "mentioned": 20,
+      "latest": {"date": "2026-10-21", "mentioned": true, "position": 4, "named": 5,
+        "cited": ["/features/payment-reminders"], "answer": "Here are good options..."}
+    }]
+  }]
+}
+```
+
+There is one entry each for ChatGPT, Claude, Perplexity and Gemini, in that order. `used_in_answers` counts the times the assistant's live fetcher, such as ChatGPT-User, opened a page of the site while answering someone; it needs the [server snippet](../track/ai-crawlers.md). `answers` and `mentioned` count the daily answers to the site's buyer questions, only for assistants with a key (`keyed`); `mention_rate` is `null` without answers. `previous` has the same counts for the period before. `position` is 1 when the site is the first product named, `null` when the latest answer does not name it. `answer` is cut to 1,000 characters.
 
 ## GET `/api/v1/sites/{domain}/visitors/{visitor_id}`
 

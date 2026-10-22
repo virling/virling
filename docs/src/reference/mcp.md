@@ -63,6 +63,7 @@ Any client that speaks the Streamable HTTP transport and can send a header works
 | `get_overview` | Visitors, payments, revenue, conversion and revenue per visitor, the previous period and the change. | `site`, range |
 | `get_breakdown` | Visitors and credited revenue per channel, referrer, campaign, keyword, landing page, page, country, device, browser or OS. | `site`, `dimension` (required), range, `limit` |
 | `get_retention` | Customers acquired, still paying, net and average LTV, refund rate and 30-day churn per first-payment channel, referrer and campaign, with a headline. | `site`, range |
+| `get_ai_answers` | Per assistant: answers that opened the site's pages, how often its answers to the site's buyer questions name the site, cited pages, and the visitors and revenue it sent, with each question's latest answer. | `site`, range |
 | `list_payments` | Payments, newest first, with the credited visit and the visitor ID. | `site`, range, `filter`, `limit`, `offset` |
 | `get_visitor_timeline` | One visitor's visits, pages, goals, exits and payments. | `site`, `visitor_id` (required) |
 
