@@ -13,7 +13,7 @@ use url::Url;
 
 use crate::app::AppState;
 use crate::events::Event;
-use crate::ua::{browser, device, is_bot, is_spam_referrer};
+use crate::ua::{browser, device, impossible_mac, is_bot, is_spam_referrer};
 use crate::{channel, crawlers};
 
 const SESSION_IDLE: Duration = Duration::minutes(30);
@@ -33,6 +33,8 @@ pub struct Incoming {
     v: Option<String>,
     /// screen width in CSS px
     w: Option<u32>,
+    /// window.devicePixelRatio
+    d: Option<f64>,
     /// goal name
     g: Option<String>,
     /// navigator.language
@@ -553,6 +555,8 @@ pub async fn collect(
             Some("automated")
         } else if e.w == Some(0) {
             Some("no screen")
+        } else if impossible_mac(user_agent, e.w, e.d) {
+            Some("impossible screen")
         } else {
             None
         };
