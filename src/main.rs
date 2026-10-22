@@ -1170,6 +1170,53 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn hosted_mentions_need_a_paid_plan() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let hosted = AppState {
+            config: Arc::new(Config {
+                hosted: true,
+                ai_keys: crate::answers::ServerKeys([Some("sk-test".into()), None, None, None]),
+                ..(*state.config).clone()
+            }),
+            ..state.clone()
+        };
+        let page = |s: AppState| {
+            let cookie = cookie.clone();
+            async move {
+                body_text(call(&s, get("/app/example.com/settings", Some(&cookie))).await).await
+            }
+        };
+        let gated = "Mentions are included on paid plans.";
+        let run_now = r#"formaction="/app/example.com/settings/ai/run" disabled>Run now"#;
+        let own = page(state.clone()).await;
+        assert!(!own.contains(gated), "self-hosted is not gated");
+        let free = page(hosted.clone()).await;
+        assert!(free.contains(gated) && free.contains(run_now));
+        let res = call(
+            &hosted,
+            form(
+                "/app/example.com/settings/ai/run",
+                String::new(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert!(
+            res.headers()["location"]
+                .to_str()
+                .unwrap()
+                .contains("error=ai-limit")
+        );
+        sqlx::query("UPDATE accounts SET plan = 'founding'")
+            .execute(&state.db)
+            .await
+            .unwrap();
+        let paid = page(hosted).await;
+        assert!(!paid.contains(gated) && !paid.contains(run_now));
+    }
+
+    #[tokio::test]
     async fn one_pageview_is_singular() {
         let (_dir, state, _store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;

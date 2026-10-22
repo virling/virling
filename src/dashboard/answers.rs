@@ -26,6 +26,8 @@ pub fn day(d: Date) -> i64 {
 /// What the Answers tab and the drill-down read for one range, all from SQLite.
 pub struct Inputs {
     pub keyed: Vec<Assistant>,
+    /// False on the hosted service for sites not on a paid plan.
+    pub paid: bool,
     pub now: Vec<(String, Tally)>,
     pub prev: Vec<(String, Tally)>,
     /// (provider, page, answers citing it)
@@ -47,6 +49,7 @@ impl Inputs {
         let db = &state.db;
         Ok(Inputs {
             keyed: answers::usable(state, site_id).await?,
+            paid: answers::paid(state, site_id).await?,
             now: answers::tallies(db, site_id, a, b).await?,
             prev: answers::tallies(db, site_id, a - len, a - 1).await?,
             cited: answers::cited(db, site_id, a, b).await?,
@@ -223,6 +226,9 @@ pub fn tab(
                 "Used in: answers that opened your pages. Mentioned: answers that name you."
             }
             (false, false) => "Add API keys in Settings to see how often each assistant names you.",
+            (false, true) if !i.paid => {
+                "Used in: answers that opened your pages. Mentions are included on paid plans."
+            }
             (false, true) => "Used in: answers that opened your pages.",
         },
         link: match (keyed, hosted) {
@@ -235,6 +241,7 @@ pub fn tab(
             (false, false) => {
                 "To see how often each assistant names you, add API keys in Settings."
             }
+            (false, true) if !i.paid => "Mentions are included on paid plans.",
             (false, true) => "",
         },
         settings,
@@ -265,6 +272,7 @@ struct AnswersView {
     opened: Vec<String>,
     keyed: bool,
     hosted: bool,
+    paid: bool,
     provider: &'static str,
     settings: String,
     questions: Vec<QuestionView>,
@@ -385,6 +393,7 @@ pub async fn page(
         opened: n.opened.iter().take(8).map(|(p, _)| p.clone()).collect(),
         keyed: inputs.keyed.contains(&a),
         hosted: state.config.hosted,
+        paid: inputs.paid,
         provider: a.provider_name(),
         settings: format!("{}#ai-answers", app_path(&ctx.site.domain, "settings")),
         questions: latest
@@ -566,6 +575,7 @@ mod tests {
         let t = |answers, mentioned| Tally { answers, mentioned };
         let inputs = Inputs {
             keyed: vec![Assistant::ChatGpt],
+            paid: true,
             now: vec![("openai".into(), t(20, 7))],
             prev: vec![("openai".into(), t(20, 4))],
             cited: vec![("openai".into(), "/pricing".into(), 5)],
@@ -633,6 +643,7 @@ mod tests {
         let none = super::tab(
             &Inputs {
                 keyed: Vec::new(),
+                paid: true,
                 now: Vec::new(),
                 prev: Vec::new(),
                 cited: Vec::new(),
@@ -645,7 +656,24 @@ mod tests {
             false,
             true,
         );
-        assert!(none.rows.is_empty() && none.link.is_empty());
+        assert!(none.rows.is_empty() && none.link.is_empty() && none.note.is_empty());
+        let free = super::tab(
+            &Inputs {
+                keyed: Vec::new(),
+                paid: false,
+                now: Vec::new(),
+                prev: Vec::new(),
+                cited: Vec::new(),
+                pages: Vec::new(),
+            },
+            &[],
+            &[],
+            |_| String::new(),
+            String::new(),
+            false,
+            true,
+        );
+        assert_eq!(free.note, "Mentions are included on paid plans.");
         assert_eq!(ordinal(2), "2nd");
         assert_eq!(ordinal(11), "11th");
         assert_eq!(

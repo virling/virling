@@ -696,8 +696,25 @@ async fn keys_for(state: &AppState, site_id: &str) -> anyhow::Result<Vec<(Assist
     Ok(out)
 }
 
+/// Paid and founding accounts get hosted runs; every site runs on a self-hosted server.
+pub async fn paid(state: &AppState, site_id: &str) -> sqlx::Result<bool> {
+    if !state.config.hosted {
+        return Ok(true);
+    }
+    let paid: Option<bool> = sqlx::query_scalar(
+        "SELECT a.plan IN ('paid', 'founding') FROM sites s JOIN accounts a ON a.id = s.account_id WHERE s.id = ?",
+    )
+    .bind(site_id)
+    .fetch_optional(&state.db)
+    .await?;
+    Ok(paid.unwrap_or(false))
+}
+
 /// Assistants a site's questions go to.
 pub async fn usable(state: &AppState, site_id: &str) -> sqlx::Result<Vec<Assistant>> {
+    if !paid(state, site_id).await? {
+        return Ok(Vec::new());
+    }
     let own: Vec<String> = if state.config.hosted {
         Vec::new()
     } else {
@@ -1450,6 +1467,23 @@ mod tests {
             }),
             ..state.clone()
         };
+        assert!(
+            paid(state, &site).await.unwrap(),
+            "self-hosted runs every site"
+        );
+        assert!(!paid(&hosted, &site).await.unwrap());
+        assert!(
+            usable(&hosted, &site).await.unwrap().is_empty(),
+            "free sites skip"
+        );
+        for plan in ["founding", "paid"] {
+            sqlx::query("UPDATE accounts SET plan = ?")
+                .bind(plan)
+                .execute(db)
+                .await
+                .unwrap();
+            assert!(paid(&hosted, &site).await.unwrap(), "{plan}");
+        }
         assert_eq!(usable(&hosted, &site).await.unwrap(), [Assistant::ChatGpt]);
         let fresh: Vec<String> = (1..=5).map(|i| format!("Another {i}?")).collect();
         save_settings(db, &site, &fresh, "").await.unwrap();

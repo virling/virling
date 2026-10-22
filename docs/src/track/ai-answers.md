@@ -7,7 +7,7 @@ It has two layers:
 | Column | What it counts | Needs |
 | --- | --- | --- |
 | Used in | Answers where the assistant opened one of your pages live, because someone asked it a question | The [server snippet](ai-crawlers.md#count-every-crawler-optional) |
-| Mentioned | Of your buyer questions, asked once a week, how many answers named your site | Nothing on the hosted plan; keys when self-hosting |
+| Mentioned | Of your buyer questions, asked once a week, how many answers named your site | A paid hosted plan; keys when self-hosting |
 | Visitors, Revenue | Visits that came from the assistant, and the revenue credited to them | Nothing extra |
 
 ## Used in
@@ -35,7 +35,7 @@ To change them, open **Site settings > AI answers**. Keep 5 to 20 questions, eac
 
 ### Hosted plan
 
-Included. Virling pays the providers and no key is needed.
+Included on paid plans and founding spots. Virling pays the providers and no key is needed. Free and trial sites still see Used in.
 
 ### Self-hosted
 
