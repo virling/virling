@@ -322,7 +322,7 @@ const CLOUDFLARE: [(IpAddr, u32); 22] = {
 };
 
 /// Whether cf-* headers are Cloudflare's: the peer is Cloudflare, or with trust_proxy a proxy on this host or network, such as cloudflared.
-fn via_cloudflare(peer: IpAddr, trust_proxy: bool) -> bool {
+pub(crate) fn via_cloudflare(peer: IpAddr, trust_proxy: bool) -> bool {
     let peer = peer.to_canonical();
     let local = match peer {
         IpAddr::V4(a) => a.is_loopback() || a.is_private(),
@@ -340,7 +340,12 @@ fn via_cloudflare(peer: IpAddr, trust_proxy: bool) -> bool {
         })
 }
 
-fn client_ip(headers: &HeaderMap, peer: SocketAddr, trust_proxy: bool, cf: bool) -> IpAddr {
+pub(crate) fn client_ip(
+    headers: &HeaderMap,
+    peer: SocketAddr,
+    trust_proxy: bool,
+    cf: bool,
+) -> IpAddr {
     let header = |name: &str| {
         headers
             .get(name)

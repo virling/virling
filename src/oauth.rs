@@ -1,5 +1,7 @@
+use std::net::SocketAddr;
+
 use askama::Template;
-use axum::extract::{FromRequestParts, Query, State};
+use axum::extract::{ConnectInfo, FromRequestParts, Query, State};
 use axum::http::request::Parts;
 use axum::http::{HeaderMap, HeaderValue, StatusCode, Uri, header};
 use axum::response::{IntoResponse, Redirect, Response};
@@ -25,6 +27,8 @@ const REFRESH_PREFIX: &str = "vr_";
 const SCOPE: &str = "read";
 const NEXT_COOKIE: &str = "virling_next";
 const DOCS: &str = "https://docs.virling.com/reference/mcp.html";
+const REGISTER_PER_SECOND: u32 = 3;
+const TOKEN_PER_SECOND: u32 = 20;
 
 fn now() -> i64 {
     OffsetDateTime::now_utc().unix_timestamp()
@@ -115,8 +119,41 @@ fn client_error(code: &str, description: &str) -> Response {
         .into_response()
 }
 
+/// Per-IP requests per second, with the ingest limiter; a 429 when over.
+fn limited(
+    state: &AppState,
+    route: &str,
+    peer: SocketAddr,
+    headers: &HeaderMap,
+    limit: u32,
+) -> Option<Response> {
+    let trust = state.config.trust_proxy;
+    let ip = crate::ingest::client_ip(
+        headers,
+        peer,
+        trust,
+        crate::ingest::via_cloudflare(peer.ip(), trust),
+    );
+    (!state.limiter.allow(&format!("oauth-{route}:{ip}"), limit)).then(|| {
+        (
+            StatusCode::TOO_MANY_REQUESTS,
+            [(header::RETRY_AFTER, "1")],
+            Json(json!({ "error": "too_many_requests" })),
+        )
+            .into_response()
+    })
+}
+
 /// RFC 7591 registration of a public client; it gets no secret and uses PKCE.
-pub async fn register(State(state): State<AppState>, body: axum::body::Bytes) -> Response {
+pub async fn register(
+    State(state): State<AppState>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    body: axum::body::Bytes,
+) -> Response {
+    if let Some(res) = limited(&state, "register", peer, &headers, REGISTER_PER_SECOND) {
+        return res;
+    }
     let Ok(meta) = serde_json::from_slice::<Value>(&body) else {
         return client_error("invalid_client_metadata", "send the metadata as JSON");
     };
@@ -479,7 +516,15 @@ fn new_tokens() -> (String, String) {
 }
 
 /// Code exchange and refresh; refresh tokens rotate, and reusing an old one revokes the grant.
-pub async fn token(State(state): State<AppState>, Form(p): Form<TokenParams>) -> Response {
+pub async fn token(
+    State(state): State<AppState>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    Form(p): Form<TokenParams>,
+) -> Response {
+    if let Some(res) = limited(&state, "token", peer, &headers, TOKEN_PER_SECOND) {
+        return res;
+    }
     if !p
         .resource
         .as_deref()
@@ -693,6 +738,7 @@ mod tests {
     use std::sync::Arc;
 
     use axum::body::Body;
+    use axum::extract::connect_info::MockConnectInfo;
     use axum::http::Request;
     use tower::ServiceExt;
 
@@ -716,7 +762,15 @@ mod tests {
     }
 
     async fn send(state: &AppState, req: Request<Body>) -> Response {
-        router(state.clone()).oneshot(req).await.unwrap()
+        send_from(state, req, 7).await
+    }
+
+    async fn send_from(state: &AppState, req: Request<Body>, ip: u8) -> Response {
+        router(state.clone())
+            .layer(MockConnectInfo(SocketAddr::from(([203, 0, 113, ip], 5555))))
+            .oneshot(req)
+            .await
+            .unwrap()
     }
 
     async fn body(res: Response) -> String {
@@ -767,6 +821,10 @@ mod tests {
     }
 
     async fn register_client(state: &AppState, redirects: Value) -> (StatusCode, Value) {
+        register_from(state, redirects, 7).await
+    }
+
+    async fn register_from(state: &AppState, redirects: Value, ip: u8) -> (StatusCode, Value) {
         let req = Request::post("/oauth/register")
             .header("content-type", "application/json")
             .body(Body::from(
@@ -774,7 +832,7 @@ mod tests {
                     .to_string(),
             ))
             .unwrap();
-        json_of(send(state, req).await).await
+        json_of(send_from(state, req, ip).await).await
     }
 
     async fn client(state: &AppState) -> String {
@@ -978,23 +1036,55 @@ mod tests {
             c.get("client_secret").is_none(),
             "public clients get no secret"
         );
-        for bad in [
+        for (ip, bad) in [
             json!([]),
             json!(["http://claude.ai/cb"]),
             json!(["myapp://cb"]),
             json!([CALLBACK, "https://claude.ai/cb#x"]),
             json!("https://claude.ai/cb"),
-        ] {
-            let (code, e) = register_client(&f.state, bad.clone()).await;
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let (code, e) = register_from(&f.state, bad.clone(), 100 + ip as u8).await;
             assert_eq!(code, StatusCode::BAD_REQUEST, "{bad}");
             assert_eq!(e["error"], "invalid_redirect_uri");
         }
         let req = Request::post("/oauth/register")
             .body(Body::from("not json"))
             .unwrap();
-        let (code, e) = json_of(send(&f.state, req).await).await;
+        let (code, e) = json_of(send_from(&f.state, req, 99).await).await;
         assert_eq!(code, StatusCode::BAD_REQUEST);
         assert_eq!(e["error"], "invalid_client_metadata");
+    }
+
+    #[tokio::test]
+    async fn registration_and_tokens_are_rate_limited_per_ip() {
+        let f = https().await;
+        let mut codes = Vec::new();
+        for _ in 0..20 {
+            codes.push(register_from(&f.state, json!([CALLBACK]), 50).await.0);
+        }
+        assert_eq!(codes[0], StatusCode::CREATED);
+        assert!(codes.contains(&StatusCode::TOO_MANY_REQUESTS), "{codes:?}");
+        let (code, _) = register_from(&f.state, json!([CALLBACK]), 51).await;
+        assert_eq!(code, StatusCode::CREATED, "another IP is not limited");
+
+        let mut codes = Vec::new();
+        for _ in 0..60 {
+            let req = form(
+                "/oauth/token",
+                "grant_type=refresh_token&refresh_token=x".into(),
+                None,
+            );
+            codes.push(send_from(&f.state, req, 52).await.status());
+        }
+        assert_eq!(codes[0], StatusCode::BAD_REQUEST);
+        let limited = codes
+            .iter()
+            .filter(|c| **c == StatusCode::TOO_MANY_REQUESTS)
+            .count();
+        assert!(limited > 0, "{codes:?}");
     }
 
     #[tokio::test]
@@ -1047,7 +1137,7 @@ mod tests {
         let res = page(query(&client, "")).await;
         assert_eq!(res.status(), StatusCode::OK);
         let html = body(res).await;
-        assert!(html.contains("Claude wants read-only access to your Virling sites"));
+        assert!(html.contains("Claude wants read&#8209;only access to your Virling sites"));
         assert!(
             html.contains("<b>claude.ai</b>"),
             "the redirect host is shown"
@@ -1326,7 +1416,11 @@ mod tests {
 
         let res = send(&f.state, get(&authorize, Some(&cookie))).await;
         assert_eq!(res.status(), StatusCode::OK);
-        assert!(body(res).await.contains("Claude wants read-only access"));
+        assert!(
+            body(res)
+                .await
+                .contains("Claude wants read&#8209;only access")
+        );
         let code = allow(&f.state, &cookie, &client).await;
         let (_, t) = token_req(&f.state, exchange_body(&client, &code, VERIFIER)).await;
         let access = t["access_token"].as_str().unwrap();
