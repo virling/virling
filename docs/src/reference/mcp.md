@@ -1,6 +1,6 @@
 # MCP server
 
-Virling serves a [Model Context Protocol](https://modelcontextprotocol.io) endpoint, so AI assistants such as Claude can read your reports and answer questions like "which channel made the most money last month?". It is read-only and uses the same API keys as the [Read API](api.md).
+Virling serves a [Model Context Protocol](https://modelcontextprotocol.io) endpoint, so AI assistants such as Claude can read your reports and answer questions like "which channel made the most money last month?". It is read-only. Apps sign in with OAuth, or use the same API keys as the [Read API](api.md).
 
 ```text
 https://stats.example.com/mcp
@@ -10,15 +10,39 @@ It is served when the app is on (`--app`). Use your server's public URL, as in `
 
 ## Authentication
 
-Create a key in **Account settings > API keys** in the app and send it on every request:
+There are two ways to sign in. Both read every site of your account and can't change anything.
+
+**OAuth sign-in.** Apps such as claude.ai and ChatGPT sign in with your Virling account: you add the URL, the app opens Virling, and you click **Allow**. It needs `VIRLING_BASE_URL` to be a public `https://` URL; on `http://` sign-in is off and only API keys work. Connected apps are listed in **Account settings > Connected apps**, where you can revoke them. Only the account owner can connect an app.
+
+**API key.** Create a key in **Account settings > API keys** in the app and send it on every request:
 
 ```http
 Authorization: Bearer vk_...
 ```
 
-Requests without a valid key get `401`. The key reads every site of your account.
+Requests without a valid key or token get `401` with a `WWW-Authenticate` header that points at the sign-in metadata.
+
+### For client developers
+
+Virling follows the [MCP authorization spec](https://modelcontextprotocol.io/specification/latest/basic/authorization) and is its own authorization server.
+
+- Protected resource metadata (RFC 9728) at `/.well-known/oauth-protected-resource/mcp` and `/.well-known/oauth-protected-resource`. The resource is `https://stats.example.com/mcp`.
+- Authorization server metadata (RFC 8414) at `/.well-known/oauth-authorization-server`.
+- Dynamic client registration (RFC 7591) at `/oauth/register`. Clients are public: no secret, `token_endpoint_auth_method` is `none`.
+- Authorization code flow with PKCE, `S256` only, at `/oauth/authorize` and `/oauth/token`. Redirect URIs must be `https`, or `http` on `localhost`, and must match a registered one exactly; a loopback URI may use any port. The response carries `iss` (RFC 9207).
+- The `resource` parameter (RFC 8707), when sent, must be the MCP URL. Tokens only work on `/mcp`, not on the Read API.
+- One scope, `read`. Access tokens last 1 hour. Refresh tokens last 30 days and rotate on every use; reusing an old one revokes the sign-in.
+- Tokens and codes are stored hashed, like API keys.
 
 ## Claude Code
+
+On an `https` server, add the URL and run `/mcp` in a session to sign in:
+
+```sh
+claude mcp add --transport http virling https://stats.example.com/mcp
+```
+
+Or send an API key, which also works on a local `http` server:
 
 ```sh
 claude mcp add --transport http virling https://stats.example.com/mcp \
@@ -44,12 +68,15 @@ For Claude Code, the [CLI](cli.md) with `--json` works too, and uses less contex
 ## claude.ai
 
 1. Open **Customize > Connectors** and click **Add custom connector**. On Team and Enterprise plans, an Owner adds it under **Organization settings > Connectors**.
-2. Enter a name, such as Virling, and the URL `https://stats.example.com/mcp`.
-3. For **Authentication**, choose **No sign-in**.
-4. Under **Request headers**, pick `authorization` and enter `Bearer vk_...` as the value, with the word `Bearer` and a space before the key. Mark it **Required**.
-5. Click **Add**, then turn the connector on in a chat from the **+** menu.
+2. Enter a name, such as Virling, and the URL `https://stats.example.com/mcp`. Leave the advanced settings empty.
+3. Click **Add**, then **Connect**. Virling opens: sign in if asked, then click **Allow**.
+4. Turn the connector on in a chat from the **+** menu.
 
-Request headers are in beta in claude.ai and not every account has them yet. Virling does not offer OAuth sign-in yet, so without request headers the connector cannot authenticate.
+On a server without `https`, use an API key instead: choose **No sign-in** and, under **Request headers**, add `authorization` with the value `Bearer vk_...`.
+
+## ChatGPT
+
+With developer mode on, create a custom app with the URL `https://stats.example.com/mcp` and OAuth authentication. ChatGPT opens Virling: sign in if asked, then click **Allow**.
 
 ## Other clients
 
@@ -73,5 +100,4 @@ Errors such as an unknown site come back as a tool result with `isError: true` a
 
 ## Not available yet
 
-- OAuth sign-in for connectors <span class="na">Not available yet</span>
 - Tools that change data <span class="na">Not available yet</span>

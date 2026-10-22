@@ -97,6 +97,23 @@
   </form>
 </div>
 </section>
+{% if let Some(apps) = apps %}
+<section class="set-sec" id="apps">
+<div class="set-intro"><h2>Connected apps</h2><p class="muted">Apps such as Claude and ChatGPT that you connected with Virling sign-in. Like keys, they read every site on your account and can't change anything.</p></div>
+<div class="card">
+  <div class="card-head"><span class="muted">{% if apps.is_empty() %}No apps yet{% else %}{{ apps.len() }} connected{% endif %}</span><a class="btn secondary" href="https://docs.virling.com/reference/mcp.html">MCP docs</a></div>
+  {% for a in apps %}
+  <div class="conn">
+    <div class="grow"><b>{{ a.name }}</b> <span class="mono small">{{ a.host }}</span> <span class="muted small">{{ a.created }}. {{ a.used }}.</span></div>
+    <form method="post" action="/app/{{ shell.domain }}/account/apps/revoke" data-confirm="Revoke {{ a.name }}? It stops reading your sites right away." data-confirm-ok="Revoke access">
+      <input type="hidden" name="id" value="{{ a.id }}">
+      <button class="btn ghost" type="submit">Revoke</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+</section>
+{% endif %}
 {% endif %}
 </div>
 <dialog class="confirm" id="confirm">

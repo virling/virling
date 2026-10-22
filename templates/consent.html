@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+{% include "_head.html" %}
+<title>Connect an app · Virling</title>
+</head>
+<body class="auth">
+<header class="auth-top">
+  <a class="brand" href="/">{% include "_logo.html" %}<b>virling</b></a>
+</header>
+<main class="auth-main">
+  <div class="auth-box">
+  {% if view == "invalid" %}
+    <div class="auth-copy">
+      <h1>This link doesn't work</h1>
+      <p>{{ message }} Go back to the app and connect again.</p>
+    </div>
+  {% else %}
+    <div class="auth-copy">
+    {% if view == "member" %}
+      <h1>Ask the account owner</h1>
+      <p>Only the owner of this Virling account can connect apps such as <b>{{ client }}</b>.</p>
+    {% else %}
+      <h1>{{ client }} wants read&#8209;only access to your Virling sites</h1>
+      <p>It can read the reports of every site on <b>{{ email }}</b>. It can't change anything, and you can revoke it in Account settings.</p>
+    {% endif %}
+    </div>
+    <form class="stack" method="post" action="/oauth/authorize">
+      {% for (name, value) in fields %}
+      <input type="hidden" name="{{ name }}" value="{{ value }}">
+      {% endfor %}
+      {% if view == "ask" %}
+      <button class="btn lg block" type="submit" name="decision" value="allow">Allow</button>
+      {% endif %}
+      <button class="btn lg block secondary" type="submit" name="decision" value="cancel">Cancel</button>
+    </form>
+    <p class="muted small">Either way, you go back to <b>{{ host }}</b>.</p>
+  {% endif %}
+  </div>
+</main>
+</body>
+</html>

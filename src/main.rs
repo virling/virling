@@ -24,6 +24,7 @@ mod links;
 mod live;
 mod mail;
 mod mcp;
+mod oauth;
 mod onboarding;
 mod providers;
 mod query;

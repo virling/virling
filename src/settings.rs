@@ -110,6 +110,8 @@ struct AccountPage {
     theme: String,
     theme_saved: bool,
     api_keys: Vec<KeyView>,
+    /// Apps signed in with OAuth, shown when the base URL is https.
+    apps: Option<Vec<AppView>>,
     /// A key just created, shown this once.
     new_key: Option<String>,
     owner: bool,
@@ -124,6 +126,14 @@ pub struct KeyView {
     id: String,
     name: String,
     prefix: String,
+    created: String,
+    used: String,
+}
+
+pub struct AppView {
+    id: String,
+    name: String,
+    host: String,
     created: String,
     used: String,
 }
@@ -606,8 +616,16 @@ async fn show_account(
     } else {
         Ok(Vec::new())
     };
-    let (Ok(keys), Ok(team)) = (
+    let apps = if account.owner && crate::oauth::enabled(&state.config) {
+        crate::oauth::list_grants(&state.db, &account.id)
+            .await
+            .map(Some)
+    } else {
+        Ok(None)
+    };
+    let (Ok(keys), Ok(apps), Ok(team)) = (
         keys,
+        apps,
         crate::team::load(&state.db, &account.id, state.config.hosted).await,
     ) else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
@@ -628,7 +646,25 @@ async fn show_account(
         _ => "",
     };
     let now = OffsetDateTime::now_utc();
+    let at = |t: i64| OffsetDateTime::from_unix_timestamp(t).unwrap_or(now);
+    let used = |t: Option<i64>| {
+        t.map_or_else(
+            || "Never used".into(),
+            |t| format!("Used {}", ago(at(t), now)),
+        )
+    };
     render(AccountPage {
+        apps: apps.map(|apps| {
+            apps.into_iter()
+                .map(|g| AppView {
+                    host: g.host(),
+                    created: format!("Connected {}", ago(at(g.created_at), now)),
+                    used: used(g.last_used_at),
+                    id: g.id,
+                    name: g.name,
+                })
+                .collect()
+        }),
         title: "Account settings",
         api_keys: keys
             .into_iter()
@@ -1066,6 +1102,26 @@ pub async fn create_key(
 #[derive(Deserialize)]
 pub struct RevokeKeyInput {
     id: String,
+}
+
+pub async fn revoke_app(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(input): Form<RevokeKeyInput>,
+) -> Response {
+    if !account.owner {
+        return StatusCode::FORBIDDEN.into_response();
+    }
+    let ctx = match load(&state, &account, &domain, "account").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    if let Err(err) = crate::oauth::revoke_grant(&state.db, &account.id, &input.id).await {
+        tracing::error!(%err, "revoking an app failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    Redirect::to(&format!("{}#apps", app_path(&ctx.site.domain, "account"))).into_response()
 }
 
 pub async fn revoke_key(
