@@ -115,7 +115,7 @@ pub async fn lemonsqueezy_webhook(
         tracing::error!(%err, site = %site_id, "storing a LemonSqueezy webhook payment failed");
         return StatusCode::SERVICE_UNAVAILABLE;
     }
-    rebuild_attribution(&state, Some(&site_id)).await;
+    attribute(&state, Some(&site_id), false).await;
     StatusCode::NO_CONTENT
 }
 
@@ -168,7 +168,7 @@ pub async fn run(state: AppState) {
 
 pub async fn sync_all(state: &AppState) -> anyhow::Result<()> {
     sync_integrations(state, None).await?;
-    rebuild_attribution(state, None).await;
+    attribute(state, None, false).await;
     Ok(())
 }
 
@@ -208,6 +208,11 @@ async fn sync_integrations(state: &AppState, site_id: Option<&str>) -> anyhow::R
 
 /// Recomputes attribution for one site, or every site, with its model and window from SQLite.
 pub async fn rebuild_attribution(state: &AppState, site_id: Option<&str>) {
+    attribute(state, site_id, true).await;
+}
+
+/// Recomputes every payment's credit, or with `all` false only for changed payments and their customers.
+async fn attribute(state: &AppState, site_id: Option<&str>, all: bool) {
     let sites: Vec<(String, String, i64)> = match sqlx::query_as(
         "SELECT id, attribution_model, window_days FROM sites WHERE ?1 IS NULL OR id = ?1",
     )
@@ -224,8 +229,11 @@ pub async fn rebuild_attribution(state: &AppState, site_id: Option<&str>) {
     for (site_id, model, window_days) in sites {
         let store = state.events.clone();
         let id = site_id.clone();
-        let result = tokio::task::spawn_blocking(move || {
-            store.rebuild_attribution(&id, &model, window_days)
+        let result = tokio::task::spawn_blocking(move || match all {
+            true => store.rebuild_attribution(&id, &model, window_days),
+            false => store
+                .refresh_attribution(&id, &model, window_days)
+                .map(|_| ()),
         })
         .await;
         if !matches!(result, Ok(Ok(()))) {

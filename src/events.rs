@@ -128,6 +128,13 @@ pub trait EventStore: Send + Sync {
         model: &str,
         window_days: i64,
     ) -> anyhow::Result<()>;
+    /// Recomputes credit only for payments changed since the last run and their customers' other payments; false when none changed.
+    fn refresh_attribution(
+        &self,
+        site_id: &str,
+        model: &str,
+        window_days: i64,
+    ) -> anyhow::Result<bool>;
     fn overview(&self, site_id: &str, period: &Period) -> anyhow::Result<Overview> {
         self.overview_in(site_id, period, &Filter::default())
     }
@@ -240,9 +247,28 @@ pub trait EventStore: Send + Sync {
     fn timeline(&self, site_id: &str, visitor_id: &str) -> anyhow::Result<Option<Timeline>>;
 }
 
+/// Payments whose credit is recomputed: all of a site's, or with `$only_dirty` the changed ones and every payment of their customers.
+macro_rules! attribution_targets {
+    () => {
+        "(SELECT p.provider, p.provider_payment_id FROM payments p
+    WHERE p.site_id = $site AND (NOT $only_dirty OR EXISTS (
+        SELECT 1 FROM attribution_dirty d
+        JOIN payments q ON q.site_id = d.site_id AND q.provider = d.provider AND q.provider_payment_id = d.provider_payment_id
+        WHERE d.site_id = $site AND d.provider = p.provider
+            AND (q.provider_payment_id = p.provider_payment_id OR q.customer_id = p.customer_id))))"
+    };
+}
+
+const CLEAR_ATTRIBUTION: &str = concat!(
+    "DELETE FROM attribution a USING ",
+    attribution_targets!(),
+    " t WHERE a.site_id = $site AND a.provider = t.provider AND a.provider_payment_id = t.provider_payment_id"
+);
+
 /// Sessions as touches (first pageview's fields), then the credited session per payment, then renewal inheritance.
 /// A payment without a visitor ID is credited from the customer's latest free trial start before it.
-const REBUILD_ATTRIBUTION: &str = "
+const REBUILD_ATTRIBUTION: &str = concat!(
+    "
 INSERT INTO attribution
 WITH starts AS (
     SELECT visitor_id, session_id, ts, channel, referrer_host, utm_campaign, path, country, device
@@ -253,6 +279,9 @@ pays AS (
     SELECT p.provider, p.provider_payment_id, p.ts, coalesce(p.visitor_id, tr.visitor_id) AS visitor_id,
         coalesce(tr.ts, p.ts) AS touch_by, p.customer_id, p.is_renewal, p.status
     FROM payments p
+    JOIN ",
+    attribution_targets!(),
+    " targets USING (provider, provider_payment_id)
     LEFT JOIN trials tr ON p.visitor_id IS NULL AND tr.site_id = p.site_id AND tr.provider = p.provider
         AND tr.customer_id = p.customer_id AND tr.ts <= p.ts
     WHERE p.site_id = $site
@@ -292,7 +321,8 @@ FROM pays p
 LEFT JOIN own o USING (provider, provider_payment_id)
 LEFT JOIN firsts f ON p.is_renewal AND f.provider = p.provider AND f.customer_id = p.customer_id
 LEFT JOIN own inh ON inh.provider = f.provider AND inh.provider_payment_id = f.provider_payment_id
-";
+"
+);
 
 /// Marks every payment after a customer's first kept payment, across all time, as a renewal.
 const MARK_RENEWALS: &str = "
@@ -603,6 +633,48 @@ const FLUSH_AFTER: std::time::Duration = std::time::Duration::from_secs(1);
 const MAX_PENDING: usize = 1000;
 
 impl DuckStore {
+    /// Recomputes credit for all of a site's payments, or only for changed ones; false when nothing had changed.
+    fn attribute(
+        &self,
+        site_id: &str,
+        model: &str,
+        window_days: i64,
+        only_dirty: bool,
+    ) -> anyhow::Result<bool> {
+        anyhow::ensure!(
+            matches!(model, "last_non_direct" | "first_touch"),
+            "unknown attribution model {model}"
+        );
+        let mut conn = self.conn.lock().unwrap();
+        if only_dirty {
+            let dirty: i64 = conn.query_row(
+                "SELECT count(*) FROM attribution_dirty WHERE site_id = ?",
+                params![site_id],
+                |r| r.get(0),
+            )?;
+            if dirty == 0 {
+                return Ok(false);
+            }
+        }
+        flush_touches(&mut self.touch_conn.lock().unwrap(), &self.pending)?;
+        let tx = conn.transaction()?;
+        tx.execute(
+            CLEAR_ATTRIBUTION,
+            named_params! { "site": site_id, "only_dirty": only_dirty },
+        )?;
+        tx.execute(
+            REBUILD_ATTRIBUTION,
+            named_params! { "site": site_id, "model": model, "window_days": window_days, "only_dirty": only_dirty },
+        )?;
+        tx.execute(
+            "DELETE FROM attribution_dirty WHERE site_id = ?",
+            params![site_id],
+        )?;
+        tx.commit()?;
+        self.index.payments_changed(site_id);
+        Ok(true)
+    }
+
     pub fn open(path: &Path) -> anyhow::Result<Self> {
         let conn = Connection::open(path)?;
         let derived: i64 = conn.query_row(
@@ -682,6 +754,12 @@ impl DuckStore {
                 visitor_id VARCHAR,
                 customer_id VARCHAR,
                 PRIMARY KEY (site_id, provider, trial_id)
+            );
+            CREATE TABLE IF NOT EXISTS attribution_dirty (
+                site_id VARCHAR NOT NULL,
+                provider VARCHAR NOT NULL,
+                provider_payment_id VARCHAR NOT NULL,
+                PRIMARY KEY (site_id, provider, provider_payment_id)
             );
             CREATE TABLE IF NOT EXISTS attribution (
                 site_id VARCHAR NOT NULL,
@@ -1084,6 +1162,17 @@ impl EventStore for DuckStore {
             )?;
             let mut trial =
                 tx.prepare("INSERT OR REPLACE INTO trials VALUES (?, ?, ?, ?, ?, ?)")?;
+            // Only what attribution reads makes a payment dirty, so re-reading an unchanged payment costs nothing.
+            let mut dirty = tx.prepare(
+                "INSERT OR IGNORE INTO attribution_dirty SELECT $1, $2, $3 WHERE NOT EXISTS (
+                   SELECT 1 FROM payments WHERE site_id = $1 AND provider = $2 AND provider_payment_id = $3
+                     AND ts = $4 AND status = $5 AND visitor_id IS NOT DISTINCT FROM $6
+                     AND customer_id IS NOT DISTINCT FROM $7 AND is_renewal = $8)",
+            )?;
+            let mut dirty_customer = tx.prepare(
+                "INSERT OR IGNORE INTO attribution_dirty SELECT site_id, provider, provider_payment_id
+                 FROM payments WHERE site_id = ? AND provider = ? AND customer_id = ?",
+            )?;
             for p in payments {
                 let ts = Value::Timestamp(
                     TimeUnit::Microsecond,
@@ -1098,8 +1187,19 @@ impl EventStore for DuckStore {
                         p.visitor_id,
                         p.customer_id,
                     ])?;
+                    dirty_customer.execute(params![p.site_id, p.provider, p.customer_id])?;
                     continue;
                 }
+                dirty.execute(params![
+                    p.site_id,
+                    p.provider,
+                    p.provider_payment_id,
+                    ts.clone(),
+                    p.status,
+                    p.visitor_id,
+                    p.customer_id,
+                    p.is_renewal,
+                ])?;
                 stmt.execute(params![
                     p.site_id,
                     p.provider,
@@ -1219,24 +1319,17 @@ impl EventStore for DuckStore {
         model: &str,
         window_days: i64,
     ) -> anyhow::Result<()> {
-        anyhow::ensure!(
-            matches!(model, "last_non_direct" | "first_touch"),
-            "unknown attribution model {model}"
-        );
-        let mut conn = self.conn.lock().unwrap();
-        flush_touches(&mut self.touch_conn.lock().unwrap(), &self.pending)?;
-        let tx = conn.transaction()?;
-        tx.execute(
-            "DELETE FROM attribution WHERE site_id = ?",
-            params![site_id],
-        )?;
-        tx.execute(
-            REBUILD_ATTRIBUTION,
-            named_params! { "site": site_id, "model": model, "window_days": window_days },
-        )?;
-        tx.commit()?;
-        self.index.payments_changed(site_id);
-        Ok(())
+        self.attribute(site_id, model, window_days, false)
+            .map(|_| ())
+    }
+
+    fn refresh_attribution(
+        &self,
+        site_id: &str,
+        model: &str,
+        window_days: i64,
+    ) -> anyhow::Result<bool> {
+        self.attribute(site_id, model, window_days, true)
     }
 
     fn overview_in(&self, site_id: &str, period: &Period, f: &Filter) -> anyhow::Result<Overview> {
@@ -1557,6 +1650,98 @@ mod payment_tests {
             .unwrap();
         assert_eq!((pi_1.refunded, pi_1.net_usd), (2900, Some(0.0)));
     }
+    #[test]
+    fn refresh_recredits_only_changed_customers() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = DuckStore::open(&dir.path().join("e.duckdb")).unwrap();
+        let at = OffsetDateTime::from_unix_timestamp(1_760_000_000).unwrap();
+        let visit = |visitor: &str| Event {
+            site_id: "s".into(),
+            ts: at - Duration::days(1),
+            visitor_id: visitor.into(),
+            session_id: format!("{visitor}-s"),
+            kind: "pageview".into(),
+            name: None,
+            path: "/".into(),
+            referrer_host: Some("reddit.com".into()),
+            utm_source: None,
+            utm_medium: None,
+            utm_campaign: None,
+            utm_content: None,
+            utm_term: None,
+            channel: "Social".into(),
+            country: None,
+            device: "Desktop".into(),
+            browser: "Firefox".into(),
+            os: "macOS".into(),
+            region: None,
+            city: None,
+            host: None,
+            language: None,
+        };
+        store.insert_events(&[visit("v1"), visit("v2")]).unwrap();
+        let other = Payment {
+            visitor_id: Some("v2".into()),
+            customer_id: Some("cus_2".into()),
+            ..payment("pi_2", 0)
+        };
+        store
+            .upsert_payments(&[payment("pi_1", 0), other.clone()])
+            .unwrap();
+        let refresh = || {
+            store
+                .refresh_attribution("s", "last_non_direct", 90)
+                .unwrap()
+        };
+        let credit = || -> Vec<(String, Option<String>)> {
+            let conn = store.conn.lock().unwrap();
+            let mut stmt = conn
+                .prepare("SELECT provider_payment_id, session_id FROM attribution ORDER BY 1")
+                .unwrap();
+            stmt.query_map([], |r| Ok((r.get(0)?, r.get(1)?)))
+                .unwrap()
+                .map(Result::unwrap)
+                .collect()
+        };
+        assert!(refresh(), "new payments are credited");
+        assert!(!refresh(), "nothing changed since");
+        store.upsert_payments(&[other]).unwrap();
+        assert!(!refresh(), "an unchanged re-read is not a change");
+
+        // Marks pi_2's row, which only a full rebuild may touch.
+        store
+            .conn
+            .lock()
+            .unwrap()
+            .execute(
+                "UPDATE attribution SET session_id = 'kept' WHERE provider_payment_id = 'pi_2'",
+                [],
+            )
+            .unwrap();
+        let renewal = Payment {
+            ts: at + Duration::days(30),
+            visitor_id: None,
+            is_renewal: true,
+            ..payment("pi_3", 0)
+        };
+        store.upsert_payments(&[renewal]).unwrap();
+        assert!(refresh());
+        let pick = |s: &str| Some(s.to_string());
+        assert_eq!(
+            credit(),
+            [
+                ("pi_1".into(), pick("v1-s")),
+                ("pi_2".into(), pick("kept")),
+                ("pi_3".into(), pick("v1-s")),
+            ],
+            "the renewal inherits its customer's first payment; other customers are left alone"
+        );
+        store
+            .rebuild_attribution("s", "last_non_direct", 90)
+            .unwrap();
+        assert_eq!(credit()[1], ("pi_2".into(), pick("v2-s")));
+    }
+
     #[test]
     fn a_repeat_customer_is_new_once_across_all_time() {
         let dir = tempfile::tempdir().unwrap();
