@@ -1,3 +1,13 @@
+/
+  Link: </.well-known/api-catalog>; rel="api-catalog", <https://docs.virling.com/>; rel="service-doc", </llms.txt>; rel="describedby"; type="text/markdown"
+
+/.well-known/api-catalog
+  Content-Type: application/linkset+json; profile="https://www.rfc-editor.org/info/rfc9727"
+  Access-Control-Allow-Origin: *
+
+/.well-known/*
+  Access-Control-Allow-Origin: *
+
 /assets/site.css
   Cache-Control: public, max-age=31536000, immutable
 

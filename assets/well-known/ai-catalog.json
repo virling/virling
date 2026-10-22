@@ -1,0 +1,41 @@
+{
+  "specVersion": "0.91",
+  "host": {
+    "name": "Virling",
+    "domain": "virling.com",
+    "url": "https://virling.com/"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:virling.com:mcp:virling",
+      "displayName": "Virling MCP server",
+      "type": "application/mcp-server-card+json",
+      "url": "https://virling.com/.well-known/mcp/server-card.json",
+      "representativeQueries": [
+        "Which marketing channel made the most money last month?",
+        "What is revenue per visitor by channel?",
+        "Which AI assistant sends paying customers?"
+      ]
+    },
+    {
+      "identifier": "urn:air:virling.com:skill:virling",
+      "displayName": "Virling agent skill",
+      "type": "application/agent-skills+md",
+      "url": "https://virling.com/.well-known/agent-skills/virling/SKILL.md",
+      "representativeQueries": [
+        "Show revenue by channel from Virling",
+        "Which payments came from ChatGPT?"
+      ]
+    },
+    {
+      "identifier": "urn:air:virling.com:api:read",
+      "displayName": "Virling read API",
+      "type": "text/html",
+      "url": "https://docs.virling.com/reference/api.html",
+      "representativeQueries": [
+        "Virling API for revenue attribution",
+        "Get payments with their source visit"
+      ]
+    }
+  ]
+}
