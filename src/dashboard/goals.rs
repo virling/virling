@@ -267,7 +267,6 @@ fn step_label(s: &Step) -> (String, String) {
         Step::Page(p) if p == PRICING => {
             ("Viewed pricing".into(), "Any page under /pricing".into())
         }
-        Step::Page(p) if p == "/pricing" => ("Viewed pricing".into(), format!("Page: {p}")),
         Step::Page(p) => (format!("Viewed {p}"), format!("Page: {p}")),
         Step::Goal(g) => (humanize(g), format!("Goal: {g}")),
         Step::Paid => ("Paid".into(), "From your payments, automatic".into()),
@@ -633,9 +632,10 @@ mod tests {
         assert_eq!(parse("goal:"), None);
         assert_eq!(parse("x"), None);
         assert_eq!(humanize("trial_started"), "Trial started");
+        assert_eq!(step_label(&Step::Page(PRICING.into())).0, "Viewed pricing");
         assert_eq!(
             step_label(&Step::Page("/pricing".into())).0,
-            "Viewed pricing"
+            "Viewed /pricing"
         );
     }
 }

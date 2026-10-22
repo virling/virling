@@ -2306,6 +2306,13 @@ mod tests {
             funnel.contains("Any page under /pricing<"),
             "in the default funnel"
         );
+        assert_eq!(
+            post(&state, &hit("/pricing"), UA).await,
+            StatusCode::ACCEPTED
+        );
+        let funnel = goals("").await;
+        assert!(funnel.contains(r#"<option value="page:/pricing*">Viewed pricing</option>"#));
+        assert!(funnel.contains(r#"<option value="page:/pricing">Viewed /pricing</option>"#));
     }
 
     #[tokio::test]
