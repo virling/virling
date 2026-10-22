@@ -171,6 +171,8 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         base_url: "http://localhost".into(),
         waitlist_from: String::new(),
         hosted: false,
+        ai_keys: Default::default(),
+        ai_budget_usd: None,
     };
     let state = AppState::new(
         config,
@@ -312,6 +314,19 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         get("page.retention", format!("{app}/retention"), Auth::Session),
         get("page.report", format!("{app}/report"), Auth::Session),
         get("page.settings", format!("{app}/settings"), Auth::Session),
+        get(
+            "page.dashboard.ai_answers",
+            format!("{app}?ai=answers"),
+            Auth::Session,
+        ),
+        Route {
+            drawer: true,
+            ..get(
+                "page.answers.drawer",
+                format!("{app}/answers/openai"),
+                Auth::Session,
+            )
+        },
         get("page.share", format!("/r/{share}"), Auth::None),
         get("page.public", format!("/share/{domain}"), Auth::None),
         get(
@@ -352,6 +367,11 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         ),
         get("api.retention", format!("{api_base}/retention"), Auth::Key),
         get(
+            "api.ai_answers",
+            format!("{api_base}/ai-answers"),
+            Auth::Key,
+        ),
+        get(
             "api.visitor",
             format!("{api_base}/visitors/{}", enc(&visitor)),
             Auth::Key,
@@ -365,6 +385,7 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
             json!({ "site": domain, "dimension": "channel" }),
         ),
         ("get_retention", json!({ "site": domain })),
+        ("get_ai_answers", json!({ "site": domain })),
         ("list_payments", json!({ "site": domain })),
         (
             "get_visitor_timeline",

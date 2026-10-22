@@ -1,0 +1,36 @@
+<div class="journey ans">
+  <div class="j-head">
+    <div class="j-who"><span class="av">{{ v.icon|safe }}</span><b>{{ v.name }}</b></div>
+    <span class="j-meta">{{ v.range }}</span>
+  </div>
+  <div class="j-stats">
+    <div><span class="k">Used in</span><b>{{ v.reads }}</b><span class="s">answers, read live</span></div>
+    <div><span class="k">Mentioned</span><b>{{ v.mentioned }}</b><span class="s">{{ v.rate }}</span></div>
+    <div><span class="k">Sent</span><b class="rev">{{ v.revenue }}</b><span class="s">{{ v.visitors }}</span></div>
+  </div>
+  <div class="j-sec">
+    <b class="j-title">Your questions</b>
+    {% if v.questions.is_empty() %}
+    <p class="muted">{% if v.keyed %}No answers in this range yet. Questions run once a week. <a href="{{ v.settings }}">Questions</a>{% else if v.hosted %}{{ v.name }} is not set up on this server.{% else %}Add a {{ v.provider }} key to ask {{ v.name }} your buyer questions once a week. <a href="{{ v.settings }}">Settings</a>{% endif %}</p>
+    {% endif %}
+    {% for q in v.questions %}
+    <details class="ans-q">
+      <summary><span>{{ q.question }}</span><span class="badge{% if q.named %} ok{% endif %}">{{ q.rate }}</span></summary>
+      <span class="ans-meta">{{ q.latest }}</span>
+      <p class="ans-text">{% for (t, m) in q.pieces %}{% if *m %}<mark>{{ t }}</mark>{% else %}{{ t }}{% endif %}{% endfor %}</p>
+    </details>
+    {% endfor %}
+  </div>
+  {% if !v.cited.is_empty() %}
+  <div class="j-sec">
+    <b class="j-title">Pages it cites</b>
+    {% for (p, n) in v.cited %}<div class="det"><span class="mono">{{ p }}</span><span>{{ n }}</span></div>{% endfor %}
+  </div>
+  {% endif %}
+  {% if !v.opened.is_empty() %}
+  <div class="j-sec">
+    <b class="j-title">Pages it opened while answering</b>
+    <div class="chips">{% for p in v.opened %}<span class="chip mono">{{ p }}</span>{% endfor %}</div>
+  </div>
+  {% endif %}
+</div>

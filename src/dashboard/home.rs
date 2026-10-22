@@ -11,8 +11,8 @@ use time::{Date, Duration, OffsetDateTime};
 
 use super::daterange::{Picked, RangeMenu};
 use super::{
-    Ctx, Opt, Shell, blocking, cards, day, delta, encode, goals, group, insight, link, load, money,
-    plural, provider_name, source_of, usd, views,
+    Ctx, Opt, Shell, answers, blocking, cards, day, delta, encode, goals, group, insight, link,
+    load, money, plural, provider_name, source_of, usd, views,
 };
 use crate::alias::Names;
 use crate::app::AppState;
@@ -54,8 +54,8 @@ const FILTERS: [(&str, &str); 12] = [
 ];
 
 /// Params kept by every link besides the range, filters and card tabs.
-const KEEP: [&str; 10] = [
-    "compare", "view", "chart", "gtab", "vtab", "ret", "s1", "s2", "s3", "funnel",
+const KEEP: [&str; 11] = [
+    "compare", "view", "chart", "gtab", "vtab", "ret", "s1", "s2", "s3", "funnel", "ai",
 ];
 
 const VIEWS: [(&str, &str); 5] = [
@@ -1214,7 +1214,7 @@ async fn page(
             )
             .await
             .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
-            page.ai = Some(cards::ai_card(
+            let mut ai = cards::ai_card(
                 &sources,
                 &tabs[0].0,
                 &bots,
@@ -1223,7 +1223,35 @@ async fn page(
                 (show_prev).then_some(report.previous_days.as_slice()),
                 &filter_href,
                 now,
-            ));
+            );
+            if public.is_none() {
+                let range = (at(from), at(to + Duration::days(1)) - 1);
+                let inputs = answers::Inputs::load(&state, &ctx.site.id, (from, to), range)
+                    .await
+                    .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+                let drawer = |a: crate::answers::Assistant| {
+                    format!(
+                        "{}?from={from}&to={to}",
+                        site_url(&format!("answers/{}", a.as_str()))
+                    )
+                };
+                ai.answers = Some(answers::tab(
+                    &inputs,
+                    &bots,
+                    &sources,
+                    drawer,
+                    format!("{}#ai-answers", site_url("settings")),
+                    q.rest.get("ai").is_some_and(|v| v == "answers"),
+                    state.config.hosted,
+                ));
+                if let Some(n) = ai.answers.as_mut() {
+                    n.tabs = (
+                        format!("{}#ai", href(&[("ai", "")])),
+                        format!("{}#ai", href(&[("ai", "answers")])),
+                    );
+                }
+            }
+            page.ai = Some(ai);
         }
         Data::Goals(g) => {
             page.goals = Some(goals::view(

@@ -136,6 +136,22 @@ pub fn candidates(html: &str, base: &Url) -> Vec<Url> {
     out
 }
 
+/// The page's `<title>`, for suggesting AI answer questions.
+fn page_title(html: &str) -> Option<String> {
+    let lower = html.to_ascii_lowercase();
+    let open = lower.find("<title")?;
+    let start = open + lower[open..].find('>')? + 1;
+    let end = start + lower[start..].find("</title")?;
+    let title = html[start..end]
+        .replace("&amp;", "&")
+        .replace("&#39;", "'")
+        .replace("&quot;", "\"")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
+    (!title.is_empty()).then(|| title.chars().take(200).collect())
+}
+
 /// Value of attribute `name` in a single tag, quoted or not.
 fn attr<'a>(tag: &'a str, name: &str) -> Option<&'a str> {
     let lower = tag.to_ascii_lowercase();
@@ -176,19 +192,27 @@ async fn body(mut res: reqwest::Response) -> anyhow::Result<Vec<u8>> {
     Ok(out)
 }
 
-/// The icon of `domain` as (content type, bytes).
-pub async fn fetch(client: &Client, domain: &str) -> anyhow::Result<(String, Vec<u8>)> {
+/// The icon of `domain` as (content type, bytes), and the homepage title.
+pub async fn fetch(
+    client: &Client,
+    domain: &str,
+) -> anyhow::Result<(String, Vec<u8>, Option<String>)> {
     fetch_from(client, Url::parse(&format!("https://{domain}/"))?).await
 }
 
-async fn fetch_from(client: &Client, base: Url) -> anyhow::Result<(String, Vec<u8>)> {
+async fn fetch_from(
+    client: &Client,
+    base: Url,
+) -> anyhow::Result<(String, Vec<u8>, Option<String>)> {
     if !literal_ip_is_public(&base) {
         anyhow::bail!("not a public host");
     }
     let page = client.get(base.clone()).send().await?;
     let base = page.url().clone();
     let html = body(page).await.unwrap_or_default();
-    for url in candidates(&String::from_utf8_lossy(&html), &base) {
+    let html = String::from_utf8_lossy(&html);
+    let title = page_title(&html);
+    for url in candidates(&html, &base) {
         if !literal_ip_is_public(&url) {
             continue;
         }
@@ -211,7 +235,7 @@ async fn fetch_from(client: &Client, base: Url) -> anyhow::Result<(String, Vec<u
         if let Ok(bytes) = body(res).await
             && !bytes.is_empty()
         {
-            return Ok((kind, bytes));
+            return Ok((kind, bytes, title));
         }
     }
     anyhow::bail!("no usable icon")
@@ -242,18 +266,21 @@ pub fn refresh(state: &AppState, site_id: &str, domain: &str, fetched: Option<(i
         if let Err(err) = &fetched {
             tracing::debug!(%err, %domain, "favicon fetch failed");
         }
-        let (kind, bytes) = fetched.map_or((None, None), |(k, b)| (Some(k), Some(b)));
+        let (kind, bytes, title) =
+            fetched.map_or((None, None, None), |(k, b, t)| (Some(k), Some(b), t));
         let saved = sqlx::query(
-            "INSERT INTO site_icons (site_id, content_type, body, fetched_at) VALUES (?, ?, ?, ?)
+            "INSERT INTO site_icons (site_id, content_type, body, fetched_at, title) VALUES (?, ?, ?, ?, ?)
              ON CONFLICT (site_id) DO UPDATE SET
                 content_type = coalesce(excluded.content_type, site_icons.content_type),
                 body = coalesce(excluded.body, site_icons.body),
-                fetched_at = excluded.fetched_at",
+                fetched_at = excluded.fetched_at,
+                title = coalesce(excluded.title, site_icons.title)",
         )
         .bind(&site_id)
         .bind(kind)
         .bind(bytes)
         .bind(now)
+        .bind(title)
         .execute(&state.db)
         .await;
         if let Err(err) = saved {
@@ -350,7 +377,7 @@ pub(crate) async fn save_source(db: &SqlitePool, client: &Client, host: &str, ba
     if let Err(err) = &fetched {
         tracing::debug!(%err, %host, "source icon fetch failed");
     }
-    let (kind, bytes) = fetched.map_or((None, None), |(k, b)| (Some(k), Some(b)));
+    let (kind, bytes) = fetched.map_or((None, None), |(k, b, _)| (Some(k), Some(b)));
     let at = now();
     let saved: Result<bool, _> = sqlx::query_scalar(
         "INSERT INTO source_icons (host, content_type, body, fetched_at) VALUES (?, ?, ?, ?)
@@ -387,6 +414,17 @@ pub async fn source_body(db: &SqlitePool, host: &str) -> Option<(String, Vec<u8>
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn titles_are_read_from_the_page() {
+        assert_eq!(
+            page_title("<html><head><TITLE>\n  Tallybird &amp; co |\n Invoicing</title>")
+                .as_deref(),
+            Some("Tallybird & co | Invoicing")
+        );
+        assert_eq!(page_title("<title></title>"), None);
+        assert_eq!(page_title("<p>no title</p>"), None);
+    }
 
     #[test]
     fn icon_links_resolve_against_the_page() {

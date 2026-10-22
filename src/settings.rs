@@ -7,6 +7,7 @@ use serde::Deserialize;
 use sqlx::SqlitePool;
 use time::OffsetDateTime;
 
+use crate::answers::{self, Assistant};
 use crate::api;
 use crate::app::AppState;
 use crate::auth::{Account, random_token};
@@ -20,6 +21,43 @@ const MODELS: [&str; 2] = ["last_non_direct", "first_touch"];
 const RETURNS: [i64; 3] = [1, 5, 30];
 
 type IntegrationRow = (String, Option<i64>, Option<String>);
+type AiKeyRow = (String, Vec<u8>, Vec<u8>, Option<String>);
+type AiSettingsRow = (String, String, Option<i64>, i64, i64);
+
+/// One assistant in the AI answers settings: its saved key's last four characters, or a key form.
+pub struct AiKeyView {
+    key: &'static str,
+    name: &'static str,
+    icon: String,
+    /// "gpt-6-luna, about $0.011 a question"
+    about: String,
+    placeholder: &'static str,
+    help_url: &'static str,
+    hint: String,
+    error: String,
+    /// The server sets this key for every site.
+    server: bool,
+    connected: bool,
+    replacing: bool,
+}
+
+/// The AI answers settings: keys on a self-hosted server, questions, names to look for and the run line.
+pub struct AiSettings {
+    keys: Vec<AiKeyView>,
+    questions: Vec<String>,
+    /// "8 of 20"
+    count: String,
+    names: String,
+    placeholder: String,
+    /// The questions showing are suggestions, not saved ones.
+    suggested: bool,
+    /// Empty on the hosted service, where runs are included.
+    cost: String,
+    run: String,
+    can_run: bool,
+    note: &'static str,
+    error: &'static str,
+}
 
 pub struct Connection {
     provider: String,
@@ -59,6 +97,7 @@ struct SettingsPage {
     public_on: bool,
     public_hide: bool,
     public_saved: bool,
+    ai: AiSettings,
 }
 
 #[derive(Template)]
@@ -95,6 +134,7 @@ pub struct SavedQuery {
     error: Option<String>,
     team: Option<String>,
     add: Option<String>,
+    replace: Option<String>,
 }
 
 /// Agency branding on a site's client report; empty fields are left off.
@@ -136,6 +176,16 @@ pub async fn page(
     Path(domain): Path<String>,
     Query(q): Query<SavedQuery>,
 ) -> Response {
+    show(state, account, domain, q, None).await
+}
+
+async fn show(
+    state: AppState,
+    account: Account,
+    domain: String,
+    q: SavedQuery,
+    typed: Option<Typed>,
+) -> Response {
     let ctx = match load(&state, &account, &domain, "settings").await {
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
@@ -169,8 +219,13 @@ pub async fn page(
         Ok(n) => plural(n, "bot visitor"),
         Err(code) => return code.into_response(),
     };
+    let ai = match ai_settings(&state, &ctx.site.id, &ctx.site.domain, &q, typed.as_ref()).await {
+        Ok(ai) => ai,
+        Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
+    };
     let now = OffsetDateTime::now_utc();
     render(SettingsPage {
+        ai,
         title: "Site settings",
         script_host: state.config.base_url.clone(),
         cookieless: ctx.site.cookieless,
@@ -230,6 +285,296 @@ pub async fn page(
         },
         shell: ctx.shell,
     })
+}
+
+/// "$0.48", or "$0.011" and "$0.0002" under ten cents.
+fn cents(usd: f64) -> String {
+    if usd < 0.001 {
+        format!("${usd:.4}")
+    } else if usd < 0.1 {
+        format!("${usd:.3}")
+    } else {
+        format!("${usd:.2}")
+    }
+}
+
+/// Questions and names as typed, shown again when they do not save.
+type Typed = (Vec<String>, String);
+
+async fn ai_settings(
+    state: &AppState,
+    site_id: &str,
+    domain: &str,
+    q: &SavedQuery,
+    typed: Option<&Typed>,
+) -> sqlx::Result<AiSettings> {
+    let hosted = state.config.hosted;
+    let keys: Vec<AiKeyRow> = if hosted {
+        Vec::new()
+    } else {
+        sqlx::query_as(
+            "SELECT provider, key_ciphertext, key_nonce, last_error FROM ai_keys WHERE site_id = ?",
+        )
+        .bind(site_id)
+        .fetch_all(&state.db)
+        .await?
+    };
+    let saved: Option<AiSettingsRow> = sqlx::query_as(
+        "SELECT questions, names, last_run_at, run_day, manual_runs FROM ai_settings WHERE site_id = ?",
+    )
+    .bind(site_id)
+    .fetch_optional(&state.db)
+    .await?;
+    let title: Option<String> =
+        sqlx::query_scalar("SELECT title FROM site_icons WHERE site_id = ?")
+            .bind(site_id)
+            .fetch_optional(&state.db)
+            .await?
+            .flatten();
+    let (questions, names, last_run, run_day, manual) =
+        saved.unwrap_or((String::new(), String::new(), None, 0, 0));
+    let suggested = questions.is_empty();
+    let (questions, names) = match typed {
+        Some((q, n)) => (q.clone(), n.clone()),
+        None if suggested => (
+            answers::suggest(domain, title.as_deref(), &[], &[]),
+            answers::auto_names(domain, title.as_deref()),
+        ),
+        None => (answers::clean_questions(&questions), names),
+    };
+    let server = &state.config.ai_keys;
+    let replace = q.replace.as_deref().and_then(Assistant::parse);
+    let views: Vec<AiKeyView> = Assistant::ALL
+        .into_iter()
+        .filter(|_| !hosted)
+        .map(|a| {
+            let row = keys.iter().find(|k| k.0 == a.as_str());
+            AiKeyView {
+                key: a.as_str(),
+                name: a.provider_name(),
+                icon: crate::icons::source(a.logo(), 20),
+                about: format!("{}, about {} a question", a.model(), cents(a.cost())),
+                placeholder: a.placeholder(),
+                help_url: a.help_url(),
+                hint: row
+                    .and_then(|k| state.vault.decrypt(&k.1, &k.2).ok())
+                    .map(|k| crate::onboarding::key_hint(&k))
+                    .unwrap_or_default(),
+                error: row.and_then(|k| k.3.clone()).unwrap_or_default(),
+                server: server.get(a).is_some(),
+                connected: row.is_some(),
+                replacing: row.is_some() && replace == Some(a),
+            }
+        })
+        .collect();
+    let usable: Vec<Assistant> = Assistant::ALL
+        .into_iter()
+        .filter(|a| server.get(*a).is_some() || keys.iter().any(|k| k.0 == a.as_str()))
+        .collect();
+    let n = questions.len();
+    let cost = if hosted {
+        String::new()
+    } else if usable.is_empty() {
+        "Each question costs about $0.011 on ChatGPT and Claude, $0.002 on Perplexity and $0.0002 on Gemini.".to_string()
+    } else {
+        let run = answers::run_cost(n, &usable);
+        format!(
+            "About {} a run, {} a month, for {} on {}, billed by each provider to its key.",
+            cents(run),
+            cents(run * answers::RUNS_PER_MONTH),
+            plural(n as u64, "question"),
+            plural(usable.len() as u64, "assistant"),
+        )
+    };
+    let today = OffsetDateTime::now_utc().unix_timestamp().div_euclid(86400);
+    let left = if run_day >= today {
+        (answers::MANUAL_PER_DAY - manual).max(0)
+    } else {
+        answers::MANUAL_PER_DAY
+    };
+    let now = OffsetDateTime::now_utc();
+    let next = (run_day + answers::EVERY_DAYS - today).max(0);
+    let run = match last_run.and_then(|t| OffsetDateTime::from_unix_timestamp(t).ok()) {
+        _ if usable.is_empty() && hosted => "AI answers are not set up on this server.".into(),
+        _ if usable.is_empty() => "Add a key to start. Questions run once a week.".into(),
+        Some(t) if next > 0 && next <= answers::EVERY_DAYS => format!(
+            "Runs once a week. Last run {}; the next in {}.",
+            ago(t, now),
+            plural(next as u64, "day")
+        ),
+        Some(t) => format!("Runs once a week. Last run {}.", ago(t, now)),
+        None => "Runs once a week. The first run starts once the site has visits.".into(),
+    };
+    Ok(AiSettings {
+        keys: views,
+        count: format!("{n} of {}", answers::MAX_QUESTIONS),
+        questions,
+        names,
+        placeholder: answers::auto_names(domain, title.as_deref()),
+        suggested,
+        cost,
+        run,
+        can_run: !usable.is_empty() && left > 0,
+        note: match q.saved.as_deref() {
+            Some("ai") => "Saved. The next run asks these questions.",
+            Some("ai-key") => "Key saved. It is stored encrypted and only sent to its provider.",
+            Some("ai-run") => "Running now. Answers show on the dashboard in a few minutes.",
+            _ => "",
+        },
+        error: match (typed, q.error.as_deref()) {
+            (Some((q, _)), _) => {
+                if q.len() < answers::MIN_QUESTIONS {
+                    "Add at least 5 questions."
+                } else {
+                    ""
+                }
+            }
+            (_, Some("ai-key")) => "Paste a key first.",
+            (_, Some("ai-limit")) => {
+                "Run now works once a day. The next weekly run starts on its own."
+            }
+            _ => "",
+        },
+    })
+}
+
+#[derive(Deserialize)]
+pub struct AiKeyInput {
+    provider: String,
+    key: String,
+}
+
+/// Saves an assistant's API key on a self-hosted server, encrypted like payment keys.
+pub async fn save_ai_key(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(input): Form<AiKeyInput>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "settings").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    let Some(a) = Assistant::parse(&input.provider) else {
+        return StatusCode::BAD_REQUEST.into_response();
+    };
+    if state.config.hosted || state.config.ai_keys.get(a).is_some() {
+        return StatusCode::FORBIDDEN.into_response();
+    }
+    let settings = app_path(&ctx.site.domain, "settings");
+    let key = input.key.trim();
+    if key.is_empty() {
+        return Redirect::to(&format!("{settings}?error=ai-key#ai-answers")).into_response();
+    }
+    if let Err(err) = answers::save_key(&state, &ctx.site.id, a, key).await {
+        tracing::error!(%err, "saving an AI key failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    Redirect::to(&format!("{settings}?saved=ai-key#ai-answers")).into_response()
+}
+
+#[derive(Deserialize)]
+pub struct AiRemoveInput {
+    provider: String,
+}
+
+pub async fn remove_ai_key(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(input): Form<AiRemoveInput>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "settings").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    if let Err(err) = sqlx::query("DELETE FROM ai_keys WHERE site_id = ? AND provider = ?")
+        .bind(&ctx.site.id)
+        .bind(&input.provider)
+        .execute(&state.db)
+        .await
+    {
+        tracing::error!(%err, "removing an AI key failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    Redirect::to(&format!(
+        "{}#ai-answers",
+        app_path(&ctx.site.domain, "settings")
+    ))
+    .into_response()
+}
+
+/// Saves 5 to 20 buyer questions, one per `q` field, and the names that count as a mention.
+pub async fn save_ai(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(input): Form<Vec<(String, String)>>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "settings").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    let field = |k: &str| -> Vec<String> {
+        input
+            .iter()
+            .filter(|f| f.0 == k)
+            .map(|f| f.1.replace(['\r', '\n'], " "))
+            .collect()
+    };
+    let questions = answers::clean_questions(&field("q").join("\n"));
+    let names: String = field("names").concat().chars().take(300).collect();
+    if questions.len() < answers::MIN_QUESTIONS {
+        return show(
+            state,
+            account,
+            domain,
+            SavedQuery::default(),
+            Some((questions, names)),
+        )
+        .await;
+    }
+    if let Err(err) = answers::save_settings(&state.db, &ctx.site.id, &questions, &names).await {
+        tracing::error!(%err, "saving AI questions failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    Redirect::to(&format!(
+        "{}?saved=ai#ai-answers",
+        app_path(&ctx.site.domain, "settings")
+    ))
+    .into_response()
+}
+
+/// Starts a run now, once a day at most.
+pub async fn run_ai(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "settings").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    let settings = app_path(&ctx.site.domain, "settings");
+    let claimed = match answers::usable(&state, &ctx.site.id).await {
+        Ok(k) if !k.is_empty() => answers::claim(&state.db, &ctx.site.id, true).await,
+        Ok(_) => Ok(false),
+        Err(err) => Err(err),
+    };
+    match claimed {
+        Ok(true) => {
+            let (bg, id) = (state.clone(), ctx.site.id.clone());
+            tokio::spawn(
+                async move { answers::run_site(&bg, &id, &|a| a.base().to_string()).await },
+            );
+            Redirect::to(&format!("{settings}?saved=ai-run#ai-answers")).into_response()
+        }
+        Ok(false) => Redirect::to(&format!("{settings}?error=ai-limit#ai-answers")).into_response(),
+        Err(err) => {
+            tracing::error!(%err, "starting an AI run failed");
+            StatusCode::SERVICE_UNAVAILABLE.into_response()
+        }
+    }
 }
 
 /// The account page: email, plan and API keys, which apply to every site.

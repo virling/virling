@@ -1,5 +1,6 @@
 mod alias;
 mod animals;
+mod answers;
 mod api;
 mod app;
 mod assets;
@@ -147,6 +148,21 @@ struct ServeArgs {
         default_value = "Rahul at Virling <hello@virling.com>"
     )]
     waitlist_from: String,
+    /// OpenAI key for AI answers on every site
+    #[arg(long, env = "VIRLING_OPENAI_KEY", hide_env_values = true)]
+    openai_key: Option<String>,
+    /// Anthropic key for AI answers on every site
+    #[arg(long, env = "VIRLING_ANTHROPIC_KEY", hide_env_values = true)]
+    anthropic_key: Option<String>,
+    /// Perplexity key for AI answers on every site
+    #[arg(long, env = "VIRLING_PERPLEXITY_KEY", hide_env_values = true)]
+    perplexity_key: Option<String>,
+    /// Google Gemini key for AI answers on every site
+    #[arg(long, env = "VIRLING_GEMINI_KEY", hide_env_values = true)]
+    gemini_key: Option<String>,
+    /// Estimated USD a month after which AI answer runs pause
+    #[arg(long, env = "VIRLING_AI_ANSWERS_BUDGET_USD")]
+    ai_answers_budget_usd: Option<f64>,
 }
 
 #[tokio::main]
@@ -196,6 +212,13 @@ async fn main() -> anyhow::Result<()> {
                 base_url: args.base_url.trim_end_matches('/').to_string(),
                 waitlist_from: args.waitlist_from,
                 hosted: args.hosted,
+                ai_keys: answers::ServerKeys([
+                    args.openai_key,
+                    args.anthropic_key,
+                    args.perplexity_key,
+                    args.gemini_key,
+                ]),
+                ai_budget_usd: args.ai_answers_budget_usd,
             };
             let mailer = mail::Mailer::new(args.smtp_url.as_deref(), &args.mail_from)?;
             let vault = crypto::Vault::load(&cli.data_dir, args.secret_key.as_deref())?;
@@ -203,6 +226,7 @@ async fn main() -> anyhow::Result<()> {
             let state = AppState::new(config, db, Arc::new(events), mailer, vault);
             if app_enabled {
                 tokio::spawn(sync::run(state.clone()));
+                tokio::spawn(answers::run(state.clone()));
                 favicon::spawn_sources(state.clone());
                 tokio::spawn(dashboard::schedule::run(state.clone()));
             }
@@ -292,6 +316,8 @@ mod tests {
             base_url: "http://localhost:8080".into(),
             waitlist_from: "Rahul at Virling <hello@virling.com>".into(),
             hosted: false,
+            ai_keys: Default::default(),
+            ai_budget_usd: None,
         };
         let state = AppState::new(
             config,

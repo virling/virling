@@ -2,6 +2,8 @@
 
 The **AI** card on the dashboard has one row per AI company, with the pages its crawlers read next to the visitors and revenue its assistants sent. Hover a company's pages read to see each bot's hits, pages, most-read page and when it was last seen. Crawler hits are stored apart from visits, so they never count as visitors.
 
+The **Answers** tab of the same card counts the answer fetchers per assistant and how often assistants name you. See [AI answers](ai-answers.md).
+
 Each bot has a type:
 
 | Type | What the bot does | Bots |

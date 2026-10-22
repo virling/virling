@@ -302,6 +302,20 @@ img.favicon { background: none; object-fit: contain; }
 .conn { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--rule-2); }
 .conn .grow { display: flex; flex: 1 1 280px; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 .conn .err { flex-basis: 100%; color: var(--error-text); }
+.card > .conn:first-child { border-top: 0; padding-top: 0; }
+.card > form:first-child > .setting:first-child { border-top: 0; padding-top: 0; }
+.conn .ai-key { flex: 1 1 200px; max-width: 280px; height: 40px; font-size: 14px; }
+.setting.stacked { flex-direction: column; align-items: stretch; gap: 10px; }
+.setting.stacked > div:first-child { max-width: none; }
+.q-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.q-head .muted { font-variant-numeric: tabular-nums; }
+.q-list { display: flex; flex-direction: column; gap: 8px; }
+.q-list:empty { display: none; }
+.q-row { display: grid; grid-template-columns: minmax(0, 1fr) 32px; align-items: center; gap: 6px; }
+.q-row .input { width: 100%; min-width: 0; height: 40px; font-size: 14px; }
+.q-x { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: transparent; color: var(--ink-3); cursor: pointer; }
+.q-x:hover { background: var(--hover); color: var(--ink); }
+.btn.ghost.q-add { padding: 0 8px; margin-left: -8px; }
 .setting > .input, .setting .actions > .input { flex: none; width: 280px; height: 40px; font-size: 14px; }
 .affix.compact { flex: none; width: 160px; height: 40px; }
 .affix.compact input { font-size: 14px; }
@@ -645,6 +659,13 @@ a.ctl { text-decoration: none; }
 .d3-ai-logos { display: flex; gap: 10px; margin-bottom: 4px; filter: grayscale(1); opacity: .45; }
 .d3-row.d3-airow { grid-template-columns: minmax(0, 1fr) 64px 60px 76px 72px; }
 .d3-airow .pg { color: var(--ink-2); font-size: 13px; }
+.d3-row.d3-ansrow { grid-template-columns: minmax(0, 1fr) 56px 84px 60px 72px; }
+.d3-ansrow .pg { color: var(--ink-2); font-size: 13px; }
+.d3-ansrow .mt { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.d3-ansrow .mt small { font-size: 11px; color: var(--ink-3); }
+.d3-ansrow .mt small.up { color: var(--up-deep); }
+.d3-ansrow .mt small.down { color: var(--rev-deep); }
+.d3-row.th .mt { color: inherit; }
 .d3-row.th .v, .d3-row.th .pg { color: inherit; font-size: inherit; }
 .d3-ai .d3-foot .d3-spark { flex: 1; padding: 0; }
 .d3-row.kid { min-height: 40px; }
@@ -793,6 +814,7 @@ a.ctl { text-decoration: none; }
   .d3-row .v { display: none; }
   .d3-row .x { display: none; }
   .d3-row.d3-airow { grid-template-columns: minmax(0, 1fr) 52px 60px 56px; }
+  .d3-row.d3-ansrow { grid-template-columns: minmax(0, 1fr) 48px 76px 56px; }
   .d3-bc { padding: 12px 10px 8px; }
   .d3-grow { grid-template-columns: minmax(0, 1fr) 72px 96px; }
   .d3-grow .pd { display: none; }
@@ -873,6 +895,12 @@ a.ctl { text-decoration: none; }
 .det > span:last-child { display: flex; align-items: center; gap: 6px; text-align: right; overflow-wrap: anywhere; }
 .det .mono { font-size: 12px; }
 .journey-page { padding: 0 0 16px; }
+.ans-q { border-top: 1px solid var(--rule-2); padding: 10px 0; }
+.ans-q summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; font-weight: 600; }
+.ans-q summary .badge:not(.ok) { background: var(--chip); color: var(--ink-2); }
+.ans-meta { display: block; margin-top: 8px; font-size: 12px; color: var(--ink-3); }
+.ans-text { margin: 6px 0 0; white-space: pre-line; line-height: 1.55; color: var(--ink-2); }
+.ans-text mark { padding: 0 2px; border-radius: 3px; background: var(--vis-wash); color: var(--ink); font-weight: 600; }
 .j-visitor { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; color: var(--visitors-text); font-weight: 600; text-decoration: none; }
 .j-visitor b { color: var(--ink); }
 .j-visitor .grow { flex: 1; color: var(--ink-3); font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
