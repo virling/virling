@@ -1536,6 +1536,7 @@ pub async fn public(
             live,
             agency: false,
             sample: None,
+            banner: String::new(),
         },
         site: Site {
             id,

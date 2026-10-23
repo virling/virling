@@ -71,6 +71,8 @@ pub struct Shell {
     pub agency: bool,
     /// Set while the site holds sample data; true when the viewer may remove it.
     pub sample: Option<bool>,
+    /// A billing line above the page, such as the days left in the trial.
+    pub banner: String,
 }
 
 /// A site in the switcher.
@@ -183,12 +185,37 @@ async fn load_in(
     .fetch_one(&state.db)
     .await
     .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+    let now = OffsetDateTime::now_utc();
+    let trial = match &state.config.billing {
+        Some(_) if account.owner => crate::billing::load(&state.db, &account.id)
+            .await
+            .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?
+            .filter(|b| {
+                crate::billing::plan(&b.status, b.trial_ends_at, now.unix_timestamp()) == "trialing"
+            })
+            .and_then(|b| b.trial_ends_at),
+        _ => None,
+    };
     let store = state.events.clone();
     let (id, tz) = (site.id.clone(), site.timezone.clone());
     let live = state.presence.count(&id);
-    let (offset, live, visitors, first, picked) = blocking(move || {
+    let (offset, live, visitors, first, picked, attributed) = blocking(move || {
         let offset = store.utc_offset(&tz)?;
         let today = OffsetDateTime::now_utc().to_offset(offset).date();
+        let attributed = match trial {
+            Some(ends) => {
+                let start =
+                    OffsetDateTime::from_unix_timestamp(ends - crate::billing::TRIAL_DAYS * 86400)?;
+                let trial = Period {
+                    from: start.to_offset(offset).date().min(today),
+                    to: today,
+                    tz: tz.clone(),
+                };
+                let t = store.overview(&id, &trial)?.current;
+                Some((t.matched_payments, t.matched_revenue_usd))
+            }
+            None => None,
+        };
         let first = store.first_event(&id)?;
         let picked = args.map(|a| {
             let first_day = first.map(|t| t.to_offset(offset).date());
@@ -210,7 +237,7 @@ async fn load_in(
             },
         };
         let visitors = store.overview(&id, &period)?.current.visitors;
-        Ok((offset, live, visitors, first, picked))
+        Ok((offset, live, visitors, first, picked, attributed))
     })
     .await?;
     let icons: Vec<(String, i64, bool)> = sqlx::query_as(
@@ -256,6 +283,25 @@ async fn load_in(
         live,
         agency: account_type == "agency",
         sample: site.sample_data.then_some(account.owner),
+        banner: match (trial, attributed) {
+            (Some(ends), Some((payments, revenue))) => {
+                let left = crate::billing::days_left(ends, now.unix_timestamp());
+                let left = format!(
+                    "Trial: {left} day{} left.",
+                    if left == 1 { "" } else { "s" }
+                );
+                if payments == 0 {
+                    format!("{left} Connect payments to see which visits pay.")
+                } else {
+                    format!(
+                        "{left} {}, {}, attributed so far.",
+                        plural(payments, "payment"),
+                        money(revenue)
+                    )
+                }
+            }
+            _ => String::new(),
+        },
     };
     let ctx = Ctx {
         site,

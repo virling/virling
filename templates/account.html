@@ -19,7 +19,44 @@
   </form>
 </div>
 </section>
-{% if owner %}
+{% if let Some(b) = billing %}
+<section class="set-sec" id="plan">
+<div class="set-intro"><h2>Plan and billing</h2><p class="muted">Applies to every site on your account. Billed monthly through Dodo Payments.</p></div>
+<div class="card">
+  {% if !billing_note.is_empty() %}<div class="notice ok-note" role="status">{{ billing_note }}</div>{% endif %}
+  {% if b.state == "none" %}
+  <form method="post" action="/app/{{ shell.domain }}/account/billing">
+    <div class="setting">
+      <div><b id="plan-label">{{ b.headline }}</b><span class="muted">Personal is $19 a month. Agency is $79 a month with client reports and {{ crate::team::INCLUDED }} users, then {{ crate::team::SEAT_PRICE }} per extra seat.</span></div>
+      <div class="seg" role="radiogroup" aria-labelledby="plan-label">
+        <label><input type="radio" name="plan" value="personal"{% if !shell.agency %} checked{% endif %}>Personal</label>
+        <label><input type="radio" name="plan" value="agency"{% if shell.agency %} checked{% endif %}>Agency</label>
+      </div>
+    </div>
+    <div class="actions end"><span class="muted small">{{ b.detail }}</span><button class="btn" type="submit">{% if b.trial %}Start 14-day trial{% else %}Subscribe{% endif %}</button></div>
+  </form>
+  {% else %}
+  <div class="setting">
+    <div><b>{{ b.headline }}</b><span class="muted">{{ b.detail }}</span></div>
+    <div class="actions">
+      <form method="post" action="/app/{{ shell.domain }}/account/billing/portal"><button class="btn secondary" type="submit">{% if b.state == "past_due" %}Update card{% else %}Manage billing{% endif %}</button></form>
+      {% if b.cancelling %}
+      <form method="post" action="/app/{{ shell.domain }}/account/billing/resume"><button class="btn" type="submit">Keep my plan</button></form>
+      {% else %}
+      <form method="post" action="/app/{{ shell.domain }}/account/billing/cancel"><button class="btn ghost" type="submit">{% if b.state == "trial" %}Cancel trial{% else %}Cancel plan{% endif %}</button></form>
+      {% endif %}
+    </div>
+  </div>
+  {% if b.state != "past_due" && !b.cancelling %}
+  <form class="setting" method="post" action="/app/{{ shell.domain }}/account/plan">
+    <div><b>Switch plan</b><span class="muted">{% if shell.agency %}Personal is $19 a month for one user, with the weekly report emailed to you.{% else %}Agency is $79 a month with white-label client reports and {{ crate::team::INCLUDED }} users.{% endif %}</span></div>
+    <div class="actions"><input type="hidden" name="account_type" value="{% if shell.agency %}personal{% else %}agency{% endif %}"><button class="btn secondary" type="submit">Switch to {% if shell.agency %}Personal{% else %}Agency{% endif %}</button></div>
+  </form>
+  {% endif %}
+  {% endif %}
+</div>
+</section>
+{% else if owner %}
 <section class="set-sec" id="plan">
 <div class="set-intro"><h2>Plan</h2><p class="muted">Applies to every site on your account. There is no billing yet, so you can switch any time.</p></div>
 <form class="card" method="post" action="/app/{{ shell.domain }}/account/plan">
