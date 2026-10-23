@@ -6,6 +6,8 @@ For each event Virling stores: the time, the path without its query string, the 
 
 It does not store IP addresses, full user agents, full referrer URLs, or anything a visitor types.
 
+The [privacy policy](https://virling.com/privacy) covers the hosted service.
+
 ## The visitor cookie
 
 | Property | Value |
