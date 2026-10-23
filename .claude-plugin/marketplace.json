@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "virling",
-      "source": ".",
+      "source": "./plugins/virling",
       "description": "Ask which channels, referrers, campaigns and pages make money, from your Virling server.",
       "category": "analytics"
     }

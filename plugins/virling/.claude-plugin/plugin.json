@@ -1,5 +1,6 @@
 {
   "name": "virling",
+  "version": "1.0.0",
   "displayName": "Virling",
   "description": "Ask which channels, referrers, campaigns and pages make money, from your Virling server. Bundles the Virling skill and the read-only MCP server.",
   "author": {
@@ -9,7 +10,12 @@
   "homepage": "https://docs.virling.com/reference/mcp.html",
   "repository": "https://github.com/virling/virling",
   "license": "AGPL-3.0",
-  "keywords": ["analytics", "revenue", "attribution", "mcp"],
+  "keywords": [
+    "analytics",
+    "revenue",
+    "attribution",
+    "mcp"
+  ],
   "userConfig": {
     "server_url": {
       "type": "string",
@@ -23,5 +29,7 @@
       "type": "http",
       "url": "${user_config.server_url}/mcp"
     }
-  }
+  },
+  "icon": ".claude-plugin/icon.png",
+  "privacyPolicyUrl": "https://virling.com/privacy"
 }
