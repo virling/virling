@@ -683,6 +683,7 @@ impl SiteIndex {
                 self.attr(pv.attrs, COUNTRY),
                 self.attr(pv.attrs, BROWSER),
                 self.attr(pv.attrs, DEVICE),
+                self.attr(pv.attrs, OS),
             )
         });
         visitors::assemble(

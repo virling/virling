@@ -169,6 +169,7 @@ pub struct Timeline {
     /// From the last pageview.
     pub country: Option<String>,
     pub browser: Option<String>,
+    pub os: Option<String>,
     pub device: Option<String>,
 }
 
@@ -488,23 +489,31 @@ pub(crate) fn timeline(
         .query_map(params, payment_row)?
         .collect::<Result<_, _>>()?;
     let mut stmt = conn.prepare(
-        "SELECT country, browser, device FROM events
+        "SELECT country, browser, device, os FROM events
         WHERE site_id = $site AND visitor_id = $visitor AND kind = 'pageview'
         ORDER BY ts DESC LIMIT 1",
     )?;
     let last = stmt
-        .query_map(params, |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))?
+        .query_map(params, |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?)))?
         .next()
         .transpose()?;
     Ok(assemble(visitor_id, events, payments, last))
 }
+
+/// Country, browser, device and OS of the last pageview.
+pub(crate) type LastSeen = (
+    Option<String>,
+    Option<String>,
+    Option<String>,
+    Option<String>,
+);
 
 /// A visitor's events (ordered as the timeline query orders them) and payments as visits.
 pub(crate) fn assemble(
     visitor_id: &str,
     events: Vec<Ev>,
     payments: Vec<PaymentRow>,
-    last: Option<(Option<String>, Option<String>, Option<String>)>,
+    last: Option<LastSeen>,
 ) -> Option<Timeline> {
     if events.is_empty() && payments.is_empty() {
         return None;
@@ -549,13 +558,14 @@ pub(crate) fn assemble(
         }
     }
     entries.sort_by_key(|e| e.ts());
-    let (country, browser, device) = last.unwrap_or((None, None, None));
+    let (country, browser, device, os) = last.unwrap_or_default();
     Some(Timeline {
         visitor_id: visitor_id.to_string(),
         entries,
         payments,
         country,
         browser,
+        os,
         device,
     })
 }

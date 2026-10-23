@@ -6,13 +6,17 @@
     <span class="av lg">{{ avatar|safe }}</span>
     <div class="vt-name">
       <h2>{{ name }}</h2>
-      <span class="j-meta">{% if !country.is_empty() %}{{ flag|safe }}{{ country }}<i class="sep"></i>{% endif %}{% if !browser.is_empty() %}{{ browser }}<i class="sep"></i>{% endif %}First seen {{ first_seen }}<i class="sep"></i>Last seen {{ last_seen }}</span>
+      <span class="j-meta">{% if !country.is_empty() %}{{ flag|safe }}{{ country }}<i class="sep"></i>{% endif %}{% if !device.is_empty() %}{{ device }}<i class="sep"></i>{% endif %}{% if !os.is_empty() %}{{ os_icon|safe }}{{ os }}<i class="sep"></i>{% endif %}{% if !browser.is_empty() %}{{ browser_icon|safe }}{{ browser }}<i class="sep"></i>{% endif %}First seen {{ first_seen }}<i class="sep"></i>Last seen {{ last_seen }}</span>
+      <span class="vt-vid"><span class="mono">{{ visitor_id }}</span><button type="button" class="vt-copy" data-copy-text="{{ visitor_id }}" title="Copy visitor ID" aria-label="Copy visitor ID"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7.5a2 2 0 0 0 2 2h2.5"/></svg></button></span>
     </div>
     {% if paid %}<span class="badge paid-b">Paid</span>{% else %}<span class="badge ref">Not paid</span>{% endif %}
   </div>
+  {% if !summary.is_empty() %}<p class="vt-sum">{{ summary }}</p>{% endif %}
   <div class="vt-stats">
     <div><span class="k">First source</span><b>{{ first_icon|safe }}<span class="lbl">{{ first_source }}</span></b><span class="s">{% if first_channel.is_empty() %}&nbsp;{% else %}{{ first_channel }}{% endif %}</span></div>
-    <div><span class="k">Visits</span><b>{{ visits }}</b><span class="s">{{ pageviews }}</span></div>
+    <div><span class="k">Visits</span><b>{{ visits }}</b><span class="s">&nbsp;</span></div>
+    <div><span class="k">Pageviews</span><b>{{ pageviews }}</b><span class="s">&nbsp;</span></div>
+    <div><span class="k">Time on site</span><b>{{ time_on_site }}</b><span class="s">all visits</span></div>
     <div><span class="k">Goals</span><b>{{ goals }}</b><span class="s">reached</span></div>
     <div class="vt-rev"><span class="k">Lifetime revenue</span>{% if paid %}<b>{{ revenue }}</b>{% else %}<b class="zero">$0</b>{% endif %}<span class="s">{{ payments }}</span></div>
     <div class="vt-exit"><span class="k">Last exit</span><b><span class="lbl">{% if exit.is_empty() %}n/a{% else %}{{ exit }}{% endif %}</span></b><span class="s">&nbsp;</span></div>
@@ -49,7 +53,7 @@
           <li class="st-exit out"><span class="t">{{ time }}</span><span class="p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>Clicked out to {{ icon|safe }}<span class="mono lbl">{{ link }}</span><span class="from">from <span class="mono">{{ page }}</span></span></span><span class="d"></span></li>
           {% endif %}
           {% when StepView::Pay(p) %}
-          <li class="st-pay"><span class="t">{{ p.time }}</span><a class="p" href="{{ p.href }}" data-drawer>{% include "_check.html" %}<b>Paid {{ p.amount }}</b>{% if p.renewal %}<span class="renewal">renewal</span>{% endif %}{% if p.status_class != "ok" %}<span class="badge {{ p.status_class }}">{{ p.status }}</span>{% endif %}{% if !p.refunded.is_empty() %}<span class="dim">{{ p.refunded }} refunded</span>{% endif %}<span class="prov-inline">{{ p.provider_icon|safe }}{{ p.provider }}</span></a><span class="d"></span></li>
+          <li class="st-pay"><span class="t">{{ p.time }}</span><a class="p" href="{{ p.href }}" data-drawer>{% include "_check.html" %}<b>Paid {{ p.amount }}</b>{% if p.renewal %}<span class="renewal">renewal</span>{% endif %}{% if p.status_class != "ok" %}<span class="badge {{ p.status_class }}">{{ p.status }}</span>{% endif %}{% if !p.refunded.is_empty() %}<span class="dim">{{ p.refunded }} refunded</span>{% endif %}<span class="prov-inline">{{ p.provider_icon|safe }}{{ p.provider }}</span><span class="credit-line">{{ p.credit }}</span></a><span class="d"></span></li>
           {% endmatch %}
           {% endfor %}
         </ol>
@@ -58,7 +62,7 @@
     {% when EntryView::Pay(p) %}
     <li class="vt-pay">
       <span class="tl-ico">{% include "_check.html" %}</span>
-      <a class="vt-ph" href="{{ p.href }}" data-drawer><b>Paid {{ p.amount }}</b>{% if p.renewal %}<span class="renewal">renewal</span>{% endif %}{% if p.status_class != "ok" %}<span class="badge {{ p.status_class }}">{{ p.status }}</span>{% endif %}{% if !p.refunded.is_empty() %}<span class="dim">{{ p.refunded }} refunded</span>{% endif %}<span class="prov-inline">{{ p.provider_icon|safe }}{{ p.provider }}</span><span class="grow"></span><span class="dim">{{ p.time }}</span></a>
+      <a class="vt-ph" href="{{ p.href }}" data-drawer><b>Paid {{ p.amount }}</b>{% if p.renewal %}<span class="renewal">renewal</span>{% endif %}{% if p.status_class != "ok" %}<span class="badge {{ p.status_class }}">{{ p.status }}</span>{% endif %}{% if !p.refunded.is_empty() %}<span class="dim">{{ p.refunded }} refunded</span>{% endif %}<span class="prov-inline">{{ p.provider_icon|safe }}{{ p.provider }}</span><span class="credit-line">{{ p.credit }}</span><span class="grow"></span><span class="dim">{{ p.time }}</span></a>
     </li>
     {% endmatch %}
     {% endfor %}
