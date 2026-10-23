@@ -889,6 +889,15 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn sign_in_links_are_rate_limited_per_ip() {
+        let (_dir, state, _store) = setup().await;
+        for i in 0..22 {
+            call(&state, form("/login", format!("email=u{i}%40b.co"), None)).await;
+        }
+        assert_eq!(sent(&state).len(), 20);
+    }
+
+    #[tokio::test]
     async fn waitlist_sends_one_confirmation_with_working_leave_link() {
         let (_dir, state, _store) = setup().await;
         let join = |body: &'static str| {

@@ -1,11 +1,12 @@
 use askama::Template;
 use axum::Form;
-use axum::extract::{FromRequestParts, Query, State};
+use axum::extract::{ConnectInfo, FromRequestParts, Query, State};
 use axum::http::request::Parts;
 use axum::http::{HeaderMap, HeaderValue, header};
 use axum::response::{Html, IntoResponse, Redirect, Response};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
+use std::net::SocketAddr;
 use time::OffsetDateTime;
 
 use crate::app::AppState;
@@ -15,6 +16,7 @@ use crate::waitlist::valid_email;
 const LINK_TTL_SECS: i64 = 15 * 60;
 const SESSION_TTL_SECS: i64 = 30 * 24 * 3600;
 const LINKS_PER_HOUR: i64 = 5;
+const LINKS_PER_IP_HOUR: i64 = 20;
 pub const SESSION_COOKIE: &str = "virling_session";
 
 pub fn random_token() -> String {
@@ -78,7 +80,12 @@ pub struct LoginInput {
     email: String,
 }
 
-pub async fn send_link(State(state): State<AppState>, Form(input): Form<LoginInput>) -> Response {
+pub async fn send_link(
+    State(state): State<AppState>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    Form(input): Form<LoginInput>,
+) -> Response {
     let email = input.email.trim().to_ascii_lowercase();
     if !valid_email(&email) {
         return page(LoginPage {
@@ -95,13 +102,29 @@ pub async fn send_link(State(state): State<AppState>, Form(input): Form<LoginInp
             .fetch_one(&state.db)
             .await
             .unwrap_or(LINKS_PER_HOUR);
-    if recent < LINKS_PER_HOUR {
+    let trust = state.config.trust_proxy;
+    let ip = crate::ingest::client_ip(
+        &headers,
+        peer,
+        trust,
+        crate::ingest::via_cloudflare(peer.ip(), trust),
+    )
+    .to_string();
+    let from_ip: i64 =
+        sqlx::query_scalar("SELECT count(*) FROM login_tokens WHERE ip = ? AND created_at > ?")
+            .bind(&ip)
+            .bind(now() - 3600)
+            .fetch_one(&state.db)
+            .await
+            .unwrap_or(LINKS_PER_IP_HOUR);
+    if recent < LINKS_PER_HOUR && from_ip < LINKS_PER_IP_HOUR {
         let token = random_token();
-        let inserted = sqlx::query("INSERT INTO login_tokens (token_hash, email, created_at, expires_at) VALUES (?, ?, ?, ?)")
+        let inserted = sqlx::query("INSERT INTO login_tokens (token_hash, email, created_at, expires_at, ip) VALUES (?, ?, ?, ?, ?)")
             .bind(hash_token(&token))
             .bind(&email)
             .bind(now())
             .bind(now() + LINK_TTL_SECS)
+            .bind(&ip)
             .execute(&state.db)
             .await;
         if let Err(err) = inserted {
@@ -137,7 +160,7 @@ pub async fn send_link(State(state): State<AppState>, Form(input): Form<LoginInp
             });
         }
     } else {
-        tracing::warn!(%email, "login link rate limit reached");
+        tracing::warn!(%email, %ip, "login link rate limit reached");
     }
     page(LoginPage {
         view: "sent",
