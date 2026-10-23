@@ -144,6 +144,8 @@ pub struct Totals {
     pub revenue_per_visitor: Option<f64>,
     /// Converted customers per visitor; None until a payment is matched.
     pub conversion: Option<f64>,
+    /// Mean seconds from first to last event of visits that began in the period and have two or more events.
+    pub avg_visit_secs: Option<f64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -231,6 +233,8 @@ pub struct BreakdownRow {
     pub customers: u64,
     pub revenue_usd: f64,
     pub revenue_per_visitor: Option<f64>,
+    /// Channel rows only: as `Totals::avg_visit_secs`, over the channel's visits.
+    pub avg_visit_secs: Option<f64>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -457,6 +461,7 @@ fn totals(conn: &Connection, site_id: &str, period: &Period, f: &Filter) -> anyh
     )?;
     let visitors = visitors as u64;
     let some = matched > 0;
+    let visits = visit_times(conn, site_id, period, f)?;
     Ok(Totals {
         visitors,
         sessions: sessions as u64,
@@ -469,7 +474,46 @@ fn totals(conn: &Connection, site_id: &str, period: &Period, f: &Filter) -> anyh
         matched_revenue_usd: matched_usd,
         revenue_per_visitor: ratio(matched_usd, visitors).filter(|_| some),
         conversion: ratio(converted as f64, visitors).filter(|_| some),
+        avg_visit_secs: mean(visits.iter().map(|v| (v.1, v.2))),
     })
+}
+
+/// (channel, seconds, visits) over visits that began in the period and have two or more events.
+fn visit_times(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+    f: &Filter,
+) -> anyhow::Result<Vec<(Option<String>, f64, u64)>> {
+    let (scope, within) = (f.cte(), f.within("t.session_id"));
+    let sql = format!(
+        "WITH {BOUNDS}{scope}
+        SELECT channel, sum(secs), count(*) FROM (
+            SELECT t.channel, epoch(max(e.ts)) - epoch(min(e.ts)) AS secs
+            FROM touches t
+            JOIN events e ON e.site_id = t.site_id AND e.session_id = t.session_id, bounds
+            WHERE t.site_id = $site AND t.ts >= lo AND t.ts < hi{within}
+            GROUP BY t.session_id, t.channel
+            HAVING max(e.ts) > min(e.ts)
+        ) GROUP BY channel"
+    );
+    let mut stmt = conn.prepare(&sql)?;
+    let rows = stmt.query_map(
+        named_params! {
+            "site": site_id,
+            "tz": period.tz,
+            "from": period.from.to_string(),
+            "to": period.to.to_string(),
+        },
+        |r| Ok((r.get(0)?, r.get(1)?, r.get::<_, i64>(2)? as u64)),
+    )?;
+    Ok(rows.collect::<Result<_, _>>()?)
+}
+
+/// Mean of (seconds, visits) sums.
+pub(crate) fn mean(sums: impl Iterator<Item = (f64, u64)>) -> Option<f64> {
+    let (secs, n) = sums.fold((0.0, 0), |a, b| (a.0 + b.0, a.1 + b.1));
+    ratio(secs, n)
 }
 
 pub(crate) fn overview(
@@ -738,10 +782,15 @@ pub(crate) fn breakdown(
             ))
         },
     )?;
-    Ok(breakdown_rows(
-        dimension,
-        rows.collect::<Result<Vec<_>, _>>()?,
-    ))
+    let mut out = breakdown_rows(dimension, rows.collect::<Result<Vec<_>, _>>()?);
+    if dimension == Dimension::Channel {
+        for (key, secs, n) in visit_times(conn, site_id, period, f)? {
+            if let Some(r) = out.iter_mut().find(|r| !r.unattributed && r.key == key) {
+                r.avg_visit_secs = ratio(secs, n);
+            }
+        }
+    }
+    Ok(out)
 }
 
 /// Merges (unattributed, key, visitors, payments, revenue, customers) rows into a sorted breakdown.
@@ -785,6 +834,7 @@ pub(crate) fn breakdown_rows(
                 customers: customers as u64,
                 revenue_usd,
                 revenue_per_visitor: None,
+                avg_visit_secs: None,
             });
         }
     }
@@ -1262,6 +1312,7 @@ pub(crate) fn last_pages(
                 customers: r.get::<_, i64>(4)? as u64,
                 revenue_usd,
                 revenue_per_visitor: ratio(revenue_usd, visitors),
+                avg_visit_secs: None,
             })
         },
     )?;
@@ -2267,6 +2318,31 @@ mod tests {
             .collect();
         assert_eq!(got, [("/pricing", 2, 1, 100.0), ("/compare", 1, 1, 100.0)]);
         assert_eq!(rows[0].revenue_per_visitor, Some(50.0));
+    }
+
+    #[test]
+    fn visit_time_averages_visits_with_two_events() {
+        let (_dir, store) = store();
+        let mut more = visit("v1", "a", T + Duration::minutes(4), "Social");
+        more.path = "/more".into();
+        let mut longer = visit("v2", "b", T + Duration::minutes(10), "Social");
+        longer.path = "/more".into();
+        store
+            .insert_events(&[
+                visit("v1", "a", T, "Social"),
+                more,
+                visit("v2", "b", T, "Social"),
+                longer,
+                visit("v3", "c", T, "Paid"),
+            ])
+            .unwrap();
+        let o = store.overview("s", &period()).unwrap();
+        assert_eq!(o.current.avg_visit_secs, Some(420.0));
+        assert_eq!(o.previous.avg_visit_secs, None);
+        let rows = store.breakdown("s", &period(), Dimension::Channel).unwrap();
+        let secs = |l: &str| rows.iter().find(|r| r.label == l).unwrap().avg_visit_secs;
+        assert_eq!(secs("Social"), Some(420.0));
+        assert_eq!(secs("Paid"), None);
     }
 
     #[test]

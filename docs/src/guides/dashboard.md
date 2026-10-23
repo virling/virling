@@ -8,7 +8,8 @@ The date picker at the top right sets the period for every page: Today, Yesterda
 
 ## Overview
 
-- **Four numbers:** Revenue, New customers, Revenue per visitor and Visitors. Revenue counts on the payment date, so some revenue in a range can come from visits before it.
+- **Five numbers:** Revenue, New customers, Revenue per visitor, Visitors and Avg visit time. Revenue counts on the payment date, so some revenue in a range can come from visits before it.
+- **Avg visit time:** the average time from a visit's first event to its last. A visit ends after 30 minutes without activity. Only visits with two or more events count, so a visitor who views one page and leaves is not averaged in as zero. It shows a dash when no visit in the range has two events.
 - **Revenue chart:** bars for revenue per day, with a dot per day for visitors on the right axis. Hover a bar for the day's payments.
 - **Insight line:** the biggest finding in the period, such as what an AI assistant visitor is worth compared with your average.
 
@@ -18,7 +19,7 @@ Each card lists visitors, revenue and revenue per visitor for every row, with a 
 
 | Card | What it shows | Tabs |
 | --- | --- | --- |
-| Channels | Where visitors came from. Open a channel to see its sources. | Channel, Source, Campaign, Keyword |
+| Channels | Where visitors came from. The Channel tab also shows each channel's average visit time. Open a channel to see its sources. | Channel, Source, Campaign, Keyword |
 | AI | Visits from AI assistants such as ChatGPT, Claude and Perplexity, and the pages AI crawlers read. See [AI crawlers](../track/ai-crawlers.md) and [AI answers](../track/ai-answers.md). | Visits, Answers |
 | Pages | The first page of the visit, or the last page before paying. | Landing page, Before paying |
 | Location | Where visitors are. | Country, City, Language |

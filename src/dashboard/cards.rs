@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use time::OffsetDateTime;
 
-use super::{FilterHref, Opt, group, link, money, usd};
+use super::{FilterHref, Opt, group, link, money, usd, visit_time};
 use crate::channel::source_name;
 use crate::crawlers::{BotHits, by_name};
 use crate::icons;
@@ -204,6 +204,8 @@ pub struct BarRow {
     pub(super) visitors: String,
     pub(super) revenue: String,
     pub(super) per_visitor: String,
+    /// Average visit time, empty on rows under a channel.
+    pub(super) visit: String,
     pub(super) small: bool,
     /// Revenue in range from a visit before it, so no visitors to show.
     pub(super) earlier: bool,
@@ -220,6 +222,8 @@ pub struct BarRow {
 /// One tab's rows; every tab is rendered so switching needs no reload.
 pub struct Panel {
     pub(super) on: bool,
+    /// Shows the average visit time column.
+    pub(super) timed: bool,
     pub(super) head: &'static str,
     pub(super) rows: Vec<BarRow>,
     pub(super) openable: bool,
@@ -602,6 +606,11 @@ fn bar(i: &Item, base: &Base, kid: bool, href: String, id: String) -> BarRow {
         } else {
             "$0".into()
         },
+        visit: if kid {
+            String::new()
+        } else {
+            r.avg_visit_secs.map_or_else(|| "–".into(), visit_time)
+        },
         earlier: r.visitors == 0 && r.revenue_usd > 0.0,
         small: base.warn_small
             && !kid
@@ -699,6 +708,7 @@ fn panel(
     };
     Panel {
         on,
+        timed: tab == Tab::Channel,
         head: tab.head(),
         openable: rows.iter().any(|r| !r.kids.is_empty()),
         rows,
@@ -919,6 +929,7 @@ pub fn ai_card(
                 customers: 0,
                 revenue_usd: 0.0,
                 revenue_per_visitor: None,
+                avg_visit_secs: None,
             },
             name,
             logo,
@@ -1089,6 +1100,7 @@ mod tests {
             customers: 1,
             revenue_usd: revenue,
             revenue_per_visitor: Some(revenue / visitors as f64),
+            avg_visit_secs: None,
         }
     }
 

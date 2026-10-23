@@ -12,7 +12,7 @@ use time::{Date, Duration, OffsetDateTime};
 use super::daterange::{Picked, RangeMenu};
 use super::{
     Ctx, Opt, Shell, answers, blocking, cards, day, delta, encode, goals, group, insight, link,
-    load, money, plural, provider_name, source_of, usd, views,
+    load, money, plural, provider_name, source_of, usd, views, visit_time,
 };
 use crate::alias::Names;
 use crate::app::AppState;
@@ -338,6 +338,10 @@ fn pv_text(t: &Totals) -> String {
     t.revenue_per_visitor.map_or_else(|| "–".into(), usd)
 }
 
+fn time_text(t: &Totals) -> String {
+    t.avg_visit_secs.map_or_else(|| "–".into(), visit_time)
+}
+
 const SYNCING: &str = "Syncing payments…";
 
 /// KPI tiles: against the previous period, the whole site when filtered, or early-data notes on a new site.
@@ -407,6 +411,15 @@ fn kpis(
                 "flat",
                 "of all visitors".into(),
             ),
+            kpi(
+                "Avg visit time",
+                time_text(cur),
+                String::new(),
+                "",
+                all.avg_visit_secs
+                    .map(|a| format!("your average of {}", visit_time(a)))
+                    .unwrap_or_default(),
+            ),
         ];
     }
     if young {
@@ -461,6 +474,13 @@ fn kpis(
                     format!("since the script went live {since_txt}")
                 },
             ),
+            kpi(
+                "Avg visit time",
+                time_text(cur),
+                String::new(),
+                "",
+                "visits with 2 or more events".into(),
+            ),
         ];
     }
     let d = |c: Option<f64>, p: Option<f64>| {
@@ -509,6 +529,14 @@ fn kpis(
             group(cur.visitors),
             d(Some(cur.visitors as f64), Some(prev.visitors as f64)),
             conv(cur),
+        ),
+        tile(
+            "Avg visit time",
+            time_text(cur),
+            d(cur.avg_visit_secs, prev.avg_visit_secs),
+            prev.avg_visit_secs
+                .map(|p| from(visit_time(p)))
+                .unwrap_or_default(),
         ),
     ]
 }

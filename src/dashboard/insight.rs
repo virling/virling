@@ -163,6 +163,7 @@ mod tests {
             customers: 1,
             revenue_usd,
             revenue_per_visitor: Some(revenue_usd / visitors as f64),
+            avg_visit_secs: None,
         }
     }
 

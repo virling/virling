@@ -1,4 +1,4 @@
-{% macro row(r) %}
+{% macro row(r, timed) %}
 <div class="d3-row{% if r.kid %} kid{% endif %}">
   <div class="nmw">
     {% if r.href.is_empty() %}<span class="nm">{% else %}<a class="nm" href="{{ r.href }}" title="Show only {{ r.name }}">{% endif %}
@@ -11,6 +11,7 @@
   <span class="num v">{% if r.earlier %}<span class="early" title="Paid in this range after a visit before it">earlier visit</span>{% else %}{{ r.visitors }}{% endif %}</span>
   <span class="num rv">{{ r.revenue }}</span>
   <span class="num pv">{{ r.per_visitor }}{% if r.small %}<small>small sample</small>{% endif %}</span>
+  {% if timed %}<span class="num tm">{{ r.visit }}</span>{% endif %}
   <span class="x">{% if !r.ratio.is_empty() %}<span class="bdg {{ r.tone }}">{{ r.ratio }}</span>{% endif %}</span>
 </div>
 {% endmacro %}
