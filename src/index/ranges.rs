@@ -12,6 +12,9 @@ const RANGES_KEPT: usize = 32;
 /// Payment rows of a breakdown per column, keyed by (unattributed, value).
 pub(super) type ColumnPays = Vec<HashMap<(bool, u32), Agg>>;
 
+/// Per channel id: summed microseconds and count of visits.
+pub(super) type VisitSums = FastMap<u32, (i64, u64)>;
+
 /// Counts of long ranges kept across appends, updated in place when an append only adds to them.
 #[derive(Default)]
 pub(super) struct Kept {
@@ -23,6 +26,8 @@ pub(super) struct Kept {
     sources: HashMap<(i64, i64), HashMap<(u32, u32), u64>>,
     /// Per (lo, hi): visitors and sessions with an event in range, and which visitors.
     tracked: HashMap<(i64, i64), (u64, u64, Vec<bool>)>,
+    /// Per (lo, hi): visit time sums over every session.
+    pub(super) visits: HashMap<(i64, i64), VisitSums>,
     /// Per (lo, hi): payment rows of every column, until a credited session or the payments change.
     pub(super) tpay: HashMap<(i64, i64), Arc<ColumnPays>>,
 }
@@ -184,6 +189,26 @@ impl SiteIndex {
         }
         kept.tracked.insert((lo, hi), t.clone());
         t
+    }
+
+    /// Moves a session's visit from `old` to `new` in kept visit sums.
+    pub(super) fn kept_visit(
+        &mut self,
+        old: Option<(i64, u32, i64)>,
+        new: Option<(i64, u32, i64)>,
+    ) {
+        if old == new {
+            return;
+        }
+        for (&(lo, hi), sums) in self.kept.get_mut().unwrap().visits.iter_mut() {
+            for (visit, sign) in [(old, -1), (new, 1)] {
+                if let Some((_, c, us)) = visit.filter(|v| v.0 >= lo && v.0 < hi) {
+                    let e = sums.entry(c).or_default();
+                    e.0 += sign * us;
+                    e.1 = e.1.wrapping_add_signed(sign);
+                }
+            }
+        }
     }
 
     /// Adds the newest pageview to kept page counts, or drops them when `add` is false.

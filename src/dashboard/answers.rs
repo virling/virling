@@ -567,6 +567,7 @@ mod tests {
             customers: 1,
             revenue_usd: revenue,
             revenue_per_visitor: None,
+            avg_visit_secs: None,
         }
     }
 

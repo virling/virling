@@ -1277,6 +1277,7 @@ mod tests {
             customers: 1,
             revenue_usd: revenue,
             revenue_per_visitor: (visitors > 0).then(|| revenue / visitors as f64),
+            avg_visit_secs: None,
         }
     }
 

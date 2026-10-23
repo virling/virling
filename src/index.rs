@@ -14,6 +14,7 @@ use crate::stats::{CUSTOMER, Filter, NET_USD, Period};
 mod days;
 pub mod goals;
 mod ranges;
+use ranges::VisitSums;
 pub mod retention;
 pub mod rows;
 
@@ -685,6 +686,7 @@ impl SiteIndex {
             let next = self.sessions.len() as u32;
             let s = *self.session_ids.entry(key(&e.session_id)).or_insert(next);
             let before = self.sessions.get(s as usize).map(|x| (x.first, x.last));
+            let visit = (s != next).then(|| self.visit_of(s)).flatten();
             if s == next {
                 self.sessions.push(Session {
                     visitor: v,
@@ -820,6 +822,8 @@ impl SiteIndex {
                     }
                 }
             }
+            let now = self.visit_of(s);
+            self.kept_visit(visit, now);
         }
         self.days_changed(spans);
     }
@@ -1444,6 +1448,65 @@ impl SiteIndex {
             .collect()
     }
 
+    /// A visit with two or more events as (touch, channel id, microseconds), or None.
+    pub(super) fn visit_of(&self, s: u32) -> Option<(i64, u32, i64)> {
+        let sess = &self.sessions[s as usize];
+        (sess.touch != i64::MAX && sess.last > sess.first)
+            .then(|| (sess.touch, sess.cols[CHANNEL], sess.last - sess.first))
+    }
+
+    /// Per channel id: summed microseconds and count of visits with two or more events that began in [lo, hi).
+    fn visit_times(&self, lo: i64, hi: i64, scope: &Scope) -> VisitSums {
+        let count = || {
+            let from = self
+                .by_touch
+                .partition_point(|&s| self.sessions[s as usize].touch < lo);
+            let to = self
+                .by_touch
+                .partition_point(|&s| self.sessions[s as usize].touch < hi);
+            let mut out = VisitSums::default();
+            for &s in &self.by_touch[from..to] {
+                if let Some((_, c, us)) = self.visit_of(s).filter(|_| scope.has(s)) {
+                    let e = out.entry(c).or_default();
+                    e.0 += us;
+                    e.1 += 1;
+                }
+            }
+            out
+        };
+        if !scope.all() {
+            return (*self.memo(format!("visits {lo} {hi} {}", scope.1), count)).clone();
+        }
+        let mut kept = self.kept.lock().unwrap();
+        if kept.visits.len() >= 32 {
+            kept.visits.clear();
+        }
+        kept.visits.entry((lo, hi)).or_insert_with(count).clone()
+    }
+
+    /// Mean seconds of visits with two or more events that began in [lo, hi).
+    pub fn avg_visit_secs(&self, lo: i64, hi: i64, scope: &Scope) -> Option<f64> {
+        let visits = self.visit_times(lo, hi, scope);
+        crate::stats::mean(visits.values().map(|&(us, n)| (us as f64 / 1e6, n)))
+    }
+
+    /// Mean seconds per channel, as `avg_visit_secs`.
+    pub fn channel_visit_secs(
+        &self,
+        lo: i64,
+        hi: i64,
+        scope: &Scope,
+    ) -> Vec<(Option<String>, f64)> {
+        self.visit_times(lo, hi, scope)
+            .iter()
+            .filter(|(_, v)| v.1 > 0)
+            .map(|(&c, &(us, n))| {
+                let name = self.strings.name(c).map(str::to_string);
+                (name, us as f64 / 1e6 / n as f64)
+            })
+            .collect()
+    }
+
     /// Distinct visitors per path over pageviews in [lo, hi).
     pub fn page_visitors(&self, lo: i64, hi: i64, scope: &Scope) -> Arc<HashMap<u32, i64>> {
         self.memo(format!("pages {lo} {hi} {}", scope.1), || {
@@ -2057,6 +2120,7 @@ pub mod read {
             matched_revenue_usd: matched_usd,
             revenue_per_visitor: ratio(matched_usd, visitors).filter(|_| some),
             conversion: ratio(converted as f64, visitors).filter(|_| some),
+            avg_visit_secs: ix.avg_visit_secs(lo, hi, scope),
         }
     }
 
@@ -2224,7 +2288,15 @@ pub mod read {
                 rows.extend(ix.page_payments(lo, hi, &scope));
             }
         }
-        Ok(Some(breakdown_rows(d, rows)))
+        let mut out = breakdown_rows(d, rows);
+        if d == Dimension::Channel {
+            for (key, secs) in ix.channel_visit_secs(lo, hi, &scope) {
+                if let Some(r) = out.iter_mut().find(|r| !r.unattributed && r.key == key) {
+                    r.avg_visit_secs = Some(secs);
+                }
+            }
+        }
+        Ok(Some(out))
     }
 
     pub fn last_pages(
@@ -2249,6 +2321,7 @@ pub mod read {
                     customers,
                     revenue_usd,
                     revenue_per_visitor: ratio(revenue_usd, visitors),
+                    avg_visit_secs: None,
                 },
             )
             .collect();

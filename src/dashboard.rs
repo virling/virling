@@ -1234,6 +1234,16 @@ pub(crate) fn duration(d: Duration) -> String {
     }
 }
 
+/// "45s", "2m 14s" or "1h 05m"
+pub(crate) fn visit_time(secs: f64) -> String {
+    let n = secs.round() as u64;
+    match n {
+        0..60 => format!("{n}s"),
+        60..3600 => format!("{}m {:02}s", n / 60, n % 60),
+        _ => format!("{}h {:02}m", n / 3600, n % 3600 / 60),
+    }
+}
+
 fn journey_view(j: Journey, names: &Names, domain: &str, offset: UtcOffset) -> JourneyView {
     let p = &j.payment;
     let (status, status_class) = status(&p.status);
@@ -1407,6 +1417,13 @@ mod tests {
         assert_eq!(native(123456, "sek"), "1,235 SEK");
         assert_eq!(money(701.52), "$702");
         assert_eq!(native(500, "jpy"), "¥500");
+    }
+
+    #[test]
+    fn formats_visit_time() {
+        assert_eq!(visit_time(45.4), "45s");
+        assert_eq!(visit_time(134.0), "2m 14s");
+        assert_eq!(visit_time(3900.0), "1h 05m");
     }
 
     #[test]
