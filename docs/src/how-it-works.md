@@ -5,7 +5,7 @@ Virling is one binary that receives events from your site, pulls payments from y
 ## The pieces
 
 1. **The script.** `v.js` runs on your site. On every page load and route change it sends a pageview to `/api/event` on your Virling server, with the page URL, the referrer, the screen width and a visitor ID from a first-party cookie. Goals you call from your code go the same way.
-2. **Ingest.** The server drops bots and foreign hosts, applies the per-site rate limit, sorts each visit into a [channel](attribution/channels.md), groups pageviews into sessions and writes the events to DuckDB.
+2. **Ingest.** The server drops bots and foreign hosts, and keeps automated browsers apart, including Chrome claiming macOS on a screen under 1,024 device pixels, which no Mac has ([details](reference/event-api.md#responses)). Then it applies the per-site rate limit, sorts each visit into a [channel](attribution/channels.md), groups pageviews into sessions and writes the events to DuckDB.
 3. **Payment sync.** With `--app`, a background job polls every connected provider once a minute with a read-only key. The first run imports the last 90 days. Amounts are converted to USD.
 4. **Attribution.** After each sync round, attribution is rebuilt for every site: each payment carrying a visitor ID is matched to that visitor's sessions in the lookback window, and one session gets the credit. See [How attribution works](attribution/index.md).
 5. **The app.** Sign-in, onboarding, the dashboard, the payments list and payment journeys, served at `/app` when you start with `--app`.
