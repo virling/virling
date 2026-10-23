@@ -54,7 +54,7 @@
       <p class="lead">Paste this before <span class="mono">&lt;/head&gt;</span> on every page of <b>{{ domain }}</b>. Under 2 KB, loads async.</p>
     </div>
     <div class="step-body">
-    <div class="code" data-tabs>
+    <div class="code" data-tabs data-prompt="Add the Virling analytics script to my website {{ domain }}. Use the {tab} version below. Put it where the first comment says, on every page, and change nothing else.">
       <div class="code-head">
         <div class="tabs" role="tablist" aria-label="Platform">
           <button role="tab" aria-selected="true" aria-controls="p-html">HTML</button>
@@ -65,7 +65,7 @@
           <button role="tab" aria-selected="false" aria-controls="p-nocode">Framer, Webflow</button>
           <button role="tab" aria-selected="false" aria-controls="p-shopify">Shopify</button>
         </div>
-        <button class="copy" type="button" data-copy>Copy</button>
+        <span class="copies"><button class="copy" type="button" data-copy-prompt>Copy prompt</button><button class="copy" type="button" data-copy>Copy</button></span>
       </div>
       <pre id="p-html" role="tabpanel">&lt;script defer src="{{ script_host }}/v.js"
   data-site="{{ domain }}"&gt;&lt;/script&gt;</pre>

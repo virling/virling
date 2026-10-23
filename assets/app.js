@@ -65,13 +65,21 @@ for (const select of document.querySelectorAll("[data-select]")) {
 for (const box of document.querySelectorAll("[data-tabs]")) {
   const tabs = [...box.querySelectorAll("[role=tab]")];
   const copy = box.querySelector("[data-copy]");
+  const prompt = box.querySelector("[data-copy-prompt]");
   tabs.forEach((tab) => tab.addEventListener("click", () => {
     tabs.forEach((t) => {
       t.setAttribute("aria-selected", String(t === tab));
       document.getElementById(t.getAttribute("aria-controls")).hidden = t !== tab;
     });
     if (copy) copy.textContent = "Copy";
+    if (prompt) prompt.textContent = "Copy prompt";
   }));
+  prompt?.addEventListener("click", async () => {
+    const tab = box.querySelector("[role=tab][aria-selected=true]").textContent;
+    const intro = box.dataset.prompt.replace("{tab}", tab);
+    await navigator.clipboard.writeText(intro + "\n\n" + box.querySelector("pre:not([hidden])").textContent.trim());
+    prompt.textContent = "Copied";
+  });
   copy?.addEventListener("click", async () => {
     const lines = box.querySelector("pre:not([hidden])").textContent.split("\n");
     const code = lines.filter((l) => !/^\s*(\/\/|<!--|\s+before|\s+Webflow)/.test(l)).join("\n").trim();
