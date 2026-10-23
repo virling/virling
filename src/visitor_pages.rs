@@ -566,6 +566,8 @@ pub struct PayStep {
     refunded: String,
     provider_icon: String,
     provider: &'static str,
+    /// "Credited to Google by visitor ID", or "Not attributed".
+    credit: String,
     href: String,
 }
 
@@ -600,7 +602,14 @@ struct VisitorPage {
     payments: String,
     flag: String,
     country: String,
+    device: String,
+    os_icon: String,
+    os: String,
+    browser_icon: String,
     browser: String,
+    visitor_id: String,
+    summary: String,
+    time_on_site: String,
     first_seen: String,
     last_seen: String,
     first_icon: String,
@@ -619,6 +628,17 @@ fn stay(secs: i64) -> String {
         s @ 0..60 => format!("{s}s"),
         s @ 60..3600 => format!("{}m {:02}s", s / 60, s % 60),
         s => format!("{}h {:02}m", s / 3600, s % 3600 / 60),
+    }
+}
+
+/// A visit's length from its first to its last event; a dash when it has one event.
+fn length(len: Duration) -> String {
+    if len <= Duration::ZERO {
+        "–".into()
+    } else if len < Duration::minutes(1) {
+        "under a minute".into()
+    } else {
+        duration(len)
     }
 }
 
@@ -644,6 +664,11 @@ fn pay_step(p: &PaymentRow, domain: &str, time: String) -> PayStep {
         },
         provider_icon: icons::provider(&p.provider, 14),
         provider: provider_short(&p.provider),
+        credit: match (&p.touch, &p.visitor_id) {
+            (Some(t), Some(_)) => format!("Credited to {} by visitor ID", t.source),
+            (Some(t), None) => format!("Credited to {} through the customer", t.source),
+            (None, _) => "Not attributed".into(),
+        },
         href: format!(
             "{}/{}/{}",
             sites::app_path(domain, "payments"),
@@ -666,11 +691,7 @@ fn timeline_view(t: &Timeline, domain: &str, offset: UtcOffset) -> Vec<EntryView
                 EntryView::Visit(VisitView {
                     n,
                     date: local(v.start, offset),
-                    length: if len < Duration::minutes(1) {
-                        "under a minute".into()
-                    } else {
-                        duration(len)
-                    },
+                    length: length(len),
                     icon: icons::source(&v.source, 16),
                     channel: if v.channel == v.source {
                         String::new()
@@ -760,9 +781,49 @@ pub async fn timeline(
         })
         .next()
         .unwrap_or_default();
+    let on_site = visits
+        .iter()
+        .fold(Duration::ZERO, |a, v| a + (v.end - v.start));
+    let landing = first
+        .and_then(|v| {
+            v.steps.iter().find_map(|s| match s {
+                Step::Page { path, .. } => Some(path.clone()),
+                _ => None,
+            })
+        })
+        .unwrap_or_default();
+    let leaving = visits
+        .iter()
+        .rev()
+        .flat_map(|v| v.steps.iter().rev())
+        .find_map(|s| match s {
+            Step::Exit { page, link, .. } => Some(match link {
+                Some(l) => format!("clicked out to {l}"),
+                None => format!("leaving from {page}"),
+            }),
+            _ => None,
+        });
     let revenue: f64 = t.payments.iter().filter_map(|p| p.net_usd).sum();
     let last = visits.last().map(|v| v.end);
     let now = OffsetDateTime::now_utc();
+    let first_source = first.map(|v| v.source.clone()).unwrap_or_default();
+    let mut summary = format!("First came from {first_source}");
+    if let Some(v) = first.filter(|v| v.channel != v.source) {
+        summary += &format!(" ({})", v.channel);
+    }
+    if !landing.is_empty() {
+        summary += &format!(", landed on {landing}");
+    }
+    if let (Some(l), Some(at)) = (leaving, last) {
+        summary += &format!(". Last seen {l} {}", ago(at, now));
+    }
+    summary += &format!(". {}", plural(visits.len() as u64, "visit"));
+    if on_site > Duration::ZERO {
+        summary += &format!(", {} on site in total", stay(on_site.whole_seconds()));
+    }
+    summary += ".";
+    let known = |s: &Option<String>| s.clone().filter(|s| s != "Unknown").unwrap_or_default();
+    let (browser, os, device) = (known(&t.browser), known(&t.os), known(&t.device));
     let key = match t.payments.first() {
         Some(p) => payer_key(p),
         None => format!("v:{}", t.visitor_id),
@@ -781,10 +842,29 @@ pub async fn timeline(
         payments: plural(t.payments.len() as u64, "payment"),
         flag: t.country.as_deref().map(icons::flag).unwrap_or_default(),
         country: t.country.as_deref().map(icons::country).unwrap_or_default(),
-        browser: match (&t.browser, &t.device) {
-            (Some(b), Some(d)) if d != "Unknown" => format!("{b} on {d}"),
-            (Some(b), _) => b.clone(),
-            _ => String::new(),
+        device,
+        os_icon: if os.is_empty() {
+            String::new()
+        } else {
+            icons::ua(&os)
+        },
+        os,
+        browser_icon: if browser.is_empty() {
+            String::new()
+        } else {
+            icons::ua(&browser)
+        },
+        browser,
+        visitor_id: t.visitor_id.clone(),
+        summary: if first.is_some() {
+            summary
+        } else {
+            String::new()
+        },
+        time_on_site: if on_site > Duration::ZERO {
+            stay(on_site.whole_seconds())
+        } else {
+            "–".into()
         },
         first_seen: first
             .map(|v| day(v.start.to_offset(ctx.offset).date()))
@@ -793,13 +873,13 @@ pub async fn timeline(
         first_icon: first
             .map(|v| icons::source(&v.source, 16))
             .unwrap_or_default(),
-        first_source: first.map(|v| v.source.clone()).unwrap_or_default(),
+        first_source,
         first_channel: first
             .filter(|v| v.channel != v.source)
             .map(|v| v.channel.clone())
             .unwrap_or_default(),
         visits: group(visits.len() as u64),
-        pageviews: plural(pageviews, "pageview"),
+        pageviews: group(pageviews),
         goals: group(goals),
         exit: last_exit,
         entries: timeline_view(&t, &ctx.site.domain, ctx.offset),
@@ -816,6 +896,13 @@ mod tests {
         assert_eq!(stay(45), "45s");
         assert_eq!(stay(125), "2m 05s");
         assert_eq!(stay(3720), "1h 02m");
+    }
+
+    #[test]
+    fn visit_length_is_a_dash_when_unknown() {
+        assert_eq!(length(Duration::ZERO), "–");
+        assert_eq!(length(Duration::seconds(30)), "under a minute");
+        assert_eq!(length(Duration::minutes(5)), "5 minutes");
     }
 
     #[test]

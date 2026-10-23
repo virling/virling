@@ -1218,7 +1218,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn one_pageview_is_singular() {
+    async fn one_pageview_counts_as_one() {
         let (_dir, state, _store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;
         let vid = "0b7c2d1e-aaaa-bbbb-cccc-1234567890ab";
@@ -1229,7 +1229,7 @@ mod tests {
         let uri = format!("/app/example.com/visitors/{vid}");
         let body = body_text(call(&state, get(&uri, Some(&cookie))).await).await;
         assert!(
-            body.contains(r#"<span class="s">1 pageview</span>"#),
+            body.contains(r#"<span class="k">Pageviews</span><b>1</b>"#),
             "{body}"
         );
     }
