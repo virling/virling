@@ -8,7 +8,7 @@ Add the [script](track/script.md) to your site, connect your payment provider wi
 
 ## Is Virling free and open source?
 
-Yes. Virling is licensed under AGPL-3.0 and self-hosting is free. The hosted plan is <span class="na">Not available yet</span>.
+Yes. Virling is licensed under AGPL-3.0 and self-hosting is free. The hosted plan is <span class="na">Not available yet</span>, but you can hold a founding spot on the [Hosted plan](hosted.md) page.
 
 ## Do ad blockers block Virling?
 
