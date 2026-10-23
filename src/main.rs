@@ -208,6 +208,22 @@ struct ServeArgs {
     /// Add-on billed for each Agency user past the 3 included
     #[arg(long, env = "VIRLING_DODO_SEAT_ADDON")]
     dodo_seat_addon: Option<String>,
+    /// Personal at the founding price, $11.40 a month
+    #[arg(long, env = "VIRLING_DODO_PERSONAL_FOUNDING_PRODUCT")]
+    dodo_personal_founding_product: Option<String>,
+    /// Agency at the founding price, $29 a month
+    #[arg(long, env = "VIRLING_DODO_AGENCY_FOUNDING_PRODUCT")]
+    dodo_agency_founding_product: Option<String>,
+    /// virling.com lookup of founding pre-orders by email
+    #[arg(
+        long,
+        env = "VIRLING_FOUNDERS_URL",
+        default_value = "https://virling.com/api/founders"
+    )]
+    founders_url: String,
+    /// Bearer token for the founders lookup, the worker's FOUNDERS_TOKEN
+    #[arg(long, env = "VIRLING_FOUNDERS_TOKEN", hide_env_values = true)]
+    founders_token: Option<String>,
 }
 
 #[tokio::main]
@@ -260,6 +276,16 @@ async fn main() -> anyhow::Result<()> {
                         personal: need(args.dodo_personal_product, "--dodo-personal-product")?,
                         agency: need(args.dodo_agency_product, "--dodo-agency-product")?,
                         seat: need(args.dodo_seat_addon, "--dodo-seat-addon")?,
+                        personal_founding: need(
+                            args.dodo_personal_founding_product,
+                            "--dodo-personal-founding-product",
+                        )?,
+                        agency_founding: need(
+                            args.dodo_agency_founding_product,
+                            "--dodo-agency-founding-product",
+                        )?,
+                        founders_url: args.founders_url,
+                        founders_token: need(args.founders_token, "--founders-token")?,
                     })
                 }
                 Some(_) => anyhow::bail!("--dodo-api-key needs --hosted"),

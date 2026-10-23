@@ -33,7 +33,7 @@
         <label><input type="radio" name="plan" value="agency"{% if shell.agency %} checked{% endif %}>Agency</label>
       </div>
     </div>
-    <div class="actions end"><span class="muted small">{{ b.detail }}</span><button class="btn" type="submit">{% if b.trial %}Start 14-day trial{% else %}Subscribe{% endif %}</button></div>
+    <div class="actions end"><span class="muted small">{{ b.detail }}</span><button class="btn" type="submit">{{ b.button }}</button></div>
   </form>
   {% else %}
   <div class="setting">
@@ -43,7 +43,7 @@
       {% if b.cancelling %}
       <form method="post" action="/app/{{ shell.domain }}/account/billing/resume"><button class="btn" type="submit">Keep my plan</button></form>
       {% else %}
-      <form method="post" action="/app/{{ shell.domain }}/account/billing/cancel"><button class="btn ghost" type="submit">{% if b.state == "trial" %}Cancel trial{% else %}Cancel plan{% endif %}</button></form>
+      <form method="post" action="/app/{{ shell.domain }}/account/billing/cancel"><button class="btn ghost" type="submit">{{ b.button }}</button></form>
       {% endif %}
     </div>
   </div>
