@@ -93,7 +93,7 @@ fn now() -> i64 {
 /// The account of a valid, unrevoked API key.
 pub async fn key_account(db: &SqlitePool, key: &str) -> Option<String> {
     let row: Option<(String, String, Option<i64>)> = sqlx::query_as(
-        "SELECT id, account_id, last_used_at FROM api_keys WHERE key_hash = ? AND revoked_at IS NULL",
+        "SELECT k.id, k.account_id, k.last_used_at FROM api_keys k JOIN accounts a ON a.id = k.account_id WHERE k.key_hash = ? AND k.revoked_at IS NULL AND a.suspended_at IS NULL",
     )
     .bind(hash_token(key))
     .fetch_optional(db)

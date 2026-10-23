@@ -741,7 +741,7 @@ async fn refresh(db: &SqlitePool, client: &str, p: &TokenParams) -> Issued {
 /// The account of a live access token issued for this server's MCP endpoint.
 async fn token_account(state: &AppState, token: &str) -> Option<String> {
     let row: Option<(String, String, String, Option<i64>)> = sqlx::query_as(
-        "SELECT id, account_id, resource, last_used_at FROM oauth_grants WHERE access_hash = ? AND access_expires_at > ? AND revoked_at IS NULL",
+        "SELECT g.id, g.account_id, g.resource, g.last_used_at FROM oauth_grants g JOIN accounts a ON a.id = g.account_id WHERE g.access_hash = ? AND g.access_expires_at > ? AND g.revoked_at IS NULL AND a.suspended_at IS NULL",
     )
     .bind(hash_token(token))
     .bind(now())

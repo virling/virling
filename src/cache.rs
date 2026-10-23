@@ -175,6 +175,16 @@ impl<S: EventStore> EventStore for Cached<S> {
         self.inner.settled(site_id)
     }
 
+    fn events_today(&self) -> anyhow::Result<Vec<(String, u64)>> {
+        self.inner.events_today()
+    }
+
+    fn purge_site(&self, site_id: &str) -> anyhow::Result<()> {
+        let result = self.inner.purge_site(site_id);
+        self.changed([site_id]);
+        result
+    }
+
     fn generation(&self, site_id: &str) -> u64 {
         let state = self.state.lock().unwrap();
         state.generations.get(site_id).copied().unwrap_or(0)

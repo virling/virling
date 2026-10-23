@@ -100,6 +100,10 @@ pub trait EventStore: Send + Sync {
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64>;
     /// The first pageview of the newest visitor, as the dashboard shows that visitor.
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>>;
+    /// Events per site in the last 24 hours.
+    fn events_today(&self) -> anyhow::Result<Vec<(String, u64)>>;
+    /// Removes everything stored for the site.
+    fn purge_site(&self, site_id: &str) -> anyhow::Result<()>;
     /// When the site's first event arrived.
     fn first_event(&self, site_id: &str) -> anyhow::Result<Option<OffsetDateTime>>;
     /// Bumped on every write to the site; 0 for stores that do not count writes.
@@ -1255,6 +1259,23 @@ impl EventStore for DuckStore {
             |r| r.get(0),
         )?;
         Ok(us.map(stats::from_micros))
+    }
+
+    fn events_today(&self) -> anyhow::Result<Vec<(String, u64)>> {
+        let conn = self.reader()?;
+        let mut stmt = conn.prepare(
+            "SELECT site_id, count(*) FROM events WHERE ts > now() - INTERVAL 1 DAY GROUP BY site_id",
+        )?;
+        let rows = stmt.query_map([], |r| Ok((r.get(0)?, r.get::<_, i64>(1)? as u64)))?;
+        Ok(rows.collect::<Result<_, _>>()?)
+    }
+
+    fn purge_site(&self, site_id: &str) -> anyhow::Result<()> {
+        let _gate = self.index.gate();
+        let conn = self.conn.lock().unwrap();
+        flush_touches(&mut self.touch_conn.lock().unwrap(), &self.pending)?;
+        self.index.forget(site_id);
+        crate::purge::site(&conn, site_id)
     }
 
     fn insert_bots(&self, bots: &[(Event, &str)]) -> anyhow::Result<()> {

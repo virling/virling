@@ -1,0 +1,6 @@
+{% if !prev.is_empty() || !next.is_empty() %}
+<div class="adm-pager">
+  {% if !prev.is_empty() %}<a class="btn secondary" href="{{ prev }}">Newer</a>{% endif %}
+  {% if !next.is_empty() %}<a class="btn secondary" href="{{ next }}">Older</a>{% endif %}
+</div>
+{% endif %}

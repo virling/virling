@@ -1,3 +1,4 @@
+mod admin;
 mod alias;
 mod animals;
 mod answers;
@@ -27,6 +28,7 @@ mod mcp;
 mod oauth;
 mod onboarding;
 mod providers;
+mod purge;
 mod query;
 mod retention;
 mod retention_page;
@@ -149,6 +151,18 @@ struct ServeArgs {
         default_value = "Rahul at Virling <hello@virling.com>"
     )]
     waitlist_from: String,
+    /// Emails allowed into /admin, comma separated. Unset: no admin panel.
+    #[arg(long, env = "VIRLING_ADMINS")]
+    admins: Option<String>,
+    /// Resend API key for beta invite emails from the admin panel
+    #[arg(long, env = "RESEND_API_KEY", hide_env_values = true)]
+    resend_key: Option<String>,
+    /// URL of the website's beta applications feed, listed in the admin panel
+    #[arg(long, env = "VIRLING_APPLICATIONS_URL")]
+    applications_url: Option<String>,
+    /// Bearer token for the applications feed
+    #[arg(long, env = "VIRLING_APPLICATIONS_TOKEN", hide_env_values = true)]
+    applications_token: Option<String>,
     /// OpenAI key for AI answers on every site
     #[arg(long, env = "VIRLING_OPENAI_KEY", hide_env_values = true)]
     openai_key: Option<String>,
@@ -224,7 +238,13 @@ async fn main() -> anyhow::Result<()> {
             let mailer = mail::Mailer::new(args.smtp_url.as_deref(), &args.mail_from)?;
             let vault = crypto::Vault::load(&cli.data_dir, args.secret_key.as_deref())?;
             let app_enabled = config.app;
-            let state = AppState::new(config, db, Arc::new(events), mailer, vault);
+            let mut state = AppState::new(config, db, Arc::new(events), mailer, vault);
+            state.admin = Arc::new(admin::Settings::new(
+                args.admins.as_deref(),
+                args.resend_key,
+                args.applications_url,
+                args.applications_token,
+            ));
             if app_enabled {
                 tokio::spawn(sync::run(state.clone()));
                 tokio::spawn(answers::run(state.clone()));

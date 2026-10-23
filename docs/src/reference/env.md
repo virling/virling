@@ -20,6 +20,10 @@ Every setting can be given as a flag or an environment variable. See [CLI](cli.m
 | `VIRLING_ANTHROPIC_KEY` | unset | Anthropic key for Claude in AI answers. |
 | `VIRLING_PERPLEXITY_KEY` | unset | Perplexity key for AI answers. |
 | `VIRLING_GEMINI_KEY` | unset | Google Gemini key for AI answers. |
+| `VIRLING_ADMINS` | unset | Comma separated emails allowed into the [admin panel](../self-host/admin.md). Unset: no admin panel. |
+| `RESEND_API_KEY` | unset | Resend API key for beta invite emails sent from the admin panel. |
+| `VIRLING_APPLICATIONS_URL` | unset | URL of the website's beta applications feed, listed in the admin panel. |
+| `VIRLING_APPLICATIONS_TOKEN` | unset | Bearer token for the applications feed. |
 | `VIRLING_AI_ANSWERS_BUDGET_USD` | unset | Estimated USD a month after which AI answer runs pause until the next month. Unset: no cap. |
 | `RUST_LOG` | `info` | Log level and filter, such as `debug` or `virling=debug`. |
 
