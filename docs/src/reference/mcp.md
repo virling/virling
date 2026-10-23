@@ -91,7 +91,13 @@ In a session, `/plugin marketplace add virling/virling` and `/plugin install vir
 
 ## Other clients
 
-Any client that speaks the Streamable HTTP transport and can send a header works. Point it at `/mcp` with the `Authorization` header above. Virling answers each request with one JSON response; it does not open event streams or keep sessions, and `GET /mcp` returns `405`. It speaks MCP 2026-07-28, which has no `initialize` and starts with `server/discover`, and the earlier revisions from 2025-03-26 to 2025-11-25.
+Any client that speaks the Streamable HTTP transport and can send a header works. Point it at `/mcp` with the `Authorization` header above. Virling answers each request with one JSON response; it does not open event streams or keep sessions, and `GET /mcp` returns `405`.
+
+Virling speaks MCP 2026-07-28 and the earlier revisions from 2025-03-26 to 2025-11-25:
+
+- **2026-07-28.** There is no `initialize` and no session. Each request carries `io.modelcontextprotocol/protocolVersion` in `params._meta`, and the same version in the `MCP-Protocol-Version` header. Send `Mcp-Method` with the method, and on `tools/call` send `Mcp-Name` with the tool name. A missing or different header gets `400` with error `-32020`. `server/discover` returns the supported versions, capabilities and instructions. Results carry `resultType` and `serverInfo` in `_meta`, `tools/list` can be cached for an hour (`ttlMs`), and an unknown method gets `404` with `-32601`.
+- **2025-11-25 and earlier.** Start with `initialize` as before. Virling answers with the version you asked for, or 2025-11-25 if it does not know that version.
+- A version Virling does not support, in `_meta` or in the header, gets `400` with error `-32022` and the supported versions in `error.data.supported`.
 
 ## Tools
 
