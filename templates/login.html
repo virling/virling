@@ -21,7 +21,7 @@
       <input type="hidden" name="email" value="{{ email }}">
       {% if let Some(key) = turnstile %}
       <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-      <div class="cf-turnstile" data-sitekey="{{ key }}"></div>
+      <div class="cf-turnstile" data-sitekey="{{ key }}" data-appearance="interaction-only" data-size="flexible"></div>
       {% endif %}
       <button class="btn secondary" type="submit">Send it again</button>
     </form>
@@ -61,7 +61,7 @@
       </label>
       {% if let Some(key) = turnstile %}
       <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-      <div class="cf-turnstile" data-sitekey="{{ key }}"></div>
+      <div class="cf-turnstile" data-sitekey="{{ key }}" data-appearance="interaction-only" data-size="flexible"></div>
       {% endif %}
       <button class="btn lg block" type="submit">Email me a sign-in link</button>
     </form>
