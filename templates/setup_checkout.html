@@ -13,14 +13,14 @@
       <p class="lead">Pass the visitor ID from the <span class="mono">virling_vid</span> cookie into checkout. That is how a payment is credited to the visit that brought it. Payments without it still count, as Unattributed.</p>
     </div>
     <div class="step-body">
-    <div class="code" data-tabs>
+    <div class="code" data-tabs data-prompt="In the server code of {{ domain }} that creates a {tab} checkout, pass the visitor ID from the virling_vid cookie as shown below. Change nothing else.">
       <div class="code-head">
         <div class="tabs" role="tablist" aria-label="Payment provider">
           {% for (key, name, on) in tabs %}
           <button role="tab" aria-selected="{{ on }}" aria-controls="c-{{ key }}">{{ name }}</button>
           {% endfor %}
         </div>
-        <button class="copy" type="button" data-copy>Copy</button>
+        <span class="copies"><button class="copy" type="button" data-copy-prompt>Copy prompt</button><button class="copy" type="button" data-copy>Copy</button></span>
       </div>
       {% for (key, _name, on) in tabs %}
       <pre id="c-{{ key }}" role="tabpanel"{% if !on %} hidden{% endif %}>{% if key == &"stripe" %}// Stripe Checkout (Node, stripe): pass the visitor ID on the session

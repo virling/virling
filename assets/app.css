@@ -153,6 +153,7 @@ h1, h2, h3 { margin: 0; letter-spacing: -0.03em; }
 .code .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
 .code .tabs button { height: 32px; padding: 0 12px; border: 0; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; background: transparent; color: var(--ink-4); }
 .code .tabs button[aria-selected=true] { background: var(--ink-hover); color: var(--on-ink); }
+.code .copies { display: flex; gap: 8px; }
 .code .copy { height: 32px; padding: 0 10px; border: 1px solid #2e333c; border-radius: 8px; background: transparent; color: #c9cdd4; font-size: 13px; cursor: pointer; }
 .code pre { margin: 0; padding: 20px; color: #e6e8eb; font: 14px/1.7 var(--mono); overflow-x: auto; }
 .code pre[hidden] { display: none; }
