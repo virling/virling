@@ -18,6 +18,8 @@ use crate::auth::Account;
 use crate::sites::{self, app_path};
 
 pub const TRIAL_DAYS: i64 = 14;
+/// The first month a founding pre-order already paid for.
+const FOUNDER_MONTH: Duration = Duration::days(30);
 const REMIND_BEFORE: Duration = Duration::days(3);
 const TOLERANCE_SECS: i64 = 5 * 60;
 const INTERVAL: std::time::Duration = std::time::Duration::from_secs(3600);
@@ -32,13 +34,21 @@ pub struct Dodo {
     pub agency: String,
     /// The add-on for each Agency user past the included ones.
     pub seat: String,
+    /// Products at the founding price, for the first 50 customers of each plan.
+    pub personal_founding: String,
+    pub agency_founding: String,
+    /// The virling.com lookup of founding pre-orders by email, and its bearer token.
+    pub founders_url: String,
+    pub founders_token: String,
 }
 
 /// Monthly price in cents of a plan with `extra` paid seats.
-pub fn price(product: &str, extra: i64) -> i64 {
-    match product {
-        "agency" => 7900 + 900 * extra,
-        _ => 1900,
+pub fn price(product: &str, extra: i64, founding: bool) -> i64 {
+    match (product, founding) {
+        ("agency", false) => 7900 + 900 * extra,
+        ("agency", true) => 2900 + 900 * extra,
+        (_, false) => 1900,
+        (_, true) => 1140,
     }
 }
 
@@ -62,11 +72,12 @@ pub struct Billing {
     pub renews_at: Option<i64>,
     pub cancelling: bool,
     pub extra_seats: i64,
+    pub founding: bool,
 }
 
 pub async fn load(db: &sqlx::SqlitePool, account_id: &str) -> sqlx::Result<Option<Billing>> {
     sqlx::query_as(
-        "SELECT subscription_id, customer_id, status, product, trial_ends_at, renews_at, cancelling, extra_seats
+        "SELECT subscription_id, customer_id, status, product, trial_ends_at, renews_at, cancelling, extra_seats, founding
          FROM billing WHERE account_id = ?",
     )
     .bind(account_id)
@@ -246,9 +257,11 @@ async fn subscription(
     sub: &Sub,
     at: i64,
 ) -> anyhow::Result<()> {
-    let product = match sub.product_id.as_str() {
-        p if p == dodo.agency => "agency",
-        p if p == dodo.personal => "personal",
+    let (product, founding) = match sub.product_id.as_str() {
+        p if p == dodo.agency => ("agency", false),
+        p if p == dodo.personal => ("personal", false),
+        p if p == dodo.agency_founding => ("agency", true),
+        p if p == dodo.personal_founding => ("personal", true),
         _ => return Ok(()),
     };
     let account = match sub.metadata.get("account_id").and_then(Value::as_str) {
@@ -290,12 +303,13 @@ async fn subscription(
         .map(|a| a.quantity)
         .sum();
     sqlx::query(
-        "INSERT INTO billing (account_id, subscription_id, customer_id, status, product, trial_ends_at, renews_at, cancelling, extra_seats, event_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        "INSERT INTO billing (account_id, subscription_id, customer_id, status, product, trial_ends_at, renews_at, cancelling, extra_seats, event_at, founding)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT (account_id) DO UPDATE SET subscription_id = excluded.subscription_id,
            customer_id = excluded.customer_id, status = excluded.status, product = excluded.product,
            trial_ends_at = excluded.trial_ends_at, renews_at = excluded.renews_at,
-           cancelling = excluded.cancelling, extra_seats = excluded.extra_seats, event_at = excluded.event_at",
+           cancelling = excluded.cancelling, extra_seats = excluded.extra_seats, event_at = excluded.event_at,
+           founding = excluded.founding",
     )
     .bind(&account)
     .bind(&sub.subscription_id)
@@ -307,10 +321,21 @@ async fn subscription(
     .bind(sub.cancel_at_next_billing_date)
     .bind(extra)
     .bind(at)
+    .bind(founding)
     .execute(&mut *tx)
     .await?;
+    let prepaid: Option<i64> =
+        sqlx::query_scalar("SELECT founder_until FROM accounts WHERE id = ?")
+            .bind(&account)
+            .fetch_one(&mut *tx)
+            .await?;
+    let plan = match plan(&sub.status, trial, at) {
+        "trialing" | "paid" if founding => "founding",
+        "cancelled" if prepaid.is_some_and(|t| at < t) => "founding",
+        p => p,
+    };
     sqlx::query("UPDATE accounts SET plan = ?, account_type = ? WHERE id = ?")
-        .bind(plan(&sub.status, trial, at))
+        .bind(plan)
         .bind(product)
         .bind(&account)
         .execute(&mut *tx)
@@ -338,11 +363,12 @@ async fn call(state: &AppState, method: Method, path: &str, body: Value) -> anyh
 }
 
 /// The cart for a plan: Agency carries one seat add-on per user past the included ones.
-fn cart(dodo: &Dodo, product: &str, extra: i64) -> Value {
-    let id = if product == "agency" {
-        &dodo.agency
-    } else {
-        &dodo.personal
+fn cart(dodo: &Dodo, product: &str, extra: i64, founding: bool) -> Value {
+    let id = match (product, founding) {
+        ("agency", false) => &dodo.agency,
+        ("agency", true) => &dodo.agency_founding,
+        (_, false) => &dodo.personal,
+        (_, true) => &dodo.personal_founding,
     };
     let mut item = json!({ "product_id": id, "quantity": 1 });
     if product == "agency" && extra > 0 {
@@ -396,51 +422,78 @@ pub struct View {
     pub headline: String,
     pub detail: String,
     pub cancelling: bool,
-    /// Whether choosing a plan starts the 14-day trial.
-    pub trial: bool,
+    /// The label of the button that starts a plan, or of the one that cancels it.
+    pub button: &'static str,
 }
 
 pub async fn view(db: &sqlx::SqlitePool, account_id: &str, now: i64) -> sqlx::Result<View> {
     let b = load(db, account_id).await?;
+    let (founder, prepaid): (Option<String>, Option<i64>) =
+        sqlx::query_as("SELECT founder, founder_until FROM accounts WHERE id = ?")
+            .bind(account_id)
+            .fetch_one(db)
+            .await?;
     let Some(b) = b.clone().filter(live) else {
+        let (headline, detail, button) = match (&founder, prepaid.filter(|t| now < *t), &b) {
+            (Some(f), Some(until), _) => (
+                format!("Founding {} spot", crate::dashboard::plan_label(f)),
+                format!(
+                    "Your first month is paid until {}. Add a card to keep {} a month for life after that.",
+                    date(until),
+                    crate::dashboard::money(price(f, 0, true) as f64 / 100.0)
+                ),
+                "Add card",
+            ),
+            (_, _, None) => (
+                "Start your 14-day trial".to_string(),
+                "$0 today. Cancel anytime before day 15.".to_string(),
+                "Start 14-day trial",
+            ),
+            _ => (
+                "Choose a plan".to_string(),
+                "Your trial is used, so the first month is charged today.".to_string(),
+                "Subscribe",
+            ),
+        };
         return Ok(View {
             state: "none",
-            headline: if b.is_none() {
-                "Start your 14-day trial".into()
-            } else {
-                "Choose a plan".into()
-            },
-            detail: if b.is_none() {
-                "$0 today. Cancel anytime before day 15.".into()
-            } else {
-                "Your trial is used, so the first month is charged today.".into()
-            },
+            headline,
+            detail,
             cancelling: false,
-            trial: b.is_none(),
+            button,
         });
     };
-    let name = crate::dashboard::plan_label(&b.product);
-    let amount = crate::dashboard::money(price(&b.product, b.extra_seats) as f64 / 100.0);
-    let (state, headline, detail) = match plan(&b.status, b.trial_ends_at, now) {
+    let name = match b.founding {
+        true => format!("Founding {}", crate::dashboard::plan_label(&b.product)),
+        false => crate::dashboard::plan_label(&b.product).to_string(),
+    };
+    let amount =
+        crate::dashboard::money(price(&b.product, b.extra_seats, b.founding) as f64 / 100.0);
+    let (state, headline, detail, button) = match plan(&b.status, b.trial_ends_at, now) {
         "trialing" => {
             let ends = b.trial_ends_at.unwrap_or(now);
             let left = days_left(ends, now);
             (
                 "trial",
-                format!(
-                    "{name} trial, {left} day{} left",
-                    if left == 1 { "" } else { "s" }
-                ),
+                match b.founding {
+                    true => format!("{name}, first month paid"),
+                    false => format!(
+                        "{name} trial, {left} day{} left",
+                        if left == 1 { "" } else { "s" }
+                    ),
+                },
                 if b.cancelling {
-                    format!(
-                        "Your trial ends on {}. Nothing will be charged.",
-                        date(ends)
-                    )
+                    format!("Ends on {}. Nothing will be charged.", date(ends))
                 } else {
                     format!(
                         "First charge {amount} on {}. Cancel anytime before then and nothing is charged.",
                         date(ends)
                     )
+                },
+                if b.founding {
+                    "Cancel plan"
+                } else {
+                    "Cancel trial"
                 },
             )
         }
@@ -454,12 +507,14 @@ pub async fn view(db: &sqlx::SqlitePool, account_id: &str, now: i64) -> sqlx::Re
                 } else {
                     format!("Renews on {on}.")
                 },
+                "Cancel plan",
             )
         }
         _ => (
             "past_due",
             format!("{name}, payment failed"),
             "The last charge didn't go through. Update your card to keep your plan.".into(),
+            "Cancel plan",
         ),
     };
     Ok(View {
@@ -467,8 +522,80 @@ pub async fn view(db: &sqlx::SqlitePool, account_id: &str, now: i64) -> sqlx::Re
         headline,
         detail,
         cancelling: b.cancelling,
-        trial: false,
+        button,
     })
+}
+
+/// Links a founding pre-order bought on virling.com with the same email: plan 'founding' and a paid first month.
+pub async fn link_founder(state: AppState, account_id: String) {
+    let linked = async {
+        let Some(dodo) = &state.config.billing else {
+            return anyhow::Ok(());
+        };
+        let (email, founder): (String, Option<String>) =
+            sqlx::query_as("SELECT email, founder FROM accounts WHERE id = ?")
+                .bind(&account_id)
+                .fetch_one(&state.db)
+                .await?;
+        if founder.is_some() || load(&state.db, &account_id).await?.is_some() {
+            return Ok(());
+        }
+        let resp = state
+            .http
+            .get(&dodo.founders_url)
+            .query(&[("email", &email)])
+            .bearer_auth(&dodo.founders_token)
+            .send()
+            .await?
+            .error_for_status()?;
+        #[derive(Deserialize)]
+        struct Found {
+            founders: Vec<Spot>,
+        }
+        #[derive(Deserialize)]
+        struct Spot {
+            plan: String,
+        }
+        let found: Found = resp.json().await?;
+        let Some(plan) = found
+            .founders
+            .iter()
+            .map(|s| s.plan.as_str())
+            .find(|p| *p == "agency")
+            .or_else(|| found.founders.first().map(|s| s.plan.as_str()))
+            .filter(|p| matches!(*p, "agency" | "personal"))
+        else {
+            return Ok(());
+        };
+        sqlx::query(
+            "UPDATE accounts SET founder = ?, founder_until = ?, plan = 'founding', account_type = ?
+             WHERE id = ? AND founder IS NULL",
+        )
+        .bind(plan)
+        .bind(now() + FOUNDER_MONTH.whole_seconds())
+        .bind(plan)
+        .bind(&account_id)
+        .execute(&state.db)
+        .await?;
+        Ok(())
+    }
+    .await;
+    if let Err(err) = linked {
+        tracing::error!(%err, account = %account_id, "looking up a founding spot failed");
+    }
+}
+
+/// Ends the founding plan of founders whose paid month ran out without a card on file.
+pub async fn expire_founders(db: &sqlx::SqlitePool, now: i64) -> sqlx::Result<()> {
+    sqlx::query(
+        "UPDATE accounts SET plan = 'cancelled' WHERE plan = 'founding' AND founder_until <= ?
+           AND id NOT IN (SELECT account_id FROM billing
+                          WHERE status IN ('active', 'past_due', 'on_hold', 'paused'))",
+    )
+    .bind(now)
+    .execute(db)
+    .await?;
+    Ok(())
 }
 
 #[derive(Deserialize)]
@@ -495,22 +622,28 @@ pub async fn start(
         if old.as_ref().is_some_and(live) {
             return Ok(None);
         }
-        let email: String = sqlx::query_scalar("SELECT email FROM accounts WHERE id = ?")
-            .bind(&account.id)
-            .fetch_one(&state.db)
-            .await?;
+        let (email, founder, prepaid): (String, Option<String>, Option<i64>) =
+            sqlx::query_as("SELECT email, founder, founder_until FROM accounts WHERE id = ?")
+                .bind(&account.id)
+                .fetch_one(&state.db)
+                .await?;
         let dodo = state
             .config
             .billing
             .as_ref()
             .expect("checked in owner_page");
         let extra = extra_seats(&state.db, &account.id).await?;
+        let founding = founder.as_deref() == Some(input.plan.as_str());
+        // A founder's prepaid month runs as the trial, so the first charge comes when it ends.
+        let days = match (founding, old.is_some()) {
+            (true, _) => days_left(prepaid.unwrap_or(0), now()),
+            (false, true) => 0,
+            (false, false) => TRIAL_DAYS,
+        };
         let body = json!({
-            "product_cart": [cart(dodo, &input.plan, extra)],
+            "product_cart": [cart(dodo, &input.plan, extra, founding)],
             "customer": { "email": email },
-            "subscription_data": {
-                "trial_period_days": if old.is_some() { 0 } else { TRIAL_DAYS }
-            },
+            "subscription_data": { "trial_period_days": days },
             "return_url": format!("{}{page}?billing=started#plan", state.config.base_url),
             "metadata": { "account_id": account.id },
         });
@@ -632,7 +765,7 @@ pub async fn change_plan(state: &AppState, account_id: &str, product: &str) -> a
     } else {
         0
     };
-    let item = cart(dodo, product, extra);
+    let item = cart(dodo, product, extra, b.founding && b.product == product);
     call(
         state,
         Method::POST,
@@ -677,10 +810,13 @@ pub struct Email<'a> {
     pub button: &'a str,
 }
 
+/// Account, email, product, extra seats, first charge, founding and the first site's domain.
+type DueRow = (String, String, String, i64, i64, bool, Option<String>);
+
 /// Emails each trial 3 days before its first charge, with the date and amount.
 pub async fn remind(state: &AppState, now: i64) -> anyhow::Result<()> {
-    let due: Vec<(String, String, String, i64, i64, Option<String>)> = sqlx::query_as(
-        "SELECT b.account_id, a.email, b.product, b.extra_seats, b.trial_ends_at,
+    let due: Vec<DueRow> = sqlx::query_as(
+        "SELECT b.account_id, a.email, b.product, b.extra_seats, b.trial_ends_at, b.founding,
                 (SELECT domain FROM sites WHERE account_id = a.id ORDER BY created_at LIMIT 1)
          FROM billing b JOIN accounts a ON a.id = b.account_id
          WHERE b.status = 'active' AND NOT b.cancelling AND NOT b.reminded
@@ -690,24 +826,37 @@ pub async fn remind(state: &AppState, now: i64) -> anyhow::Result<()> {
     .bind(now + REMIND_BEFORE.whole_seconds())
     .fetch_all(&state.db)
     .await?;
-    for (account, email, product, extra, ends, domain) in due {
+    for (account, email, product, extra, ends, founding, domain) in due {
         let (day, amount) = (
             date(ends),
-            crate::dashboard::money(price(&product, extra) as f64 / 100.0),
+            crate::dashboard::money(price(&product, extra, founding) as f64 / 100.0),
         );
         let name = crate::dashboard::plan_label(&product);
         let link = match domain {
             Some(d) => format!("{}{}#plan", state.config.base_url, app_path(&d, "account")),
             None => format!("{}/app", state.config.base_url),
         };
-        let lines = [
-            format!(
-                "Your 14-day trial of Virling {name} ends on {day}. That day your card is charged {amount} for the first month, then {amount} each month."
-            ),
-            "To stop it, open Account settings and click Cancel trial before then. Nothing is charged if you cancel.".to_string(),
-        ];
+        let lines = if founding {
+            [
+                format!(
+                    "Your paid founding month of Virling {name} ends on {day}. That day your card is charged {amount}, your founding price, then {amount} each month."
+                ),
+                "To stop it, open Account settings and click Cancel plan before then. Nothing is charged if you cancel.".to_string(),
+            ]
+        } else {
+            [
+                format!(
+                    "Your 14-day trial of Virling {name} ends on {day}. That day your card is charged {amount} for the first month, then {amount} each month."
+                ),
+                "To stop it, open Account settings and click Cancel trial before then. Nothing is charged if you cancel.".to_string(),
+            ]
+        };
         let html = Email {
-            heading: "Your trial ends in 3 days",
+            heading: if founding {
+                "Your first charge is in 3 days"
+            } else {
+                "Your trial ends in 3 days"
+            },
             lines: &lines,
             link: &link,
             button: "Open billing",
@@ -718,7 +867,11 @@ pub async fn remind(state: &AppState, now: i64) -> anyhow::Result<()> {
             .mailer
             .send(
                 &email,
-                &format!("Your Virling trial ends on {day}"),
+                &if founding {
+                    format!("Your first Virling charge is on {day}")
+                } else {
+                    format!("Your Virling trial ends on {day}")
+                },
                 text,
                 html,
             )
@@ -735,6 +888,9 @@ pub async fn run(state: AppState) {
     loop {
         if let Err(err) = remind(&state, now()).await {
             tracing::error!(%err, "sending trial reminders failed");
+        }
+        if let Err(err) = expire_founders(&state.db, now()).await {
+            tracing::error!(%err, "ending founding months failed");
         }
         tokio::time::sleep(INTERVAL).await;
     }
@@ -769,12 +925,22 @@ mod tests {
             async move {
                 let method = req.method().to_string();
                 let uri = req.uri().to_string();
+                let bearer = req.headers()["authorization"].to_str().unwrap().to_string();
                 let bytes = axum::body::to_bytes(req.into_body(), usize::MAX)
                     .await
                     .unwrap();
                 let body: Value = serde_json::from_slice(&bytes).unwrap_or(Value::Null);
                 seen.lock().unwrap().push((method, uri.clone(), body));
-                let reply = if uri == "/checkouts" {
+                let reply = if uri.starts_with("/api/founders") {
+                    assert_eq!(bearer, "Bearer founders_test");
+                    match uri.as_str() {
+                        "/api/founders?email=owner%40agency.com" => {
+                            json!({ "founders": [{ "plan": "agency", "number": 7 }] })
+                        }
+                        _ => json!({ "founders": [] }),
+                    }
+                } else if uri == "/checkouts" {
+                    assert_eq!(bearer, "Bearer test_key");
                     json!({ "session_id": "cks_1", "checkout_url": "https://test.checkout.dodopayments.com/session/cks_1" })
                 } else if uri.contains("customer-portal") {
                     json!({ "link": "https://customer.dodopayments.com/portal/1" })
@@ -816,6 +982,7 @@ mod tests {
             .await
             .unwrap();
         let (url, calls) = mock().await;
+        let founders_url = format!("{url}/api/founders");
         let config = Config {
             marketing: false,
             app: true,
@@ -833,6 +1000,10 @@ mod tests {
                 personal: "pdt_personal".into(),
                 agency: "pdt_agency".into(),
                 seat: "adn_seat".into(),
+                personal_founding: "pdt_personal_founding".into(),
+                agency_founding: "pdt_agency_founding".into(),
+                founders_url,
+                founders_token: "founders_test".into(),
             }),
         };
         let store =
@@ -984,8 +1155,10 @@ mod tests {
         }
         assert_eq!(days_left(NOV_1 + 9 * DAY - 60, NOV_1), 9);
         assert_eq!(days_left(NOV_1 - 1, NOV_1), 0);
-        assert_eq!(price("agency", 2), 9700);
-        assert_eq!(price("personal", 0), 1900);
+        assert_eq!(price("agency", 2, false), 9700);
+        assert_eq!(price("personal", 0, false), 1900);
+        assert_eq!(price("agency", 1, true), 3800);
+        assert_eq!(price("personal", 0, true), 1140);
     }
 
     #[tokio::test]
@@ -1088,7 +1261,7 @@ mod tests {
         assert!(v.cancelling);
         assert_eq!(
             v.detail,
-            "Your trial ends on November 15, 2026. Nothing will be charged."
+            "Ends on November 15, 2026. Nothing will be charged."
         );
         remind(&t.state, NOV_1 + 12 * DAY).await.unwrap();
         assert!(mails(&t).is_empty(), "no reminder after cancelling");
@@ -1108,7 +1281,7 @@ mod tests {
         let v = view(&t.state.db, &t.account, NOV_1 + 15 * DAY)
             .await
             .unwrap();
-        assert_eq!((v.state, v.trial), ("none", false));
+        assert_eq!((v.state, v.button), ("none", "Subscribe"));
         post(&t, "/app/agency.com/account/billing", "plan=personal").await;
         let (_, uri, body) = t.calls.lock().unwrap()[1].clone();
         assert_eq!(uri, "/checkouts");
@@ -1247,5 +1420,131 @@ mod tests {
         assert!(uri.starts_with(
             "/customers/cus_1/customer-portal/session?return_url=https%3A%2F%2Fapp.virling.com"
         ));
+    }
+
+    async fn founder_until(t: &T) -> Option<i64> {
+        sqlx::query_scalar("SELECT founder_until FROM accounts WHERE id = ?")
+            .bind(&t.account)
+            .fetch_one(&t.state.db)
+            .await
+            .unwrap()
+    }
+
+    #[tokio::test]
+    async fn founders_link_by_email_and_keep_their_price() {
+        let t = setup().await;
+        link_founder(t.state.clone(), t.account.clone()).await;
+        assert_eq!(plan_of(&t).await, ("founding".into(), "agency".into()));
+        let until = founder_until(&t).await.unwrap();
+        assert!(
+            (until - now() - 30 * DAY).abs() < 60,
+            "the prepaid month starts at sign-up"
+        );
+        link_founder(t.state.clone(), t.account.clone()).await;
+        assert_eq!(t.calls.lock().unwrap().len(), 1, "looked up once");
+
+        let v = view(&t.state.db, &t.account, now()).await.unwrap();
+        assert_eq!((v.state, v.button), ("none", "Add card"));
+        assert_eq!(v.headline, "Founding Agency spot");
+        assert!(
+            v.detail.contains("Add a card to keep $29 a month for life"),
+            "{}",
+            v.detail
+        );
+
+        post(&t, "/app/agency.com/account/billing", "plan=agency").await;
+        let (_, uri, body) = t.calls.lock().unwrap()[1].clone();
+        assert_eq!(uri, "/checkouts");
+        assert_eq!(body["product_cart"][0]["product_id"], "pdt_agency_founding");
+        assert_eq!(
+            body["subscription_data"]["trial_period_days"], 30,
+            "no charge for the paid month"
+        );
+
+        let start = until - 30 * DAY;
+        let active = hook(&t, "subscription.active", start, |d| {
+            d["product_id"] = json!("pdt_agency_founding");
+            d["trial_period_days"] = json!(30);
+            d["next_billing_date"] = json!(rfc(until));
+        });
+        send(&t, "msg_1", active).await;
+        assert_eq!(plan_of(&t).await.0, "founding");
+        let v = view(&t.state.db, &t.account, start + DAY).await.unwrap();
+        assert_eq!(v.headline, "Founding Agency, first month paid");
+        assert!(v.detail.starts_with("First charge $29 on"), "{}", v.detail);
+
+        remind(&t.state, until - 3 * DAY).await.unwrap();
+        let (_, subject, text) = mails(&t)[0].clone();
+        assert!(
+            subject.starts_with("Your first Virling charge is on"),
+            "{subject}"
+        );
+        assert!(text.contains("charged $29, your founding price"), "{text}");
+
+        let renewed = hook(&t, "subscription.renewed", until, |d| {
+            d["product_id"] = json!("pdt_agency_founding");
+            d["next_billing_date"] = json!(rfc(until + 30 * DAY));
+        });
+        send(&t, "msg_2", renewed).await;
+        assert_eq!(plan_of(&t).await.0, "founding");
+        assert!(
+            crate::answers::paid(&t.state, &site(&t).await)
+                .await
+                .unwrap()
+        );
+    }
+
+    async fn site(t: &T) -> String {
+        sqlx::query_scalar("SELECT id FROM sites WHERE account_id = ?")
+            .bind(&t.account)
+            .fetch_one(&t.state.db)
+            .await
+            .unwrap()
+    }
+
+    #[tokio::test]
+    async fn other_emails_are_not_founders() {
+        let t = setup().await;
+        let other = sites::find_or_create_account(&t.state.db, "someone@else.com")
+            .await
+            .unwrap();
+        link_founder(t.state.clone(), other.clone()).await;
+        let plan: String = sqlx::query_scalar("SELECT plan FROM accounts WHERE id = ?")
+            .bind(&other)
+            .fetch_one(&t.state.db)
+            .await
+            .unwrap();
+        assert_eq!(plan, "self_hosted");
+        send(&t, "msg_1", hook(&t, "subscription.active", NOV_1, |_| {})).await;
+        link_founder(t.state.clone(), t.account.clone()).await;
+        assert_eq!(
+            plan_of(&t).await.0,
+            "trialing",
+            "a subscribed account is not looked up"
+        );
+        assert_eq!(t.calls.lock().unwrap().len(), 1);
+        assert!(
+            !crate::answers::paid(&t.state, &site(&t).await)
+                .await
+                .unwrap(),
+            "trials skip AI answers"
+        );
+    }
+
+    #[tokio::test]
+    async fn founding_month_ends_without_a_card() {
+        let t = setup().await;
+        link_founder(t.state.clone(), t.account.clone()).await;
+        let until = founder_until(&t).await.unwrap();
+        expire_founders(&t.state.db, until - 1).await.unwrap();
+        assert_eq!(plan_of(&t).await.0, "founding");
+        let cancelled = hook(&t, "subscription.cancelled", until - 5 * DAY, |d| {
+            d["product_id"] = json!("pdt_agency_founding");
+            d["status"] = json!("cancelled");
+        });
+        send(&t, "msg_1", cancelled).await;
+        assert_eq!(plan_of(&t).await.0, "founding", "the paid month still runs");
+        expire_founders(&t.state.db, until).await.unwrap();
+        assert_eq!(plan_of(&t).await.0, "cancelled");
     }
 }

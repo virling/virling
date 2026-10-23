@@ -207,6 +207,9 @@ pub async fn verify(
     };
     let started = async {
         let account = sites::find_or_create_account(&state.db, &email).await?;
+        if state.config.billing.is_some() {
+            tokio::spawn(crate::billing::link_founder(state.clone(), account.clone()));
+        }
         start_session(&state, &account).await
     }
     .await;
