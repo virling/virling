@@ -91,7 +91,7 @@ In a session, `/plugin marketplace add virling/virling` and `/plugin install vir
 
 ## Other clients
 
-Any client that speaks the Streamable HTTP transport and can send a header works. Point it at `/mcp` with the `Authorization` header above. Virling answers each request with one JSON response; it does not open event streams or keep sessions, and `GET /mcp` returns `405`.
+Any client that speaks the Streamable HTTP transport and can send a header works. Point it at `/mcp` with the `Authorization` header above. Virling answers each request with one JSON response; it does not open event streams or keep sessions, and `GET /mcp` returns `405`. It speaks MCP 2026-07-28, which has no `initialize` and starts with `server/discover`, and the earlier revisions from 2025-03-26 to 2025-11-25.
 
 ## Tools
 

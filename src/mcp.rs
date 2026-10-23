@@ -11,8 +11,9 @@ use crate::api::{
 };
 use crate::app::AppState;
 
-/// Newest first; the first is answered when a client asks for one we do not know.
-const VERSIONS: [&str; 3] = ["2025-11-25", "2025-06-18", "2025-03-26"];
+/// Newest first; the first is the stateless revision, the rest use `initialize`.
+const VERSIONS: [&str; 4] = ["2026-07-28", "2025-11-25", "2025-06-18", "2025-03-26"];
+const META_VERSION: &str = "io.modelcontextprotocol/protocolVersion";
 
 const INSTRUCTIONS: &str = "Virling links website visits to payments, so every report shows revenue, not only traffic. \
 Start with list_sites. Use get_overview for totals and change, get_breakdown for revenue by channel, referrer, campaign, page, country or device, \
@@ -26,36 +27,67 @@ pub async fn post(
     headers: HeaderMap,
     body: Bytes,
 ) -> Response {
-    if let Some(v) = headers
-        .get("mcp-protocol-version")
-        .and_then(|v| v.to_str().ok())
-        && !VERSIONS.contains(&v)
-        && v != "2024-11-05"
-    {
-        return (
-            StatusCode::BAD_REQUEST,
-            format!("unsupported MCP-Protocol-Version {v}"),
-        )
-            .into_response();
-    }
     let msg: Value = match serde_json::from_slice(&body) {
         Ok(v) => v,
         Err(_) => return Json(error(Value::Null, -32700, "parse error")).into_response(),
     };
+    let header = |name: &str| headers.get(name).and_then(|v| v.to_str().ok());
+    let id = msg.get("id").cloned().unwrap_or(Value::Null);
+    let meta = msg["params"]["_meta"][META_VERSION].as_str();
+    if let Some(v) = meta.or(header("mcp-protocol-version"))
+        && !VERSIONS.contains(&v)
+        && v != "2024-11-05"
+    {
+        let e = json!({ "jsonrpc": "2.0", "id": id, "error": { "code": -32022, "message": "Unsupported protocol version",
+            "data": { "supported": VERSIONS, "requested": v } } });
+        return (StatusCode::BAD_REQUEST, Json(e)).into_response();
+    }
+    let modern = meta.is_some() || header("mcp-protocol-version") == Some(VERSIONS[0]);
+    if modern {
+        let method = msg["method"].as_str();
+        let checks = [
+            (
+                "MCP-Protocol-Version",
+                header("mcp-protocol-version"),
+                Some(meta.unwrap_or_default()),
+            ),
+            ("Mcp-Method", header("mcp-method"), method),
+            (
+                "Mcp-Name",
+                header("mcp-name"),
+                (method == Some("tools/call"))
+                    .then(|| msg["params"]["name"].as_str().unwrap_or_default()),
+            ),
+        ];
+        if let Some((name, got, want)) = checks
+            .iter()
+            .find(|(_, got, want)| want.is_some() && got != want)
+        {
+            let (got, want) = (got.unwrap_or("missing"), want.unwrap_or_default());
+            let message = format!("Header mismatch: {name} is '{got}', the body has '{want}'");
+            return (StatusCode::BAD_REQUEST, Json(error(id, -32020, &message))).into_response();
+        }
+    }
     let replies: Vec<Value> = match msg {
         Value::Array(batch) => {
             let mut out = Vec::new();
             for m in batch {
-                out.extend(handle(&state, &key.id, m).await);
+                out.extend(handle(&state, &key.id, m, false).await);
             }
             if out.is_empty() {
                 return StatusCode::ACCEPTED.into_response();
             }
             return Json(Value::Array(out)).into_response();
         }
-        m => handle(&state, &key.id, m).await.into_iter().collect(),
+        m => handle(&state, &key.id, m, modern)
+            .await
+            .into_iter()
+            .collect(),
     };
     match replies.into_iter().next() {
+        Some(r) if modern && r["error"]["code"] == -32601 => {
+            (StatusCode::NOT_FOUND, Json(r)).into_response()
+        }
         Some(r) => Json(r).into_response(),
         None => StatusCode::ACCEPTED.into_response(),
     }
@@ -65,8 +97,12 @@ fn error(id: Value, code: i64, message: &str) -> Value {
     json!({ "jsonrpc": "2.0", "id": id, "error": { "code": code, "message": message } })
 }
 
+fn server_info() -> Value {
+    json!({ "name": "virling", "title": "Virling", "version": env!("CARGO_PKG_VERSION") })
+}
+
 /// One message's reply; None for notifications and responses.
-async fn handle(state: &AppState, account: &str, msg: Value) -> Option<Value> {
+async fn handle(state: &AppState, account: &str, msg: Value, modern: bool) -> Option<Value> {
     let Some(method) = msg["method"].as_str() else {
         let response =
             msg.get("id").is_some() && (msg.get("result").is_some() || msg.get("error").is_some());
@@ -75,21 +111,29 @@ async fn handle(state: &AppState, account: &str, msg: Value) -> Option<Value> {
     };
     let id = msg.get("id")?.clone();
     let params = &msg["params"];
-    let result = match method {
+    let mut result = match method {
         "initialize" => {
             let asked = params["protocolVersion"].as_str().unwrap_or_default();
-            let version = VERSIONS
-                .iter()
-                .find(|v| **v == asked)
-                .unwrap_or(&VERSIONS[0]);
+            let legacy = &VERSIONS[1..];
+            let version = legacy.iter().find(|v| **v == asked).unwrap_or(&legacy[0]);
             json!({
                 "protocolVersion": version,
                 "capabilities": { "tools": {} },
-                "serverInfo": { "name": "virling", "title": "Virling", "version": env!("CARGO_PKG_VERSION") },
+                "serverInfo": server_info(),
                 "instructions": INSTRUCTIONS,
             })
         }
+        "server/discover" => json!({
+            "supportedVersions": VERSIONS,
+            "capabilities": { "tools": {} },
+            "instructions": INSTRUCTIONS,
+            "ttlMs": 3_600_000,
+            "cacheScope": "private",
+        }),
         "ping" => json!({}),
+        "tools/list" if modern => {
+            json!({ "tools": tools(), "ttlMs": 3_600_000, "cacheScope": "private" })
+        }
         "tools/list" => json!({ "tools": tools() }),
         "tools/call" => {
             let name = params["name"].as_str().unwrap_or_default();
@@ -112,6 +156,10 @@ async fn handle(state: &AppState, account: &str, msg: Value) -> Option<Value> {
         }
         _ => return Some(error(id, -32601, &format!("method not found: {method}"))),
     };
+    if modern || method == "server/discover" {
+        result["resultType"] = json!("complete");
+        result["_meta"] = json!({ "io.modelcontextprotocol/serverInfo": server_info() });
+    }
     Some(json!({ "jsonrpc": "2.0", "id": id, "result": result }))
 }
 
@@ -300,11 +348,23 @@ mod tests {
     use crate::app::router;
 
     async fn rpc(state: &AppState, key: Option<&str>, body: Value) -> (StatusCode, Value) {
+        rpc_with(state, key, &[], body).await
+    }
+
+    async fn rpc_with(
+        state: &AppState,
+        key: Option<&str>,
+        headers: &[(&str, &str)],
+        body: Value,
+    ) -> (StatusCode, Value) {
         let mut req = Request::post("/mcp")
             .header("content-type", "application/json")
             .header("accept", "application/json, text/event-stream");
         if let Some(k) = key {
             req = req.header("authorization", format!("Bearer {k}"));
+        }
+        for (k, v) in headers {
+            req = req.header(*k, *v);
         }
         let res = router(state.clone())
             .oneshot(req.body(Body::from(body.to_string())).unwrap())
@@ -338,7 +398,7 @@ mod tests {
         assert_eq!(r["result"]["serverInfo"]["name"], "virling");
         assert!(r["result"]["capabilities"]["tools"].is_object());
         let (_, r) = rpc(&f.state, Some(&f.key), json!({ "jsonrpc": "2.0", "id": 2, "method": "initialize", "params": { "protocolVersion": "1999-01-01" } })).await;
-        assert_eq!(r["result"]["protocolVersion"], VERSIONS[0]);
+        assert_eq!(r["result"]["protocolVersion"], "2025-11-25");
 
         let (code, _) = rpc(
             &f.state,
@@ -393,6 +453,176 @@ mod tests {
         )
         .await;
         assert_eq!(r["result"], json!({}));
+    }
+
+    /// A 2026-07-28 request: version and client in `_meta`, mirrored in headers.
+    async fn modern(
+        f: &crate::api::tests::Fixture,
+        method: &str,
+        mut params: Value,
+    ) -> (StatusCode, Value) {
+        params["_meta"] = json!({ "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+            "io.modelcontextprotocol/clientInfo": { "name": "t", "version": "1" }, "io.modelcontextprotocol/clientCapabilities": {} });
+        let name = params["name"].as_str().unwrap_or_default().to_string();
+        let mut headers = vec![
+            ("mcp-protocol-version", "2026-07-28"),
+            ("mcp-method", method),
+        ];
+        if !name.is_empty() {
+            headers.push(("mcp-name", &name));
+        }
+        let body = json!({ "jsonrpc": "2.0", "id": 1, "method": method, "params": params });
+        rpc_with(&f.state, Some(&f.key), &headers, body).await
+    }
+
+    #[tokio::test]
+    async fn serves_the_stateless_revision() {
+        let f = fixture().await;
+        let (code, r) = modern(&f, "server/discover", json!({})).await;
+        assert_eq!(code, StatusCode::OK);
+        assert_eq!(r["result"]["supportedVersions"], json!(VERSIONS));
+        assert_eq!(r["result"]["resultType"], "complete");
+        assert!(r["result"]["capabilities"]["tools"].is_object());
+        assert_eq!(
+            r["result"]["_meta"]["io.modelcontextprotocol/serverInfo"]["name"],
+            "virling"
+        );
+
+        let (_, r) = modern(&f, "tools/list", json!({})).await;
+        assert_eq!(r["result"]["tools"].as_array().unwrap().len(), 7);
+        assert_eq!(r["result"]["resultType"], "complete");
+        assert_eq!(r["result"]["cacheScope"], "private");
+        assert!(r["result"]["ttlMs"].as_u64().unwrap() > 0);
+
+        let (code, r) = modern(
+            &f,
+            "tools/call",
+            json!({ "name": "list_sites", "arguments": {} }),
+        )
+        .await;
+        assert_eq!(code, StatusCode::OK);
+        assert_eq!(r["result"]["isError"], false);
+        assert_eq!(r["result"]["resultType"], "complete");
+
+        let (code, r) = modern(&f, "resources/list", json!({})).await;
+        assert_eq!(
+            (code, r["error"]["code"].clone()),
+            (StatusCode::NOT_FOUND, json!(-32601))
+        );
+    }
+
+    #[tokio::test]
+    async fn rejects_bad_versions_and_headers() {
+        let f = fixture().await;
+        let meta = |v: &str| json!({ "_meta": { "io.modelcontextprotocol/protocolVersion": v } });
+        let list = |params: Value| json!({ "jsonrpc": "2.0", "id": 7, "method": "tools/list", "params": params });
+        let key = Some(f.key.as_str());
+
+        let (code, r) = rpc_with(
+            &f.state,
+            key,
+            &[
+                ("mcp-protocol-version", "2099-01-01"),
+                ("mcp-method", "tools/list"),
+            ],
+            list(meta("2099-01-01")),
+        )
+        .await;
+        assert_eq!(code, StatusCode::BAD_REQUEST);
+        assert_eq!(r["id"], 7);
+        assert_eq!(r["error"]["code"], -32022);
+        assert_eq!(r["error"]["data"]["supported"][0], "2026-07-28");
+        assert_eq!(r["error"]["data"]["requested"], "2099-01-01");
+        let (code, r) = rpc_with(
+            &f.state,
+            key,
+            &[("mcp-protocol-version", "2099-01-01")],
+            list(json!({})),
+        )
+        .await;
+        assert_eq!(
+            (code, r["error"]["code"].clone()),
+            (StatusCode::BAD_REQUEST, json!(-32022))
+        );
+
+        for (headers, params) in [
+            (vec![("mcp-method", "tools/list")], meta("2026-07-28")),
+            (
+                vec![
+                    ("mcp-protocol-version", "2026-07-28"),
+                    ("mcp-method", "tools/list"),
+                ],
+                json!({}),
+            ),
+            (
+                vec![
+                    ("mcp-protocol-version", "2025-11-25"),
+                    ("mcp-method", "tools/list"),
+                ],
+                meta("2026-07-28"),
+            ),
+            (
+                vec![
+                    ("mcp-protocol-version", "2026-07-28"),
+                    ("mcp-method", "tools/call"),
+                ],
+                meta("2026-07-28"),
+            ),
+            (
+                vec![("mcp-protocol-version", "2026-07-28")],
+                meta("2026-07-28"),
+            ),
+        ] {
+            let (code, r) = rpc_with(&f.state, key, &headers, list(params)).await;
+            assert_eq!(
+                (code, r["error"]["code"].clone()),
+                (StatusCode::BAD_REQUEST, json!(-32020)),
+                "{headers:?}"
+            );
+        }
+        let mut call = call(8, "list_sites", json!({}));
+        call["params"]["_meta"] = meta("2026-07-28")["_meta"].clone();
+        let headers = [
+            ("mcp-protocol-version", "2026-07-28"),
+            ("mcp-method", "tools/call"),
+            ("mcp-name", "get_overview"),
+        ];
+        let (code, r) = rpc_with(&f.state, key, &headers, call).await;
+        assert_eq!(
+            (code, r["error"]["code"].clone()),
+            (StatusCode::BAD_REQUEST, json!(-32020))
+        );
+    }
+
+    #[tokio::test]
+    async fn older_clients_still_initialize() {
+        let f = fixture().await;
+        let key = Some(f.key.as_str());
+        let init = json!({ "jsonrpc": "2.0", "id": 1, "method": "initialize", "params": { "protocolVersion": "2026-07-28" } });
+        let (_, r) = rpc_with(
+            &f.state,
+            key,
+            &[("mcp-protocol-version", "2025-11-25")],
+            init,
+        )
+        .await;
+        assert_eq!(r["result"]["protocolVersion"], "2025-11-25");
+        let list = json!({ "jsonrpc": "2.0", "id": 2, "method": "tools/list" });
+        let (code, r) = rpc_with(
+            &f.state,
+            key,
+            &[("mcp-protocol-version", "2025-11-25")],
+            list,
+        )
+        .await;
+        assert_eq!(code, StatusCode::OK);
+        assert!(r["result"].get("resultType").is_none() && r["result"].get("ttlMs").is_none());
+        let probe = json!({ "jsonrpc": "2.0", "id": 3, "method": "server/discover" });
+        let (code, r) = rpc(&f.state, key, probe).await;
+        assert_eq!(
+            (code, r["result"]["supportedVersions"][0].clone()),
+            (StatusCode::OK, json!("2026-07-28"))
+        );
     }
 
     #[tokio::test]
