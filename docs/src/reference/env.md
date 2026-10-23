@@ -21,9 +21,15 @@ Every setting can be given as a flag or an environment variable. See [CLI](cli.m
 | `VIRLING_PERPLEXITY_KEY` | unset | Perplexity key for AI answers. |
 | `VIRLING_GEMINI_KEY` | unset | Google Gemini key for AI answers. |
 | `VIRLING_AI_ANSWERS_BUDGET_USD` | unset | Estimated USD a month after which AI answer runs pause until the next month. Unset: no cap. |
+| `VIRLING_DODO_API_KEY` | unset | Dodo Payments API key that bills the hosted plans. Needs `VIRLING_HOSTED` and the Dodo variables below. Unset: no billing. |
+| `VIRLING_DODO_API_URL` | `https://live.dodopayments.com` | Dodo API to call. `https://test.dodopayments.com` for test mode. |
+| `VIRLING_DODO_WEBHOOK_SECRET` | unset | Signing secret of the Dodo webhook that points at `/api/webhooks/dodo`. |
+| `VIRLING_DODO_PERSONAL_PRODUCT` | unset | Dodo subscription product for Personal. |
+| `VIRLING_DODO_AGENCY_PRODUCT` | unset | Dodo subscription product for Agency. |
+| `VIRLING_DODO_SEAT_ADDON` | unset | Dodo add-on billed for each Agency user past the 3 included. |
 | `RUST_LOG` | `info` | Log level and filter, such as `debug` or `virling=debug`. |
 
-`VIRLING_MARKETING` and `VIRLING_WAITLIST_FROM` exist for virling.com itself. A self-hosted server does not need them.
+`VIRLING_MARKETING`, `VIRLING_WAITLIST_FROM` and the `VIRLING_DODO_*` variables exist for virling.com and the hosted service. A self-hosted server does not need them.
 
 ## Minimal production set
 

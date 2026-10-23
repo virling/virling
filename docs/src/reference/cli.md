@@ -38,6 +38,12 @@ virling serve [OPTIONS]
 | `--ai-answers-budget-usd <USD>`<br>`VIRLING_AI_ANSWERS_BUDGET_USD` | unset | Estimated monthly spend after which AI answer runs pause. |
 | `--marketing`<br>`VIRLING_MARKETING` | off | Serve the virling.com landing pages and waitlist. Not needed when self-hosting. |
 | `--waitlist-from <ADDR>`<br>`VIRLING_WAITLIST_FROM` | `Rahul at Virling <hello@virling.com>` | Sender for waitlist emails. Only used with `--marketing`. |
+| `--dodo-api-key <KEY>`<br>`VIRLING_DODO_API_KEY` | unset | Bill the hosted plans through Dodo Payments. Needs `--hosted` and the other `--dodo-*` flags. Not needed when self-hosting. |
+| `--dodo-api-url <URL>`<br>`VIRLING_DODO_API_URL` | `https://live.dodopayments.com` | Dodo API, or `https://test.dodopayments.com` for test mode. |
+| `--dodo-webhook-secret <SECRET>`<br>`VIRLING_DODO_WEBHOOK_SECRET` | unset | Signing secret of the Dodo webhook at `/api/webhooks/dodo`. |
+| `--dodo-personal-product <ID>`<br>`VIRLING_DODO_PERSONAL_PRODUCT` | unset | Dodo product for Personal. |
+| `--dodo-agency-product <ID>`<br>`VIRLING_DODO_AGENCY_PRODUCT` | unset | Dodo product for Agency. |
+| `--dodo-seat-addon <ID>`<br>`VIRLING_DODO_SEAT_ADDON` | unset | Dodo add-on for each Agency user past the 3 included. |
 
 A flag on the command line wins over its environment variable. Boolean variables take `true` or `false`.
 
