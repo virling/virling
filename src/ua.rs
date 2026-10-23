@@ -95,13 +95,6 @@ pub fn device(width: Option<u32>) -> &'static str {
     }
 }
 
-/// Chromium claiming macOS on a screen under 1024 device pixels: no Mac has one, headless browsers posing as Macs do.
-pub fn impossible_mac(user_agent: &str, width: Option<u32>, ratio: Option<f64>) -> bool {
-    user_agent.contains("Macintosh")
-        && user_agent.contains("Chrome/")
-        && width.is_some_and(|w| f64::from(w) * ratio.unwrap_or(1.0) < 1024.0)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -135,20 +128,5 @@ mod tests {
         assert_eq!(device(Some(390)), "Mobile");
         assert_eq!(device(Some(800)), "Tablet");
         assert_eq!(device(Some(1440)), "Desktop");
-    }
-
-    #[test]
-    fn macs_have_desktop_screens() {
-        let mac = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
-        let ipad = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15";
-        let win = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
-        assert!(impossible_mac(mac, Some(800), None));
-        assert!(impossible_mac(mac, Some(800), Some(1.0)));
-        assert!(!impossible_mac(mac, Some(960), Some(1.5)), "zoomed in");
-        assert!(!impossible_mac(mac, Some(1440), None));
-        assert!(!impossible_mac(mac, None, None));
-        assert!(!impossible_mac(ipad, Some(820), Some(2.0)));
-        assert!(!impossible_mac(ipad, Some(820), None));
-        assert!(!impossible_mac(win, Some(800), None));
     }
 }

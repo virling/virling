@@ -13,7 +13,7 @@ use url::Url;
 
 use crate::app::AppState;
 use crate::events::Event;
-use crate::ua::{browser, device, impossible_mac, is_bot, is_spam_referrer};
+use crate::ua::{browser, device, is_bot, is_spam_referrer};
 use crate::{channel, crawlers};
 
 const SESSION_IDLE: Duration = Duration::minutes(30);
@@ -386,6 +386,13 @@ fn os(user_agent: &str) -> &'static str {
     }
 }
 
+/// Chromium claiming macOS on a screen under 1024 device pixels: no Mac has one, headless browsers posing as Macs do.
+fn impossible_mac(user_agent: &str, width: Option<u32>, ratio: Option<f64>) -> bool {
+    user_agent.contains("Macintosh")
+        && user_agent.contains("Chrome/")
+        && width.is_some_and(|w| f64::from(w) * ratio.unwrap_or(1.0) < 1024.0)
+}
+
 pub(crate) fn host_belongs(host: &str, domain: &str) -> bool {
     let host = host.strip_prefix("www.").unwrap_or(host);
     host == domain || host.ends_with(&format!(".{domain}"))
@@ -727,6 +734,21 @@ mod tests {
         assert_eq!(client_ip(&h, peer, true, true), ip("198.51.100.4"));
         assert_eq!(client_ip(&h, peer, true, false), ip("192.0.2.1"));
         assert_eq!(client_ip(&h, peer, false, false), ip("127.0.0.1"));
+    }
+
+    #[test]
+    fn macs_have_desktop_screens() {
+        let mac = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
+        let ipad = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15";
+        let win = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
+        assert!(impossible_mac(mac, Some(800), None));
+        assert!(impossible_mac(mac, Some(800), Some(1.0)));
+        assert!(!impossible_mac(mac, Some(960), Some(1.5)), "zoomed in");
+        assert!(!impossible_mac(mac, Some(1440), None));
+        assert!(!impossible_mac(mac, None, None));
+        assert!(!impossible_mac(ipad, Some(820), Some(2.0)));
+        assert!(!impossible_mac(ipad, Some(820), None));
+        assert!(!impossible_mac(win, Some(800), None));
     }
 
     #[test]
