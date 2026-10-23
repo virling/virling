@@ -31,6 +31,5 @@
       "url": "${user_config.server_url}/mcp"
     }
   },
-  "icon": ".claude-plugin/icon.png",
   "privacyPolicyUrl": "https://virling.com/privacy"
 }
