@@ -77,6 +77,8 @@ struct SettingsPage {
     cookieless: bool,
     /// Same-visit domains, one per line.
     same_visit: String,
+    /// Ignored addresses and ranges, one per line.
+    ignore_ips: String,
     return_minutes: i64,
     /// Bot visitors filtered in the last 30 days.
     bots: String,
@@ -240,6 +242,7 @@ async fn show(
         script_host: state.config.base_url.clone(),
         cookieless: ctx.site.cookieless,
         same_visit: ctx.site.same_visit.replace(' ', "\n"),
+        ignore_ips: ctx.site.ignore_ips.replace(' ', "\n"),
         return_minutes: ctx.site.return_minutes,
         bots,
         windows: WINDOWS
@@ -701,6 +704,8 @@ pub struct SettingsInput {
     cookieless: Option<String>,
     #[serde(default)]
     same_visit: String,
+    #[serde(default)]
+    ignore_ips: String,
     #[serde(default = "default_return")]
     return_minutes: i64,
 }
@@ -723,6 +728,26 @@ fn same_visit_domains(input: &str, domain: &str) -> String {
     out.join(" ")
 }
 
+/// Up to 50 distinct addresses and CIDR ranges from free text; anything else is dropped.
+fn ignore_list(input: &str) -> String {
+    let mut out: Vec<String> = Vec::new();
+    for (net, bits) in input
+        .split([' ', ',', '\n', '\r', '\t'])
+        .filter_map(crate::ingest::ip_range)
+    {
+        let full = if net.is_ipv4() { 32 } else { 128 };
+        let r = if bits == full {
+            net.to_string()
+        } else {
+            format!("{net}/{bits}")
+        };
+        if !out.contains(&r) && out.len() < 50 {
+            out.push(r);
+        }
+    }
+    out.join(" ")
+}
+
 pub async fn save(
     State(state): State<AppState>,
     account: Account,
@@ -740,12 +765,13 @@ pub async fn save(
         return StatusCode::BAD_REQUEST.into_response();
     }
     let updated = sqlx::query(
-        "UPDATE sites SET attribution_model = ?, window_days = ?, cookieless = ?, same_visit = ?, return_minutes = ? WHERE id = ?",
+        "UPDATE sites SET attribution_model = ?, window_days = ?, cookieless = ?, same_visit = ?, ignore_ips = ?, return_minutes = ? WHERE id = ?",
     )
     .bind(&input.model)
     .bind(input.window_days)
     .bind(input.cookieless.is_some())
     .bind(same_visit_domains(&input.same_visit, &ctx.site.domain))
+    .bind(ignore_list(&input.ignore_ips))
     .bind(input.return_minutes)
     .bind(&ctx.site.id)
     .execute(&state.db)
@@ -1168,6 +1194,17 @@ mod tests {
             "app.example.net docs.example.org"
         );
         assert_eq!(same_visit_domains("", "example.com"), "");
+    }
+
+    #[test]
+    fn ignore_lists_keep_only_addresses_and_ranges() {
+        assert_eq!(
+            ignore_list(
+                "203.0.113.7, 198.51.100.0/24\n2001:DB8::/32 office 10.0.0.1/40 203.0.113.7/32"
+            ),
+            "203.0.113.7 198.51.100.0/24 2001:db8::/32"
+        );
+        assert_eq!(ignore_list(""), "");
     }
 
     #[test]

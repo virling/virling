@@ -68,6 +68,14 @@
     <div><b>Bot filtering</b><span class="muted">Visits from automated browsers, such as headless Chrome driven by Playwright or Selenium, from browsers with no languages, from pages with no screen and from browsers posing as a Mac on a screen no Mac has are kept out of every number. Filtered in the last 30 days: {{ bots }}.</span></div>
   </div>
   <div class="setting">
+    <div><b>Exclude my visits</b><span class="muted">Opens {{ shell.domain }} with <span class="mono">?virling=ignore</span>, and from then on the script sends nothing from this browser. Do it once in each browser you use, and on each subdomain you browse. <span class="mono">?virling=track</span> counts the browser again.</span></div>
+    <a class="btn secondary" href="https://{{ shell.domain }}/?virling=ignore" target="_blank" rel="noopener">Exclude this browser</a>
+  </div>
+  <div class="setting">
+    <div><b id="ignore-ips-label">Ignored IP addresses</b><span class="muted">Events from these addresses or ranges, such as your office network, are dropped when they arrive. One per line, like 203.0.113.7 or 203.0.113.0/24. Only this list is stored, never visitor IPs.</span></div>
+    <textarea class="input set-area" name="ignore_ips" rows="3" placeholder="203.0.113.0/24" spellcheck="false" aria-labelledby="ignore-ips-label">{{ ignore_ips }}</textarea>
+  </div>
+  <div class="setting">
     <div><b id="return-label">Count a return as a new visit after</b><span class="muted">How long a visitor has to be gone, with every tab of {{ shell.domain }} closed, before coming back starts a new visit. A quicker return shows as "Came back" in the same visit. Reloads and returns from checkout or sign-in never start a new visit.</span></div>
     <div class="seg" role="radiogroup" aria-labelledby="return-label">
       {% for m in [1, 5, 30] %}<label><input type="radio" name="return_minutes" value="{{ m }}"{% if *m == return_minutes %} checked{% endif %}>{{ m }} min</label>{% endfor %}

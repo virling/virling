@@ -96,6 +96,17 @@ test("time zone is sent only when the browser has one", () => {
   assert.equal("z" in browser("https://example.com/", { zone: "" }).sent[0], false);
 });
 
+test("?virling=ignore silences this browser until ?virling=track", () => {
+  const cookie = jar("example.com");
+  assert.equal(browser("https://example.com/?virling=ignore", { cookie }).sent.length, 0);
+  const later = browser("https://example.com/pricing", { cookie });
+  later.fire("w:", "pagehide");
+  assert.deepEqual([later.sent.length, later.timers.length], [0, 0]);
+  assert.equal(browser("https://example.com/?virling=track", { cookie }).sent.length, 1);
+  assert.equal(browser("https://example.com/", { cookie }).sent.length, 1);
+  assert.equal([...cookie.cookies.values()].some((c) => c.name == "virling"), false);
+});
+
 test("automation and a browser without languages are flagged", () => {
   assert.equal(browser("https://example.com/").sent[0].b, undefined);
   assert.equal(browser("https://example.com/", { agent: { webdriver: true } }).sent[0].b, true);

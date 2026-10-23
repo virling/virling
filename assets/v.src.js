@@ -1,8 +1,11 @@
 /*! Virling, AGPL-3.0 */
 ((w, d, n, L) => {
   var s = d.currentScript, has = (a) => s.hasAttribute(a), on = (t, e, f, c) => t.addEventListener(e, f, c),
-    site = s && s.getAttribute("data-site");
-  if (!site || (/^(localhost|127\.|\[::1\])/.test(L.hostname) && !has("data-dev")) || (has("data-respect-gpc") && n.globalPrivacyControl)) return;
+    site = s && s.getAttribute("data-site"),
+    // ?virling=ignore stops this browser sending anything, ?virling=track undoes it; the flag is renewed on each load.
+    ig = /virling=(ignore|track)/.exec(L.search + d.cookie)?.[1];
+  ig && (d.cookie = "virling=ignore;path=/;max-age=" + (ig == "track" ? 0 : 34e6));
+  if (ig == "ignore" || !site || (/^(localhost|127\.|\[::1\])/.test(L.hostname) && !has("data-dev")) || (has("data-respect-gpc") && n.globalPrivacyControl)) return;
   var endpoint = s.getAttribute("data-api") || new URL("/api/event", s.src);
   var ref = d.referrer, last, vid = null, nav = performance.getEntriesByType("navigation")[0]?.type;
 

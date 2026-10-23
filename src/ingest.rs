@@ -331,15 +331,41 @@ pub(crate) fn via_cloudflare(peer: IpAddr, trust_proxy: bool) -> bool {
         IpAddr::V6(a) => a.is_loopback() || a.is_unique_local(),
     };
     (trust_proxy && local)
-        || CLOUDFLARE.iter().any(|&(net, bits)| match (peer, net) {
-            (IpAddr::V4(a), IpAddr::V4(n)) => {
-                u32::from(a) >> (32 - bits) == u32::from(n) >> (32 - bits)
-            }
-            (IpAddr::V6(a), IpAddr::V6(n)) => {
-                u128::from(a) >> (128 - bits) == u128::from(n) >> (128 - bits)
-            }
-            _ => false,
-        })
+        || CLOUDFLARE
+            .iter()
+            .any(|&(net, bits)| in_range(peer, net, bits))
+}
+
+fn in_range(ip: IpAddr, net: IpAddr, bits: u32) -> bool {
+    match (ip, net) {
+        (IpAddr::V4(a), IpAddr::V4(n)) => {
+            u32::from(a).checked_shr(32 - bits) == u32::from(n).checked_shr(32 - bits)
+        }
+        (IpAddr::V6(a), IpAddr::V6(n)) => {
+            u128::from(a).checked_shr(128 - bits) == u128::from(n).checked_shr(128 - bits)
+        }
+        _ => false,
+    }
+}
+
+/// An address or CIDR range such as 203.0.113.0/24, as network and prefix length.
+pub(crate) fn ip_range(s: &str) -> Option<(IpAddr, u32)> {
+    let (addr, bits) = s.split_once('/').unwrap_or((s, ""));
+    let addr = addr.parse::<IpAddr>().ok()?.to_canonical();
+    let max = if addr.is_ipv4() { 32 } else { 128 };
+    let bits = match bits {
+        "" => max,
+        b => b.parse().ok().filter(|b| *b <= max)?,
+    };
+    Some((addr, bits))
+}
+
+/// Whether `ip` is in one of the space-separated addresses and ranges.
+fn ignored(ip: IpAddr, list: &str) -> bool {
+    let ip = ip.to_canonical();
+    list.split_whitespace()
+        .filter_map(ip_range)
+        .any(|(net, bits)| in_range(ip, net, bits))
 }
 
 pub(crate) fn client_ip(
@@ -475,6 +501,9 @@ pub async fn collect(
         else {
             continue;
         };
+        if ignored(ip, &site.ignore_ips) {
+            continue;
+        }
         if !state
             .limiter
             .allow(&site.id, state.config.events_per_second)
@@ -749,6 +778,22 @@ mod tests {
         assert!(!impossible_mac(ipad, Some(820), Some(2.0)));
         assert!(!impossible_mac(ipad, Some(820), None));
         assert!(!impossible_mac(win, Some(800), None));
+    }
+
+    #[test]
+    fn ignored_addresses_and_ranges() {
+        let ip = |s: &str| s.parse::<IpAddr>().unwrap();
+        let list = "203.0.113.7 198.51.100.0/24 2001:db8::/32";
+        assert!(ignored(ip("203.0.113.7"), list));
+        assert!(!ignored(ip("203.0.113.8"), list));
+        assert!(ignored(ip("198.51.100.200"), list));
+        assert!(ignored(ip("::ffff:198.51.100.1"), list));
+        assert!(ignored(ip("2001:db8:1::5"), list));
+        assert!(!ignored(ip("2001:db9::1"), list));
+        assert!(ignored(ip("192.0.2.1"), "0.0.0.0/0"));
+        assert!(!ignored(ip("192.0.2.1"), ""));
+        assert_eq!(ip_range("10.0.0.0/33"), None);
+        assert_eq!(ip_range("nope"), None);
     }
 
     #[test]

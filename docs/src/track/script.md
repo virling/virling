@@ -60,8 +60,18 @@ With [cookieless mode](cookieless.md) no cookie is set.
 - On `localhost`, `127.*` and `[::1]`, unless the tag has `data-dev`.
 - When the tag has `data-respect-gpc` and the browser sends Global Privacy Control.
 - When `data-site` is missing.
+- In a browser you excluded with `?virling=ignore`, see below.
 
-On the server, events from bots, from pages on another host and for sites that do not exist are dropped. Events from automated browsers, pages with no screen, and Chrome claiming macOS on a screen under 1,024 device pixels are kept apart as bots and left out of every number. See [Privacy and consent](privacy.md).
+On the server, events from addresses on the site's ignore list, from bots, from pages on another host and for sites that do not exist are dropped. Events from automated browsers, pages with no screen, and Chrome claiming macOS on a screen under 1,024 device pixels are kept apart as bots and left out of every number. See [Privacy and consent](privacy.md).
+
+## Exclude your own visits
+
+Your own browsing should not count. Two ways, which you can combine:
+
+- **This browser.** In Site settings, click **Exclude this browser**, or open any page of your site with `?virling=ignore` added, such as `https://example.com/?virling=ignore`. The script stores a first-party `virling` cookie on that host and from then on sends nothing from the browser and shows nothing. The cookie is renewed on each page load. Do it once per browser, and once per subdomain you browse, such as `docs.example.com`. Open a page with `?virling=track` to count the browser again. Clearing the site's cookies undoes it too.
+- **IP addresses.** In Site settings, add addresses or CIDR ranges under **Ignored IP addresses**, one per line, such as `203.0.113.7` or `203.0.113.0/24` (IPv6 works too). The server drops events from them when they arrive. Only the list you enter is stored; visitor IP addresses are never stored.
+
+Both apply from then on. Visits already recorded stay in your reports.
 
 ## Check that it works
 

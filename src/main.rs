@@ -383,6 +383,25 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn ignored_addresses_send_nothing() {
+        let (_dir, state, store) = setup().await;
+        sqlx::query("UPDATE sites SET ignore_ips = '198.51.100.0/24 162.158.0.7'")
+            .execute(&state.db)
+            .await
+            .unwrap();
+        let hit = r#"{"n":"pageview","u":"https://example.com/","s":"example.com","w":1280}"#;
+        assert_eq!(post(&state, hit, UA).await, StatusCode::ACCEPTED);
+        assert!(store.dump().is_empty(), "the listed address is ignored");
+        sqlx::query("UPDATE sites SET ignore_ips = '198.51.100.0/24'")
+            .execute(&state.db)
+            .await
+            .unwrap();
+        state.sites.invalidate("example.com");
+        assert_eq!(post(&state, hit, UA).await, StatusCode::ACCEPTED);
+        assert_eq!(store.dump().len(), 1, "other addresses count");
+    }
+
+    #[tokio::test]
     async fn time_zone_gives_the_country_when_no_header_does() {
         let (_dir, state, store) = setup().await;
         let hit = |path: &str, zone: &str| {
@@ -2966,7 +2985,7 @@ mod tests {
         let monday = seed_last_week(&store, &site);
         crate::sync::rebuild_attribution(&state, Some(&site)).await;
         let s: crate::sites::Site = sqlx::query_as(
-            "SELECT id, domain, timezone, cookieless, same_visit, return_minutes FROM sites WHERE id = ?",
+            "SELECT id, domain, timezone, cookieless, same_visit, return_minutes, ignore_ips FROM sites WHERE id = ?",
         )
         .bind(&site)
         .fetch_one(&state.db)

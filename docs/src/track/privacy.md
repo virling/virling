@@ -4,7 +4,7 @@
 
 For each event Virling stores: the time, the path without its query string, the referrer host, UTM tags, the channel, the country, the device type, the browser name, a visitor ID and a session ID. For goals, the goal name. For outbound link clicks, the destination host and path without its query string. When the page is closed or left, a leave event with no extra data, used for time on page and the exit page.
 
-It does not store IP addresses, full user agents, full referrer URLs, or anything a visitor types.
+It does not store IP addresses, full user agents, full referrer URLs, or anything a visitor types. An [ignore list](script.md#exclude-your-own-visits) of addresses you enter yourself is stored and checked when events arrive.
 
 ## The visitor cookie
 
