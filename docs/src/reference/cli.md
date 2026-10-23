@@ -44,6 +44,10 @@ virling serve [OPTIONS]
 | `--dodo-personal-product <ID>`<br>`VIRLING_DODO_PERSONAL_PRODUCT` | unset | Dodo product for Personal. |
 | `--dodo-agency-product <ID>`<br>`VIRLING_DODO_AGENCY_PRODUCT` | unset | Dodo product for Agency. |
 | `--dodo-seat-addon <ID>`<br>`VIRLING_DODO_SEAT_ADDON` | unset | Dodo add-on for each Agency user past the 3 included. |
+| `--dodo-personal-founding-product <ID>`<br>`VIRLING_DODO_PERSONAL_FOUNDING_PRODUCT` | unset | Dodo product for Personal at the founding price. |
+| `--dodo-agency-founding-product <ID>`<br>`VIRLING_DODO_AGENCY_FOUNDING_PRODUCT` | unset | Dodo product for Agency at the founding price. |
+| `--founders-url <URL>`<br>`VIRLING_FOUNDERS_URL` | `https://virling.com/api/founders` | Lookup of founding pre-orders by email. |
+| `--founders-token <TOKEN>`<br>`VIRLING_FOUNDERS_TOKEN` | unset | Bearer token for the founders lookup. |
 
 A flag on the command line wins over its environment variable. Boolean variables take `true` or `false`.
 
