@@ -120,6 +120,9 @@ struct AccountPage {
     team_note: &'static str,
     /// An email waiting for the owner to confirm a paid seat.
     adding: String,
+    /// The hosted subscription, for the owner when billing is set up.
+    billing: Option<crate::billing::View>,
+    billing_note: &'static str,
 }
 
 pub struct KeyView {
@@ -145,6 +148,7 @@ pub struct SavedQuery {
     team: Option<String>,
     add: Option<String>,
     replace: Option<String>,
+    billing: Option<String>,
 }
 
 /// Agency branding on a site's client report; empty fields are left off.
@@ -637,6 +641,23 @@ async fn show_account(
     else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
+    let billing = match &state.config.billing {
+        Some(_) if account.owner => {
+            let now = OffsetDateTime::now_utc().unix_timestamp();
+            match crate::billing::view(&state.db, &account.id, now).await {
+                Ok(v) => Some(v),
+                Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
+            }
+        }
+        _ => None,
+    };
+    let billing_note = match (q.billing.as_deref(), q.error.as_deref()) {
+        (Some("started"), _) => "Thanks. Your plan shows here as soon as Dodo confirms it.",
+        (Some("error"), _) | (_, Some("billing")) => {
+            "Billing didn't respond. Nothing was changed, so try again in a minute."
+        }
+        _ => "",
+    };
     let team_note = match (q.saved.as_deref(), q.team.as_deref(), q.error.as_deref()) {
         (Some("invite"), _, _) => "Invite sent. The link works for 7 days.",
         (_, Some("email"), _) => "Enter a valid email.",
@@ -691,6 +712,8 @@ async fn show_account(
         team,
         team_note,
         adding: q.add.unwrap_or_default(),
+        billing,
+        billing_note,
     })
 }
 
@@ -1010,6 +1033,17 @@ pub async fn save_plan(
             ))
             .into_response();
         }
+    }
+    if ctx.shell.agency != (input.account_type == "agency")
+        && let Err(err) =
+            crate::billing::change_plan(&state, &account.id, &input.account_type).await
+    {
+        tracing::error!(%err, "changing the Dodo plan failed");
+        return Redirect::to(&format!(
+            "{}?error=billing#plan",
+            app_path(&ctx.site.domain, "account")
+        ))
+        .into_response();
     }
     if let Err(err) = sqlx::query("UPDATE accounts SET account_type = ? WHERE id = ?")
         .bind(&input.account_type)

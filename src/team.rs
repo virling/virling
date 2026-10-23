@@ -59,14 +59,17 @@ async fn used(db: &SqlitePool, org: &str) -> sqlx::Result<i64> {
     .await
 }
 
-/// Stores the user count, so billing can read the extra seats.
-async fn record_seats(db: &SqlitePool, org: &str) -> sqlx::Result<()> {
-    let n = used(db, org).await?;
+/// Stores the user count and bills the extra seats.
+async fn record_seats(state: &AppState, org: &str) -> sqlx::Result<()> {
+    let n = used(&state.db, org).await?;
     sqlx::query("UPDATE accounts SET seats = ? WHERE id = ?")
         .bind(n)
         .bind(org)
-        .execute(db)
+        .execute(&state.db)
         .await?;
+    if state.config.billing.is_some() {
+        tokio::spawn(crate::billing::sync_seats(state.clone(), org.to_string()));
+    }
     Ok(())
 }
 
@@ -205,7 +208,7 @@ pub async fn invite(
         .bind(now() + INVITE_TTL_SECS)
         .execute(&state.db)
         .await?;
-        record_seats(&state.db, &account.id).await?;
+        record_seats(&state, &account.id).await?;
         let owner = &team.people[0].email;
         let link = format!("{}/invite?token={token}", state.config.base_url);
         let text = format!(
@@ -254,7 +257,7 @@ pub async fn revoke(
             .bind(&account.id)
             .execute(&state.db)
             .await?;
-        record_seats(&state.db, &account.id).await
+        record_seats(&state, &account.id).await
     }
     .await;
     if let Err(err) = done {
@@ -287,7 +290,7 @@ pub async fn remove(
                 .execute(&state.db)
                 .await?;
         }
-        record_seats(&state.db, &account.id).await
+        record_seats(&state, &account.id).await
     }
     .await;
     if let Err(err) = done {
@@ -367,7 +370,7 @@ pub async fn accept(State(state): State<AppState>, Form(input): Form<TokenInput>
             .bind(&id)
             .execute(&state.db)
             .await?;
-        record_seats(&state.db, &org).await?;
+        record_seats(&state, &org).await?;
         auth::start_session(&state, &user).await.map(Some)
     }
     .await;

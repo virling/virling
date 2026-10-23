@@ -62,6 +62,7 @@
   </header>
   {% endblock %}
   <main class="content">
+  {% if !shell.banner.is_empty() %}<div class="notice row bill-note" role="status"><span>{{ shell.banner }}</span><a class="btn secondary" href="/app/{{ shell.domain }}/account#plan">Billing</a></div>{% endif %}
   {% block content %}{% endblock %}
   </main>
 </div>

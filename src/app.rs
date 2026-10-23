@@ -37,6 +37,8 @@ pub struct Config {
     pub ai_keys: crate::answers::ServerKeys,
     /// Monthly USD after which AI answer runs pause, server-wide.
     pub ai_budget_usd: Option<f64>,
+    /// Dodo billing for the hosted plans; None on self-hosted servers.
+    pub billing: Option<crate::billing::Dodo>,
 }
 
 #[derive(Clone)]
@@ -249,6 +251,19 @@ pub fn router(state: AppState) -> Router {
                 "/invite",
                 get(crate::team::confirm).post(crate::team::accept),
             )
+            .route("/app/{domain}/account/billing", post(crate::billing::start))
+            .route(
+                "/app/{domain}/account/billing/cancel",
+                post(crate::billing::cancel),
+            )
+            .route(
+                "/app/{domain}/account/billing/resume",
+                post(crate::billing::resume),
+            )
+            .route(
+                "/app/{domain}/account/billing/portal",
+                post(crate::billing::portal),
+            )
             .route("/app/{domain}/account/theme", post(settings::save_theme))
             .route("/app/{domain}/account/api-keys", post(settings::create_key))
             .route(
@@ -269,6 +284,7 @@ pub fn router(state: AppState) -> Router {
                 get(api::visitor),
             )
             .route("/mcp", post(mcp::post))
+            .route("/api/webhooks/dodo", post(crate::billing::webhook))
             .route(
                 "/api/webhooks/lemonsqueezy/{site_id}",
                 post(crate::sync::lemonsqueezy_webhook),

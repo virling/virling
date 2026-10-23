@@ -195,6 +195,7 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         hosted: false,
         ai_keys: Default::default(),
         ai_budget_usd: None,
+        billing: None,
     };
     let state = AppState::new(
         config,

@@ -1463,6 +1463,7 @@ mod tests {
                 hosted: true,
                 ai_keys: ServerKeys([Some("sk-test-openai".into()), None, None, None]),
                 ai_budget_usd: Some(spent_once + 0.025),
+                billing: None,
                 ..(*state.config).clone()
             }),
             ..state.clone()

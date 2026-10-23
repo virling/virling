@@ -1467,6 +1467,7 @@ pub async fn public(
             avatar: String::new(),
             live,
             agency: false,
+            banner: String::new(),
         },
         site: Site {
             id,

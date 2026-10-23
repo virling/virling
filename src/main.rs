@@ -6,6 +6,7 @@ mod app;
 mod assets;
 mod auth;
 mod bench;
+mod billing;
 mod cache;
 mod channel;
 mod chart;
@@ -73,7 +74,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Command {
     /// Run the server (default)
-    Serve(ServeArgs),
+    Serve(Box<ServeArgs>),
     /// Add a site to track
     AddSite {
         domain: String,
@@ -164,6 +165,26 @@ struct ServeArgs {
     /// Estimated USD a month after which AI answer runs pause
     #[arg(long, env = "VIRLING_AI_ANSWERS_BUDGET_USD")]
     ai_answers_budget_usd: Option<f64>,
+    /// Dodo Payments API key for the hosted plans; needs --hosted and the product IDs below
+    #[arg(long, env = "VIRLING_DODO_API_KEY", hide_env_values = true)]
+    dodo_api_key: Option<String>,
+    /// https://test.dodopayments.com for test mode
+    #[arg(
+        long,
+        env = "VIRLING_DODO_API_URL",
+        default_value = "https://live.dodopayments.com"
+    )]
+    dodo_api_url: String,
+    /// Signing secret of the Dodo webhook pointed at /api/webhooks/dodo
+    #[arg(long, env = "VIRLING_DODO_WEBHOOK_SECRET", hide_env_values = true)]
+    dodo_webhook_secret: Option<String>,
+    #[arg(long, env = "VIRLING_DODO_PERSONAL_PRODUCT")]
+    dodo_personal_product: Option<String>,
+    #[arg(long, env = "VIRLING_DODO_AGENCY_PRODUCT")]
+    dodo_agency_product: Option<String>,
+    /// Add-on billed for each Agency user past the 3 included
+    #[arg(long, env = "VIRLING_DODO_SEAT_ADDON")]
+    dodo_seat_addon: Option<String>,
 }
 
 #[tokio::main]
@@ -200,10 +221,27 @@ async fn main() -> anyhow::Result<()> {
 
     let command = match cli.command {
         Some(c) => c,
-        None => Command::Serve(ServeArgs::parse_from(["serve"])),
+        None => Command::Serve(Box::new(ServeArgs::parse_from(["serve"]))),
     };
     match command {
         Command::Serve(args) => {
+            let billing = match args.dodo_api_key {
+                Some(api_key) if args.hosted => {
+                    let need = |v: Option<String>, flag: &str| {
+                        v.with_context(|| format!("--dodo-api-key needs {flag}"))
+                    };
+                    Some(billing::Dodo {
+                        api_url: args.dodo_api_url.trim_end_matches('/').to_string(),
+                        api_key,
+                        webhook_secret: need(args.dodo_webhook_secret, "--dodo-webhook-secret")?,
+                        personal: need(args.dodo_personal_product, "--dodo-personal-product")?,
+                        agency: need(args.dodo_agency_product, "--dodo-agency-product")?,
+                        seat: need(args.dodo_seat_addon, "--dodo-seat-addon")?,
+                    })
+                }
+                Some(_) => anyhow::bail!("--dodo-api-key needs --hosted"),
+                None => None,
+            };
             let events = Cached::new(DuckStore::open(&cli.data_dir.join("events.duckdb"))?);
             let config = Config {
                 marketing: args.marketing,
@@ -220,6 +258,7 @@ async fn main() -> anyhow::Result<()> {
                     args.gemini_key,
                 ]),
                 ai_budget_usd: args.ai_answers_budget_usd,
+                billing,
             };
             let mailer = mail::Mailer::new(args.smtp_url.as_deref(), &args.mail_from)?;
             let vault = crypto::Vault::load(&cli.data_dir, args.secret_key.as_deref())?;
@@ -230,6 +269,9 @@ async fn main() -> anyhow::Result<()> {
                 tokio::spawn(answers::run(state.clone()));
                 favicon::spawn_sources(state.clone());
                 tokio::spawn(dashboard::schedule::run(state.clone()));
+                if state.config.billing.is_some() {
+                    tokio::spawn(billing::run(state.clone()));
+                }
             }
             let listener = tokio::net::TcpListener::bind(args.addr)
                 .await
@@ -319,6 +361,7 @@ mod tests {
             hosted: false,
             ai_keys: Default::default(),
             ai_budget_usd: None,
+            billing: None,
         };
         let state = AppState::new(
             config,
