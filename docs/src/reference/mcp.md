@@ -29,6 +29,7 @@ Virling follows the [MCP authorization spec](https://modelcontextprotocol.io/spe
 - Protected resource metadata (RFC 9728) at `/.well-known/oauth-protected-resource/mcp` and `/.well-known/oauth-protected-resource`. The resource is `https://stats.example.com/mcp`.
 - Authorization server metadata (RFC 8414) at `/.well-known/oauth-authorization-server`.
 - Dynamic client registration (RFC 7591) at `/oauth/register`. Clients are public: no secret, `token_endpoint_auth_method` is `none`.
+- Client ID Metadata Documents: a `client_id` that is an `https` URL is read from that URL when the app signs in. The document must name the same `client_id`, a `client_name` and its `redirect_uris`, and be at most 5 KB. Virling fetches it only from public addresses, does not accept a redirect, waits at most 3 seconds and keeps it for its `Cache-Control` `max-age`, an hour by default and a day at most.
 - Authorization code flow with PKCE, `S256` only, at `/oauth/authorize` and `/oauth/token`. Redirect URIs must be `https`, or `http` on `localhost`, and must match a registered one exactly; a loopback URI may use any port. The response carries `iss` (RFC 9207).
 - The `resource` parameter (RFC 8707), when sent, must be the MCP URL. Tokens only work on `/mcp`, not on the Read API.
 - One scope, `read`. Access tokens last 1 hour. Refresh tokens last 30 days and rotate on every use; reusing an old one revokes the sign-in.

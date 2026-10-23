@@ -1,4 +1,5 @@
 use std::net::SocketAddr;
+use std::time::Duration;
 
 use askama::Template;
 use axum::extract::{ConnectInfo, FromRequestParts, Query, State};
@@ -29,6 +30,8 @@ const NEXT_COOKIE: &str = "virling_next";
 const DOCS: &str = "https://docs.virling.com/reference/mcp.html";
 const REGISTER_PER_SECOND: u32 = 3;
 const TOKEN_PER_SECOND: u32 = 20;
+const METADATA_MAX_BYTES: usize = 5 * 1024;
+const METADATA_MAX_AGE_SECS: i64 = 86_400;
 
 fn now() -> i64 {
     OffsetDateTime::now_utc().unix_timestamp()
@@ -73,6 +76,7 @@ pub async fn authorization_server(State(state): State<AppState>) -> Json<Value> 
         "grant_types_supported": ["authorization_code", "refresh_token"],
         "code_challenge_methods_supported": ["S256"],
         "token_endpoint_auth_methods_supported": ["none"],
+        "client_id_metadata_document_supported": true,
         "authorization_response_iss_parameter_supported": true,
         "service_documentation": DOCS,
     }))
@@ -212,6 +216,92 @@ pub async fn register(
         .into_response()
 }
 
+/// A Client ID Metadata Document URL: https on a domain, with a path and nothing to normalize.
+fn metadata_url(id: &str) -> bool {
+    let Ok(u) = Url::parse(id) else {
+        return false;
+    };
+    id.len() <= 2000
+        && u.scheme() == "https"
+        && u.as_str() == id
+        && matches!(u.host(), Some(url::Host::Domain(_)))
+        && u.path() != "/"
+        && u.fragment().is_none()
+        && u.username().is_empty()
+        && u.password().is_none()
+}
+
+/// The name and redirect URIs of a metadata document whose client_id is `id`.
+fn from_document(id: &str, doc: &Value) -> Option<(String, Vec<String>)> {
+    let uris: Vec<String> = doc["redirect_uris"]
+        .as_array()?
+        .iter()
+        .map(|u| u.as_str().map(String::from))
+        .collect::<Option<_>>()?;
+    let name: String = doc["client_name"]
+        .as_str()?
+        .trim()
+        .chars()
+        .take(60)
+        .collect();
+    (doc["client_id"] == id
+        && !name.is_empty()
+        && (1..=10).contains(&uris.len())
+        && uris.iter().all(|u| valid_redirect(u))
+        && doc
+            .get("token_endpoint_auth_method")
+            .is_none_or(|m| m == "none"))
+    .then_some((name, uris))
+}
+
+/// Seconds to keep a fetched document, from its Cache-Control; an hour when it has none.
+fn max_age(cache_control: &str) -> i64 {
+    let mut age = 3600;
+    for d in cache_control.to_ascii_lowercase().split(',').map(str::trim) {
+        match d.strip_prefix("max-age=") {
+            Some(s) => age = s.parse().unwrap_or(0),
+            None if d == "no-store" || d == "no-cache" => return 0,
+            None => {}
+        }
+    }
+    age.clamp(0, METADATA_MAX_AGE_SECS)
+}
+
+/// Fetches a client's metadata document from a public host and saves it as the client's row.
+async fn fetch_client(state: &AppState, id: &str) -> anyhow::Result<()> {
+    let res = state
+        .favicons
+        .get(id)
+        .header(reqwest::header::ACCEPT, "application/json")
+        .timeout(Duration::from_secs(3))
+        .send()
+        .await?;
+    anyhow::ensure!(
+        res.status() == StatusCode::OK && res.url().as_str() == id,
+        "not served at its own URL"
+    );
+    let age = max_age(
+        res.headers()
+            .get(reqwest::header::CACHE_CONTROL)
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or_default(),
+    );
+    let doc: Value = serde_json::from_slice(&crate::favicon::body(res, METADATA_MAX_BYTES).await?)?;
+    let (name, uris) = from_document(id, &doc).ok_or(anyhow::anyhow!("invalid metadata"))?;
+    sqlx::query(
+        "INSERT INTO oauth_clients (id, name, redirect_uris, created_at, refresh_at) VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT (id) DO UPDATE SET name = excluded.name, redirect_uris = excluded.redirect_uris, refresh_at = excluded.refresh_at",
+    )
+    .bind(id)
+    .bind(name)
+    .bind(uris.join("\n"))
+    .bind(now())
+    .bind(now() + age)
+    .execute(&state.db)
+    .await?;
+    Ok(())
+}
+
 fn host(uri: &str) -> String {
     Url::parse(uri)
         .ok()
@@ -300,9 +390,33 @@ fn valid_challenge(c: &str) -> bool {
 
 /// The client's name and redirect URI; an error page when either is wrong, else an error sent back to the app.
 async fn check(state: &AppState, p: &AuthorizeParams) -> Result<(String, String), Box<Response>> {
+    let id = p.client_id.as_deref().unwrap_or_default();
+    if metadata_url(id) {
+        let refresh_at: Option<Option<i64>> =
+            sqlx::query_scalar("SELECT refresh_at FROM oauth_clients WHERE id = ?")
+                .bind(id)
+                .fetch_optional(&state.db)
+                .await
+                .map_err(|_| Box::new(StatusCode::SERVICE_UNAVAILABLE.into_response()))?;
+        if !refresh_at.flatten().is_some_and(|t| t > now()) {
+            let fetched = match state
+                .limiter
+                .allow(&format!("oauth-metadata:{}", host(id)), REGISTER_PER_SECOND)
+            {
+                true => fetch_client(state, id).await,
+                false => Err(anyhow::anyhow!("too many fetches")),
+            };
+            if let Err(err) = fetched {
+                tracing::info!(%err, client = id, "reading client metadata failed");
+                return Err(Box::new(invalid(
+                    "Virling could not read this app's client metadata.",
+                )));
+            }
+        }
+    }
     let client: Option<(String, String)> =
         sqlx::query_as("SELECT name, redirect_uris FROM oauth_clients WHERE id = ?")
-            .bind(p.client_id.as_deref().unwrap_or_default())
+            .bind(id)
             .fetch_optional(&state.db)
             .await
             .map_err(|_| Box::new(StatusCode::SERVICE_UNAVAILABLE.into_response()))?;
@@ -1006,6 +1120,7 @@ mod tests {
         assert_eq!(m["code_challenge_methods_supported"], json!(["S256"]));
         assert_eq!(m["token_endpoint_auth_methods_supported"], json!(["none"]));
         assert_eq!(m["authorization_response_iss_parameter_supported"], true);
+        assert_eq!(m["client_id_metadata_document_supported"], true);
 
         let plain = fixture().await;
         for path in [
@@ -1085,6 +1200,118 @@ mod tests {
             .filter(|c| **c == StatusCode::TOO_MANY_REQUESTS)
             .count();
         assert!(limited > 0, "{codes:?}");
+    }
+
+    #[test]
+    fn client_metadata_documents_are_checked() {
+        const DOC: &str = "https://app.example.com/oauth/client.json";
+        assert!(metadata_url(DOC));
+        for bad in [
+            "http://app.example.com/client.json",
+            "https://app.example.com",
+            "https://app.example.com/",
+            "https://203.0.113.9/client.json",
+            "https://[2001:db8::1]/client.json",
+            "https://user@app.example.com/client.json",
+            "https://app.example.com/client.json#x",
+            "https://app.example.com/a/../client.json",
+            "https://APP.example.com/client.json",
+            "9d6c0b1e-0000-4000-8000-000000000000",
+        ] {
+            assert!(!metadata_url(bad), "{bad}");
+        }
+
+        let doc = json!({ "client_id": DOC, "client_name": " Example ", "redirect_uris": [CALLBACK, "http://127.0.0.1:3000/cb"], "token_endpoint_auth_method": "none" });
+        assert_eq!(
+            from_document(DOC, &doc),
+            Some((
+                "Example".into(),
+                vec![CALLBACK.into(), "http://127.0.0.1:3000/cb".into()]
+            ))
+        );
+        let with = |k: &str, v: Value| {
+            let mut d = doc.clone();
+            d[k] = v;
+            from_document(DOC, &d)
+        };
+        assert_eq!(
+            with("client_id", json!("https://app.example.com/other.json")),
+            None
+        );
+        assert_eq!(with("client_name", json!("")), None);
+        assert_eq!(with("client_name", Value::Null), None);
+        assert_eq!(with("redirect_uris", json!([])), None);
+        assert_eq!(
+            with("redirect_uris", json!(["http://evil.example/cb"])),
+            None
+        );
+        assert_eq!(with("redirect_uris", json!([CALLBACK, 7])), None);
+        assert_eq!(
+            with("token_endpoint_auth_method", json!("private_key_jwt")),
+            None
+        );
+        assert_eq!(from_document(DOC, &json!("not an object")), None);
+
+        assert_eq!(max_age(""), 3600);
+        assert_eq!(max_age("public, max-age=600"), 600);
+        assert_eq!(max_age("Max-Age=999999999"), 86_400);
+        assert_eq!(max_age("max-age=600, no-store"), 0);
+        assert_eq!(max_age("no-cache"), 0);
+        assert_eq!(max_age("max-age=x"), 0);
+    }
+
+    #[tokio::test]
+    async fn metadata_document_clients_sign_in() {
+        const DOC: &str = "https://app.example.com/oauth/client.json";
+        let f = https().await;
+        let cookie = session(&f.state, &f.account).await;
+        let page = |client: &str| {
+            let (state, cookie) = (f.state.clone(), cookie.clone());
+            let q = query(&enc(client), "");
+            async move { send(&state, get(&format!("/oauth/authorize?{q}"), Some(&cookie))).await }
+        };
+
+        for (client, message) in [
+            (
+                "https://localhost/oauth/client.json",
+                "could not read this app",
+            ),
+            ("https://127.0.0.1/oauth/client.json", "not registered"),
+        ] {
+            let res = page(client).await;
+            assert_eq!(res.status(), StatusCode::BAD_REQUEST, "{client}");
+            assert!(body(res).await.contains(message), "{client}");
+        }
+
+        sqlx::query("INSERT INTO oauth_clients (id, name, redirect_uris, created_at, refresh_at) VALUES (?, 'Example', ?, ?, ?)")
+            .bind(DOC)
+            .bind(CALLBACK)
+            .bind(now())
+            .bind(now() + 3600)
+            .execute(&f.state.db)
+            .await
+            .unwrap();
+        let res = page(DOC).await;
+        assert_eq!(res.status(), StatusCode::OK);
+        assert!(
+            body(res)
+                .await
+                .contains("Example wants read&#8209;only access")
+        );
+        let code = allow(&f.state, &cookie, &enc(DOC)).await;
+        let (status, t) = token_req(&f.state, exchange_body(&enc(DOC), &code, VERIFIER)).await;
+        assert_eq!(status, StatusCode::OK);
+        assert!(
+            t["access_token"]
+                .as_str()
+                .unwrap()
+                .starts_with(ACCESS_PREFIX)
+        );
+        let n: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM oauth_clients")
+            .fetch_one(&f.state.db)
+            .await
+            .unwrap();
+        assert_eq!(n, 1, "one row per client, not per connection");
     }
 
     #[tokio::test]
