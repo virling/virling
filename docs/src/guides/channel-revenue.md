@@ -33,7 +33,7 @@ Paste this before `</head>` on every page:
   data-site="yourdomain.com"></script>
 ```
 
-It is about 1.2 KB gzipped and sets one first-party cookie, `virling_vid`, which is the visitor ID that checkout will carry. Do not turn on [cookieless mode](../track/cookieless.md) for this site: without the visitor ID, payments cannot be linked to visits.
+It is about 1.4 KB gzipped and sets one first-party cookie, `virling_vid`, which is the visitor ID that checkout will carry. Do not turn on [cookieless mode](../track/cookieless.md) for this site: without the visitor ID, payments cannot be linked to visits.
 
 Tag the links you share with UTM parameters, or use [tracked links](../track/links.md), so each post and campaign shows up by name.
 
