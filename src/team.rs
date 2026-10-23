@@ -319,12 +319,14 @@ pub async fn confirm(State(state): State<AppState>, Query(input): Query<TokenInp
     match pending(&state.db, &input.token).await {
         Some((_, _, email)) => auth::page(LoginPage {
             view: "invite",
+            turnstile: None,
             email,
             token: input.token,
             error: None,
         }),
         None => auth::page(LoginPage {
             view: "enter",
+            turnstile: None,
             email: String::new(),
             token: String::new(),
             error: Some(EXPIRED),
@@ -337,6 +339,7 @@ pub async fn accept(State(state): State<AppState>, Form(input): Form<TokenInput>
     let fail = |error: &'static str| {
         auth::page(LoginPage {
             view: "enter",
+            turnstile: None,
             email: String::new(),
             token: String::new(),
             error: Some(error),

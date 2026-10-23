@@ -37,6 +37,23 @@ pub struct Config {
     pub ai_keys: crate::answers::ServerKeys,
     /// Monthly USD after which AI answer runs pause, server-wide.
     pub ai_budget_usd: Option<f64>,
+    /// Cloudflare Turnstile on the sign-in form; off unless both keys are set.
+    pub turnstile: Option<Turnstile>,
+}
+
+#[derive(Clone)]
+pub struct Turnstile {
+    pub site_key: String,
+    pub secret: String,
+    pub verify_url: String,
+}
+
+impl std::fmt::Debug for Turnstile {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Turnstile")
+            .field("site_key", &self.site_key)
+            .finish_non_exhaustive()
+    }
 }
 
 #[derive(Clone)]

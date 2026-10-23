@@ -14,6 +14,8 @@ Every setting can be given as a flag or an environment variable. See [CLI](cli.m
 | `VIRLING_EVENTS_PER_SECOND` | `200` | Events accepted per site per second. |
 | `VIRLING_SMTP_URL` | unset | SMTP URL for sign-in emails, such as `smtps://user:pass@smtp.example.com:465`. Unset: emails are logged. |
 | `VIRLING_MAIL_FROM` | `Virling <login@virling.com>` | Sender for sign-in emails. |
+| `VIRLING_TURNSTILE_SITE_KEY` | unset | Cloudflare Turnstile site key. With the secret, the sign-in form asks visitors to pass a Turnstile check before a link is emailed. Unset: no check. |
+| `VIRLING_TURNSTILE_SECRET` | unset | Cloudflare Turnstile secret key. Needs the site key too. When the check is on and Cloudflare cannot confirm a visitor, no link is sent. |
 | `VIRLING_MARKETING` | `false` | Serve the virling.com landing pages and waitlist. |
 | `VIRLING_WAITLIST_FROM` | `Rahul at Virling <hello@virling.com>` | Sender for waitlist emails. |
 | `VIRLING_OPENAI_KEY` | unset | OpenAI key every site's [AI answers](../track/ai-answers.md) ask ChatGPT with. |

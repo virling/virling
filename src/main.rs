@@ -136,6 +136,12 @@ struct ServeArgs {
     /// SMTP URL for sign-in emails, e.g. smtps://api_token:TOKEN@smtp.mx.cloudflare.net:465. Unset: links are logged.
     #[arg(long, env = "VIRLING_SMTP_URL", hide_env_values = true)]
     smtp_url: Option<String>,
+    /// Cloudflare Turnstile site key for the sign-in form; needs the secret too
+    #[arg(long, env = "VIRLING_TURNSTILE_SITE_KEY")]
+    turnstile_site_key: Option<String>,
+    /// Cloudflare Turnstile secret key; needs the site key too
+    #[arg(long, env = "VIRLING_TURNSTILE_SECRET", hide_env_values = true)]
+    turnstile_secret: Option<String>,
     #[arg(
         long,
         env = "VIRLING_MAIL_FROM",
@@ -220,6 +226,13 @@ async fn main() -> anyhow::Result<()> {
                     args.gemini_key,
                 ]),
                 ai_budget_usd: args.ai_answers_budget_usd,
+                turnstile: args.turnstile_site_key.zip(args.turnstile_secret).map(
+                    |(site_key, secret)| app::Turnstile {
+                        site_key,
+                        secret,
+                        verify_url: auth::TURNSTILE_VERIFY_URL.into(),
+                    },
+                ),
             };
             let mailer = mail::Mailer::new(args.smtp_url.as_deref(), &args.mail_from)?;
             let vault = crypto::Vault::load(&cli.data_dir, args.secret_key.as_deref())?;
@@ -319,6 +332,7 @@ mod tests {
             hosted: false,
             ai_keys: Default::default(),
             ai_budget_usd: None,
+            turnstile: None,
         };
         let state = AppState::new(
             config,
@@ -895,6 +909,71 @@ mod tests {
             call(&state, form("/login", format!("email=u{i}%40b.co"), None)).await;
         }
         assert_eq!(sent(&state).len(), 20);
+    }
+
+    async fn with_turnstile(state: &AppState, verify_url: String) -> AppState {
+        AppState {
+            config: Arc::new(Config {
+                turnstile: Some(crate::app::Turnstile {
+                    site_key: "site-key".into(),
+                    secret: "secret".into(),
+                    verify_url,
+                }),
+                ..(*state.config).clone()
+            }),
+            ..state.clone()
+        }
+    }
+
+    async fn fake_siteverify() -> String {
+        let app = axum::Router::new().route(
+            "/",
+            axum::routing::post(|axum::Json(b): axum::Json<serde_json::Value>| async move {
+                axum::Json(serde_json::json!({ "success": b["response"] == "good" }))
+            }),
+        );
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("http://{}/", listener.local_addr().unwrap());
+        tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+        url
+    }
+
+    #[tokio::test]
+    async fn turnstile_is_off_by_default() {
+        let (_dir, state, _store) = setup().await;
+        let page = body_text(call(&state, get("/login", None)).await).await;
+        assert!(!page.contains("cf-turnstile"));
+        call(&state, form("/login", "email=a%40b.co".into(), None)).await;
+        assert_eq!(sent(&state).len(), 1);
+    }
+
+    #[tokio::test]
+    async fn turnstile_accepts_a_valid_token() {
+        let (_dir, state, _store) = setup().await;
+        let state = with_turnstile(&state, fake_siteverify().await).await;
+        let page = body_text(call(&state, get("/login", None)).await).await;
+        assert!(page.contains(r#"data-sitekey="site-key""#));
+        assert!(!page.contains("secret"));
+        let body = "email=a%40b.co&cf-turnstile-response=good".to_string();
+        let res = body_text(call(&state, form("/login", body, None)).await).await;
+        assert!(res.contains("Check your email"));
+        assert_eq!(sent(&state).len(), 1);
+    }
+
+    #[tokio::test]
+    async fn turnstile_rejects_bad_missing_and_unreachable() {
+        let (_dir, state, _store) = setup().await;
+        let live = with_turnstile(&state, fake_siteverify().await).await;
+        let down = with_turnstile(&state, "http://127.0.0.1:1/".into()).await;
+        for (state, body) in [
+            (&live, "email=a%40b.co&cf-turnstile-response=bad"),
+            (&live, "email=a%40b.co"),
+            (&down, "email=a%40b.co&cf-turnstile-response=good"),
+        ] {
+            let res = body_text(call(state, form("/login", body.into(), None)).await).await;
+            assert!(res.contains("Confirm you are human"));
+        }
+        assert!(sent(&state).is_empty());
     }
 
     #[tokio::test]
