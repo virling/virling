@@ -1,6 +1,6 @@
 {
   "name": "virling",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "Virling",
   "description": "Ask which channels, referrers, campaigns and pages make money, from your Virling server. Bundles the Virling skill and the read-only MCP server.",
   "author": {
@@ -20,7 +20,8 @@
     "server_url": {
       "type": "string",
       "title": "Virling server URL",
-      "description": "Your Virling server, such as https://stats.example.com, without a trailing slash",
+      "description": "Hosted users enter https://beta.virling.com. Self-hosters enter their own HTTPS URL, such as https://stats.example.com, without a trailing slash. Claude asks you to sign in to Virling after this.",
+      "default": "https://beta.virling.com",
       "required": true
     }
   },
