@@ -12,7 +12,7 @@ It is served when the app is on (`--app`). Use your server's public URL, as in `
 
 There are two ways to sign in. Both read every site of your account and can't change anything.
 
-**OAuth sign-in.** Apps such as claude.ai and ChatGPT sign in with your Virling account: you add the URL, the app opens Virling, and you click **Allow**. It needs `VIRLING_BASE_URL` to be a public `https://` URL; on `http://` sign-in is off and only API keys work. Connected apps are listed in **Account settings > Connected apps**, where you can revoke them. Only the account owner can connect an app.
+**OAuth sign-in.** Apps such as claude.ai and ChatGPT sign in with your Virling account: you add the URL, the app opens Virling, and you click **Allow**. It needs `VIRLING_BASE_URL` to be a public `https://` URL at the root of its host, such as `https://stats.example.com`. On `http://`, or with a path such as `https://example.com/virling`, sign-in is off and only API keys work. Apps look for the sign-in metadata at the root of the host (RFC 8414 and RFC 9728), and Virling's pages link to root paths, so serve it on its own host or subdomain. Connected apps are listed in **Account settings > Connected apps**, where you can revoke them. Only the account owner can connect an app.
 
 **API key.** Create a key in **Account settings > API keys** in the app and send it on every request:
 
