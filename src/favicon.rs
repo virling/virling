@@ -177,14 +177,14 @@ fn attr<'a>(tag: &'a str, name: &str) -> Option<&'a str> {
     None
 }
 
-/// Reads at most `MAX_BYTES` of a response body.
-async fn body(mut res: reqwest::Response) -> anyhow::Result<Vec<u8>> {
-    if res.content_length().is_some_and(|n| n > MAX_BYTES as u64) {
+/// Reads at most `max` bytes of a response body.
+pub(crate) async fn body(mut res: reqwest::Response, max: usize) -> anyhow::Result<Vec<u8>> {
+    if res.content_length().is_some_and(|n| n > max as u64) {
         anyhow::bail!("too large");
     }
     let mut out = Vec::new();
     while let Some(chunk) = res.chunk().await? {
-        if out.len() + chunk.len() > MAX_BYTES {
+        if out.len() + chunk.len() > max {
             anyhow::bail!("too large");
         }
         out.extend_from_slice(&chunk);
@@ -209,7 +209,7 @@ async fn fetch_from(
     }
     let page = client.get(base.clone()).send().await?;
     let base = page.url().clone();
-    let html = body(page).await.unwrap_or_default();
+    let html = body(page, MAX_BYTES).await.unwrap_or_default();
     let html = String::from_utf8_lossy(&html);
     let title = page_title(&html);
     for url in candidates(&html, &base) {
@@ -232,7 +232,7 @@ async fn fetch_from(
         if !TYPES.contains(&kind.as_str()) {
             continue;
         }
-        if let Ok(bytes) = body(res).await
+        if let Ok(bytes) = body(res, MAX_BYTES).await
             && !bytes.is_empty()
         {
             return Ok((kind, bytes, title));
