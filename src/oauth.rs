@@ -37,9 +37,9 @@ fn now() -> i64 {
     OffsetDateTime::now_utc().unix_timestamp()
 }
 
-/// OAuth sign-in needs a public https base URL.
+/// OAuth sign-in needs a public https base URL at the root of its host, where clients look for the metadata.
 pub fn enabled(config: &Config) -> bool {
-    config.base_url.starts_with("https://")
+    Url::parse(&config.base_url).is_ok_and(|u| u.scheme() == "https" && u.path() == "/")
 }
 
 /// The MCP endpoint's canonical URI, which every token is bound to.
@@ -1134,6 +1134,23 @@ mod tests {
         let res = mcp(&plain.state, None).await;
         assert_eq!(res.status(), StatusCode::UNAUTHORIZED);
         assert_eq!(www_authenticate(&res), "Bearer");
+
+        let mut path = fixture().await;
+        path.state.config = Arc::new(Config {
+            base_url: "https://example.com/virling".into(),
+            ..(*path.state.config).clone()
+        });
+        let res = send(
+            &path.state,
+            get("/.well-known/oauth-authorization-server", None),
+        )
+        .await;
+        assert_eq!(
+            res.status(),
+            StatusCode::NOT_FOUND,
+            "no sign-in under a path"
+        );
+        assert_eq!(www_authenticate(&mcp(&path.state, None).await), "Bearer");
     }
 
     #[tokio::test]
