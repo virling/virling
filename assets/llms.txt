@@ -12,6 +12,7 @@ Status: early development. Releases are on GitHub and can be self-hosted today. 
 - [For agencies](https://virling.com/agency): weekly branded reports that show each client which channels brought paying customers
 - [Live demo](https://virling.com/demo/): a static demo dashboard with made-up data
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
+- [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
 
 ## Docs
 
