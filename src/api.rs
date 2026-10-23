@@ -712,6 +712,7 @@ pub(crate) mod tests {
             hosted: false,
             ai_keys: Default::default(),
             ai_budget_usd: None,
+            turnstile: None,
         };
         let state = AppState::new(
             config,

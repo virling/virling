@@ -24,7 +24,7 @@ Virling joins every visit to the payment that followed. It answers the questions
 
 It runs as one Rust binary with embedded storage. No Postgres, no ClickHouse, no Redis.
 
-> **Status:** early development. Releases are on the [releases page](https://github.com/virling/virling/releases) and run on your own server today. Expect breaking changes until a stable release. A hosted plan is on a waitlist at [virling.com](https://virling.com).
+> **Status:** early development. Releases are on the [releases page](https://github.com/virling/virling/releases) and run on your own server today. Expect breaking changes until a stable release. The hosted beta is open to everyone at [beta.virling.com](https://beta.virling.com/login).
 
 ## What works today
 

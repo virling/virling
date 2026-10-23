@@ -19,6 +19,10 @@
     <form class="notice" method="post" action="/login">
       <span>Not there? Check spam, or</span>
       <input type="hidden" name="email" value="{{ email }}">
+      {% if let Some(key) = turnstile %}
+      <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+      <div class="cf-turnstile" data-sitekey="{{ key }}"></div>
+      {% endif %}
       <button class="btn secondary" type="submit">Send it again</button>
     </form>
     <a class="link-quiet" href="/login">Use a different email</a>
@@ -55,6 +59,10 @@
       <label class="field">Email
         <input type="email" name="email" value="{{ email }}" placeholder="you@company.com" autocomplete="email" required autofocus>
       </label>
+      {% if let Some(key) = turnstile %}
+      <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+      <div class="cf-turnstile" data-sitekey="{{ key }}"></div>
+      {% endif %}
       <button class="btn lg block" type="submit">Email me a sign-in link</button>
     </form>
   {% endif %}

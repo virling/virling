@@ -1,11 +1,12 @@
 use askama::Template;
 use axum::Form;
-use axum::extract::{FromRequestParts, Query, State};
+use axum::extract::{ConnectInfo, FromRequestParts, Query, State};
 use axum::http::request::Parts;
 use axum::http::{HeaderMap, HeaderValue, header};
 use axum::response::{Html, IntoResponse, Redirect, Response};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
+use std::net::SocketAddr;
 use time::OffsetDateTime;
 
 use crate::app::AppState;
@@ -15,6 +16,8 @@ use crate::waitlist::valid_email;
 const LINK_TTL_SECS: i64 = 15 * 60;
 const SESSION_TTL_SECS: i64 = 30 * 24 * 3600;
 const LINKS_PER_HOUR: i64 = 5;
+const LINKS_PER_IP_HOUR: i64 = 20;
+pub const TURNSTILE_VERIFY_URL: &str = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 pub const SESSION_COOKIE: &str = "virling_session";
 
 pub fn random_token() -> String {
@@ -41,6 +44,7 @@ pub struct LoginPage {
     pub email: String,
     pub token: String,
     pub error: Option<&'static str>,
+    pub turnstile: Option<String>,
 }
 
 #[derive(Template)]
@@ -64,9 +68,10 @@ pub fn page(p: LoginPage) -> Response {
     }
 }
 
-pub async fn login_form() -> Response {
+pub async fn login_form(State(state): State<AppState>) -> Response {
     page(LoginPage {
         view: "enter",
+        turnstile: site_key(&state),
         email: String::new(),
         token: String::new(),
         error: None,
@@ -76,16 +81,71 @@ pub async fn login_form() -> Response {
 #[derive(Deserialize)]
 pub struct LoginInput {
     email: String,
+    #[serde(rename = "cf-turnstile-response")]
+    turnstile: Option<String>,
 }
 
-pub async fn send_link(State(state): State<AppState>, Form(input): Form<LoginInput>) -> Response {
+fn site_key(state: &AppState) -> Option<String> {
+    state.config.turnstile.as_ref().map(|t| t.site_key.clone())
+}
+
+/// True when Turnstile is off, or Cloudflare confirms the token; any failure counts as a bot.
+async fn human(state: &AppState, token: Option<&str>, ip: &str) -> bool {
+    let Some(t) = &state.config.turnstile else {
+        return true;
+    };
+    let Some(token) = token.filter(|t| !t.is_empty()) else {
+        return false;
+    };
+    let sent = state
+        .http
+        .post(&t.verify_url)
+        .json(&serde_json::json!({ "secret": t.secret, "response": token, "remoteip": ip }))
+        .send()
+        .await;
+    let verdict = match sent {
+        Ok(res) => res.json::<serde_json::Value>().await.ok(),
+        Err(_) => None,
+    };
+    let ok = verdict.is_some_and(|v| v["success"] == true);
+    if !ok {
+        tracing::warn!(%ip, "turnstile check failed");
+    }
+    ok
+}
+
+pub async fn send_link(
+    State(state): State<AppState>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    Form(input): Form<LoginInput>,
+) -> Response {
+    let trust = state.config.trust_proxy;
+    let ip = crate::ingest::client_ip(
+        &headers,
+        peer,
+        trust,
+        crate::ingest::via_cloudflare(peer.ip(), trust),
+    )
+    .to_string();
+    let key = site_key(&state);
     let email = input.email.trim().to_ascii_lowercase();
     if !valid_email(&email) {
         return page(LoginPage {
             view: "enter",
+            turnstile: key.clone(),
             email,
             token: String::new(),
             error: Some("Enter a valid email."),
+        });
+    }
+    if !human(&state, input.turnstile.as_deref(), &ip).await {
+        return page(LoginPage {
+            view: "enter",
+            turnstile: key,
+            email,
+            token: String::new(),
+            error: Some("Confirm you are human and try again."),
         });
     }
     let recent: i64 =
@@ -95,19 +155,28 @@ pub async fn send_link(State(state): State<AppState>, Form(input): Form<LoginInp
             .fetch_one(&state.db)
             .await
             .unwrap_or(LINKS_PER_HOUR);
-    if recent < LINKS_PER_HOUR {
+    let from_ip: i64 =
+        sqlx::query_scalar("SELECT count(*) FROM login_tokens WHERE ip = ? AND created_at > ?")
+            .bind(&ip)
+            .bind(now() - 3600)
+            .fetch_one(&state.db)
+            .await
+            .unwrap_or(LINKS_PER_IP_HOUR);
+    if recent < LINKS_PER_HOUR && from_ip < LINKS_PER_IP_HOUR {
         let token = random_token();
-        let inserted = sqlx::query("INSERT INTO login_tokens (token_hash, email, created_at, expires_at) VALUES (?, ?, ?, ?)")
+        let inserted = sqlx::query("INSERT INTO login_tokens (token_hash, email, created_at, expires_at, ip) VALUES (?, ?, ?, ?, ?)")
             .bind(hash_token(&token))
             .bind(&email)
             .bind(now())
             .bind(now() + LINK_TTL_SECS)
+            .bind(&ip)
             .execute(&state.db)
             .await;
         if let Err(err) = inserted {
             tracing::error!(%err, "storing login token failed");
             return page(LoginPage {
                 view: "enter",
+                turnstile: key.clone(),
                 email,
                 token: String::new(),
                 error: Some("Something went wrong. Try again."),
@@ -131,16 +200,18 @@ pub async fn send_link(State(state): State<AppState>, Form(input): Form<LoginInp
             tracing::error!(%err, "sending login email failed");
             return page(LoginPage {
                 view: "enter",
+                turnstile: key.clone(),
                 email,
                 token: String::new(),
                 error: Some("We couldn't send the email. Try again in a minute."),
             });
         }
     } else {
-        tracing::warn!(%email, "login link rate limit reached");
+        tracing::warn!(%email, %ip, "login link rate limit reached");
     }
     page(LoginPage {
         view: "sent",
+        turnstile: key.clone(),
         email,
         token: String::new(),
         error: None,
@@ -169,12 +240,14 @@ pub async fn confirm(State(state): State<AppState>, Query(input): Query<TokenInp
     match pending_email(&state, &input.token).await {
         Some(email) => page(LoginPage {
             view: "confirm",
+            turnstile: None,
             email,
             token: input.token,
             error: None,
         }),
         None => page(LoginPage {
             view: "enter",
+            turnstile: None,
             email: String::new(),
             token: String::new(),
             error: Some(EXPIRED),
@@ -200,6 +273,7 @@ pub async fn verify(
     let Some(email) = email else {
         return page(LoginPage {
             view: "enter",
+            turnstile: None,
             email: String::new(),
             token: String::new(),
             error: Some(EXPIRED),
@@ -216,6 +290,7 @@ pub async fn verify(
             tracing::error!(%err, "creating session failed");
             page(LoginPage {
                 view: "enter",
+                turnstile: None,
                 email,
                 token: String::new(),
                 error: Some("Something went wrong. Try again."),

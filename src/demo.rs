@@ -18,7 +18,7 @@ const DAYS: i64 = 180;
 const TIMELINES: usize = 12;
 /// A made-up mark for the made-up site, so the site switcher shows an icon.
 const SITE_ICON: &str = r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#1F6F5C"/><path d="M9 9v14M13.5 9v14M18 9v14M22.5 9v14M7 20l18-8" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>"##;
-const BANNER: &str = r#"<div class="notice row"><span>Demo with sample data.</span><a class="b" href="/#join">Join the waitlist</a></div>"#;
+const BANNER: &str = r#"<div class="notice row"><span>Demo with sample data.</span><a class="b" href="https://beta.virling.com/login">Start the beta</a></div>"#;
 
 /// Where visitors come from: referrer host, utm source/medium/campaign, share of traffic, growth over the period, chance to buy.
 struct Source {
@@ -974,6 +974,7 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
         hosted: false,
         ai_keys: Default::default(),
         ai_budget_usd: None,
+        turnstile: None,
     };
     let state = AppState::new(config, db.clone(), store, mail::Mailer::Log, vault);
     sync::rebuild_attribution(&state, Some(&site)).await;

@@ -36,6 +36,8 @@ virling serve [OPTIONS]
 | `--perplexity-key <KEY>`<br>`VIRLING_PERPLEXITY_KEY` | unset | Perplexity key for AI answers. |
 | `--gemini-key <KEY>`<br>`VIRLING_GEMINI_KEY` | unset | Google Gemini key for AI answers. |
 | `--ai-answers-budget-usd <USD>`<br>`VIRLING_AI_ANSWERS_BUDGET_USD` | unset | Estimated monthly spend after which AI answer runs pause. |
+| `--turnstile-site-key <KEY>`<br>`VIRLING_TURNSTILE_SITE_KEY` | unset | Cloudflare Turnstile site key for the sign-in form. Used only with the secret. |
+| `--turnstile-secret <KEY>`<br>`VIRLING_TURNSTILE_SECRET` | unset | Cloudflare Turnstile secret key. Used only with the site key. |
 | `--marketing`<br>`VIRLING_MARKETING` | off | Serve the virling.com landing pages and waitlist. Not needed when self-hosting. |
 | `--waitlist-from <ADDR>`<br>`VIRLING_WAITLIST_FROM` | `Rahul at Virling <hello@virling.com>` | Sender for waitlist emails. Only used with `--marketing`. |
 

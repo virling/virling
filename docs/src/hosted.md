@@ -1,6 +1,6 @@
 # Hosted plan
 
-A hosted Virling at app.virling.com is coming. It is <span class="na">Not available yet</span>.
+The hosted beta at beta.virling.com is open to everyone. Paid plans are <span class="na">Not available yet</span>.
 
 It runs the same open-source code, so the [script](track/script.md), [payment connections](payments/index.md) and [checkout linking](payments/checkout.md) work the same way, without a server to run.
 
@@ -17,4 +17,4 @@ Self-hosting stays free, with every feature.
 
 Virling pays for the AI assistants that [AI answers](track/ai-answers.md) asks, so no API key is needed. This is included on paid plans and founding spots.
 
-Apply for the beta, or join the waitlist, at [virling.com](https://virling.com) to hear when it opens. Until then, [self-host Virling](quickstart.md).
+The hosted beta is open to everyone, with no application. Sign in with your email at [beta.virling.com](https://beta.virling.com/login) to start. You can also [self-host Virling](quickstart.md).
