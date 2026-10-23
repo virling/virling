@@ -81,7 +81,7 @@ With developer mode on, create a custom app with the URL `https://stats.example.
 
 ## Claude Code plugin
 
-This repository is also a Claude Code plugin marketplace. The `virling` plugin bundles the [agent skill](https://github.com/virling/virling/tree/main/skills/virling) and the MCP server:
+This repository is also a Claude Code plugin marketplace. The `virling` plugin bundles the [agent skill](https://github.com/virling/virling/tree/main/plugins/virling/skills/virling) and the MCP server:
 
 ```sh
 claude plugin marketplace add virling/virling
