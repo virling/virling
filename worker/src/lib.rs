@@ -247,6 +247,29 @@ fn signup_of(key: &str) -> Option<(&str, &str)> {
     key.strip_prefix("signup:")?.split_once(':')
 }
 
+/// Beta applications for the operator panel, behind a bearer ADMIN_TOKEN.
+async fn applications(req: Request, ctx: RouteContext<()>) -> Result<Response> {
+    let given = req
+        .headers()
+        .get("Authorization")?
+        .and_then(|h| h.strip_prefix("Bearer ").map(str::to_string))
+        .unwrap_or_default();
+    let expected = ctx
+        .secret("ADMIN_TOKEN")
+        .map(|s| s.to_string())
+        .unwrap_or_default();
+    if !analytics::token_matches(&given, &expected) {
+        return json_status(json!({ "error": "unauthorized" }), 401);
+    }
+    let rows = ctx
+        .d1("DB")?
+        .prepare("SELECT email, wedge, created_at, site, payments, revenue, audience FROM applications ORDER BY created_at DESC LIMIT 500")
+        .all()
+        .await?
+        .results::<serde_json::Value>()?;
+    private(Response::from_json(&rows)?)
+}
+
 async fn send_email(api_key: &str, body: &serde_json::Value) -> Result<()> {
     let headers = Headers::new();
     headers.set("Authorization", &format!("Bearer {api_key}"))?;
@@ -672,6 +695,7 @@ async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         .post_async("/api/event", collect)
         .options("/api/event", event_preflight)
         .post_async("/api/waitlist", join)
+        .get_async("/api/applications", applications)
         .get_async("/waitlist/leave", leave)
         .post_async("/api/preorder/session", preorder_session)
         .get_async("/api/preorder/status", preorder_status)

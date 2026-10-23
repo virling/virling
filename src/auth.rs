@@ -290,6 +290,12 @@ pub async fn verify(
     };
     let started = async {
         let account = sites::find_or_create_account(&state.db, &email).await?;
+        let suspended: bool =
+            sqlx::query_scalar("SELECT suspended_at IS NOT NULL FROM accounts WHERE id = ?")
+                .bind(&account)
+                .fetch_one(&state.db)
+                .await?;
+        anyhow::ensure!(!suspended, "account suspended");
         start_session(&state, &account).await
     }
     .await;
@@ -382,7 +388,7 @@ impl FromRequestParts<AppState> for Account {
     ) -> Result<Self, Self::Rejection> {
         let token = cookie(&parts.headers, SESSION_COOKIE).ok_or(Redirect::to("/login"))?;
         let row: Option<(String, Option<String>)> = sqlx::query_as(
-            "SELECT s.account_id, m.org_id FROM sessions s LEFT JOIN members m ON m.account_id = s.account_id WHERE s.token_hash = ? AND s.expires_at > ?",
+            "SELECT s.account_id, m.org_id FROM sessions s JOIN accounts u ON u.id = s.account_id LEFT JOIN members m ON m.account_id = s.account_id LEFT JOIN accounts o ON o.id = m.org_id WHERE s.token_hash = ? AND s.expires_at > ? AND u.suspended_at IS NULL AND o.suspended_at IS NULL",
         )
         .bind(hash_token(&token))
         .bind(now())

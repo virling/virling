@@ -2054,6 +2054,12 @@ impl Indexes {
             )
     }
 
+    /// Drops the site's index and anything waiting to refresh it.
+    pub fn forget(&self, site_id: &str) {
+        self.slots.lock().unwrap().remove(site_id);
+        self.stale_payments.lock().unwrap().remove(site_id);
+    }
+
     pub fn gate(&self) -> std::sync::MutexGuard<'_, ()> {
         self.gate.lock().unwrap()
     }

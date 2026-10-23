@@ -702,7 +702,7 @@ pub async fn paid(state: &AppState, site_id: &str) -> sqlx::Result<bool> {
         return Ok(true);
     }
     let paid: Option<bool> = sqlx::query_scalar(
-        "SELECT a.plan IN ('paid', 'founding') FROM sites s JOIN accounts a ON a.id = s.account_id WHERE s.id = ?",
+        "SELECT a.plan IN ('paid', 'founding', 'comped') FROM sites s JOIN accounts a ON a.id = s.account_id WHERE s.id = ?",
     )
     .bind(site_id)
     .fetch_optional(&state.db)

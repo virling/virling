@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+{% include "_head.html" %}
+<meta name="robots" content="noindex">
+<title>Admin · Virling</title>
+</head>
+<body class="adm">
+<header class="adm-top">
+  <a class="brand" href="/admin">{% include "_logo.html" %}<b>virling</b></a>
+  <span class="tag">Admin</span>
+  <nav class="seg small" aria-label="Admin">
+    <a href="/admin"{% if tab == "overview" %} aria-current="page"{% endif %}>Overview</a>
+    <a href="/admin/accounts"{% if tab == "accounts" || tab == "account" %} aria-current="page"{% endif %}>Accounts</a>
+    <a href="/admin/sites"{% if tab == "sites" %} aria-current="page"{% endif %}>Sites</a>
+    <a href="/admin/signups"{% if tab == "signups" %} aria-current="page"{% endif %}>Signups</a>
+    <a href="/admin/beta"{% if tab == "beta" %} aria-current="page"{% endif %}>Beta</a>
+    <a href="/admin/audit"{% if tab == "audit" %} aria-current="page"{% endif %}>Audit log</a>
+  </nav>
+  <span class="grow"></span>
+  <span class="muted small">{{ admin }}</span>
+  <a class="btn ghost" href="/app">App</a>
+</header>
+<main class="adm-main">
+{% if !notice.is_empty() %}<div class="notice ok-note" role="status">{{ notice }}</div>{% endif %}
+
+{% if tab == "overview" %}
+<section class="adm-grid">
+  {% for (k, v) in stats %}<div class="card adm-stat"><span class="muted small">{{ k }}</span><b>{{ v }}</b></div>{% endfor %}
+</section>
+<div class="adm-cols">
+  <section class="card">
+    <div class="card-head"><h2>Health</h2></div>
+    {% for (k, v) in health %}<div class="adm-line"><span class="muted">{{ k }}</span><span class="mono">{{ v }}</span></div>{% endfor %}
+  </section>
+  <section class="card">
+    <div class="card-head"><h2>Busiest sites, 24 hours</h2></div>
+    {% for (k, v) in busiest %}<div class="adm-line"><span>{{ k }}</span><span class="mono">{{ v }}</span></div>{% endfor %}
+    {% if busiest.is_empty() %}<p class="muted">No events yet.</p>{% endif %}
+  </section>
+</div>
+
+{% else if tab == "accounts" %}
+<form class="adm-search" method="get" action="/admin/accounts">
+  <input class="input" name="q" value="{{ q }}" placeholder="Email starts with" maxlength="100" aria-label="Search accounts">
+  <button class="btn secondary" type="submit">Search</button>
+</form>
+<div class="card flush">
+<table class="adm-table">
+  <thead><tr><th>Email</th><th>Plan</th><th>Type</th><th class="num">Sites</th><th>Created</th><th>Status</th></tr></thead>
+  <tbody>
+  {% for a in accounts %}
+  <tr><td><a href="/admin/accounts/{{ a.id }}">{{ a.email }}</a>{% if a.admin %} <span class="tag">admin</span>{% endif %}</td><td>{{ a.plan }}</td><td>{{ a.kind }}</td><td class="num">{{ a.sites }}</td><td>{{ a.created }}</td><td>{% if a.suspended %}<span class="badge bad">Suspended</span>{% else %}<span class="badge ok">Active</span>{% endif %}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if accounts.is_empty() %}<p class="muted adm-empty">No accounts.</p>{% endif %}
+</div>
+{% include "_admin_pager.html" %}
+
+{% else if tab == "account" %}
+{% if let Some(a) = account %}
+<div class="adm-title"><h1>{{ a.email }}</h1>{% if a.suspended %}<span class="badge bad">Suspended</span>{% else %}<span class="badge ok">Active</span>{% endif %}{% if a.admin %}<span class="tag">admin</span>{% endif %}</div>
+<div class="card">
+  <div class="adm-line"><span class="muted">Plan</span><span>{{ a.plan }}</span></div>
+  <div class="adm-line"><span class="muted">Type</span><span>{{ a.kind }}</span></div>
+  <div class="adm-line"><span class="muted">Created</span><span>{{ a.created }}</span></div>
+  <div class="adm-line"><span class="muted">Sites</span><span>{{ a.sites }}</span></div>
+</div>
+<form class="card" method="post" action="/admin/accounts/{{ a.id }}/plan">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <div class="setting">
+    <div><b id="plan-label">Plan</b><span class="muted">Founding and Free access unlock paid features without billing.</span></div>
+    <div class="seg" role="radiogroup" aria-labelledby="plan-label">
+      {% for (k, l) in crate::admin::PLANS %}<label><input type="radio" name="value" value="{{ k }}"{% if a.plan_key == *k %} checked{% endif %}>{{ l }}</label>{% endfor %}
+    </div>
+  </div>
+  <div class="actions end"><button class="btn" type="submit">Save plan</button></div>
+</form>
+{% if !a.admin %}
+<div class="card">
+  <div class="setting">
+    <div><b>Sign in as this user</b><span class="muted">Opens their app read only for 30 minutes with a banner. Logged in the audit log.</span></div>
+    <form method="post" action="/admin/accounts/{{ a.id }}/sign-in"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn secondary" type="submit"{% if a.suspended %} disabled{% endif %}>Sign in as</button></form>
+  </div>
+  <div class="setting">
+    <div><b>{% if a.suspended %}Suspended{% else %}Suspend{% endif %}</b><span class="muted">A suspended account is signed out and cannot sign in. Its API keys stop working. Tracking continues.</span></div>
+    <form method="post" action="/admin/accounts/{{ a.id }}/suspend"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="value" value="{% if a.suspended %}off{% else %}on{% endif %}"><button class="btn secondary" type="submit">{% if a.suspended %}Unsuspend{% else %}Suspend{% endif %}</button></form>
+  </div>
+</div>
+{% endif %}
+<h2 class="adm-h">Sites</h2>
+<div class="card flush">
+<table class="adm-table">
+  <thead><tr><th>Domain</th><th class="num">Events, 24 hours</th><th>Created</th><th>Delete</th></tr></thead>
+  <tbody>
+  {% for s in sites %}
+  <tr><td>{{ s.domain }}</td><td class="num">{{ s.events }}</td><td>{{ s.created }}</td><td>
+    <form class="adm-confirm" method="post" action="/admin/sites/{{ s.id }}/delete"><input type="hidden" name="csrf" value="{{ csrf }}"><input class="input" name="confirm" placeholder="Type {{ s.domain }}" autocomplete="off" aria-label="Type {{ s.domain }} to delete it" required><button class="btn secondary" type="submit">Delete</button></form>
+  </td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if sites.is_empty() %}<p class="muted adm-empty">No sites.</p>{% endif %}
+</div>
+{% if !a.admin %}
+<form class="card" method="post" action="/admin/accounts/{{ a.id }}/delete">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <div class="setting">
+    <div><b>Delete account</b><span class="muted">Removes the account, its sites and their stored events for good. Type {{ a.email }} to confirm.</span></div>
+    <div class="actions"><input class="input" name="confirm" placeholder="{{ a.email }}" autocomplete="off" aria-label="Type {{ a.email }} to delete it" required><button class="btn danger" type="submit">Delete account</button></div>
+  </div>
+</form>
+{% endif %}
+{% endif %}
+
+{% else if tab == "sites" %}
+<form class="adm-search" method="get" action="/admin/sites">
+  <input class="input" name="q" value="{{ q }}" placeholder="Domain starts with" maxlength="100" aria-label="Search sites">
+  <button class="btn secondary" type="submit">Search</button>
+</form>
+<div class="card flush">
+<table class="adm-table">
+  <thead><tr><th>Domain</th><th>Owner</th><th class="num">Events, 24 hours</th><th>Created</th></tr></thead>
+  <tbody>
+  {% for s in sites %}
+  <tr><td>{{ s.domain }}</td><td>{{ s.owner }}</td><td class="num">{{ s.events }}</td><td>{{ s.created }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if sites.is_empty() %}<p class="muted adm-empty">No sites.</p>{% endif %}
+</div>
+{% include "_admin_pager.html" %}
+
+{% else if tab == "signups" %}
+<div class="card flush">
+<table class="adm-table">
+  <thead><tr><th>Email</th><th>List</th><th>Clients</th><th>Joined</th></tr></thead>
+  <tbody>
+  {% for s in signups %}
+  <tr><td>{{ s.email }}</td><td>{{ s.wedge }}</td><td>{{ s.clients }}</td><td>{{ s.created }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if signups.is_empty() %}<p class="muted adm-empty">No signups.</p>{% endif %}
+</div>
+{% include "_admin_pager.html" %}
+
+{% else if tab == "beta" %}
+{% if !note.is_empty() %}<p class="muted">{{ note }}</p>{% endif %}
+<div class="card flush">
+<table class="adm-table">
+  <thead><tr><th>Email</th><th>List</th><th>Site</th><th>Payments</th><th>Revenue</th><th>Audience</th><th>Applied</th><th></th></tr></thead>
+  <tbody>
+  {% for a in applications %}
+  <tr><td>{{ a.email }}</td><td>{{ a.wedge }}</td><td>{{ a.site }}</td><td>{{ a.payments }}</td><td>{{ a.revenue }}</td><td>{{ a.audience }}</td><td>{{ a.created }}</td><td>
+    {% if a.invited %}<span class="badge ok">Invited</span>{% else if can_invite %}<form method="post" action="/admin/beta/invite"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="email" value="{{ a.email }}"><button class="btn secondary" type="submit">Approve and invite</button></form>{% endif %}
+  </td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% else if tab == "audit" %}
+<div class="card flush">
+<table class="adm-table">
+  <thead><tr><th>When</th><th>Who</th><th>What</th><th>Target</th><th>Detail</th></tr></thead>
+  <tbody>
+  {% for e in audit %}
+  <tr><td>{{ e.created }}</td><td>{{ e.admin }}</td><td>{{ e.action }}</td><td>{{ e.target }}</td><td>{{ e.detail }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if audit.is_empty() %}<p class="muted adm-empty">Nothing yet.</p>{% endif %}
+</div>
+{% endif %}
+</main>
+</body>
+</html>

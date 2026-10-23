@@ -52,6 +52,7 @@
 - [systemd](self-host/systemd.md)
 - [Reverse proxy](self-host/reverse-proxy.md)
 - [Sign-in email](self-host/smtp.md)
+- [Admin panel](self-host/admin.md)
 - [Data, backups, upgrades](self-host/data.md)
 
 # Reference
