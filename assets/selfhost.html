@@ -16,7 +16,7 @@
 <meta property="og:image:height" content="506">
 <meta property="og:image:alt" content="Pencil drawing of a scale: a pile of gray balloons outweighed by a small stack of orange coins">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"WebSite","@id":"https://virling.com/#website","name":"Virling","url":"https://virling.com/","publisher":{"@id":"https://virling.com/#org"}},{"@type":"SoftwareApplication","name":"Virling","url":"https://virling.com/","description":"Open-source revenue attribution. Virling joins every visit to the payment that followed, so you can see which traffic channels bring paying customers. It reads payments from Stripe, Dodo Payments, Polar and LemonSqueezy with a read-only key and runs as one Rust binary on your own server.","applicationCategory":"BusinessApplication","applicationSubCategory":"Revenue analytics","operatingSystem":"Linux, macOS, Docker","license":"https://github.com/virling/virling/blob/main/LICENSE","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","description":"Self-hosting is free under AGPLv3."},"featureList":["Revenue by traffic channel, page and country","Payment journeys: the visits before each payment","Last non-direct or first-touch attribution with a 30 to 365 day lookback","Stripe, Dodo Payments, Polar and LemonSqueezy sync with read-only keys","Tracking script about 1.2 KB gzipped","Optional cookieless mode","Weekly branded client reports for agencies"],"publisher":{"@id":"https://virling.com/#org"},"sameAs":["https://github.com/virling/virling"]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"WebSite","@id":"https://virling.com/#website","name":"Virling","url":"https://virling.com/","publisher":{"@id":"https://virling.com/#org"}},{"@type":"SoftwareApplication","name":"Virling","url":"https://virling.com/","description":"Open-source revenue attribution. Virling joins every visit to the payment that followed, so you can see which traffic channels bring paying customers. It reads payments from Stripe, Dodo Payments, Polar and LemonSqueezy with a read-only key and runs as one Rust binary on your own server.","applicationCategory":"BusinessApplication","applicationSubCategory":"Revenue analytics","operatingSystem":"Linux, macOS, Docker","license":"https://github.com/virling/virling/blob/main/LICENSE","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","description":"Self-hosting is free under AGPLv3."},"featureList":["Revenue by traffic channel, page and country","Payment journeys: the visits before each payment","Last non-direct or first-touch attribution with a 30 to 365 day lookback","Stripe, Dodo Payments, Polar and LemonSqueezy sync with read-only keys","Tracking script about 1.4 KB gzipped","Optional cookieless mode","Weekly branded client reports for agencies"],"publisher":{"@id":"https://virling.com/#org"},"sameAs":["https://github.com/virling/virling"]}]}</script>
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
@@ -110,15 +110,15 @@
       <dl class="spec-list">
         <div><dt>Binary</dt><dd>One Rust binary. <span>Linux x86_64 and arm64, macOS, Docker.</span></dd></div>
         <div><dt>Storage</dt><dd>Embedded DuckDB for events, SQLite for settings. <span>No Postgres, no ClickHouse, no Redis.</span></dd></div>
-        <div><dt>Script</dt><dd>About 1.2 KB gzipped, one tag in your head.</dd></div>
+        <div><dt>Script</dt><dd>About 1.4 KB gzipped, one tag in your head.</dd></div>
         <div><dt>License</dt><dd>AGPLv3</dd></div>
         <div><dt>Payments</dt><dd>Read-only keys for Stripe, Dodo Payments and Polar. <span>LemonSqueezy adds a webhook.</span></dd></div>
       </dl>
     </div>
     <div class="spec-code">
-      <p class="soon"><span class="chip">Available with the first build</span><span>Add this tag to your site's head.</span></p>
+      <p class="soon"><span class="chip">Hosted beta</span><span>Add this tag to your site's head.</span></p>
       <div class="code">
-        <pre data-snippet>&lt;script defer src=<b>"https://app.virling.com/v.js"</b> data-site=<b>"yoursite.com"</b>&gt;&lt;/script&gt;</pre>
+        <pre data-snippet>&lt;script defer src=<b>"https://beta.virling.com/v.js"</b> data-site=<b>"yoursite.com"</b>&gt;&lt;/script&gt;</pre>
         <button class="btn sm copy" type="button" data-copy-snippet>Copy</button>
         <a class="btn sm ghost" href="https://docs.virling.com" data-goal="docs_click">How to install</a>
       </div>
