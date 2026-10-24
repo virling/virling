@@ -11,6 +11,9 @@
 /.well-known/oauth-protected-resource
   Content-Type: application/json
 
+/.well-known/poppy.json
+  Content-Type: application/json
+
 /.well-known/*
   Access-Control-Allow-Origin: *
 
