@@ -1,0 +1,1 @@
+ALTER TABLE sites ADD COLUMN ignore_ips TEXT NOT NULL DEFAULT '';

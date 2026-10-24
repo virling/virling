@@ -33,6 +33,8 @@ pub struct Incoming {
     v: Option<String>,
     /// screen width in CSS px
     w: Option<u32>,
+    /// window.devicePixelRatio
+    d: Option<f64>,
     /// goal name
     g: Option<String>,
     /// navigator.language
@@ -362,6 +364,40 @@ pub(crate) fn client_ip(
     peer.ip()
 }
 
+/// Whether an address or range is valid as an ignore-list entry.
+pub(crate) fn valid_ignore(entry: &str) -> bool {
+    match entry.split_once('/') {
+        Some((net, len)) => net
+            .parse::<IpAddr>()
+            .ok()
+            .zip(len.parse::<u32>().ok())
+            .is_some_and(|(net, len)| len <= if net.is_ipv4() { 32 } else { 128 }),
+        None => entry.parse::<IpAddr>().is_ok(),
+    }
+}
+
+/// Whether the address is on a site's ignore list of addresses and CIDR ranges.
+fn ip_ignored(list: &str, ip: IpAddr) -> bool {
+    let wide = |ip: IpAddr| match ip {
+        IpAddr::V4(v) => (u128::from(u32::from(v)), 32),
+        IpAddr::V6(v) => (u128::from(v), 128),
+    };
+    let (addr, width) = wide(ip);
+    list.split_whitespace().any(|entry| {
+        let (net, len) = entry.split_once('/').unwrap_or((entry, "128"));
+        let Ok(net) = net.parse::<IpAddr>() else {
+            return false;
+        };
+        let (net, net_width) = wide(net);
+        let Ok(len) = len.parse::<u32>() else {
+            return false;
+        };
+        let shift = net_width - len.min(net_width);
+        net_width == width
+            && net.checked_shr(shift).unwrap_or(0) == addr.checked_shr(shift).unwrap_or(0)
+    })
+}
+
 /// Operating system from a user agent; iPadOS that reports as a Mac reads as macOS.
 fn os(user_agent: &str) -> &'static str {
     if ["iPhone", "iPad", "iPod"]
@@ -382,6 +418,13 @@ fn os(user_agent: &str) -> &'static str {
     } else {
         "Other"
     }
+}
+
+/// Chromium claiming macOS on a screen under 1024 device pixels: no Mac has one, headless browsers posing as Macs do.
+fn impossible_mac(user_agent: &str, width: Option<u32>, ratio: Option<f64>) -> bool {
+    user_agent.contains("Macintosh")
+        && user_agent.contains("Chrome/")
+        && width.is_some_and(|w| f64::from(w) * ratio.unwrap_or(1.0) < 1024.0)
 }
 
 pub(crate) fn host_belongs(host: &str, domain: &str) -> bool {
@@ -466,6 +509,9 @@ pub async fn collect(
         else {
             continue;
         };
+        if ip_ignored(&site.ignore_ips, ip) {
+            continue;
+        }
         if !state
             .limiter
             .allow(&site.id, state.config.events_per_second)
@@ -559,6 +605,8 @@ pub async fn collect(
             Some("automated")
         } else if e.w == Some(0) {
             Some("no screen")
+        } else if impossible_mac(user_agent, e.w, e.d) {
+            Some("impossible screen")
         } else {
             None
         };
@@ -733,6 +781,36 @@ mod tests {
         assert_eq!(client_ip(&h, peer, true, true), ip("198.51.100.4"));
         assert_eq!(client_ip(&h, peer, true, false), ip("192.0.2.1"));
         assert_eq!(client_ip(&h, peer, false, false), ip("127.0.0.1"));
+    }
+
+    #[test]
+    fn macs_have_desktop_screens() {
+        let mac = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
+        let ipad = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15";
+        let win = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
+        assert!(impossible_mac(mac, Some(800), None));
+        assert!(impossible_mac(mac, Some(800), Some(1.0)));
+        assert!(!impossible_mac(mac, Some(960), Some(1.5)), "zoomed in");
+        assert!(!impossible_mac(mac, Some(1440), None));
+        assert!(!impossible_mac(mac, None, None));
+        assert!(!impossible_mac(ipad, Some(820), Some(2.0)));
+        assert!(!impossible_mac(ipad, Some(820), None));
+        assert!(!impossible_mac(win, Some(800), None));
+    }
+
+    #[test]
+    fn ignored_addresses_and_ranges_match() {
+        let ip = |s: &str| s.parse::<IpAddr>().unwrap();
+        let list = "203.0.113.7 198.51.100.0/24 2001:db8::/32";
+        assert!(ip_ignored(list, ip("203.0.113.7")));
+        assert!(!ip_ignored(list, ip("203.0.113.8")));
+        assert!(ip_ignored(list, ip("198.51.100.200")));
+        assert!(!ip_ignored(list, ip("198.51.101.1")));
+        assert!(ip_ignored(list, ip("2001:db8:1::1")));
+        assert!(!ip_ignored(list, ip("2001:db9::1")));
+        assert!(!ip_ignored("", ip("203.0.113.7")));
+        assert!(valid_ignore("10.0.0.0/8") && valid_ignore("::1"));
+        assert!(!valid_ignore("10.0.0.0/33") && !valid_ignore("nope"));
     }
 
     #[test]

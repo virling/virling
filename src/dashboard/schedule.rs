@@ -221,6 +221,7 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
             same_visit: String::new(),
             return_minutes: 5,
             sample_data: false,
+            ignore_ips: String::new(),
         };
         let s = Schedule {
             on: true,

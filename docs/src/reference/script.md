@@ -50,6 +50,8 @@ Calls queued in `window.virling.q` before the script loads are replayed in order
 | --- | --- | --- | --- |
 | `virling_vid` | `v` followed by a timestamp and random characters | 1 year, renewed on each visit | Domain is the registrable domain, so subdomains share it; Path `/`, `SameSite=Lax`, `Secure` on HTTPS |
 
+`virling_ignore` is set to `1` for a year only when you open the site with `#virling-ignore`; while it is set the script sends nothing. Opening `#virling-track` removes it.
+
 The server accepts visitor IDs of 8 to 64 letters, digits and dashes. Anything else is replaced with the daily cookieless hash.
 
 ## Automatic behavior

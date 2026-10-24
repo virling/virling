@@ -28,7 +28,7 @@ It runs as one Rust binary with embedded storage. No Postgres, no ClickHouse, no
 
 ## What works today
 
-- **Tracking script** (`/v.js`, about 1.3 KB gzipped, source in `assets/v.src.js`): pageviews, UTM tags, referrers, single-page-app route changes, custom goals, and a first-party visitor ID. Stripe Payment Links, Polar checkout links and Dodo payment links get the visitor ID added automatically.
+- **Tracking script** (`/v.js`, about 1.4 KB gzipped, source in `assets/v.src.js`): pageviews, UTM tags, referrers, single-page-app route changes, custom goals, and a first-party visitor ID. Stripe Payment Links, Polar checkout links and Dodo payment links get the visitor ID added automatically.
 - **Cookieless mode**: a daily-rotating salted hash instead of a cookie, for sites that want no consent banner, at the cost of payment attribution.
 - **Event ingest** into embedded DuckDB, with bot filtering, per-site rate limits and channel rules (Paid, Email, AI, Organic search, Communities, Social, Referral, Direct). Visitor IPs are never stored.
 - **Payment sync** from Stripe, Dodo Payments, Polar and LemonSqueezy with a read-only key (LemonSqueezy keys cannot be limited): a 90-day backfill, then a poll every minute. Virling never creates, changes or refunds anything. LemonSqueezy payments count toward revenue, but linking them to visits waits on webhook support.

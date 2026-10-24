@@ -1545,6 +1545,7 @@ pub async fn public(
             same_visit: String::new(),
             return_minutes: 5,
             sample_data: false,
+            ignore_ips: String::new(),
         },
         today: OffsetDateTime::now_utc().to_offset(offset).date(),
         first_day: first.map(|t| t.to_offset(offset).date()),

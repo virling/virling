@@ -1,6 +1,6 @@
 # Add the script
 
-One tag, about 1.2 KB gzipped. It records pageviews, referrers, UTM tags, route changes in single-page apps and the goals you send.
+One tag, about 1.4 KB gzipped. It records pageviews, referrers, UTM tags, route changes in single-page apps and the goals you send.
 
 ```html
 <script defer src="https://stats.example.com/v.js"
@@ -25,7 +25,7 @@ On load, and on each route change, the script sends one pageview to `/api/event`
 | Referrer | `document.referrer` on the first event of the page load. Later route changes send none. |
 | Site | The `data-site` value. |
 | Visitor ID | The `virling_vid` first-party cookie, unless cookieless. |
-| Screen width | `screen.width` in CSS pixels, used for Desktop, Tablet or Mobile. |
+| Screen width | `screen.width` in CSS pixels, used for Desktop, Tablet or Mobile, and `devicePixelRatio`. |
 | Language | `navigator.language`, stored as a code such as `en-US`. In cookieless mode only the base code, such as `en`, is kept. |
 | Bot flag | Sent only when `navigator.webdriver` is set or `navigator.languages` is empty, as in Playwright, Puppeteer or Selenium. |
 
@@ -60,8 +60,11 @@ With [cookieless mode](cookieless.md) no cookie is set.
 - On `localhost`, `127.*` and `[::1]`, unless the tag has `data-dev`.
 - When the tag has `data-respect-gpc` and the browser sends Global Privacy Control.
 - When `data-site` is missing.
+- In a browser you opted out: open your site with `#virling-ignore` on the end (Site settings has the link) and the script sets a `virling_ignore` cookie and sends nothing from then on. `#virling-track` turns it off again. The cookie belongs to the host you opened, so do it for each host you use.
 
-On the server, events from bots, from pages on another host and for sites that do not exist are dropped. Events from automated browsers and pages with no screen are kept apart as bots and left out of every number. See [Privacy and consent](privacy.md).
+To leave out an address or a range, such as an office, list it under Ignored IP addresses in Site settings. It is checked as each event arrives and is never stored.
+
+On the server, events from bots, from pages on another host and for sites that do not exist are dropped. Events from automated browsers, pages with no screen, and Chrome claiming macOS on a screen under 1,024 device pixels are kept apart as bots and left out of every number. See [Privacy and consent](privacy.md).
 
 ## Check that it works
 
