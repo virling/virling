@@ -64,6 +64,10 @@ On a site with no events yet, the setup step and the empty dashboard offer **Try
 
 Sample data is never counted anywhere that matters: the public dashboard, client report links and weekly emails stay off while it is present, and no payment provider is contacted. It is never mixed with real data: the first real pageview, or connecting a payment provider, removes it automatically. Only the account owner can add or remove it.
 
+## Telegram alerts
+
+In **Site settings > Telegram alerts**, paste a bot token from @BotFather and your chat ID. Virling sends a test message, then one message per new paid payment, with its amount and source, within a minute. The token is stored encrypted, and only the account owner can set it. Alerts stay off while a site holds sample data. Traffic-spike and daily-digest messages are not available yet.
+
 ## Share a site
 
 In **Site settings**:

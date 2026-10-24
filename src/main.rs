@@ -40,6 +40,7 @@ mod stack;
 mod stats;
 mod sync;
 mod team;
+mod telegram;
 mod ua;
 mod visitor_pages;
 mod visitors;
@@ -267,6 +268,7 @@ async fn main() -> anyhow::Result<()> {
             ));
             if app_enabled {
                 tokio::spawn(sync::run(state.clone()));
+                tokio::spawn(telegram::run(state.clone()));
                 tokio::spawn(answers::run(state.clone()));
                 favicon::spawn_sources(state.clone());
                 tokio::spawn(dashboard::schedule::run(state.clone()));

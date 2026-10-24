@@ -108,6 +108,26 @@
   {% if connections.is_empty() %}<p class="empty">No payment provider connected yet.</p>{% endif %}
 </div>
 </section>
+<section class="set-sec" id="telegram">
+<div class="set-intro"><h2>Telegram alerts</h2><p class="muted">Get a Telegram message for each new payment on {{ shell.domain }}. Create a bot with @BotFather, send it a message, then paste its token and your chat ID. The token is stored encrypted.</p></div>
+<div class="card">
+  {% if !telegram_note.is_empty() %}<div class="notice ok-note" role="status">{{ telegram_note }}</div>{% endif %}
+  {% if let Some((chat, error)) = telegram %}
+  <div class="conn">
+    <div class="grow"><b>Chat <span class="mono">{{ chat }}</span></b> <span class="badge {% if error.is_empty() %}ok{% else %}bad{% endif %}">{% if error.is_empty() %}On{% else %}Error{% endif %}</span>{% if !error.is_empty() %}<span class="err small">{{ error }}</span>{% endif %}</div>
+    <form method="post" action="/app/{{ shell.domain }}/settings/telegram/remove" data-confirm="Turn off Telegram alerts?">
+      <button class="btn ghost" type="submit">Turn off</button>
+    </form>
+  </div>
+  {% else %}
+  <form method="post" action="/app/{{ shell.domain }}/settings/telegram" class="stack">
+    <label class="field">Bot token<input class="input" name="token" type="password" autocomplete="off" spellcheck="false" required></label>
+    <label class="field">Chat ID<input class="input" name="chat_id" autocomplete="off" spellcheck="false" required></label>
+    <div class="actions"><button class="btn" type="submit">Send a test and turn on</button></div>
+  </form>
+  {% endif %}
+</div>
+</section>
 <section class="set-sec" id="ai-answers">
 <div class="set-intro"><h2>AI answers</h2><p class="muted">Once a week, Virling asks ChatGPT, Claude, Perplexity and Gemini your buyer questions with web search on, and counts how often they name {{ shell.domain }}. Pages assistants open while answering are counted without any setup.</p></div>
 <div class="card">

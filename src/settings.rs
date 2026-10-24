@@ -100,6 +100,9 @@ struct SettingsPage {
     public_hide: bool,
     public_saved: bool,
     ai: AiSettings,
+    /// The chat that gets payment alerts and the last send error, when set up.
+    telegram: Option<(String, String)>,
+    telegram_note: &'static str,
 }
 
 #[derive(Template)]
@@ -235,9 +238,23 @@ async fn show(
         Ok(ai) => ai,
         Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
     };
+    let telegram: Option<(String, Option<String>)> =
+        sqlx::query_as("SELECT chat_id, last_error FROM telegram_alerts WHERE site_id = ?")
+            .bind(&ctx.site.id)
+            .fetch_optional(&state.db)
+            .await
+            .ok()
+            .flatten();
+    let telegram_note = match (q.saved.as_deref(), q.error.as_deref()) {
+        (Some("telegram"), _) => "Saved. A test message was sent to your chat.",
+        (_, Some("telegram")) => "Telegram did not accept that bot token and chat ID.",
+        _ => "",
+    };
     let now = OffsetDateTime::now_utc();
     render(SettingsPage {
         ai,
+        telegram: telegram.map(|(chat, error)| (chat, error.unwrap_or_default())),
+        telegram_note,
         title: "Site settings",
         script_host: state.config.base_url.clone(),
         cookieless: ctx.site.cookieless,

@@ -343,6 +343,14 @@ pub fn router(state: AppState) -> Router {
             .route(
                 "/app/{domain}/settings/disconnect",
                 post(settings::disconnect),
+            )
+            .route(
+                "/app/{domain}/settings/telegram",
+                post(crate::telegram::save),
+            )
+            .route(
+                "/app/{domain}/settings/telegram/remove",
+                post(crate::telegram::remove),
             );
         app = app.merge(crate::admin::routes());
         if oauth::enabled(&state.config) {
