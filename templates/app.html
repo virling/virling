@@ -52,6 +52,9 @@
   </div>
 </aside>
 <div class="main">
+  {% if let Some(owner) = shell.sample %}
+  <div class="sample-bar" role="status"><span><b>Sample data.</b><span class="more"> These reports are generated for this site, not real visitors.</span></span>{% if owner %}<form method="post" action="/app/{{ shell.domain }}/sample/remove"><button class="d3-btn sm" type="submit">Remove sample data</button></form>{% endif %}</div>
+  {% endif %}
   {% block top %}
   <header class="top">
     <button class="burger" type="button" aria-controls="side" aria-expanded="false" aria-label="Menu" data-burger>
@@ -63,9 +66,6 @@
     {% block tools %}{% endblock %}
   </header>
   {% endblock %}
-  {% if let Some(owner) = shell.sample %}
-  <div class="notice row sample" role="status"><span><b>Sample data.</b> These reports are generated for this site, not real visitors.</span>{% if owner %}<form method="post" action="/app/{{ shell.domain }}/sample/remove"><button class="d3-btn sm" type="submit">Remove sample data</button></form>{% endif %}</div>
-  {% endif %}
   <main class="content">
   {% block content %}{% endblock %}
   </main>
