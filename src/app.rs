@@ -369,6 +369,7 @@ pub fn router(state: AppState) -> Router {
                     "/.well-known/oauth-authorization-server",
                     get(oauth::authorization_server),
                 )
+                .route("/oauth/jwks", get(oauth::jwks))
                 .route("/oauth/register", post(oauth::register))
                 .route(
                     "/oauth/authorize",

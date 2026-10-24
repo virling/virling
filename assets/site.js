@@ -234,3 +234,40 @@ document.addEventListener("click", (e) => {
   const el = e.target.closest && e.target.closest("[data-goal]");
   if (el && window.virling) virling("goal", el.dataset.goal);
 }, true);
+
+const modelContext = document.modelContext || navigator.modelContext;
+if (modelContext && modelContext.registerTool) {
+  const stop = new AbortController();
+  addEventListener("pagehide", () => stop.abort());
+  const say = (t) => ({ content: [{ type: "text", text: t }] });
+  const pages = { home: "/", pricing: "/pricing", "self-host": "/self-host", agency: "/agency", demo: "/demo", integrations: "/integrations", changelog: "/changelog", blog: "/blog" };
+  modelContext.registerTool({
+    name: "open_page",
+    description: "Open a page of the Virling site.",
+    inputSchema: { type: "object", properties: { page: { type: "string", enum: Object.keys(pages) } }, required: ["page"] },
+    execute: async ({ page }) => {
+      if (!pages[page]) return say("Unknown page.");
+      location.href = pages[page];
+      return say("Opening " + page + ".");
+    },
+  }, { signal: stop.signal });
+  modelContext.registerTool({
+    name: "read_page",
+    description: "Read the page that is open now as Markdown.",
+    inputSchema: { type: "object", properties: {} },
+    execute: async () => {
+      const path = location.pathname.replace(/\/$/, "") || "/index";
+      const res = await fetch(path + ".md");
+      return say(res.ok ? await res.text() : "No Markdown copy of this page.");
+    },
+  }, { signal: stop.signal });
+  modelContext.registerTool({
+    name: "start_beta",
+    description: "Open the sign-in page of the hosted Virling beta. A person signs in there with their email; no application is needed.",
+    inputSchema: { type: "object", properties: {} },
+    execute: async () => {
+      location.href = "https://beta.virling.com/login";
+      return say("Opening the beta sign-in page.");
+    },
+  }, { signal: stop.signal });
+}
