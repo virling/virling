@@ -77,7 +77,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Command {
     /// Run the server (default)
-    Serve(ServeArgs),
+    Serve(Box<ServeArgs>),
     /// Add a site to track
     AddSite {
         domain: String,
@@ -225,7 +225,7 @@ async fn main() -> anyhow::Result<()> {
 
     let command = match cli.command {
         Some(c) => c,
-        None => Command::Serve(ServeArgs::parse_from(["serve"])),
+        None => Command::Serve(Box::new(ServeArgs::parse_from(["serve"]))),
     };
     match command {
         Command::Serve(args) => {

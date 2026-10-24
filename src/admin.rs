@@ -196,11 +196,7 @@ impl FromRequestParts<AppState> for Admin {
         if writes && !same_origin(&parts.headers, &state.config.base_url) {
             return Err(StatusCode::FORBIDDEN.into_response());
         }
-        let limit = if writes { 2 } else { 10 };
-        if !state
-            .limiter
-            .allow(&format!("admin:{writes}:{email}"), limit)
-        {
+        if writes && !state.limiter.allow(&format!("admin:{email}"), 2) {
             return Err(
                 (StatusCode::TOO_MANY_REQUESTS, [(header::RETRY_AFTER, "1")]).into_response(),
             );
@@ -1236,10 +1232,12 @@ mod tests {
             trust_proxy: false,
             events_per_second: 200,
             base_url: "http://localhost:8080".into(),
+            mcp_url: None,
             waitlist_from: "Virling <hello@virling.com>".into(),
             hosted: true,
             ai_keys: Default::default(),
             ai_budget_usd: None,
+            turnstile: None,
         };
         let mut state = AppState::new(
             config,
@@ -1826,7 +1824,7 @@ mod tests {
         assert_eq!(missing.status(), StatusCode::NOT_FOUND);
         let mut limited = 0;
         for _ in 0..30 {
-            if send(&f.state, get("/admin/audit", Some(&f.admin)))
+            if send(&f.state, change("/admin/accounts/x/suspend", &f.admin, ""))
                 .await
                 .status()
                 == StatusCode::TOO_MANY_REQUESTS

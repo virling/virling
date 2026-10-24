@@ -23,7 +23,7 @@ An operator panel at `/admin` lists accounts, sites, plans, signups, beta applic
 - **Beta:** approve an applicant and email the invite through the [Resend](https://resend.com) API with `RESEND_API_KEY`.
 - **Audit log:** every action above records who did it, what, the target and when. The panel shows the latest 100.
 
-Admin pages are never cached, are rate limited, and accept changes only from the same origin with a per-session token. A suspended or support session cannot reach them. Secrets are never shown.
+Admin pages are never cached, changes are rate limited, and they accept changes only from the same origin with a per-session token. A suspended or support session cannot reach them. Secrets are never shown.
 
 ## Beta applications
 
