@@ -162,12 +162,6 @@ struct ServeArgs {
         default_value = "Rahul at Virling <hello@virling.com>"
     )]
     waitlist_from: String,
-    /// Emails allowed into /admin, comma separated. Unset: no admin panel.
-    #[arg(long, env = "VIRLING_ADMINS")]
-    admins: Option<String>,
-    /// Resend API key for beta invite emails from the admin panel
-    #[arg(long, env = "RESEND_API_KEY", hide_env_values = true)]
-    resend_key: Option<String>,
     /// URL of the website's beta applications feed, listed in the admin panel
     #[arg(long, env = "VIRLING_APPLICATIONS_URL")]
     applications_url: Option<String>,
@@ -268,8 +262,6 @@ async fn main() -> anyhow::Result<()> {
             let app_enabled = config.app;
             let mut state = AppState::new(config, db, Arc::new(events), mailer, vault);
             state.admin = Arc::new(admin::Settings::new(
-                args.admins.as_deref(),
-                args.resend_key,
                 args.applications_url,
                 args.applications_token,
             ));

@@ -1,4 +1,4 @@
-//! Operator panel at /admin, open to the emails in VIRLING_ADMINS; everyone else gets a 404.
+//! Operator panel at /admin, open to the emails in the admins table; everyone else gets a 404.
 #![allow(clippy::type_complexity)]
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -12,7 +12,6 @@ use axum::response::{Html, IntoResponse, Redirect, Response};
 use axum::routing::{get, post};
 use axum::{Form, Router};
 use serde::Deserialize;
-use serde_json::json;
 use sqlx::SqliteConnection;
 use time::OffsetDateTime;
 use time::macros::format_description;
@@ -24,7 +23,6 @@ use crate::waitlist::valid_email;
 const PAGE: usize = 50;
 const SUPPORT_TTL_SECS: i64 = 30 * 60;
 const BETA_TTL: Duration = Duration::from_secs(60);
-const RESEND_URL: &str = "https://api.resend.com/emails";
 const RETURN_COOKIE: &str = "virling_return";
 pub const PLANS: [(&str, &str); 4] = [
     ("self_hosted", "None"),
@@ -35,10 +33,7 @@ pub const PLANS: [(&str, &str); 4] = [
 
 #[derive(Default)]
 pub struct Settings {
-    admins: Vec<String>,
-    resend_key: Option<String>,
     applications: Option<(String, String)>,
-    resend_url: Option<String>,
     beta: Mutex<Beta>,
 }
 
@@ -62,30 +57,28 @@ struct Application {
 }
 
 impl Settings {
-    pub fn new(
-        admins: Option<&str>,
-        resend_key: Option<String>,
-        applications_url: Option<String>,
-        applications_token: Option<String>,
-    ) -> Self {
+    pub fn new(applications_url: Option<String>, applications_token: Option<String>) -> Self {
         Settings {
-            admins: admins
-                .unwrap_or_default()
-                .split(',')
-                .map(|e| e.trim().to_ascii_lowercase())
-                .filter(|e| !e.is_empty())
-                .collect(),
-            resend_key: resend_key.filter(|k| !k.is_empty()),
             applications: applications_url
                 .zip(applications_token)
                 .filter(|(u, t)| !u.is_empty() && !t.is_empty()),
             ..Default::default()
         }
     }
+}
 
-    fn is_admin(&self, email: &str) -> bool {
-        self.admins.iter().any(|a| a.eq_ignore_ascii_case(email))
-    }
+async fn is_admin(db: &sqlx::SqlitePool, email: &str) -> bool {
+    sqlx::query_scalar::<_, i64>("SELECT 1 FROM admins WHERE email = lower(?)")
+        .bind(email)
+        .fetch_optional(db)
+        .await
+        .is_ok_and(|r| r.is_some())
+}
+
+async fn admin_emails(db: &sqlx::SqlitePool) -> sqlx::Result<Vec<String>> {
+    sqlx::query_scalar("SELECT email FROM admins ORDER BY email")
+        .fetch_all(db)
+        .await
 }
 
 fn now() -> i64 {
@@ -189,9 +182,10 @@ impl FromRequestParts<AppState> for Admin {
         .await
         .ok()
         .flatten();
-        let email = email
-            .filter(|e| state.admin.is_admin(e))
-            .ok_or_else(not_found)?;
+        let email = email.ok_or_else(not_found)?;
+        if !is_admin(&state.db, &email).await {
+            return Err(not_found());
+        }
         let writes = !matches!(parts.method, Method::GET | Method::HEAD);
         if writes && !same_origin(&parts.headers, &state.config.base_url) {
             return Err(StatusCode::FORBIDDEN.into_response());
@@ -252,7 +246,7 @@ fn notice(code: &str) -> &'static str {
         "invited" => "Invite sent.",
         "already" => "Already invited.",
         "failed" => "The invite email could not be sent. See the server log.",
-        "nomail" => "Set RESEND_API_KEY to send invites.",
+        "nomail" => "Email is not configured. Set VIRLING_SMTP_URL to send invites.",
         "nomatch" => "That does not match. Nothing was changed.",
         "admin" => "Not allowed for an admin account.",
         "inactive" => "Nothing to sign in to: the account is suspended.",
@@ -321,12 +315,12 @@ struct Page {
     stats: Vec<(String, String)>,
     health: Vec<(String, String)>,
     busiest: Vec<(String, String)>,
+    admins: Vec<String>,
     accounts: Vec<AccountRow>,
     account: Option<AccountRow>,
     sites: Vec<SiteRow>,
     signups: Vec<SignupRow>,
     applications: Vec<ApplicationRow>,
-    can_invite: bool,
     audit: Vec<AuditRow>,
 }
 
@@ -345,7 +339,7 @@ pub struct View {
 }
 
 impl View {
-    fn page(&self, state: &AppState, admin: &Admin, tab: &'static str) -> Page {
+    fn page(&self, _state: &AppState, admin: &Admin, tab: &'static str) -> Page {
         Page {
             tab,
             admin: admin.email.clone(),
@@ -359,7 +353,6 @@ impl View {
                 .chars()
                 .take(100)
                 .collect(),
-            can_invite: state.admin.resend_key.is_some(),
             ..Default::default()
         }
     }
@@ -409,12 +402,13 @@ async fn account_rows(
     .bind(hi)
     .fetch_all(&state.db)
     .await?;
+    let admins = admin_emails(&state.db).await?;
     Ok(rows
         .into_iter()
         .map(
             |(id, email, plan, kind, created, suspended, sites)| AccountRow {
                 id,
-                admin: state.admin.is_admin(&email),
+                admin: admins.contains(&email),
                 email,
                 plan: label(&plan),
                 plan_key: plan,
@@ -534,16 +528,13 @@ pub async fn overview(
             .into(),
         ),
         (
-            "Invite email key".into(),
-            on(state.admin.resend_key.is_some()),
-        ),
-        (
             "Applications feed".into(),
             on(state.admin.applications.is_some()),
         ),
         ("Support sessions open".into(), support.to_string()),
     ];
     page.busiest = busiest;
+    page.admins = admin_emails(&state.db).await.unwrap_or_default();
     render(page)
 }
 
@@ -768,10 +759,9 @@ async fn target(state: &AppState, id: &str) -> Option<(String, bool)> {
         .await
         .ok()
         .flatten();
-    email.map(|e| {
-        let admin = state.admin.is_admin(&e);
-        (e, admin)
-    })
+    let email = email?;
+    let admin = is_admin(&state.db, &email).await;
+    Some((email, admin))
 }
 
 pub async fn set_plan(
@@ -1089,24 +1079,18 @@ pub struct Invite {
     email: String,
 }
 
-async fn send_invite(state: &AppState, key: &str, to: &str) -> anyhow::Result<()> {
+async fn send_invite(state: &AppState, to: &str) -> anyhow::Result<()> {
     let link = format!("{}/login", state.config.base_url);
-    let body = json!({
-        "from": state.config.waitlist_from,
-        "to": [to],
-        "subject": "You are in the Virling beta",
-        "text": format!("You are in the Virling beta.\n\nSign in with this email address:\n{link}\n\nWe email you a one-time sign-in link that works for 15 minutes."),
-        "html": format!("<p>You are in the Virling beta.</p><p><a href=\"{link}\">Sign in to Virling</a> with this email address. We email you a one-time sign-in link that works for 15 minutes.</p>"),
-    });
+    let text = format!(
+        "You are in the Virling beta.\n\nSign in with this email address:\n{link}\n\nWe email you a one-time sign-in link that works for 15 minutes."
+    );
+    let html = format!(
+        "<p>You are in the Virling beta.</p><p><a href=\"{link}\">Sign in to Virling</a> with this email address. We email you a one-time sign-in link that works for 15 minutes.</p>"
+    );
     state
-        .http
-        .post(state.admin.resend_url.as_deref().unwrap_or(RESEND_URL))
-        .bearer_auth(key)
-        .json(&body)
-        .send()
-        .await?
-        .error_for_status()?;
-    Ok(())
+        .mailer
+        .send(to, "You are in the Virling beta", text, html)
+        .await
 }
 
 /// Approves a beta applicant and emails the invite.
@@ -1130,9 +1114,9 @@ pub async fn invite(
     if !applied || !valid_email(&email) {
         return back("/admin/beta", "nomatch");
     }
-    let Some(key) = state.admin.resend_key.as_deref() else {
+    if matches!(*state.mailer, crate::mail::Mailer::Log) {
         return back("/admin/beta", "nomail");
-    };
+    }
     let recorded = async {
         let mut tx = state.db.begin().await?;
         let new = sqlx::query(
@@ -1156,7 +1140,7 @@ pub async fn invite(
         Ok(false) => return back("/admin/beta", "already"),
         Err(err) => return unavailable(err, "recording the invite"),
     }
-    if let Err(err) = send_invite(&state, key, &email).await {
+    if let Err(err) = send_invite(&state, &email).await {
         tracing::error!(%err, "sending the beta invite failed");
         let undo = async {
             let mut tx = state.db.begin().await?;
@@ -1239,19 +1223,21 @@ mod tests {
             ai_budget_usd: None,
             turnstile: None,
         };
-        let mut state = AppState::new(
+        let state = AppState::new(
             config,
             db,
             store,
             crate::mail::Mailer::Capture(Default::default()),
             crate::crypto::Vault::load(dir.path(), None).unwrap(),
         );
-        state.admin = Arc::new(Settings::new(
-            Some(&format!(" {} , second@example.com", ADMIN.to_uppercase())),
-            Some("re_secret_key".into()),
-            None,
-            None,
-        ));
+        for email in [ADMIN, "second@example.com"] {
+            sqlx::query("INSERT INTO admins (email, created_at) VALUES (?, ?)")
+                .bind(email)
+                .bind(now())
+                .execute(&state.db)
+                .await
+                .unwrap();
+        }
         let (_, admin) = session(&state, ADMIN).await;
         let (user, token) = session(&state, "me@example.com").await;
         let site = crate::sites::create_site(&state.db, &user, "example.com", "UTC")
@@ -1407,14 +1393,20 @@ mod tests {
             "csrf=x&value=on".into(),
         );
         assert_eq!(call(&f.state, forged).await.status(), StatusCode::NOT_FOUND);
-        let none = AppState {
-            admin: Arc::default(),
-            ..f.state.clone()
-        };
+        sqlx::query("DELETE FROM admins WHERE email = ?")
+            .bind(ADMIN)
+            .execute(&f.state.db)
+            .await
+            .unwrap();
         assert_eq!(
-            call(&none, get("/admin", Some(&f.admin))).await.status(),
+            call(&f.state, get("/admin", Some(&f.admin))).await.status(),
             StatusCode::NOT_FOUND
         );
+        sqlx::query("INSERT INTO admins (email, created_at) VALUES (?, 0)")
+            .bind(ADMIN)
+            .execute(&f.state.db)
+            .await
+            .unwrap();
         sqlx::query("UPDATE accounts SET suspended_at = 1 WHERE email = ?")
             .bind(ADMIN)
             .execute(&f.state.db)
@@ -1696,23 +1688,18 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn beta_invites_go_out_through_resend() {
+    async fn beta_invites_go_out_through_the_mailer() {
         let mut f = setup().await;
         let feed = r#"[{"email":"Ann@Example.com","wedge":"agency","created_at":1790000000000,"site":"ann.dev","payments":"stripe","revenue":"1k_10k","audience":"clients"},{"email":"bob@example.com","wedge":"selfhost","created_at":1790000100000,"site":null,"payments":null,"revenue":null,"audience":null}]"#;
         let (feed_url, feed_seen) = mock("200 OK", feed).await;
-        let (resend_url, resend_seen) = mock("200 OK", r#"{"id":"1"}"#).await;
-        let (fail_url, _) = mock("500 Internal Server Error", "{}").await;
-        let settings = |resend: &str| {
-            let mut s = Settings::new(
-                Some(ADMIN),
-                Some("re_secret_key".into()),
-                Some(feed_url.clone()),
-                Some("feed_secret".into()),
-            );
-            s.resend_url = Some(resend.to_string());
-            Arc::new(s)
+        f.state.admin = Arc::new(Settings::new(
+            Some(feed_url.clone()),
+            Some("feed_secret".into()),
+        ));
+        let sent_mail = |f: &Fixture| match &*f.state.mailer {
+            crate::mail::Mailer::Capture(m) => m.lock().unwrap().clone(),
+            _ => Vec::new(),
         };
-        f.state.admin = settings(&resend_url);
         let unknown = call(
             &f.state,
             change("/admin/beta/invite", &f.admin, "email=ann%40example.com"),
@@ -1734,41 +1721,38 @@ mod tests {
                 && page.contains("ann.dev")
                 && page.contains("Approve and invite")
         );
-        assert!(!page.contains("re_secret_key") && !page.contains("feed_secret"));
+        assert!(!page.contains("feed_secret"));
         let stranger = call(
             &f.state,
             change("/admin/beta/invite", &f.admin, "email=eve%40example.com"),
         )
         .await;
         assert!(location(&stranger).ends_with("?n=nomatch"));
-        assert!(resend_seen.lock().unwrap().is_empty());
+        assert!(sent_mail(&f).is_empty());
         let sent = call(
             &f.state,
             change("/admin/beta/invite", &f.admin, "email=ann%40example.com"),
         )
         .await;
         assert!(location(&sent).ends_with("?n=invited"));
-        {
-            let seen = resend_seen.lock().unwrap();
-            assert_eq!(seen.len(), 1);
-            let req = seen[0].to_ascii_lowercase();
-            assert!(req.starts_with("post /emails") || req.starts_with("post / "));
-            assert!(req.contains("authorization: bearer re_secret_key"));
-            assert!(
-                req.contains(r#""to":["ann@example.com"]"#) && req.contains("localhost:8080/login")
-            );
-        }
+        let mail = sent_mail(&f);
+        assert_eq!(mail.len(), 1);
+        assert_eq!(mail[0].0, "ann@example.com");
+        assert!(mail[0].2.contains("localhost:8080/login"));
         let twice = call(
             &f.state,
             change("/admin/beta/invite", &f.admin, "email=ann%40example.com"),
         )
         .await;
         assert!(location(&twice).ends_with("?n=already"));
-        assert_eq!(resend_seen.lock().unwrap().len(), 1);
+        assert_eq!(sent_mail(&f).len(), 1);
         let page = text(call(&f.state, get("/admin/beta", Some(&f.admin))).await).await;
         assert!(page.contains("Invited"));
-        f.state.admin = settings(&fail_url);
         fetch_applications(&f.state).await;
+        f.state.mailer = Arc::new(
+            crate::mail::Mailer::new(Some("smtp://127.0.0.1:1"), "Virling <login@example.com>")
+                .unwrap(),
+        );
         let failed = call(
             &f.state,
             change("/admin/beta/invite", &f.admin, "email=bob%40example.com"),
@@ -1781,6 +1765,13 @@ mod tests {
                 .await
                 .unwrap();
         assert_eq!(kept, 0, "a failed send can be retried");
+        f.state.mailer = Arc::new(crate::mail::Mailer::Log);
+        let unset = call(
+            &f.state,
+            change("/admin/beta/invite", &f.admin, "email=bob%40example.com"),
+        )
+        .await;
+        assert!(location(&unset).ends_with("?n=nomail"));
         let actions: Vec<String> = audit_actions(&f.state)
             .await
             .into_iter()
@@ -1833,5 +1824,95 @@ mod tests {
             }
         }
         assert!(limited > 0, "a flood of admin requests is turned away");
+    }
+
+    fn sources(dir: &std::path::Path, out: &mut Vec<(String, String)>) {
+        for entry in std::fs::read_dir(dir).unwrap().flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                sources(&path, out);
+            } else if path.extension().is_some_and(|e| e == "rs") {
+                let text = std::fs::read_to_string(&path).unwrap();
+                let code = text.split("#[cfg(test)]").next().unwrap_or_default();
+                out.push((path.display().to_string(), code.to_ascii_lowercase()));
+            }
+        }
+    }
+
+    #[test]
+    fn no_code_writes_the_admins_table() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        let mut files = Vec::new();
+        sources(&root.join("src"), &mut files);
+        sources(&root.join("worker/src"), &mut files);
+        assert!(files.len() > 20);
+        for (path, code) in files {
+            let words: Vec<&str> = code
+                .split(|c: char| !c.is_ascii_alphanumeric() && c != '_')
+                .filter(|w| !w.is_empty())
+                .collect();
+            for (i, w) in words.iter().enumerate() {
+                if *w != "admins" || i == 0 {
+                    continue;
+                }
+                let prev = words[i - 1];
+                let before = if i > 1 { words[i - 2] } else { "" };
+                let writes = matches!(prev, "into" | "update" | "table")
+                    || (prev == "from" && before == "delete");
+                assert!(!writes, "{path} writes the admins table");
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn admin_sessions_cannot_change_admins() {
+        let f = setup().await;
+        let (other, _) = session(&f.state, "second@example.com").await;
+        let before: Vec<String> = admin_emails(&f.state.db).await.unwrap();
+        assert_eq!(before, ["boss@example.com", "second@example.com"]);
+        let mut uris = vec![
+            "/admin/admins".to_string(),
+            "/admin/admins/new".to_string(),
+            "/admin/admins/delete".to_string(),
+            format!("/admin/accounts/{}/admin", f.user),
+            format!("/admin/accounts/{}/make-admin", f.user),
+        ];
+        for action in ["plan", "suspend", "sign-in", "delete"] {
+            uris.push(format!("/admin/accounts/{other}/{action}"));
+            uris.push(format!("/admin/accounts/{}/{action}", f.user));
+        }
+        for uri in &uris {
+            let fields = "value=comped&confirm=me%40example.com&email=me%40example.com";
+            let res = call(&f.state, change(uri, &f.admin, fields)).await;
+            let unknown = uri.contains("/admins") || uri.ends_with("admin");
+            if unknown {
+                assert!(
+                    matches!(
+                        res.status(),
+                        StatusCode::NOT_FOUND | StatusCode::METHOD_NOT_ALLOWED
+                    ),
+                    "{uri}"
+                );
+            }
+        }
+        for method in ["PUT", "PATCH", "DELETE"] {
+            let req = Request::builder()
+                .method(method)
+                .uri("/admin/admins")
+                .header("cookie", cookie_of(&f.admin))
+                .body(Body::empty())
+                .unwrap();
+            let res = call(&f.state, req).await;
+            assert!(
+                matches!(
+                    res.status(),
+                    StatusCode::NOT_FOUND | StatusCode::METHOD_NOT_ALLOWED
+                ),
+                "{method}"
+            );
+        }
+        assert_eq!(admin_emails(&f.state.db).await.unwrap(), before);
+        let page = text(call(&f.state, get("/admin", Some(&f.admin))).await).await;
+        assert!(page.contains("second@example.com") && page.contains("Read only"));
     }
 }

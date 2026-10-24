@@ -36,8 +36,6 @@ virling serve [OPTIONS]
 | `--anthropic-key <KEY>`<br>`VIRLING_ANTHROPIC_KEY` | unset | Anthropic key for AI answers. |
 | `--perplexity-key <KEY>`<br>`VIRLING_PERPLEXITY_KEY` | unset | Perplexity key for AI answers. |
 | `--gemini-key <KEY>`<br>`VIRLING_GEMINI_KEY` | unset | Google Gemini key for AI answers. |
-| `--admins <EMAILS>`<br>`VIRLING_ADMINS` | unset | Comma separated emails allowed into the [admin panel](../self-host/admin.md). Unset: no admin panel. |
-| `--resend-key <KEY>`<br>`RESEND_API_KEY` | unset | Resend API key for beta invites sent from the admin panel. |
 | `--applications-url <URL>`<br>`VIRLING_APPLICATIONS_URL` | unset | Beta applications feed listed in the admin panel. |
 | `--applications-token <TOKEN>`<br>`VIRLING_APPLICATIONS_TOKEN` | unset | Bearer token for the applications feed. |
 | `--ai-answers-budget-usd <USD>`<br>`VIRLING_AI_ANSWERS_BUDGET_USD` | unset | Estimated monthly spend after which AI answer runs pause. |
