@@ -14,6 +14,7 @@ mod crawlers;
 mod crypto;
 mod dashboard;
 mod demo;
+mod disposable;
 mod events;
 mod favicon;
 mod flags;
@@ -947,10 +948,10 @@ mod tests {
     #[tokio::test]
     async fn sign_in_links_are_rate_limited_per_ip() {
         let (_dir, state, _store) = setup().await;
-        for i in 0..22 {
+        for i in 0..7 {
             call(&state, form("/login", format!("email=u{i}%40b.co"), None)).await;
         }
-        assert_eq!(sent(&state).len(), 20);
+        assert_eq!(sent(&state).len(), 5);
     }
 
     async fn with_turnstile(state: &AppState, verify_url: String) -> AppState {
