@@ -38,6 +38,11 @@
     {% for (k, v) in busiest %}<div class="adm-line"><span>{{ k }}</span><span class="mono">{{ v }}</span></div>{% endfor %}
     {% if busiest.is_empty() %}<p class="muted">No events yet.</p>{% endif %}
   </section>
+  <section class="card">
+    <div class="card-head"><h2>Admins</h2></div>
+    {% for e in admins %}<div class="adm-line"><span>{{ e }}</span></div>{% endfor %}
+    <p class="muted small">Read only. Admins are set in the database.</p>
+  </section>
 </div>
 
 {% else if tab == "accounts" %}
@@ -154,7 +159,7 @@
   <tbody>
   {% for a in applications %}
   <tr><td>{{ a.email }}</td><td>{{ a.wedge }}</td><td>{{ a.site }}</td><td>{{ a.payments }}</td><td>{{ a.revenue }}</td><td>{{ a.audience }}</td><td>{{ a.created }}</td><td>
-    {% if a.invited %}<span class="badge ok">Invited</span>{% else if can_invite %}<form method="post" action="/admin/beta/invite"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="email" value="{{ a.email }}"><button class="btn secondary" type="submit">Approve and invite</button></form>{% endif %}
+    {% if a.invited %}<span class="badge ok">Invited</span>{% else %}<form method="post" action="/admin/beta/invite"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="email" value="{{ a.email }}"><button class="btn secondary" type="submit">Approve and invite</button></form>{% endif %}
   </td></tr>
   {% endfor %}
   </tbody>
