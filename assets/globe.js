@@ -138,9 +138,15 @@
     const px = (lon) => ((lon + 180) / 360) * TW;
     const py = (lat) => ((90 - lat) / 180) * TH;
 
+    const isDark = () => {
+      const t = document.documentElement.dataset.theme;
+      return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    };
+
     const paint = () => {
+      const dark = isDark();
       t2.globalAlpha = 1;
-      t2.fillStyle = colors.soft;
+      t2.fillStyle = dark ? "#102a40" : "#cfe5f3";
       t2.fillRect(0, 0, TW, TH);
       t2.strokeStyle = colors["rule-2"];
       t2.lineWidth = 2;
@@ -164,8 +170,8 @@
               }
               t2.closePath();
             }
-            t2.globalAlpha = 0.11;
-            t2.fillStyle = colors.ink;
+            t2.globalAlpha = 1;
+            t2.fillStyle = dark ? "#2c4a3a" : "#d9e8c8";
             t2.fill();
             if (val) {
               t2.globalAlpha = 0.18 + 0.62 * Math.sqrt(val / max);
