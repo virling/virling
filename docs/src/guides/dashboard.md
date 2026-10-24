@@ -40,6 +40,12 @@ Two lists sit at the top of the page. **Latest payments** shows each payment wit
 - **Client report:** a shareable report for one site. See below.
 - **Site settings:** the script, payment connections, attribution model, goals and sharing.
 
+## Sample data
+
+On a site with no events yet, the setup step and the empty dashboard offer **Try with sample data**. It fills that site with generated visitors, payments and goals, so every page and every [MCP tool](../reference/mcp.md) shows real-looking results. A **Sample data** notice stays on the site until you click **Remove sample data**, which deletes exactly the generated rows.
+
+Sample data is never counted anywhere that matters: the public dashboard, client report links and weekly emails stay off while it is present, and no payment provider is contacted. It is never mixed with real data: the first real pageview, or connecting a payment provider, removes it automatically. Only the account owner can add or remove it.
+
 ## Share a site
 
 In **Site settings**:
