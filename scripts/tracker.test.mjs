@@ -75,7 +75,7 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
     ...agent,
   };
   const performance = { getEntriesByType: (t) => (t == "navigation" ? [{ type: nav }] : []) };
-  const ctx = { window, document, navigator, location, history, performance, BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: zone }) }) }, URL, JSON, Date, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]) };
+  const ctx = { window, document, navigator, location, history, performance, BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, devicePixelRatio: 2, Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: zone }) }) }, URL, JSON, Date, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]) };
   vm.runInNewContext(SRC, ctx);
   const fire = (t, e, ev = {}) => (listeners[t + e] || []).forEach((f) => f(ev));
   return { sent, urls, timers, cookie, window, document, history, location, fire };
@@ -85,10 +85,18 @@ test("pageview with page, screen and language", () => {
   const b = browser("https://example.com/pricing?x=1");
   assert.equal(b.sent.length, 1);
   assert.deepEqual(
-    { n: b.sent[0].n, u: b.sent[0].u, s: b.sent[0].s, w: b.sent[0].w, l: b.sent[0].l },
-    { n: "pageview", u: "https://example.com/pricing?x=1", s: "example.com", w: 1440, l: "en-US" },
+    { n: b.sent[0].n, u: b.sent[0].u, s: b.sent[0].s, w: b.sent[0].w, d: b.sent[0].d, l: b.sent[0].l },
+    { n: "pageview", u: "https://example.com/pricing?x=1", s: "example.com", w: 1440, d: 2, l: "en-US" },
   );
   assert.match(b.sent[0].v, /^v[a-z0-9]+$/);
+});
+
+test("opt-out link stops sending until it is undone", () => {
+  const cookie = jar("example.com");
+  assert.equal(browser("https://example.com/#virling-ignore", { cookie }).sent.length, 0);
+  assert.equal(browser("https://example.com/", { cookie }).sent.length, 0);
+  assert.equal(browser("https://example.com/#virling-track", { cookie }).sent.length, 1);
+  assert.equal(browser("https://example.com/", { cookie }).sent.length, 1);
 });
 
 test("time zone is sent only when the browser has one", () => {

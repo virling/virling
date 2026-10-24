@@ -2,7 +2,9 @@
 ((w, d, n, L) => {
   var s = d.currentScript, has = (a) => s.hasAttribute(a), on = (t, e, f, c) => t.addEventListener(e, f, c),
     site = s && s.getAttribute("data-site");
-  if (!site || (/^(localhost|127\.|\[::1\])/.test(L.hostname) && !has("data-dev")) || (has("data-respect-gpc") && n.globalPrivacyControl)) return;
+  // Opening the site with #virling-ignore sets a cookie that stops all sending; #virling-track clears it.
+  /^#virling-(ignore|track)$/.test(L.hash) && (d.cookie = "virling_ignore=1;path=/;max-age=" + (L.hash[9] == "i" ? 31536e3 : 0));
+  if (!site || /virling_ignore=1/.test(d.cookie) || (/^(localhost|127\.|\[::1\])/.test(L.hostname) && !has("data-dev")) || (has("data-respect-gpc") && n.globalPrivacyControl)) return;
   var endpoint = s.getAttribute("data-api") || new URL("/api/event", s.src);
   var ref = d.referrer, last, vid = null, nav = performance.getEntriesByType("navigation")[0]?.type;
 
@@ -16,7 +18,7 @@
   }
 
   var send = (name, goal) => {
-    var body = JSON.stringify([{ n: name, u: L.href, r: ref, s: site, v: vid, w: screen.width, g: goal, l: n.language, z: Intl.DateTimeFormat().resolvedOptions().timeZone || void 0, k: nav, b: n.webdriver || !n.languages?.length || void 0 }]);
+    var body = JSON.stringify([{ n: name, u: L.href, r: ref, s: site, v: vid, w: screen.width, d: devicePixelRatio, g: goal, l: n.language, z: Intl.DateTimeFormat().resolvedOptions().timeZone || void 0, k: nav, b: n.webdriver || !n.languages?.length || void 0 }]);
     ref = nav = null;
     n.sendBeacon?.(endpoint, body) || fetch(endpoint, { method: "POST", body, keepalive: true });
   };

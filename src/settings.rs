@@ -78,6 +78,8 @@ struct SettingsPage {
     /// Same-visit domains, one per line.
     same_visit: String,
     return_minutes: i64,
+    /// Ignored addresses and ranges, one per line.
+    ignore_ips: String,
     /// Bot visitors filtered in the last 30 days.
     bots: String,
     model: String,
@@ -241,6 +243,7 @@ async fn show(
         cookieless: ctx.site.cookieless,
         same_visit: ctx.site.same_visit.replace(' ', "\n"),
         return_minutes: ctx.site.return_minutes,
+        ignore_ips: ctx.site.ignore_ips.replace(' ', "\n"),
         bots,
         windows: WINDOWS
             .iter()
@@ -703,6 +706,8 @@ pub struct SettingsInput {
     same_visit: String,
     #[serde(default = "default_return")]
     return_minutes: i64,
+    #[serde(default)]
+    ignore_ips: String,
 }
 
 fn default_return() -> i64 {
@@ -718,6 +723,20 @@ fn same_visit_domains(input: &str, domain: &str) -> String {
     {
         if !crate::ingest::host_belongs(&d, domain) && !out.contains(&d) && out.len() < 20 {
             out.push(d);
+        }
+    }
+    out.join(" ")
+}
+
+/// Up to 20 distinct valid addresses or CIDR ranges from free text.
+fn ignore_list(input: &str) -> String {
+    let mut out: Vec<&str> = Vec::new();
+    for e in input
+        .split([' ', ',', '\n', '\r', '\t'])
+        .filter(|e| crate::ingest::valid_ignore(e))
+    {
+        if !out.contains(&e) && out.len() < 20 {
+            out.push(e);
         }
     }
     out.join(" ")
@@ -740,13 +759,14 @@ pub async fn save(
         return StatusCode::BAD_REQUEST.into_response();
     }
     let updated = sqlx::query(
-        "UPDATE sites SET attribution_model = ?, window_days = ?, cookieless = ?, same_visit = ?, return_minutes = ? WHERE id = ?",
+        "UPDATE sites SET attribution_model = ?, window_days = ?, cookieless = ?, same_visit = ?, return_minutes = ?, ignore_ips = ? WHERE id = ?",
     )
     .bind(&input.model)
     .bind(input.window_days)
     .bind(input.cookieless.is_some())
     .bind(same_visit_domains(&input.same_visit, &ctx.site.domain))
     .bind(input.return_minutes)
+    .bind(ignore_list(&input.ignore_ips))
     .bind(&ctx.site.id)
     .execute(&state.db)
     .await;

@@ -375,17 +375,19 @@ mod tests {
     async fn automated_browsers_are_kept_out_of_visits() {
         let (_dir, state, store) = setup().await;
         let linux = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
+        let mac = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
         let page = |extra: &str, v: &str| {
             format!(
                 r#"{{"n":"pageview","u":"https://example.com/","s":"example.com","v":"{v}"{extra}}}"#
             )
         };
-        for (extra, v) in [
-            (r#","w":1280,"b":true"#, "vplaywright1"),
-            (r#","w":0"#, "vnoscreen01"),
+        for (extra, v, ua) in [
+            (r#","w":1280,"b":true"#, "vplaywright1", linux),
+            (r#","w":0"#, "vnoscreen01", linux),
+            (r#","w":800,"d":1"#, "vheadlessmac", mac),
         ] {
             assert_eq!(
-                post(&state, &page(extra, v), linux).await,
+                post(&state, &page(extra, v), ua).await,
                 StatusCode::ACCEPTED
             );
         }
@@ -394,12 +396,20 @@ mod tests {
             .fetch_one(&state.db)
             .await
             .unwrap();
-        assert_eq!(store.bots_filtered(&site, 30).unwrap(), 2);
+        assert_eq!(store.bots_filtered(&site, 30).unwrap(), 3);
         assert_eq!(
             post(&state, &page(r#","w":1280"#, "vlinuxdesk1"), linux).await,
             StatusCode::ACCEPTED
         );
-        assert_eq!(store.dump().len(), 1, "a normal Linux desktop visit counts");
+        assert_eq!(
+            post(&state, &page(r#","w":960,"d":1.5"#, "vzoomedmac1"), mac).await,
+            StatusCode::ACCEPTED
+        );
+        assert_eq!(
+            store.dump().len(),
+            2,
+            "a Linux desktop and a zoomed Mac count"
+        );
     }
 
     #[tokio::test]
@@ -3216,7 +3226,7 @@ mod tests {
         let monday = seed_last_week(&store, &site);
         crate::sync::rebuild_attribution(&state, Some(&site)).await;
         let s: crate::sites::Site = sqlx::query_as(
-            "SELECT id, domain, timezone, cookieless, same_visit, return_minutes, sample_data FROM sites WHERE id = ?",
+            "SELECT id, domain, timezone, cookieless, same_visit, return_minutes, sample_data, ignore_ips FROM sites WHERE id = ?",
         )
         .bind(&site)
         .fetch_one(&state.db)

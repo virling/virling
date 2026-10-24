@@ -1092,7 +1092,7 @@ pub async fn shared(
     Query(q): Query<WeekQuery>,
 ) -> Response {
     let site: Result<Option<Site>, _> = sqlx::query_as(
-        "SELECT s.id, s.domain, s.timezone, s.cookieless, s.same_visit, s.return_minutes, s.sample_data FROM report_brands b JOIN sites s ON s.id = b.site_id WHERE b.share_token = ? AND s.sample_data = 0",
+        "SELECT s.id, s.domain, s.timezone, s.cookieless, s.same_visit, s.return_minutes, s.sample_data, s.ignore_ips FROM report_brands b JOIN sites s ON s.id = b.site_id WHERE b.share_token = ? AND s.sample_data = 0",
     )
     .bind(&token)
     .fetch_optional(&state.db)

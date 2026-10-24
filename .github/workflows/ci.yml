@@ -25,11 +25,11 @@ jobs:
       - run: cargo fmt --check
       - run: cargo fmt --check
         working-directory: worker
-      - name: Tracker is built from source and at most 1,350 B gzipped
+      - name: Tracker is built from source and at most 1,420 B gzipped
         run: |
           ./scripts/build-tracker.sh
           git diff --exit-code assets/v.js
-          test "$(gzip -9c assets/v.js | wc -c)" -le 1350
+          test "$(gzip -9c assets/v.js | wc -c)" -le 1420
       - run: node --test scripts/tracker.test.mjs
 
   server:
