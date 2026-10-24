@@ -1038,6 +1038,8 @@ a.ctl { text-decoration: none; }
   .vt { padding: 12px 12px 0; }
   .vtl > li { gap: 8px; }
   .vt-steps li { grid-template-columns: 58px minmax(0, 1fr) auto; gap: 8px; padding: 0 8px; }
+  .vt-steps .st-pay { padding: 6px 8px; }
+  .vt-steps .st-pay .p { flex-wrap: wrap; white-space: normal; }
   .st-exit .from { display: none; }
   .pay-empty { grid-template-columns: minmax(0, 1fr); }
   .pay-empty img { max-width: 240px; }
