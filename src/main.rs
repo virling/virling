@@ -19,6 +19,7 @@ mod favicon;
 mod flags;
 mod fx;
 mod globe;
+mod html_md;
 mod icons;
 mod index;
 mod ingest;

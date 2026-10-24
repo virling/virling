@@ -26,6 +26,9 @@ for f in site.css site.js app.css app.js; do
   v=$(cksum "public/assets/$f" | cut -d' ' -f1)
   find public -name '*.html' -exec perl -pi -e "s#/assets/$f\"#/assets/$f?v=$v\"#g" {} +
 done
+# A Markdown copy of every page for AI crawlers, at the page's URL plus .md.
+rustc -O --edition 2024 ../scripts/md.rs -o "${TMPDIR:-/tmp}/virling-md"
+"${TMPDIR:-/tmp}/virling-md" public
 cp -R ../assets/well-known public/.well-known
 mkdir -p public/.well-known/agent-skills/virling && cp ../skills/virling/*.md public/.well-known/agent-skills/virling/
 d=$(shasum -a 256 public/.well-known/agent-skills/virling/SKILL.md | cut -d' ' -f1)
