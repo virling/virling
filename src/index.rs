@@ -977,8 +977,8 @@ pub type Pieces = Vec<(i64, i64, i64)>;
 
 type Offsets = Arc<Vec<(i64, i64)>>;
 type PeriodKey = (String, time::Date, time::Date);
-/// Payments, net USD and distinct customers of a row.
-type Agg = (i64, f64, HashSet<u32>);
+/// Payments, net USD, distinct customers and refunded payments of a row.
+type Agg = (i64, f64, HashSet<u32>, i64);
 /// Payments, distinct customers, net USD and revenue by channel of an hour.
 type HourAgg = (u64, HashSet<u32>, f64, Vec<(Option<String>, f64)>);
 /// Top source names per channel.
@@ -1092,8 +1092,8 @@ impl Marks {
     }
 }
 
-/// One payment-side row of a breakdown: (unattributed, key, payments, revenue, customers).
-pub type RawRow = (bool, Option<String>, i64, i64, f64, i64);
+/// One payment-side row of a breakdown: (unattributed, key, visitors, payments, revenue, customers, refunded).
+pub type RawRow = (bool, Option<String>, i64, i64, f64, i64, i64);
 
 impl SiteIndex {
     pub fn scope(&self, f: &Filter) -> Arc<Scope> {
@@ -1419,6 +1419,7 @@ impl SiteIndex {
                     e.0 += 1;
                     e.1 += p.net.unwrap_or(0.0);
                     e.2.insert(p.customer);
+                    e.3 += i64::from(p.row.refunded > 0);
                 }
             }
             rows
@@ -1437,10 +1438,12 @@ impl SiteIndex {
         };
         all[k]
             .iter()
-            .map(|(&(u, key), (n, r, c))| (u, key, *n, *r, c.len() as i64))
+            .map(|(&(u, key), (n, r, c, f))| (u, key, *n, *r, c.len() as i64, *f))
             .collect::<Vec<_>>()
             .into_iter()
-            .map(|(u, key, n, r, c)| (u, self.strings.name(key).map(str::to_string), 0, n, r, c))
+            .map(|(u, key, n, r, c, f)| {
+                (u, self.strings.name(key).map(str::to_string), 0, n, r, c, f)
+            })
             .collect()
     }
 
@@ -1524,11 +1527,20 @@ impl SiteIndex {
                 e.0 += 1;
                 e.1 += p.net.unwrap_or(0.0);
                 e.2.insert(p.customer);
+                e.3 += i64::from(p.row.refunded > 0);
             }
         }
         rows.into_iter()
-            .map(|((u, key), (n, r, c))| {
-                (u, key.map(|k| self.path_name(k)), 0, n, r, c.len() as i64)
+            .map(|((u, key), (n, r, c, f))| {
+                (
+                    u,
+                    key.map(|k| self.path_name(k)),
+                    0,
+                    n,
+                    r,
+                    c.len() as i64,
+                    f,
+                )
             })
             .collect()
     }
@@ -2211,7 +2223,7 @@ pub mod read {
                 rows.extend(
                     ix.touch_visitors(lo, hi, &scope, k)
                         .into_iter()
-                        .map(|(key, n)| (false, key, n, 0, 0.0, 0)),
+                        .map(|(key, n)| (false, key, n, 0, 0.0, 0, 0)),
                 );
                 rows.extend(ix.touch_payments(lo, hi, &scope, k));
             }
@@ -2219,7 +2231,7 @@ pub mod read {
                 rows.extend(
                     ix.page_visitors(lo, hi, &scope)
                         .iter()
-                        .map(|(&path, &n)| (false, Some(ix.path_name(path)), n, 0, 0.0, 0)),
+                        .map(|(&path, &n)| (false, Some(ix.path_name(path)), n, 0, 0.0, 0, 0)),
                 );
                 rows.extend(ix.page_payments(lo, hi, &scope));
             }
@@ -2247,6 +2259,7 @@ pub mod read {
                     visitors,
                     payments,
                     customers,
+                    refunded: 0,
                     revenue_usd,
                     revenue_per_visitor: ratio(revenue_usd, visitors),
                 },

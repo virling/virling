@@ -229,6 +229,8 @@ pub struct BreakdownRow {
     pub payments: u64,
     /// Distinct paying customers credited to this row.
     pub customers: u64,
+    /// Payments credited to this row that were refunded in whole or part.
+    pub refunded: u64,
     pub revenue_usd: f64,
     pub revenue_per_visitor: Option<f64>,
 }
@@ -695,16 +697,16 @@ pub(crate) fn breakdown(
     let sql = format!(
         "WITH {BOUNDS}{scope}
         SELECT unattributed, key, sum(visitors)::BIGINT, sum(payments)::BIGINT, sum(revenue),
-            sum(customers)::BIGINT
+            sum(customers)::BIGINT, sum(refunded)::BIGINT
         FROM (
             SELECT false AS unattributed, {key} AS key, count(DISTINCT visitor_id) AS visitors,
-                   0 AS payments, 0.0 AS revenue, 0 AS customers
+                   0 AS payments, 0.0 AS revenue, 0 AS customers, 0 AS refunded
             FROM {table}, bounds
             WHERE site_id = $site AND {kind} AND ts >= lo AND ts < hi{within}
             GROUP BY 2
             UNION ALL
             SELECT a.session_id IS NULL, k.key, 0, count(*), coalesce(sum({NET_USD}), 0),
-                   count(DISTINCT {CUSTOMER})
+                   count(DISTINCT {CUSTOMER}), count(*) FILTER (WHERE p.refunded > 0)
             FROM payments p
             JOIN bounds ON p.ts >= lo AND p.ts < hi
             LEFT JOIN attribution a ON a.site_id = p.site_id AND a.provider = p.provider
@@ -735,6 +737,7 @@ pub(crate) fn breakdown(
                 r.get::<_, i64>(3)?,
                 r.get::<_, f64>(4)?,
                 r.get::<_, i64>(5)?,
+                r.get::<_, i64>(6)?,
             ))
         },
     )?;
@@ -744,14 +747,14 @@ pub(crate) fn breakdown(
     ))
 }
 
-/// Merges (unattributed, key, visitors, payments, revenue, customers) rows into a sorted breakdown.
+/// Merges (unattributed, key, visitors, payments, revenue, customers, refunded) rows into a sorted breakdown.
 pub(crate) fn breakdown_rows(
     dimension: Dimension,
-    rows: Vec<(bool, Option<String>, i64, i64, f64, i64)>,
+    rows: Vec<(bool, Option<String>, i64, i64, f64, i64, i64)>,
 ) -> Vec<BreakdownRow> {
     let mut out: Vec<BreakdownRow> = Vec::new();
     for row in rows {
-        let (unattributed, mut key, visitors, payments, revenue_usd, customers) = row;
+        let (unattributed, mut key, visitors, payments, revenue_usd, customers, refunded) = row;
         match dimension {
             Dimension::Referrer => key = key.as_deref().map(source_domain),
             Dimension::ChannelSource | Dimension::PageSource => {
@@ -774,6 +777,7 @@ pub(crate) fn breakdown_rows(
             existing.visitors += visitors as u64;
             existing.payments += payments as u64;
             existing.customers += customers as u64;
+            existing.refunded += refunded as u64;
             existing.revenue_usd += revenue_usd;
         } else {
             out.push(BreakdownRow {
@@ -783,6 +787,7 @@ pub(crate) fn breakdown_rows(
                 visitors: visitors as u64,
                 payments: payments as u64,
                 customers: customers as u64,
+                refunded: refunded as u64,
                 revenue_usd,
                 revenue_per_visitor: None,
             });
@@ -1260,6 +1265,7 @@ pub(crate) fn last_pages(
                 visitors,
                 payments: r.get::<_, i64>(2)? as u64,
                 customers: r.get::<_, i64>(4)? as u64,
+                refunded: 0,
                 revenue_usd,
                 revenue_per_visitor: ratio(revenue_usd, visitors),
             })

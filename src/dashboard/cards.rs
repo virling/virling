@@ -204,6 +204,8 @@ pub struct BarRow {
     pub(super) visitors: String,
     pub(super) revenue: String,
     pub(super) per_visitor: String,
+    /// Share of payments refunded; empty when the table has no such column.
+    pub(super) refund: String,
     pub(super) small: bool,
     /// Revenue in range from a visit before it, so no visitors to show.
     pub(super) earlier: bool,
@@ -222,6 +224,8 @@ pub struct Panel {
     pub(super) on: bool,
     pub(super) head: &'static str,
     pub(super) rows: Vec<BarRow>,
+    /// Shows the refunded column.
+    pub(super) refunds: bool,
     pub(super) openable: bool,
     pub(super) foot: String,
     /// Where the "Tracked link" form posts; empty on tabs without one.
@@ -613,10 +617,19 @@ fn bar(i: &Item, base: &Base, kid: bool, href: String, id: String) -> BarRow {
             .map(|x| format!("{x:.1}x"))
             .unwrap_or_default(),
         tone: x.map_or("", tone),
+        refund: String::new(),
         href,
         kids: Vec::new(),
         copy: String::new(),
     }
+}
+
+/// Refunded share of a row's payments, "–" with none refunded.
+fn refund_rate(r: &BreakdownRow) -> String {
+    if r.refunded == 0 || r.payments == 0 {
+        return "–".into();
+    }
+    format!("{:.1}%", r.refunded as f64 / r.payments as f64 * 100.0)
 }
 
 fn shares(r: &BreakdownRow, base: &Base) -> (f64, f64) {
@@ -650,6 +663,12 @@ fn panel(
     // The "none" row of campaigns and keywords goes last.
     items.sort_by_key(|i| i.row.key.is_none());
     items.truncate(SHOWN);
+    let refunds = !base.hide
+        && matches!(
+            tab,
+            Tab::Channel | Tab::Source | Tab::Campaign | Tab::Keyword
+        )
+        && items.iter().any(|i| i.row.payments > 0);
     let nested: Vec<Vec<Item>> = items
         .iter()
         .map(|i| {
@@ -666,6 +685,9 @@ fn panel(
         .enumerate()
         .map(|(n, (i, ks))| {
             let mut row = bar(i, base, false, filter_href(&i.filter), format!("{key}-{n}"));
+            if refunds {
+                row.refund = refund_rate(&i.row);
+            }
             if row.sub.is_empty() && !ks.is_empty() {
                 row.sub = match tab {
                     Tab::Country if ks.len() > 1 => format!("{} cities", ks.len()),
@@ -683,7 +705,13 @@ fn panel(
             if ks.len() > 1 || (ks.len() == 1 && ks[0].name != i.name) {
                 row.kids = ks
                     .iter()
-                    .map(|k| bar(k, base, true, filter_href(&k.filter), String::new()))
+                    .map(|k| {
+                        let mut kid = bar(k, base, true, filter_href(&k.filter), String::new());
+                        if refunds {
+                            kid.refund = refund_rate(&k.row);
+                        }
+                        kid
+                    })
                     .collect();
             }
             row
@@ -701,6 +729,7 @@ fn panel(
         on,
         head: tab.head(),
         openable: rows.iter().any(|r| !r.kids.is_empty()),
+        refunds,
         rows,
         foot,
         new_link: String::new(),
@@ -917,6 +946,7 @@ pub fn ai_card(
                 visitors: 0,
                 payments: 0,
                 customers: 0,
+                refunded: 0,
                 revenue_usd: 0.0,
                 revenue_per_visitor: None,
             },
@@ -1087,9 +1117,21 @@ mod tests {
             visitors,
             payments: 1,
             customers: 1,
+            refunded: 0,
             revenue_usd: revenue,
             revenue_per_visitor: Some(revenue / visitors as f64),
         }
+    }
+
+    #[test]
+    fn refund_rate_is_a_dash_without_refunds() {
+        let mut r = row("Social", 10, 50.0);
+        assert_eq!(refund_rate(&r), "–");
+        r.payments = 8;
+        r.refunded = 1;
+        assert_eq!(refund_rate(&r), "12.5%");
+        r.payments = 0;
+        assert_eq!(refund_rate(&r), "–");
     }
 
     #[test]
