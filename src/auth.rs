@@ -89,12 +89,19 @@ fn site_key(state: &AppState) -> Option<String> {
     state.config.turnstile.as_ref().map(|t| t.site_key.clone())
 }
 
-/// True when Turnstile is off, or Cloudflare confirms the token; any failure counts as a bot.
+/// True when Turnstile is off, or Cloudflare confirms the token for the login action and base URL host; any failure counts as a bot.
 async fn human(state: &AppState, token: Option<&str>, ip: &str) -> bool {
     let Some(t) = &state.config.turnstile else {
         return true;
     };
     let Some(token) = token.filter(|t| !t.is_empty()) else {
+        return false;
+    };
+    let Some(host) = url::Url::parse(&state.config.base_url)
+        .ok()
+        .and_then(|u| u.host_str().map(str::to_owned))
+    else {
+        tracing::warn!("turnstile cannot check the hostname: base url has no host");
         return false;
     };
     let sent = state
@@ -107,7 +114,9 @@ async fn human(state: &AppState, token: Option<&str>, ip: &str) -> bool {
         Ok(res) => res.json::<serde_json::Value>().await.ok(),
         Err(_) => None,
     };
-    let ok = verdict.is_some_and(|v| v["success"] == true);
+    let ok = verdict.is_some_and(|v| {
+        v["success"] == true && v["action"] == "login" && v["hostname"] == host.as_str()
+    });
     if !ok {
         tracing::warn!(%ip, "turnstile check failed");
     }

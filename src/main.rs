@@ -929,7 +929,20 @@ mod tests {
         let app = axum::Router::new().route(
             "/",
             axum::routing::post(|axum::Json(b): axum::Json<serde_json::Value>| async move {
-                axum::Json(serde_json::json!({ "success": b["response"] == "good" }))
+                let (action, hostname) = match b["response"].as_str() {
+                    Some("wrong-action") => ("logout", "localhost"),
+                    Some("wrong-host") => ("login", "evil.example"),
+                    _ => ("login", "localhost"),
+                };
+                let success = b["response"] != "bad";
+                if b["response"] == "no-fields" {
+                    return axum::Json(serde_json::json!({ "success": true }));
+                }
+                axum::Json(serde_json::json!({
+                    "success": success,
+                    "action": action,
+                    "hostname": hostname,
+                }))
             }),
         );
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -968,6 +981,9 @@ mod tests {
         for (state, body) in [
             (&live, "email=a%40b.co&cf-turnstile-response=bad"),
             (&live, "email=a%40b.co"),
+            (&live, "email=a%40b.co&cf-turnstile-response=wrong-action"),
+            (&live, "email=a%40b.co&cf-turnstile-response=wrong-host"),
+            (&live, "email=a%40b.co&cf-turnstile-response=no-fields"),
             (&down, "email=a%40b.co&cf-turnstile-response=good"),
         ] {
             let res = body_text(call(state, form("/login", body.into(), None)).await).await;
