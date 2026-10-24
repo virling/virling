@@ -1352,11 +1352,20 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .gl-stage canvas:focus-visible { outline: 2px solid var(--visitors-tint); outline-offset: -2px; }
 .gl-chips { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .gl-chip { position: absolute; left: 0; top: 0; height: 24px; padding: 0 10px; display: flex; align-items: center; border: 1px solid var(--revenue); border-radius: 12px; background: var(--paper); color: var(--ink); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.gl-chip.v { border-color: var(--visitors); }
+.gl-chip.pay { height: 30px; padding: 0 14px; border-width: 2px; border-radius: 15px; font-size: 14px; animation: gl-pop .5s cubic-bezier(.2,1.4,.4,1); }
+@keyframes gl-pop { from { scale: .6; } to { scale: 1; } }
+@media (prefers-reduced-motion: reduce) { .gl-chip.pay { animation: none; } }
 .gl-idle { margin: 0; padding: 8px 16px 12px; color: var(--ink-3); font-size: 12px; }
 .gl-idle[hidden] { display: none; }
 .gl-flat-note { display: none; margin: 0; padding: 4px 16px 14px; }
 .gl-flat .gl-stage canvas, .gl-flat .gl-zoom, .gl-flat .gl-legend, .gl-flat .gl-chips, .gl-flat .gl-idle, .gl-flat .gl-seg { display: none; }
 .gl-flat .gl-stage { height: auto; }
+.gl-zoom button svg { display: block; margin: auto; }
+.gl-zoom button[hidden] { display: none; }
+.gl-main:fullscreen { --paper: #0d1b2a; --ink: #e8eef5; --ink-2: #b8c4d2; --ink-3: #8a9bb0; --rule: #2a4560; --rule-2: #16293c; --rule-3: #16293c; --soft: #16293c; --visitors: #6f86ff; --revenue: #ff9a4d; display: flex; flex-direction: column; background: #07121d; border: 0; border-radius: 0; color: var(--ink); }
+.gl-main:fullscreen .gl-stage { height: auto; flex: 1; min-height: 0; }
+.gl-main:fullscreen .gl-seg button[aria-pressed="true"] { background: #1b3248; }
 .gl-flat .gl-flat-note { display: block; }
 .gl-flat .gl-replay { position: static; width: auto; margin: 0 16px 14px; box-shadow: none; }
 .gl-zoom { position: absolute; right: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 6px; }

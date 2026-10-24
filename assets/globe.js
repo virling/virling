@@ -23,6 +23,9 @@
   let gl = null;
   let placed = [];
   const seenPays = new Set();
+  const seenVis = new Set();
+  const main = root.querySelector(".gl-main");
+  const fsOn = () => document.fullscreenElement === main;
   const colors = {};
 
   const h = (tag, cls, text) => {
@@ -32,7 +35,7 @@
     return el;
   };
   const readColors = () => {
-    const s = getComputedStyle(document.documentElement);
+    const s = getComputedStyle(main);
     for (const n of ["soft", "rule", "rule-2", "paper", "ink", "ink-3", "visitors", "revenue", "sans"]) {
       colors[n] = s.getPropertyValue("--" + n).trim();
     }
@@ -95,9 +98,9 @@
     glide = { t0: performance.now(), from: { lon: lon0, lat: lat0 }, dl: d, dp: to.lat - lat0 };
     wake();
   };
-  const burst = (cc, label, delay = 0) => {
+  const burst = (cc, label, delay = 0, visitor = false) => {
     const pt = outline?.pts[cc];
-    if (pt) gl?.burst(pt, label, performance.now() + delay);
+    if (pt) gl?.burst(pt, label, performance.now() + delay, visitor);
   };
   const zoomBy = (k) => {
     zoom = Math.max(0.8, Math.min(3, zoom * k));
@@ -144,9 +147,10 @@
     };
 
     const paint = () => {
+      const fs = fsOn();
       const dark = isDark();
       t2.globalAlpha = 1;
-      t2.fillStyle = dark ? "#102a40" : "#cfe5f3";
+      t2.fillStyle = fs ? "#07121d" : dark ? "#102a40" : "#cfe5f3";
       t2.fillRect(0, 0, TW, TH);
       t2.strokeStyle = colors["rule-2"];
       t2.lineWidth = 2;
@@ -171,10 +175,10 @@
               t2.closePath();
             }
             t2.globalAlpha = 1;
-            t2.fillStyle = dark ? "#2c4a3a" : "#d9e8c8";
+            t2.fillStyle = fs ? "#15283a" : dark ? "#2c4a3a" : "#d9e8c8";
             t2.fill();
             if (val) {
-              t2.globalAlpha = 0.18 + 0.62 * Math.sqrt(val / max);
+              t2.globalAlpha = (fs ? 0.35 : 0.18) + (fs ? 0.65 : 0.62) * Math.sqrt(val / max);
               t2.fillStyle = accent;
               t2.fill();
             }
@@ -265,18 +269,19 @@
       tmp.project(cam);
       return { x: (tmp.x * 0.5 + 0.5) * W, y: (-tmp.y * 0.5 + 0.5) * H, facing };
     };
-    const addBurst = (pt, label, t0) => {
+    const addBurst = (pt, label, t0, visitor) => {
       if (still()) bursts.splice(0).forEach(drop);
       const n = vec(pt[0], pt[1]);
-      const b = { n, t0, idle: false, meshes: [mkRing(n, colors.revenue), mkRing(n, colors.revenue)] };
-      const dot = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({ color: colors.revenue, transparent: true, depthWrite: false }));
+      const c = visitor ? colors.visitors : colors.revenue;
+      const b = { n, t0, idle: false, visitor, meshes: [mkRing(n, c), mkRing(n, c)] };
+      const dot = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({ color: c, transparent: true, depthWrite: false }));
       dot.position.copy(n).multiplyScalar(1.008);
       dot.quaternion.copy(b.meshes[0].quaternion);
       dot.scale.setScalar(0.012);
       dot.visible = false;
       globe.add(dot);
       b.meshes.push(dot);
-      b.chip = h("div", "gl-chip", label);
+      b.chip = h("div", visitor ? "gl-chip v" : "gl-chip pay", label);
       chips.append(b.chip);
       bursts.push(b);
       wake();
@@ -354,7 +359,7 @@
         const ring = (m, t, a) => {
           m.visible = vis && t > 0 && t < 1;
           if (!m.visible) return;
-          m.scale.setScalar((b.idle ? 0.1 : 0.07) * (1 - Math.pow(1 - t, 2)) + 0.012);
+          m.scale.setScalar((b.idle ? 0.1 : b.visitor ? 0.07 : 0.15) * (1 - Math.pow(1 - t, 2)) + 0.012);
           m.material.opacity = a * (1 - t) * edge;
         };
         if (still() && !b.idle) {
@@ -660,6 +665,9 @@
     data.payments.forEach((p) => seenPays.add(p.id));
     const show = first ? fresh.slice(0, 2) : fresh.slice(0, 4);
     show.forEach((p, i) => burst(p.cc, p.amt + (p.src ? " · " + p.src : ""), i * 500));
+    const arrived = first ? [] : data.visitors.filter((v) => !seenVis.has(v.id));
+    data.visitors.forEach((v) => seenVis.add(v.id));
+    if (!reduce.matches) arrived.slice(0, 4).forEach((v, i) => burst(v.cc, [v.name, v.place].filter(Boolean).join(" · "), i * 400, true));
     const quiet = !drag && !selected && !replay && performance.now() - lastInput > 4000;
     if (show[0] && (first || quiet)) {
       const pt = outline?.pts[show[0].cc];
@@ -690,6 +698,12 @@
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", recolor);
   new MutationObserver(recolor).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   reduce.addEventListener("change", wake);
+  document.addEventListener("fullscreenchange", recolor);
+  const full = root.querySelector("[data-full]");
+  if (document.fullscreenEnabled) {
+    full.hidden = false;
+    full.addEventListener("click", () => (fsOn() ? document.exitFullscreen() : main.requestFullscreen()));
+  }
 
   readColors();
   canvas.style.cursor = "grab";
