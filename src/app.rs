@@ -1,11 +1,13 @@
 use std::sync::Arc;
 
+use askama::Template;
 use axum::Router;
 use axum::extract::{Path, State};
 use axum::http::{HeaderMap, StatusCode, header};
 use axum::response::{Html, IntoResponse, Redirect, Response};
 use axum::routing::{get, post};
 use sqlx::SqlitePool;
+use time::OffsetDateTime;
 
 use crate::crypto::Vault;
 use crate::events::EventStore;
@@ -74,6 +76,7 @@ pub struct AppState {
     pub favicons: reqwest::Client,
     pub rates: Arc<Rates>,
     pub presence: Arc<crate::live::Presence>,
+    pub admin: Arc<crate::admin::Settings>,
 }
 
 impl AppState {
@@ -103,6 +106,7 @@ impl AppState {
             limiter: Arc::default(),
             mailer: Arc::new(mailer),
             presence: Arc::default(),
+            admin: Arc::default(),
         }
     }
 }
@@ -340,6 +344,7 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/settings/disconnect",
                 post(settings::disconnect),
             );
+        app = app.merge(crate::admin::routes());
         if oauth::enabled(&state.config) {
             app = app
                 .route(
@@ -411,12 +416,31 @@ async fn mcp_host_only(
 }
 
 /// Marks a signed-in user's pages with their Light or Dark choice, so they render in it without a flash.
+/// A support session is read only and shows a banner.
 async fn theme(
     State(state): State<AppState>,
     req: axum::extract::Request,
     next: axum::middleware::Next,
 ) -> Response {
     let token = auth::cookie(req.headers(), auth::SESSION_COOKIE);
+    if let Some(token) = token.as_ref().filter(|_| {
+        !matches!(
+            *req.method(),
+            axum::http::Method::GET | axum::http::Method::HEAD
+        ) && req.uri().path() != "/admin/stop"
+    }) {
+        let support: Option<i64> = sqlx::query_scalar(
+            "SELECT 1 FROM sessions WHERE token_hash = ? AND impersonator IS NOT NULL",
+        )
+        .bind(auth::hash_token(token))
+        .fetch_optional(&state.db)
+        .await
+        .ok()
+        .flatten();
+        if support.is_some() {
+            return StatusCode::FORBIDDEN.into_response();
+        }
+    }
     let res = next.run(req).await;
     let html = res
         .headers()
@@ -425,26 +449,48 @@ async fn theme(
     let Some(token) = token.filter(|_| html) else {
         return res;
     };
-    let theme: Option<String> = sqlx::query_scalar(
-        "SELECT a.theme FROM sessions s JOIN accounts a ON a.id = s.account_id WHERE s.token_hash = ?",
+    let row: Option<(String, Option<String>, i64, String)> = sqlx::query_as(
+        "SELECT a.theme, s.impersonator, s.expires_at, a.email FROM sessions s JOIN accounts a ON a.id = s.account_id WHERE s.token_hash = ?",
     )
     .bind(auth::hash_token(&token))
     .fetch_optional(&state.db)
     .await
     .ok()
     .flatten();
-    let Some(theme) = theme.filter(|t| t == "light" || t == "dark") else {
+    let Some((theme, by, expires, email)) = row else {
         return res;
     };
+    let themed = theme == "light" || theme == "dark";
+    if !themed && by.is_none() {
+        return res;
+    }
     let (mut parts, body) = res.into_parts();
     let Ok(bytes) = axum::body::to_bytes(body, usize::MAX).await else {
         return StatusCode::INTERNAL_SERVER_ERROR.into_response();
     };
-    let page = String::from_utf8_lossy(&bytes).replacen(
-        r#"<html lang="en">"#,
-        &format!(r#"<html lang="en" data-theme="{theme}">"#),
-        1,
-    );
+    let mut page = String::from_utf8_lossy(&bytes).into_owned();
+    if themed {
+        page = page.replacen(
+            r#"<html lang="en">"#,
+            &format!(r#"<html lang="en" data-theme="{theme}">"#),
+            1,
+        );
+    }
+    if let Some(by) = by
+        && let Some(at) = page
+            .find("<body")
+            .and_then(|i| page[i..].find('>').map(|j| i + j + 1))
+    {
+        let minutes = ((expires - OffsetDateTime::now_utc().unix_timestamp()) / 60).max(0);
+        let banner = crate::admin::Banner {
+            email: &email,
+            by: &by,
+            minutes,
+        }
+        .render()
+        .unwrap_or_default();
+        page.insert_str(at, &banner);
+    }
     parts.headers.remove(header::CONTENT_LENGTH);
     Response::from_parts(parts, axum::body::Body::from(page))
 }

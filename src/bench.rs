@@ -198,13 +198,14 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         ai_budget_usd: None,
         turnstile: None,
     };
-    let state = AppState::new(
+    let mut state = AppState::new(
         config,
         db,
         events.clone(),
         mail::Mailer::Log,
         crypto::Vault::load(dir, None)?,
     );
+    state.admin = Arc::new(crate::admin::Settings::new(Some(EMAIL), None, None, None));
     if seeded {
         let started = Instant::now();
         sync::rebuild_attribution(&state, Some(&site_id)).await;
@@ -385,6 +386,18 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         ));
     }
     let api_base = format!("/api/v1/sites/{domain}");
+    for page in ["", "/accounts", "/sites", "/signups", "/beta", "/audit"] {
+        routes.push(get(
+            &format!("page.admin{}", page.replace('/', ".")),
+            format!("/admin{page}"),
+            Auth::Session,
+        ));
+    }
+    routes.push(get(
+        "page.admin.search",
+        "/admin/accounts?q=bench".into(),
+        Auth::Session,
+    ));
     routes.push(get("api.sites", "/api/v1/sites".into(), Auth::Key));
     for range in ["7d", "30d", "90d"] {
         routes.push(get(
