@@ -35,6 +35,10 @@ Virling follows the [MCP authorization spec](https://modelcontextprotocol.io/spe
 - One scope, `read`. Access tokens last 1 hour. Refresh tokens last 30 days and rotate on every use; reusing an old one revokes the sign-in.
 - Tokens and codes are stored hashed, like API keys.
 
+## A dedicated MCP host
+
+To give assistants a short address such as `https://mcp.example.com/mcp` while the app and sign-in stay on `VIRLING_BASE_URL`, point a second DNS name or tunnel at the same server and set `VIRLING_MCP_URL=https://mcp.example.com` (`--mcp-url`). It must be `https` with no path. Requests to that host answer only `/mcp` and the two `/.well-known/oauth-protected-resource` paths; everything else is `404` with no cookies. Its resource metadata names `https://mcp.example.com/mcp` as the resource and your base URL as the authorization server, so sign-in, authorization, tokens and registration stay there. Connect clients to `<mcp_url>/mcp`. Tokens are bound to the `resource` the app asked for: one for the MCP host works only there, and one for the base URL works on both. The base URL keeps working.
+
 ## Claude Code
 
 On an `https` server, add the URL and run `/mcp` in a session to sign in:

@@ -42,19 +42,47 @@ pub fn enabled(config: &Config) -> bool {
     Url::parse(&config.base_url).is_ok_and(|u| u.scheme() == "https" && u.path() == "/")
 }
 
-/// The MCP endpoint's canonical URI, which every token is bound to.
+/// The MCP endpoint's canonical URI on the base URL, which tokens are bound to by default.
 fn resource(config: &Config) -> String {
     format!("{}/mcp", config.base_url)
 }
 
+/// Whether the request was sent to the dedicated MCP host.
+pub fn on_mcp_host(config: &Config, headers: &HeaderMap) -> bool {
+    let Some(mcp) = config.mcp_url.as_deref().and_then(|u| Url::parse(u).ok()) else {
+        return false;
+    };
+    let sent = headers
+        .get(header::HOST)
+        .and_then(|h| h.to_str().ok())
+        .and_then(|h| Url::parse(&format!("https://{h}")).ok());
+    sent.is_some_and(|s| s.host_str().is_some() && s.host_str() == mcp.host_str())
+}
+
+/// The MCP endpoint URI of the host a request was sent to.
+fn resource_for(config: &Config, headers: &HeaderMap) -> String {
+    match &config.mcp_url {
+        Some(mcp) if on_mcp_host(config, headers) => format!("{mcp}/mcp"),
+        _ => resource(config),
+    }
+}
+
+/// The canonical resource a client asked for, when it is one this server issues tokens for.
+fn asked_resource(config: &Config, asked: &str) -> Option<String> {
+    let asked = asked.trim_end_matches('/');
+    std::iter::once(resource(config))
+        .chain(config.mcp_url.iter().map(|u| format!("{u}/mcp")))
+        .find(|r| r == asked)
+}
+
 fn same_resource(config: &Config, asked: &str) -> bool {
-    asked.trim_end_matches('/') == resource(config)
+    asked_resource(config, asked).is_some()
 }
 
 /// RFC 9728 metadata of the MCP endpoint, at the root and path-suffixed well-known URIs.
-pub async fn protected_resource(State(state): State<AppState>) -> Json<Value> {
+pub async fn protected_resource(State(state): State<AppState>, headers: HeaderMap) -> Json<Value> {
     Json(json!({
-        "resource": resource(&state.config),
+        "resource": resource_for(&state.config, &headers),
         "authorization_servers": [state.config.base_url],
         "scopes_supported": [SCOPE],
         "bearer_methods_supported": ["header"],
@@ -561,7 +589,12 @@ pub async fn consent(
     .bind(&account.id)
     .bind(&redirect)
     .bind(p.code_challenge.as_deref().unwrap_or_default())
-    .bind(resource(&state.config))
+    .bind(
+        p.resource
+            .as_deref()
+            .and_then(|r| asked_resource(&state.config, r))
+            .unwrap_or_else(|| resource(&state.config)),
+    )
     .bind(now() + CODE_TTL_SECS)
     .execute(&state.db)
     .await;
@@ -683,6 +716,9 @@ async fn exchange(db: &SqlitePool, client: &str, p: &TokenParams) -> Issued {
         return Err("invalid_grant");
     };
     if code_client != client
+        || p.resource
+            .as_deref()
+            .is_some_and(|r| r.trim_end_matches('/') != resource)
         || p.redirect_uri.as_ref().is_some_and(|r| *r != redirect)
         || !pkce_ok(p.code_verifier.as_deref().unwrap_or_default(), &challenge)
     {
@@ -739,7 +775,7 @@ async fn refresh(db: &SqlitePool, client: &str, p: &TokenParams) -> Issued {
 }
 
 /// The account of a live access token issued for this server's MCP endpoint.
-async fn token_account(state: &AppState, token: &str) -> Option<String> {
+async fn token_account(state: &AppState, headers: &HeaderMap, token: &str) -> Option<String> {
     let row: Option<(String, String, String, Option<i64>)> = sqlx::query_as(
         "SELECT id, account_id, resource, last_used_at FROM oauth_grants WHERE access_hash = ? AND access_expires_at > ? AND revoked_at IS NULL",
     )
@@ -750,7 +786,7 @@ async fn token_account(state: &AppState, token: &str) -> Option<String> {
     .ok()
     .flatten();
     let (id, account, aud, used) = row?;
-    if aud != resource(&state.config) {
+    if aud != resource_for(&state.config, headers) && aud != resource(&state.config) {
         return None;
     }
     if used.is_none_or(|t| t < now() - 60) {
@@ -777,22 +813,27 @@ impl FromRequestParts<AppState> for McpAccount {
     ) -> Result<Self, Self::Rejection> {
         let token = api::bearer(parts);
         let id = match token {
-            Some(t) if t.starts_with(ACCESS_PREFIX) => token_account(state, t).await,
+            Some(t) if t.starts_with(ACCESS_PREFIX) => {
+                token_account(state, &parts.headers, t).await
+            }
             Some(t) => api::key_account(&state.db, t).await,
             None => None,
         };
         id.map(|id| McpAccount { id })
-            .ok_or_else(|| challenge(&state.config, token.is_some()))
+            .ok_or_else(|| challenge(&state.config, &parts.headers, token.is_some()))
     }
 }
 
 /// 401 that points clients at the resource metadata, so they can start OAuth sign-in.
-fn challenge(config: &Config, sent_token: bool) -> Response {
+fn challenge(config: &Config, headers: &HeaderMap, sent_token: bool) -> Response {
     let mut value = "Bearer".to_string();
     if enabled(config) {
+        let origin = match &config.mcp_url {
+            Some(mcp) if on_mcp_host(config, headers) => mcp,
+            _ => &config.base_url,
+        };
         value = format!(
-            r#"Bearer resource_metadata="{}/.well-known/oauth-protected-resource/mcp", scope="{SCOPE}""#,
-            config.base_url
+            r#"Bearer resource_metadata="{origin}/.well-known/oauth-protected-resource/mcp", scope="{SCOPE}""#
         );
         if sent_token {
             value.push_str(r#", error="invalid_token""#);
@@ -1546,6 +1587,137 @@ mod tests {
             .unwrap();
         let (_, e) = token_req(&f.state, refresh_body(&client, &refresh)).await;
         assert_eq!(e["error"], "invalid_grant", "expired refresh token");
+    }
+
+    const MCP_HOST: &str = "mcp.example.com";
+    const MCP_RESOURCE: &str = "https://mcp.example.com/mcp";
+
+    async fn with_mcp_host() -> Fixture {
+        let mut f = https().await;
+        f.state.config = Arc::new(Config {
+            mcp_url: Some("https://mcp.example.com".into()),
+            ..(*f.state.config).clone()
+        });
+        f
+    }
+
+    fn on_host(host: &str, req: Request<Body>) -> Request<Body> {
+        let (mut parts, body) = req.into_parts();
+        parts.headers.insert(header::HOST, host.parse().unwrap());
+        Request::from_parts(parts, body)
+    }
+
+    async fn mcp_on(state: &AppState, host: &str, token: Option<&str>) -> Response {
+        let mut req = Request::post("/mcp").header("content-type", "application/json");
+        if let Some(t) = token {
+            req = req.header("authorization", format!("Bearer {t}"));
+        }
+        let call = json!({ "jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": { "name": "list_sites", "arguments": {} } });
+        let req = req.body(Body::from(call.to_string())).unwrap();
+        send(state, on_host(host, req)).await
+    }
+
+    #[tokio::test]
+    async fn mcp_host_serves_only_the_endpoint_and_its_metadata() {
+        let f = with_mcp_host().await;
+        for path in [
+            "/",
+            "/app",
+            "/auth/login",
+            "/oauth/authorize",
+            "/oauth/token",
+            "/.well-known/oauth-authorization-server",
+            "/api/v1/sites",
+        ] {
+            let res = send(&f.state, on_host(MCP_HOST, get(path, None))).await;
+            assert_eq!(res.status(), StatusCode::NOT_FOUND, "{path}");
+            assert!(res.headers().get(header::SET_COOKIE).is_none(), "{path}");
+        }
+        for path in [
+            "/.well-known/oauth-protected-resource",
+            "/.well-known/oauth-protected-resource/mcp",
+        ] {
+            let (code, m) = json_of(send(&f.state, on_host(MCP_HOST, get(path, None))).await).await;
+            assert_eq!(code, StatusCode::OK);
+            assert_eq!(m["resource"], MCP_RESOURCE);
+            assert_eq!(
+                m["authorization_servers"],
+                json!(["https://stats.example.com"])
+            );
+        }
+        let (_, m) = json_of(
+            send(
+                &f.state,
+                get("/.well-known/oauth-protected-resource/mcp", None),
+            )
+            .await,
+        )
+        .await;
+        assert_eq!(m["resource"], RESOURCE, "the base host is unchanged");
+
+        let res = mcp_on(&f.state, MCP_HOST, None).await;
+        assert_eq!(res.status(), StatusCode::UNAUTHORIZED);
+        assert_eq!(
+            www_authenticate(&res),
+            r#"Bearer resource_metadata="https://mcp.example.com/.well-known/oauth-protected-resource/mcp", scope="read""#
+        );
+        let res = mcp_on(&f.state, "stats.example.com", None).await;
+        assert_eq!(
+            www_authenticate(&res),
+            format!(r#"Bearer resource_metadata="{METADATA}", scope="read""#)
+        );
+    }
+
+    #[tokio::test]
+    async fn tokens_are_bound_to_the_requested_audience() {
+        let f = with_mcp_host().await;
+        let client = client(&f.state).await;
+        let cookie = session(&f.state, &f.account).await;
+        let swap = |s: String| s.replace(&enc(RESOURCE), &enc(MCP_RESOURCE));
+        let res = send(
+            &f.state,
+            form(
+                "/oauth/authorize",
+                swap(query(&client, "&decision=allow")),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(res.status(), StatusCode::SEE_OTHER);
+        let code = param(&location(&res), "code").unwrap();
+        let (status, t) = token_req(&f.state, swap(exchange_body(&client, &code, VERIFIER))).await;
+        assert_eq!(status, StatusCode::OK, "{t}");
+        let access = t["access_token"].as_str().unwrap();
+        assert_eq!(
+            mcp_on(&f.state, MCP_HOST, Some(access)).await.status(),
+            StatusCode::OK
+        );
+        assert_eq!(
+            mcp_on(&f.state, "stats.example.com", Some(access))
+                .await
+                .status(),
+            StatusCode::UNAUTHORIZED,
+            "an mcp audience token is not valid on the base host"
+        );
+
+        let (_, base_access, _) = tokens(&f).await;
+        assert_eq!(
+            mcp_on(&f.state, "stats.example.com", Some(&base_access))
+                .await
+                .status(),
+            StatusCode::OK
+        );
+        assert_eq!(
+            mcp_on(&f.state, MCP_HOST, Some(&base_access))
+                .await
+                .status(),
+            StatusCode::OK
+        );
+
+        let other = exchange_body(&client, "x", VERIFIER)
+            .replace(&enc(RESOURCE), &enc("https://other.example/mcp"));
+        let (_, e) = token_req(&f.state, other).await;
+        assert_eq!(e["error"], "invalid_target");
     }
 
     #[tokio::test]

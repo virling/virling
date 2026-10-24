@@ -191,6 +191,7 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         trust_proxy: false,
         events_per_second: u32::MAX,
         base_url: "https://localhost".into(),
+        mcp_url: None,
         waitlist_from: String::new(),
         hosted: false,
         ai_keys: Default::default(),

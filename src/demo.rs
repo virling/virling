@@ -990,6 +990,7 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
         trust_proxy: false,
         events_per_second: 200,
         base_url: "https://go.tallybird.app".into(),
+        mcp_url: None,
         waitlist_from: String::new(),
         hosted: false,
         ai_keys: Default::default(),
