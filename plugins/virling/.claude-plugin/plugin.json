@@ -1,6 +1,6 @@
 {
   "name": "virling",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "displayName": "Virling",
   "description": "Ask which channels, referrers, campaigns and pages make money, from your Virling server. Bundles the Virling skill and the read-only MCP server.",
   "author": {
@@ -16,20 +16,11 @@
     "attribution",
     "mcp"
   ],
-  "userConfig": {
-    "server_url": {
-      "type": "string",
-      "title": "Virling server URL",
-      "description": "Your Virling server, such as https://stats.example.com, without a trailing slash",
-      "required": true
-    }
-  },
   "mcpServers": {
     "virling": {
       "type": "http",
-      "url": "${user_config.server_url}/mcp"
+      "url": "https://beta.virling.com/mcp"
     }
   },
-  "icon": ".claude-plugin/icon.png",
   "privacyPolicyUrl": "https://virling.com/privacy"
 }
