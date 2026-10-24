@@ -276,6 +276,24 @@ pub fn plan_label(account_type: &str) -> &'static str {
     }
 }
 
+impl Shell {
+    /// The local part of the email as a name ("maya.chen@x.com" -> "Maya Chen").
+    pub fn display_name(&self) -> String {
+        let local = self.email.split('@').next().unwrap_or_default();
+        local
+            .split(['.', '_', '-', '+'])
+            .filter(|p| !p.is_empty())
+            .map(|p| {
+                let mut c = p.chars();
+                c.next()
+                    .map(|f| f.to_uppercase().chain(c).collect::<String>())
+                    .unwrap_or_default()
+            })
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
+}
+
 /// Up to two initials from the local part of an email ("maya.chen@x.com" -> "MC").
 fn initials(email: &str) -> String {
     email

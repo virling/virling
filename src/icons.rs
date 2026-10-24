@@ -305,7 +305,7 @@ pub fn brand(slug: &str, size: u32) -> String {
 
 fn glyph_path(name: &str) -> &'static str {
     match name {
-        "direct" => r#"<path d="M5 3l14 8-6 2-3 6z"/>"#,
+        "direct" => r#"<circle cx="12" cy="12" r="8"/><path d="M6.3 17.7L17.7 6.3"/>"#,
         "email" => {
             r#"<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/>"#
         }
@@ -572,7 +572,7 @@ mod tests {
     #[test]
     fn sources_fall_back_to_glyphs_and_letters() {
         assert!(source("Hacker News", 14).contains(r#"aria-label="Hacker News""#));
-        assert!(source("Direct", 14).contains("M5 3l14 8"));
+        assert!(source("Direct", 14).contains("M6.3 17.7L17.7 6.3"));
         assert!(source("Unattributed", 14).contains("var(--ink-4)"));
         assert!(source("<b>log", 14).contains(">&lt;</span>"));
         assert!(source("someblog.dev", 14).contains(">S</span>"));
