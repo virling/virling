@@ -853,6 +853,8 @@ pub struct AiCard {
     /// Greyed logos for the empty state.
     pub(super) logos: Vec<String>,
     pub(super) docs: &'static str,
+    /// Some AI crawler read a page in the range.
+    pub(super) crawled: bool,
     /// The Answers tab, signed in only.
     pub(super) answers: Option<super::answers::AnswersTab>,
 }
@@ -1082,6 +1084,7 @@ pub fn ai_card(
             .map(|l| icons::source(l, 18))
             .collect(),
         docs: "https://docs.virling.com/track/ai-crawlers.html",
+        crawled: !bots.is_empty(),
         answers: None,
     }
 }

@@ -1449,3 +1449,4 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .adm-confirm { display: flex; gap: 8px; margin: 0; }
 .adm-confirm .input { width: 220px; height: 36px; font-size: 13px; }
 .adm-confirm .btn { height: 36px; }
+.d3-hint { margin: 8px 8px 0; font-size: 12px; color: var(--ink-3); }
