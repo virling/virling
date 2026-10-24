@@ -133,6 +133,43 @@ pub fn router(state: AppState) -> Router {
             get(|| asset("text/javascript", include_str!("../assets/app.js"))),
         )
         .route(
+            "/assets/globe.js",
+            get(|| asset("text/javascript", include_str!("../assets/globe.js"))),
+        )
+        .route(
+            "/assets/globe/countries.json",
+            get(|| async {
+                (
+                    [
+                        (header::CONTENT_TYPE, "application/json"),
+                        (header::CACHE_CONTROL, "public, max-age=604800"),
+                    ],
+                    include_str!("../assets/globe/countries.json"),
+                )
+            }),
+        )
+        .route(
+            "/assets/vendor/three-r170.module.min.js",
+            get(|| async {
+                (
+                    [
+                        (header::CONTENT_TYPE, "text/javascript"),
+                        (header::CACHE_CONTROL, "public, max-age=31536000, immutable"),
+                    ],
+                    include_str!("../assets/vendor/three-r170.module.min.js"),
+                )
+            }),
+        )
+        .route(
+            "/assets/vendor/three-LICENSE.txt",
+            get(|| {
+                asset(
+                    "text/plain",
+                    include_str!("../assets/vendor/three-LICENSE.txt"),
+                )
+            }),
+        )
+        .route(
             "/assets/email-logo.png",
             get(|| async {
                 (
@@ -206,6 +243,8 @@ pub fn router(state: AppState) -> Router {
                 get(dashboard::answers::page),
             )
             .route("/app/{domain}/visitors", get(visitor_pages::list))
+            .route("/app/{domain}/globe", get(crate::globe::page))
+            .route("/app/{domain}/globe/data", get(crate::globe::data))
             .route("/app/{domain}/retention", get(retention_page::page))
             .route("/app/{domain}/links", get(links::page).post(links::create))
             .route("/app/{domain}/links/delete", post(links::delete))

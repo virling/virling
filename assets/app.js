@@ -141,7 +141,7 @@ if (poll) {
       if (!res.ok) throw res.status;
       const next = (await res.json()).v;
       if (!busy()) {
-        if (v && next != v) await refresh();
+        if (v && next != v && document.dispatchEvent(new Event("live", { cancelable: true }))) await refresh();
         v = next;
       }
       fails = 0;

@@ -32,8 +32,25 @@ Click a row to filter the whole page by it. Revenue per visitor is the number to
 
 Two lists sit at the top of the page. **Latest payments** shows each payment with its source and the visit before it. **Visitors** shows who is on the site now and what they did. Both update live.
 
+## Live globe
+
+Open **Live globe** in the sidebar (`/app/yourdomain.com/globe`) to watch visitors arrive on a 3D globe. It is drawn in your browser from one small bundled outline of the world, so it loads nothing from other sites and needs no map key.
+
+- **Visitors** appear as their animal face at the centre of their country. Visitors who have paid have an orange ring. Hover a face for the page they are on.
+- **Payments** make a ring pulse at the payer's country with the amount and the channel that brought them, the moment the payment is synced. Open the page and the two latest payments pulse once.
+- **Replay a journey:** click a paying customer, on the globe, in the list or in Latest payments. The globe turns to them and a panel steps through where they came from, the pages they viewed, their goals and the payment. Close it to go back.
+- **Shading:** the **Visits** and **Revenue per visitor** switch colours each country for the date range at the top right. Revenue per visitor shows which countries are worth more than their traffic suggests.
+- **On the site now** lists the people on the globe, with their countries, sources and devices below it. It shows visitors with a tab open and anyone active in the last 5 minutes, up to 60.
+
+Drag to rotate, use the plus and minus buttons (or the arrow keys, `+` and `-` with the globe focused) to turn and zoom. The globe turns slowly on its own when you leave it alone. With reduced motion turned on in your system, it stays still, the rings do not pulse, and the latest payment is marked with a fixed ring and label instead. It follows your light or dark theme and works on a phone.
+
+When nobody is on the site, the globe keeps turning slowly with a few soft grey pulses and says it is idle. The pulses are decoration, not visitors. The globe uses WebGL through a bundled copy of three.js that loads only on this page; if the browser has no WebGL, the page shows the same lists without the globe.
+
+Places are shown at the country level, so visitors from the same country sit close together around its centre. Visitors with no known country are listed but not drawn.
+
 ## The other pages
 
+- **Live globe:** visitors and payments on a globe, described above.
 - **Visitors:** every visitor with their first source, pages, goals and what they paid. Open one to see their full journey.
   A visitor page opens with their device, OS, browser and visitor ID (click the copy icon to copy it), a one-line summary, and stats for first source, visits, pageviews, time on site, goals, spent and last exit. Time on site adds up each visit from its first to its last event, and a visit ends after 30 minutes of no activity. A dash means nothing later is known, not zero. The timeline lists every visit with the time on each page, and each payment sits where it happened with its amount, provider and the source it was credited to: by visitor ID when the payment carried one, or through the customer when it did not.
 - **Payments:** every payment with its source, status and time to complete. Open one to see the visits before it. Filter by goal, attributed, unattributed or refunded.
