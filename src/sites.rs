@@ -17,6 +17,8 @@ pub struct Site {
     pub same_visit: String,
     /// Minutes away after which a return is a new visit.
     pub return_minutes: i64,
+    /// Whether the site holds generated sample data.
+    pub sample_data: bool,
 }
 
 type CacheEntry = (Option<Arc<Site>>, Instant);
@@ -34,7 +36,7 @@ impl SiteCache {
             return site.clone();
         }
         let site = sqlx::query_as::<_, Site>(
-            "SELECT id, domain, timezone, cookieless, same_visit, return_minutes FROM sites WHERE domain = ?",
+            "SELECT id, domain, timezone, cookieless, same_visit, return_minutes, sample_data FROM sites WHERE domain = ?",
         )
         .bind(domain)
         .fetch_optional(db)
@@ -65,7 +67,7 @@ pub fn app_path(domain: &str, page: &str) -> String {
 
 pub async fn for_account(db: &SqlitePool, account_id: &str) -> anyhow::Result<Vec<Site>> {
     Ok(sqlx::query_as::<_, Site>(
-        "SELECT id, domain, timezone, cookieless, same_visit, return_minutes FROM sites WHERE account_id = ? ORDER BY created_at",
+        "SELECT id, domain, timezone, cookieless, same_visit, return_minutes, sample_data FROM sites WHERE account_id = ? ORDER BY created_at",
     )
     .bind(account_id)
     .fetch_all(db)

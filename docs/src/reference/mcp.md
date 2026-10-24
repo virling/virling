@@ -108,6 +108,8 @@ Any client that speaks the Streamable HTTP transport and can send a header works
 
 `site` is a domain from `list_sites`. It can be left out when the account has one site. A range is `range` (`today`, `7d`, `30d`, `90d`, `12m` or `all`) or `from` and `to` as `YYYY-MM-DD`. The results have the same fields as the [Read API](api.md) responses, as structured content and as JSON text.
 
+To try the tools before any traffic arrives, open a new site and choose **Try with sample data**. Every tool then returns generated results, and **Remove sample data** clears them. See [Read your dashboard](../guides/dashboard.md#sample-data).
+
 Errors such as an unknown site come back as a tool result with `isError: true` and a message, so the assistant can correct itself.
 
 ## Not available yet

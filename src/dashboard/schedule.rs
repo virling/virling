@@ -205,7 +205,7 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
         "SELECT s.id, s.domain, s.timezone, s.cookieless, b.send_weekday, b.send_minute, b.recipients, b.send_from,
             a.account_type = 'agency', a.email
          FROM report_brands b JOIN sites s ON s.id = b.site_id JOIN accounts a ON a.id = s.account_id
-         WHERE b.send_on = 1 AND (b.recipients <> '' OR a.account_type <> 'agency')",
+         WHERE b.send_on = 1 AND s.sample_data = 0 AND (b.recipients <> '' OR a.account_type <> 'agency')",
     )
     .fetch_all(&state.db)
     .await?;
@@ -220,6 +220,7 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
             cookieless,
             same_visit: String::new(),
             return_minutes: 5,
+            sample_data: false,
         };
         let s = Schedule {
             on: true,

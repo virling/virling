@@ -1842,6 +1842,8 @@ pub struct Indexes {
     cap: usize,
     /// Sites whose payments changed since the index read them.
     stale_payments: Mutex<HashSet<String>>,
+    /// Sites whose index must be dropped once it finishes loading, because rows were removed meanwhile.
+    discard: Mutex<HashSet<String>>,
     /// Held by writers from commit until their events are applied, and by a load while its snapshot starts.
     gate: Mutex<()>,
 }
@@ -1852,6 +1854,7 @@ impl Indexes {
             slots: Mutex::default(),
             cap,
             stale_payments: Mutex::default(),
+            discard: Mutex::default(),
             gate: Mutex::default(),
         }
     }
@@ -1918,6 +1921,9 @@ impl Indexes {
             Some((Slot::Loading(p), _)) => p,
             _ => Vec::new(),
         };
+        if self.discard.lock().unwrap().remove(site_id) {
+            return Ok(());
+        }
         let fit = loaded.map(|mut ix| {
             ix.apply(&pending);
             ix
@@ -2017,6 +2023,17 @@ impl Indexes {
         match self.slots.lock().unwrap().get(site_id) {
             Some((Slot::Ready(ix, _), _)) if !ix.read().unwrap().broken => Some(ix.clone()),
             _ => None,
+        }
+    }
+
+    /// Drops the site's index after rows were removed; one still loading is dropped when it finishes.
+    pub fn forget(&self, site_id: &str) {
+        self.stale_payments.lock().unwrap().remove(site_id);
+        let mut slots = self.slots.lock().unwrap();
+        if matches!(slots.get(site_id), Some((Slot::Loading(_), _))) {
+            self.discard.lock().unwrap().insert(site_id.to_string());
+        } else {
+            slots.remove(site_id);
         }
     }
 

@@ -61,6 +61,9 @@
     {% block tools %}{% endblock %}
   </header>
   {% endblock %}
+  {% if let Some(owner) = shell.sample %}
+  <div class="notice row sample" role="status"><span><b>Sample data.</b> These reports are generated for this site, not real visitors.</span>{% if owner %}<form method="post" action="/app/{{ shell.domain }}/sample/remove"><button class="d3-btn sm" type="submit">Remove sample data</button></form>{% endif %}</div>
+  {% endif %}
   <main class="content">
   {% block content %}{% endblock %}
   </main>

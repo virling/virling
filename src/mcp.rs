@@ -271,22 +271,21 @@ fn tools() -> Vec<Value> {
         .iter()
         .map(|d| format!("{}: {}", d.0, d.2))
         .collect();
-    let read_only =
-        json!({ "readOnlyHint": true, "destructiveHint": false, "openWorldHint": false });
+    let read_only = |title: &str| json!({ "title": title, "readOnlyHint": true, "destructiveHint": false, "openWorldHint": false });
     vec![
         json!({
             "name": "list_sites",
             "title": "List sites",
-            "description": "List the sites this API key can read, with their timezones. Call this first to get the site domain for the other tools.",
+            "description": "List the sites you can read, with their timezones. Call this first to get the site domain for the other tools.",
             "inputSchema": { "type": "object", "properties": {} },
-            "annotations": read_only,
+            "annotations": read_only("List sites"),
         }),
         json!({
             "name": "get_overview",
             "title": "Get overview",
             "description": "Totals for a date range and for the period of the same length before it: visitors, sessions, payments, customers, revenue_usd (net of refunds), conversion (matched paying customers / visitors) and revenue_per_visitor, plus change as a fraction (0.25 = +25%, null when there is nothing to compare).",
             "inputSchema": with(json!({}), &[]),
-            "annotations": read_only,
+            "annotations": read_only("Get overview"),
         }),
         json!({
             "name": "get_breakdown",
@@ -296,21 +295,21 @@ fn tools() -> Vec<Value> {
                 "dimension": { "type": "string", "enum": dims, "description": "What to group by." },
                 "limit": { "type": "integer", "minimum": 1, "maximum": MAX_ROWS, "description": "Rows to return, default 100." }
             }), &["dimension"]),
-            "annotations": read_only,
+            "annotations": read_only("Break down revenue"),
         }),
         json!({
             "name": "get_retention",
             "title": "Get retention by channel",
             "description": "Which channels bring customers who stay. Customers are grouped by the channel, referrer and campaign credited for their first payment; renewals keep that first channel. The range picks customers whose first payment falls in it. Per row: customers, still_paying (a live subscription per the provider, else a payment not fully refunded within the last billing interval plus 7 days), first_payment_usd, refunded_usd, net_ltv_usd (all their payments so far, net of refunds), avg_ltv_usd, refund_rate (share of customers with any refund), churn_30d (of customers who first paid 30 to 60 days ago, whatever the range, the share with no payment and no live subscription in the last 30 days), share_customers and share_still_paying. day_one is true under 60 days of payments, when LTV is not meaningful yet. headline is the most striking statement, null when data is thin.",
             "inputSchema": with(json!({}), &[]),
-            "annotations": read_only,
+            "annotations": read_only("Retention by channel"),
         }),
         json!({
             "name": "get_ai_answers",
             "title": "Get AI answers",
             "description": "How AI assistants answer about the site, per assistant (ChatGPT, Claude, Perplexity, Gemini): used_in_answers (times its live fetcher, such as ChatGPT-User, opened a site page while answering someone; needs the server snippet), answers and mentioned (of the site's buyer questions asked once a week with web search, how many answers named the site; only for assistants set up on the server, see keyed), mention_rate, previous (the same counts for the period before), cited_pages (site pages cited, with answer counts), opened_pages, visitors and revenue_usd (referral visits credited to that assistant), and per question the latest answer with position (1 = the first product named), named (products named) and the answer text.",
             "inputSchema": with(json!({}), &[]),
-            "annotations": read_only,
+            "annotations": read_only("AI assistant answers"),
         }),
         json!({
             "name": "list_payments",
@@ -321,7 +320,7 @@ fn tools() -> Vec<Value> {
                 "limit": { "type": "integer", "minimum": 1, "maximum": MAX_PAYMENTS, "description": "Payments per page, default 20." },
                 "offset": { "type": "integer", "minimum": 0, "description": "Payments to skip, for the next page." }
             }), &[]),
-            "annotations": read_only,
+            "annotations": read_only("List payments"),
         }),
         json!({
             "name": "get_visitor_timeline",
@@ -332,7 +331,7 @@ fn tools() -> Vec<Value> {
                 "properties": { "site": site, "visitor_id": { "type": "string", "description": "Visitor ID from a payment's visitor field." } },
                 "required": ["visitor_id"]
             },
-            "annotations": read_only,
+            "annotations": read_only("Visitor timeline"),
         }),
     ]
 }
@@ -431,6 +430,7 @@ mod tests {
         for t in tools {
             assert_eq!(t["inputSchema"]["type"], "object");
             assert_eq!(t["annotations"]["readOnlyHint"], true);
+            assert!(!t["annotations"]["title"].as_str().unwrap().is_empty());
             assert!(t["description"].as_str().unwrap().len() > 40);
         }
         assert_eq!(tools[2]["inputSchema"]["required"], json!(["dimension"]));

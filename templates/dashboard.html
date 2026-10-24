@@ -54,7 +54,7 @@
     <span class="listening"><i></i>Listening for {{ w.domain }}</span>
     <h2>Waiting for your first visitor</h2>
     <p>Open your site in a new tab. This page updates on its own the moment the first pageview arrives, usually within a few seconds.</p>
-    <div class="acts"><a class="d3-btn dark" href="https://{{ w.domain }}" target="_blank" rel="noopener">Open {{ w.domain }}</a><a class="d3-btn" href="{{ w.install_href }}">Check the install</a></div>
+    <div class="acts"><a class="d3-btn dark" href="https://{{ w.domain }}" target="_blank" rel="noopener">Open {{ w.domain }}</a><a class="d3-btn" href="{{ w.install_href }}">Check the install</a><form method="post" action="{{ w.sample_href }}"><button class="d3-btn" type="submit">Try with sample data</button></form></div>
   </div>
   <div class="d3-code">
     <div class="d3-code-head"><span>In your site's head</span><button type="button" data-copy-text="{{ w.snippet }}">Copy</button></div>

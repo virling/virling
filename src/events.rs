@@ -46,6 +46,9 @@ pub struct Event {
     pub language: Option<String>,
 }
 
+/// Provider of sample payments, and with a dash the prefix of sample visitor and session IDs.
+pub const SAMPLE: &str = "sample";
+
 /// Status of a free trial start; stored apart from payments, only to credit the trial's later charges.
 pub const TRIAL: &str = "trial";
 
@@ -98,6 +101,8 @@ pub trait EventStore: Send + Sync {
     ) -> anyhow::Result<Retention>;
     #[cfg(test)]
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64>;
+    /// Removes every sample row of the site: events and visitors tagged by ID, payments of the sample provider.
+    fn remove_sample(&self, site_id: &str) -> anyhow::Result<()>;
     /// The first pageview of the newest visitor, as the dashboard shows that visitor.
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>>;
     /// When the site's first event arrived.
@@ -1228,6 +1233,36 @@ impl EventStore for DuckStore {
         Ok(())
     }
 
+    fn remove_sample(&self, site_id: &str) -> anyhow::Result<()> {
+        let _gate = self.index.gate();
+        let mut conn = self.conn.lock().unwrap();
+        flush_touches(&mut self.touch_conn.lock().unwrap(), &self.pending)?;
+        let tx = conn.transaction()?;
+        let tag = format!("{SAMPLE}-");
+        for sql in [
+            "DELETE FROM events WHERE site_id = $1 AND starts_with(visitor_id, $2)",
+            "DELETE FROM touches WHERE site_id = $1 AND starts_with(session_id, $2)",
+            "DELETE FROM first_touches WHERE site_id = $1 AND starts_with(visitor_id, $2)",
+        ] {
+            tx.execute(sql, params![site_id, tag])?;
+        }
+        for table in [
+            "payments",
+            "trials",
+            "attribution",
+            "attribution_dirty",
+            "subscriptions",
+        ] {
+            tx.execute(
+                &format!("DELETE FROM {table} WHERE site_id = $1 AND provider = $2"),
+                params![site_id, SAMPLE],
+            )?;
+        }
+        tx.commit()?;
+        self.index.forget(site_id);
+        Ok(())
+    }
+
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>> {
         let conn = self.read()?;
         let mut stmt = conn.prepare(
@@ -1996,6 +2031,47 @@ mod payment_tests {
             page.rows.iter().map(|r| r.pageviews).sum()
         };
         assert_eq!((index.total, views(&index)), (sql.total, views(&sql)));
+    }
+
+    #[test]
+    fn removing_sample_data_leaves_real_rows_and_the_index_exact() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = DuckStore::open(&dir.path().join("e.duckdb")).unwrap();
+        let now = OffsetDateTime::now_utc();
+        let (events, payments, subs) = crate::demo::sample("site", now);
+        let sample_events = events.len() as u64;
+        store.insert_events(&events).unwrap();
+        store.upsert_payments(&payments).unwrap();
+        store.replace_subscriptions("site", SAMPLE, &subs).unwrap();
+        let mut real = events[0].clone();
+        real.visitor_id = "realvisitor1".into();
+        real.session_id = "realsession1".into();
+        store.insert_events(&[real]).unwrap();
+        store.load_index("site");
+        let p = Period {
+            from: time::macros::date!(2000 - 01 - 01),
+            to: now.date(),
+            tz: "UTC".into(),
+        };
+        assert!(store.overview("site", &p).unwrap().current.payments > 0);
+        store.remove_sample("site").unwrap();
+        store.remove_sample("site").unwrap();
+        assert_eq!(store.count_events("site").unwrap(), 1);
+        store.load_index("site");
+        let o = store.overview("site", &p).unwrap().current;
+        assert_eq!((o.visitors, o.payments), (1, 0));
+        assert!(sample_events > 1);
+        let left: i64 = store
+            .read()
+            .unwrap()
+            .query_row(
+                "SELECT (SELECT count(*) FROM payments) + (SELECT count(*) FROM subscriptions)
+                 + (SELECT count(*) FROM attribution) + (SELECT count(*) FROM touches WHERE session_id LIKE 'sample-%')",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(left, 0);
     }
 }
 
