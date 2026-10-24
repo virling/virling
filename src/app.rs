@@ -240,6 +240,7 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/setup/dismiss",
                 post(dashboard::dismiss_setup),
             )
+            .route("/app/{domain}/ai-test", post(onboarding::ai_test))
             .route("/app/{domain}/sample", post(crate::sample::add))
             .route("/app/{domain}/sample/remove", post(crate::sample::remove))
             .route("/app/{domain}", get(dashboard::dashboard))
