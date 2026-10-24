@@ -26,6 +26,8 @@ Each card lists visitors, revenue and revenue per visitor for every row, with a 
 | Location | Where visitors are. | Country, City, Language |
 | Devices | What they use. | Device, Browser, OS |
 
+The Channels card also shows **Refunded**, the share of a row's payments that were refunded in whole or part. A dash means none. Virling does not store disputes apart from refunds: a lost dispute counts as a refund where the provider reports it, and a dispute still open does not count.
+
 Click a row to filter the whole page by it. Revenue per visitor is the number to watch: a channel with many visitors and a low chip is loud but does not pay, and a small one with a high chip is worth more of your time. See [Find which channel pays](channel-revenue.md).
 
 ## Latest payments and visitors

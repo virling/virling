@@ -629,6 +629,8 @@ a.ctl { text-decoration: none; }
 .d3-row { display: grid; grid-template-columns: minmax(0, 1fr) 60px 76px 72px 44px; align-items: center; column-gap: 10px; min-height: 48px; padding: 3px 8px; border-radius: 10px; }
 .d3-panel.timed .d3-row { grid-template-columns: minmax(0, 1fr) 60px 76px 72px 68px 44px; }
 .d3-row .tm { color: var(--ink-2); font-size: 13px; }
+.d3-row.hasrf { grid-template-columns: minmax(0, 1fr) 60px 76px 72px 56px 44px; }
+.d3-panel.timed .d3-row.hasrf { grid-template-columns: minmax(0, 1fr) 60px 76px 72px 68px 56px 44px; }
 .d3-row:hover { background: var(--soft); }
 .d3-row.th { min-height: 30px; margin-bottom: 4px; border-bottom: 1px solid var(--rule-2); border-radius: 0; font-size: 12px; font-weight: 500; color: var(--ink-3); }
 .d3-row.th:hover { background: transparent; }
@@ -650,6 +652,8 @@ a.ctl { text-decoration: none; }
 .d3-row .rv { font-weight: 600; }
 .d3-row .pv { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
 .d3-row .pv small { font-size: 11px; color: var(--ink-3); }
+.d3-row .rf { color: var(--ink-2); font-size: 13px; }
+.d3-row.th .rf { color: inherit; font-size: inherit; }
 .d3-row .x { display: flex; justify-content: flex-end; }
 .d3-row .early { padding: 1px 5px; border-radius: 5px; background: var(--ground); font-size: 11px; color: var(--ink-2); white-space: nowrap; }
 .d3 .bdg { padding: 2px 6px; border-radius: 6px; background: var(--chip); font-size: 11px; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
@@ -817,8 +821,8 @@ a.ctl { text-decoration: none; }
   .d3-body { padding: 16px 12px 32px; }
 }
 @media (max-width: 720px) {
-  .d3-row { grid-template-columns: minmax(0, 1fr) 60px 64px; column-gap: 8px; padding: 3px 2px; }
-  .d3-row .v { display: none; }
+  .d3-row, .d3-row.hasrf { grid-template-columns: minmax(0, 1fr) 60px 64px; column-gap: 8px; padding: 3px 2px; }
+  .d3-row .v, .d3-row .rf { display: none; }
   .d3-row .x { display: none; }
   .d3-row .tm { display: none; }
   .d3-panel.timed .d3-row { grid-template-columns: minmax(0, 1fr) 60px 64px; }
