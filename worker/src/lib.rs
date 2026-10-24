@@ -531,6 +531,38 @@ async fn dodo_webhook(mut req: Request, ctx: RouteContext<()>) -> Result<Respons
     json_status(json!({ "received": true }), 200)
 }
 
+/// Founding spots bought with an email, for the hosted app to link them at sign-up.
+async fn founder_lookup(req: Request, ctx: RouteContext<()>) -> Result<Response> {
+    let given = req.headers().get("Authorization")?.unwrap_or_default();
+    let expected = ctx
+        .secret("FOUNDERS_TOKEN")
+        .map(|s| s.to_string())
+        .unwrap_or_default();
+    if !analytics::token_matches(given.trim_start_matches("Bearer "), &expected) {
+        return json_status(json!({ "error": "unauthorized" }), 401);
+    }
+    let email = req
+        .url()?
+        .query_pairs()
+        .find(|(k, _)| k == "email")
+        .map(|(_, v)| v.trim().to_ascii_lowercase())
+        .unwrap_or_default();
+    let kv = ctx.kv("WAITLIST")?;
+    let mut founders = Vec::new();
+    for key in kv.list().prefix("founder:".into()).execute().await?.keys {
+        let Some(plan) = preorder::plan_of_key(&key.name) else {
+            continue;
+        };
+        if let Some(record) = kv.get(&key.name).json::<FounderRecord>().await?
+            && !email.is_empty()
+            && record.email.eq_ignore_ascii_case(&email)
+        {
+            founders.push(json!({ "plan": plan, "number": record.number }));
+        }
+    }
+    private(Response::from_json(&json!({ "founders": founders }))?)
+}
+
 fn cors(mut res: Response) -> Result<Response> {
     res.headers_mut().set("Access-Control-Allow-Origin", "*")?;
     Ok(res)
@@ -740,6 +772,7 @@ async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         .post_async("/api/preorder/session", preorder_session)
         .get_async("/api/preorder/status", preorder_status)
         .post_async("/api/dodo/webhook", dodo_webhook)
+        .get_async("/api/founders", founder_lookup)
         .or_else_any_method_async("/", pages)
         .or_else_any_method_async("/*path", pages)
         .run(req, env)

@@ -1222,6 +1222,7 @@ mod tests {
             ai_keys: Default::default(),
             ai_budget_usd: None,
             turnstile: None,
+            billing: None,
         };
         let state = AppState::new(
             config,

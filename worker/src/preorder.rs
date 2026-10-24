@@ -2,7 +2,7 @@
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 use hmac::{Hmac, KeyInit, Mac};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sha2::Sha256;
 
@@ -11,7 +11,7 @@ pub const PERSONAL_PRODUCT_ID: &str = "pdt_0NqDoRZUoz8LY0PbCgNu8";
 pub const FOUNDING_SPOTS: u64 = 50;
 const TOLERANCE_SECS: i64 = 5 * 60;
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Plan {
     #[default]
@@ -230,6 +230,17 @@ pub fn founder_from_event(body: &str) -> Option<Founder> {
             .map(str::to_string),
         amount_cents: event.data.total_amount,
     })
+}
+
+/// The plan of a founder record from its KV key, for the founder lookup.
+pub fn plan_of_key(key: &str) -> Option<Plan> {
+    if key.starts_with("founder:personal:") {
+        Some(Plan::Personal)
+    } else if key.starts_with("founder:") {
+        Some(Plan::Agency)
+    } else {
+        None
+    }
 }
 
 pub fn spots_left(founders: u64) -> u64 {
@@ -472,6 +483,20 @@ mod tests {
             Some("vabc123")
         );
         assert_eq!(cookie_visitor("a=1"), None);
+    }
+
+    #[test]
+    fn founder_keys_name_their_plan() {
+        assert_eq!(
+            plan_of_key(&Plan::Agency.founder_key("pay_1")),
+            Some(Plan::Agency)
+        );
+        assert_eq!(
+            plan_of_key(&Plan::Personal.founder_key("pay_1")),
+            Some(Plan::Personal)
+        );
+        assert_eq!(plan_of_key(Plan::Agency.count_key()), None);
+        assert_eq!(plan_of_key("signup:agency:a@b.co"), None);
     }
 
     #[test]

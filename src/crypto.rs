@@ -3,6 +3,26 @@ use std::path::Path;
 use aes_gcm::aead::{Aead, KeyInit};
 use aes_gcm::{Aes256Gcm, Key, Nonce};
 use anyhow::Context;
+use sha2::{Digest, Sha256};
+
+/// HMAC-SHA256 of `msg` with `key`.
+pub fn hmac_sha256(key: &[u8], msg: &[u8]) -> [u8; 32] {
+    let mut block = [0u8; 64];
+    if key.len() > block.len() {
+        block[..32].copy_from_slice(&Sha256::digest(key));
+    } else {
+        block[..key.len()].copy_from_slice(key);
+    }
+    let inner = Sha256::new()
+        .chain_update(block.map(|b| b ^ 0x36))
+        .chain_update(msg)
+        .finalize();
+    Sha256::new()
+        .chain_update(block.map(|b| b ^ 0x5c))
+        .chain_update(inner)
+        .finalize()
+        .into()
+}
 
 /// Encrypts payment-provider keys at rest with AES-256-GCM.
 pub struct Vault {

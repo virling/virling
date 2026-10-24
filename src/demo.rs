@@ -996,6 +996,7 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
         ai_keys: Default::default(),
         ai_budget_usd: None,
         turnstile: None,
+        billing: None,
     };
     let state = AppState::new(config, db.clone(), store, mail::Mailer::Log, vault);
     sync::rebuild_attribution(&state, Some(&site)).await;
