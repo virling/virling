@@ -169,6 +169,26 @@
     const rim = new THREE.Mesh(new THREE.RingGeometry(0.995, 1.005, 160), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true }));
     rim.position.z = 1.2;
     scene.add(rim);
+    // Earth look in full screen: a blue halo behind the globe and a darker limb in front.
+    const radial = (stops, z, order) => {
+      const c = document.createElement("canvas");
+      c.width = c.height = 512;
+      const x = c.getContext("2d");
+      const g = x.createRadialGradient(256, 256, 0, 256, 256, 256);
+      for (const [o, col] of stops) g.addColorStop(o, col);
+      x.fillStyle = g;
+      x.fillRect(0, 0, 512, 512);
+      const t = new THREE.CanvasTexture(c);
+      t.colorSpace = THREE.SRGBColorSpace;
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false }));
+      m.position.z = z;
+      m.renderOrder = order;
+      m.visible = false;
+      scene.add(m);
+      return m;
+    };
+    const halo = radial([[0, "rgba(0,0,0,0)"], [0.74, "rgba(120,190,255,.8)"], [0.79, "rgba(80,150,255,.4)"], [0.9, "rgba(50,100,230,.1)"], [1, "rgba(0,0,0,0)"]], -2, -2);
+    const limb = radial([[0, "rgba(0,0,0,0)"], [0.5, "rgba(0,0,0,0)"], [0.76, "rgba(2,8,20,.62)"], [0.7695, "rgba(2,8,20,.62)"], [0.77, "rgba(0,0,0,0)"], [1, "rgba(0,0,0,0)"]], 1.3, -1);
 
     const vec = (lon, lat) => {
       const la = lat * RAD, lo = lon * RAD;
@@ -186,35 +206,55 @@
       const fs = fsOn();
       const dark = isDark();
       t2.globalAlpha = 1;
-      t2.fillStyle = fs ? "#07121d" : dark ? "#102a40" : "#cfe5f3";
+      const ramp = (stops) => {
+        const g = t2.createLinearGradient(0, 0, 0, TH);
+        for (const [la, c] of stops) g.addColorStop((90 - la) / 180, c);
+        return g;
+      };
+      t2.fillStyle = fs ? ramp([[90, "#0a2442"], [40, "#0c3f70"], [0, "#0e5088"], [-40, "#0c3f70"], [-90, "#0a2442"]]) : dark ? "#102a40" : "#cfe5f3";
       t2.fillRect(0, 0, TW, TH);
-      t2.strokeStyle = colors["rule-2"];
-      t2.lineWidth = 2;
-      t2.beginPath();
-      for (let lo = -150; lo <= 180; lo += 30) { t2.moveTo(px(lo), 0); t2.lineTo(px(lo), TH); }
-      for (let la = -60; la <= 60; la += 30) { t2.moveTo(0, py(la)); t2.lineTo(TW, py(la)); }
-      t2.stroke();
+      halo.visible = limb.visible = fs;
+      rim.visible = !fs;
+      if (!fs) {
+        t2.strokeStyle = colors["rule-2"];
+        t2.lineWidth = 2;
+        t2.beginPath();
+        for (let lo = -150; lo <= 180; lo += 30) { t2.moveTo(px(lo), 0); t2.lineTo(px(lo), TH); }
+        for (let la = -60; la <= 60; la += 30) { t2.moveTo(0, py(la)); t2.lineTo(TW, py(la)); }
+        t2.stroke();
+      }
       if (outline) {
+        const trace = (s, off) => {
+          t2.beginPath();
+          for (const g of s.rings) {
+            for (let i = 0; i < g.n; i++) {
+              const x = px(g.lon[i]) + off, y = py(g.lat[i]);
+              if (i) t2.lineTo(x, y); else t2.moveTo(x, y);
+            }
+            t2.closePath();
+          }
+        };
+        const land = fs && ramp([[90, "#e4ecf0"], [72, "#8d9b86"], [55, "#38623c"], [36, "#8e8c5c"], [24, "#b09a62"], [10, "#3f6c3b"], [0, "#2b5b34"], [-10, "#3f6c3b"], [-24, "#a58b55"], [-40, "#4a6b3d"], [-58, "#a9b8b0"], [-90, "#eef3f6"]]);
+        if (fs) {
+          t2.shadowColor = "rgba(90,190,240,.9)";
+          t2.shadowBlur = 18;
+          t2.fillStyle = "#2f86bd";
+          for (const s of outline.shapes) for (const off of [-TW, 0, TW]) { trace(s, off); t2.fill(); }
+          t2.shadowBlur = 0;
+        }
         const { by, max } = shade();
         const accent = mode === "revenue" ? colors.revenue : colors.visitors;
         t2.lineWidth = 1.4;
-        t2.strokeStyle = fs ? colors.rule : colors.paper;
+        t2.strokeStyle = fs ? "rgba(255,255,255,.25)" : colors.paper;
         for (const s of outline.shapes) {
           const val = by.get(s.cc);
           for (const off of [-TW, 0, TW]) {
-            t2.beginPath();
-            for (const g of s.rings) {
-              for (let i = 0; i < g.n; i++) {
-                const x = px(g.lon[i]) + off, y = py(g.lat[i]);
-                if (i) t2.lineTo(x, y); else t2.moveTo(x, y);
-              }
-              t2.closePath();
-            }
+            trace(s, off);
             t2.globalAlpha = 1;
-            t2.fillStyle = fs ? "#1d3850" : dark ? "#2c4a3a" : "#d9e8c8";
+            t2.fillStyle = fs ? land : dark ? "#2c4a3a" : "#d9e8c8";
             t2.fill();
             if (val) {
-              t2.globalAlpha = (fs ? 0.35 : 0.18) + (fs ? 0.65 : 0.62) * Math.sqrt(val / max);
+              t2.globalAlpha = (fs ? 0.5 : 0.18) + (fs ? 0.4 : 0.62) * Math.sqrt(val / max);
               t2.fillStyle = accent;
               t2.fill();
             }
