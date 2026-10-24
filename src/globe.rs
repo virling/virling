@@ -38,6 +38,8 @@ const ACTIVE: Duration = Duration::minutes(5);
 struct Raw {
     now: OffsetDateTime,
     live: Vec<(VisitorRow, Activity)>,
+    /// The latest visitor, only when nobody is live.
+    last: Option<(VisitorRow, Activity)>,
     pays: Vec<(PaymentRow, Option<String>)>,
     countries: Vec<BreakdownRow>,
     journeys: Vec<Timeline>,
@@ -58,9 +60,11 @@ fn load(
         to: today,
         tz: tz.clone(),
     };
-    let rows: Vec<VisitorRow> = store
+    let recent = store
         .visitor_list(id, &day, &VisitorFilter::default(), 100, 0)?
-        .rows
+        .rows;
+    let latest = recent.iter().max_by_key(|r| r.last_seen).cloned();
+    let rows: Vec<VisitorRow> = recent
         .into_iter()
         .filter(|r| online.contains(&r.visitor_id) || now - r.last_seen < ACTIVE)
         .take(MAX_LIVE)
@@ -77,6 +81,19 @@ fn load(
         .into_iter()
         .zip(store.activity(id, tz, &who)?)
         .collect();
+
+    let last = match latest {
+        Some(r) if live.is_empty() => {
+            let who = Who {
+                visitor_id: Some(r.visitor_id.clone()),
+                session_id: None,
+                ts: r.last_seen,
+            };
+            let a = store.activity(id, tz, &[who])?.into_iter().next();
+            Some((r, a.unwrap_or_default()))
+        }
+        _ => None,
+    };
 
     let month = Period {
         from: today - Duration::days(29),
@@ -120,6 +137,7 @@ fn load(
     Ok(Raw {
         now,
         live,
+        last,
         pays,
         countries: store.breakdown(id, p, Dimension::Country)?,
         journeys,
@@ -140,6 +158,15 @@ struct GVisitor {
     dev: String,
     paid: u64,
     spent: String,
+    at: Option<(f32, f32)>,
+}
+
+#[derive(Serialize)]
+struct GLast {
+    name: String,
+    cc: String,
+    place: String,
+    ago: String,
     at: Option<(f32, f32)>,
 }
 
@@ -177,6 +204,7 @@ pub struct Globe {
     /// Animal faces as inline SVG, shared by the visitors and payments that use them.
     faces: Vec<String>,
     visitors: Vec<GVisitor>,
+    last: Option<GLast>,
     payments: Vec<GPay>,
     countries: Vec<GCountry>,
     /// Steps of a customer's visits, as (kind, label), by visitor ID.
@@ -218,7 +246,9 @@ fn steps(t: &Timeline) -> Vec<(&'static str, String)> {
 
 fn keys(raw: &Raw) -> Vec<String> {
     let live = raw.live.iter().map(|(r, _)| r.who.clone());
-    live.chain(raw.pays.iter().map(|(p, _)| payer_key(p)))
+    let last = raw.last.iter().map(|(r, _)| r.who.clone());
+    live.chain(last)
+        .chain(raw.pays.iter().map(|(p, _)| payer_key(p)))
         .collect()
 }
 
@@ -264,6 +294,13 @@ fn view(raw: Raw, names: &Names, label: &str, pin: &dyn Fn(&str) -> Option<(f32,
             }
         })
         .collect();
+    let last = raw.last.as_ref().map(|(r, a)| GLast {
+        name: who(&r.who).1,
+        cc: a.country.clone().unwrap_or_default(),
+        place: place(&a.country),
+        ago: ago(r.last_seen, raw.now),
+        at: pin(&r.visitor_id),
+    });
     let payments = raw
         .pays
         .iter()
@@ -311,6 +348,7 @@ fn view(raw: Raw, names: &Names, label: &str, pin: &dyn Fn(&str) -> Option<(f32,
         label: label.to_string(),
         faces,
         visitors,
+        last,
         payments,
         countries,
         journeys: raw

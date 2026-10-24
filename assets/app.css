@@ -1363,7 +1363,7 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .gl-flat .gl-stage { height: auto; }
 .gl-zoom button svg { display: block; margin: auto; }
 .gl-zoom button[hidden] { display: none; }
-.gl-main:fullscreen { --paper: #0d1b2a; --ink: #e8eef5; --ink-2: #b8c4d2; --ink-3: #8a9bb0; --rule: #2a4560; --rule-2: #16293c; --rule-3: #16293c; --soft: #16293c; --visitors: #6f86ff; --revenue: #ff9a4d; display: flex; flex-direction: column; background: #07121d; border: 0; border-radius: 0; color: var(--ink); }
+.gl-main:fullscreen { --paper: #0d1b2a; --ink: #e8eef5; --ink-2: #b8c4d2; --ink-3: #8a9bb0; --rule: #2a4560; --rule-2: #16293c; --rule-3: #16293c; --soft: #16293c; --visitors: #6f86ff; --revenue: #ff9a4d; display: flex; flex-direction: column; background: radial-gradient(1px 1px at 12% 18%, #fff9, transparent), radial-gradient(1px 1px at 82% 12%, #fff8, transparent), radial-gradient(1.5px 1.5px at 30% 78%, #fffa, transparent), radial-gradient(1px 1px at 68% 84%, #fff8, transparent), radial-gradient(1px 1px at 92% 58%, #fff9, transparent), radial-gradient(1px 1px at 6% 52%, #fff8, transparent), radial-gradient(1.5px 1.5px at 48% 8%, #fff9, transparent), radial-gradient(1px 1px at 22% 38%, #fff7, transparent), #01060d; border: 0; border-radius: 0; color: var(--ink); }
 .gl-main:fullscreen .gl-stage { height: auto; flex: 1; min-height: 0; }
 .gl-main:fullscreen .gl-seg button[aria-pressed="true"] { background: #1b3248; }
 .gl-flat .gl-flat-note { display: block; }
@@ -1372,6 +1372,7 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .gl-zoom button { width: 32px; height: 32px; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); color: var(--ink-2); font-size: 16px; line-height: 1; cursor: pointer; }
 .gl-zoom button:hover { color: var(--ink); border-color: var(--field); }
 .gl-legend { position: absolute; left: 16px; bottom: 14px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-3); pointer-events: none; }
+.gl-legend b { font-weight: 500; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .gl-legend i { width: 28px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--rule), var(--visitors)); }
 .gl-legend i.rev { background: linear-gradient(90deg, var(--rule), var(--revenue)); }
 .gl-tip { position: absolute; display: flex; flex-direction: column; gap: 1px; max-width: 220px; padding: 6px 10px; border-radius: 8px; background: var(--tip); color: #fff; font-size: 12px; pointer-events: none; z-index: 2; }
