@@ -6,7 +6,7 @@ It runs the same open-source code, so the [script](track/script.md), [payment co
 
 ## Plans
 
-- **Personal:** $19 a month. The same open-source app, run for you, with a weekly email report.
+- **Personal:** $19 a month. The same open-source app, run for you, with no event limit and a weekly email report.
 - **Agency:** $79 a month. 30 client sites, 1M pageviews a month, white-label weekly client reports and a team of 3.
 
 The first 50 customers of each plan keep a founding price for life: $11.40 a month for Personal and $29 a month for Agency. You can hold a founding spot today at [virling.com/pricing](https://virling.com/pricing). Your first month after launch is already paid, and you can cancel for a full refund any time before launch.
