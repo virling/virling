@@ -929,7 +929,7 @@ a.ctl { text-decoration: none; }
 .vr-ic { display: inline-flex; flex: none; }
 .vr-pages { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .vr-ev { display: flex; align-items: center; gap: 6px; overflow: hidden; white-space: nowrap; }
-.vr-intent { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--ink-3); font-size: 12px; }
+.vr-meta { display: flex; align-items: center; gap: 6px; opacity: .6; }
 .vf-search .input.sm { height: 28px; width: 200px; padding: 0 10px; font-size: 13px; border-radius: 8px; }
 .vr:last-child { border-bottom: 0; }
 .vr > span { min-width: 0; }
@@ -942,8 +942,6 @@ a.ctl { text-decoration: none; }
 .vr .ch { flex: 0 100 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--ink-4); }
 @media (max-width: 1180px) { .vr .ch { display: none; } }
 @media (max-width: 1080px) { .vr .vr-ev { display: none; } }
-.vr-ev .src { min-width: 0; flex: 0 1 auto; }
-.vr-ev .lbl { overflow: hidden; text-overflow: ellipsis; }
 .vr .mono { font-size: 12px; }
 .vr-rev b { color: var(--revenue-text); font-weight: 600; }
 .vr-sum { display: none; }

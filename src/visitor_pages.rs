@@ -83,7 +83,6 @@ pub struct VisitorView {
     pageviews: String,
     last_seen: String,
     last_full: String,
-    exit_icon: String,
     exit_link: String,
     goals: Vec<String>,
     more_goals: usize,
@@ -111,6 +110,7 @@ struct VisitorsPage {
     goals: Vec<MenuOpt>,
     exits: Vec<Opt>,
     paid: Vec<Opt>,
+    filters_on: usize,
     search: String,
     /// Range and filter params kept by the search form.
     keep: Vec<(String, String)>,
@@ -182,11 +182,6 @@ fn visitor_view(
         pageviews: group(v.pageviews),
         last_seen: ago(v.last_seen, now),
         last_full: local(v.last_seen, offset),
-        exit_icon: v
-            .exit_link
-            .as_deref()
-            .map(|l| icons::source(l.split('/').next().unwrap_or(l), 16))
-            .unwrap_or_default(),
         exit_link: v.exit_link.clone().unwrap_or_default(),
         goals: v.goals.iter().take(2).cloned().collect(),
         more_goals: v.goals.len().saturating_sub(2),
@@ -398,9 +393,9 @@ pub async fn list(
         "exit",
         exit,
         &[
-            ("", "All"),
-            ("link", "Clicked a link"),
-            ("page", "Closed or bounced"),
+            ("", "Any"),
+            ("link", "Left through a link"),
+            ("page", "Left without a link"),
         ],
     );
     let paid_opts = seg(
@@ -408,6 +403,7 @@ pub async fn list(
         paid,
         &[("", "Everyone"), ("yes", "Paid"), ("no", "Not paid")],
     );
+    let filters_on = usize::from(exit.is_some()) + usize::from(paid.is_some());
 
     let page_href = |n: u32| {
         let n = n.to_string();
@@ -450,16 +446,20 @@ pub async fn list(
         on: sort.unwrap_or("") == k,
     })
     .collect();
-    let text = "minmax(0, auto)";
     let mut cols = vec![
         "minmax(150px, auto)",
+        "auto",
         "minmax(150px, auto)",
         "auto",
         "auto",
-        text,
+        if events {
+            "fit-content(200px)"
+        } else {
+            "minmax(0, 1fr)"
+        },
     ];
     if events {
-        cols.push(text);
+        cols.push("minmax(0, 1fr)");
     }
     if revenue {
         cols.push("auto");
@@ -491,6 +491,7 @@ pub async fn list(
         goals: goal_opts,
         exits,
         paid: paid_opts,
+        filters_on,
         search,
         keep,
         heads,
