@@ -1,6 +1,8 @@
 {% extends "app.html" %}
 {% block tools %}{% include "_range.html" %}{% endblock %}
 {% block content %}
+<link rel="modulepreload" href="/assets/vendor/three-r170.module.min.js">
+<link rel="preload" as="fetch" href="/assets/globe/countries.json" crossorigin>
 <div class="gl" id="globe-root" data-outline="/assets/globe/countries.json" data-three="/assets/vendor/three-r170.module.min.js">
   <section class="box gl-main">
     <div class="gl-head">
@@ -19,9 +21,9 @@
       </div>
       <div class="gl-legend"><i></i><span></span></div>
       <div class="gl-chips"></div>
-      <div class="gl-idle" hidden>Idle: nobody on the site right now. The soft pulses are decoration, not visitors.</div>
       <div class="gl-replay" hidden></div>
     </div>
+    <p class="gl-idle" hidden>Idle: nobody on the site right now. The soft pulses are decoration, not visitors.</p>
     <p class="gl-flat-note dim">The globe needs WebGL, which this browser does not offer. The lists show the same live data.</p>
     <p class="sr gl-sum" aria-live="polite"></p>
     <noscript><p class="gl-empty dim">The globe needs JavaScript.</p></noscript>

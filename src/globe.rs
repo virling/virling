@@ -343,12 +343,22 @@ struct GlobePage {
     data: String,
 }
 
+/// Adds the time spent in the handler as a `Server-Timing` header, visible in the browser's network panel.
+fn timing(mut res: Response, t0: std::time::Instant) -> Response {
+    let ms = t0.elapsed().as_secs_f64() * 1000.0;
+    if let Ok(v) = format!("app;dur={ms:.1}").parse::<axum::http::HeaderValue>() {
+        res.headers_mut().insert("server-timing", v);
+    }
+    res
+}
+
 pub async fn page(
     State(state): State<AppState>,
     account: Account,
     Path(domain): Path<String>,
     Query(args): Query<RangeArgs>,
 ) -> Response {
+    let t0 = std::time::Instant::now();
     let (ctx, picked) = match load_ranged(&state, &account, &domain, "globe", args).await {
         Ok(r) => r,
         Err(code) => return code.into_response(),
@@ -359,14 +369,17 @@ pub async fn page(
         Err(code) => return code.into_response(),
     };
     let base = sites::app_path(&ctx.site.domain, "globe");
-    render(GlobePage {
-        title: "Live globe",
-        range: picked.menu(ctx.today, ctx.first_day, &base, &[]),
-        data: serde_json::to_string(&globe)
-            .unwrap_or_default()
-            .replace('<', "\\u003c"),
-        shell: ctx.shell,
-    })
+    timing(
+        render(GlobePage {
+            title: "Live globe",
+            range: picked.menu(ctx.today, ctx.first_day, &base, &[]),
+            data: serde_json::to_string(&globe)
+                .unwrap_or_default()
+                .replace('<', "\\u003c"),
+            shell: ctx.shell,
+        }),
+        t0,
+    )
 }
 
 pub async fn data(
@@ -375,13 +388,14 @@ pub async fn data(
     Path(domain): Path<String>,
     Query(args): Query<RangeArgs>,
 ) -> Response {
+    let t0 = std::time::Instant::now();
     let (ctx, picked) = match load_ranged(&state, &account, &domain, "globe", args).await {
         Ok(r) => r,
         Err(code) => return code.into_response(),
     };
     let p = picked.period(&ctx.site.timezone);
     match build(&state, &ctx.site, p, &picked.label).await {
-        Ok(g) => Json(g).into_response(),
+        Ok(g) => timing(Json(g).into_response(), t0),
         Err(code) => code.into_response(),
     }
 }
