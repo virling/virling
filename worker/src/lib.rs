@@ -727,26 +727,7 @@ async fn pages(req: Request, ctx: RouteContext<()>) -> Result<Response> {
     assets.fetch_request(req).await
 }
 
-/// User agent parts of the AI crawlers and assistants Virling counts; the server keeps only the ones it knows.
-const AI_AGENTS: &[&str] = &[
-    "gptbot",
-    "oai-searchbot",
-    "chatgpt-user",
-    "claudebot",
-    "claude-",
-    "anthropic-ai",
-    "perplexity",
-    "google-extended",
-    "googleother",
-    "applebot-extended",
-    "amazonbot",
-    "meta-external",
-    "ccbot",
-    "bytespider",
-    "duckassistbot",
-];
-
-/// Tells the Virling server about an AI fetch of a page, since they never run the tracking script.
+/// Tells the Virling server about a bot reading a page, since bots never run the tracking script.
 fn forward_ai(req: &Request, ctx: &Context) {
     let ua = req
         .headers()
@@ -754,8 +735,7 @@ fn forward_ai(req: &Request, ctx: &Context) {
         .ok()
         .flatten()
         .unwrap_or_default();
-    let lower = ua.to_ascii_lowercase();
-    if req.method() != Method::Get || !AI_AGENTS.iter().any(|t| lower.contains(t)) {
+    if req.method() != Method::Get || ua.is_empty() || !ua::is_bot(&ua) {
         return;
     }
     let Ok(url) = req.url() else {
