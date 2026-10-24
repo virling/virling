@@ -56,7 +56,14 @@
           const l = x / 10;
           lon[i] = i && Math.abs(l - lon[i - 1]) > 180 ? l + (l < lon[i - 1] ? 360 : -360) : l;
         }
-        out.push({ n, lon, lat });
+        let a = 1e9, b = -1e9, c = 1e9, d = -1e9;
+        for (let i = 0; i < n; i++) {
+          if (lon[i] < a) a = lon[i];
+          if (lon[i] > b) b = lon[i];
+          if (lat[i] < c) c = lat[i];
+          if (lat[i] > d) d = lat[i];
+        }
+        out.push({ n, lon, lat, box: [a, b, c, d] });
       }
       outline.shapes.push({ cc, rings: out });
     }
@@ -74,6 +81,33 @@
       const lat = pt[1] + rr * Math.sin(a);
       return { v, lon: pt[0] + (rr * Math.cos(a)) / Math.max(Math.cos(lat * RAD), 0.3), lat };
     });
+  };
+
+  const lastPt = () => {
+    const l = data.last;
+    return l && (l.at ? [l.at[1], l.at[0]] : outline?.pts[l.cc]);
+  };
+
+  const inside = (g, lo, la) => {
+    for (const off of [-360, 0, 360]) {
+      const x = lo + off;
+      if (x < g.box[0] || x > g.box[1] || la < g.box[2] || la > g.box[3]) continue;
+      let in_ = false;
+      for (let i = 0, j = g.n - 1; i < g.n; j = i++) {
+        const xi = g.lon[i], yi = g.lat[i], xj = g.lon[j], yj = g.lat[j];
+        if (yi > la !== yj > la && x < ((xj - xi) * (la - yi)) / (yj - yi) + xi) in_ = !in_;
+      }
+      if (in_) return true;
+    }
+    return false;
+  };
+  const countryAt = (ll) => {
+    if (!ll || !outline) return null;
+    const by = new Map(data.countries.map((c) => [c.cc, c]));
+    for (const s of outline.shapes) {
+      if (by.has(s.cc) && s.rings.some((g) => inside(g, ll[0], ll[1]))) return by.get(s.cc);
+    }
+    return null;
   };
 
   const shade = () => {
@@ -130,7 +164,8 @@
     const tex = new THREE.CanvasTexture(tc);
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-    globe.add(new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), new THREE.MeshBasicMaterial({ map: tex })));
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), new THREE.MeshBasicMaterial({ map: tex }));
+    globe.add(ball);
     const rim = new THREE.Mesh(new THREE.RingGeometry(0.995, 1.005, 160), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true }));
     rim.position.z = 1.2;
     scene.add(rim);
@@ -163,7 +198,7 @@
         const { by, max } = shade();
         const accent = mode === "revenue" ? colors.revenue : colors.visitors;
         t2.lineWidth = 1.4;
-        t2.strokeStyle = colors.paper;
+        t2.strokeStyle = fs ? colors.rule : colors.paper;
         for (const s of outline.shapes) {
           const val = by.get(s.cc);
           for (const off of [-TW, 0, TW]) {
@@ -176,7 +211,7 @@
               t2.closePath();
             }
             t2.globalAlpha = 1;
-            t2.fillStyle = fs ? "#15283a" : dark ? "#2c4a3a" : "#d9e8c8";
+            t2.fillStyle = fs ? "#1d3850" : dark ? "#2c4a3a" : "#d9e8c8";
             t2.fill();
             if (val) {
               t2.globalAlpha = (fs ? 0.35 : 0.18) + (fs ? 0.65 : 0.62) * Math.sqrt(val / max);
@@ -241,7 +276,7 @@
       wake();
     };
 
-    // Rings pulse where a payment lands; soft grey ones drift by while the site is idle.
+    // Rings pulse where a payment lands; while the site is idle one soft ring marks where the last visitor was.
     const ringGeo = new THREE.RingGeometry(0.9, 1, 64);
     const dotGeo = new THREE.CircleGeometry(1, 20);
     const bursts = [];
@@ -288,16 +323,13 @@
       wake();
     };
     let nextAmbient = 0;
-    const idling = () => !data.visitors.length && !still() && onscreen && outline && !document.hidden;
+    const idling = () => !data.visitors.length && data.last && !still() && onscreen && outline && !document.hidden;
     const ambient = (now) => {
-      if (!idling() || now < nextAmbient || bursts.filter((b) => b.idle).length >= 3) return;
-      const shapes = outline.shapes;
-      const pt = outline.pts[shapes[Math.floor(Math.random() * shapes.length)].cc];
-      if (pt) {
-        const n = vec(pt[0], pt[1]);
-        bursts.push({ n, t0: now, idle: true, meshes: [mkRing(n, colors["ink-3"]), mkRing(n, colors["ink-3"])] });
-      }
-      nextAmbient = now + 2400;
+      const pt = idling() && lastPt();
+      if (!pt || now < nextAmbient || bursts.some((b) => b.idle)) return;
+      const n = vec(pt[0], pt[1]);
+      bursts.push({ n, t0: now, idle: true, meshes: [mkRing(n, colors.visitors), mkRing(n, colors.visitors)] });
+      nextAmbient = now + 4200;
     };
 
     const resize = () => {
@@ -394,6 +426,8 @@
       else lastTs = 0;
     };
 
+    const ray = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
     const hitAt = (x, y) => {
       view();
       let best = null, bd = Infinity;
@@ -415,6 +449,15 @@
       markers,
       paint: () => { paint(); gl.wake(); },
       hitAt,
+      lonLatAt: (x, y) => {
+        view();
+        ndc.set((x / W) * 2 - 1, -(y / H) * 2 + 1);
+        ray.setFromCamera(ndc, cam);
+        const hit = ray.intersectObject(ball)[0];
+        if (!hit) return null;
+        const p = globe.worldToLocal(hit.point.clone());
+        return [Math.atan2(-p.z, p.x) / RAD, Math.asin(Math.max(-1, Math.min(1, p.y))) / RAD];
+      },
       size: () => [W, H],
       pxPerRad: () => H / (2 * half()),
     };
@@ -449,15 +492,17 @@
     }
     const [x, y] = local(e);
     const v = gl.hitAt(x, y);
+    const c = v ? null : countryAt(gl.lonLatAt(x, y));
     canvas.style.cursor = v ? "pointer" : "grab";
-    if (v) {
+    if (v || c) {
       const [W] = gl.size();
       tip.textContent = "";
-      tip.append(h("b", "", v.name), h("span", "", [v.place, v.page].filter(Boolean).join(" · ")));
+      if (v) tip.append(h("b", "", v.name), h("span", "", [v.place, v.page].filter(Boolean).join(" · ")));
+      else tip.append(h("b", "", c.name), h("span", "", `${c.visitors} visits · ${usd.format(c.rev)} revenue · ${usd.format(c.rpv)} per visitor`));
       tip.style.left = Math.min(W - 180, Math.max(4, x + 14)) + "px";
       tip.style.top = Math.max(4, y - 44) + "px";
     }
-    tip.hidden = !v;
+    tip.hidden = !v && !c;
   });
   canvas.addEventListener("pointerup", (e) => {
     if (!drag) return;
@@ -507,6 +552,10 @@
     root.querySelector(".gl-legend span").textContent =
       (mode === "revenue" ? "Shaded by revenue per visitor, " : "Shaded by visits, ") + data.label.toLowerCase();
     root.querySelector(".gl-legend i").className = mode === "revenue" ? "rev" : "";
+    const [lo, hi] = root.querySelectorAll(".gl-legend b");
+    const max = shade().max;
+    lo.textContent = mode === "revenue" ? usd.format(0) : "0";
+    hi.textContent = mode === "revenue" ? usd.format(max) : String(max);
   };
 
   const pick = (id) => {
@@ -608,7 +657,9 @@
     live.textContent = "";
     root.querySelector("#gl-count").textContent = data.online ? `${data.online} on the site now` : "Nobody on the site right now";
     root.querySelector(".gl-sum").textContent = `${data.visitors.length} visitors shown on the globe`;
-    idleNote.hidden = data.visitors.length > 0;
+    const last = data.last;
+    idleNote.hidden = data.visitors.length > 0 || !last;
+    if (last) idleNote.textContent = `Last visitor: ${last.name}${last.place ? " from " + last.place : ""}, ${last.ago}.`;
     if (!data.visitors.length) live.append(h("p", "gl-empty dim", "Visitors appear here the second they land on your site."));
     for (const v of data.visitors.slice(0, 12)) {
       const row = h("button", "gl-row" + (v.id === selected ? " on" : ""));
@@ -669,6 +720,14 @@
     const arrived = first ? [] : data.visitors.filter((v) => !seenVis.has(v.id));
     data.visitors.forEach((v) => seenVis.add(v.id));
     if (!reduce.matches) arrived.slice(0, 4).forEach((v, i) => burst(v.cc, [v.name, v.place].filter(Boolean).join(" · "), i * 400, true, v.at));
+    if (first) {
+      const best = data.countries.reduce((a, c) => (c.visitors > (a?.visitors || 0) ? c : a), null);
+      const pt = (best && outline?.pts[best.cc]) || lastPt();
+      if (pt) {
+        lon0 = pt[0] * RAD;
+        lat0 = Math.max(-1.2, Math.min(1.2, pt[1] * RAD * 0.8));
+      }
+    }
     const quiet = !drag && !selected && !replay && performance.now() - lastInput > 4000;
     if (show[0] && (first || quiet)) {
       const pt = outline?.pts[show[0].cc];

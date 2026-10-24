@@ -1372,6 +1372,7 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .gl-zoom button { width: 32px; height: 32px; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); color: var(--ink-2); font-size: 16px; line-height: 1; cursor: pointer; }
 .gl-zoom button:hover { color: var(--ink); border-color: var(--field); }
 .gl-legend { position: absolute; left: 16px; bottom: 14px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-3); pointer-events: none; }
+.gl-legend b { font-weight: 500; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .gl-legend i { width: 28px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--rule), var(--visitors)); }
 .gl-legend i.rev { background: linear-gradient(90deg, var(--rule), var(--revenue)); }
 .gl-tip { position: absolute; display: flex; flex-direction: column; gap: 1px; max-width: 220px; padding: 6px 10px; border-radius: 8px; background: var(--tip); color: #fff; font-size: 12px; pointer-events: none; z-index: 2; }
