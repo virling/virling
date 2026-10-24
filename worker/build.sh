@@ -30,7 +30,7 @@ done
 rustc -O --edition 2024 ../scripts/md.rs -o "${TMPDIR:-/tmp}/virling-md"
 "${TMPDIR:-/tmp}/virling-md" public
 cp -R ../assets/well-known public/.well-known
-mkdir -p public/.well-known/agent-skills/virling && cp ../skills/virling/*.md public/.well-known/agent-skills/virling/
+mkdir -p public/.well-known/agent-skills/virling && cp ../plugins/virling/skills/virling/*.md public/.well-known/agent-skills/virling/
 d=$(shasum -a 256 public/.well-known/agent-skills/virling/SKILL.md | cut -d' ' -f1)
 printf '{\n  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",\n  "skills": [\n    {\n      "name": "virling",\n      "type": "skill-md",\n      "description": "Answer revenue attribution questions from a Virling server: which channels, referrers, pages and AI assistants bring paying customers.",\n      "url": "/.well-known/agent-skills/virling/SKILL.md",\n      "digest": "sha256:%s"\n    }\n  ]\n}\n' "$d" > public/.well-known/agent-skills/index.json
 cp _headers public/
