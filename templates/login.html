@@ -21,9 +21,10 @@
       <input type="hidden" name="email" value="{{ email }}">
       {% if let Some(key) = turnstile %}
       <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-      <div class="cf-turnstile" data-sitekey="{{ key }}" data-action="login" data-appearance="interaction-only" data-size="flexible"></div>
+      <div class="cf-turnstile" data-sitekey="{{ key }}" data-action="login" data-appearance="interaction-only" data-size="flexible" data-callback="vReady"></div>
+      <script>function vReady(){document.querySelectorAll("button[data-wait]").forEach(function(b){b.disabled=false})}setTimeout(vReady,10000)</script>
       {% endif %}
-      <button class="btn secondary" type="submit">Send it again</button>
+      <button class="btn secondary" type="submit"{% if turnstile.is_some() %} disabled data-wait{% endif %}>Send it again</button>
     </form>
     <a class="link-quiet" href="/login">Use a different email</a>
   {% else if view == "invite" %}
@@ -61,9 +62,10 @@
       </label>
       {% if let Some(key) = turnstile %}
       <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-      <div class="cf-turnstile" data-sitekey="{{ key }}" data-action="login" data-appearance="interaction-only" data-size="flexible"></div>
+      <div class="cf-turnstile" data-sitekey="{{ key }}" data-action="login" data-appearance="interaction-only" data-size="flexible" data-callback="vReady"></div>
+      <script>function vReady(){document.querySelectorAll("button[data-wait]").forEach(function(b){b.disabled=false})}setTimeout(vReady,10000)</script>
       {% endif %}
-      <button class="btn lg block" type="submit">Email me a sign-in link</button>
+      <button class="btn lg block" type="submit"{% if turnstile.is_some() %} disabled data-wait{% endif %}>Email me a sign-in link</button>
     </form>
   {% endif %}
   </div>
