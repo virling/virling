@@ -149,6 +149,8 @@ struct DashboardPage {
     kpis: Vec<Kpi>,
     /// Revenue in range that came from visits before it.
     earlier: String,
+    /// Share of revenue matched to a visit and why the rest was not.
+    unmatched: String,
     charts: Vec<ChartPanel>,
     chart_tabs: Vec<Opt>,
     cards: Vec<cards::TabCard>,
@@ -175,6 +177,7 @@ struct PublicPage {
     insight: Option<(String, String)>,
     kpis: Vec<Kpi>,
     earlier: String,
+    unmatched: String,
     charts: Vec<ChartPanel>,
     chart_tabs: Vec<Opt>,
     cards: Vec<cards::TabCard>,
@@ -289,6 +292,35 @@ fn matching(split: &[ProviderSplit], sync: Option<bool>, domain: &str, window: i
         desc,
         fixes,
     }
+}
+
+/// Share of revenue matched to a visit and the reasons for the rest; empty when nothing is missing.
+fn unmatched_line(cur: &Totals, split: &[ProviderSplit], window: i64) -> String {
+    let gap = cur.revenue_usd - cur.matched_revenue_usd;
+    if cur.revenue_usd <= 0.0 || gap < 0.005 {
+        return String::new();
+    }
+    let sum = |f: fn(&ProviderSplit) -> u64| split.iter().map(f).sum::<u64>();
+    let (no_visitor, unseen) = (sum(|s| s.no_visitor), sum(|s| s.unseen));
+    let mut why = Vec::new();
+    if no_visitor > 0 {
+        why.push(format!(
+            "{} had no visitor ID",
+            plural(no_visitor, "payment")
+        ));
+    }
+    if unseen > 0 {
+        why.push(format!(
+            "{} had no visit in the {window} days before paying",
+            plural(unseen, "payment")
+        ));
+    }
+    let pct = (cur.matched_revenue_usd / cur.revenue_usd * 100.0).floor();
+    let head = format!("{pct:.0}% of revenue is matched to a visit.");
+    if why.is_empty() {
+        return head;
+    }
+    format!("{head} {}.", why.join(", "))
 }
 
 fn chip_view(key: &str, value: &str) -> (String, String) {
@@ -852,6 +884,7 @@ async fn page(
         insight: None,
         kpis: Vec::new(),
         earlier: String::new(),
+        unmatched: String::new(),
         charts: Vec::new(),
         chart_tabs: Vec::new(),
         cards: Vec::new(),
@@ -1072,6 +1105,9 @@ async fn page(
                     "{} {when} came from visits before {before}. Revenue counts on the payment date.",
                     money(earlier)
                 );
+            }
+            if public.is_none() && filters.is_empty() {
+                page.unmatched = unmatched_line(cur, &split, window_days);
             }
 
             let picked = match q.chart.as_deref() {
@@ -1359,6 +1395,7 @@ async fn page(
         insight: page.insight,
         kpis: page.kpis,
         earlier: page.earlier,
+        unmatched: String::new(),
         charts: page.charts,
         chart_tabs: page.chart_tabs,
         cards: page.cards,
@@ -1671,5 +1708,29 @@ mod tests {
         );
         assert!(m.fixes[1].code.is_empty());
         assert!(!matching(&[], None, "x.com", 30).connected);
+    }
+
+    #[test]
+    fn unmatched_line_gives_share_and_reasons() {
+        let split = [ProviderSplit {
+            no_visitor: 2,
+            unseen: 1,
+            ..Default::default()
+        }];
+        let t = Totals {
+            revenue_usd: 200.0,
+            matched_revenue_usd: 150.0,
+            ..Default::default()
+        };
+        assert_eq!(
+            unmatched_line(&t, &split, 30),
+            "75% of revenue is matched to a visit. 2 payments had no visitor ID, 1 payment had no visit in the 30 days before paying."
+        );
+        let all = Totals {
+            matched_revenue_usd: 200.0,
+            ..t
+        };
+        assert_eq!(unmatched_line(&all, &split, 30), "");
+        assert_eq!(unmatched_line(&Totals::default(), &[], 30), "");
     }
 }
