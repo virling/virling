@@ -51,7 +51,7 @@ Places are shown at the country level, so visitors from the same country sit clo
 ## The other pages
 
 - **Live globe:** visitors and payments on a globe, described above.
-- **Visitors:** every visitor with their first source, pages, goals and what they paid. Open one to see their full journey.
+- **Visitors:** every visitor with their first source, pages, goals and what they paid. Open one to see their full journey. Filter by source and goal, search pages, or use **Filters** to pick visitors who left through a link or without one, and who paid or did not. The name stands alone, with country, browser and system in a muted column beside it, and goals, exit links and intents all show as the same kind of chip.
   A visitor page opens with their device, OS, browser and visitor ID (click the copy icon to copy it), a one-line summary, and stats for first source, visits, pageviews, time on site, goals, spent and last exit. Time on site adds up each visit from its first to its last event, and a visit ends after 30 minutes of no activity. A dash means nothing later is known, not zero. The timeline lists every visit with the time on each page, and each payment sits where it happened with its amount, provider and the source it was credited to: by visitor ID when the payment carried one, or through the customer when it did not.
 - **Payments:** every payment with its source, status and time to complete. Open one to see the visits before it. Filter by goal, attributed, unattributed or refunded.
 - **Retention:** customers who still pay, by the channel of their first payment. See [Retention by channel](../attribution/retention.md).
