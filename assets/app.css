@@ -1348,7 +1348,7 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .gl-stage canvas:focus-visible { outline: 2px solid var(--visitors-tint); outline-offset: -2px; }
 .gl-chips { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .gl-chip { position: absolute; left: 0; top: 0; height: 24px; padding: 0 10px; display: flex; align-items: center; border: 1px solid var(--revenue); border-radius: 12px; background: var(--paper); color: var(--ink); font-size: 12px; font-weight: 600; white-space: nowrap; }
-.gl-idle { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); max-width: calc(100% - 140px); padding: 5px 12px; border: 1px solid var(--rule); border-radius: 999px; background: var(--paper); color: var(--ink-3); font-size: 12px; text-align: center; pointer-events: none; }
+.gl-idle { margin: 0; padding: 8px 16px 12px; color: var(--ink-3); font-size: 12px; }
 .gl-idle[hidden] { display: none; }
 .gl-flat-note { display: none; margin: 0; padding: 4px 16px 14px; }
 .gl-flat .gl-stage canvas, .gl-flat .gl-zoom, .gl-flat .gl-legend, .gl-flat .gl-chips, .gl-flat .gl-idle, .gl-flat .gl-seg { display: none; }
