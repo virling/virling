@@ -12,8 +12,6 @@ command = "./build.sh"
 [assets]
 directory = "./public"
 html_handling = "auto-trailing-slash"
-binding = "ASSETS"
-run_worker_first = ["/*", "!/assets/*", "!/.well-known/*", "!/*.md", "!/*.txt", "!/*.xml", "!/*.ico", "!/*.svg", "!/*.js", "!/*.sh"]
 
 [[kv_namespaces]]
 binding = "WAITLIST"

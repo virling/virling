@@ -687,46 +687,6 @@ async fn stats_page(req: Request, ctx: RouteContext<()>) -> Result<Response> {
     }
 }
 
-/// Markdown copy of a page, when the browser or agent asks for text/markdown.
-fn markdown_path(path: &str) -> Option<String> {
-    let path = path.trim_end_matches('/');
-    if path.ends_with(".md") {
-        return None;
-    }
-    Some(if path.is_empty() {
-        "/index.md".into()
-    } else {
-        format!("{path}.md")
-    })
-}
-
-/// Serves the page's Markdown copy to `Accept: text/markdown`, and every other request from the static assets.
-async fn pages(req: Request, ctx: RouteContext<()>) -> Result<Response> {
-    let assets = ctx.env.assets("ASSETS")?;
-    let wants = req.method() == Method::Get
-        && req
-            .headers()
-            .get("Accept")?
-            .is_some_and(|a| a.contains("text/markdown"));
-    if wants && let Some(path) = markdown_path(req.url()?.path()) {
-        let mut url = req.url()?;
-        url.set_path(&path);
-        let mut copy = assets
-            .fetch_request(Request::new(url.as_str(), Method::Get)?)
-            .await?;
-        if copy.status_code() == 200 {
-            let text = copy.text().await?;
-            let mut res = Response::ok(&text)?;
-            let h = res.headers_mut();
-            h.set("Content-Type", "text/markdown; charset=utf-8")?;
-            h.set("Vary", "Accept")?;
-            h.set("x-markdown-tokens", &(text.len() / 4).to_string())?;
-            return Ok(res);
-        }
-    }
-    assets.fetch_request(req).await
-}
-
 #[event(fetch)]
 async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
     Router::new()
@@ -740,7 +700,6 @@ async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         .post_async("/api/preorder/session", preorder_session)
         .get_async("/api/preorder/status", preorder_status)
         .post_async("/api/dodo/webhook", dodo_webhook)
-        .or_else_any_method_async("/*path", pages)
         .run(req, env)
         .await
 }
