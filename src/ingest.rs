@@ -13,7 +13,7 @@ use url::Url;
 
 use crate::app::AppState;
 use crate::events::Event;
-use crate::ua::{browser, device, is_bot, is_spam_referrer};
+use crate::ua::{browser, device, in_app_source, is_bot, is_spam_referrer};
 use crate::{channel, crawlers};
 
 const SESSION_IDLE: Duration = Duration::minutes(30);
@@ -531,10 +531,16 @@ pub async fn collect(
                     .split_whitespace()
                     .any(|d| host_belongs(h, d))
         });
+        let bare = from.is_none() && utm_source.is_none();
         let referrer_host = from
             .map(|(h, _)| h)
             .filter(|_| !same_site && !keep)
-            .or_else(|| utm_source.as_deref().and_then(channel::source_host));
+            .or_else(|| utm_source.as_deref().and_then(channel::source_host))
+            .or_else(|| {
+                in_app_source(user_agent)
+                    .filter(|_| bare)
+                    .map(str::to_string)
+            });
         if referrer_host.as_deref().is_some_and(is_spam_referrer) {
             continue;
         }
