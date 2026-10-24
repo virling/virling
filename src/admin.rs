@@ -1393,14 +1393,20 @@ mod tests {
             "csrf=x&value=on".into(),
         );
         assert_eq!(call(&f.state, forged).await.status(), StatusCode::NOT_FOUND);
-        let none = AppState {
-            admin: Arc::default(),
-            ..f.state.clone()
-        };
+        sqlx::query("DELETE FROM admins WHERE email = ?")
+            .bind(ADMIN)
+            .execute(&f.state.db)
+            .await
+            .unwrap();
         assert_eq!(
-            call(&none, get("/admin", Some(&f.admin))).await.status(),
+            call(&f.state, get("/admin", Some(&f.admin))).await.status(),
             StatusCode::NOT_FOUND
         );
+        sqlx::query("INSERT INTO admins (email, created_at) VALUES (?, 0)")
+            .bind(ADMIN)
+            .execute(&f.state.db)
+            .await
+            .unwrap();
         sqlx::query("UPDATE accounts SET suspended_at = 1 WHERE email = ?")
             .bind(ADMIN)
             .execute(&f.state.db)
