@@ -91,6 +91,11 @@ pub async fn protected_resource(State(state): State<AppState>, headers: HeaderMa
     }))
 }
 
+/// Access tokens are opaque, so the key set is empty.
+pub async fn jwks() -> Json<Value> {
+    Json(json!({ "keys": [] }))
+}
+
 /// RFC 8414 metadata; this server is its own authorization server.
 pub async fn authorization_server(State(state): State<AppState>) -> Json<Value> {
     let base = &state.config.base_url;
@@ -98,6 +103,7 @@ pub async fn authorization_server(State(state): State<AppState>) -> Json<Value> 
         "issuer": base,
         "authorization_endpoint": format!("{base}/oauth/authorize"),
         "token_endpoint": format!("{base}/oauth/token"),
+        "jwks_uri": format!("{base}/oauth/jwks"),
         "registration_endpoint": format!("{base}/oauth/register"),
         "scopes_supported": [SCOPE],
         "response_types_supported": ["code"],
@@ -1154,6 +1160,7 @@ mod tests {
             "https://stats.example.com/oauth/authorize"
         );
         assert_eq!(m["token_endpoint"], "https://stats.example.com/oauth/token");
+        assert_eq!(m["jwks_uri"], "https://stats.example.com/oauth/jwks");
         assert_eq!(
             m["registration_endpoint"],
             "https://stats.example.com/oauth/register"

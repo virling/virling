@@ -1,0 +1,14 @@
+{
+  "resource": "https://mcp.virling.com/mcp",
+  "authorization_servers": [
+    "https://beta.virling.com"
+  ],
+  "scopes_supported": [
+    "read"
+  ],
+  "bearer_methods_supported": [
+    "header"
+  ],
+  "resource_name": "Virling",
+  "resource_documentation": "https://docs.virling.com/reference/mcp.html"
+}
