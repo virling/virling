@@ -88,7 +88,7 @@ claude plugin marketplace add virling/virling
 claude plugin install virling@virling
 ```
 
-In a session, `/plugin marketplace add virling/virling` and `/plugin install virling@virling` do the same. Claude Code asks for your server's URL, such as `https://stats.example.com`. Then run `/mcp`, choose **virling** and sign in. The plugin uses OAuth sign-in, so the server needs `https`. On `http`, add the server with an API key as above.
+In a session, `/plugin marketplace add virling/virling` and `/plugin install virling@virling` do the same. The plugin connects to hosted Virling at `https://beta.virling.com`. Run `/mcp`, choose **virling** and sign in. If you self-host, add your own server instead, with the steps above. OAuth sign-in needs `https`; on `http`, use an API key.
 
 ## Other clients
 
