@@ -252,6 +252,15 @@ fn place(headers: &HeaderMap, names: &[&str]) -> Option<String> {
     })
 }
 
+/// Latitude and longitude from Cloudflare's visitor location headers, rounded to about a kilometre.
+fn coords(headers: &HeaderMap) -> Option<(f32, f32)> {
+    let num = |h: &str, max: f32| {
+        let v: f32 = headers.get(h)?.to_str().ok()?.trim().parse().ok()?;
+        (v.abs() <= max).then(|| (v * 100.0).round() / 100.0)
+    };
+    Some((num("cf-iplatitude", 90.0)?, num("cf-iplongitude", 180.0)?))
+}
+
 fn country(headers: &HeaderMap, skip: usize) -> Option<String> {
     ["cf-ipcountry", "x-vercel-ip-country", "x-country-code"][skip..]
         .iter()
@@ -489,6 +498,7 @@ pub async fn collect(
         &["cf-region", "x-vercel-ip-country-region"][skip..],
     );
     let city = place(&headers, &["cf-ipcity", "x-vercel-ip-city"][skip..]);
+    let pin = if cf { coords(&headers) } else { None };
     let browser = browser(user_agent);
     let os = os(user_agent);
     let accept_language = headers
@@ -681,6 +691,9 @@ pub async fn collect(
             bots.push((event, reason));
             continue;
         }
+        if let Some(at) = pin {
+            state.pins.set(&site.id, &event.visitor_id, at);
+        }
         if site.sample_data {
             let (state, site) = (state.clone(), site.clone());
             tokio::spawn(async move { crate::sample::clear(&state, &site).await });
@@ -740,6 +753,17 @@ pub async fn preflight() -> Response {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn reads_rounded_coordinates_and_rejects_bad_ones() {
+        let mut h = HeaderMap::new();
+        assert_eq!(coords(&h), None);
+        h.insert("cf-iplatitude", "19.07598".parse().unwrap());
+        h.insert("cf-iplongitude", "72.87766".parse().unwrap());
+        assert_eq!(coords(&h), Some((19.08, 72.88)));
+        h.insert("cf-iplatitude", "91".parse().unwrap());
+        assert_eq!(coords(&h), None);
+    }
 
     #[test]
     fn reads_region_and_city_from_proxy_headers() {

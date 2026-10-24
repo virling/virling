@@ -65,6 +65,7 @@
   const place = () => {
     const seen = new Map();
     placed = data.visitors.map((v) => {
+      if (v.at) return { v, lon: v.at[1], lat: v.at[0] };
       const pt = outline?.pts[v.cc];
       if (!pt) return null;
       const k = seen.get(v.cc) || 0;
@@ -98,8 +99,8 @@
     glide = { t0: performance.now(), from: { lon: lon0, lat: lat0 }, dl: d, dp: to.lat - lat0 };
     wake();
   };
-  const burst = (cc, label, delay = 0, visitor = false) => {
-    const pt = outline?.pts[cc];
+  const burst = (cc, label, delay = 0, visitor = false, at = null) => {
+    const pt = at ? [at[1], at[0]] : outline?.pts[cc];
     if (pt) gl?.burst(pt, label, performance.now() + delay, visitor);
   };
   const zoomBy = (k) => {
@@ -651,7 +652,7 @@
         } else {
           const pt = outline?.pts[p.cc];
           if (pt) goTo(pt[0], pt[1]);
-          burst(p.cc, p.amt + (p.src ? " · " + p.src : ""));
+          burst(p.cc, p.amt + (p.src ? " · " + p.src : ""), 0, false, p.at);
         }
       });
       feed.append(row);
@@ -664,10 +665,10 @@
     const fresh = data.payments.filter((p) => !seenPays.has(p.id));
     data.payments.forEach((p) => seenPays.add(p.id));
     const show = first ? fresh.slice(0, 2) : fresh.slice(0, 4);
-    show.forEach((p, i) => burst(p.cc, p.amt + (p.src ? " · " + p.src : ""), i * 500));
+    show.forEach((p, i) => burst(p.cc, p.amt + (p.src ? " · " + p.src : ""), i * 500, false, p.at));
     const arrived = first ? [] : data.visitors.filter((v) => !seenVis.has(v.id));
     data.visitors.forEach((v) => seenVis.add(v.id));
-    if (!reduce.matches) arrived.slice(0, 4).forEach((v, i) => burst(v.cc, [v.name, v.place].filter(Boolean).join(" · "), i * 400, true));
+    if (!reduce.matches) arrived.slice(0, 4).forEach((v, i) => burst(v.cc, [v.name, v.place].filter(Boolean).join(" · "), i * 400, true, v.at));
     const quiet = !drag && !selected && !replay && performance.now() - lastInput > 4000;
     if (show[0] && (first || quiet)) {
       const pt = outline?.pts[show[0].cc];

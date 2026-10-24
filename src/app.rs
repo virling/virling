@@ -76,6 +76,7 @@ pub struct AppState {
     pub favicons: reqwest::Client,
     pub rates: Arc<Rates>,
     pub presence: Arc<crate::live::Presence>,
+    pub pins: Arc<crate::live::Pins>,
     pub admin: Arc<crate::admin::Settings>,
 }
 
@@ -106,6 +107,7 @@ impl AppState {
             limiter: Arc::default(),
             mailer: Arc::new(mailer),
             presence: Arc::default(),
+            pins: Arc::default(),
             admin: Arc::default(),
         }
     }

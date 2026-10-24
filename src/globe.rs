@@ -140,6 +140,7 @@ struct GVisitor {
     dev: String,
     paid: u64,
     spent: String,
+    at: Option<(f32, f32)>,
 }
 
 #[derive(Serialize)]
@@ -156,6 +157,7 @@ struct GPay {
     ago: String,
     ts: i64,
     vid: Option<String>,
+    at: Option<(f32, f32)>,
 }
 
 #[derive(Serialize)]
@@ -220,7 +222,7 @@ fn keys(raw: &Raw) -> Vec<String> {
         .collect()
 }
 
-fn view(raw: Raw, names: &Names, label: &str) -> Globe {
+fn view(raw: Raw, names: &Names, label: &str, pin: &dyn Fn(&str) -> Option<(f32, f32)>) -> Globe {
     let mut faces: Vec<String> = Vec::new();
     let mut seen: HashMap<String, (usize, String)> = HashMap::new();
     let mut who = |key: &str| -> (usize, String) {
@@ -258,6 +260,7 @@ fn view(raw: Raw, names: &Names, label: &str) -> Globe {
                 } else {
                     String::new()
                 },
+                at: pin(&r.visitor_id),
             }
         })
         .collect();
@@ -283,6 +286,7 @@ fn view(raw: Raw, names: &Names, label: &str) -> Globe {
                 ago: ago(p.ts, raw.now),
                 ts: p.ts.unix_timestamp(),
                 vid: p.visitor.clone(),
+                at: p.visitor.as_deref().and_then(pin),
             }
         })
         .collect();
@@ -330,7 +334,9 @@ async fn build(
     let names = Names::load(&state.db, &site.id, keys(&raw))
         .await
         .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
-    Ok(view(raw, &names, label))
+    let pins = state.pins.clone();
+    let sid = site.id.clone();
+    Ok(view(raw, &names, label, &|v| pins.get(&sid, v)))
 }
 
 #[derive(Template)]
