@@ -276,7 +276,7 @@ fn tools() -> Vec<Value> {
         json!({
             "name": "list_sites",
             "title": "List sites",
-            "description": "List the sites you can read, with their timezones. Call this first to get the site domain for the other tools.",
+            "description": "List the sites you can read, with their domains and timezones.",
             "inputSchema": { "type": "object", "properties": {} },
             "annotations": read_only("List sites"),
         }),
@@ -325,7 +325,7 @@ fn tools() -> Vec<Value> {
         json!({
             "name": "get_visitor_timeline",
             "title": "Get visitor timeline",
-            "description": "Everything one visitor did, oldest first. entries are visits (source, channel, campaign, pageviews and steps: page with secs on page, goal, exit with the link clicked out, payment) or standalone payments such as renewals. Use the visitor field of a payment from list_payments.",
+            "description": "Everything one visitor did, oldest first. entries are visits (source, channel, campaign, pageviews and steps: page with secs on page, goal, exit with the link clicked out, payment) or standalone payments such as renewals. Takes the visitor ID from a payment's visitor field.",
             "inputSchema": {
                 "type": "object",
                 "properties": { "site": site, "visitor_id": { "type": "string", "description": "Visitor ID from a payment's visitor field." } },
