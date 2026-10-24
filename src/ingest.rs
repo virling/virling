@@ -627,6 +627,10 @@ pub async fn collect(
             bots.push((event, reason));
             continue;
         }
+        if site.sample_data {
+            let (state, site) = (state.clone(), site.clone());
+            tokio::spawn(async move { crate::sample::clear(&state, &site).await });
+        }
         if back {
             // A "Came back" row just before the page the visitor returned to.
             events.push(Event {

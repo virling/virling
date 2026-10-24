@@ -99,6 +99,12 @@ impl<S: EventStore> EventStore for Cached<S> {
         result
     }
 
+    fn remove_sample(&self, site_id: &str) -> anyhow::Result<()> {
+        let result = self.inner.remove_sample(site_id);
+        self.changed([site_id]);
+        result
+    }
+
     fn replace_subscriptions(
         &self,
         site_id: &str,

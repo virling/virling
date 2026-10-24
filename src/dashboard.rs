@@ -69,6 +69,8 @@ pub struct Shell {
     pub live: u64,
     /// Agency accounts get the client report; personal ones a weekly email to themselves.
     pub agency: bool,
+    /// Set while the site holds sample data; true when the viewer may remove it.
+    pub sample: Option<bool>,
 }
 
 /// A site in the switcher.
@@ -253,6 +255,7 @@ async fn load_in(
         email,
         live,
         agency: account_type == "agency",
+        sample: site.sample_data.then_some(account.owner),
     };
     let ctx = Ctx {
         site,

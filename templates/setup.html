@@ -121,6 +121,7 @@ export default function App({ Component, pageProps }) {
       <span class="tick" data-got hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>
       <span data-got hidden style="flex:1"><b>First pageview received</b><small class="detail" data-detail></small></span>
     </div>
+    {% if sample %}<form method="post" action="/app/{{ domain }}/sample" class="actions"><button class="btn ghost" type="submit">Try with sample data</button></form>{% endif %}
     <div class="actions">
       <a class="btn ghost" href="/app/setup">Add a different site</a>
       <a class="btn lg" href="/app/{{ domain }}/setup/payments" data-stack-next>Continue</a>

@@ -836,6 +836,26 @@ pub(crate) fn seed(
     (events, payments, subscriptions)
 }
 
+/// The demo data tagged as sample: visitor and session IDs prefixed, payments and subscriptions under the sample provider.
+pub(crate) fn sample(
+    site: &str,
+    now: OffsetDateTime,
+) -> (Vec<Event>, Vec<Payment>, Vec<Subscription>) {
+    let tag = format!("{}-", crate::events::SAMPLE);
+    let (mut events, mut payments, subscriptions) = seed(site, now);
+    for e in &mut events {
+        e.visitor_id.insert_str(0, &tag);
+        e.session_id.insert_str(0, &tag);
+    }
+    for p in &mut payments {
+        p.provider = crate::events::SAMPLE.into();
+        if let Some(v) = &mut p.visitor_id {
+            v.insert_str(0, &tag);
+        }
+    }
+    (events, payments, subscriptions)
+}
+
 /// Seeds a throwaway data dir, serves the app on localhost and writes the reachable demo pages to `out`.
 pub async fn export(out: &Path) -> anyhow::Result<()> {
     let dir = std::env::temp_dir().join(format!("virling-demo-{}", uuid::Uuid::new_v4()));

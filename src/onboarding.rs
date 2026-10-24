@@ -53,6 +53,8 @@ struct SetupPage {
     timezones: Vec<(String, bool)>,
     error: Option<&'static str>,
     script_host: String,
+    /// Whether to offer sample data.
+    sample: bool,
 }
 
 /// The timezone menu; a zone outside the short list is added at the top.
@@ -131,6 +133,7 @@ pub async fn site_form(_account: Account) -> Response {
         timezones: tz_options("UTC"),
         error: None,
         script_host: String::new(),
+        sample: false,
     })
 }
 
@@ -159,6 +162,7 @@ pub async fn create_site(
             timezones: tz_options(&timezone),
             error: Some(error),
             script_host: String::new(),
+            sample: false,
         })
     };
     let Some(domain) = sites::normalize_domain(&input.domain) else {
@@ -187,15 +191,16 @@ pub struct Done {
     payments: bool,
 }
 
-async fn done(state: &AppState, site_id: &str) -> Done {
+async fn done(state: &AppState, site: &Site) -> Done {
     let store = state.events.clone();
-    let id = site_id.to_string();
-    let script = tokio::task::spawn_blocking(move || store.latest_pageview(&id))
-        .await
-        .is_ok_and(|r| r.is_ok_and(|e| e.is_some()));
+    let id = site.id.clone();
+    let script = !site.sample_data
+        && tokio::task::spawn_blocking(move || store.latest_pageview(&id))
+            .await
+            .is_ok_and(|r| r.is_ok_and(|e| e.is_some()));
     let payments =
         sqlx::query_scalar::<_, i64>("SELECT count(*) FROM integrations WHERE site_id = ?")
-            .bind(site_id)
+            .bind(&site.id)
             .fetch_one(&state.db)
             .await
             .is_ok_and(|n| n > 0);
@@ -237,9 +242,11 @@ pub async fn script_step(
     let Some(site) = owned_site(&state, &account, &domain).await else {
         return StatusCode::NOT_FOUND.into_response();
     };
+    let done = done(&state, &site).await;
     render(SetupPage {
         step: 2,
-        done: done(&state, &site.id).await,
+        sample: !done.script && !done.payments && !site.sample_data,
+        done,
         domain: site.domain,
         timezone: site.timezone,
         timezones: Vec::new(),
@@ -282,6 +289,9 @@ pub async fn latest_event(
     let Some(site) = owned_site(&state, &account, &domain).await else {
         return StatusCode::NOT_FOUND.into_response();
     };
+    if site.sample_data {
+        return Json(json!(null)).into_response();
+    }
     let store = state.events.clone();
     match tokio::task::spawn_blocking(move || store.latest_pageview(&site.id)).await {
         Ok(Ok(Some(e))) => Json(json!({
@@ -517,7 +527,7 @@ pub async fn payments_step(
     };
     let want = q.provider.as_deref().and_then(Provider::parse);
     let replace = want.filter(|_| q.replace.is_some());
-    let done = done(&state, &site.id).await;
+    let done = done(&state, &site).await;
     render(PaymentsStep {
         done,
         ..payments_page(site, connected, want, replace, None)
@@ -553,7 +563,7 @@ pub async fn connect_payments(
             Ok(c) => c,
             Err(code) => return code.into_response(),
         };
-        let done = done(&state, &site.id).await;
+        let done = done(&state, &site).await;
         return render(PaymentsStep {
             done,
             ..payments_page(
@@ -565,6 +575,7 @@ pub async fn connect_payments(
             )
         });
     }
+    crate::sample::clear(&state, &site).await;
     let bg = state.clone();
     let id = site.id.clone();
     tokio::spawn(async move {
@@ -611,7 +622,7 @@ pub async fn checkout_step(
         .unwrap_or(Provider::Stripe);
     render(CheckoutStep {
         step: 4,
-        done: done(&state, &site.id).await,
+        done: done(&state, &site).await,
         domain: site.domain,
         tabs: Provider::ALL
             .into_iter()

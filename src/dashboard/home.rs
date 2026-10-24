@@ -120,6 +120,7 @@ pub struct Waiting {
     domain: String,
     snippet: String,
     install_href: String,
+    sample_href: String,
 }
 
 /// One revenue chart type, all rendered so the tabs switch without a reload.
@@ -883,6 +884,7 @@ async fn page(
                         }
                     ),
                     install_href: site_url("setup/script"),
+                    sample_href: site_url("sample"),
                 });
             }
             let paid_total: u64 = split.iter().map(|s| s.first_payments + s.renewals).sum();
@@ -897,7 +899,8 @@ async fn page(
                     act,
                     href,
                 };
-            let mut steps = if empty {
+            let fresh = empty || ctx.site.sample_data;
+            let mut steps = if fresh {
                 vec![
                     step(
                         true,
@@ -968,7 +971,7 @@ async fn page(
                     site_url("setup/checkout"),
                 ),
             });
-            if !empty {
+            if !fresh {
                 steps.push(step(
                     setup.has_goals,
                     "Track a goal",
@@ -981,16 +984,16 @@ async fn page(
                 s.num = i + 1;
             }
             let done = steps.iter().filter(|s| s.done).count();
-            if public.is_none() && (empty || (age <= 14 && !dismissed && done < steps.len())) {
+            if public.is_none() && (fresh || (age <= 14 && !dismissed && done < steps.len())) {
                 page.setup = Some(SetupCard {
-                    title: if empty {
+                    title: if fresh {
                         format!("Get {} tracking", ctx.site.domain)
                     } else {
                         "Finish setting up".into()
                     },
                     count: format!("{done} of {} done", steps.len()),
                     steps,
-                    dismiss: if empty {
+                    dismiss: if fresh {
                         String::new()
                     } else {
                         site_url("setup/dismiss")
@@ -1460,7 +1463,7 @@ pub async fn public(
     let row: Result<Option<PublicSite>, _> = sqlx::query_as(
         "SELECT s.id, s.timezone, s.cookieless, s.window_days, s.public_hide_revenue, i.fetched_at
          FROM sites s LEFT JOIN site_icons i ON i.site_id = s.id AND i.body IS NOT NULL
-         WHERE s.domain = ? AND s.public_dashboard = 1",
+         WHERE s.domain = ? AND s.public_dashboard = 1 AND s.sample_data = 0",
     )
     .bind(&domain)
     .fetch_optional(&state.db)
@@ -1495,6 +1498,7 @@ pub async fn public(
             avatar: String::new(),
             live,
             agency: false,
+            sample: None,
         },
         site: Site {
             id,
@@ -1503,6 +1507,7 @@ pub async fn public(
             cookieless,
             same_visit: String::new(),
             return_minutes: 5,
+            sample_data: false,
         },
         today: OffsetDateTime::now_utc().to_offset(offset).date(),
         first_day: first.map(|t| t.to_offset(offset).date()),
