@@ -161,6 +161,7 @@ mod tests {
             visitors,
             payments: 1,
             customers: 1,
+            refunded: 0,
             revenue_usd,
             revenue_per_visitor: Some(revenue_usd / visitors as f64),
             avg_visit_secs: None,

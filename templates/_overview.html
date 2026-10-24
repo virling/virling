@@ -31,7 +31,7 @@
     <div class="d3-bc-head"><h2>{{ c.title }}</h2><nav class="d3-tabs" aria-label="{{ c.label }}">{% for t in c.tabs %}<a href="{{ t.href }}" data-tab="{{ c.key }}-p{{ loop.index0 }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
     {% for p in c.panels %}
     <div class="d3-panel{% if p.timed %} timed{% endif %}" id="{{ c.key }}-p{{ loop.index0 }}" data-card{% if !p.on %} hidden{% endif %}>
-    <div class="d3-row th"><span>{{ p.head }}</span><span class="num v">Visitors</span><span class="num rv">Revenue</span><span class="num pv">Per visitor</span>{% if p.timed %}<span class="num tm">Visit time</span>{% endif %}<span class="x"></span></div>
+    <div class="d3-row th{% if p.refunds %} hasrf{% endif %}"><span>{{ p.head }}</span><span class="num v">Visitors</span><span class="num rv">Revenue</span><span class="num pv">Per visitor</span>{% if p.timed %}<span class="num tm">Visit time</span>{% endif %}{% if p.refunds %}<span class="num rf" title="Payments refunded or lost in a dispute">Refunded</span>{% endif %}<span class="x"></span></div>
     {% if p.rows.is_empty() %}
     <div class="d3-skel"></div><div class="d3-skel s"></div>
     <div class="d3-empty"><b>{{ p.empty.0 }}</b><span>{{ p.empty.1 }}</span></div>
