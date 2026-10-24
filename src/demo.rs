@@ -14,6 +14,8 @@ use crate::{auth, channel, crypto, favicon, flags, icons, mail, sites, sync};
 
 const DOMAIN: &str = "tallybird.app";
 const DAYS: i64 = 180;
+/// Days of history in the sample data, enough for retention yet quick to load.
+const SAMPLE_DAYS: i64 = 75;
 /// Visitor timelines the demo prebuilds, taken from the first payments it reaches.
 const TIMELINES: usize = 12;
 /// A made-up mark for the made-up site, so the site switcher shows an icon.
@@ -701,14 +703,22 @@ pub(crate) fn seed(
     site: &str,
     now: OffsetDateTime,
 ) -> (Vec<Event>, Vec<Payment>, Vec<Subscription>) {
+    generate(site, now, DAYS)
+}
+
+fn generate(
+    site: &str,
+    now: OffsetDateTime,
+    days: i64,
+) -> (Vec<Event>, Vec<Payment>, Vec<Subscription>) {
     let mut rng = Rng(0x5EED_DE30_0000_0001);
     let mut events = Vec::new();
     let mut payments = Vec::new();
     let mut subscriptions = Vec::new();
-    let start = now.date() - Duration::days(DAYS);
-    for d in 0..=DAYS {
+    let start = now.date() - Duration::days(days);
+    for d in 0..=days {
         let day = (start + Duration::days(d)).midnight().assume_utc();
-        let progress = d as f64 / DAYS as f64;
+        let progress = d as f64 / days as f64;
         let weekend = matches!(
             day.weekday(),
             time::Weekday::Saturday | time::Weekday::Sunday
@@ -722,8 +732,8 @@ pub(crate) fn seed(
                 if s.utm.is_some() && day.weekday() == time::Weekday::Tuesday {
                     w *= 4.0;
                 }
-                if s.host == Some("news.ycombinator.com") && (DAYS - d == 41 || DAYS - d == 40) {
-                    w *= if DAYS - d == 41 { 40.0 } else { 12.0 };
+                if s.host == Some("news.ycombinator.com") && (days - d == 41 || days - d == 40) {
+                    w *= if days - d == 41 { 40.0 } else { 12.0 };
                 }
                 (i, w)
             })
@@ -842,7 +852,7 @@ pub(crate) fn sample(
     now: OffsetDateTime,
 ) -> (Vec<Event>, Vec<Payment>, Vec<Subscription>) {
     let tag = format!("{}-", crate::events::SAMPLE);
-    let (mut events, mut payments, subscriptions) = seed(site, now);
+    let (mut events, mut payments, subscriptions) = generate(site, now, SAMPLE_DAYS);
     for e in &mut events {
         e.visitor_id.insert_str(0, &tag);
         e.session_id.insert_str(0, &tag);
