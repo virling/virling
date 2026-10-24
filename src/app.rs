@@ -394,12 +394,16 @@ pub fn router(state: AppState) -> Router {
     } else if state.config.app {
         app = app.route("/", get(|| async { Redirect::temporary("/app") }));
     }
-    app.layer(axum::middleware::from_fn_with_state(state.clone(), theme))
-        .layer(axum::middleware::from_fn_with_state(
-            state.clone(),
-            mcp_host_only,
-        ))
-        .with_state(state)
+    app.layer(axum::middleware::from_fn_with_state(
+        state.clone(),
+        crate::markdown::negotiate,
+    ))
+    .layer(axum::middleware::from_fn_with_state(state.clone(), theme))
+    .layer(axum::middleware::from_fn_with_state(
+        state.clone(),
+        mcp_host_only,
+    ))
+    .with_state(state)
 }
 
 /// On the MCP host only the MCP endpoint and its metadata answer; everything else is a bare 404.
