@@ -924,7 +924,7 @@ a.ctl { text-decoration: none; }
 .vr { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; column-gap: 14px; align-items: center; height: 30px; padding: 0 16px; border-bottom: 1px solid var(--rule-2); font-size: 13px; color: var(--ink); text-decoration: none; }
 .vr.th { height: 30px; font-size: 12px; font-weight: 500; color: var(--ink-3); }
 .vr.th .sort { color: inherit; text-decoration: none; }
-.vr.th .sort:hover, .vr.th .sort.on { color: var(--ink); }
+.vr.th .sort:hover { color: var(--ink); }
 .vr.paid { box-shadow: inset 2px 0 0 var(--up); }
 .vr-ic { display: inline-flex; flex: none; }
 .vr-pages { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
