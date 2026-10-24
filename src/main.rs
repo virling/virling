@@ -25,6 +25,7 @@ mod ingest;
 mod links;
 mod live;
 mod mail;
+mod markdown;
 mod mcp;
 mod oauth;
 mod onboarding;
