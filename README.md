@@ -96,7 +96,7 @@ virling.vid();
 cargo test
 ```
 
-`worker/` holds the Cloudflare Worker that serves virling.com during the waitlist phase. It reuses the landing pages in `assets/` and builds with `wrangler deploy`.
+`worker/` holds the Cloudflare Worker that serves virling.com. It reuses the landing pages in `assets/` and builds with `wrangler deploy`.
 
 ## License
 
