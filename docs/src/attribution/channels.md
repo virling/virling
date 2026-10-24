@@ -19,7 +19,8 @@ The rules run in this order and the first match wins:
    - A known AI source is **AI**, a known search source is **Organic search**, a known community source is **Communities**, a known social source is **Social**.
    - Any other value is **Referral**.
 4. Any other `utm_medium` with no referrer and no source is **Referral**.
-5. Everything else is **Direct**.
+5. A visit with no referrer and no source whose user agent shows a known [in-app browser](#in-app-browsers) is credited to that app.
+6. Everything else is **Direct**.
 
 Referrers from your own domain and its subdomains are ignored, so moving between your pages never changes the channel.
 
@@ -35,6 +36,23 @@ A leading `www.` is ignored, and subdomains match: `old.reddit.com` matches `red
 | Social | `t.co`, `x.com`, `twitter.com`, `facebook.com`, `instagram.com`, `linkedin.com`, `lnkd.in`, `youtube.com`, `youtu.be`, `threads.net`, `bsky.app`, `mastodon.social`, `pinterest.com`, `tiktok.com` |
 
 AI is checked before search, so `gemini.google.com` is AI, not Organic search.
+
+## In-app browsers
+
+Links opened inside an app often arrive with no referrer. When the user agent names the app, the visit is credited to it instead of Direct. A referrer or a `utm_source` always wins.
+
+| App | Source | Channel |
+| --- | --- | --- |
+| Instagram | `instagram.com` | Social |
+| Facebook and Messenger | `facebook.com` | Social |
+| TikTok | `tiktok.com` | Social |
+| LinkedIn | `linkedin.com` | Social |
+| Telegram | `t.me` | Social |
+| WhatsApp | `whatsapp.com` | Social |
+| Slack | `slack.com` | Social |
+| Discord | `discord.com` | Social |
+
+Some apps open links in a plain system browser that does not name them. Those visits stay Direct.
 
 ## Known sources
 
@@ -57,6 +75,7 @@ These `utm_source` or `ref` values are matched exactly, lowercased:
 | From `chatgpt.com` | AI |
 | `/?ref=producthunt` with no referrer | Communities |
 | From `someblog.dev` | Referral |
+| Link opened in the Instagram app, no referrer | Social, from Instagram |
 | Typed URL or bookmark | Direct |
 
 ## Referrer names
