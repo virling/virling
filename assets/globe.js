@@ -715,11 +715,15 @@
     }
     const places = root.querySelector("#gl-places");
     places.textContent = "";
+    const topRows = data.countries.slice().sort((a, b) => b.visitors - a.visitors).slice(0, 5).map((c) => [c.name, `${c.visitors} · ${usd.format(c.rpv)}`]);
+    const over = root.querySelector(".gl-top");
+    over.textContent = "";
+    for (const [name, val] of topRows) over.append(h("div", "gl-kv", name), h("b", "", val));
     if (mode === "revenue") {
       const rows = data.countries.filter((c) => c.rpv > 0).sort((a, b) => b.rpv - a.rpv).slice(0, 4).map((c) => [c.name, usd.format(c.rpv)]);
       places.append(block("Revenue per visitor", rows));
     } else {
-      places.append(block("Countries", top(data.visitors.map((v) => v.place), 4)));
+      places.append(block("Top countries", topRows));
     }
     places.append(block("Sources", top(data.visitors.map((v) => v.src), 4)), block("Devices", top(data.visitors.map((v) => v.dev), 3)));
 

@@ -1372,6 +1372,10 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .gl-zoom button { width: 32px; height: 32px; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); color: var(--ink-2); font-size: 16px; line-height: 1; cursor: pointer; }
 .gl-zoom button:hover { color: var(--ink); border-color: var(--field); }
 .gl-legend { position: absolute; left: 16px; bottom: 14px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-3); pointer-events: none; }
+.gl-top { display: none; }
+.gl-main:fullscreen .gl-top { display: grid; grid-template-columns: auto auto; gap: 4px 14px; position: absolute; left: 16px; top: 8px; font-size: 13px; color: var(--ink-2); pointer-events: none; }
+.gl-top .gl-kv { padding: 0; }
+.gl-top b { font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
 .gl-legend b { font-weight: 500; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .gl-legend i { width: 28px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--rule), var(--visitors)); }
 .gl-legend i.rev { background: linear-gradient(90deg, var(--rule), var(--revenue)); }
