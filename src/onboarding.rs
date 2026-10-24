@@ -255,6 +255,22 @@ pub async fn script_step(
     })
 }
 
+/// Counts one sample AI answer fetch, so the AI card shows what the server snippet will do.
+pub async fn ai_test(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+) -> Response {
+    let Some(site) = owned_site(&state, &account, &domain).await else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    if let Some(bot) = crate::crawlers::detect("ChatGPT-User/1.0") {
+        let page = format!("https://{}/", site.domain);
+        crate::crawlers::record(&state, bot, &site.domain, &page).await;
+    }
+    StatusCode::ACCEPTED.into_response()
+}
+
 /// The framework, payment providers and install status read from the site's live homepage.
 pub async fn stack(
     State(state): State<AppState>,

@@ -1453,3 +1453,8 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .adm-confirm { display: flex; gap: 8px; margin: 0; }
 .adm-confirm .input { width: 220px; height: 36px; font-size: 13px; }
 .adm-confirm .btn { height: 36px; }
+
+.ai-fetch { margin-top: 12px; font-size: 13px; color: var(--ink-2); }
+.ai-fetch summary { cursor: pointer; font-weight: 600; color: var(--ink); }
+.ai-fetch pre { margin: 8px 0; max-height: 220px; overflow: auto; }
+.ai-fetch .actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; }

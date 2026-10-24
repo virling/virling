@@ -452,3 +452,11 @@ for (const list of document.querySelectorAll("[data-qlist]")) {
   });
   sync();
 }
+
+for (const b of document.querySelectorAll("[data-ai-test]")) {
+  b.addEventListener("click", async () => {
+    const note = b.parentElement.querySelector("[data-ai-note]");
+    const res = await fetch(b.dataset.aiTest, { method: "POST" });
+    note.textContent = res.ok ? "Test sent. ChatGPT-User now shows on the AI card of your dashboard." : "The test did not go through.";
+  });
+}
