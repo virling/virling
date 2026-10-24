@@ -15,6 +15,7 @@
   {% endfor %}
 </section>
 {% if !earlier.is_empty() %}<p class="d3-earlier" id="earlier" data-sync>{{ earlier }}</p>{% endif %}
+{% if !unmatched.is_empty() %}<p class="d3-earlier" id="unmatched" data-sync>{{ unmatched }} <a href="https://docs.virling.com/payments/checkout.html">Pass the visitor ID</a></p>{% endif %}
 <section class="d3-card d3-chart" id="revenue" data-sync>
   <div class="d3-ch-head" data-key="chart"><h2>{% for c in charts %}{% if c.on %}{{ c.title }}{% endif %}{% endfor %}</h2><nav class="d3-tabs" aria-label="Chart type">{% for t in chart_tabs %}<a href="{{ t.href }}" data-tab="chart-p{{ loop.index0 }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
   {% for c in charts %}

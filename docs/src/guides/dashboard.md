@@ -9,6 +9,7 @@ The date picker at the top right sets the period for every page: Today, Yesterda
 ## Overview
 
 - **Four numbers:** Revenue, New customers, Revenue per visitor and Visitors. Revenue counts on the payment date, so some revenue in a range can come from visits before it.
+- **Matched revenue:** under the four numbers, one line gives the share of revenue matched to a visit and why the rest was not, such as payments with no visitor ID or with no visit inside the lookback window. It disappears when every payment is matched. See [Link checkout to visits](../payments/checkout.md).
 - **Revenue chart:** bars for revenue per day, with a dot per day for visitors on the right axis. Hover a bar for the day's payments.
 - **Insight line:** the biggest finding in the period, such as what an AI assistant visitor is worth compared with your average.
 
