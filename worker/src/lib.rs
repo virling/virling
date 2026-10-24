@@ -727,8 +727,57 @@ async fn pages(req: Request, ctx: RouteContext<()>) -> Result<Response> {
     assets.fetch_request(req).await
 }
 
+/// User agent parts of the AI crawlers and assistants Virling counts; the server keeps only the ones it knows.
+const AI_AGENTS: &[&str] = &[
+    "gptbot",
+    "oai-searchbot",
+    "chatgpt-user",
+    "claudebot",
+    "claude-",
+    "anthropic-ai",
+    "perplexity",
+    "google-extended",
+    "googleother",
+    "applebot-extended",
+    "amazonbot",
+    "meta-external",
+    "ccbot",
+    "bytespider",
+    "duckassistbot",
+];
+
+/// Tells the Virling server about an AI fetch of a page, since they never run the tracking script.
+fn forward_ai(req: &Request, ctx: &Context) {
+    let ua = req
+        .headers()
+        .get("User-Agent")
+        .ok()
+        .flatten()
+        .unwrap_or_default();
+    let lower = ua.to_ascii_lowercase();
+    if req.method() != Method::Get || !AI_AGENTS.iter().any(|t| lower.contains(t)) {
+        return;
+    }
+    let Ok(url) = req.url() else {
+        return;
+    };
+    let body = serde_json::json!({ "s": "virling.com", "u": url.as_str(), "ua": ua }).to_string();
+    ctx.wait_until(async move {
+        let headers = Headers::new();
+        let _ = headers.set("content-type", "application/json");
+        let mut init = RequestInit::new();
+        init.with_method(Method::Post)
+            .with_headers(headers)
+            .with_body(Some(worker::wasm_bindgen::JsValue::from_str(&body)));
+        if let Ok(post) = Request::new_with_init("https://beta.virling.com/api/crawl", &init) {
+            let _ = Fetch::Request(post).send().await;
+        }
+    });
+}
+
 #[event(fetch)]
-async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
+async fn fetch(req: Request, env: Env, ctx: Context) -> Result<Response> {
+    forward_ai(&req, &ctx);
     Router::new()
         .get_async("/api/stats", stats_json)
         .get_async("/stats", stats_page)
