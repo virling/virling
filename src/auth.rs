@@ -17,6 +17,7 @@ const LINK_TTL_SECS: i64 = 15 * 60;
 const SESSION_TTL_SECS: i64 = 30 * 24 * 3600;
 const LINKS_PER_HOUR: i64 = 5;
 const LINKS_PER_IP_HOUR: i64 = 20;
+const LINKS_PER_IP_10_MIN: i64 = 5;
 pub const TURNSTILE_VERIFY_URL: &str = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 pub const SESSION_COOKIE: &str = "virling_session";
 
@@ -148,6 +149,15 @@ pub async fn send_link(
             error: Some("Enter a valid email."),
         });
     }
+    if crate::disposable::is_disposable(&email) {
+        return page(LoginPage {
+            view: "enter",
+            turnstile: key,
+            email,
+            token: String::new(),
+            error: Some("Use a permanent email address, not a temporary one."),
+        });
+    }
     if !human(&state, input.turnstile.as_deref(), &ip).await {
         return page(LoginPage {
             view: "enter",
@@ -171,7 +181,14 @@ pub async fn send_link(
             .fetch_one(&state.db)
             .await
             .unwrap_or(LINKS_PER_IP_HOUR);
-    if recent < LINKS_PER_HOUR && from_ip < LINKS_PER_IP_HOUR {
+    let burst: i64 =
+        sqlx::query_scalar("SELECT count(*) FROM login_tokens WHERE ip = ? AND created_at > ?")
+            .bind(&ip)
+            .bind(now() - 600)
+            .fetch_one(&state.db)
+            .await
+            .unwrap_or(LINKS_PER_IP_10_MIN);
+    if recent < LINKS_PER_HOUR && from_ip < LINKS_PER_IP_HOUR && burst < LINKS_PER_IP_10_MIN {
         let token = random_token();
         let inserted = sqlx::query("INSERT INTO login_tokens (token_hash, email, created_at, expires_at, ip) VALUES (?, ?, ?, ?, ?)")
             .bind(hash_token(&token))

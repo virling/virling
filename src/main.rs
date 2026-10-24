@@ -14,6 +14,7 @@ mod crawlers;
 mod crypto;
 mod dashboard;
 mod demo;
+mod disposable;
 mod events;
 mod favicon;
 mod flags;
