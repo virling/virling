@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sha2::{Digest, Sha256};
 use time::{Duration, OffsetDateTime};
 
 use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription};
@@ -203,21 +202,10 @@ pub async fn register_webhook(
 
 /// HMAC-SHA256 of a webhook body with its signing secret, in lowercase hex as `X-Signature` carries it.
 pub fn signature(secret: &str, body: &[u8]) -> String {
-    let mut key = [0u8; 64];
-    if secret.len() > key.len() {
-        key[..32].copy_from_slice(&Sha256::digest(secret.as_bytes()));
-    } else {
-        key[..secret.len()].copy_from_slice(secret.as_bytes());
-    }
-    let inner = Sha256::new()
-        .chain_update(key.map(|b| b ^ 0x36))
-        .chain_update(body)
-        .finalize();
-    let outer = Sha256::new()
-        .chain_update(key.map(|b| b ^ 0x5c))
-        .chain_update(inner)
-        .finalize();
-    outer.iter().map(|b| format!("{b:02x}")).collect()
+    crate::crypto::hmac_sha256(secret.as_bytes(), body)
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect()
 }
 
 /// The order or subscription invoice a webhook reports, with the visitor ID from its custom data.

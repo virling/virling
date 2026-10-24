@@ -26,9 +26,19 @@ Every setting can be given as a flag or an environment variable. See [CLI](cli.m
 | `VIRLING_APPLICATIONS_URL` | unset | URL of the website's beta applications feed, listed in the admin panel. |
 | `VIRLING_APPLICATIONS_TOKEN` | unset | Bearer token for the applications feed. |
 | `VIRLING_AI_ANSWERS_BUDGET_USD` | unset | Estimated USD a month after which AI answer runs pause until the next month. Unset: no cap. |
+| `VIRLING_DODO_API_KEY` | unset | Dodo Payments API key that bills the hosted plans. Needs `VIRLING_HOSTED` and the Dodo variables below. Unset: no billing. |
+| `VIRLING_DODO_API_URL` | `https://live.dodopayments.com` | Dodo API to call. `https://test.dodopayments.com` for test mode. |
+| `VIRLING_DODO_WEBHOOK_SECRET` | unset | Signing secret of the Dodo webhook that points at `/api/webhooks/dodo`. |
+| `VIRLING_DODO_PERSONAL_PRODUCT` | unset | Dodo subscription product for Personal. |
+| `VIRLING_DODO_AGENCY_PRODUCT` | unset | Dodo subscription product for Agency. |
+| `VIRLING_DODO_SEAT_ADDON` | unset | Dodo add-on billed for each Agency user past the 3 included. |
+| `VIRLING_DODO_PERSONAL_FOUNDING_PRODUCT` | unset | Dodo product for Personal at the founding price, $11.40 a month. |
+| `VIRLING_DODO_AGENCY_FOUNDING_PRODUCT` | unset | Dodo product for Agency at the founding price, $29 a month. |
+| `VIRLING_FOUNDERS_URL` | `https://virling.com/api/founders` | Where sign-up looks up founding pre-orders by email. |
+| `VIRLING_FOUNDERS_TOKEN` | unset | Bearer token for that lookup, the same as the virling.com worker's `FOUNDERS_TOKEN` secret. |
 | `RUST_LOG` | `info` | Log level and filter, such as `debug` or `virling=debug`. |
 
-`VIRLING_MARKETING` and `VIRLING_WAITLIST_FROM` exist for virling.com itself. A self-hosted server does not need them.
+`VIRLING_MARKETING`, `VIRLING_WAITLIST_FROM` and the `VIRLING_DODO_*` variables exist for virling.com and the hosted service. A self-hosted server does not need them.
 
 ## Minimal production set
 

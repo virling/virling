@@ -7,6 +7,7 @@ mod app;
 mod assets;
 mod auth;
 mod bench;
+mod billing;
 mod cache;
 mod channel;
 mod chart;
@@ -187,6 +188,42 @@ struct ServeArgs {
     /// Estimated USD a month after which AI answer runs pause
     #[arg(long, env = "VIRLING_AI_ANSWERS_BUDGET_USD")]
     ai_answers_budget_usd: Option<f64>,
+    /// Dodo Payments API key for the hosted plans; needs --hosted and the product IDs below
+    #[arg(long, env = "VIRLING_DODO_API_KEY", hide_env_values = true)]
+    dodo_api_key: Option<String>,
+    /// https://test.dodopayments.com for test mode
+    #[arg(
+        long,
+        env = "VIRLING_DODO_API_URL",
+        default_value = "https://live.dodopayments.com"
+    )]
+    dodo_api_url: String,
+    /// Signing secret of the Dodo webhook pointed at /api/webhooks/dodo
+    #[arg(long, env = "VIRLING_DODO_WEBHOOK_SECRET", hide_env_values = true)]
+    dodo_webhook_secret: Option<String>,
+    #[arg(long, env = "VIRLING_DODO_PERSONAL_PRODUCT")]
+    dodo_personal_product: Option<String>,
+    #[arg(long, env = "VIRLING_DODO_AGENCY_PRODUCT")]
+    dodo_agency_product: Option<String>,
+    /// Add-on billed for each Agency user past the 3 included
+    #[arg(long, env = "VIRLING_DODO_SEAT_ADDON")]
+    dodo_seat_addon: Option<String>,
+    /// Personal at the founding price, $11.40 a month
+    #[arg(long, env = "VIRLING_DODO_PERSONAL_FOUNDING_PRODUCT")]
+    dodo_personal_founding_product: Option<String>,
+    /// Agency at the founding price, $29 a month
+    #[arg(long, env = "VIRLING_DODO_AGENCY_FOUNDING_PRODUCT")]
+    dodo_agency_founding_product: Option<String>,
+    /// virling.com lookup of founding pre-orders by email
+    #[arg(
+        long,
+        env = "VIRLING_FOUNDERS_URL",
+        default_value = "https://virling.com/api/founders"
+    )]
+    founders_url: String,
+    /// Bearer token for the founders lookup, the worker's FOUNDERS_TOKEN
+    #[arg(long, env = "VIRLING_FOUNDERS_TOKEN", hide_env_values = true)]
+    founders_token: Option<String>,
 }
 
 #[tokio::main]
@@ -227,6 +264,33 @@ async fn main() -> anyhow::Result<()> {
     };
     match command {
         Command::Serve(args) => {
+            let billing = match args.dodo_api_key {
+                Some(api_key) if args.hosted => {
+                    let need = |v: Option<String>, flag: &str| {
+                        v.with_context(|| format!("--dodo-api-key needs {flag}"))
+                    };
+                    Some(billing::Dodo {
+                        api_url: args.dodo_api_url.trim_end_matches('/').to_string(),
+                        api_key,
+                        webhook_secret: need(args.dodo_webhook_secret, "--dodo-webhook-secret")?,
+                        personal: need(args.dodo_personal_product, "--dodo-personal-product")?,
+                        agency: need(args.dodo_agency_product, "--dodo-agency-product")?,
+                        seat: need(args.dodo_seat_addon, "--dodo-seat-addon")?,
+                        personal_founding: need(
+                            args.dodo_personal_founding_product,
+                            "--dodo-personal-founding-product",
+                        )?,
+                        agency_founding: need(
+                            args.dodo_agency_founding_product,
+                            "--dodo-agency-founding-product",
+                        )?,
+                        founders_url: args.founders_url,
+                        founders_token: need(args.founders_token, "--founders-token")?,
+                    })
+                }
+                Some(_) => anyhow::bail!("--dodo-api-key needs --hosted"),
+                None => None,
+            };
             let events = Cached::new(DuckStore::open(&cli.data_dir.join("events.duckdb"))?);
             let config = Config {
                 marketing: args.marketing,
@@ -260,6 +324,7 @@ async fn main() -> anyhow::Result<()> {
                         verify_url: auth::TURNSTILE_VERIFY_URL.into(),
                     },
                 ),
+                billing,
             };
             let mailer = mail::Mailer::new(args.smtp_url.as_deref(), &args.mail_from)?;
             let vault = crypto::Vault::load(&cli.data_dir, args.secret_key.as_deref())?;
@@ -275,6 +340,9 @@ async fn main() -> anyhow::Result<()> {
                 tokio::spawn(answers::run(state.clone()));
                 favicon::spawn_sources(state.clone());
                 tokio::spawn(dashboard::schedule::run(state.clone()));
+                if state.config.billing.is_some() {
+                    tokio::spawn(billing::run(state.clone()));
+                }
             }
             let listener = tokio::net::TcpListener::bind(args.addr)
                 .await
@@ -366,6 +434,7 @@ mod tests {
             ai_keys: Default::default(),
             ai_budget_usd: None,
             turnstile: None,
+            billing: None,
         };
         let state = AppState::new(
             config,

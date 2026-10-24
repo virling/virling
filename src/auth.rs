@@ -313,6 +313,9 @@ pub async fn verify(
                 .fetch_one(&state.db)
                 .await?;
         anyhow::ensure!(!suspended, "account suspended");
+        if state.config.billing.is_some() {
+            tokio::spawn(crate::billing::link_founder(state.clone(), account.clone()));
+        }
         start_session(&state, &account).await
     }
     .await;
