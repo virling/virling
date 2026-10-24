@@ -273,7 +273,7 @@
       if (still()) bursts.splice(0).forEach(drop);
       const n = vec(pt[0], pt[1]);
       const c = visitor ? colors.visitors : colors.revenue;
-      const b = { n, t0, idle: false, meshes: [mkRing(n, c), mkRing(n, c)] };
+      const b = { n, t0, idle: false, visitor, meshes: [mkRing(n, c), mkRing(n, c)] };
       const dot = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({ color: c, transparent: true, depthWrite: false }));
       dot.position.copy(n).multiplyScalar(1.008);
       dot.quaternion.copy(b.meshes[0].quaternion);
@@ -281,7 +281,7 @@
       dot.visible = false;
       globe.add(dot);
       b.meshes.push(dot);
-      b.chip = h("div", visitor ? "gl-chip v" : "gl-chip", label);
+      b.chip = h("div", visitor ? "gl-chip v" : "gl-chip pay", label);
       chips.append(b.chip);
       bursts.push(b);
       wake();
@@ -359,7 +359,7 @@
         const ring = (m, t, a) => {
           m.visible = vis && t > 0 && t < 1;
           if (!m.visible) return;
-          m.scale.setScalar((b.idle ? 0.1 : 0.07) * (1 - Math.pow(1 - t, 2)) + 0.012);
+          m.scale.setScalar((b.idle ? 0.1 : b.visitor ? 0.07 : 0.15) * (1 - Math.pow(1 - t, 2)) + 0.012);
           m.material.opacity = a * (1 - t) * edge;
         };
         if (still() && !b.idle) {
