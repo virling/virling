@@ -1,5 +1,5 @@
 {
-  "resource": "https://mcp.virling.com/mcp",
+  "resource": "https://virling.com",
   "authorization_servers": [
     "https://beta.virling.com"
   ],
