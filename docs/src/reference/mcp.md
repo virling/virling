@@ -72,6 +72,8 @@ For Claude Code, the [CLI](cli.md) with `--json` works too, and uses less contex
 
 ## claude.ai
 
+For hosted Virling, add it from the [Claude directory](https://claude.ai/directory/virling): open the listing, click **Connect**, and click **Allow** when Virling opens. For a self-hosted server, add a custom connector:
+
 1. Open **Customize > Connectors** and click **Add custom connector**. On Team and Enterprise plans, an Owner adds it under **Organization settings > Connectors**.
 2. Enter a name, such as Virling, and the URL `https://stats.example.com/mcp`. Leave the advanced settings empty.
 3. Click **Add**, then **Connect**. Virling opens: sign in if asked, then click **Allow**.
