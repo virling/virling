@@ -42,7 +42,7 @@
   <div class="menu-wrap account" data-menu>
     <button type="button" aria-haspopup="true" aria-expanded="false">
       <span class="favicon avatar">{{ shell.avatar }}</span>
-      <span class="grow who"><b>{{ shell.email }}</b><span>{{ shell.plan }}</span></span>
+      <span class="grow who" title="{{ shell.email }}"><b>{{ shell.display_name() }}</b><span>{{ shell.plan }}</span></span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
     </button>
     <div class="menu up" hidden>
