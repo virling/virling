@@ -29,6 +29,8 @@ pub struct Config {
     pub events_per_second: u32,
     /// Public URL of this server, used in emails and script snippets, without a trailing slash.
     pub base_url: String,
+    /// Optional separate https origin that serves only the MCP endpoint, without a trailing slash.
+    pub mcp_url: Option<String>,
     /// Sender for waitlist emails; replies go to this address.
     pub waitlist_from: String,
     /// The hosted service, where Agency teams can buy seats past the 3 included.
@@ -341,7 +343,32 @@ pub fn router(state: AppState) -> Router {
         app = app.route("/", get(|| async { Redirect::temporary("/app") }));
     }
     app.layer(axum::middleware::from_fn_with_state(state.clone(), theme))
+        .layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            mcp_host_only,
+        ))
         .with_state(state)
+}
+
+/// On the MCP host only the MCP endpoint and its metadata answer; everything else is a bare 404.
+async fn mcp_host_only(
+    State(state): State<AppState>,
+    req: axum::extract::Request,
+    next: axum::middleware::Next,
+) -> Response {
+    if oauth::on_mcp_host(&state.config, req.headers()) {
+        let path = req.uri().path();
+        let allowed = matches!(
+            path,
+            "/mcp"
+                | "/.well-known/oauth-protected-resource"
+                | "/.well-known/oauth-protected-resource/mcp"
+        );
+        if !allowed {
+            return StatusCode::NOT_FOUND.into_response();
+        }
+    }
+    next.run(req).await
 }
 
 /// Marks a signed-in user's pages with their Light or Dark choice, so they render in it without a flash.

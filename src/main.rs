@@ -134,6 +134,9 @@ struct ServeArgs {
         default_value = "http://localhost:8080"
     )]
     base_url: String,
+    /// Separate https origin that serves only the MCP endpoint, such as https://mcp.example.com
+    #[arg(long, env = "VIRLING_MCP_URL")]
+    mcp_url: Option<String>,
     /// SMTP URL for sign-in emails, e.g. smtps://api_token:TOKEN@smtp.mx.cloudflare.net:465. Unset: links are logged.
     #[arg(long, env = "VIRLING_SMTP_URL", hide_env_values = true)]
     smtp_url: Option<String>,
@@ -218,6 +221,16 @@ async fn main() -> anyhow::Result<()> {
                 trust_proxy: args.trust_proxy,
                 events_per_second: args.events_per_second,
                 base_url: args.base_url.trim_end_matches('/').to_string(),
+                mcp_url: args
+                    .mcp_url
+                    .map(|u| u.trim_end_matches('/').to_string())
+                    .map(|u| match url::Url::parse(&u) {
+                        Ok(p) if p.scheme() == "https" && p.path() == "/" => Ok(u),
+                        _ => Err(anyhow::anyhow!(
+                            "VIRLING_MCP_URL must be an https origin without a path"
+                        )),
+                    })
+                    .transpose()?,
                 waitlist_from: args.waitlist_from,
                 hosted: args.hosted,
                 ai_keys: answers::ServerKeys([
@@ -329,6 +342,7 @@ mod tests {
             trust_proxy: false,
             events_per_second: 200,
             base_url: "http://localhost:8080".into(),
+            mcp_url: None,
             waitlist_from: "Rahul at Virling <hello@virling.com>".into(),
             hosted: false,
             ai_keys: Default::default(),
