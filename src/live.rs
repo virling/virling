@@ -19,6 +19,8 @@ use crate::sites;
 const FRESH: Duration = Duration::from_secs(75);
 /// How long a poll waits for a change before answering anyway.
 const WAIT: Duration = Duration::from_secs(25);
+const PIN_TTL: Duration = Duration::from_secs(3600);
+const PIN_CAP: usize = 20_000;
 
 /// Visitors per site with a visible tab open, and when each was last heard from.
 #[derive(Default)]
@@ -57,6 +59,31 @@ impl Presence {
         };
         v.retain(|_, t| t.elapsed() < FRESH);
         v.len() as u64
+    }
+}
+
+/// Where each recent visitor is, from the proxy's latitude and longitude headers; kept in memory only.
+#[derive(Default)]
+pub struct Pins(Mutex<HashMap<String, (f32, f32, Instant)>>);
+
+impl Pins {
+    pub fn set(&self, site_id: &str, visitor_id: &str, at: (f32, f32)) {
+        let mut all = self.0.lock().unwrap();
+        if all.len() >= PIN_CAP {
+            all.retain(|_, v| v.2.elapsed() < PIN_TTL);
+        }
+        if all.len() < PIN_CAP {
+            all.insert(
+                format!("{site_id}/{visitor_id}"),
+                (at.0, at.1, Instant::now()),
+            );
+        }
+    }
+
+    pub fn get(&self, site_id: &str, visitor_id: &str) -> Option<(f32, f32)> {
+        let all = self.0.lock().unwrap();
+        let v = all.get(&format!("{site_id}/{visitor_id}"))?;
+        (v.2.elapsed() < PIN_TTL).then_some((v.0, v.1))
     }
 }
 
