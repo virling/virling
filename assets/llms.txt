@@ -35,6 +35,15 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [MCP server](https://docs.virling.com/reference/mcp): read-only access for AI assistants
 - [FAQ](https://docs.virling.com/faq)
 
+## Blog
+
+- [Find which marketing channel pays](https://virling.com/blog/find-which-channel-pays): five steps to measure revenue per visitor by channel
+- [Ask Claude which channel pays](https://virling.com/blog/ask-claude-which-channel-pays): connect payments and ask an MCP assistant
+- [What is revenue per visitor, and how to work it out](https://virling.com/blog/what-is-revenue-per-visitor): Revenue per visitor is revenue divided by visitors. A worked example, what a good number looks like, and how to use it to pick channels.
+- [First-touch or last-touch attribution for a SaaS](https://virling.com/blog/first-touch-vs-last-touch-attribution-saas): First touch credits the visit that found you. Last touch credits the visit before the payment. Which to use for a small SaaS, with an example.
+- [How to track Stripe revenue by traffic source](https://virling.com/blog/track-stripe-revenue-by-traffic-source): Stripe knows who paid, not where they came from. Pass the visitor ID into checkout so each payment can be joined to the visit before it.
+- [Which UTM parameters to use to trace revenue](https://virling.com/blog/utm-parameters-for-revenue-tracking): Five UTM parameters, the naming rules that keep reports clean, and the mistakes that send revenue to Direct.
+
 ## Source
 
 - [GitHub repository](https://github.com/virling/virling): code, releases and changelog, AGPLv3
