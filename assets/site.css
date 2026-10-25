@@ -379,6 +379,7 @@ a.more:hover svg { transform: translateX(2px); }
 }
 .post { max-width: 760px; }
 .post h2 { margin: 24px 0 0; font-size: 24px; letter-spacing: -0.02em; }
+.post h3 { margin: 18px 0 0; font-size: 17px; letter-spacing: -0.01em; }
 .post code { font: 0.9em var(--mono); background: var(--ground); border: 1px solid var(--rule-2); border-radius: 6px; padding: 1px 5px; }
 .band.alt .post code { background: #fff; }
 .post-list { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: 17px; line-height: 1.6; color: var(--ink-2); }

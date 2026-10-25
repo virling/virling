@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dodo Payments analytics: see which channel brought each payment</title>
+<title>Dodo Payments analytics: which channel brought each payment</title>
 <meta name="description" content="Join every Dodo Payments payment to the visit before it. Revenue per channel, renewals and refunds, with payment links that need no code.">
 <link rel="canonical" href="https://virling.com/integrations/dodo-payments">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Virling">
 <meta property="og:url" content="https://virling.com/integrations/dodo-payments">
-<meta property="og:title" content="Dodo Payments analytics: see which channel brought each payment">
+<meta property="og:title" content="Dodo Payments analytics: which channel brought each payment">
 <meta property="og:description" content="Join every Dodo Payments payment to the visit before it. Revenue per channel, renewals and refunds, with payment links that need no code.">
 <meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"Dodo Payments","item":"https://virling.com/integrations/dodo-payments"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"Dodo Payments","item":"https://virling.com/integrations/dodo-payments"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I see which channel a Dodo Payments payment came from?","acceptedAnswer":{"@type":"Answer","text":"Connect Dodo Payments to Virling with an API key. Virling reads each payment's metadata.virling_vid and ties it to the visit before it, and static payment links need no code."}},{"@type":"Question","name":"Do live and test keys both work for Dodo Payments?","acceptedAnswer":{"@type":"Answer","text":"Yes. Virling tries the key against live.dodopayments.com first and test.dodopayments.com second, and remembers which one accepted it."}},{"@type":"Question","name":"How are refunds and renewals handled for Dodo Payments?","acceptedAnswer":{"@type":"Answer","text":"Refunds update the payment they belong to, lost or accepted disputes count as refunded, and every payment after the first paid one of a subscription is marked as a renewal."}}]}]}</script>
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
@@ -71,13 +71,17 @@
 const vid = window.virling?.vid?.();
 if (vid) url.searchParams.set(&quot;metadata_virling_vid&quot;, vid);
 location.href = url.href;</pre></div>
+<h2>Frequently asked questions</h2>
+<h3>How do I see which channel a Dodo Payments payment came from?</h3><p class="p">Connect Dodo Payments to Virling with an API key. Virling reads each payment&#x27;s metadata.virling_vid and ties it to the visit before it, and static payment links need no code.</p>
+<h3>Do live and test keys both work for Dodo Payments?</h3><p class="p">Yes. Virling tries the key against live.dodopayments.com first and test.dodopayments.com second, and remembers which one accepted it.</p>
+<h3>How are refunds and renewals handled for Dodo Payments?</h3><p class="p">Refunds update the payment they belong to, lost or accepted disputes count as refunded, and every payment after the first paid one of a subscription is marked as a renewal.</p>
       <p class="p">Full reference: <a href="https://docs.virling.com/payments/dodo.html">Dodo Payments in the docs</a>.</p>
     </div>
   </div></section>
 </main>
 
 <footer class="foot"><div class="wrap">
-  <div class="links"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><span class="grow"></span><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/self-host">Self-host</a><a href="/demo">Demo</a><a href="/changelog">Changelog</a><a href="/integrations">Integrations</a><a href="/blog">Blog</a><a href="/vs">Compare</a><a href="/agency" data-goal="agency_click">Agencies</a></div>
+  <div class="links"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><span class="grow"></span><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/self-host">Self-host</a><a href="/demo">Demo</a><a href="/changelog">Changelog</a><a href="/integrations">Integrations</a><a href="/blog">Blog</a><a href="/vs">Compare</a><a href="/about">About</a><a href="/agency" data-goal="agency_click">Agencies</a></div>
   <div class="fine"><span>Open source under AGPLv3. Built by Stacklance Infotech LLP.</span><span class="legal"><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span><span>Hosted beta open now.</span></div>
 </div></footer>
 <script defer src="/assets/site.js"></script>

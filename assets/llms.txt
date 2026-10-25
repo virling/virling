@@ -14,6 +14,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [For agencies](https://virling.com/agency): weekly branded reports that show each client which channels brought paying customers
 - [Live demo](https://virling.com/demo/): a static demo dashboard with made-up data
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
+- [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
 - [Terms of service](https://virling.com/terms): the rules for using the hosted service
 - [Refund and cancellation](https://virling.com/refunds): 14-day trial, how to cancel, no refunds after the trial, founding pre-orders
