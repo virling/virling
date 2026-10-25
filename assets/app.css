@@ -610,7 +610,7 @@ a.ctl { text-decoration: none; }
 .chart .end { position: absolute; width: 10px; height: 10px; margin: 0 0 -5px -5px; border-radius: 50%; background: var(--revenue); box-shadow: 0 0 0 3px var(--paper); pointer-events: none; }
 .chart .end-l { position: absolute; right: 0; padding: 3px 8px; border-radius: 6px; background: var(--ink); color: var(--on-ink); font-size: 12px; font-weight: 600; white-space: nowrap; pointer-events: none; }
 .d3-note { margin: 10px 0 0; font-size: 13px; color: var(--ink-2); }
-.d3-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 16px; }
+.d3-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 16px; align-items: start; }
 .d3-body { container-type: inline-size; }
 @container (min-width: 1468px) {
   .d3-cards { grid-template-columns: repeat(6, 1fr); }
@@ -627,10 +627,10 @@ a.ctl { text-decoration: none; }
 .d3-panel { flex: 1; display: flex; flex-direction: column; }
 .d3-panel[hidden] { display: none; }
 .d3-row { display: grid; grid-template-columns: minmax(0, 1fr) 60px 76px 72px 44px; align-items: center; column-gap: 10px; min-height: 48px; padding: 3px 8px; border-radius: 10px; }
-.d3-panel.timed .d3-row { grid-template-columns: minmax(0, 1fr) 60px 76px 72px 68px 44px; }
+.d3-panel.timed .d3-row { grid-template-columns: minmax(0, 1fr) 52px 64px 64px 60px 32px; column-gap: 8px; }
 .d3-row .tm { color: var(--ink-2); font-size: 13px; }
-.d3-row.hasrf { grid-template-columns: minmax(0, 1fr) 60px 76px 72px 56px 44px; }
-.d3-panel.timed .d3-row.hasrf { grid-template-columns: minmax(0, 1fr) 60px 76px 72px 68px 56px 44px; }
+.d3-row.hasrf { grid-template-columns: minmax(0, 1fr) 52px 64px 64px 52px 32px; }
+.d3-panel.timed .d3-row.hasrf { grid-template-columns: minmax(0, 1fr) 52px 64px 64px 60px 52px 32px; }
 .d3-row:hover { background: var(--soft); }
 .d3-row.th { min-height: 30px; margin-bottom: 4px; border-bottom: 1px solid var(--rule-2); border-radius: 0; font-size: 12px; font-weight: 500; color: var(--ink-3); }
 .d3-row.th:hover { background: transparent; }
