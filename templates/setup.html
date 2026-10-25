@@ -114,7 +114,7 @@ export default function App({ Component, pageProps }) {
     <details class="ai-fetch">
       <summary>Also count AI assistants that read your pages</summary>
       <p>When someone asks an assistant about {{ domain }}, it fetches the page without a browser, so the script never runs. To see those visits, forward them from your server. This Cloudflare Worker sends only the user agent and URL of AI crawlers. <a href="https://docs.virling.com/track/ai-crawlers.html" target="_blank" rel="noopener">Other stacks</a></p>
-      <pre>const AI = /gptbot|oai-searchbot|chatgpt-user|claudebot|claude-|anthropic-ai|perplexity|google-extended|googleother|applebot-extended|amazonbot|meta-external|ccbot|bytespider|duckassistbot/i;
+      <div class="code"><pre>const AI = /gptbot|oai-searchbot|chatgpt-user|claudebot|claude-|anthropic-ai|perplexity|google-extended|googleother|applebot-extended|amazonbot|meta-external|ccbot|bytespider|duckassistbot/i;
 
 export default {
   async fetch(request, env, ctx) {
@@ -128,8 +128,8 @@ export default {
     }
     return fetch(request);
   },
-};</pre>
-      <div class="actions"><button class="btn ghost" type="button" data-ai-test="/app/{{ domain }}/ai-test">Send a test</button><span data-ai-note role="status"></span></div>
+};</pre></div>
+      <div class="actions"><button class="btn" type="button" data-ai-test="/app/{{ domain }}/ai-test">Send a test</button><span data-ai-note role="status"></span></div>
     </details>
     <div class="stack-check" data-stack="/app/{{ domain }}/setup/stack">
       <span data-stack-note role="status">Reading {{ domain }} to pick your platform.</span>
