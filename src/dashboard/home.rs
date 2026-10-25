@@ -156,6 +156,7 @@ struct DashboardPage {
     chart_tabs: Vec<Opt>,
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
+    bots: Option<cards::BotsCard>,
     goals: Option<goals::GoalsView>,
     visitors: Option<views::VisitorsView>,
     payments: Option<views::PaymentsView>,
@@ -183,6 +184,7 @@ struct PublicPage {
     chart_tabs: Vec<Opt>,
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
+    bots: Option<cards::BotsCard>,
     retention: Option<views::RetentionView>,
 }
 
@@ -890,6 +892,7 @@ async fn page(
         chart_tabs: Vec::new(),
         cards: Vec::new(),
         ai: None,
+        bots: None,
         goals: None,
         visitors: None,
         payments: None,
@@ -1318,6 +1321,9 @@ async fn page(
                     );
                 }
             }
+            if public.is_none() {
+                page.bots = Some(cards::bots_card(&bots, now));
+            }
             page.ai = Some(ai);
         }
         Data::Goals(g) => {
@@ -1403,6 +1409,7 @@ async fn page(
         chart_tabs: page.chart_tabs,
         cards: page.cards,
         ai: page.ai,
+        bots: page.bots,
         retention: page.retention,
     });
     // Off means gone right away, so nothing may keep a copy.

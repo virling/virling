@@ -186,8 +186,51 @@ pub fn by_name(name: &str) -> Option<&'static Crawler> {
     CRAWLERS.iter().find(|c| c.name == name)
 }
 
+/// A short name for a bot that is not a known AI crawler, from its user agent.
+pub fn other_name(user_agent: &str) -> String {
+    const HINTS: [&str; 6] = ["bot", "crawl", "spider", "slurp", "fetch", "preview"];
+    let tokens: Vec<&str> = user_agent
+        .split([' ', ';', '(', ')', ','])
+        .map(|t| t.split('/').next().unwrap_or(""))
+        .filter(|t| {
+            !t.is_empty()
+                && !t.starts_with('+')
+                && !t.eq_ignore_ascii_case("compatible")
+                && !t.eq_ignore_ascii_case("mozilla")
+        })
+        .collect();
+    let pick = tokens
+        .iter()
+        .find(|t| {
+            let t = t.to_ascii_lowercase();
+            HINTS.iter().any(|h| t.contains(h))
+        })
+        .or(tokens.first());
+    let name: String = pick
+        .map(|t| {
+            t.chars()
+                .filter(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '.' | '_'))
+                .take(40)
+                .collect()
+        })
+        .unwrap_or_default();
+    if name.is_empty() {
+        "Unknown bot".into()
+    } else {
+        name
+    }
+}
+
+/// Most distinct bot names kept per site, so made-up user agents cannot grow the tables.
+const MAX_OTHER_BOTS: i64 = 200;
+
 /// Counts one fetch of `page` by `bot` when the page belongs to the site at `domain`.
 pub async fn record(state: &AppState, bot: &Crawler, domain: &str, page: &str) {
+    record_as(state, bot.name, domain, page).await;
+}
+
+/// Counts one fetch by the bot called `name`, which may be any bot, not only a known AI crawler.
+pub async fn record_as(state: &AppState, name: &str, domain: &str, page: &str) {
     let Some(site) = state
         .sites
         .by_domain(&state.db, &domain.to_ascii_lowercase())
@@ -208,11 +251,34 @@ pub async fn record(state: &AppState, bot: &Crawler, domain: &str, page: &str) {
     {
         return;
     }
+    if by_name(name).is_none() && !has_room(&state.db, &site.id, name).await {
+        return;
+    }
     let path: String = url.path().chars().take(500).collect();
     let now = OffsetDateTime::now_utc().unix_timestamp();
-    if let Err(err) = count(&state.db, &site.id, bot.name, &path, now).await {
+    if let Err(err) = count(&state.db, &site.id, name, &path, now).await {
         tracing::warn!(%err, "counting a crawler hit failed");
     }
+}
+
+/// Whether this bot is already counted for the site, or the site has room for another name.
+async fn has_room(db: &SqlitePool, site_id: &str, name: &str) -> bool {
+    let known: bool = sqlx::query_scalar(
+        "SELECT EXISTS(SELECT 1 FROM crawler_pages WHERE site_id = ? AND bot = ?)",
+    )
+    .bind(site_id)
+    .bind(name)
+    .fetch_one(db)
+    .await
+    .unwrap_or(false);
+    known
+        || sqlx::query_scalar::<_, i64>(
+            "SELECT COUNT(DISTINCT bot) FROM crawler_pages WHERE site_id = ?",
+        )
+        .bind(site_id)
+        .fetch_one(db)
+        .await
+        .is_ok_and(|n| n < MAX_OTHER_BOTS)
 }
 
 pub(crate) async fn count(
@@ -258,8 +324,12 @@ pub struct Hit {
 
 /// POST /api/crawl from a site's server or edge, for crawlers that never run the script.
 pub async fn collect(State(state): State<AppState>, Json(hit): Json<Hit>) -> Response {
-    if let Some(bot) = detect(&hit.ua) {
-        record(&state, bot, &hit.s, &hit.u).await;
+    match detect(&hit.ua) {
+        Some(bot) => record(&state, bot, &hit.s, &hit.u).await,
+        None if crate::ua::is_bot(&hit.ua) => {
+            record_as(&state, &other_name(&hit.ua), &hit.s, &hit.u).await;
+        }
+        None => {}
     }
     StatusCode::ACCEPTED.into_response()
 }
@@ -267,8 +337,13 @@ pub async fn collect(State(state): State<AppState>, Json(hit): Json<Hit>) -> Res
 /// Counts a crawler that fetched the script, from the page in its Referer.
 pub fn script_fetch(state: &AppState, headers: &HeaderMap) {
     let get = |h| headers.get(h).and_then(|v| v.to_str().ok());
-    let Some(bot) = get(header::USER_AGENT).and_then(detect) else {
+    let Some(agent) = get(header::USER_AGENT) else {
         return;
+    };
+    let name = match detect(agent) {
+        Some(bot) => bot.name.to_string(),
+        None if crate::ua::is_bot(agent) => other_name(agent),
+        None => return,
     };
     let Some(page) = get(header::REFERER).map(str::to_string) else {
         return;
@@ -280,7 +355,7 @@ pub fn script_fetch(state: &AppState, headers: &HeaderMap) {
         return;
     };
     let state = state.clone();
-    tokio::spawn(async move { record(&state, bot, &host, &page).await });
+    tokio::spawn(async move { record_as(&state, &name, &host, &page).await });
 }
 
 /// One bot's hits in a range.
@@ -357,6 +432,20 @@ pub async fn answer_pages(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn names_other_bots_from_their_user_agent() {
+        assert_eq!(
+            other_name("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"),
+            "Googlebot"
+        );
+        assert_eq!(other_name("curl/8.4.0"), "curl");
+        assert_eq!(
+            other_name("Mozilla/5.0 (compatible; AhrefsBot/7.0; +http://ahrefs.com/robot/)"),
+            "AhrefsBot"
+        );
+        assert_eq!(other_name(""), "Unknown bot");
+    }
+
     use super::*;
 
     #[test]
