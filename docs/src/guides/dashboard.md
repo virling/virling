@@ -30,6 +30,10 @@ The Channels card also shows **Refunded**, the share of a row's payments that we
 
 Click a row to filter the whole page by it. Revenue per visitor is the number to watch: a channel with many visitors and a low chip is loud but does not pay, and a small one with a high chip is worth more of your time. See [Find which channel pays](channel-revenue.md).
 
+## Time to pay
+
+The **Time to pay** card shows, for each channel that brought at least three first payments in the range, the median time from the customer's first visit to their first payment, and the share who paid within 1, 7 and 30 days. A channel with a long median is not failing, so give it the time its customers need before you cut it. Renewals do not count, and it reads the 500 newest payments in the range.
+
 ## Latest payments and visitors
 
 Two lists sit at the top of the page. **Latest payments** shows each payment with its source and the visit before it. **Visitors** shows who is on the site now and what they did. Both update live.
