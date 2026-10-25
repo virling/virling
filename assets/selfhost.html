@@ -101,9 +101,23 @@
     </div>
   </div></section>
 
+  <section class="band" id="mcp"><div class="wrap">
+    <div class="spec">
+      <div class="txt"><span class="kicker">03<span>/</span>ask your assistant</span><h2>Ask which channel made the money.</h2><p class="p">Virling has a read-only MCP server. Connect Claude Code, claude.ai, ChatGPT or any MCP client, then ask in plain words: which channel made the most money last month, and what is a visitor from each one worth?</p><p class="p"><a href="https://docs.virling.com/reference/mcp" data-goal="docs_click">Read the MCP docs</a></p></div>
+      <div class="spec-code">
+        <p class="soon"><span class="chip">Claude Code</span><span>Add your server, then ask.</span></p>
+        <div class="code block">
+          <pre data-snippet>claude mcp add --transport http virling \
+  https://stats.example.com/mcp</pre>
+          <button class="btn sm copy" type="button" data-copy-snippet>Copy</button>
+        </div>
+      </div>
+    </div>
+  </div></section>
+
   <section class="band alt" id="self-host"><div class="wrap">
     <div class="spec">
-      <div class="txt"><span class="kicker">03<span>/</span>runs on your box</span><h2>One binary. Your server. Your data stays put.</h2><p class="p">Download it, start it, add the tag. Your events and settings sit right next to the binary, and a backup is copying one folder.</p></div>
+      <div class="txt"><span class="kicker">04<span>/</span>runs on your box</span><h2>One binary. Your server. Your data stays put.</h2><p class="p">Download it, start it, add the tag. Your events and settings sit right next to the binary, and a backup is copying one folder.</p></div>
       <dl class="spec-list">
         <div><dt>Binary</dt><dd>One Rust binary. <span>Linux x86_64 and arm64, macOS, Docker.</span></dd></div>
         <div><dt>Storage</dt><dd>Embedded DuckDB for events, SQLite for settings. <span>No Postgres, no ClickHouse, no Redis.</span></dd></div>
@@ -124,13 +138,13 @@
 
   <section class="band art-band"><div class="wrap">
     <div class="art-split">
-      <div class="txt"><span class="kicker">04<span>/</span>for agencies</span><h2>Send every client the number they care about.</h2><p class="p">A weekly report under your brand, every Monday, showing which channels brought paying customers. One account for all your clients. <a class="more" href="/agency" data-goal="agency_click">See Virling for agencies<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p></div>
+      <div class="txt"><span class="kicker">05<span>/</span>for agencies</span><h2>Send every client the number they care about.</h2><p class="p">A weekly report under your brand, every Monday, showing which channels brought paying customers. One account for all your clients. <a class="more" href="/agency" data-goal="agency_click">See Virling for agencies<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p></div>
       <div><img src="/assets/art/08-agency-reports.webp" srcset="/assets/art/08-agency-reports-640.webp 640w, /assets/art/08-agency-reports.webp 1024w" sizes="(max-width: 768px) 92vw, 520px" width="1024" height="506" loading="lazy" decoding="async" alt="Pencil drawing: client folders, an envelope with an orange wax seal and a calendar with Monday circled"></div>
     </div>
   </div></section>
 
   <section class="band alt"><div class="wrap"><div class="note">
-    <span class="kicker">05<span>/</span>a note from the founders</span>
+    <span class="kicker">06<span>/</span>a note from the founders</span>
     <h2>Day one, in public.</h2>
     <p class="p">We're Deven and Rahul. Virling isn't launched yet. We're building it in the open: the code is on GitHub from the first commit, and we post what we shipped on X every day, including what broke.</p>
     <p class="p">The goal is small and stubborn: one honest number for every channel, the money it brought. If that's what you want too, start the beta and email hello@virling.com with what you use today. We read every email.</p>
@@ -143,7 +157,7 @@
   </div></div></section>
 
   <section class="band" id="faq"><div class="wrap"><div class="faq">
-    <span class="kicker">06<span>/</span>questions</span>
+    <span class="kicker">07<span>/</span>questions</span>
     <h2>Questions founders ask.</h2>
     <div class="faq-list">
       <div><h3>How do I see which marketing channel brings paying customers?</h3><p class="p">Give every visitor an ID, pass that ID into checkout, and join each payment back to the visits before it. Virling does all three. Add one script tag, connect your payment provider with a read-only key, and the dashboard shows revenue and revenue per visitor for every channel, page and country.</p></div>
