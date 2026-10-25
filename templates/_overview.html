@@ -111,6 +111,8 @@
     </div>
     {% endif %}
   </div>
+  {% endif %}{% endif %}
+  {% endfor %}
   {% if let Some(p) = profit %}
   <div class="d3-card d3-bc" id="profit">
     <div class="d3-bc-head"><h2>Profit by channel</h2><span class="d3-sub">spend is your monthly amount for this range</span></div>
@@ -148,6 +150,4 @@
     </div>
   </div>
   {% endif %}
-  {% endif %}{% endif %}
-  {% endfor %}
 </section>
