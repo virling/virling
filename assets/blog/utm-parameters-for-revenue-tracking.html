@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which UTM parameters to use to trace revenue</title>
+<meta name="description" content="Five UTM parameters, the naming rules that keep reports clean, and the mistakes that send revenue to Direct.">
+<link rel="canonical" href="https://virling.com/blog/utm-parameters-for-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/utm-parameters-for-revenue-tracking">
+<meta property="og:title" content="Which UTM parameters to use to trace revenue">
+<meta property="og:description" content="Five UTM parameters, the naming rules that keep reports clean, and the mistakes that send revenue to Direct.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Which UTM parameters to use to trace revenue","item":"https://virling.com/blog/utm-parameters-for-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Which UTM parameters to use to trace revenue","description":"Five UTM parameters, the naming rules that keep reports clean, and the mistakes that send revenue to Direct.","datePublished":"2026-10-26","dateModified":"2026-10-26","author":{"@type":"Organization","@id":"https://virling.com/#org"},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"mainEntityOfPage":"https://virling.com/blog/utm-parameters-for-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Which UTM parameters are required?","acceptedAnswer":{"@type":"Answer","text":"None are required technically, but utm_source, utm_medium and utm_campaign together give enough detail to trace revenue to a campaign."}},{"@type":"Question","name":"Should I add UTM tags to links on my own site?","acceptedAnswer":{"@type":"Answer","text":"No. Tagging internal links replaces the visitor's real source with an internal one and breaks attribution."}},{"@type":"Question","name":"Are UTM parameters case sensitive?","acceptedAnswer":{"@type":"Answer","text":"Most analytics tools treat different capitalisations as different values, so keep every value lowercase."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://beta.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://beta.virling.com/login" data-goal="join_click">Start the beta</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-10-26</span>
+      <h1>Which UTM parameters to use to trace revenue</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="p">Use <code>utm_source</code>, <code>utm_medium</code> and <code>utm_campaign</code> on every link you control, keep the names lowercase and consistent, and never tag links inside your own site. That is enough to trace revenue back to a post, an email or an ad.</p>
+<h2>The five parameters</h2>
+<ul class="post-list"><li><code>utm_source</code>: where the link lives, such as newsletter, x or reddit</li><li><code>utm_medium</code>: the kind of channel, such as email, social or cpc</li><li><code>utm_campaign</code>: the push it belongs to, such as launch-oct</li><li><code>utm_content</code>: which variant, useful when you test two links</li><li><code>utm_term</code>: the paid keyword, only for search ads</li></ul>
+<h2>A tagged link</h2>
+<p class="p"><code>https://example.com/pricing?utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=launch-oct</code></p>
+<h2>Naming rules that keep reports clean</h2>
+<ul class="post-list"><li>Lowercase everything. <code>X</code> and <code>x</code> become two rows in most tools</li><li>Use hyphens, not spaces</li><li>Write the names down in one list and reuse them</li><li>One value per meaning: pick <code>email</code> or <code>newsletter</code> for the medium, not both</li></ul>
+<h2>What not to tag</h2>
+<ul class="post-list"><li>Links between your own pages. They overwrite the real source with an internal one</li><li>Organic search results. Search engines already pass a referrer</li><li>Links in places that strip them, such as some private messages</li></ul>
+<h2>Why revenue goes to Direct</h2>
+<p class="p">When a visit has no UTM tags and no referrer, it is counted as direct. Most untagged email clicks, app links and shared messages end up there. Tag what you can and the Direct row shrinks.</p>
+<h2>From tags to revenue</h2>
+<p class="p">Tags only name the source. To see money, join payments to the visits that carried them, as in <a href="/blog/track-stripe-revenue-by-traffic-source">tracking Stripe revenue by traffic source</a>. Virling groups visits into channels from UTM tags and referrers; see <a href="https://docs.virling.com/attribution/channels">how channels are decided</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>Which UTM parameters are required?</h3><p class="p">None are required technically, but utm_source, utm_medium and utm_campaign together give enough detail to trace revenue to a campaign.</p>
+<h3>Should I add UTM tags to links on my own site?</h3><p class="p">No. Tagging internal links replaces the visitor&#x27;s real source with an internal one and breaks attribution.</p>
+<h3>Are UTM parameters case sensitive?</h3><p class="p">Most analytics tools treat different capitalisations as different values, so keep every value lowercase.</p>
+<p class="p">The beta is open to everyone at <a href="https://beta.virling.com/login">beta.virling.com</a>.</p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="links"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><span class="grow"></span><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/self-host">Self-host</a><a href="/demo">Demo</a><a href="/changelog">Changelog</a><a href="/integrations">Integrations</a><a href="/blog">Blog</a><a href="/vs">Compare</a><a href="/about">About</a><a href="/agency" data-goal="agency_click">Agencies</a></div>
+  <div class="fine"><span>Open source under AGPLv3. Built by Stacklance Infotech LLP.</span><span class="legal"><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span><span>Hosted beta open now.</span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
