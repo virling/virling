@@ -226,7 +226,11 @@ a.more:hover svg { transform: translateX(2px); }
 .foot .links { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
 .foot .links a { color: var(--ink-2); }
 .foot .links a:hover { color: var(--ink); }
-.foot .fine { display: flex; gap: 16px; flex-wrap: wrap; justify-content: space-between; }
+.foot .fine { display: flex; gap: 8px 32px; flex-wrap: wrap; align-items: center; }
+.foot .fine > :first-child { flex: 1 1 auto; }
+.foot .legal { display: flex; gap: 20px; flex-wrap: wrap; }
+.foot .legal a { color: var(--ink-2); }
+.foot .legal a:hover { color: var(--ink); }
 
 .card { background: #fff; border: 1px solid var(--rule); border-radius: 16px; overflow: hidden; }
 .card.lifted { box-shadow: 0 40px 80px -48px rgba(14,17,22,.35); }
