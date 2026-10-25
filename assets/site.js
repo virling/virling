@@ -223,11 +223,31 @@ for (const box of document.querySelectorAll("[data-claim]")) {
   }
 }
 
+// Example dates follow the calendar so the demo never looks stale.
+const dayFmt = (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+const daysAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return d; };
+const axis = document.querySelectorAll(".pm-x span");
+if (axis.length === 3) [29, 14, 0].forEach((n, i) => { axis[i].textContent = dayFmt(daysAgo(n)); });
+const week = document.querySelector("[data-week]");
+if (week) {
+  const sunday = daysAgo(new Date().getDay() || 7);
+  const monday = new Date(sunday); monday.setDate(sunday.getDate() - 6);
+  const end = monday.getMonth() === sunday.getMonth() ? sunday.getDate() : dayFmt(sunday);
+  week.textContent = "Revenue report, " + dayFmt(monday) + " to " + end;
+}
+const shiftDates = (box) => {
+  const months = { Sep: 8, Oct: 9 };
+  const offset = Math.round((daysAgo(3) - new Date(2026, 9, 9)) / 864e5);
+  for (const t of box.querySelectorAll("text")) {
+    t.textContent = t.textContent.replace(/\b(Sep|Oct) (\d{1,2})\b/, (_, m, d) => dayFmt(new Date(2026, months[m], +d + offset)));
+  }
+};
+
 // Diagrams load just before they scroll into view, keeping the first HTML small.
 const loadDiagrams = (box) => {
   for (const el of box.querySelectorAll("[data-dg]:not([data-loaded])")) {
     el.dataset.loaded = "1";
-    fetch(el.dataset.dg).then((r) => r.text()).then((svg) => { el.innerHTML = svg; el.style.aspectRatio = ""; }).catch(() => {});
+    fetch(el.dataset.dg).then((r) => r.text()).then((svg) => { el.innerHTML = svg; el.style.aspectRatio = ""; shiftDates(el); }).catch(() => {});
   }
 };
 const boxes = new Set([...document.querySelectorAll("[data-dg]")].map((el) => el.parentElement));
