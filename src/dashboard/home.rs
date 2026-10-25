@@ -157,6 +157,7 @@ struct DashboardPage {
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
     bots: Option<cards::BotsCard>,
+    profit: Option<crate::spend::ProfitCard>,
     goals: Option<goals::GoalsView>,
     visitors: Option<views::VisitorsView>,
     payments: Option<views::PaymentsView>,
@@ -185,6 +186,7 @@ struct PublicPage {
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
     bots: Option<cards::BotsCard>,
+    profit: Option<crate::spend::ProfitCard>,
     retention: Option<views::RetentionView>,
 }
 
@@ -893,6 +895,7 @@ async fn page(
         cards: Vec::new(),
         ai: None,
         bots: None,
+        profit: None,
         goals: None,
         visitors: None,
         payments: None,
@@ -1323,6 +1326,14 @@ async fn page(
             }
             if public.is_none() {
                 page.bots = Some(cards::bots_card(&bots, now));
+                let spend = crate::spend::load(&state.db, &ctx.site.id)
+                    .await
+                    .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+                page.profit = crate::spend::profit_card(
+                    &report.channels,
+                    &crate::spend::parse(&spend),
+                    (to - from).whole_days() + 1,
+                );
             }
             page.ai = Some(ai);
         }
@@ -1410,6 +1421,7 @@ async fn page(
         cards: page.cards,
         ai: page.ai,
         bots: page.bots,
+        profit: page.profit,
         retention: page.retention,
     });
     // Off means gone right away, so nothing may keep a copy.

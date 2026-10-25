@@ -30,6 +30,10 @@ The Channels card also shows **Refunded**, the share of a row's payments that we
 
 Click a row to filter the whole page by it. Revenue per visitor is the number to watch: a channel with many visitors and a low chip is loud but does not pay, and a small one with a high chip is worth more of your time. See [Find which channel pays](channel-revenue.md).
 
+## Profit by channel
+
+In **Site settings**, under **Monthly spend per channel**, put one channel per line with what you spend on it each month in dollars, such as `Paid 300` or `Social 50`. The channels are Paid, Email, AI, Organic search, Communities, Social, Referral and Direct. When any channel has a spend, a **Profit by channel** card appears on the dashboard. For the range you pick it shows each channel's spend (the monthly amount scaled to the range), the revenue credited to it, the profit, and the return per dollar spent. Nothing connects to an ad platform, and the numbers are only as good as the amounts you type.
+
 ## Latest payments and visitors
 
 Two lists sit at the top of the page. **Latest payments** shows each payment with its source and the visit before it. **Visitors** shows who is on the site now and what they did. Both update live.
