@@ -14,6 +14,7 @@
   </div>
   {% endfor %}
 </section>
+{% if let Some(w) = why %}<p class="d3-earlier" id="why" data-sync>{{ w }}</p>{% endif %}
 {% if !earlier.is_empty() %}<p class="d3-earlier" id="earlier" data-sync>{{ earlier }}</p>{% endif %}
 {% if !unmatched.is_empty() %}<p class="d3-earlier" id="unmatched" data-sync>{{ unmatched }} <a href="https://docs.virling.com/payments/checkout.html">Pass the visitor ID</a></p>{% endif %}
 <section class="d3-card d3-chart" id="revenue" data-sync>

@@ -10,6 +10,7 @@ The date picker at the top right sets the period for every page: Today, Yesterda
 
 - **Five numbers:** Revenue, New customers, Revenue per visitor, Visitors and Avg visit time. Revenue counts on the payment date, so some revenue in a range can come from visits before it.
 - **Avg visit time:** the average time from a visit's first event to its last. A visit ends after 30 minutes without activity. Only visits with two or more events count, so a visitor who views one page and leaves is not averaged in as zero. It shows a dash when no visit in the range has two events.
+- **Why revenue moved:** when revenue changes by at least 20% and $20 against the previous period, one line under the numbers names the channel that moved it most, such as "Revenue is up 41% ($2,000) on the previous period, mostly from Organic search (+$1,300)." It appears only when that one channel explains at least 40% of the move, and not while a filter is on.
 - **Matched revenue:** under the five numbers, one line gives the share of revenue matched to a visit and why the rest was not, such as payments with no visitor ID or with no visit inside the lookback window. It disappears when every payment is matched. See [Link checkout to visits](../payments/checkout.md).
 - **Revenue chart:** bars for revenue per day, with a dot per day for visitors on the right axis. Hover a bar for the day's payments.
 - **Insight line:** the biggest finding in the period, such as what an AI assistant visitor is worth compared with your average.
