@@ -9,7 +9,7 @@ An Unattributed payment counts toward revenue but is not credited to any visit. 
 - **No session in the window.** The visitor ID is known, but their sessions all started before the [lookback window](model.md), or after the payment.
 - **The visit was never tracked.** The script was missing on that page, blocked by an ad blocker, the visitor had Global Privacy Control with `data-respect-gpc`, or the visit was filtered as a bot.
 - **The link was opened elsewhere.** A Stripe, Polar or Dodo payment link opened from an email, a QR code or another site carries no visitor ID.
-- **LemonSqueezy.** LemonSqueezy payments cannot be linked yet. See [LemonSqueezy](../payments/lemonsqueezy.md).
+- **LemonSqueezy.** LemonSqueezy payments are linked through a webhook, which needs a public https address for your server. Without one they stay unattributed. See [LemonSqueezy](../payments/lemonsqueezy.md).
 - **A renewal of an unattributed first payment.** See [Renewals](renewals.md).
 - **Imported history.** Payments in the 90-day backfill were made before the script was on your site.
 

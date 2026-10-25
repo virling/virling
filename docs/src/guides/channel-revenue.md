@@ -2,7 +2,7 @@
 
 Visitor counts tell you which channel is loud. This guide sets Virling up so every payment shows the channel that brought it, then shows how to read the numbers and act on them each week. With a server that already runs Docker it takes about 15 minutes.
 
-It works with Stripe, Dodo Payments and Polar. LemonSqueezy payments import and count toward revenue, but linking them to visits is <span class="na">Not available yet</span>.
+It works with Stripe, Dodo Payments, Polar and LemonSqueezy. LemonSqueezy links payments to visits through a webhook, which needs a public https address for your server.
 
 ## What you need
 
