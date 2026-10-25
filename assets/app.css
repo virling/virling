@@ -1456,7 +1456,8 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 
 .ai-fetch { margin-top: 12px; font-size: 13px; color: var(--ink-2); }
 .ai-fetch summary { cursor: pointer; font-weight: 600; color: var(--ink); }
-.ai-fetch pre { margin: 8px 0; max-height: 220px; overflow: auto; }
+.ai-fetch .code { margin: 8px 0; }
+.ai-fetch .code pre { max-height: 220px; overflow: auto; }
 .ai-fetch .actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
 .d3-hint { margin: 8px 8px 0; font-size: 12px; color: var(--ink-3); }
 .d3-botrow { grid-template-columns: minmax(0, 1fr) 60px 72px 90px; }
