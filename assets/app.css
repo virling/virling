@@ -1464,3 +1464,12 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .d3-sub { font-size: 12px; color: var(--ink-3); }
 .d3-profrow { grid-template-columns: minmax(0, 1fr) 80px 90px 90px 60px; }
 .d3-payrow { grid-template-columns: minmax(0, 1fr) 76px 84px 56px 56px 60px; }
+.ll-add, .ll-list { padding: 16px; margin-bottom: 16px; }
+.ll-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; align-items: end; margin-top: 12px; }
+.ll-form label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--ink-2); }
+.ll-row { display: grid; grid-template-columns: minmax(0, 2fr) 120px 100px 80px 110px 90px 70px; gap: 10px; align-items: center; padding: 10px 4px; border-top: 1px solid var(--rule-2); font-size: 14px; }
+.ll-row.th { font-size: 12px; color: var(--ink-3); border-top: 0; }
+.ll-name { display: flex; flex-direction: column; min-width: 0; }
+.ll-name a { font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ll-note { margin: 12px 0 0; font-size: 12px; }
+@media (max-width: 800px) { .ll-row { grid-template-columns: minmax(0, 1fr) 80px 80px; } .ll-row > :nth-child(2), .ll-row > :nth-child(3), .ll-row > :nth-child(5) { display: none; } }

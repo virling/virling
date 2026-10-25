@@ -255,6 +255,14 @@ pub fn router(state: AppState) -> Router {
             .route("/app/{domain}/globe", get(crate::globe::page))
             .route("/app/{domain}/globe/data", get(crate::globe::data))
             .route("/app/{domain}/retention", get(retention_page::page))
+            .route(
+                "/app/{domain}/launches",
+                get(crate::launches::page).post(crate::launches::create),
+            )
+            .route(
+                "/app/{domain}/launches/remove",
+                post(crate::launches::remove),
+            )
             .route("/app/{domain}/links", get(links::page).post(links::create))
             .route("/app/{domain}/links/delete", post(links::delete))
             .route("/app/{domain}/funnels", post(dashboard::save_funnel))

@@ -25,6 +25,7 @@ mod html_md;
 mod icons;
 mod index;
 mod ingest;
+mod launches;
 mod links;
 mod live;
 mod mail;
