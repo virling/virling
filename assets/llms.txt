@@ -43,6 +43,10 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [First-touch or last-touch attribution for a SaaS](https://virling.com/blog/first-touch-vs-last-touch-attribution-saas): First touch credits the visit that found you. Last touch credits the visit before the payment. Which to use for a small SaaS, with an example.
 - [How to track Stripe revenue by traffic source](https://virling.com/blog/track-stripe-revenue-by-traffic-source): Stripe knows who paid, not where they came from. Pass the visitor ID into checkout so each payment can be joined to the visit before it.
 - [Which UTM parameters to use to trace revenue](https://virling.com/blog/utm-parameters-for-revenue-tracking): Five UTM parameters, the naming rules that keep reports clean, and the mistakes that send revenue to Direct.
+- [Is AI search traffic worth anything? How to measure it](https://virling.com/blog/is-ai-search-traffic-worth-anything): Visitors from ChatGPT, Perplexity and Claude are few, but they can pay well. How to count them and compare their revenue per visitor.
+- [How long does a visitor take to become a customer?](https://virling.com/blog/how-long-does-a-visitor-take-to-become-a-customer): Time to pay is the gap between the first visit and the first payment. How to measure it per channel and what to change when it is long.
+- [Cookieless analytics and revenue: what you lose and keep](https://virling.com/blog/cookieless-analytics-and-revenue): Without cookies you can count visits and keep sessions, but payments can no longer be linked to a visit. What changes and when to use it.
+- [Self-hosted analytics: what it takes to run it yourself](https://virling.com/blog/self-hosted-analytics-what-it-takes): What self-hosting analytics really costs in setup, servers and upkeep, and the questions to ask before you pick a tool.
 
 ## Source
 

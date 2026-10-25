@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cookieless analytics and revenue: what you lose and keep</title>
+<meta name="description" content="Without cookies you can count visits and keep sessions, but payments can no longer be linked to a visit. What changes and when to use it.">
+<link rel="canonical" href="https://virling.com/blog/cookieless-analytics-and-revenue">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/cookieless-analytics-and-revenue">
+<meta property="og:title" content="Cookieless analytics and revenue: what you lose and keep">
+<meta property="og:description" content="Without cookies you can count visits and keep sessions, but payments can no longer be linked to a visit. What changes and when to use it.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Cookieless analytics and revenue: what you lose and keep","item":"https://virling.com/blog/cookieless-analytics-and-revenue"}]},{"@type":"BlogPosting","headline":"Cookieless analytics and revenue: what you lose and keep","description":"Without cookies you can count visits and keep sessions, but payments can no longer be linked to a visit. What changes and when to use it.","datePublished":"2026-10-26","dateModified":"2026-10-26","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"mainEntityOfPage":"https://virling.com/blog/cookieless-analytics-and-revenue"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can I track revenue by channel without cookies?","acceptedAnswer":{"@type":"Answer","text":"Not per payment. Without a stable visitor ID there is nothing to pass into checkout, so payments show as Unattributed. Revenue totals still count."}},{"@type":"Question","name":"Is cookieless analytics less accurate?","acceptedAnswer":{"@type":"Answer","text":"For visitors, yes: a returning person counts as new each day. Page views and sessions are not affected."}},{"@type":"Question","name":"Do I still need a cookie banner for cookieless analytics?","acceptedAnswer":{"@type":"Answer","text":"Cookieless mode sets no cookie, which removes the cookie banner for this tracking. Check the rules where your visitors live."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://beta.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://beta.virling.com/login" data-goal="join_click">Start the beta</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-10-26</span>
+      <h1>Cookieless analytics and revenue: what you lose and keep</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-10-26.</p>
+<p class="p">Cookieless analytics keeps your visit counts but loses the link between a visitor and a payment. You can still see how much money came in. You can no longer see which channel it came from.</p>
+<h2>What cookieless mode does</h2>
+<p class="p">Instead of storing an ID in the browser, the server makes a visitor ID from a hash of the site, the IP address and the browser's user agent, mixed with a random salt. The salt changes every day and is never stored.</p>
+<h2>What you keep</h2>
+<ul class="post-list"><li>Page views, referrers and top pages</li><li>Sessions, because they only need 30 minutes of continuity</li><li>Revenue totals from your payment provider</li><li>No cookie, so no cookie banner for this tracking</li></ul>
+<h2>What you lose</h2>
+<ul class="post-list"><li>A returning visitor counts as new each day, so visitor totals run high</li><li>Two people behind one IP address with the same browser can count as one</li><li>Payments cannot be linked to visits, because there is no stable ID to pass into checkout. New payments show as Unattributed</li></ul>
+<h2>The trade</h2>
+<p class="p">If you want to know which channel earns money, you need a stable visitor ID, which means a first-party cookie and, depending on where your visitors live, consent. If you only want clean traffic stats and no banner, cookieless is the better fit.</p>
+<h2>Do it per site</h2>
+<p class="p">Pick per site, not per company. A marketing site where you want revenue by channel can use the cookie, and a docs site where you only want traffic can go cookieless. The steps are in <a href="https://docs.virling.com/track/cookieless">cookieless mode</a>, and <a href="https://docs.virling.com/track/privacy">privacy and consent</a> covers when consent is needed.</p>
+<h2>Frequently asked questions</h2>
+<h3>Can I track revenue by channel without cookies?</h3><p class="p">Not per payment. Without a stable visitor ID there is nothing to pass into checkout, so payments show as Unattributed. Revenue totals still count.</p>
+<h3>Is cookieless analytics less accurate?</h3><p class="p">For visitors, yes: a returning person counts as new each day. Page views and sessions are not affected.</p>
+<h3>Do I still need a cookie banner for cookieless analytics?</h3><p class="p">Cookieless mode sets no cookie, which removes the cookie banner for this tracking. Check the rules where your visitors live.</p>
+<p class="p">The beta is open to everyone at <a href="https://beta.virling.com/login">beta.virling.com</a>.</p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="links"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><span class="grow"></span><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/self-host">Self-host</a><a href="/demo">Demo</a><a href="/changelog">Changelog</a><a href="/integrations">Integrations</a><a href="/blog">Blog</a><a href="/vs">Compare</a><a href="/about">About</a><a href="/agency" data-goal="agency_click">Agencies</a></div>
+  <div class="fine"><span>Open source under AGPLv3. Built by Stacklance Infotech LLP.</span><span class="legal"><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span><span>Hosted beta open now.</span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
