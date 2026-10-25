@@ -185,29 +185,39 @@ for (const box of document.querySelectorAll("[data-claim]")) {
   });
 
   const query = new URLSearchParams(location.search);
-  const paid = box.querySelector(".joined");
-  if (paid && (query.get("preorder") === "done" || query.get("payment_id"))) {
+  const payment = query.get("payment_id");
+  if (box.hasAttribute("data-claim-confirm") && payment && (query.get("preorder") === "done" || query.get("payment_id"))) {
     history.replaceState(null, "", location.pathname);
     const state = query.get("status");
     if (state && !["active", "succeeded"].includes(state)) {
       error.textContent = failed;
     } else {
-      box.classList.add("is-paid");
-      paid.focus();
-      window.virling && virling("goal", "preorder_" + plan);
+      const show = (title, text) => {
+        const paid = document.createElement("div");
+        paid.className = "joined";
+        paid.setAttribute("role", "status");
+        paid.tabIndex = -1;
+        paid.innerHTML = '<span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span><span><b></b> <span class="muted"></span></span>';
+        paid.querySelector("b").textContent = title;
+        paid.querySelector(".muted").textContent = text;
+        box.append(paid);
+        box.classList.add("is-paid");
+        paid.focus();
+      };
       (async () => {
-        const payment = query.get("payment_id");
         const until = Date.now() + 20000;
-        while (payment && Date.now() < until) {
+        while (Date.now() < until) {
           try {
             const body = await status(payment);
             if (body.number) {
-              box.querySelector("[data-claim-title]").textContent = "You're founding customer #" + body.number + ".";
+              window.virling && virling("goal", "preorder_" + plan);
+              show("You're founding customer #" + body.number + ".", "Your spot is held and your first month after launch is paid. A welcome email is on its way.");
               return;
             }
           } catch {}
           await new Promise((r) => setTimeout(r, 2000));
         }
+        show("We're confirming your payment.", "This can take a minute. A welcome email follows once it clears.");
       })();
     }
   }
