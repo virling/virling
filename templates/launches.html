@@ -1,0 +1,35 @@
+{% extends "app.html" %}
+{% block content %}
+<section class="box ll-add">
+  <h2>Log a launch</h2>
+  <p class="dim">A post, a thread, a Product Hunt day. Virling shows the visitors, new customers and revenue of that day and the next, so you can see whether it made money or only traffic.</p>
+  {% if !error.is_empty() %}<div class="notice" role="alert">{{ error }}</div>{% endif %}
+  <form method="post" action="/app/{{ shell.domain }}/launches" class="ll-form">
+    <label>Name<input class="input" name="name" maxlength="80" placeholder="Show HN post" required></label>
+    <label>Link<input class="input" name="url" type="url" placeholder="https://news.ycombinator.com/item?id=..."></label>
+    <label>Channel<select class="input" name="channel"><option value="">Not set</option>{% for c in channels %}<option value="{{ c }}">{{ c }}</option>{% endfor %}</select></label>
+    <label>Day<input class="input" name="day" type="date" value="{{ today }}" required></label>
+    <button class="btn" type="submit">Add launch</button>
+  </form>
+</section>
+<section class="box ll-list">
+  <h2>Launches</h2>
+  {% if rows.is_empty() %}
+  <p class="dim">No launches yet. Add the first one above.</p>
+  {% else %}
+  <div class="ll-row th"><span>Launch</span><span>Channel</span><span class="num">Day</span><span class="num">Visitors</span><span class="num">New customers</span><span class="num">Revenue</span><span></span></div>
+  {% for r in rows %}
+  <div class="ll-row">
+    <span class="ll-name"><b>{{ r.name }}</b>{% if !r.url.is_empty() %}<a href="{{ r.url }}" target="_blank" rel="noopener noreferrer">{{ r.url }}</a>{% endif %}</span>
+    <span>{{ r.channel }}</span>
+    <span class="num">{{ r.day }}</span>
+    <span class="num">{{ r.visitors }}</span>
+    <span class="num">{{ r.customers }}</span>
+    <span class="num"><b>{{ r.revenue }}</b></span>
+    <form method="post" action="/app/{{ shell.domain }}/launches/remove" data-confirm="Remove this launch?"><input type="hidden" name="id" value="{{ r.id }}"><button class="b" type="submit">Remove</button></form>
+  </div>
+  {% endfor %}
+  <p class="dim ll-note">Each row counts the launch day and the day after, in your site's timezone, for all traffic on those days. It shows what the days brought, not proof that the launch caused it.</p>
+  {% endif %}
+</section>
+{% endblock %}
