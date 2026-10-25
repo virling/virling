@@ -159,6 +159,7 @@ struct DashboardPage {
     bots: Option<cards::BotsCard>,
     profit: Option<crate::spend::ProfitCard>,
     topay: Option<crate::topay::PayCard>,
+    why: Option<String>,
     goals: Option<goals::GoalsView>,
     visitors: Option<views::VisitorsView>,
     payments: Option<views::PaymentsView>,
@@ -189,6 +190,7 @@ struct PublicPage {
     bots: Option<cards::BotsCard>,
     profit: Option<crate::spend::ProfitCard>,
     topay: Option<crate::topay::PayCard>,
+    why: Option<String>,
     retention: Option<views::RetentionView>,
 }
 
@@ -899,6 +901,7 @@ async fn page(
         bots: None,
         profit: None,
         topay: None,
+        why: None,
         goals: None,
         visitors: None,
         payments: None,
@@ -1343,6 +1346,24 @@ async fn page(
                 })
                 .await?;
                 page.topay = crate::topay::pay_card(&pays.rows);
+                if filters.is_empty() {
+                    let days = (to - from).whole_days() + 1;
+                    let before = Period {
+                        from: from - Duration::days(days),
+                        to: from - Duration::days(1),
+                        tz: p.tz.clone(),
+                    };
+                    let (store, sid) = (state.events.clone(), ctx.site.id.clone());
+                    let earlier =
+                        blocking(move || store.breakdown(&sid, &before, Dimension::Channel))
+                            .await?;
+                    page.why = crate::why::revenue_change(
+                        cur.revenue_usd,
+                        overview.previous.revenue_usd,
+                        &report.channels,
+                        &earlier,
+                    );
+                }
             }
             page.ai = Some(ai);
         }
@@ -1432,6 +1453,7 @@ async fn page(
         bots: page.bots,
         profit: page.profit,
         topay: page.topay,
+        why: page.why,
         retention: page.retention,
     });
     // Off means gone right away, so nothing may keep a copy.
