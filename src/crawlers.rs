@@ -188,7 +188,46 @@ pub fn by_name(name: &str) -> Option<&'static Crawler> {
 
 /// A short name for a bot that is not a known AI crawler, from its user agent.
 pub fn other_name(user_agent: &str) -> String {
-    const HINTS: [&str; 6] = ["bot", "crawl", "spider", "slurp", "fetch", "preview"];
+    const HINTS: [&str; 14] = [
+        "bot",
+        "crawl",
+        "spider",
+        "slurp",
+        "fetch",
+        "preview",
+        "headless",
+        "lighthouse",
+        "puppeteer",
+        "playwright",
+        "selenium",
+        "phantom",
+        "pingdom",
+        "uptime",
+    ];
+    const PLATFORMS: [&str; 22] = [
+        "windows",
+        "macintosh",
+        "x11",
+        "linux",
+        "android",
+        "iphone",
+        "ipad",
+        "cros",
+        "applewebkit",
+        "khtml",
+        "gecko",
+        "chrome",
+        "safari",
+        "version",
+        "win64",
+        "wow64",
+        "nt",
+        "x64",
+        "like",
+        "intel",
+        "mac",
+        "os",
+    ];
     let tokens: Vec<&str> = user_agent
         .split([' ', ';', '(', ')', ','])
         .map(|t| t.split('/').next().unwrap_or(""))
@@ -205,7 +244,19 @@ pub fn other_name(user_agent: &str) -> String {
             let t = t.to_ascii_lowercase();
             HINTS.iter().any(|h| t.contains(h))
         })
-        .or(tokens.first());
+        .or_else(|| {
+            tokens.iter().find(|t| {
+                let t = t.to_ascii_lowercase();
+                t.starts_with(|c: char| c.is_ascii_alphabetic())
+                    && !PLATFORMS.iter().any(|p| {
+                        if p.len() >= 5 {
+                            t.starts_with(p)
+                        } else {
+                            t == *p
+                        }
+                    })
+            })
+        });
     let name: String = pick
         .map(|t| {
             t.chars()
@@ -444,6 +495,18 @@ mod tests {
             "AhrefsBot"
         );
         assert_eq!(other_name(""), "Unknown bot");
+        assert_eq!(
+            other_name(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/120.0 Safari/537.36"
+            ),
+            "HeadlessChrome"
+        );
+        assert_eq!(
+            other_name(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+            ),
+            "Unknown bot"
+        );
     }
 
     use super::*;
