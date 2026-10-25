@@ -1055,7 +1055,7 @@ async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
     let mut rewritten = Vec::new();
     let mut hosts = HashSet::new();
     for (path, file, html) in &pages {
-        let html = rewrite(html, &seen);
+        let html = seo_tags(&rewrite(html, &seen), path, file);
         if let Some(i) = html
             .find("class=\"letter\"")
             .or_else(|| html.find("<span class=\"favicon\">"))
@@ -1265,6 +1265,16 @@ fn target(url: &str) -> Option<String> {
     })
 }
 
+/// The demo's own page may be found in search; its generated pages (every filter, payment and visitor) may not.
+fn seo_tags(html: &str, path: &str, file: &str) -> String {
+    let tag = if path == "/demo/" && file == "index.html" {
+        r#"<link rel="canonical" href="https://virling.com/demo/">"#
+    } else {
+        r#"<meta name="robots" content="noindex,follow">"#
+    };
+    html.replacen("</head>", &format!("{tag}\n</head>"), 1)
+}
+
 /// Points app links at the static pages, drops what needs a server and adds the demo banner.
 fn rewrite(html: &str, built: &HashSet<String>) -> String {
     let html = html
@@ -1359,6 +1369,18 @@ fn rewrite(html: &str, built: &HashSet<String>) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn only_the_demo_home_can_be_indexed() {
+        let page = "<html><head></head><body></body></html>";
+        assert!(seo_tags(page, "/demo/", "index.html").contains("rel=\"canonical\""));
+        assert!(seo_tags(page, "/demo/payments/", "index.html").contains("noindex"));
+        assert!(seo_tags(page, "/demo/payments/stripe/pi_1/", "index.html").contains("noindex"));
+        assert_eq!(
+            seo_tags("<main></main>", "/demo/answers/x/", "drawer.html"),
+            "<main></main>"
+        );
+    }
 
     #[test]
     fn maps_prebuilt_pages_only() {
