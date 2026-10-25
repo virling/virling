@@ -610,7 +610,7 @@ a.ctl { text-decoration: none; }
 .chart .end { position: absolute; width: 10px; height: 10px; margin: 0 0 -5px -5px; border-radius: 50%; background: var(--revenue); box-shadow: 0 0 0 3px var(--paper); pointer-events: none; }
 .chart .end-l { position: absolute; right: 0; padding: 3px 8px; border-radius: 6px; background: var(--ink); color: var(--on-ink); font-size: 12px; font-weight: 600; white-space: nowrap; pointer-events: none; }
 .d3-note { margin: 10px 0 0; font-size: 13px; color: var(--ink-2); }
-.d3-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 16px; align-items: start; }
+.d3-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 16px; }
 .d3-body { container-type: inline-size; }
 @container (min-width: 1468px) {
   .d3-cards { grid-template-columns: repeat(6, 1fr); }
