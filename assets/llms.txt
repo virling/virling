@@ -4,7 +4,7 @@
 
 Virling answers questions like: which channel brought the most revenue this month, did a launch or a Reddit post make money or just traffic, what is a visitor from each source worth, and which visits did a paying customer have before they paid.
 
-Status: early development. Releases are on GitHub and can be self-hosted today. The hosted beta is open to everyone at https://beta.virling.com/login with no application. Paid hosted plans are not available yet.
+Status: early development. Releases are on GitHub and can be self-hosted today. The hosted beta is free now and open to everyone at https://beta.virling.com/login with no application. Paid plans start at launch.
 
 Every page on virling.com also has a Markdown copy at its address plus .md, such as https://virling.com/pricing.md, and https://virling.com/index.md for the home page.
 

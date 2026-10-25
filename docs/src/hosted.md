@@ -1,6 +1,6 @@
 # Hosted plan
 
-The hosted beta at beta.virling.com is open to everyone. Paid plans are <span class="na">Not available yet</span>.
+The hosted beta at beta.virling.com is free now. Paid plans start at launch.
 
 It runs the same open-source code, so the [script](track/script.md), [payment connections](payments/index.md) and [checkout linking](payments/checkout.md) work the same way, without a server to run.
 
