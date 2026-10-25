@@ -46,6 +46,7 @@ mod stats;
 mod sync;
 mod team;
 mod telegram;
+mod topay;
 mod ua;
 mod visitor_pages;
 mod visitors;
