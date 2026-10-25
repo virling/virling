@@ -40,6 +40,7 @@ mod retention_page;
 mod sample;
 mod settings;
 mod sites;
+mod spend;
 mod stack;
 mod stats;
 mod sync;

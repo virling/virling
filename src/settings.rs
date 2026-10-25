@@ -80,6 +80,7 @@ struct SettingsPage {
     return_minutes: i64,
     /// Ignored addresses and ranges, one per line.
     ignore_ips: String,
+    spend: String,
     /// Bot visitors filtered in the last 30 days.
     bots: String,
     model: String,
@@ -254,6 +255,9 @@ async fn show(
         (_, Some("telegram")) => "Telegram did not accept that bot token and chat ID.",
         _ => "",
     };
+    let spend_lines = crate::spend::load(&state.db, &ctx.site.id)
+        .await
+        .unwrap_or_default();
     let now = OffsetDateTime::now_utc();
     render(SettingsPage {
         ai,
@@ -265,6 +269,7 @@ async fn show(
         same_visit: ctx.site.same_visit.replace(' ', "\n"),
         return_minutes: ctx.site.return_minutes,
         ignore_ips: ctx.site.ignore_ips.replace(' ', "\n"),
+        spend: spend_lines,
         bots,
         windows: WINDOWS
             .iter()
@@ -748,6 +753,8 @@ pub struct SettingsInput {
     return_minutes: i64,
     #[serde(default)]
     ignore_ips: String,
+    #[serde(default)]
+    spend: String,
 }
 
 fn default_return() -> i64 {
@@ -812,6 +819,10 @@ pub async fn save(
     .await;
     if let Err(err) = updated {
         tracing::error!(%err, "saving site settings failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    if let Err(err) = crate::spend::save(&state.db, &ctx.site.id, &input.spend).await {
+        tracing::error!(%err, "saving channel spend failed");
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     }
     state.sites.invalidate(&ctx.site.domain);
