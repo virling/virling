@@ -204,7 +204,7 @@ pub fn other_name(user_agent: &str) -> String {
         "pingdom",
         "uptime",
     ];
-    const PLATFORMS: [&str; 14] = [
+    const PLATFORMS: [&str; 22] = [
         "windows",
         "macintosh",
         "x11",
@@ -219,6 +219,14 @@ pub fn other_name(user_agent: &str) -> String {
         "chrome",
         "safari",
         "version",
+        "win64",
+        "wow64",
+        "nt",
+        "x64",
+        "like",
+        "intel",
+        "mac",
+        "os",
     ];
     let tokens: Vec<&str> = user_agent
         .split([' ', ';', '(', ')', ','])
@@ -239,7 +247,14 @@ pub fn other_name(user_agent: &str) -> String {
         .or_else(|| {
             tokens.iter().find(|t| {
                 let t = t.to_ascii_lowercase();
-                !PLATFORMS.iter().any(|p| t.starts_with(p))
+                t.starts_with(|c: char| c.is_ascii_alphabetic())
+                    && !PLATFORMS.iter().any(|p| {
+                        if p.len() >= 5 {
+                            t.starts_with(p)
+                        } else {
+                            t == *p
+                        }
+                    })
             })
         });
     let name: String = pick
