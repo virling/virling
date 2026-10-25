@@ -122,6 +122,17 @@
     </div>
   </div>
   {% endif %}
+  {% if let Some(t) = topay %}
+  <div class="d3-card d3-bc" id="topay">
+    <div class="d3-bc-head"><h2>Time to pay</h2><span class="d3-sub">first visit to first payment, by channel</span></div>
+    <div class="d3-panel">
+    <div class="d3-row d3-payrow th"><span>Channel</span><span class="num">Payments</span><span class="num">Median</span><span class="num">1 day</span><span class="num">7 days</span><span class="num">30 days</span></div>
+    {% for r in t.rows %}
+    <div class="d3-row d3-payrow"><div class="nmw"><span class="nm"><span class="tx"><b>{{ r.name }}</b></span></span></div><span class="num">{{ r.payments }}</span><span class="num">{{ r.median }}</span><span class="num">{{ r.within_1 }}%</span><span class="num">{{ r.within_7 }}%</span><span class="num">{{ r.within_30 }}%</span></div>
+    {% endfor %}
+    </div>
+  </div>
+  {% endif %}
   {% if let Some(b) = bots %}
   <div class="d3-card d3-bc" id="bots">
     <div class="d3-bc-head"><h2>Bots</h2><span class="d3-sub">{{ b.total }} hits that are not AI</span></div>

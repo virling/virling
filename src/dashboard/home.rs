@@ -158,6 +158,7 @@ struct DashboardPage {
     ai: Option<cards::AiCard>,
     bots: Option<cards::BotsCard>,
     profit: Option<crate::spend::ProfitCard>,
+    topay: Option<crate::topay::PayCard>,
     goals: Option<goals::GoalsView>,
     visitors: Option<views::VisitorsView>,
     payments: Option<views::PaymentsView>,
@@ -187,6 +188,7 @@ struct PublicPage {
     ai: Option<cards::AiCard>,
     bots: Option<cards::BotsCard>,
     profit: Option<crate::spend::ProfitCard>,
+    topay: Option<crate::topay::PayCard>,
     retention: Option<views::RetentionView>,
 }
 
@@ -896,6 +898,7 @@ async fn page(
         ai: None,
         bots: None,
         profit: None,
+        topay: None,
         goals: None,
         visitors: None,
         payments: None,
@@ -1334,6 +1337,12 @@ async fn page(
                     &crate::spend::parse(&spend),
                     (to - from).whole_days() + 1,
                 );
+                let (store, sid, per) = (state.events.clone(), ctx.site.id.clone(), p.clone());
+                let pays = blocking(move || {
+                    store.payment_list(&sid, &per, crate::stats::PaymentFilter::All, 500, 0)
+                })
+                .await?;
+                page.topay = crate::topay::pay_card(&pays.rows);
             }
             page.ai = Some(ai);
         }
@@ -1422,6 +1431,7 @@ async fn page(
         ai: page.ai,
         bots: page.bots,
         profit: page.profit,
+        topay: page.topay,
         retention: page.retention,
     });
     // Off means gone right away, so nothing may keep a copy.

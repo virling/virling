@@ -1463,3 +1463,4 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .d3-botrow { grid-template-columns: minmax(0, 1fr) 60px 72px 90px; }
 .d3-sub { font-size: 12px; color: var(--ink-3); }
 .d3-profrow { grid-template-columns: minmax(0, 1fr) 80px 90px 90px 60px; }
+.d3-payrow { grid-template-columns: minmax(0, 1fr) 76px 84px 56px 56px 60px; }
