@@ -366,6 +366,8 @@ pub fn router(state: AppState) -> Router {
             )
             .route("/r/{token}", get(dashboard::report::shared))
             .route("/share/{domain}", get(dashboard::public))
+            .route("/share/{domain}/globe", get(crate::globe::public_page))
+            .route("/share/{domain}/globe/data", get(crate::globe::public_data))
             .route("/share/{domain}/icon", get(dashboard::public_icon))
             .route(
                 "/app/{domain}/settings/disconnect",

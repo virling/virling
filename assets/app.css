@@ -1344,6 +1344,11 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 
 .gl { display: grid; grid-template-columns: minmax(0, 1fr) 320px; grid-template-areas: "main side" "feed side"; gap: 16px; align-items: start; }
 .gl-main { grid-area: main; overflow: hidden; }
+.gl-public { margin: 0; background: var(--ground); color: var(--ink); font: 14px/1.4 var(--sans); }
+.gl-pub-top { display: flex; align-items: center; gap: 12px; padding: 14px 20px; }
+.gl-pub-top .grow { flex: 1; }
+.gl-pub-top a { font-size: 13px; color: var(--ink-3); }
+.gl-pub-main { max-width: 1200px; margin: 0 auto; padding: 0 20px 20px; }
 .gl-side { grid-area: side; padding-bottom: 8px; }
 .gl-feed { grid-area: feed; padding-bottom: 8px; }
 .gl-side > h2, .gl-feed > h2, .gl-head { padding: 14px 16px 6px; }

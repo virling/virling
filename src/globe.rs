@@ -378,6 +378,107 @@ async fn build(
 }
 
 #[derive(Template)]
+#[template(path = "globe_public.html")]
+struct PublicGlobePage {
+    domain: String,
+    /// The first reading as JSON, safe inside a script tag.
+    data: String,
+}
+
+/// What a public globe may show: no journeys, and no amounts when the owner hides revenue.
+fn publicize(g: &mut Globe, hide_revenue: bool) {
+    g.journeys.clear();
+    if hide_revenue {
+        for p in &mut g.payments {
+            p.amt = "A payment".into();
+            p.usd = 0.0;
+        }
+        for c in &mut g.countries {
+            c.rev = 0.0;
+            c.rpv = 0.0;
+        }
+        for v in &mut g.visitors {
+            v.spent.clear();
+        }
+    }
+}
+
+/// The site behind a public dashboard link, and whether it hides revenue.
+async fn shared(
+    state: &AppState,
+    domain: &str,
+) -> Result<(std::sync::Arc<sites::Site>, bool), StatusCode> {
+    let row: Option<(String, bool)> = sqlx::query_as(
+        "SELECT id, public_hide_revenue FROM sites WHERE domain = ? AND public_dashboard = 1 AND sample_data = 0",
+    )
+    .bind(domain)
+    .fetch_optional(&state.db)
+    .await
+    .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+    let Some((_, hide)) = row else {
+        return Err(StatusCode::NOT_FOUND);
+    };
+    let site = state
+        .sites
+        .by_domain(&state.db, domain)
+        .await
+        .ok_or(StatusCode::NOT_FOUND)?;
+    Ok((site, hide))
+}
+
+async fn public_reading(
+    state: &AppState,
+    site: &sites::Site,
+    hide: bool,
+) -> Result<Globe, StatusCode> {
+    let store = state.events.clone();
+    let tz = site.timezone.clone();
+    let p = blocking(move || {
+        let today = OffsetDateTime::now_utc()
+            .to_offset(store.utc_offset(&tz)?)
+            .date();
+        Ok(Period {
+            from: today - Duration::days(29),
+            to: today,
+            tz,
+        })
+    })
+    .await?;
+    let mut globe = build(state, site, p, "last 30 days").await?;
+    publicize(&mut globe, hide);
+    Ok(globe)
+}
+
+/// The read-only live globe of a site with a public dashboard, to link or embed.
+pub async fn public_page(State(state): State<AppState>, Path(domain): Path<String>) -> Response {
+    let (site, hide) = match shared(&state, &domain).await {
+        Ok(s) => s,
+        Err(code) => return code.into_response(),
+    };
+    let globe = match public_reading(&state, &site, hide).await {
+        Ok(g) => g,
+        Err(code) => return code.into_response(),
+    };
+    render(PublicGlobePage {
+        domain: site.domain.clone(),
+        data: serde_json::to_string(&globe)
+            .unwrap_or_default()
+            .replace('<', "\\u003c"),
+    })
+}
+
+pub async fn public_data(State(state): State<AppState>, Path(domain): Path<String>) -> Response {
+    let (site, hide) = match shared(&state, &domain).await {
+        Ok(s) => s,
+        Err(code) => return code.into_response(),
+    };
+    match public_reading(&state, &site, hide).await {
+        Ok(g) => Json(g).into_response(),
+        Err(code) => code.into_response(),
+    }
+}
+
+#[derive(Template)]
 #[template(path = "globe.html")]
 struct GlobePage {
     shell: Shell,

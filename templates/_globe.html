@@ -1,0 +1,41 @@
+<link rel="modulepreload" href="/assets/vendor/three-r170.module.min.js">
+<link rel="preload" as="fetch" href="/assets/globe/countries.json" crossorigin>
+<div class="gl" id="globe-root" data-outline="/assets/globe/countries.json" data-three="/assets/vendor/three-r170.module.min.js">
+  <section class="box gl-main">
+    <div class="gl-head">
+      <h2 id="gl-count">Live visitors</h2>
+      <div class="gl-seg" role="group" aria-label="Shade countries by">
+        <button type="button" data-mode="visits" aria-pressed="true">Visits</button>
+        <button type="button" data-mode="revenue" aria-pressed="false">Revenue per visitor</button>
+      </div>
+    </div>
+    <div class="gl-stage">
+      <canvas tabindex="0" role="img" aria-label="Globe of the visitors on your site now. Drag to turn it, arrow keys to rotate, plus and minus to zoom."></canvas>
+      <div class="gl-tip" hidden></div>
+      <div class="gl-zoom">
+        <button type="button" data-full hidden aria-label="Full screen"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg></button>
+        <button type="button" data-zoom-in aria-label="Zoom in">+</button>
+        <button type="button" data-zoom-out aria-label="Zoom out">&minus;</button>
+      </div>
+      <div class="gl-top" aria-hidden="true"></div>
+      <div class="gl-legend"><b>0</b><i></i><b></b><span></span></div>
+      <div class="gl-chips"></div>
+      <div class="gl-replay" hidden></div>
+    </div>
+    <p class="gl-idle" hidden></p>
+    <p class="gl-flat-note dim">The globe needs WebGL, which this browser does not offer. The lists show the same live data.</p>
+    <p class="sr gl-sum" aria-live="polite"></p>
+    <noscript><p class="gl-empty dim">The globe needs JavaScript.</p></noscript>
+  </section>
+  <aside class="box gl-side">
+    <h2>On the site now</h2>
+    <div id="gl-live" class="gl-list"></div>
+    <div id="gl-places" class="gl-places"></div>
+  </aside>
+  <section class="box gl-feed">
+    <h2>Latest payments</h2>
+    <div id="gl-pays" class="gl-list"></div>
+  </section>
+</div>
+<script type="application/json" id="globe-data">{{ data|safe }}</script>
+<script src="/assets/globe.js?v={{ crate::assets::asset_v() }}"></script>
