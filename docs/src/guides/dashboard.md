@@ -57,6 +57,8 @@ Drag to rotate, use the plus and minus buttons (or the arrow keys, `+` and `-` w
 
 When nobody is on the site, the globe keeps turning slowly with a few soft grey pulses and says it is idle. The pulses are decoration, not visitors. The globe uses WebGL through a bundled copy of three.js that loads only on this page; if the browser has no WebGL, the page shows the same lists without the globe.
 
+With **Public dashboard** on in Site settings, the globe is also public at `/share/yourdomain.com/globe`. Anyone with the link sees visitors and payment pulses for the last 30 days, with animal names only: no emails, no customer journeys, and no amounts when you hide revenue on the public dashboard. The page can be embedded in an iframe. Turn the public dashboard off and the globe stops working with it.
+
 Places are shown at the country level, so visitors from the same country sit close together around its centre. Visitors with no known country are listed but not drawn.
 
 ## The other pages
