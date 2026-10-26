@@ -156,7 +156,6 @@ struct DashboardPage {
     chart_tabs: Vec<Opt>,
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
-    bots: Option<cards::BotsCard>,
     profit: Option<crate::spend::ProfitCard>,
     topay: Option<crate::topay::PayCard>,
     why: Option<String>,
@@ -187,7 +186,6 @@ struct PublicPage {
     chart_tabs: Vec<Opt>,
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
-    bots: Option<cards::BotsCard>,
     profit: Option<crate::spend::ProfitCard>,
     topay: Option<crate::topay::PayCard>,
     why: Option<String>,
@@ -898,7 +896,6 @@ async fn page(
         chart_tabs: Vec::new(),
         cards: Vec::new(),
         ai: None,
-        bots: None,
         profit: None,
         topay: None,
         why: None,
@@ -1331,7 +1328,6 @@ async fn page(
                 }
             }
             if public.is_none() {
-                page.bots = Some(cards::bots_card(&bots, now));
                 let spend = crate::spend::load(&state.db, &ctx.site.id)
                     .await
                     .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
@@ -1450,7 +1446,6 @@ async fn page(
         chart_tabs: page.chart_tabs,
         cards: page.cards,
         ai: page.ai,
-        bots: page.bots,
         profit: page.profit,
         topay: page.topay,
         why: page.why,
