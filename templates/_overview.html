@@ -136,19 +136,4 @@
     </div>
   </div>
   {% endif %}
-  {% if let Some(b) = bots %}
-  <div class="d3-card d3-bc" id="bots">
-    <div class="d3-bc-head"><h2>Bots</h2><span class="d3-sub">{{ b.total }} hits that are not AI</span></div>
-    <div class="d3-panel">
-    {% if b.rows.is_empty() %}
-    <div class="d3-empty"><b>No bots counted yet</b><span>Search engines, SEO tools and link previews never run the script. Add the server snippet from the AI setup to count every bot that reads your pages. <a class="d3-link" href="https://docs.virling.com/track/ai-crawlers.html">Add the snippet</a></span></div>
-    {% else %}
-    <div class="d3-row d3-botrow th"><span>Bot</span><span class="num pg">Pages</span><span class="num v">Hits</span><span class="num tm">Last seen</span></div>
-    {% for r in b.rows %}
-    <div class="d3-row d3-botrow"><div class="nmw"><span class="nm"><span class="tx"><b>{{ r.name }}</b><span>{{ r.top_page }}</span></span></span></div><span class="num pg">{{ r.pages }}</span><span class="num v">{{ r.hits }}</span><span class="num tm">{{ r.seen }}</span></div>
-    {% endfor %}
-    {% endif %}
-    </div>
-  </div>
-  {% endif %}
 </section>

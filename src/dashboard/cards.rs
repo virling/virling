@@ -870,42 +870,6 @@ pub fn all_tabs() -> Vec<Tab> {
         .collect()
 }
 
-/// Bots that are not AI crawlers: search engines, SEO tools, previews and scripts.
-pub struct BotsCard {
-    pub(super) rows: Vec<BotRow>,
-    /// Hits by all of them in the range.
-    pub(super) total: u64,
-}
-
-pub struct BotRow {
-    pub(super) name: String,
-    pub(super) hits: u64,
-    pub(super) pages: u64,
-    pub(super) top_page: String,
-    pub(super) seen: String,
-}
-
-/// The bots that are not known AI crawlers, most active first.
-pub fn bots_card(bots: &[BotHits], now: OffsetDateTime) -> BotsCard {
-    let others: Vec<&BotHits> = bots.iter().filter(|b| by_name(&b.bot).is_none()).collect();
-    BotsCard {
-        total: others.iter().map(|b| b.hits.max(0) as u64).sum(),
-        rows: others
-            .iter()
-            .take(8)
-            .map(|b| BotRow {
-                name: b.bot.clone(),
-                hits: b.hits.max(0) as u64,
-                pages: b.pages.max(0) as u64,
-                top_page: b.top_page.clone(),
-                seen: OffsetDateTime::from_unix_timestamp(b.last_seen)
-                    .map(|t| super::ago(t, now))
-                    .unwrap_or_default(),
-            })
-            .collect(),
-    }
-}
-
 /// The AI card: share of visitors against share of revenue, and one row per AI company.
 pub struct AiCard {
     pub(super) visitors_share: f64,
