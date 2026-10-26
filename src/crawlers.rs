@@ -174,6 +174,13 @@ pub const CRAWLERS: &[Crawler] = &[
         "duckduckgo",
         Kind::Answer,
     ),
+    bot(
+        "deepseekbot",
+        "DeepSeekBot",
+        "DeepSeek",
+        "deepseek",
+        Kind::Training,
+    ),
 ];
 
 /// The AI crawler a user agent belongs to, if any.
@@ -437,7 +444,8 @@ pub async fn hits(
     .await?;
     let pages: Vec<(String, i64, String, i64)> = sqlx::query_as(
         "SELECT bot, COUNT(*), path, MAX(hits) FROM crawler_pages
-         WHERE site_id = ? AND last_seen BETWEEN ? AND ? GROUP BY bot",
+         WHERE site_id = ? AND last_seen BETWEEN ? AND ?
+           AND (path NOT LIKE '/.%' OR path LIKE '/.well-known%') GROUP BY bot",
     )
     .bind(site_id)
     .bind(from)
@@ -557,6 +565,9 @@ mod tests {
             ("GPTBot", "/", day + 30),
             ("ClaudeBot", "/docs", day + 40),
             ("GPTBot", "/old", day - 86400 * 40),
+            ("KimiBot", "/.git-credentials", day + 50),
+            ("KimiBot", "/.aws/credentials", day + 51),
+            ("KimiBot", "/.well-known/mcp", day + 52),
         ] {
             count(&db, "s", bot, path, at).await.unwrap();
         }
@@ -577,6 +588,7 @@ mod tests {
             got,
             [
                 ("GPTBot", 3, 2, "/pricing", day + 30),
+                ("KimiBot", 3, 1, "/.well-known/mcp", day + 52),
                 ("ClaudeBot", 1, 1, "/docs", day + 40)
             ]
         );
