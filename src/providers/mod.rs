@@ -183,6 +183,7 @@ pub(crate) mod e2e {
                 city: None,
                 host: None,
                 language: None,
+                direct: None,
             }])
             .unwrap();
         let rows: Vec<Payment> = payments

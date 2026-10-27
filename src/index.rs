@@ -28,7 +28,7 @@ pub const DAY_US: i64 = 86_400 * 1_000_000;
 pub const HOUR_US: i64 = 3_600 * 1_000_000;
 
 /// First-pageview columns kept per session, in this order.
-pub const COLS: [&str; 11] = [
+pub const COLS: [&str; 12] = [
     "channel",
     "referrer_host",
     "utm_campaign",
@@ -40,6 +40,7 @@ pub const COLS: [&str; 11] = [
     "browser",
     "os",
     "language",
+    "direct",
 ];
 pub const CHANNEL: usize = 0;
 pub const REFERRER: usize = 1;
@@ -244,14 +245,14 @@ struct Session {
     prev: u32,
     /// Time of the first pageview, or i64::MAX without one.
     touch: i64,
-    cols: [u32; 15],
+    cols: [u32; 16],
     /// Latest added pageview of this session, or NONE.
     pv: u32,
     /// Latest added goal, exit or leave of this session, or NONE.
     mark: u32,
     id: Id,
     /// Per column, `secs` of the visitor's touched session before this one with the same value, or 0.
-    same: [u32; 15],
+    same: [u32; 16],
 }
 
 #[derive(Clone, Copy)]
@@ -464,11 +465,11 @@ impl SiteIndex {
                 last,
                 prev: ix.visitors[v as usize].last_session,
                 touch: i64::MAX,
-                cols: [NULL; 15],
+                cols: [NULL; 16],
                 pv: NONE,
                 mark: NONE,
                 id: sid.as_str().into(),
-                same: [0; 15],
+                same: [0; 16],
             });
             ix.visitors[v as usize].last_session = s;
             ix.session_ids.insert(key(&sid), s);
@@ -486,7 +487,7 @@ impl SiteIndex {
                 tracing::warn!(session = sid, "touch without events");
                 return Ok(None);
             };
-            let mut cols = [NULL; 15];
+            let mut cols = [NULL; 16];
             for (i, c) in cols.iter_mut().take(COLS.len()).enumerate() {
                 *c = ix.strings.id(r.get::<_, Option<String>>(i + 2)?.as_deref());
             }
@@ -694,11 +695,11 @@ impl SiteIndex {
                     last: ts,
                     prev: self.visitors[v as usize].last_session,
                     touch: i64::MAX,
-                    cols: [NULL; 15],
+                    cols: [NULL; 16],
                     pv: NONE,
                     mark: NONE,
                     id: e.session_id.as_str().into(),
-                    same: [0; 15],
+                    same: [0; 16],
                 });
                 self.visitors[v as usize].last_session = s;
                 let sessions = &self.sessions;
@@ -774,8 +775,9 @@ impl SiteIndex {
                             Some(e.browser.as_str()),
                             Some(e.os.as_str()),
                             e.language.as_deref(),
+                            e.direct.as_deref(),
                         ];
-                        let mut cols = [NULL; 15];
+                        let mut cols = [NULL; 16];
                         for (c, v) in cols.iter_mut().zip(values) {
                             *c = self.strings.id(v);
                         }
@@ -920,14 +922,14 @@ impl SiteIndex {
 }
 
 /// Columns after COLS holding dimension keys built from them.
-pub const CHANNEL_SOURCE: usize = 11;
-pub const PAGE_SOURCE: usize = 12;
-pub const COUNTRY_CITY: usize = 13;
-pub const DEVICE_OS: usize = 14;
+pub const CHANNEL_SOURCE: usize = 12;
+pub const PAGE_SOURCE: usize = 13;
+pub const COUNTRY_CITY: usize = 14;
+pub const DEVICE_OS: usize = 15;
 
 impl SiteIndex {
     /// Fills the combined keys as SQL builds them: `a || '|' || b` is NULL when a part is.
-    fn combine(&mut self, cols: &mut [u32; 15]) {
+    fn combine(&mut self, cols: &mut [u32; 16]) {
         let name = |strings: &Strings, i: usize| strings.name(cols[i]).map(str::to_string);
         let s = &self.strings;
         let (ch, rf, pa, co, ci, de, os) = (
@@ -1371,8 +1373,8 @@ impl SiteIndex {
             }
             let touched = self.touched(lo, hi, scope);
             let n = self.strings.names.len();
-            let mut counts = vec![0u32; n * 15];
-            let mut stamp = vec![NONE; n * 15];
+            let mut counts = vec![0u32; n * 16];
+            let mut stamp = vec![NONE; n * 16];
             for &s in touched.iter() {
                 let sess = &self.sessions[s as usize];
                 for (c, &id) in sess.cols.iter().enumerate() {
@@ -1383,7 +1385,7 @@ impl SiteIndex {
                     }
                 }
             }
-            (0..15)
+            (0..16)
                 .map(|c| {
                     counts[c * n..(c + 1) * n]
                         .iter()
@@ -1413,11 +1415,11 @@ impl SiteIndex {
     /// Payment rows of a breakdown keyed by column `k` of the credited session's first pageview.
     pub fn touch_payments(&self, lo: i64, hi: i64, scope: &Scope, k: usize) -> Vec<RawRow> {
         let make = || {
-            let mut rows: Vec<HashMap<(bool, u32), Agg>> = vec![HashMap::new(); 15];
+            let mut rows: Vec<HashMap<(bool, u32), Agg>> = vec![HashMap::new(); 16];
             for p in self.pays(lo, hi, scope) {
                 let cols = self
                     .pay_session(p)
-                    .map_or([NULL; 15], |s| self.sessions[s as usize].cols);
+                    .map_or([NULL; 16], |s| self.sessions[s as usize].cols);
                 for (k, rows) in rows.iter_mut().enumerate() {
                     let e = rows.entry((!p.credited, cols[k])).or_default();
                     e.0 += 1;
@@ -2117,6 +2119,7 @@ pub mod read {
             Dimension::Browser => 8,
             Dimension::Os => 9,
             Dimension::Language => 10,
+            Dimension::DirectKind => 11,
             Dimension::ChannelSource => CHANNEL_SOURCE,
             Dimension::PageSource => PAGE_SOURCE,
             Dimension::CountryCity => COUNTRY_CITY,
@@ -2729,6 +2732,7 @@ pub(crate) mod tests {
                         Dimension::Language,
                         Dimension::Weekday,
                         Dimension::WeekdayHour,
+                        Dimension::DirectKind,
                     ] {
                         check(
                             &format!("breakdown {d:?} {at}"),

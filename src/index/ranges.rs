@@ -18,7 +18,7 @@ pub(super) type VisitSums = FastMap<u32, (i64, u64)>;
 /// Counts of long ranges kept across appends, updated in place when an append only adds to them.
 #[derive(Default)]
 pub(super) struct Kept {
-    /// Per (lo, hi): distinct visitors at `value * 15 + column` over first pageviews in range.
+    /// Per (lo, hi): distinct visitors at `value * 16 + column` over first pageviews in range.
     counts: HashMap<(i64, i64), Vec<u32>>,
     /// Per (lo, hi): distinct visitors per path id.
     pages: HashMap<(i64, i64), Vec<i64>>,
@@ -60,7 +60,7 @@ impl SiteIndex {
         let last = list.last().is_some_and(|l| l.1 == latest);
         for (i, &(_, s)) in list.iter().enumerate() {
             let cols = self.sessions[s as usize].cols;
-            let mut same = [0u32; 15];
+            let mut same = [0u32; 16];
             for (c, slot) in same.iter_mut().enumerate() {
                 if let Some(&(t, _)) = list[..i]
                     .iter()
@@ -130,16 +130,16 @@ impl SiteIndex {
             return;
         }
         let sess = &self.sessions[s as usize];
-        let n = self.strings.names.len() * 15;
+        let n = self.strings.names.len() * 16;
         for (&(lo, hi), counts) in kept.counts.iter_mut() {
             if sess.touch < lo || sess.touch >= hi {
                 continue;
             }
             let lo_s = (lo / 1_000_000) as u32;
             counts.resize(n, 0);
-            for c in 0..15 {
+            for c in 0..16 {
                 if sess.same[c] <= lo_s {
-                    counts[sess.cols[c] as usize * 15 + c] += 1;
+                    counts[sess.cols[c] as usize * 16 + c] += 1;
                 }
             }
         }
@@ -280,7 +280,7 @@ impl SiteIndex {
         let lo_s = whole(lo).filter(|_| scope.all())?;
         let mut kept = self.kept.lock().unwrap();
         if !kept.counts.contains_key(&(lo, hi)) {
-            let mut counts = vec![0u32; self.strings.names.len() * 15];
+            let mut counts = vec![0u32; self.strings.names.len() * 16];
             let from = self
                 .by_touch
                 .partition_point(|&s| self.sessions[s as usize].touch < lo);
@@ -289,9 +289,9 @@ impl SiteIndex {
                 .partition_point(|&s| self.sessions[s as usize].touch < hi);
             for &s in &self.by_touch[from..to] {
                 let sess = &self.sessions[s as usize];
-                for c in 0..15 {
+                for c in 0..16 {
                     if sess.same[c] <= lo_s {
-                        counts[sess.cols[c] as usize * 15 + c] += 1;
+                        counts[sess.cols[c] as usize * 16 + c] += 1;
                     }
                 }
             }
@@ -301,10 +301,10 @@ impl SiteIndex {
             kept.counts.insert((lo, hi), counts);
         }
         let counts = &kept.counts[&(lo, hi)];
-        let mut out: Vec<Vec<(u32, i64)>> = vec![Vec::new(); 15];
+        let mut out: Vec<Vec<(u32, i64)>> = vec![Vec::new(); 16];
         for (i, &k) in counts.iter().enumerate() {
             if k > 0 {
-                out[i % 15].push(((i / 15) as u32, k as i64));
+                out[i % 16].push(((i / 16) as u32, k as i64));
             }
         }
         Some(out)

@@ -56,6 +56,8 @@ pub struct Event {
     pub host: Option<String>,
     /// Browser language as "en" or "en-US".
     pub language: Option<String>,
+    /// How a Direct visit arrived; None on other channels.
+    pub direct: Option<String>,
 }
 
 /// Provider of sample payments, and with a dash the prefix of sample visitor and session IDs.
@@ -495,13 +497,13 @@ fn reclassify_channels(conn: &Connection) -> anyhow::Result<usize> {
 const TOUCH_COLUMNS: &str =
     "site_id, session_id, visitor_id, ts, path, referrer_host, utm_source, utm_medium,
     utm_campaign, utm_content, utm_term, channel, country, device, browser, os, region, city, host,
-    language";
+    language, direct";
 
 const TOUCH_TABLE: &str = "site_id VARCHAR NOT NULL, session_id VARCHAR NOT NULL,
     visitor_id VARCHAR NOT NULL, ts TIMESTAMPTZ NOT NULL, path VARCHAR NOT NULL, referrer_host VARCHAR,
     utm_source VARCHAR, utm_medium VARCHAR, utm_campaign VARCHAR, utm_content VARCHAR, utm_term VARCHAR,
     channel VARCHAR NOT NULL, country VARCHAR, device VARCHAR NOT NULL, browser VARCHAR NOT NULL,
-    os VARCHAR, region VARCHAR, city VARCHAR, host VARCHAR, language VARCHAR";
+    os VARCHAR, region VARCHAR, city VARCHAR, host VARCHAR, language VARCHAR, direct VARCHAR";
 
 /// The touch tables and their keys.
 const TOUCH_TABLES: [(&str, &str); 2] =
@@ -555,7 +557,7 @@ fn earliest(events: &[Event], key: impl Fn(&Event) -> &str) -> Vec<&Event> {
 }
 
 /// An event's values in TOUCH_COLUMNS order.
-fn touch_values(e: &Event) -> [Value; 20] {
+fn touch_values(e: &Event) -> [Value; 21] {
     let text = |v: &str| Value::Text(v.to_string());
     let opt = |v: &Option<String>| v.as_deref().map_or(Value::Null, text);
     [
@@ -579,6 +581,7 @@ fn touch_values(e: &Event) -> [Value; 20] {
         opt(&e.city),
         opt(&e.host),
         opt(&e.language),
+        opt(&e.direct),
     ]
 }
 
@@ -706,7 +709,7 @@ impl DuckStore {
         let conn = Connection::open(path)?;
         let derived: i64 = conn.query_row(
             "SELECT count(*) FROM duckdb_columns()
-            WHERE table_name IN ('touches', 'first_touches') AND column_name = 'language'",
+            WHERE table_name IN ('touches', 'first_touches') AND column_name = 'direct'",
             [],
             |r| r.get(0),
         )?;
@@ -737,13 +740,15 @@ impl DuckStore {
                 region VARCHAR,
                 city VARCHAR,
                 host VARCHAR,
-                language VARCHAR
+                language VARCHAR,
+                direct VARCHAR
             );
             ALTER TABLE events ADD COLUMN IF NOT EXISTS os VARCHAR;
             ALTER TABLE events ADD COLUMN IF NOT EXISTS region VARCHAR;
             ALTER TABLE events ADD COLUMN IF NOT EXISTS city VARCHAR;
             ALTER TABLE events ADD COLUMN IF NOT EXISTS host VARCHAR;
             ALTER TABLE events ADD COLUMN IF NOT EXISTS language VARCHAR;
+            ALTER TABLE events ADD COLUMN IF NOT EXISTS direct VARCHAR;
             CREATE TABLE IF NOT EXISTS bot_events (
                 site_id VARCHAR NOT NULL,
                 ts TIMESTAMPTZ NOT NULL,
@@ -1017,6 +1022,7 @@ impl DuckStore {
                     e.city,
                     e.host,
                     e.language,
+                    e.direct,
                 ])?;
             }
             app.flush()?;
@@ -1796,6 +1802,7 @@ mod payment_tests {
             city: None,
             host: None,
             language: None,
+            direct: None,
         };
         store.insert_events(&[visit("v1"), visit("v2")]).unwrap();
         let other = Payment {
@@ -2189,6 +2196,7 @@ mod channel_tests {
             city: None,
             host: None,
             language: None,
+            direct: None,
         };
         DuckStore::open(&path)
             .unwrap()

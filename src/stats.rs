@@ -192,6 +192,8 @@ pub enum Dimension {
     CountryCity,
     /// "device|os".
     DeviceOs,
+    /// How a Direct visit arrived.
+    DirectKind,
     Language,
     /// Local ISO weekday of the visit, 1 Monday to 7 Sunday.
     Weekday,
@@ -219,6 +221,7 @@ impl Dimension {
             }
             Dimension::CountryCity => first("country || '|' || city"),
             Dimension::DeviceOs => first("device || '|' || os"),
+            Dimension::DirectKind => first("direct"),
             Dimension::Language => first("language"),
             Dimension::Weekday => first("isodow(timezone($tz, ts))::VARCHAR"),
             Dimension::WeekdayHour => first(
@@ -1935,6 +1938,7 @@ mod tests {
             city: None,
             host: None,
             language: None,
+            direct: None,
         }
     }
 
