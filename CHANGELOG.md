@@ -4,6 +4,248 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.1] - 2026-10-26
+
+### Added
+
+- Add an AI crawlers card
+- Add an Account settings page for plan and API keys
+- Add search meta, structured data and llms.txt
+- Add an answer FAQ and lead with outcomes on the home page
+- Add an answer FAQ to the agency page
+- Add a guide to finding which channel pays
+- Add a dark theme with an Auto, Light or Dark choice
+- Add pricing, self-host, demo and changelog pages
+- Add Personal founding pre-order to the worker
+- Add Personal founding spot button on home and pricing
+- Add a dashboard screenshot and Docker quickstart to the README
+- Add integration pages and a blog to virling.com
+- Add comparison pages to virling.com
+- Add AI answers settings with keys and questions
+- Add AI answers to the read API and MCP
+- Add OAuth sign-in for the MCP server
+- Add a Claude Code plugin marketplace
+- Add a dashboard guide and refresh the hosted plan page
+- Add Copy prompt to the script and checkout setup steps
+- Add optional Turnstile to the sign-in form
+- Add privacy policy page
+- Add terms and refund pages
+- Add detail to the visitor page
+- Add a README to the Claude plugin
+- Add try with sample data for empty sites
+- Add MCP tool titles, reword list_sites
+- Add optional dedicated MCP host
+- Add live globe page with payment bursts
+- Add operator admin panel
+- Add Telegram alerts for new payments
+- Add full screen and live arrivals to the globe
+- Add a refunded column to the Channels table
+- Add the hosted 14-day trial and subscriptions via Dodo
+- Add comparison pages and alternative-style titles
+- Add a launch ledger page
+- Add a public live globe for shared sites
+- Add an About page and link it from the footer
+- Add four SEO articles with FAQ markup
+- Add four more SEO articles
+
+### Changed
+
+- Move the Claude plugin into its own folder
+- Update the per-IP limit test for the burst limit
+
+### Fixed
+
+- Fix the onboarding Payments step copy and key form
+- Fix the Next.js snippet for App and Pages Router
+- Fix lookback and quickstart link on self-host page
+- Fix admin panel on current main, add admin bench routes
+- Fix skills path in site build
+
+### Removed
+
+- Drop the compare phrase from the line chart title when off
+- Drop the count from the payments goal label
+- Drop the compromised eMudhra root from bundled certs
+- Drop repeated logos from the empty Answers tab
+- Drop impossible Macs and let owners ignore their visits
+- Remove the Bots card from the dashboard
+
+### Other
+
+- Send virling.com analytics to beta.virling.com
+- Split community sites into a Communities channel
+- Track key virling.com actions as goals
+- Fall back to the virling_vid cookie at checkout
+- Shrink the tracker and allow 1.2 KB in CI
+- Count a repeat customer's later payments as renewals
+- Price MRR from what each subscription is charged
+- Pin weekly report test to a fixed time in the week
+- Round each payment to cents so totals match rows
+- Label new customers with the range start
+- Give chart visitors their own axis
+- Share one date range control across app pages
+- Keep the range menu on screen on phones
+- Keep the not-tracking hatch off days with data
+- Set the visitor cookie on the registrable domain
+- Log pageviews on replaceState route changes
+- Treat www and same-visit domains as one site
+- Show payment states by provider connection
+- WIP: return visits, leave on pagehide, bfcache returns
+- Treat Back to another page as a move, not a return
+- Show Left to and Came back rows on the timeline
+- Document leaves, returns and the k field
+- Track Viewed pricing on any page under /pricing
+- Expose settings switches and radio groups as controls
+- Use the plural helper for every count string
+- Label the return-visit radios as a radio group
+- Default site timezone to the browser and allow changing it
+- Show zero revenue in neutral gray
+- Trust Cloudflare headers only from Cloudflare
+- Explain missing cities when visits exist
+- Space hourly chart ticks evenly
+- Link done setup steps and read done state from data
+- Give docs pages canonical URLs, descriptions and a sitemap
+- Answer channel and API questions in the docs FAQ
+- Show the dashboard's visit on the setup Script step
+- Flag automated browsers in the tracker
+- Keep flagged bot visits out of every metric
+- Describe what ships today in the README
+- Note that LemonSqueezy payments are not attributed yet
+- Keep the demo pages out of search indexes
+- Say LemonSqueezy payments are not attributed yet
+- Put API doc paths in code so parameters show
+- Lay out the setup checklist steps side by side
+- Keep each setup step to a single line
+- Say LemonSqueezy payments are not attributed yet
+- Track docs.virling.com as part of virling.com with goals
+- Keep card height fixed when switching tabs
+- Detect a site's platform and payments from its homepage
+- Give Before paying its own empty message
+- Ping every 30 s from visible tabs
+- Refresh the dashboard live as visitors arrive
+- Let Agency accounts invite team members
+- Draw app icons as thin line glyphs
+- Shorten the Link checkout setup step
+- Calm the dashboard cards
+- Use full-color brand marks for source logos
+- Draw DuckDuckGo, Tux and Copilot in their colors
+- Keep every route under 10 ms at 100x data
+- Write first pageviews after the events, in batches
+- Keep Visitors columns readable at every width
+- Hide the source type label below 1180 px
+- Show KPIs 2 by 2 when narrow and align card headers
+- Size the index budget from memory, warn near it
+- Wait for an in-flight touch flush before reading
+- Rework the Visitors list
+- Store session and visitor IDs without heap strings
+- Hold every bench route to 10 ms in CI
+- Line up Payments rows and keep the tabs by the Goal filter
+- Stretch the last dashboard cards to fill the row
+- Give the pricing cards one height and aligned rows
+- Regenerate the demo with the current UI
+- Regenerate the demo on every site deploy
+- Count funnel steps in one pass over the range
+- Write chart tooltips in place instead of piecemeal
+- Let a failing payment key be replaced from settings
+- Read the UTC offset from the cached zone table
+- Skip the touch flush for reads of events and bots
+- Schedule a touch flush only when rows were left pending
+- Write pending first pageviews once a second
+- Sort the visitor list before building its rows
+- Show a readable error when Stripe rejects a stored key
+- Keep the report chart legend inside the page
+- Refresh every live number on app pages without a reload
+- Turn the waitlist into a beta application
+- Pin the hero card and rename the nav button
+- Close beta applications on November 8
+- Use Apply for beta in the nav on every page
+- Fall back to the browser time zone for the country
+- Use tight, current screenshots on the demo page
+- Find Stripe invoices through invoice payments
+- Detect Dodo renewals from the first paid payment
+- Attach LemonSqueezy visitor IDs from a signed webhook
+- Say LemonSqueezy payments are attributed over https
+- Credit charges after a free trial to the trial's visit
+- Recompute attribution only for changed payments
+- Ask buyer questions to AI assistants each week
+- Show AI answers in the AI card
+- Document AI answers setup, cost and API
+- Run AI answers weekly with server keys and a budget
+- Publish agent discovery files on virling.com
+- Run hosted AI mention checks only on paid plans
+- Rate limit OAuth registration and token calls per IP
+- Name the /pricing funnel step by its path
+- Support the 2026-07-28 MCP revision with server/discover
+- Accept Client ID Metadata Documents for MCP sign-in
+- Turn off MCP sign-in when the base URL has a path
+- Open the beta to everyone from the site
+- Limit sign-in link requests per IP
+- Show the sign-in check only when needed
+- Show average visit time on Overview and Channels
+- State hosting, deletion and sign-in data in privacy
+- Name the operator in the privacy policy
+- Make the Claude plugin keyless with OAuth sign-in
+- Let the directory find the plugin icon by path
+- Point the Claude plugin at hosted Virling
+- Wrap the payment credit line on small screens
+- Check Turnstile action and hostname on sign-in
+- Enable the sign-in button once the check is ready
+- Document sample data
+- Show how much revenue is matched to a visit
+- Name in-app browsers and messengers as sources
+- Point the Claude plugin at mcp.virling.com
+- Make two MCP tool descriptions purely descriptive
+- Link the Claude directory listing in the docs and README
+- Draw the globe with real ocean and land colors
+- Preload globe assets, time the globe, move the idle note
+- Calmer Visitors list: one Filters menu, name alone
+- Polish Visitors: header, direct icon, avatars, account name
+- Document the Visitors polish
+- Grant admin from the database only, send invites by SMTP
+- Test the missing-admin case against the admins table
+- Pin the sample data notice while scrolling
+- Say the Personal plan has no event limit
+- Serve public pages as Markdown to AI crawlers
+- Make payment pulses bigger
+- Build a Markdown copy of every site page
+- Pin visitors at their city
+- Make the idle globe honest and readable
+- Give the full screen globe an Earth look
+- Show top countries on the globe
+- Serve Markdown to Accept: text/markdown
+- Block temp mail sign-in and add a burst limit
+- Keep the worker out of this change
+- Publish OAuth metadata, auth.md and WebMCP tools
+- Publish the Poppy discovery file
+- Use the full-color Google logo in the hero
+- Offer the AI crawler snippet and a test on setup
+- Send a Telegram digest and traffic spike message
+- Hint at the server snippet on the AI card
+- Name the site as its own protected resource
+- Document the Dodo billing settings
+- Link founding pre-orders to hosted accounts by email
+- Document the founders lookup settings
+- Make pricing, size and provider claims agree
+- Count every bot and show them in a Bots card
+- Count AI fetches of the site's own pages
+- Forward every bot fetch, not only AI ones
+- Name browser-like bots by their real tool
+- Skip platform words and numbers in bot names
+- Style the AI snippet block like the script block
+- Show profit per channel from monthly spend
+- Show how long each channel takes to get paid
+- Keep the first card row and fit channel names
+- Say why revenue moved on the dashboard
+- Tidy the site footer and update its status
+- Trim titles and add visible FAQs with markup
+- Keep generated demo pages out of search
+- Give dashboard cards in a row equal height
+- Lead the landing page with a concrete outcome
+- Link articles from product and comparison pages
+- Name Devendra Variya as author on every article
+- Give every dashboard card the same width and height
+- Count DeepSeekBot as AI and hide probe paths in Bots
+
 ## [0.2.0] - 2026-10-17
 
 ### Added
