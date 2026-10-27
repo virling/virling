@@ -158,6 +158,7 @@ struct DashboardPage {
     ai: Option<cards::AiCard>,
     profit: Option<crate::spend::ProfitCard>,
     topay: Option<crate::topay::PayCard>,
+    almost: Option<crate::almost::AlmostCard>,
     why: Option<String>,
     goals: Option<goals::GoalsView>,
     visitors: Option<views::VisitorsView>,
@@ -187,6 +188,7 @@ struct PublicPage {
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
     profit: Option<crate::spend::ProfitCard>,
+    almost: Option<crate::almost::AlmostCard>,
     topay: Option<crate::topay::PayCard>,
     why: Option<String>,
     retention: Option<views::RetentionView>,
@@ -898,6 +900,7 @@ async fn page(
         ai: None,
         profit: None,
         topay: None,
+        almost: None,
         why: None,
         goals: None,
         visitors: None,
@@ -1342,6 +1345,17 @@ async fn page(
                 })
                 .await?;
                 page.topay = crate::topay::pay_card(&pays.rows);
+                let (store, sid, per) = (state.events.clone(), ctx.site.id.clone(), p.clone());
+                let almost = blocking(move || store.almost_paid(&sid, &per)).await?;
+                page.almost = crate::almost::card(
+                    &almost,
+                    &report.channels,
+                    q.rest.get("ap").is_some_and(|v| v == "pages"),
+                    (
+                        format!("{}#almost", href(&[("ap", "")])),
+                        format!("{}#almost", href(&[("ap", "pages")])),
+                    ),
+                );
                 if filters.is_empty() {
                     let days = (to - from).whole_days() + 1;
                     let before = Period {
@@ -1448,6 +1462,7 @@ async fn page(
         ai: page.ai,
         profit: page.profit,
         topay: page.topay,
+        almost: None,
         why: page.why,
         retention: page.retention,
     });

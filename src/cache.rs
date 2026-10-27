@@ -5,6 +5,7 @@ use std::sync::{Arc, Mutex};
 use time::{OffsetDateTime, UtcOffset};
 use tokio::sync::broadcast;
 
+use crate::almost::AlmostPaid;
 use crate::events::{Event, EventStore, LatestPageview, Payment};
 use crate::providers::Subscription;
 use crate::retention::{Mrr, Retention};
@@ -304,6 +305,12 @@ impl<S: EventStore> EventStore for Cached<S> {
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary> {
         self.get(site_id, format!("payment_summary {period:?}"), || {
             self.inner.payment_summary(site_id, period)
+        })
+    }
+
+    fn almost_paid(&self, site_id: &str, period: &Period) -> anyhow::Result<AlmostPaid> {
+        self.get(site_id, format!("almost_paid {period:?}"), || {
+            self.inner.almost_paid(site_id, period)
         })
     }
 

@@ -7,6 +7,7 @@ use duckdb::types::{TimeUnit, Value};
 use duckdb::{Connection, named_params, params};
 use time::{Duration, OffsetDateTime, UtcOffset};
 
+use crate::almost::AlmostPaid;
 use crate::channel::Channel;
 use crate::index::{self, Indexes, SiteIndex, Zones, goals, read, rows};
 use crate::providers::Subscription;
@@ -212,6 +213,8 @@ pub trait EventStore: Send + Sync {
         f: &Filter,
     ) -> anyhow::Result<Vec<stats::DayPoint>>;
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary>;
+    /// Visitors who reached pricing or checkout, by channel, and where non-buyers left from.
+    fn almost_paid(&self, site_id: &str, period: &Period) -> anyhow::Result<AlmostPaid>;
     /// Payments per provider, new against renewals and why unmatched ones did not match.
     fn payment_split(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ProviderSplit>>;
     /// Visitors who reached each step in order.
@@ -1543,6 +1546,15 @@ impl EventStore for DuckStore {
             return Ok(t);
         }
         stats::goal_table(&*self.read()?, site_id, period, pages, f)
+    }
+
+    fn almost_paid(&self, site_id: &str, period: &Period) -> anyhow::Result<AlmostPaid> {
+        if let Some(a) = self.indexed(site_id, |ix, z, c| {
+            rows::read::almost_paid(ix, z, c, period)
+        })? {
+            return Ok(a);
+        }
+        crate::almost::almost_paid(&*self.read()?, site_id, period)
     }
 
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary> {

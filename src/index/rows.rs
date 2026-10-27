@@ -5,6 +5,7 @@ use std::collections::{HashMap, HashSet};
 use duckdb::Connection;
 
 use super::*;
+use crate::almost::{AlmostPaid, Reached};
 use crate::stats::{
     ACTIVITY_DAYS, Activity, FirstTouch, GoalCount, GoalRow, Journey, JourneySession,
     PaymentFilter, PaymentPage, PaymentRow, PaymentSummary, Period, Who, from_micros, micros_of,
@@ -628,6 +629,54 @@ impl SiteIndex {
         VisitorPage { total, rows }
     }
 
+    /// Visitors who viewed a /pricing page or clicked out to a checkout in [lo, hi).
+    pub fn almost_paid(&self, lo: i64, hi: i64) -> AlmostPaid {
+        let pricing: Vec<bool> = self
+            .strings
+            .names
+            .iter()
+            .map(|n| n.starts_with("/pricing"))
+            .collect();
+        let mut checkout: FastMap<u32, bool> = FastMap::default();
+        // Per visitor: reached, and the last pageview by time then path.
+        let mut seen: FastMap<u32, (bool, Option<&Pageview>)> = FastMap::default();
+        for s in self.overlapping_ids(lo, hi) {
+            let e = seen.entry(self.sessions[s as usize].visitor).or_default();
+            for pv in self.pageviews_of(s).filter(|pv| pv.ts >= lo && pv.ts < hi) {
+                e.0 |= pricing[pv.path as usize];
+                let later = |b: &Pageview| {
+                    (pv.ts, self.strings.name(pv.path)) > (b.ts, self.strings.name(b.path))
+                };
+                if e.1.is_none_or(later) {
+                    e.1 = Some(pv);
+                }
+            }
+            for m in self
+                .marks_of(s)
+                .filter(|m| m.kind == EXIT && m.ts >= lo && m.ts < hi)
+            {
+                e.0 |= *checkout.entry(m.name).or_insert_with(|| {
+                    self.strings
+                        .name(m.name)
+                        .is_some_and(crate::visitors::checkout_link)
+                });
+            }
+        }
+        AlmostPaid::collect(seen.into_iter().filter(|(_, e)| e.0).map(|(v, e)| {
+            let visitor = &self.visitors[v as usize];
+            let first = (visitor.first_touch != NONE)
+                .then(|| &self.sessions[visitor.first_touch as usize].cols);
+            Reached {
+                channel: first.map_or_else(|| "Direct".into(), |c| self.path_name(c[CHANNEL])),
+                paid: self
+                    .owned
+                    .get(&visitor.id.key())
+                    .is_some_and(|o| !o.is_empty()),
+                exit_page: e.1.map(|pv| self.path_name(pv.path)),
+            }
+        }))
+    }
+
     pub fn timeline(&self, visitor_id: &str) -> Option<Timeline> {
         let v = self.visitor_of(Some(visitor_id));
         let mut events: Vec<(i64, u8, &str, Ev)> = Vec::new();
@@ -713,6 +762,16 @@ pub mod read {
         let (lo, hi) = z.bounds(conn, period)?;
         let scope = ix.scope(f);
         Ok(Some(ix.payment_list(lo, hi, &scope, filter, limit, offset)))
+    }
+
+    pub fn almost_paid(
+        ix: &SiteIndex,
+        z: &Zones,
+        conn: &Connection,
+        period: &Period,
+    ) -> anyhow::Result<Option<AlmostPaid>> {
+        let (lo, hi) = z.bounds(conn, period)?;
+        Ok(Some(ix.almost_paid(lo, hi)))
     }
 
     pub fn payment_summary(
@@ -834,6 +893,11 @@ mod tests {
                     &format!("payment_summary {at}"),
                     read::payment_summary(&ix, &z, &conn, &p).unwrap(),
                     stats::payment_summary(&conn, SITE, &p).unwrap(),
+                );
+                check(
+                    &format!("almost_paid {at}"),
+                    read::almost_paid(&ix, &z, &conn, &p).unwrap(),
+                    crate::almost::almost_paid(&conn, SITE, &p).unwrap(),
                 );
                 let goals = stats::goal_counts(&conn, SITE, &p).unwrap();
                 check(
