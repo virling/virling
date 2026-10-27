@@ -13,7 +13,7 @@ use url::Url;
 
 use crate::app::AppState;
 use crate::events::{Event, Read};
-use crate::ua::{browser, device, in_app_source, is_bot, is_spam_referrer};
+use crate::ua::{browser, device, direct_kind, in_app_source, is_bot, is_spam_referrer};
 use crate::{channel, crawlers};
 
 const SESSION_IDLE: Duration = Duration::minutes(30);
@@ -705,6 +705,12 @@ pub async fn collect(
             os: os.to_string(),
             host: Some(page_host.to_ascii_lowercase()),
             language: language(e.l.as_deref().unwrap_or(&accept_language), site.cookieless),
+            direct: (channel == crate::channel::Channel::Direct).then(|| {
+                let shared = ["fbclid", "igshid", "ttclid", "twclid", "li_fat_id", "si"]
+                    .iter()
+                    .any(|k| query.contains_key(*k));
+                direct_kind(user_agent, keep, shared).to_string()
+            }),
         };
         if let Some(reason) = bot {
             bots.push((event, reason));
