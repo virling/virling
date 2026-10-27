@@ -514,6 +514,11 @@ fn kid_items(tab: Tab, parent: &Item, kids: &[BreakdownRow]) -> Vec<Item> {
         .filter_map(|r| {
             let rest = r.key.as_deref()?.strip_prefix(&prefix)?;
             let (icon, name, filter) = match tab {
+                Tab::Channel if pk == "Direct" && !rest.is_empty() => (
+                    icons::glyph("direct", 16, "var(--ink-2)"),
+                    rest.to_string(),
+                    vec![("direct", rest.to_string())],
+                ),
                 Tab::Channel if !rest.is_empty() => (
                     icons::source(rest, 16),
                     rest.to_string(),
@@ -572,7 +577,7 @@ fn kid_items(tab: Tab, parent: &Item, kids: &[BreakdownRow]) -> Vec<Item> {
             .total_cmp(&a.row.revenue_usd)
             .then(b.row.visitors.cmp(&a.row.visitors))
     });
-    out.truncate(KIDS);
+    out.truncate(if pk == "Direct" { 6 } else { KIDS });
     out
 }
 
@@ -1262,6 +1267,25 @@ mod tests {
         );
         let empty = ai_card(&[], &[], &[], &base(), &[], None, &href, now);
         assert!(empty.rows.is_empty() && empty.logos.len() == 5);
+    }
+
+    #[test]
+    fn direct_opens_into_how_visitors_arrived() {
+        let picks = picks(&HashMap::new());
+        let rows = vec![row("Direct", 30, 90.0), row("Social", 10, 0.0)];
+        let kids = vec![
+            row("Direct|Typed or bookmark", 18, 60.0),
+            row("Direct|Shared link", 8, 30.0),
+            row("Direct|Reddit app", 4, 0.0),
+            row("Social|x.com", 10, 0.0),
+        ];
+        let data = vec![(rows, kids); 4];
+        let c = card(&picks[0], &data, &base(), "/x", &[], &href);
+        let direct = &c.panels[0].rows[0];
+        let names: Vec<_> = direct.kids.iter().map(|k| k.name.as_str()).collect();
+        assert_eq!(names, ["Typed or bookmark", "Shared link", "Reddit app"]);
+        assert_eq!(direct.kids[1].href, "direct=Shared link");
+        assert!(c.panels[0].openable);
     }
 
     #[test]

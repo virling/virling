@@ -1197,6 +1197,7 @@ mod tests {
             city: None,
             host: None,
             language: None,
+            direct: None,
         };
         store
             .insert_events(&[
@@ -1712,6 +1713,7 @@ mod tests {
                 city: None,
                 host: None,
                 language: None,
+                direct: None,
             }])
             .unwrap();
         crate::sync::rebuild_attribution(&state, Some(&site)).await;
@@ -2438,6 +2440,7 @@ mod tests {
                 city: None,
                 host: None,
                 language: None,
+                direct: None,
             }])
             .unwrap();
         let goals = body_text(
@@ -2788,6 +2791,7 @@ mod tests {
             city: None,
             host: None,
             language: None,
+            direct: None,
             site_id: site.clone(),
             ts: time::OffsetDateTime::now_utc() - time::Duration::days(3)
                 + time::Duration::minutes(2),
@@ -2918,6 +2922,7 @@ mod tests {
             city: None,
             host: None,
             language: None,
+            direct: None,
         };
         store
             .insert_events(&[

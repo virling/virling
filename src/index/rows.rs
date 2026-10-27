@@ -1041,6 +1041,7 @@ mod tests {
             city: None,
             host: None,
             language: None,
+            direct: None,
         };
         // r1 clicks out to x.com and comes back by Back, then returns 15 minutes later as a new visit.
         let r1 = |s, secs, kind, path, name| ev("r1", s, secs, kind, path, name);

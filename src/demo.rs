@@ -641,6 +641,22 @@ fn session(
             region: v.place.map(|p| p.0.into()),
             city: v.place.map(|p| p.1.into()),
             language: Some(v.language.into()),
+            direct: (channel == "Direct").then(|| {
+                let n = session_id.bytes().map(usize::from).sum::<usize>() % 10;
+                [
+                    "Typed or bookmark",
+                    "Typed or bookmark",
+                    "Typed or bookmark",
+                    "Typed or bookmark",
+                    "Shared link",
+                    "Shared link",
+                    "Checkout return",
+                    "Instagram app",
+                    "Reddit app",
+                    "Google app",
+                ][n]
+                    .into()
+            }),
             host: Some(
                 if path.starts_with("/docs") {
                     "docs.tallybird.app"

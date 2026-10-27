@@ -684,6 +684,7 @@ mod tests {
             city: None,
             host: None,
             language: None,
+            direct: None,
         }
     }
 

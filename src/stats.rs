@@ -192,6 +192,8 @@ pub enum Dimension {
     CountryCity,
     /// "device|os".
     DeviceOs,
+    /// How a Direct visit arrived.
+    DirectKind,
     Language,
 }
 
@@ -215,6 +217,7 @@ impl Dimension {
             }
             Dimension::CountryCity => first("country || '|' || city"),
             Dimension::DeviceOs => first("device || '|' || os"),
+            Dimension::DirectKind => first("direct"),
             Dimension::Language => first("language"),
             Dimension::Page => ("pageview", "path", false),
         }
@@ -1873,6 +1876,7 @@ mod tests {
             city: None,
             host: None,
             language: None,
+            direct: None,
         }
     }
 
