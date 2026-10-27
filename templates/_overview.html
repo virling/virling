@@ -32,6 +32,13 @@
     <div class="d3-bc-head"><h2>{{ c.title }}</h2><nav class="d3-tabs" aria-label="{{ c.label }}">{% for t in c.tabs %}<a href="{{ t.href }}" data-tab="{{ c.key }}-p{{ loop.index0 }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
     {% for p in c.panels %}
     <div class="d3-panel{% if p.timed %} timed{% endif %}" id="{{ c.key }}-p{{ loop.index0 }}" data-card{% if !p.on %} hidden{% endif %}>
+    {% if let Some(g) = p.grid %}
+    <div class="d3-heat" role="table" aria-label="Visitors by weekday and hour">
+      {% for b in g.busiest %}<b class="peak" style="--from:{{ b.0 }};--n:{{ b.1 }}"></b>{% endfor %}
+      <span></span>{% for l in g.labels %}<span class="ax">{{ l }}</span>{% endfor %}
+      {% for r in g.rows %}<span class="dy">{{ r.day }}</span>{% for c in r.cells %}<i class="{{ c.class }}" title="{{ c.tip }}"></i>{% endfor %}{% endfor %}
+    </div>
+    {% else %}
     <div class="d3-row th{% if p.refunds %} hasrf{% endif %}"><span>{{ p.head }}</span><span class="num v">Visitors</span><span class="num rv">Revenue</span><span class="num pv">Per visitor</span>{% if p.timed %}<span class="num tm">Visit time</span>{% endif %}{% if p.refunds %}<span class="num rf" title="Payments refunded or lost in a dispute">Refunded</span>{% endif %}<span class="x"></span></div>
     {% if p.rows.is_empty() %}
     <div class="d3-skel"></div><div class="d3-skel s"></div>
@@ -41,6 +48,7 @@
     {% call d3::row(r, p.timed) %}{% endcall %}
     {% if !r.kids.is_empty() %}<div class="d3-kids" id="{{ r.id }}" hidden>{% for k in r.kids %}{% call d3::row(k, p.timed) %}{% endcall %}{% endfor %}</div>{% endif %}
     {% endfor %}
+    {% endif %}
     <div class="d3-foot"><span>{{ p.foot }}</span>{% if p.openable %}<button type="button" class="d3-link" data-expand-all>Expand all</button>{% endif %}{% if !p.new_link.is_empty() %}<button type="button" class="d3-link" data-open="new-link">+ Tracked link</button>{% endif %}</div>
     {% if !p.new_link.is_empty() %}
     <dialog class="d3-dlg" id="new-link">

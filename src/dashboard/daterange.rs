@@ -3,7 +3,7 @@
 use time::macros::format_description;
 use time::{Date, Duration};
 
-use super::{Opt, day, encode, href, link, resolve_range};
+use super::{Opt, day, encode, href, link};
 use crate::stats::Period;
 
 pub(crate) const PRESETS: [(&str, &str); 8] = [
@@ -92,7 +92,7 @@ impl Picked {
         to: Option<&str>,
         compare: Option<&str>,
     ) -> Self {
-        let default = resolve_range(today, first, None).3;
+        let default = "7d";
         let custom = match (ymd(from), ymd(to)) {
             (Some(f), Some(t)) if f <= t && f <= today => Some((f, t.min(today))),
             _ => None,
@@ -252,8 +252,8 @@ mod tests {
         assert_eq!(c.query(), "?from=2026-10-02&to=2026-10-09");
         assert_eq!(c.usage(3), "3 visitors Oct 2 to 9");
         let d = Picked::read(t, first, Some("bogus"), None, None, None);
-        assert_eq!((d.key, d.query()), ("30d", String::new()));
-        assert_eq!(d.usage(2), "2 visitors in the last 30 days");
+        assert_eq!((d.key, d.query()), ("7d", String::new()));
+        assert_eq!(d.usage(2), "2 visitors in the last 7 days");
         let m = c.menu(
             t,
             first,
@@ -262,7 +262,7 @@ mod tests {
         );
         assert!(m.custom && m.hidden == vec![("channel", "A B".to_string())]);
         let week = m.ranges.iter().find(|r| r.label == "Last 7 days").unwrap();
-        assert_eq!(week.href, "/app/x.com/visitors?channel=A+B&range=7d");
+        assert_eq!(week.href, "/app/x.com/visitors?channel=A+B");
         assert_eq!(
             m.compare_href,
             "/app/x.com/visitors?from=2026-10-02&to=2026-10-09&channel=A+B&compare=off"

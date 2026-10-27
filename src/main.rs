@@ -1341,7 +1341,7 @@ mod tests {
         let (_dir, state, _store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;
         for page in ["", "/visitors", "/payments", "/retention"] {
-            let uri = format!("/app/example.com{page}?range=7d&compare=off");
+            let uri = format!("/app/example.com{page}?range=30d&compare=off");
             let body = body_text(call(&state, get(&uri, Some(&cookie))).await).await;
             for want in [
                 ">Yesterday<",
@@ -1349,12 +1349,12 @@ mod tests {
                 "Custom range",
                 "Compare to previous period",
                 r#"aria-checked="false""#,
-                "in the last 7 days",
-                r#"href="/app/example.com/visitors?range=7d&#38;compare=off""#,
-                r#"href="/app/example.com/payments?range=7d&#38;compare=off""#,
-                r#"href="/app/example.com?range=7d&#38;compare=off""#,
+                "in the last 30 days",
+                r#"href="/app/example.com/visitors?range=30d&#38;compare=off""#,
+                r#"href="/app/example.com/payments?range=30d&#38;compare=off""#,
+                r#"href="/app/example.com?range=30d&#38;compare=off""#,
             ] {
-                if page == "/visitors" && want == "in the last 7 days" {
+                if page == "/visitors" && want == "in the last 30 days" {
                     continue;
                 }
                 assert!(body.contains(want), "{page}: {want}");
@@ -2340,8 +2340,8 @@ mod tests {
             "the menu shows the plan"
         );
         assert!(
-            body.contains(r#"aria-current="true"><span>Since tracking started</span>"#),
-            "new sites default"
+            body.contains(r#"aria-current="true"><span>Last 7 days</span>"#),
+            "the default range"
         );
         assert!(body.contains("<b>1 of 2</b> payments matched"));
         assert!(body.contains("1 payment from Stripe had no visitor ID"));
@@ -2368,10 +2368,10 @@ mod tests {
         );
         assert!(body.contains(r#"aria-label="Hacker News""#), "source logo");
         assert!(body.contains(r#"src="/assets/flags/de.svg""#) && body.contains("Germany"));
-        assert!(body.contains(r#"href="/app/example.com?range=7d""#));
+        assert!(body.contains(r#"href="/app/example.com?range=today""#));
         assert!(body.contains(r#"href="/app/example.com/payments""#));
         assert!(body.contains(r#"href="/app/example.com?range=30d""#));
-        assert!(!body.contains("range=all") && !body.contains("/app/sites/"));
+        assert!(!body.contains("/app/sites/"));
         let social = body_text(
             call(
                 &state,
