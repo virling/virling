@@ -1,4 +1,4 @@
-//! The dashboard's tabbed cards: Channels, Pages, Location and Devices.
+//! The dashboard's tabbed cards: Channels, Pages, Location, Devices and Timing.
 
 use std::collections::HashMap;
 
@@ -31,6 +31,8 @@ pub enum Tab {
     Device,
     Browser,
     Os,
+    Weekday,
+    Hour,
 }
 
 impl Tab {
@@ -49,6 +51,8 @@ impl Tab {
             Tab::Device => Dimension::Device,
             Tab::Browser => Dimension::Browser,
             Tab::Os => Dimension::Os,
+            Tab::Weekday => Dimension::Weekday,
+            Tab::Hour => Dimension::WeekdayHour,
         })
     }
 
@@ -78,6 +82,8 @@ impl Tab {
             Tab::Device => "Device",
             Tab::Browser => "Browser",
             Tab::Os => "Operating system",
+            Tab::Weekday => "Weekday",
+            Tab::Hour => "Hour",
         }
     }
 
@@ -94,6 +100,7 @@ impl Tab {
             Tab::Language => "Click a language to filter. From the browser setting.",
             Tab::Device => "Open a device to see its systems.",
             Tab::Browser | Tab::Os => "From the user agent.",
+            Tab::Weekday | Tab::Hour => "When visits began, in your site's time zone.",
         }
     }
 }
@@ -107,7 +114,7 @@ pub struct Spec {
     empty: (&'static str, &'static str),
 }
 
-pub const SPECS: [Spec; 4] = [
+pub const SPECS: [Spec; 5] = [
     Spec {
         key: "channels",
         title: "Channels",
@@ -162,6 +169,19 @@ pub const SPECS: [Spec; 4] = [
         empty: (
             "No devices yet",
             "Devices, browsers and systems show up after the first visit.",
+        ),
+    },
+    Spec {
+        key: "timing",
+        title: "Timing",
+        label: "Break timing down by",
+        tabs: &[
+            ("weekday", "Weekday", Tab::Weekday),
+            ("hour", "Hour", Tab::Hour),
+        ],
+        empty: (
+            "No visits yet",
+            "You will see which days and hours bring visitors and sales.",
         ),
     },
 ];
@@ -236,6 +256,8 @@ pub struct Panel {
     pub(super) new_link: String,
     /// Title and text shown when the panel has no rows.
     pub(super) empty: (&'static str, &'static str),
+    /// Draws the Hour tab's grid in place of rows.
+    pub(super) grid: Option<Heat>,
 }
 
 pub struct TabCard {
@@ -278,6 +300,16 @@ struct Item {
     filter: Vec<(&'static str, String)>,
     row: BreakdownRow,
 }
+
+const WEEKDAYS: [&str; 7] = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+];
 
 /// "English (US)", "German" or "pt-BR" for a tag like "en-US"; unknown languages keep their tag.
 pub fn language_name(tag: &str) -> String {
@@ -480,6 +512,17 @@ fn item(tab: Tab, r: &BreakdownRow) -> Item {
                     vec![("device", d)],
                 )
             }
+            Tab::Weekday => {
+                let n: usize = v("").parse().unwrap_or(1);
+                (
+                    icons::glyph("calendar", 16, "var(--ink-2)"),
+                    WEEKDAYS[n.clamp(1, 7) - 1].to_string(),
+                    String::new(),
+                    false,
+                    Vec::new(),
+                )
+            }
+            Tab::Hour => unreachable!("the Hour tab is a grid"),
             Tab::Browser | Tab::Os => {
                 let n = v("");
                 let param = if tab == Tab::Browser { "browser" } else { "os" };
@@ -633,6 +676,152 @@ fn bar(i: &Item, base: &Base, kid: bool, href: String, id: String) -> BarRow {
     }
 }
 
+/// Every weekday in order, empty ones included.
+fn whole_week(mut items: Vec<Item>) -> Vec<Item> {
+    if items.is_empty() {
+        return items;
+    }
+    (1..=7)
+        .map(|d| d.to_string())
+        .map(
+            |k| match items.iter().position(|i| i.row.key.as_deref() == Some(&k)) {
+                Some(n) => items.swap_remove(n),
+                None => item(
+                    Tab::Weekday,
+                    &BreakdownRow {
+                        key: Some(k),
+                        label: String::new(),
+                        unattributed: false,
+                        visitors: 0,
+                        payments: 0,
+                        customers: 0,
+                        refunded: 0,
+                        revenue_usd: 0.0,
+                        revenue_per_visitor: None,
+                        avg_visit_secs: None,
+                    },
+                ),
+            },
+        )
+        .collect()
+}
+
+/// The Hour tab's grid: a row per weekday, a cell per hour.
+pub struct Heat {
+    /// Hour labels over the columns; empty for the hours left unlabeled.
+    pub(super) labels: Vec<String>,
+    pub(super) rows: Vec<HeatRow>,
+    /// Runs of the busiest hours as (first hour, hours), outlined.
+    pub(super) busiest: Vec<(usize, usize)>,
+}
+
+pub struct HeatRow {
+    pub(super) day: &'static str,
+    pub(super) cells: Vec<HeatCell>,
+}
+
+pub struct HeatCell {
+    pub(super) class: String,
+    pub(super) tip: String,
+}
+
+type Cells<T> = [[T; 24]; 7];
+
+/// Visitors and revenue per weekday and hour, from "weekday|hour" rows.
+fn cells_of(rows: &[BreakdownRow]) -> (Cells<u64>, Cells<f64>) {
+    let (mut visitors, mut revenue) = ([[0; 24]; 7], [[0.0; 24]; 7]);
+    for r in rows.iter().filter(|r| !r.unattributed) {
+        let Some((d, h)) = r.key.as_deref().and_then(|k| k.split_once('|')) else {
+            continue;
+        };
+        if let (Ok(d), Ok(h)) = (d.parse::<usize>(), h.parse::<usize>())
+            && (1..=7).contains(&d)
+            && h < 24
+        {
+            visitors[d - 1][h] += r.visitors;
+            revenue[d - 1][h] += r.revenue_usd;
+        }
+    }
+    (visitors, revenue)
+}
+
+/// The three hours with the most visitors over the week, in clock order.
+fn busiest(visitors: &Cells<u64>) -> Vec<usize> {
+    let total = |h: usize| visitors.iter().map(|d| d[h]).sum::<u64>();
+    let mut hours: Vec<usize> = (0..24).filter(|h| total(*h) > 0).collect();
+    hours.sort_by(|a, b| total(*b).cmp(&total(*a)).then(a.cmp(b)));
+    let mut top: Vec<usize> = hours.into_iter().take(3).collect();
+    top.sort();
+    top
+}
+
+fn heat(visitors: &Cells<u64>, revenue: &Cells<f64>, base: &Base) -> Heat {
+    let max = visitors.iter().flatten().copied().max().unwrap_or(1).max(1);
+    let mut runs: Vec<(usize, usize)> = Vec::new();
+    for h in busiest(visitors) {
+        match runs.last_mut() {
+            Some(r) if r.0 + r.1 == h => r.1 += 1,
+            _ => runs.push((h, 1)),
+        }
+    }
+    Heat {
+        labels: (0..24)
+            .map(|h| {
+                if h % 3 == 0 {
+                    format!("{h:02}")
+                } else {
+                    String::new()
+                }
+            })
+            .collect(),
+        rows: WEEKDAYS
+            .iter()
+            .enumerate()
+            .map(|(d, name)| HeatRow {
+                day: &name[..3],
+                cells: (0..24)
+                    .map(|h| {
+                        let (v, r) = (visitors[d][h], revenue[d][h]);
+                        let class = format!("c s{}", (v * 4).div_ceil(max));
+                        let when = format!("{} {h:02}:00", &name[..3]);
+                        let tip = if v == 0 {
+                            format!("{when}: no visitors")
+                        } else if base.hide {
+                            format!("{when}: {}", super::plural(v, "visitor"))
+                        } else {
+                            format!(
+                                "{when}: {}, {} revenue, {} per visitor",
+                                super::plural(v, "visitor"),
+                                money(r),
+                                if r > 0.0 {
+                                    usd(r / v as f64)
+                                } else {
+                                    "$0".into()
+                                }
+                            )
+                        };
+                        HeatCell { class, tip }
+                    })
+                    .collect(),
+            })
+            .collect(),
+        busiest: runs,
+    }
+}
+
+/// "Best time to post: 09:00, 14:00 and 15:00", from the three hours with the most visitors.
+fn best_hours(rows: &[BreakdownRow]) -> String {
+    let hours: Vec<String> = busiest(&cells_of(rows).0)
+        .iter()
+        .map(|h| format!("{h:02}:00"))
+        .collect();
+    match hours.as_slice() {
+        [] => String::new(),
+        [only] => format!("Best time to post: {only}"),
+        [head @ .., last] => format!("Best time to post: {} and {last}", head.join(", ")),
+    }
+}
+
 /// Refunded share of a row's payments, "–" with none refunded.
 fn refund_rate(r: &BreakdownRow) -> String {
     if r.refunded == 0 || r.payments == 0 {
@@ -660,6 +849,22 @@ fn panel(
     filter_href: &FilterHref,
     empty: (&'static str, &'static str),
 ) -> Panel {
+    if tab == Tab::Hour {
+        let (visitors, revenue) = cells_of(rows);
+        let any = visitors.iter().flatten().any(|n| *n > 0);
+        return Panel {
+            on,
+            timed: false,
+            head: tab.head(),
+            rows: Vec::new(),
+            refunds: false,
+            openable: false,
+            foot: tab.foot().into(),
+            new_link: String::new(),
+            empty,
+            grid: any.then(|| heat(&visitors, &revenue, base)),
+        };
+    }
     let mut items: Vec<Item> = rows
         .iter()
         .filter(|r| {
@@ -669,9 +874,13 @@ fn panel(
         .map(|r| item(tab, r))
         .collect();
     let total = items.len();
-    // The "none" row of campaigns and keywords goes last.
-    items.sort_by_key(|i| i.row.key.is_none());
-    items.truncate(SHOWN);
+    if tab == Tab::Weekday {
+        items = whole_week(items);
+    } else {
+        // The "none" row of campaigns and keywords goes last.
+        items.sort_by_key(|i| i.row.key.is_none());
+        items.truncate(SHOWN);
+    }
     let refunds = !base.hide
         && matches!(
             tab,
@@ -744,6 +953,7 @@ fn panel(
         foot,
         new_link: String::new(),
         empty,
+        grid: None,
     }
 }
 
@@ -757,7 +967,7 @@ pub fn card(
     filter_href: &FilterHref,
 ) -> TabCard {
     let spec = pick.spec;
-    TabCard {
+    let mut card = TabCard {
         key: spec.key,
         title: spec.title,
         label: spec.label,
@@ -813,7 +1023,17 @@ pub fn card(
                 )
             })
             .collect(),
+    };
+    let hours = spec.tabs.iter().position(|t| t.2 == Tab::Hour);
+    if let Some((rows, _)) = hours.and_then(|i| data.get(i)) {
+        let best = best_hours(rows);
+        if !best.is_empty() {
+            for p in &mut card.panels {
+                p.foot = format!("{best} (site time)");
+            }
+        }
     }
+    card
 }
 
 /// Shows tracked links by name in the Campaign tab, adds the new-link form and notes a link just made.
@@ -1309,5 +1529,24 @@ mod tests {
         };
         let c = card(loc, &data, &none, "/x", &[], &href);
         assert_eq!(c.panels[1].empty.0, "No locations yet");
+    }
+
+    #[test]
+    fn the_best_time_is_the_three_busiest_hours() {
+        let rows = [
+            row("1|09", 5, 0.0),
+            row("2|09", 4, 0.0),
+            row("3|14", 7, 0.0),
+            row("3|15", 2, 0.0),
+            row("4|20", 3, 0.0),
+            row("5|03", 1, 0.0),
+        ];
+        assert_eq!(
+            best_hours(&rows),
+            "Best time to post: 09:00, 14:00 and 20:00"
+        );
+        assert_eq!(best_hours(&[]), "");
+        let (visitors, _) = cells_of(&rows);
+        assert_eq!((visitors[0][9], visitors[2][14]), (5, 7));
     }
 }

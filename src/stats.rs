@@ -193,6 +193,10 @@ pub enum Dimension {
     /// "device|os".
     DeviceOs,
     Language,
+    /// Local ISO weekday of the visit, 1 Monday to 7 Sunday.
+    Weekday,
+    /// "weekday|hour", the local hour "00" to "23" on that weekday.
+    WeekdayHour,
 }
 
 impl Dimension {
@@ -216,6 +220,10 @@ impl Dimension {
             Dimension::CountryCity => first("country || '|' || city"),
             Dimension::DeviceOs => first("device || '|' || os"),
             Dimension::Language => first("language"),
+            Dimension::Weekday => first("isodow(timezone($tz, ts))::VARCHAR"),
+            Dimension::WeekdayHour => first(
+                "isodow(timezone($tz, ts))::VARCHAR || '|' || lpad(hour(timezone($tz, ts))::VARCHAR, 2, '0')",
+            ),
             Dimension::Page => ("pageview", "path", false),
         }
     }

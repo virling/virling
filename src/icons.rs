@@ -344,6 +344,9 @@ fn glyph_path(name: &str) -> &'static str {
         "language" => {
             r#"<path d="M4 5h9M8.5 3v2M6 5c0 4 3 7 6 8M11 5c0 3-2.5 7-6 9"/><path d="M13 21l4-9 4 9M14.5 18h5"/>"#
         }
+        "calendar" => {
+            r#"<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M8.5 3v4M15.5 3v4"/>"#
+        }
         "globe" => {
             r#"<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.4 5.2 3.4 8.5s-1 6.1-3.4 8.5c-2.4-2.4-3.4-5.2-3.4-8.5s1-6.1 3.4-8.5z"/>"#
         }
