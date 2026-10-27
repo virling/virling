@@ -26,6 +26,7 @@ pub(crate) mod daterange;
 mod goals;
 mod home;
 mod insight;
+mod path;
 pub mod report;
 pub mod schedule;
 mod views;
@@ -830,6 +831,7 @@ struct PaymentsPage {
     title: &'static str,
     range: RangeMenu,
     summary: Vec<Summary>,
+    path: path::PathView,
     filters: Vec<Opt>,
     /// Payment plus each goal completed in the range.
     goals: Vec<Opt>,
@@ -988,6 +990,7 @@ pub async fn payments(
     let query = search.clone();
     let result = blocking(move || {
         let s = store.payment_summary(&id, &p)?;
+        let path = store.path_to_purchase(&id, &p)?;
         let goals = store.goal_counts(&id, &p)?;
         let goal = goals
             .iter()
@@ -1051,10 +1054,10 @@ pub async fn payments(
                 )?
                 .total
         };
-        Ok((s, goals, goal, total, customers, ever))
+        Ok((s, path, goals, goal, total, customers, ever))
     })
     .await;
-    let (s, goals, goal, total, customers, ever) = match result {
+    let (s, path, goals, goal, total, customers, ever) = match result {
         Ok(r) => r,
         Err(code) => return code.into_response(),
     };
@@ -1195,6 +1198,7 @@ pub async fn payments(
             .collect(),
         search: search.clone(),
         summary,
+        path: path::view(&path),
         filters: FILTERS
             .iter()
             .zip(&counts)

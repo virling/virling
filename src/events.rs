@@ -12,7 +12,7 @@ use crate::index::{self, Indexes, SiteIndex, Zones, goals, read, rows};
 use crate::providers::Subscription;
 use crate::retention::{self, Mrr, Retention};
 use crate::stats::{
-    self, Activity, GoalCount, GoalRow, Journey, Overview, PaymentFilter, PaymentPage,
+    self, Activity, GoalCount, GoalRow, Journey, Overview, PathPay, PaymentFilter, PaymentPage,
     PaymentSummary, Period, Report, Who,
 };
 use crate::stats::{BreakdownRow, Dimension, Filter, GoalStat, ProviderSplit, Step, StepCount};
@@ -212,6 +212,8 @@ pub trait EventStore: Send + Sync {
         f: &Filter,
     ) -> anyhow::Result<Vec<stats::DayPoint>>;
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary>;
+    /// Days, visits and pageviews from each first payment's payer's first visit to the payment.
+    fn path_to_purchase(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<PathPay>>;
     /// Payments per provider, new against renewals and why unmatched ones did not match.
     fn payment_split(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ProviderSplit>>;
     /// Visitors who reached each step in order.
@@ -1543,6 +1545,15 @@ impl EventStore for DuckStore {
             return Ok(t);
         }
         stats::goal_table(&*self.read()?, site_id, period, pages, f)
+    }
+
+    fn path_to_purchase(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<PathPay>> {
+        if let Some(p) = self.indexed(site_id, |ix, z, c| {
+            rows::read::path_to_purchase(ix, z, c, period)
+        })? {
+            return Ok(p);
+        }
+        stats::path_to_purchase(&*self.read()?, site_id, period)
     }
 
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary> {

@@ -322,6 +322,16 @@ pub struct PaymentPage {
     pub rows: Vec<PaymentRow>,
 }
 
+/// What one first payment's payer did before paying.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct PathPay {
+    pub days: f64,
+    pub visits: u64,
+    pub pages: u64,
+    pub first_channel: String,
+    pub credited_channel: Option<String>,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct JourneySession {
     pub session_id: String,
@@ -993,6 +1003,50 @@ pub(crate) fn payment_list(
         total: total as u64,
         rows: rows.collect::<Result<_, _>>()?,
     })
+}
+
+/// Visits and pageviews up to each first payment in the range, from the payer's first visit.
+pub(crate) fn path_to_purchase(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+) -> anyhow::Result<Vec<PathPay>> {
+    let mut stmt = conn.prepare(&format!(
+        "WITH {BOUNDS},
+        pays AS (
+            SELECT p.ts, coalesce(p.visitor_id, t.visitor_id) AS visitor, a.channel
+            FROM payments p
+            JOIN bounds ON p.ts >= lo AND p.ts < hi
+            LEFT JOIN attribution a ON a.site_id = p.site_id AND a.provider = p.provider
+                AND a.provider_payment_id = p.provider_payment_id
+            LEFT JOIN touches t ON t.site_id = p.site_id AND t.session_id = a.session_id
+            WHERE p.site_id = $site AND p.status <> 'failed' AND NOT p.is_renewal
+        )
+        SELECT epoch_us(p.ts) - epoch_us(f.ts), f.channel, p.channel,
+            (SELECT count(*) FROM touches s WHERE s.site_id = $site AND s.visitor_id = p.visitor AND s.ts <= p.ts),
+            (SELECT count(*) FROM events e WHERE e.site_id = $site AND e.visitor_id = p.visitor
+                AND e.kind = 'pageview' AND e.ts <= p.ts)
+        FROM pays p
+        JOIN first_touches f ON f.site_id = $site AND f.visitor_id = p.visitor AND f.ts <= p.ts"
+    ))?;
+    let rows = stmt.query_map(
+        named_params! {
+            "site": site_id,
+            "tz": period.tz,
+            "from": period.from.to_string(),
+            "to": period.to.to_string(),
+        },
+        |r| {
+            Ok(PathPay {
+                days: r.get::<_, i64>(0)? as f64 / 86_400_000_000.0,
+                first_channel: r.get(1)?,
+                credited_channel: r.get(2)?,
+                visits: r.get::<_, i64>(3)? as u64,
+                pages: r.get::<_, i64>(4)? as u64,
+            })
+        },
+    )?;
+    Ok(rows.collect::<Result<_, _>>()?)
 }
 
 pub(crate) fn journey(
