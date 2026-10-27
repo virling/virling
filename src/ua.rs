@@ -87,6 +87,7 @@ pub fn in_app_source(user_agent: &str) -> Option<&'static str> {
 }
 
 /// How a visit with no referrer or campaign arrived, as named under Direct.
+#[cfg(not(target_arch = "wasm32"))]
 pub fn direct_kind(user_agent: &str, checkout_return: bool, shared: bool) -> &'static str {
     if checkout_return {
         return "Checkout return";
@@ -208,6 +209,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(target_arch = "wasm32"))]
     fn direct_visits_are_told_apart() {
         let ios = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15";
         let kind = |ua: &str, back, shared| direct_kind(ua, back, shared);
