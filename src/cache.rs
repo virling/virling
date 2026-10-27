@@ -5,8 +5,9 @@ use std::sync::{Arc, Mutex};
 use time::{OffsetDateTime, UtcOffset};
 use tokio::sync::broadcast;
 
-use crate::events::{Event, EventStore, LatestPageview, Payment};
+use crate::events::{Event, EventStore, LatestPageview, Payment, Read};
 use crate::providers::Subscription;
+use crate::reading::ReadRow;
 use crate::retention::{Mrr, Retention};
 use crate::stats::{
     self, Activity, BreakdownRow, Dimension, Filter, GoalCount, GoalRow, GoalStat, Journey,
@@ -198,6 +199,18 @@ impl<S: EventStore> EventStore for Cached<S> {
 
     fn subscribe(&self) -> Option<broadcast::Receiver<String>> {
         Some(self.changes.subscribe())
+    }
+
+    fn insert_reads(&self, reads: &[Read]) -> anyhow::Result<()> {
+        let result = self.inner.insert_reads(reads);
+        self.changed(reads.iter().map(|r| r.site_id.as_str()));
+        result
+    }
+
+    fn reading(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ReadRow>> {
+        self.get(site_id, format!("reading {period:?}"), || {
+            self.inner.reading(site_id, period)
+        })
     }
 
     fn insert_bots(&self, bots: &[(Event, &str)]) -> anyhow::Result<()> {

@@ -36,6 +36,7 @@ mod onboarding;
 mod providers;
 mod purge;
 mod query;
+mod reading;
 mod retention;
 mod retention_page;
 mod sample;

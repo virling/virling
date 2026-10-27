@@ -125,6 +125,27 @@
     </div>
   </div>
   {% endif %}
+  {% if let Some(a) = reading %}
+  <div class="d3-card d3-bc" id="reading">
+    <div class="d3-bc-head"><h2>Reading</h2>{% if a.buyers %}<nav class="d3-tabs" aria-label="Reading view"><a href="{{ a.tabs.0 }}" data-tab="reading-p0"{% if !a.on_buyers %} class="on" aria-current="true"{% endif %}>Pages</a><a href="{{ a.tabs.1 }}" data-tab="reading-p1"{% if a.on_buyers %} class="on" aria-current="true"{% endif %}>Buyers</a></nav>{% endif %}</div>
+    <div class="d3-panel" id="reading-p0"{% if a.on_buyers %} hidden{% endif %}>
+    <div class="d3-row d3-readrow th"><span>Page</span><span class="num">Views</span><span class="num">Time</span><span class="num">Scroll</span><span class="num">To end</span></div>
+    {% for r in a.rows %}
+    <div class="d3-row d3-readrow"><div class="nmw"><span class="nm"><span class="tx"><b>{{ r.path }}</b></span></span></div><span class="num">{{ r.views }}</span><span class="num">{{ r.time }}</span><span class="num">{{ r.scroll }}</span><span class="num">{{ r.ended }}</span></div>
+    {% endfor %}
+    <div class="d3-foot"><span>Average time the page was visible, and how far it was scrolled</span></div>
+    </div>
+    {% if a.buyers %}
+    <div class="d3-panel" id="reading-p1"{% if !a.on_buyers %} hidden{% endif %}>
+    <div class="d3-row d3-readrow th"><span>Page</span><span class="num">Buyers time</span><span class="num">Scroll</span><span class="num">Others time</span><span class="num">Scroll</span></div>
+    {% for r in a.rows %}
+    <div class="d3-row d3-readrow"><div class="nmw"><span class="nm"><span class="tx"><b>{{ r.path }}</b></span></span></div><span class="num">{{ r.buyers.0 }}</span><span class="num">{{ r.buyers.1 }}</span><span class="num">{{ r.others.0 }}</span><span class="num">{{ r.others.1 }}</span></div>
+    {% endfor %}
+    <div class="d3-foot"><span>Visitors who paid, against everyone else</span></div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
   {% if let Some(t) = topay %}
   <div class="d3-card d3-bc" id="topay">
     <div class="d3-bc-head"><h2>Time to pay</h2><span class="d3-sub">first visit to first payment, by channel</span></div>

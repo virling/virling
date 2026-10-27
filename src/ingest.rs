@@ -12,7 +12,7 @@ use time::{Date, Duration, OffsetDateTime};
 use url::Url;
 
 use crate::app::AppState;
-use crate::events::Event;
+use crate::events::{Event, Read};
 use crate::ua::{browser, device, in_app_source, is_bot, is_spam_referrer};
 use crate::{channel, crawlers};
 
@@ -45,6 +45,10 @@ pub struct Incoming {
     b: Option<bool>,
     /// Browser time zone, such as Europe/Berlin.
     z: Option<String>,
+    /// Seconds a page was visible, on a read.
+    e: Option<u32>,
+    /// Furthest scroll in percent, on a read.
+    x: Option<u32>,
 }
 
 #[derive(Deserialize)]
@@ -511,6 +515,7 @@ pub async fn collect(
 
     let mut events = Vec::with_capacity(incoming.len());
     let mut bots = Vec::new();
+    let mut reads = Vec::new();
     for e in incoming {
         let Some(site) = state
             .sites
@@ -541,6 +546,7 @@ pub async fn collect(
             "exit" => "exit",
             "leave" => "leave",
             "ping" => "ping",
+            "read" => "read",
             _ => continue,
         };
         let name = match kind {
@@ -620,6 +626,19 @@ pub async fn collect(
         } else {
             None
         };
+        if kind == "read" {
+            if let (None, Some(secs), Some(scroll)) = (bot, e.e, e.x) {
+                reads.push(Read {
+                    site_id: site.id.clone(),
+                    ts: now,
+                    visitor_id,
+                    path,
+                    secs: secs.min(3600) as u16,
+                    scroll: scroll.min(100) as u8,
+                });
+            }
+            continue;
+        }
         if bot.is_none() && kind == "leave" {
             state.presence.gone(&site.id, &visitor_id);
         } else if bot.is_none() {
@@ -710,10 +729,11 @@ pub async fn collect(
         events.push(event);
     }
 
-    if !events.is_empty() || !bots.is_empty() {
+    if !events.is_empty() || !bots.is_empty() || !reads.is_empty() {
         let store = state.events.clone();
         let result = tokio::task::spawn_blocking(move || {
             store.insert_bots(&bots)?;
+            store.insert_reads(&reads)?;
             if events.is_empty() {
                 return Ok(());
             }

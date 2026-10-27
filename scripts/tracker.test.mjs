@@ -39,6 +39,7 @@ const tick = () => new Promise((r) => setTimeout(r, 5));
 
 function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set(), agent = {}, zone = "Europe/Berlin" } = {}) {
   const loc = new URL(url);
+  const clock = { t: 1_700_000_000_000 };
   const sent = [];
   const urls = [];
   const timers = [];
@@ -54,6 +55,7 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
     referrer: "",
     visibilityState: "visible",
     hidden: false,
+    documentElement: { scrollHeight: 2000 },
     addEventListener: on("d:"),
     get cookie() { return cookie.get(); },
     set cookie(v) { cookie.set(v); },
@@ -67,7 +69,7 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
     for (const k of ["href", "pathname", "search", "hash"]) location[k] = n[k];
   };
   const location = { href: loc.href, hostname: loc.hostname, protocol: loc.protocol, pathname: loc.pathname, search: loc.search, hash: loc.hash, origin: loc.origin };
-  const window = { addEventListener: on("w:"), BroadcastChannel: channel(bus) };
+  const window = { addEventListener: on("w:"), BroadcastChannel: channel(bus), scrollY: 0, innerHeight: 800 };
   const navigator = {
     language: "en-US",
     languages: ["en-US"],
@@ -75,10 +77,10 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
     ...agent,
   };
   const performance = { getEntriesByType: (t) => (t == "navigation" ? [{ type: nav }] : []) };
-  const ctx = { window, document, navigator, location, history, performance, BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, devicePixelRatio: 2, Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: zone }) }) }, URL, JSON, Date, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]) };
+  const ctx = { window, document, navigator, location, history, performance, BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, devicePixelRatio: 2, Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: zone }) }) }, URL, JSON, Date: { now: () => clock.t }, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]) };
   vm.runInNewContext(SRC, ctx);
   const fire = (t, e, ev = {}) => (listeners[t + e] || []).forEach((f) => f(ev));
-  return { sent, urls, timers, cookie, window, document, history, location, fire };
+  return { sent, urls, timers, cookie, window, document, history, location, fire, clock };
 }
 
 test("pageview with page, screen and language", () => {
@@ -248,4 +250,48 @@ test("pushState and replaceState route changes log pageviews, once per URL", () 
     b.sent.map((e) => new URL(e.u).pathname),
     ["/", "/a", "/b", "/a", "/c"],
   );
+});
+
+test("reading time and scroll depth are sent once, when the page ends", () => {
+  const b = browser("https://example.com/blog/post");
+  b.clock.t += 20_000;
+  b.window.scrollY = 600;
+  b.fire("w:", "scroll");
+  b.window.scrollY = 300;
+  b.fire("w:", "scroll");
+  b.fire("w:", "pagehide", { persisted: false });
+  const read = b.sent.find((e) => e.n == "read");
+  assert.deepEqual([read.u, read.e, read.x], ["https://example.com/blog/post", 20, 70]);
+  assert.deepEqual(b.sent.map((e) => e.n), ["pageview", "read", "leave"]);
+});
+
+test("time in a hidden tab is not reading time", () => {
+  const b = browser("https://example.com/");
+  b.clock.t += 10_000;
+  b.document.hidden = true;
+  b.fire("d:", "visibilitychange");
+  b.clock.t += 60_000;
+  b.document.hidden = false;
+  b.fire("d:", "visibilitychange");
+  b.clock.t += 5_000;
+  b.fire("w:", "pagehide", { persisted: false });
+  assert.equal(b.sent.find((e) => e.n == "read").e, 15);
+});
+
+test("a route change reports the page it leaves, and a glance sends nothing", () => {
+  const b = browser("https://example.com/a");
+  b.clock.t += 8_000;
+  b.history.pushState({}, "", "/b");
+  b.clock.t += 500;
+  b.fire("w:", "pagehide", { persisted: false });
+  const reads = b.sent.filter((e) => e.n == "read");
+  assert.deepEqual(reads.map((e) => [e.u, e.e, e.x]), [["https://example.com/a", 8, 40]]);
+});
+
+test("reading depth sets no cookie in cookieless mode", () => {
+  const b = browser("https://example.com/", { attrs: { "data-cookieless": "" } });
+  b.clock.t += 5_000;
+  b.fire("w:", "pagehide", { persisted: false });
+  assert.equal(b.cookie.cookies.size, 0);
+  assert.equal(b.sent.find((e) => e.n == "read").e, 5);
 });
