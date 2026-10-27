@@ -1,6 +1,7 @@
 mod admin;
 mod alerts;
 mod alias;
+mod almost;
 mod animals;
 mod answers;
 mod api;
