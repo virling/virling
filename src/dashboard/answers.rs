@@ -152,6 +152,8 @@ fn pages_line(n: &Numbers) -> String {
 pub struct AnswerRow {
     pub(super) icon: String,
     pub(super) name: &'static str,
+    /// The company the AI card groups the assistant under.
+    pub(super) company: &'static str,
     pub(super) sub: String,
     pub(super) href: String,
     pub(super) reads: String,
@@ -199,6 +201,7 @@ pub fn tab(
             Some(AnswerRow {
                 icon: crate::icons::source(a.logo(), 16),
                 name: a.name(),
+                company: a.company(),
                 sub: pages_line(&n),
                 href: href(a),
                 reads: group(n.reads.max(0) as u64),
