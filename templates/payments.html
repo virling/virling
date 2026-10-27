@@ -5,6 +5,27 @@
   {% for s in summary %}<div><span class="sn">{{ s.name }}</span><b>{{ s.value }}</b><span class="dim">{{ s.sub }}</span></div>{% endfor %}
 </section>
 {% if !never_paid %}
+<section class="box path" id="pay-path" data-sync>
+  <div class="path-head"><h2>Path to purchase</h2><span class="dim">First payments from customers matched to a visit</span></div>
+  {% if path.count == 0 %}
+  <p class="bd-empty pad">No first payments with a tracked visit in this range.</p>
+  {% else %}
+  <div class="summary path-sum">
+    {% for s in path.stats %}<div><span class="sn">{{ s.name }}</span><b>{{ s.value }}</b><span class="dim">{{ s.sub }}</span></div>{% endfor %}
+  </div>
+  <div class="path-cols">
+    <div class="path-dist">
+      <h3>Time to buy</h3>
+      {% for (label, n, pct) in path.buckets %}<div class="path-bar"><span>{{ label }}</span><span class="t"><i style="width:{{ "{:.1}"|format(pct) }}%"></i></span><b>{{ n }}</b></div>{% endfor %}
+    </div>
+    <div class="path-ch">
+      <h3>Channels</h3>
+      <div class="path-row th"><span>Channel</span><span class="num">First touch</span><span class="num">Credited</span></div>
+      {% for (name, first, credited) in path.channels %}<div class="path-row"><span>{{ name }}</span><span class="num">{{ first }}</span><span class="num">{{ credited }}</span></div>{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</section>
 <div class="list-bar">
   <div class="menu-wrap goal-pick" data-menu>
     <button type="button" class="ctl" aria-haspopup="true" aria-expanded="false"><span class="dim">Goal</span>{{ goal_label }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>

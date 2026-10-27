@@ -851,6 +851,19 @@ a.ctl { text-decoration: none; }
 .vfilters > .dim { margin-left: auto; }
 .sg .count { color: var(--ink-4); font-weight: 500; }
 .pay-list { overflow: hidden; }
+.path { overflow: hidden; }
+.path-head { display: flex; align-items: baseline; gap: 12px; padding: 14px 16px 10px; }
+.path-head h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; }
+.path-sum { border-top: 1px solid var(--rule-2); }
+.path-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; padding: 14px 16px 16px; border-top: 1px solid var(--rule-2); }
+.path-cols h3 { margin: 0 0 6px; font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.path-bar { display: grid; grid-template-columns: 96px minmax(0, 1fr) 40px; column-gap: 12px; align-items: center; min-height: 28px; font-size: 13px; }
+.path-bar .t { height: 8px; border-radius: 4px; background: var(--visitors-soft); overflow: hidden; }
+.path-bar .t i { display: block; height: 100%; background: var(--visitors-tint); }
+.path-bar b { font-weight: 600; text-align: right; }
+.path-row { display: grid; grid-template-columns: minmax(0, 1fr) 88px 88px; column-gap: 12px; align-items: center; min-height: 28px; font-size: 13px; }
+.path-row.th { min-height: 24px; font-size: 12px; color: var(--ink-3); }
+.path-row .num { text-align: right; }
 .renewal { margin-left: 6px; padding: 1px 6px; border: 1px solid var(--rule); border-radius: 6px; font-size: 12px; color: var(--ink-3); font-style: normal; }
 .badge.ref { background: var(--rule-3); color: var(--ink-2); }
 .pay-empty { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 28px; align-items: center; padding: 16px 24px 16px 16px; }
@@ -1019,6 +1032,7 @@ a.ctl { text-decoration: none; }
   .kpi b { font-size: 24px; }
   .hide-sm { display: none; }
   .summary { grid-template-columns: 1fr 1fr; }
+  .path-cols { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .summary > div:nth-child(3) { border-left: 0; }
   .summary > div:nth-child(n+3) { border-top: 1px solid var(--rule-2); }
   .vis-list { display: block; }

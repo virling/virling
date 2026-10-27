@@ -10,8 +10,8 @@ use crate::providers::Subscription;
 use crate::retention::{Mrr, Retention};
 use crate::stats::{
     self, Activity, BreakdownRow, Dimension, Filter, GoalCount, GoalRow, GoalStat, Journey,
-    Overview, PaymentFilter, PaymentPage, PaymentSummary, Period, ProviderSplit, Report, Step,
-    StepCount, Who,
+    Overview, PathPay, PaymentFilter, PaymentPage, PaymentSummary, Period, ProviderSplit, Report,
+    Step, StepCount, Who,
 };
 use crate::visitors::{Facets, Timeline, VisitorFilter, VisitorPage};
 
@@ -304,6 +304,12 @@ impl<S: EventStore> EventStore for Cached<S> {
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary> {
         self.get(site_id, format!("payment_summary {period:?}"), || {
             self.inner.payment_summary(site_id, period)
+        })
+    }
+
+    fn path_to_purchase(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<PathPay>> {
+        self.get(site_id, format!("path_to_purchase {period:?}"), || {
+            self.inner.path_to_purchase(site_id, period)
         })
     }
 

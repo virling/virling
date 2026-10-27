@@ -6,7 +6,7 @@ use duckdb::Connection;
 
 use super::*;
 use crate::stats::{
-    ACTIVITY_DAYS, Activity, FirstTouch, GoalCount, GoalRow, Journey, JourneySession,
+    ACTIVITY_DAYS, Activity, FirstTouch, GoalCount, GoalRow, Journey, JourneySession, PathPay,
     PaymentFilter, PaymentPage, PaymentRow, PaymentSummary, Period, Who, from_micros, micros_of,
     source,
 };
@@ -153,6 +153,41 @@ impl SiteIndex {
                 .map(|p| self.row(p))
                 .collect(),
         }
+    }
+
+    pub fn path_to_purchase(&self, lo: i64, hi: i64) -> Vec<PathPay> {
+        let all = Scope(None, String::new());
+        let mut out = Vec::new();
+        for p in self.pays(lo, hi, &all).filter(|p| !p.renewal) {
+            let Some(v) = self.pay_visitor(p).or_else(|| {
+                self.pay_session(p)
+                    .map(|s| self.sessions[s as usize].visitor)
+            }) else {
+                continue;
+            };
+            let first = self.visitors[v as usize].first_touch;
+            if first == NONE || self.sessions[first as usize].touch > p.ts {
+                continue;
+            }
+            let (mut visits, mut pages) = (0, 0);
+            for s in self.sessions_of(v) {
+                let sess = &self.sessions[s as usize];
+                if sess.touch > p.ts {
+                    continue;
+                }
+                visits += 1;
+                pages += self.pageviews_of(s).filter(|pv| pv.ts <= p.ts).count() as u64;
+            }
+            let sess = &self.sessions[first as usize];
+            out.push(PathPay {
+                days: (p.ts - sess.touch) as f64 / DAY_US as f64,
+                visits,
+                pages,
+                first_channel: self.path_name(sess.cols[CHANNEL]),
+                credited_channel: self.name_of(p.channel),
+            });
+        }
+        out
     }
 
     pub fn payment_summary(&self, lo: i64, hi: i64) -> PaymentSummary {
@@ -715,6 +750,16 @@ pub mod read {
         Ok(Some(ix.payment_list(lo, hi, &scope, filter, limit, offset)))
     }
 
+    pub fn path_to_purchase(
+        ix: &SiteIndex,
+        z: &Zones,
+        conn: &Connection,
+        period: &Period,
+    ) -> anyhow::Result<Option<Vec<PathPay>>> {
+        let (lo, hi) = z.bounds(conn, period)?;
+        Ok(Some(ix.path_to_purchase(lo, hi)))
+    }
+
     pub fn payment_summary(
         ix: &SiteIndex,
         z: &Zones,
@@ -834,6 +879,17 @@ mod tests {
                     &format!("payment_summary {at}"),
                     read::payment_summary(&ix, &z, &conn, &p).unwrap(),
                     stats::payment_summary(&conn, SITE, &p).unwrap(),
+                );
+                let sorted = |mut v: Vec<PathPay>| {
+                    v.sort_by(|a, b| format!("{a:?}").cmp(&format!("{b:?}")));
+                    v
+                };
+                check(
+                    &format!("path_to_purchase {at}"),
+                    read::path_to_purchase(&ix, &z, &conn, &p)
+                        .unwrap()
+                        .map(sorted),
+                    sorted(stats::path_to_purchase(&conn, SITE, &p).unwrap()),
                 );
                 let goals = stats::goal_counts(&conn, SITE, &p).unwrap();
                 check(
