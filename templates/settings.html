@@ -112,6 +112,24 @@
   {% if connections.is_empty() %}<p class="empty">No payment provider connected yet.</p>{% endif %}
 </div>
 </section>
+<section class="set-sec" id="alerts">
+<div class="set-intro"><h2>Email alerts</h2><p class="muted">Emails go to {{ shell.email }}. Get one for each new sale with where the visitor came from, and a summary of yesterday each day at the hour you pick, in the time zone of {{ shell.domain }}.</p></div>
+<div class="card">
+  {% if alerts_saved %}<div class="notice ok-note" role="status">Saved.</div>{% endif %}
+  <form method="post" action="/app/{{ shell.domain }}/settings/alerts" class="stack">
+    <div class="setting">
+      <div><b>New sales</b><span class="muted">One email per sale, with its amount and source.</span></div>
+      <label class="switch"><input type="checkbox" role="switch" name="sales"{% if alerts.sales %} checked{% endif %}><span></span><span class="sr">Email for each new sale</span></label>
+    </div>
+    <div class="setting">
+      <div><b>Daily digest</b><span class="muted">Yesterday's visitors, sales and revenue, and the top channel.</span></div>
+      <label class="switch"><input type="checkbox" role="switch" name="digest"{% if alerts.digest %} checked{% endif %}><span></span><span class="sr">Daily digest email</span></label>
+    </div>
+    <label class="field">Send the digest at<select class="input" name="hour">{% for h in alert_hours %}<option value="{{ h }}"{% if *h == alerts.hour %} selected{% endif %}>{{ "{:02}"|format(h) }}:00</option>{% endfor %}</select></label>
+    <div class="actions"><button class="btn" type="submit">Save</button></div>
+  </form>
+</div>
+</section>
 <section class="set-sec" id="telegram">
 <div class="set-intro"><h2>Telegram alerts</h2><p class="muted">Get a Telegram message for each new payment on {{ shell.domain }}, when traffic runs well above usual, and a summary of yesterday each morning. Create a bot with @BotFather, send it a message, then paste its token and your chat ID. The token is stored encrypted.</p></div>
 <div class="card">

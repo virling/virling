@@ -104,6 +104,9 @@ struct SettingsPage {
     /// The chat that gets payment alerts and the last send error, when set up.
     telegram: Option<(String, String)>,
     telegram_note: &'static str,
+    alerts: crate::alerts::Settings,
+    alert_hours: Vec<i64>,
+    alerts_saved: bool,
 }
 
 #[derive(Template)]
@@ -255,6 +258,9 @@ async fn show(
         (_, Some("telegram")) => "Telegram did not accept that bot token and chat ID.",
         _ => "",
     };
+    let Ok(alerts) = crate::alerts::load_settings(&state.db, &ctx.site.id).await else {
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    };
     let spend_lines = crate::spend::load(&state.db, &ctx.site.id)
         .await
         .unwrap_or_default();
@@ -263,6 +269,9 @@ async fn show(
         ai,
         telegram: telegram.map(|(chat, error)| (chat, error.unwrap_or_default())),
         telegram_note,
+        alerts,
+        alert_hours: (0..24).collect(),
+        alerts_saved: q.saved.as_deref() == Some("alerts"),
         title: "Site settings",
         script_host: state.config.base_url.clone(),
         cookieless: ctx.site.cookieless,

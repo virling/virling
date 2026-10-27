@@ -373,6 +373,7 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/settings/disconnect",
                 post(settings::disconnect),
             )
+            .route("/app/{domain}/settings/alerts", post(crate::alerts::save))
             .route(
                 "/app/{domain}/settings/telegram",
                 post(crate::telegram::save),
