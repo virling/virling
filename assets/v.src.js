@@ -17,15 +17,22 @@
     i < 0 && ck(31536000, dom = 0);
   }
 
-  var send = (name, goal) => {
-    var body = JSON.stringify([{ n: name, u: L.href, r: ref, s: site, v: vid, w: screen.width, d: devicePixelRatio, g: goal, l: n.language, z: Intl.DateTimeFormat().resolvedOptions().timeZone || void 0, k: nav, b: n.webdriver || !n.languages?.length || void 0 }]);
+  var send = (name, goal, u, e, x) => {
+    var body = JSON.stringify([{ n: name, u: u || L.href, e, x, r: ref, s: site, v: vid, w: screen.width, d: devicePixelRatio, g: goal, l: n.language, z: Intl.DateTimeFormat().resolvedOptions().timeZone || void 0, k: nav, b: n.webdriver || !n.languages?.length || void 0 }]);
     ref = nav = null;
     n.sendBeacon?.(endpoint, body) || fetch(endpoint, { method: "POST", body, keepalive: true });
   };
 
+  // Reading depth: seconds the page was visible and the furthest scroll, sent once when the page ends; nothing is stored.
+  var href = L.href, shown = d.hidden ? 0 : Date.now(), act = 0, deep = 0, tick = () => { shown && (act += Date.now() - shown); shown = d.hidden ? 0 : Date.now(); },
+    depth = () => deep = Math.max(deep, (w.scrollY + w.innerHeight) * 100 / d.documentElement.scrollHeight | 0),
+    report = () => { tick(); act > 1e3 && (depth(), send("read", 0, href, act / 1e3 | 0, deep)); act = deep = 0; };
+  on(d, "visibilitychange", tick);
+  on(w, "scroll", depth, { passive: true });
+
   var pageview = () => {
     var path = L.pathname + L.search;
-    if (path != last) { last = path; send("pageview"); }
+    if (path != last) { last && report(); last = path; href = L.href; send("pageview"); }
   };
 
   // Routers navigate with pushState or replaceState; pageview skips a repeat of the same URL.
@@ -62,7 +69,7 @@
   setInterval(() => d.hidden || send("ping"), 3e4);
   tabs();
   // Leave only when the page itself goes away; the channel closes so the page can still enter the back/forward cache.
-  on(w, "pagehide", () => { bc && (bc.postMessage(0), bc.close()); peers > 0 || send("leave"); });
+  on(w, "pagehide", () => { report(); bc && (bc.postMessage(0), bc.close()); peers > 0 || send("leave"); });
   // A page restored by Back from the back/forward cache is a return, sent like a fresh load.
   on(w, "pageshow", (e) => { if (e.persisted) { tabs(); nav = "back_forward"; send("pageview"); } });
 

@@ -158,6 +158,7 @@ struct DashboardPage {
     ai: Option<cards::AiCard>,
     profit: Option<crate::spend::ProfitCard>,
     topay: Option<crate::topay::PayCard>,
+    reading: Option<crate::reading::ReadCard>,
     why: Option<String>,
     goals: Option<goals::GoalsView>,
     visitors: Option<views::VisitorsView>,
@@ -187,6 +188,7 @@ struct PublicPage {
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
     profit: Option<crate::spend::ProfitCard>,
+    reading: Option<crate::reading::ReadCard>,
     topay: Option<crate::topay::PayCard>,
     why: Option<String>,
     retention: Option<views::RetentionView>,
@@ -898,6 +900,7 @@ async fn page(
         ai: None,
         profit: None,
         topay: None,
+        reading: None,
         why: None,
         goals: None,
         visitors: None,
@@ -1342,6 +1345,16 @@ async fn page(
                 })
                 .await?;
                 page.topay = crate::topay::pay_card(&pays.rows);
+                let (store, sid, per) = (state.events.clone(), ctx.site.id.clone(), p.clone());
+                let read = blocking(move || store.reading(&sid, &per)).await?;
+                page.reading = crate::reading::card(
+                    &read,
+                    q.rest.get("rd").is_some_and(|v| v == "buyers"),
+                    (
+                        format!("{}#reading", href(&[("rd", "")])),
+                        format!("{}#reading", href(&[("rd", "buyers")])),
+                    ),
+                );
                 if filters.is_empty() {
                     let days = (to - from).whole_days() + 1;
                     let before = Period {
@@ -1448,6 +1461,7 @@ async fn page(
         ai: page.ai,
         profit: page.profit,
         topay: page.topay,
+        reading: None,
         why: page.why,
         retention: page.retention,
     });

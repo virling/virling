@@ -8,7 +8,7 @@ use anyhow::Context;
 use time::{Duration, OffsetDateTime};
 
 use crate::app::{self, AppState, Config};
-use crate::events::{DuckStore, Event, EventStore, Payment};
+use crate::events::{DuckStore, Event, EventStore, Payment, Read};
 use crate::providers::Subscription;
 use crate::{auth, channel, crypto, favicon, flags, icons, mail, sites, sync};
 
@@ -920,6 +920,7 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
     let (events, payments, subscriptions) = seed(&site, now);
     store.insert_events(&events)?;
     store.upsert_payments(&payments)?;
+    store.insert_reads(&reads(&events, &payments))?;
     store.replace_subscriptions(&site, "stripe", &subscriptions)?;
     for (n, (slug, name, source, channel, path)) in LINKS.iter().enumerate() {
         let clicks: HashSet<&str> = events
@@ -1001,6 +1002,32 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
     let state = AppState::new(config, db.clone(), store, mail::Mailer::Log, vault);
     sync::rebuild_attribution(&state, Some(&site)).await;
     Ok((state, token))
+}
+
+/// Reading time and scroll for a third of the pageviews, a little deeper for visitors who paid.
+fn reads(events: &[Event], payments: &[Payment]) -> Vec<Read> {
+    let paid: HashSet<&str> = payments
+        .iter()
+        .filter_map(|p| p.visitor_id.as_deref())
+        .collect();
+    events
+        .iter()
+        .filter(|e| e.kind == "pageview")
+        .enumerate()
+        .filter(|(i, _)| i % 3 == 0)
+        .map(|(i, e)| {
+            let n = (i * 7919 + e.path.len() * 31) % 100;
+            let bonus = paid.contains(e.visitor_id.as_str()) as usize;
+            Read {
+                site_id: e.site_id.clone(),
+                ts: e.ts,
+                visitor_id: e.visitor_id.clone(),
+                path: e.path.clone(),
+                secs: (10 + n * 2 + bonus * 50) as u16,
+                scroll: (20 + n * 6 / 10 + bonus * 20).min(100) as u8,
+            }
+        })
+        .collect()
 }
 
 async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {

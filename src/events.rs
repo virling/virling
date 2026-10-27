@@ -10,6 +10,7 @@ use time::{Duration, OffsetDateTime, UtcOffset};
 use crate::channel::Channel;
 use crate::index::{self, Indexes, SiteIndex, Zones, goals, read, rows};
 use crate::providers::Subscription;
+use crate::reading::ReadRow;
 use crate::retention::{self, Mrr, Retention};
 use crate::stats::{
     self, Activity, GoalCount, GoalRow, Journey, Overview, PathPay, PaymentFilter, PaymentPage,
@@ -17,6 +18,17 @@ use crate::stats::{
 };
 use crate::stats::{BreakdownRow, Dimension, Filter, GoalStat, ProviderSplit, Step, StepCount};
 use crate::visitors::{self, Facets, Timeline, VisitorFilter, VisitorPage};
+
+/// How long a page was read and how far it was scrolled, sent when the visitor leaves it.
+#[derive(Debug, Clone)]
+pub struct Read {
+    pub site_id: String,
+    pub ts: OffsetDateTime,
+    pub visitor_id: String,
+    pub path: String,
+    pub secs: u16,
+    pub scroll: u8,
+}
 
 #[derive(Debug, Clone)]
 pub struct Event {
@@ -121,6 +133,10 @@ pub trait EventStore: Send + Sync {
     }
     /// Stores events flagged as bots, with why, apart from visits and every metric.
     fn insert_bots(&self, bots: &[(Event, &str)]) -> anyhow::Result<()>;
+    /// Stores reading time and scroll depth, kept apart from events and the session index.
+    fn insert_reads(&self, reads: &[Read]) -> anyhow::Result<()>;
+    /// Reading per page in the range, most read first, with those who paid shown apart.
+    fn reading(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ReadRow>>;
     /// Bot visitors filtered in the last `days` days.
     fn bots_filtered(&self, site_id: &str, days: i64) -> anyhow::Result<u64>;
     /// Current UTC offset of IANA zone `tz`.
@@ -742,6 +758,14 @@ impl DuckStore {
                 language VARCHAR,
                 reason VARCHAR NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS reads (
+                site_id VARCHAR NOT NULL,
+                ts TIMESTAMPTZ NOT NULL,
+                vh UBIGINT NOT NULL,
+                path VARCHAR NOT NULL,
+                secs USMALLINT NOT NULL,
+                scroll UTINYINT NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS payments (
                 site_id VARCHAR NOT NULL,
                 provider VARCHAR NOT NULL,
@@ -1342,6 +1366,33 @@ impl EventStore for DuckStore {
         }
         app.flush()?;
         Ok(())
+    }
+
+    fn insert_reads(&self, reads: &[Read]) -> anyhow::Result<()> {
+        if reads.is_empty() {
+            return Ok(());
+        }
+        let conn = self.conn.lock().unwrap();
+        let tx = conn.unchecked_transaction()?;
+        let mut stmt =
+            tx.prepare("INSERT INTO reads VALUES (?, ?, hash(CAST(? AS VARCHAR)), ?, ?, ?)")?;
+        for r in reads {
+            stmt.execute(params![
+                r.site_id,
+                ts_value(r.ts),
+                r.visitor_id,
+                r.path,
+                r.secs,
+                r.scroll
+            ])?;
+        }
+        drop(stmt);
+        tx.commit()?;
+        Ok(())
+    }
+
+    fn reading(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ReadRow>> {
+        crate::reading::reading(&*self.read()?, site_id, period)
     }
 
     fn bots_filtered(&self, site_id: &str, days: i64) -> anyhow::Result<u64> {
