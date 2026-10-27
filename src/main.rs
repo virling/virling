@@ -1,4 +1,5 @@
 mod admin;
+mod alerts;
 mod alias;
 mod animals;
 mod answers;
@@ -341,6 +342,7 @@ async fn main() -> anyhow::Result<()> {
             if app_enabled {
                 tokio::spawn(sync::run(state.clone()));
                 tokio::spawn(telegram::run(state.clone()));
+                tokio::spawn(alerts::run(state.clone()));
                 tokio::spawn(answers::run(state.clone()));
                 favicon::spawn_sources(state.clone());
                 tokio::spawn(dashboard::schedule::run(state.clone()));
@@ -1299,8 +1301,8 @@ mod tests {
         let cookie = sign_in(&state, "me%40example.com").await;
         let site =
             body_text(call(&state, get("/app/example.com/settings", Some(&cookie))).await).await;
-        assert_eq!(site.matches(r#"type="checkbox" role="switch""#).count(), 3);
-        assert_eq!(site.matches(r#"type="checkbox""#).count(), 3);
+        assert_eq!(site.matches(r#"type="checkbox" role="switch""#).count(), 5);
+        assert_eq!(site.matches(r#"type="checkbox""#).count(), 5);
         assert!(
             site.contains(r#"<div class="seg" role="radiogroup" aria-labelledby="model-label">"#)
         );
@@ -3128,6 +3130,77 @@ mod tests {
                 .await
                 .status(),
             StatusCode::NOT_FOUND
+        );
+    }
+
+    #[tokio::test]
+    async fn alert_emails_go_out_once() {
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        let now = time::OffsetDateTime::now_utc();
+        let page = call(&state, get("/app/example.com/settings", Some(&cookie))).await;
+        assert!(body_text(page).await.contains("Email alerts"));
+        let path = "/app/example.com/settings/alerts";
+        let res = call(
+            &state,
+            form(path, "sales=on&digest=on&hour=0".into(), Some(&cookie)),
+        )
+        .await;
+        assert_eq!(
+            res.headers()["location"],
+            "/app/example.com/settings?saved=alerts#alerts"
+        );
+        let before = sent(&state).len();
+        assert_eq!(
+            crate::alerts::tick(&state, now).await.unwrap(),
+            0,
+            "nothing new yet"
+        );
+        store
+            .upsert_payments(&[Payment {
+                site_id: site.clone(),
+                provider: "stripe".into(),
+                provider_payment_id: "pi_alert".into(),
+                ts: now + time::Duration::minutes(1),
+                amount: 4900,
+                currency: "usd".into(),
+                amount_usd: Some(49.0),
+                refunded: 0,
+                status: "paid".into(),
+                visitor_id: None,
+                customer_id: None,
+                is_renewal: false,
+            }])
+            .unwrap();
+        let later = now + time::Duration::minutes(2);
+        assert_eq!(crate::alerts::tick(&state, later).await.unwrap(), 1);
+        assert_eq!(
+            crate::alerts::tick(&state, later).await.unwrap(),
+            0,
+            "never twice"
+        );
+        let mail = sent(&state);
+        assert_eq!(mail.len(), before + 1);
+        assert_eq!(mail[before].0, "me@example.com");
+        assert!(mail[before].1.contains("New sale on example.com: $49"));
+        sqlx::query("UPDATE email_alerts SET sales = 0, digest_day = 0")
+            .execute(&state.db)
+            .await
+            .unwrap();
+        let tomorrow = now + time::Duration::days(1);
+        assert_eq!(crate::alerts::tick(&state, tomorrow).await.unwrap(), 1);
+        assert_eq!(
+            crate::alerts::tick(&state, tomorrow).await.unwrap(),
+            0,
+            "one digest a day"
+        );
+        assert!(
+            sent(&state)
+                .last()
+                .unwrap()
+                .1
+                .starts_with("Yesterday on example.com")
         );
     }
 
