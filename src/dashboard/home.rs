@@ -156,6 +156,7 @@ struct DashboardPage {
     chart_tabs: Vec<Opt>,
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
+    cash: Vec<cards::CashRow>,
     profit: Option<crate::spend::ProfitCard>,
     topay: Option<crate::topay::PayCard>,
     reading: Option<crate::reading::ReadCard>,
@@ -187,6 +188,7 @@ struct PublicPage {
     chart_tabs: Vec<Opt>,
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
+    cash: Vec<cards::CashRow>,
     profit: Option<crate::spend::ProfitCard>,
     reading: Option<crate::reading::ReadCard>,
     topay: Option<crate::topay::PayCard>,
@@ -898,6 +900,7 @@ async fn page(
         chart_tabs: Vec::new(),
         cards: Vec::new(),
         ai: None,
+        cash: Vec::new(),
         profit: None,
         topay: None,
         reading: None,
@@ -1374,6 +1377,7 @@ async fn page(
                     );
                 }
             }
+            page.cash = cards::ai_cash(&ai);
             page.ai = Some(ai);
         }
         Data::Goals(g) => {
@@ -1459,6 +1463,7 @@ async fn page(
         chart_tabs: page.chart_tabs,
         cards: page.cards,
         ai: page.ai,
+        cash: page.cash,
         profit: page.profit,
         topay: page.topay,
         reading: None,

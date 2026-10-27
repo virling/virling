@@ -1105,7 +1105,7 @@ pub struct AiCard {
     /// Some AI crawler read a page in the range.
     pub(super) crawled: bool,
     /// The Answers tab, signed in only.
-    pub(super) answers: Option<super::answers::AnswersTab>,
+    pub(super) answers: Option<crate::dashboard::answers::AnswersTab>,
 }
 
 /// One AI company: visitors and revenue from its assistants, pages its crawlers read.
@@ -1132,6 +1132,50 @@ pub(super) fn ai_company(source: &str) -> (String, String) {
         .find(|(keys, _, _)| keys.iter().any(|k| s.contains(k)))
         .map(|(_, c, l)| (c.to_string(), l.to_string()))
         .unwrap_or_else(|| (source_name(source), source.to_string()))
+}
+
+/// One AI company on the AI to cash card.
+pub struct CashRow {
+    pub(super) icon: String,
+    pub(super) name: String,
+    pub(super) pages: String,
+    /// "7 of 20" answers that name the site, or a dash.
+    pub(super) named: String,
+    pub(super) visitors: String,
+    pub(super) revenue: String,
+}
+
+/// Per AI company: pages its crawlers read, answers naming the site, visitors it sent and revenue.
+pub fn ai_cash(ai: &AiCard) -> Vec<CashRow> {
+    let answers = ai.answers.as_ref().map_or(&[][..], |a| &a.rows);
+    let mut rows: Vec<CashRow> = ai
+        .rows
+        .iter()
+        .map(|r| CashRow {
+            icon: r.bar.icon.clone(),
+            name: r.bar.name.clone(),
+            pages: r.pages.clone(),
+            named: answers
+                .iter()
+                .find(|a| a.company == r.bar.name)
+                .map_or_else(|| "\u{2013}".into(), |a| a.mentioned.clone()),
+            visitors: r.bar.visitors.clone(),
+            revenue: r.bar.revenue.clone(),
+        })
+        .collect();
+    for a in answers {
+        if a.mentioned != "\u{2013}" && !rows.iter().any(|r| r.name == a.company) {
+            rows.push(CashRow {
+                icon: icons::source(&ai_company(a.company).1, 16),
+                name: a.company.into(),
+                pages: "0".into(),
+                named: a.mentioned.clone(),
+                visitors: a.visitors.clone(),
+                revenue: a.revenue.clone(),
+            });
+        }
+    }
+    rows.into_iter().take(SHOWN).collect()
 }
 
 fn ai_revenue(days: &[DayPoint]) -> f64 {
@@ -1426,6 +1470,51 @@ mod tests {
         assert_eq!(r[1].kids[0].href, "source=chatgpt.com");
         assert!(c.panels[0].openable && r[0].kids.is_empty());
         assert!(c.panels[0].on && !c.panels[1].on);
+    }
+
+    #[test]
+    fn ai_to_cash_joins_crawls_answers_visits_and_revenue() {
+        let sources = [row("AI|chatgpt.com", 15, 80.0)];
+        let now = OffsetDateTime::from_unix_timestamp(3600).unwrap();
+        let mut ai = ai_card(&sources, &[], &[], &base(), &[], None, &href, now);
+        assert!(ai_cash(&ai).iter().all(|r| r.named == "\u{2013}"));
+        let answer =
+            |company: &'static str, mentioned: &str| crate::dashboard::answers::AnswerRow {
+                icon: String::new(),
+                name: "x",
+                company,
+                sub: String::new(),
+                href: String::new(),
+                reads: "0".into(),
+                reads_title: String::new(),
+                mentioned: mentioned.into(),
+                was: String::new(),
+                tone: "",
+                visitors: "0".into(),
+                revenue: "$0".into(),
+            };
+        ai.answers = Some(crate::dashboard::answers::AnswersTab {
+            rows: vec![
+                answer("OpenAI", "7 of 20"),
+                answer("Google", "3 of 20"),
+                answer("Anthropic", "\u{2013}"),
+            ],
+            foot: "",
+            link: "",
+            note: "",
+            settings: String::new(),
+            on: false,
+            tabs: (String::new(), String::new()),
+        });
+        let rows = ai_cash(&ai);
+        let seen: Vec<_> = rows
+            .iter()
+            .map(|r| (r.name.as_str(), r.named.as_str(), r.visitors.as_str()))
+            .collect();
+        assert_eq!(
+            seen,
+            [("OpenAI", "7 of 20", "15"), ("Google", "3 of 20", "0")]
+        );
     }
 
     #[test]

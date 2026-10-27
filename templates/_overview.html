@@ -120,6 +120,24 @@
     </div>
     {% endif %}
   </div>
+  {% if !cash.is_empty() %}
+  <div class="d3-card d3-bc" id="ai-cash">
+    <div class="d3-bc-head"><h2>AI to cash</h2><span class="d3-sub">crawled, named, visited, paid</span></div>
+    <div class="d3-panel">
+    <div class="d3-row d3-cashrow th"><span>Assistant</span><span class="num pg">Pages read</span><span class="num nd">Names you</span><span class="num v">Visitors</span><span class="num rv">Revenue</span></div>
+    {% for r in cash %}
+    <div class="d3-row d3-cashrow">
+      <div class="nmw"><span class="nm"><span class="ic">{{ r.icon|safe }}</span><span class="tx"><b>{{ r.name }}</b></span></span></div>
+      <span class="num pg">{{ r.pages }}</span>
+      <span class="num nd">{{ r.named }}</span>
+      <span class="num v">{{ r.visitors }}</span>
+      <span class="num rv">{{ r.revenue }}</span>
+    </div>
+    {% endfor %}
+    <div class="d3-foot"><span>Pages read by its crawler. Names you: answers that mention your site.</span></div>
+    </div>
+  </div>
+  {% endif %}
   {% endif %}{% endif %}
   {% endfor %}
   {% if let Some(p) = profit %}
