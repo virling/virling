@@ -48,6 +48,16 @@ pub struct RowView {
     churn_title: String,
 }
 
+pub struct SourceView {
+    icon: String,
+    label: String,
+    customers: String,
+    lifetime: String,
+    avg: String,
+    renewals: String,
+    repeat: String,
+}
+
 #[derive(Template)]
 #[template(path = "retention.html")]
 struct RetentionPage {
@@ -62,6 +72,7 @@ struct RetentionPage {
     tabs: Vec<Opt>,
     head: &'static str,
     rows: Vec<RowView>,
+    sources: Vec<SourceView>,
     empty: String,
     no_payments: bool,
     /// None when no provider is connected, else whether one is still on its first sync.
@@ -252,6 +263,26 @@ pub async fn page(
             .collect(),
         head,
         rows: rows.iter().map(|x| row_view(x, by, max)).collect(),
+        sources: r
+            .sources
+            .iter()
+            .map(|x| SourceView {
+                icon: icons::source(
+                    if x.source == "Unknown" {
+                        "Unattributed"
+                    } else {
+                        &x.source
+                    },
+                    16,
+                ),
+                label: x.source.clone(),
+                customers: group(x.customers),
+                lifetime: money(x.lifetime_usd),
+                avg: money(x.avg_usd),
+                renewals: group(x.renewals),
+                repeat: pct(Some(x.repeat_share)),
+            })
+            .collect(),
         empty: format!(
             "No customers made their first payment in {}.",
             if picked.key == "custom" {
