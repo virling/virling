@@ -125,6 +125,25 @@
     </div>
   </div>
   {% endif %}
+  {% if let Some(a) = almost %}
+  <div class="d3-card d3-bc" id="almost">
+    <div class="d3-bc-head"><h2>Almost paid</h2><nav class="d3-tabs" aria-label="Almost paid view"><a href="{{ a.tabs.0 }}" data-tab="almost-p0"{% if !a.on_pages %} class="on" aria-current="true"{% endif %}>Channels</a><a href="{{ a.tabs.1 }}" data-tab="almost-p1"{% if a.on_pages %} class="on" aria-current="true"{% endif %}>Last page</a></nav></div>
+    <div class="d3-panel" id="almost-p0"{% if a.on_pages %} hidden{% endif %}>
+    <div class="d3-row d3-almostrow th"><span>Channel</span><span class="num">Reached</span><span class="num">Paid</span><span class="num rv">Left on table</span></div>
+    {% for r in a.rows %}
+    <div class="d3-row d3-almostrow"><div class="nmw"><span class="nm"><span class="tx"><b>{{ r.name }}</b></span></span></div><span class="num">{{ r.reached }}</span><span class="num">{{ r.paid }}</span><span class="num rv">{{ r.left }}</span></div>
+    {% endfor %}
+    <div class="d3-foot"><span>Visitors who viewed pricing or went to checkout</span></div>
+    </div>
+    <div class="d3-panel" id="almost-p1"{% if !a.on_pages %} hidden{% endif %}>
+    <div class="d3-row d3-almostpg th"><span>Page</span><span class="num">Visitors</span></div>
+    {% for (page, n) in a.pages %}
+    <div class="d3-row d3-almostpg"><div class="nmw"><span class="nm"><span class="tx"><b>{{ page }}</b></span></span></div><span class="num">{{ n }}</span></div>
+    {% endfor %}
+    <div class="d3-foot"><span>Last page seen by those who did not pay</span></div>
+    </div>
+  </div>
+  {% endif %}
   {% if let Some(t) = topay %}
   <div class="d3-card d3-bc" id="topay">
     <div class="d3-bc-head"><h2>Time to pay</h2><span class="d3-sub">first visit to first payment, by channel</span></div>
