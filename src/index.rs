@@ -2299,8 +2299,9 @@ pub mod read {
         let scope = ix.scope(f);
         let (lo, hi) = z.bounds(conn, period)?;
         if matches!(d, Dimension::Weekday | Dimension::WeekdayHour) {
-            let rows = timing_rows(ix, z, conn, &period.tz, (lo, hi), &scope, d)?;
-            return Ok(Some(breakdown_rows(d, rows)));
+            let t = timing_rows(ix, z, conn, &period.tz, (lo, hi), &scope)?;
+            let rows = if d == Dimension::Weekday { &t.0 } else { &t.1 };
+            return Ok(Some(breakdown_rows(d, rows.clone())));
         }
         let mut rows: Vec<RawRow> = Vec::new();
         match key_of(d) {
@@ -2332,7 +2333,9 @@ pub mod read {
         Ok(Some(out))
     }
 
-    /// Rows keyed by the local weekday (1 Monday to 7), or "weekday|hour" with the hour "00" to "23", of a visit's first pageview.
+    /// Weekday rows (key 1 Monday to 7) and cell rows (key "weekday|hour", hour "00" to "23") of visits' first pageviews.
+    type Timing = (Vec<RawRow>, Vec<RawRow>);
+
     fn timing_rows(
         ix: &SiteIndex,
         z: &Zones,
@@ -2340,69 +2343,79 @@ pub mod read {
         tz: &str,
         (lo, hi): (i64, i64),
         scope: &Scope,
-        d: Dimension,
-    ) -> anyhow::Result<Vec<RawRow>> {
-        let mut years: HashMap<i32, Arc<Vec<(i64, i64)>>> = HashMap::new();
-        let mut key = |ts: i64| -> anyhow::Result<usize> {
-            let year = time::OffsetDateTime::from_unix_timestamp(ts.div_euclid(1_000_000))
-                .map_or(1970, |t| t.year());
-            if let std::collections::hash_map::Entry::Vacant(e) = years.entry(year) {
-                e.insert(z.year(conn, tz, year)?);
-            }
-            let segs = &years[&year];
-            let local = ts + segs[segs.partition_point(|s| s.0 <= ts).saturating_sub(1)].1;
-            let weekday = (local.div_euclid(DAY_US) + 3).rem_euclid(7) as usize;
-            Ok(if d == Dimension::Weekday {
-                weekday
-            } else {
-                weekday * 24 + local.div_euclid(HOUR_US).rem_euclid(24) as usize
-            })
+    ) -> anyhow::Result<Arc<Timing>> {
+        let year = |us: i64| {
+            time::OffsetDateTime::from_unix_timestamp(us.div_euclid(1_000_000))
+                .map_or(1970, |t| t.year())
         };
-        let name = |k: usize| {
-            Some(if d == Dimension::Weekday {
-                (k + 1).to_string()
-            } else {
-                format!("{}|{:02}", k / 24 + 1, k % 24)
-            })
-        };
-        let mut visitors = [0i64; 168];
-        // Sessions come ordered by visitor, so a key's last visitor tells whether it counted already.
-        let mut last = [NONE; 168];
-        for &s in ix.touched(lo, hi, scope).iter() {
-            let sess = &ix.sessions[s as usize];
-            let k = key(sess.touch)?;
-            if last[k] != sess.visitor {
-                last[k] = sess.visitor;
-                visitors[k] += 1;
+        let mut segs: Vec<(i64, i64)> = Vec::new();
+        for y in year(ix.first_event().unwrap_or(lo).min(lo))..=year(hi) {
+            for &(t, off) in z.year(conn, tz, y)?.iter() {
+                if segs.last().is_none_or(|l| l.1 != off) {
+                    segs.push((t, off));
+                }
             }
         }
-        let mut pays: HashMap<(bool, Option<usize>), Agg> = HashMap::new();
-        for p in ix.pays(lo, hi, scope) {
-            let touch = ix
-                .pay_session(p)
-                .map(|s| ix.sessions[s as usize].touch)
-                .filter(|&t| t != i64::MAX);
-            let k = match touch {
-                Some(t) => Some(key(t)?),
-                None => None,
+        Ok(ix.memo(format!("timing {lo} {hi} {tz} {}", scope.1), || {
+            // The weekday (0 Monday) and hour of a time in the site's zone.
+            let at = |ts: i64| {
+                let local = ts + segs[segs.partition_point(|s| s.0 <= ts).saturating_sub(1)].1;
+                (
+                    (local.div_euclid(DAY_US) + 3).rem_euclid(7) as usize,
+                    local.div_euclid(HOUR_US).rem_euclid(24) as usize,
+                )
             };
-            let e = pays.entry((!p.credited, k)).or_default();
-            e.0 += 1;
-            e.1 += p.net.unwrap_or(0.0);
-            e.2.insert(p.customer);
-            e.3 += i64::from(p.row.refunded > 0);
-        }
-        let mut rows: Vec<RawRow> = visitors
-            .iter()
-            .enumerate()
-            .filter(|(_, n)| **n > 0)
-            .map(|(k, &n)| (false, name(k), n, 0, 0.0, 0, 0))
-            .collect();
-        rows.extend(
-            pays.into_iter()
-                .map(|((u, k), (n, r, c, f))| (u, k.and_then(name), 0, n, r, c.len() as i64, f)),
-        );
-        Ok(rows)
+            let (mut days, mut cells) = ([0i64; 7], [0i64; 168]);
+            // Sessions come ordered by visitor, so a key's last visitor tells whether it counted already.
+            let (mut last_day, mut last_cell) = ([NONE; 7], [NONE; 168]);
+            for &s in ix.touched(lo, hi, scope).iter() {
+                let sess = &ix.sessions[s as usize];
+                let (d, h) = at(sess.touch);
+                if last_day[d] != sess.visitor {
+                    last_day[d] = sess.visitor;
+                    days[d] += 1;
+                }
+                if last_cell[d * 24 + h] != sess.visitor {
+                    last_cell[d * 24 + h] = sess.visitor;
+                    cells[d * 24 + h] += 1;
+                }
+            }
+            type Pays = HashMap<(bool, Option<usize>), Agg>;
+            let (mut by_day, mut by_cell): (Pays, Pays) = Default::default();
+            for p in ix.pays(lo, hi, scope) {
+                let touch = ix
+                    .pay_session(p)
+                    .map(|s| ix.sessions[s as usize].touch)
+                    .filter(|&t| t != i64::MAX)
+                    .map(at);
+                let keys = [
+                    (&mut by_day, touch.map(|(d, _)| d)),
+                    (&mut by_cell, touch.map(|(d, h)| d * 24 + h)),
+                ];
+                for (map, k) in keys {
+                    let e = map.entry((!p.credited, k)).or_default();
+                    e.0 += 1;
+                    e.1 += p.net.unwrap_or(0.0);
+                    e.2.insert(p.customer);
+                    e.3 += i64::from(p.row.refunded > 0);
+                }
+            }
+            let day = |k: usize| Some((k + 1).to_string());
+            let cell = |k: usize| Some(format!("{}|{:02}", k / 24 + 1, k % 24));
+            let rows = |seen: &[i64], pays: Pays, name: &dyn Fn(usize) -> Option<String>| {
+                let mut rows: Vec<RawRow> = seen
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, n)| **n > 0)
+                    .map(|(k, &n)| (false, name(k), n, 0, 0.0, 0, 0))
+                    .collect();
+                rows.extend(pays.into_iter().map(|((u, k), (n, r, c, f))| {
+                    (u, k.and_then(name), 0, n, r, c.len() as i64, f)
+                }));
+                rows
+            };
+            (rows(&days, by_day, &day), rows(&cells, by_cell, &cell))
+        }))
     }
 
     pub fn last_pages(
