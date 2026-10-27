@@ -19,6 +19,9 @@ const HEADLINE_MIN_ROW: u64 = 5;
 /// Smallest gap between share of customers and share of still-paying customers worth a headline.
 const HEADLINE_GAP: f64 = 0.15;
 
+/// Sources listed in the lifetime value table before the rest fold into one row.
+const MAX_SOURCES: usize = 10;
+
 /// One customer's lifetime, keyed by the attribution of their first payment.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Customer {
@@ -38,6 +41,10 @@ pub struct Customer {
     pub referrer_host: Option<String>,
     pub campaign: Option<String>,
     pub in_range: bool,
+    /// Payments that were not failed, the first included.
+    pub payments: u64,
+    /// Source of the payer's first visit; None when no visit is known.
+    pub first_source: Option<String>,
 }
 
 impl Customer {
@@ -93,6 +100,19 @@ pub struct RetentionRow {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct SourceLtv {
+    pub source: String,
+    pub customers: u64,
+    /// Every payment of these customers so far, net of refunds.
+    pub lifetime_usd: f64,
+    pub avg_usd: f64,
+    /// Payments after each customer's first.
+    pub renewals: u64,
+    /// Share of customers who paid more than once.
+    pub repeat_share: f64,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct StatusSource {
     pub provider: String,
     /// True when still-paying comes from the provider's subscription status, false when from payment recency only.
@@ -109,6 +129,8 @@ pub struct Retention {
     pub channels: Vec<RetentionRow>,
     pub referrers: Vec<RetentionRow>,
     pub campaigns: Vec<RetentionRow>,
+    /// Customers acquired in the range by the source of their first visit, most lifetime revenue first.
+    pub sources: Vec<SourceLtv>,
     pub headline: Option<String>,
     pub status_sources: Vec<StatusSource>,
 }
@@ -124,7 +146,7 @@ pub enum By {
 const CUSTOMERS: &str = "
 pays AS (
     SELECT {CUSTOMER} AS cust, p.provider, p.customer_id, p.provider_payment_id, p.ts,
-        epoch_us(p.ts) AS us, p.is_renewal, p.amount, p.refunded, p.amount_usd,
+        epoch_us(p.ts) AS us, p.is_renewal, p.visitor_id, p.amount, p.refunded, p.amount_usd,
         {NET_USD} AS net, p.amount_usd - {NET_USD} AS refunded_usd
     FROM payments p
     WHERE p.site_id = $site AND p.status <> 'failed' AND epoch_us(p.ts) <= $now
@@ -140,7 +162,7 @@ kept AS (
 ),
 totals AS (
     SELECT cust, coalesce(sum(net), 0) AS net, coalesce(sum(refunded_usd), 0) AS refunded_usd,
-        bool_or(refunded > 0) AS any_refund, max(us) FILTER (WHERE refunded < amount) AS last_kept
+        bool_or(refunded > 0) AS any_refund, count(*) AS n, max(us) FILTER (WHERE refunded < amount) AS last_kept
     FROM pays GROUP BY cust
 ),
 subs AS (
@@ -150,7 +172,7 @@ subs AS (
 )
 SELECT f.us, coalesce(f.amount_usd, 0), t.net, t.refunded_usd, t.any_refund, t.last_kept, k.gap,
     s.live, a.session_id IS NULL, a.channel, a.referrer_host, a.campaign,
-    f.ts >= b.lo AND f.ts < b.hi
+    f.ts >= b.lo AND f.ts < b.hi, t.n, v.channel, v.referrer_host
 FROM firsts f
 CROSS JOIN bounds b
 JOIN totals t USING (cust)
@@ -158,6 +180,9 @@ LEFT JOIN kept k USING (cust)
 LEFT JOIN subs s ON s.provider = f.provider AND s.customer_id = f.customer_id
 LEFT JOIN attribution a ON a.site_id = $site AND a.provider = f.provider
     AND a.provider_payment_id = f.provider_payment_id
+LEFT JOIN touches st ON st.site_id = $site AND st.session_id = a.session_id
+LEFT JOIN first_touches v ON v.site_id = $site AND v.visitor_id = coalesce(f.visitor_id, st.visitor_id)
+    AND v.ts <= f.ts
 WHERE NOT f.is_renewal AND ((f.ts >= b.lo AND f.ts < b.hi) OR f.us > $now - 60 * 86400000000)
 ";
 
@@ -275,6 +300,14 @@ pub(crate) fn customers(
                 referrer_host: r.get(10)?,
                 campaign: r.get(11)?,
                 in_range: r.get(12)?,
+                payments: r.get::<_, i64>(13)? as u64,
+                first_source: match r.get::<_, Option<String>>(14)? {
+                    Some(channel) => Some(crate::stats::source(
+                        r.get::<_, Option<String>>(15)?.as_deref(),
+                        &channel,
+                    )),
+                    None => None,
+                },
             })
         },
     )?;
@@ -328,12 +361,75 @@ pub fn summarize(
         channels: shares(aggregate(list, now, Some(By::Channel)), &total),
         referrers: shares(aggregate(list, now, Some(By::Referrer)), &total),
         campaigns: shares(aggregate(list, now, Some(By::Campaign)), &total),
+        sources: by_first_source(list),
         total,
         headline: None,
         status_sources,
     };
     r.headline = headline(&r);
     r
+}
+
+/// Customers acquired in the range, grouped by the source of their first visit.
+fn by_first_source(list: &[Customer]) -> Vec<SourceLtv> {
+    let mut rows: Vec<(SourceLtv, u64)> = Vec::new();
+    for c in list.iter().filter(|c| c.in_range) {
+        let source = c.first_source.as_deref().unwrap_or("Unknown");
+        let i = rows
+            .iter()
+            .position(|r| r.0.source == source)
+            .unwrap_or_else(|| {
+                rows.push((
+                    SourceLtv {
+                        source: source.into(),
+                        customers: 0,
+                        lifetime_usd: 0.0,
+                        avg_usd: 0.0,
+                        renewals: 0,
+                        repeat_share: 0.0,
+                    },
+                    0,
+                ));
+                rows.len() - 1
+            });
+        let (r, repeat) = &mut rows[i];
+        r.customers += 1;
+        r.lifetime_usd += c.net_usd;
+        r.renewals += c.payments.saturating_sub(1);
+        *repeat += (c.payments > 1) as u64;
+    }
+    let mut out: Vec<SourceLtv> = rows
+        .into_iter()
+        .map(|(mut r, repeat)| {
+            r.avg_usd = r.lifetime_usd / r.customers as f64;
+            r.repeat_share = repeat as f64 / r.customers as f64;
+            r
+        })
+        .collect();
+    out.sort_by(|a, b| {
+        (a.source == "Unknown")
+            .cmp(&(b.source == "Unknown"))
+            .then(b.lifetime_usd.total_cmp(&a.lifetime_usd))
+            .then(a.source.cmp(&b.source))
+    });
+    if out.len() > MAX_SOURCES {
+        let rest = out.split_off(MAX_SOURCES - 1);
+        let customers: u64 = rest.iter().map(|r| r.customers).sum();
+        let lifetime_usd: f64 = rest.iter().map(|r| r.lifetime_usd).sum();
+        let repeat: f64 = rest
+            .iter()
+            .map(|r| r.repeat_share * r.customers as f64)
+            .sum();
+        out.push(SourceLtv {
+            source: "Other sources".into(),
+            customers,
+            lifetime_usd,
+            avg_usd: lifetime_usd / customers as f64,
+            renewals: rest.iter().map(|r| r.renewals).sum(),
+            repeat_share: repeat / customers as f64,
+        });
+    }
+    out
 }
 
 fn key_of(c: &Customer, by: By) -> (bool, Option<String>) {
@@ -512,6 +608,8 @@ mod tests {
             referrer_host: Some("x.com".into()),
             campaign: None,
             in_range: true,
+            payments: 1,
+            first_source: Some("x.com".into()),
         }
     }
 
@@ -605,6 +703,7 @@ mod tests {
             channels: Vec::new(),
             referrers: rows,
             campaigns: Vec::new(),
+            sources: Vec::new(),
             headline: None,
             status_sources: Vec::new(),
         }
@@ -978,5 +1077,34 @@ mod tests {
             (sql.customers, sql.cohort_customers)
         );
         assert!((index.usd - sql.usd).abs() + (index.cohort_usd - sql.cohort_usd).abs() < 1e-9);
+    }
+
+    #[test]
+    fn lifetime_value_groups_by_first_source() {
+        let c = |source: Option<&str>, net: f64, payments: u64| Customer {
+            net_usd: net,
+            payments,
+            first_source: source.map(Into::into),
+            ..customer()
+        };
+        let out_of_range = Customer {
+            in_range: false,
+            ..c(Some("Reddit"), 99.0, 1)
+        };
+        let rows = by_first_source(&[
+            c(Some("Reddit"), 10.0, 1),
+            c(Some("Reddit"), 30.0, 3),
+            c(None, 5.0, 1),
+            out_of_range,
+        ]);
+        assert_eq!(rows.len(), 2);
+        let r = &rows[0];
+        assert_eq!(r.source, "Reddit");
+        assert_eq!((r.customers, r.renewals), (2, 2));
+        assert_eq!(
+            (r.lifetime_usd, r.avg_usd, r.repeat_share),
+            (40.0, 20.0, 0.5)
+        );
+        assert_eq!(rows[1].source, "Unknown");
     }
 }

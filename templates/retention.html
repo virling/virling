@@ -52,6 +52,22 @@
     <a href="https://docs.virling.com/attribution/retention.html">How this is counted</a>
   </div>
 </section>
+{% if !sources.is_empty() %}
+<section class="box ltv">
+  <div class="ltv-head"><h2>Lifetime value by first source</h2><span class="dim">Customers who first paid in this range, by where their first visit came from. Net of refunds.</span></div>
+  <div class="ltv-row th"><span>Source</span><span class="num">Customers</span><span class="num">Lifetime revenue</span><span class="num">Avg value</span><span class="num">Renewals</span><span class="num">Repeat share</span></div>
+  {% for r in sources %}
+  <div class="ltv-row">
+    <span class="t">{{ r.icon|safe }}<span class="lbl">{{ r.label }}</span></span>
+    <span class="num" data-k="Customers">{{ r.customers }}</span>
+    <span class="num rev" data-k="Lifetime revenue">{{ r.lifetime }}</span>
+    <span class="num" data-k="Avg value">{{ r.avg }}</span>
+    <span class="num" data-k="Renewals">{{ r.renewals }}</span>
+    <span class="num" data-k="Repeat share">{{ r.repeat }}</span>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
 {% if !status_note.is_empty() %}<p class="dim rt-note">{{ status_note }}</p>{% endif %}
 {% endif %}
 {% endblock %}

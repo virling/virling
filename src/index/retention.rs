@@ -73,6 +73,7 @@ impl SiteIndex {
             refunded_usd: f64,
             any_refund: bool,
             kept: Vec<(i64, &'a str)>,
+            count: u64,
         }
         fn id(p: &Pay) -> (i64, &str) {
             (p.ts, &p.row.provider_payment_id)
@@ -86,7 +87,9 @@ impl SiteIndex {
                 refunded_usd: 0.0,
                 any_refund: false,
                 kept: Vec::new(),
+                count: 0,
             });
+            a.count += 1;
             if id(p) < id(a.first) {
                 a.first = p;
             }
@@ -115,6 +118,21 @@ impl SiteIndex {
             a.kept.sort_unstable();
             let n = a.kept.len();
             let touch = row.touch.as_ref();
+            let first_source = self
+                .pay_visitor(f)
+                .or_else(|| {
+                    self.pay_session(f)
+                        .map(|s| self.sessions[s as usize].visitor)
+                })
+                .map(|v| self.visitors[v as usize].first_touch)
+                .filter(|&s| s != NONE && self.sessions[s as usize].touch <= f.ts)
+                .map(|s| {
+                    let sess = &self.sessions[s as usize];
+                    crate::stats::source(
+                        self.strings.name(sess.cols[REFERRER]),
+                        &self.path_name(sess.cols[CHANNEL]),
+                    )
+                });
             let end = row
                 .customer_id
                 .as_deref()
@@ -137,6 +155,8 @@ impl SiteIndex {
                     referrer_host: touch.and_then(|t| t.referrer_host.clone()),
                     campaign: touch.and_then(|t| t.campaign.clone()),
                     in_range: false,
+                    payments: a.count,
+                    first_source,
                 },
             ));
         }
