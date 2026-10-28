@@ -609,6 +609,12 @@ fn pre(p: &Period, first: Option<Date>, days: &[DayPoint]) -> Option<(f64, Strin
     }
 }
 
+fn joined<T, E>(r: Result<Result<T, E>, tokio::task::JoinError>) -> Result<T, StatusCode> {
+    r.ok()
+        .and_then(Result::ok)
+        .ok_or(StatusCode::SERVICE_UNAVAILABLE)
+}
+
 pub async fn dashboard(
     State(state): State<AppState>,
     account: Account,
@@ -720,6 +726,46 @@ async fn page(
     let now = OffsetDateTime::now_utc();
     let tz = ctx.site.timezone.clone();
     let online = state.presence.ids(&ctx.site.id);
+    // The Overview cards that read their own tables run while the main pass builds the charts.
+    let early = view.is_empty().then(|| {
+        let at = |d: Date| d.midnight().assume_offset(ctx.offset).unix_timestamp();
+        let (db, site) = (state.db.clone(), ctx.site.id.clone());
+        let (lo, hi) = (at(from), at(to + Duration::days(1)) - 1);
+        let links = tokio::spawn({
+            let (db, site) = (db.clone(), site.clone());
+            async move { crate::links::site_links(&db, &site).await }
+        });
+        let bots = tokio::spawn({
+            let (db, site) = (db.clone(), site.clone());
+            async move { crate::crawlers::hits(&db, &site, lo, hi).await }
+        });
+        let own = public.is_none().then(|| {
+            let spend = tokio::spawn({
+                let (db, site) = (db.clone(), site.clone());
+                async move { crate::spend::load(&db, &site).await }
+            });
+            let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
+            let pays = tokio::spawn(blocking(move || {
+                store.payment_list(&sid, &per, crate::stats::PaymentFilter::All, 500, 0)
+            }));
+            let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
+            let read = tokio::spawn(blocking(move || store.reading(&sid, &per)));
+            let earlier = filters.is_empty().then(|| {
+                let days = (to - from).whole_days() + 1;
+                let before = Period {
+                    from: from - Duration::days(days),
+                    to: from - Duration::days(1),
+                    tz: p.tz.clone(),
+                };
+                let (store, sid) = (state.events.clone(), site.clone());
+                tokio::spawn(blocking(move || {
+                    store.breakdown(&sid, &before, Dimension::Channel)
+                }))
+            });
+            (spend, pays, read, earlier)
+        });
+        (links, bots, own)
+    });
     let data = blocking(move || {
         let mut f = Filter::default();
         for (k, v) in &wanted {
@@ -1273,9 +1319,10 @@ async fn page(
                     cards::card(pick, mine, &base_numbers, &base, &params, &filter_href)
                 })
                 .collect();
-            let links = crate::links::site_links(&state.db, &ctx.site.id)
-                .await
-                .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+            let Some((links, bots, own)) = early else {
+                return Err(StatusCode::SERVICE_UNAVAILABLE);
+            };
+            let links = joined(links.await)?;
             cards::with_links(
                 &mut page.cards,
                 &links,
@@ -1288,14 +1335,7 @@ async fn page(
                 q.rest.get("link_error").map(String::as_str),
             );
             let at = |d: Date| d.midnight().assume_offset(ctx.offset).unix_timestamp();
-            let bots = crate::crawlers::hits(
-                &state.db,
-                &ctx.site.id,
-                at(from),
-                at(to + Duration::days(1)) - 1,
-            )
-            .await
-            .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+            let bots = joined(bots.await)?;
             let mut ai = cards::ai_card(
                 &sources,
                 &tabs[0].0,
@@ -1333,23 +1373,16 @@ async fn page(
                     );
                 }
             }
-            if public.is_none() {
-                let spend = crate::spend::load(&state.db, &ctx.site.id)
-                    .await
-                    .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+            if let Some((spend, pays, read, earlier)) = own {
+                let spend = joined(spend.await)?;
                 page.profit = crate::spend::profit_card(
                     &report.channels,
                     &crate::spend::parse(&spend),
                     (to - from).whole_days() + 1,
                 );
-                let (store, sid, per) = (state.events.clone(), ctx.site.id.clone(), p.clone());
-                let pays = blocking(move || {
-                    store.payment_list(&sid, &per, crate::stats::PaymentFilter::All, 500, 0)
-                })
-                .await?;
+                let pays = joined(pays.await)?;
                 page.topay = crate::topay::pay_card(&pays.rows);
-                let (store, sid, per) = (state.events.clone(), ctx.site.id.clone(), p.clone());
-                let read = blocking(move || store.reading(&sid, &per)).await?;
+                let read = joined(read.await)?;
                 page.reading = crate::reading::card(
                     &read,
                     q.rest.get("rd").is_some_and(|v| v == "buyers"),
@@ -1358,17 +1391,8 @@ async fn page(
                         format!("{}#reading", href(&[("rd", "buyers")])),
                     ),
                 );
-                if filters.is_empty() {
-                    let days = (to - from).whole_days() + 1;
-                    let before = Period {
-                        from: from - Duration::days(days),
-                        to: from - Duration::days(1),
-                        tz: p.tz.clone(),
-                    };
-                    let (store, sid) = (state.events.clone(), ctx.site.id.clone());
-                    let earlier =
-                        blocking(move || store.breakdown(&sid, &before, Dimension::Channel))
-                            .await?;
+                if let Some(earlier) = earlier {
+                    let earlier = joined(earlier.await)?;
                     page.why = crate::why::revenue_change(
                         cur.revenue_usd,
                         overview.previous.revenue_usd,
