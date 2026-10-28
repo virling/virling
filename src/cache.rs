@@ -5,6 +5,7 @@ use std::sync::{Arc, Mutex};
 use time::{OffsetDateTime, UtcOffset};
 use tokio::sync::broadcast;
 
+use crate::almost::AlmostPaid;
 use crate::events::{Event, EventStore, LatestPageview, Payment, Read};
 use crate::providers::Subscription;
 use crate::reading::ReadRow;
@@ -326,6 +327,12 @@ impl<S: EventStore> EventStore for Cached<S> {
         })
     }
 
+    fn almost_paid(&self, site_id: &str, period: &Period) -> anyhow::Result<AlmostPaid> {
+        self.get(site_id, format!("almost_paid {period:?}"), || {
+            self.inner.almost_paid(site_id, period)
+        })
+    }
+
     fn payment_split(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ProviderSplit>> {
         self.get(site_id, format!("payment_split {period:?}"), || {
             self.inner.payment_split(site_id, period)
@@ -449,6 +456,7 @@ mod tests {
             city: None,
             host: None,
             language: None,
+            direct: None,
         }
     }
 

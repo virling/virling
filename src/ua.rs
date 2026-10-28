@@ -86,6 +86,33 @@ pub fn in_app_source(user_agent: &str) -> Option<&'static str> {
     .map(|(_, host)| *host)
 }
 
+/// How a visit with no referrer or campaign arrived, as named under Direct.
+#[cfg(not(target_arch = "wasm32"))]
+pub fn direct_kind(user_agent: &str, checkout_return: bool, shared: bool) -> &'static str {
+    if checkout_return {
+        return "Checkout return";
+    }
+    let ua = user_agent.to_ascii_lowercase();
+    [
+        (&["instagram"][..], "Instagram app"),
+        (&["musical_ly", "bytedancewebview", "tiktok"], "TikTok app"),
+        (&["telegram"], "Telegram app"),
+        (&["reddit"], "Reddit app"),
+        (&["twitter"], "X app"),
+        (&["gsa/"], "Google app"),
+    ]
+    .iter()
+    .find(|(marks, _)| marks.iter().any(|m| ua.contains(m)))
+    .map_or(
+        if shared {
+            "Shared link"
+        } else {
+            "Typed or bookmark"
+        },
+        |(_, name)| name,
+    )
+}
+
 pub fn browser(user_agent: &str) -> &'static str {
     if user_agent.contains("Edg/") {
         "Edge"
@@ -179,5 +206,25 @@ mod tests {
         assert_eq!(device(Some(390)), "Mobile");
         assert_eq!(device(Some(800)), "Tablet");
         assert_eq!(device(Some(1440)), "Desktop");
+    }
+
+    #[test]
+    #[cfg(not(target_arch = "wasm32"))]
+    fn direct_visits_are_told_apart() {
+        let ios = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15";
+        let kind = |ua: &str, back, shared| direct_kind(ua, back, shared);
+        assert_eq!(kind(ios, false, false), "Typed or bookmark");
+        assert_eq!(kind(ios, false, true), "Shared link");
+        assert_eq!(kind(ios, true, true), "Checkout return");
+        for (marker, name) in [
+            ("Instagram 330.0", "Instagram app"),
+            ("musical_ly_33.0", "TikTok app"),
+            ("Telegram-iOS/10.0", "Telegram app"),
+            ("Reddit/Version 2024.20", "Reddit app"),
+            ("Twitter for iPhone", "X app"),
+            ("GSA/300.0 Mobile/15E148", "Google app"),
+        ] {
+            assert_eq!(kind(&format!("{ios} {marker}"), false, false), name);
+        }
     }
 }

@@ -267,14 +267,18 @@ pub async fn page(
             .sources
             .iter()
             .map(|x| SourceView {
-                icon: icons::source(
-                    if x.source == "Unknown" {
-                        "Unattributed"
-                    } else {
-                        &x.source
-                    },
-                    16,
-                ),
+                icon: if x.source == "Other sources" {
+                    icons::glyph("globe", 16, "var(--ink-2)")
+                } else {
+                    icons::source(
+                        if x.source == "Unknown" {
+                            "Unattributed"
+                        } else {
+                            &x.source
+                        },
+                        16,
+                    )
+                },
                 label: x.source.clone(),
                 customers: group(x.customers),
                 lifetime: money(x.lifetime_usd),

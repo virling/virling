@@ -38,7 +38,7 @@ pub struct DashboardQuery {
 }
 
 /// Filter params, and the first-pageview column each one matches; "viewed" matches any page of the visit.
-const FILTERS: [(&str, &str); 12] = [
+const FILTERS: [(&str, &str); 13] = [
     ("channel", "channel"),
     ("source", "referrer_host"),
     ("campaign", "utm_campaign"),
@@ -51,6 +51,7 @@ const FILTERS: [(&str, &str); 12] = [
     ("device", "device"),
     ("browser", "browser"),
     ("os", "os"),
+    ("direct", "direct"),
 ];
 
 /// Params kept by every link besides the range, filters and card tabs.
@@ -160,6 +161,7 @@ struct DashboardPage {
     profit: Option<crate::spend::ProfitCard>,
     topay: Option<crate::topay::PayCard>,
     reading: Option<crate::reading::ReadCard>,
+    almost: Option<crate::almost::AlmostCard>,
     why: Option<String>,
     goals: Option<goals::GoalsView>,
     visitors: Option<views::VisitorsView>,
@@ -191,6 +193,7 @@ struct PublicPage {
     cash: Vec<cards::CashRow>,
     profit: Option<crate::spend::ProfitCard>,
     reading: Option<crate::reading::ReadCard>,
+    almost: Option<crate::almost::AlmostCard>,
     topay: Option<crate::topay::PayCard>,
     why: Option<String>,
     retention: Option<views::RetentionView>,
@@ -363,6 +366,10 @@ fn chip_view(key: &str, value: &str) -> (String, String) {
         "city" => (icons::glyph("pin", 16, "var(--ink-2)"), value.to_string()),
         "language" => (cards::language_icon(value), cards::language_name(value)),
         "device" => (icons::device(value), value.to_string()),
+        "direct" => (
+            icons::glyph("direct", 16, "var(--ink-2)"),
+            value.to_string(),
+        ),
         _ => (icons::ua(value), value.to_string()),
     }
 }
@@ -750,6 +757,8 @@ async fn page(
             }));
             let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
             let read = tokio::spawn(blocking(move || store.reading(&sid, &per)));
+            let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
+            let almost = tokio::spawn(blocking(move || store.almost_paid(&sid, &per)));
             let earlier = filters.is_empty().then(|| {
                 let days = (to - from).whole_days() + 1;
                 let before = Period {
@@ -762,7 +771,7 @@ async fn page(
                     store.breakdown(&sid, &before, Dimension::Channel)
                 }))
             });
-            (spend, pays, read, earlier)
+            (spend, pays, read, almost, earlier)
         });
         (links, bots, own)
     });
@@ -828,10 +837,19 @@ async fn page(
                 let mut tabs = Vec::new();
                 for t in cards::all_tabs() {
                     let rows = rows_of(t.dimension())?;
-                    let kids = match t.kids() {
+                    let mut kids = match t.kids() {
                         Some(d) => rows_of(Some(d))?,
                         None => Vec::new(),
                     };
+                    if t == cards::Tab::Channel {
+                        let direct = rows_of(Some(Dimension::DirectKind))?;
+                        kids.extend(direct.into_iter().filter(|r| !r.unattributed).filter_map(
+                            |mut r| {
+                                r.key = Some(format!("Direct|{}", r.key?));
+                                Some(r)
+                            },
+                        ));
+                    }
                     tabs.push((rows, kids));
                 }
                 let sources = rows_of(Some(Dimension::ChannelSource))?;
@@ -950,6 +968,7 @@ async fn page(
         profit: None,
         topay: None,
         reading: None,
+        almost: None,
         why: None,
         goals: None,
         visitors: None,
@@ -1373,7 +1392,7 @@ async fn page(
                     );
                 }
             }
-            if let Some((spend, pays, read, earlier)) = own {
+            if let Some((spend, pays, read, almost, earlier)) = own {
                 let spend = joined(spend.await)?;
                 page.profit = crate::spend::profit_card(
                     &report.channels,
@@ -1389,6 +1408,16 @@ async fn page(
                     (
                         format!("{}#reading", href(&[("rd", "")])),
                         format!("{}#reading", href(&[("rd", "buyers")])),
+                    ),
+                );
+                let almost = joined(almost.await)?;
+                page.almost = crate::almost::card(
+                    &almost,
+                    &report.channels,
+                    q.rest.get("ap").is_some_and(|v| v == "pages"),
+                    (
+                        format!("{}#almost", href(&[("ap", "")])),
+                        format!("{}#almost", href(&[("ap", "pages")])),
                     ),
                 );
                 if let Some(earlier) = earlier {
@@ -1491,6 +1520,7 @@ async fn page(
         profit: page.profit,
         topay: page.topay,
         reading: None,
+        almost: None,
         why: page.why,
         retention: page.retention,
     });
