@@ -2621,6 +2621,11 @@ pub(crate) mod tests {
         (dir, store, now.date())
     }
 
+    /// The full time zone and range matrix runs in CI; local runs skip the 400 day range and one zone.
+    pub(super) fn full_matrix() -> bool {
+        std::env::var_os("CI").is_some()
+    }
+
     pub(super) fn filters() -> Vec<Filter> {
         let one = |col: &'static str, v: Option<&str>| Filter {
             first: vec![(col, vec![v.map(str::to_string)])],

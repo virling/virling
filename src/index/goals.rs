@@ -187,7 +187,7 @@ mod tests {
     use time::Duration;
 
     use super::*;
-    use crate::index::tests::{SITE, check, filters, seeded};
+    use crate::index::tests::{SITE, check, filters, full_matrix, seeded};
     use crate::stats;
 
     #[test]
@@ -198,7 +198,10 @@ mod tests {
         let conn = store.conn_for_test();
         let z = Zones::default();
         let mut checked = 0;
-        for tz in ["UTC", "America/New_York"] {
+        for tz in ["UTC", "America/New_York"]
+            .into_iter()
+            .filter(|tz| full_matrix() || *tz != "UTC")
+        {
             for (from, to) in [
                 (today, today),
                 (today - Duration::days(6), today),
@@ -206,6 +209,9 @@ mod tests {
                 (today - Duration::days(400), today),
                 (today - Duration::days(45), today - Duration::days(40)),
             ] {
+                if !full_matrix() && (to - from).whole_days() > 100 {
+                    continue;
+                }
                 let p = Period {
                     from,
                     to,
