@@ -26,8 +26,7 @@
   </div>
   {% endfor %}
 </section>
-<section class="d3-cards" id="cards" data-sync>
-  {% for c in cards %}
+{% macro tabcard(c) %}
   <div class="d3-card d3-bc" id="{{ c.key }}">
     <div class="d3-bc-head"><h2>{{ c.title }}</h2><nav class="d3-tabs" aria-label="{{ c.label }}">{% for t in c.tabs %}<a href="{{ t.href }}" data-tab="{{ c.key }}-p{{ loop.index0 }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
     {% for p in c.panels %}
@@ -68,37 +67,77 @@
     </div>
     {% endfor %}
   </div>
-  {% if loop.index == 1 %}{% if let Some(a) = ai %}
-  <div class="d3-card d3-bc d3-ai" id="ai">
+{% endmacro %}
+<section class="d3-cards" id="cards" data-sync>
+  {% for c in cards %}{% if loop.index <= 2 %}{% call tabcard(c) %}{% endcall %}{% endif %}{% endfor %}
+  {% if let Some(g) = goal_card %}
+  <div class="d3-card d3-bc" id="goals">
+    <div class="d3-bc-head"><h2>Goals</h2><nav class="d3-tabs" aria-label="Goals view">{% for t in g.tabs %}<a href="{{ t.href }}" data-tab="goals-p{{ loop.index0 }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
+    <div class="d3-panel" id="goals-p0" data-card{% if g.on_list %} hidden{% endif %}>
+    {% if g.steps.is_empty() %}
+    <div class="d3-skel"></div><div class="d3-skel s"></div>
+    <div class="d3-empty"><b>No goals yet</b><span>Track signups and checkouts to see where visitors drop off.</span><a class="d3-link" href="{{ g.docs }}">Set up goals</a></div>
+    {% else %}
+    <div class="d3-row d3-goalrow th"><span>Step</span><span class="num">Visitors</span><span class="num">Of all</span></div>
+    {% for r in g.steps %}
+    <div class="d3-row d3-goalrow">
+      <div class="nmw"><span class="nm"><span class="ic">{{ r.icon|safe }}</span><span class="tx"><b>{{ r.name }}</b>{% if !r.drop.is_empty() %}<span class="dn{% if r.bad %} bad{% endif %}">{{ r.drop }}</span>{% endif %}</span></span></div>
+      <span class="num rv">{{ r.count }}</span>
+      <span class="num cv">{{ r.conv }}</span>
+    </div>
+    {% endfor %}
+    <div class="d3-foot"><span>{{ g.foot }}</span></div>
+    {% endif %}
+    </div>
+    <div class="d3-panel" id="goals-p1" data-card{% if !g.on_list %} hidden{% endif %}>
+    {% if g.goals.is_empty() %}
+    <div class="d3-skel"></div><div class="d3-skel s"></div>
+    <div class="d3-empty"><b>No goals yet</b><span>Track signups and checkouts to see where visitors drop off.</span><a class="d3-link" href="{{ g.docs }}">Set up goals</a></div>
+    {% else %}
+    <div class="d3-row d3-glrow th"><span>Goal</span><span class="num">Count</span><span class="num">Per visitor</span></div>
+    {% for r in g.goals %}
+    <div class="d3-row d3-glrow">
+      <div class="nmw"><span class="nm"><span class="tx"><b>{{ r.name }}</b><span>{{ r.sub }}</span></span></span></div>
+      <span class="num cv">{{ r.count }}</span>
+      <span class="num rv">{{ r.per_visitor }}</span>
+    </div>
+    {% endfor %}
+    <div class="d3-foot"><span>{{ g.foot }}</span><a href="{{ g.docs }}">Setup</a></div>
+    {% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% if let Some(a) = ai %}
+  <div class="d3-card d3-bc d3-ai d3-wide" id="ai">
     <div class="d3-bc-head"><h2>AI</h2>{% if !a.rows.is_empty() %}<div class="d3-ai-cmp" aria-label="AI share of visitors and of revenue">
       <span class="l">Visitors</span><span class="t"><i style="width:{{ "{:.1}"|format(a.visitors_share) }}%"></i></span><b>{{ "{:.0}"|format(a.visitors_share) }}%</b>
       <span class="l">Revenue</span><span class="t rv"><i style="width:{{ "{:.1}"|format(a.revenue_share) }}%"></i></span><b>{{ "{:.0}"|format(a.revenue_share) }}%</b>
-    </div>{% endif %}{% if let Some(n) = a.answers %}<nav class="d3-tabs" aria-label="AI view"><a href="{{ n.tabs.0 }}" data-tab="ai-p0"{% if !n.on %} class="on" aria-current="true"{% endif %}>Visits</a><a href="{{ n.tabs.1 }}" data-tab="ai-p1"{% if n.on %} class="on" aria-current="true"{% endif %}>Answers</a></nav>{% endif %}</div>
-    <div class="d3-panel" id="ai-p0"{% if let Some(n) = a.answers %}{% if n.on %} hidden{% endif %}{% endif %}>
+    </div>{% endif %}<a class="d3-link" href="{{ a.docs }}">Setup</a><nav class="d3-tabs" aria-label="AI view">{% for t in a.tabs %}<a href="{{ t.href }}" data-tab="{{ t.panel }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
+    {% for t in a.tabs %}{% if t.panel == "ai-crawls" %}
+    <div class="d3-panel" id="ai-crawls"{% if !t.on %} hidden{% endif %}>
     {% if a.rows.is_empty() %}
     <div class="d3-empty"><span class="d3-ai-logos">{% for l in a.logos %}{{ l|safe }}{% endfor %}</span><b>No AI activity yet</b><span>Visitors who click through from ChatGPT, Claude, Perplexity and others show up here, with the pages GPTBot, ClaudeBot and other AI crawlers read. Most crawlers never run JavaScript, so add the server snippet to count them.</span><a class="d3-link" href="{{ a.docs }}">Add the snippet</a></div>
     {% else %}
-    <div class="d3-row d3-airow th"><span>Company</span><span class="num pg">Pages read</span><span class="num v">Visitors</span><span class="num rv">Revenue</span><span class="num pv">Per visitor</span></div>
+    <div class="d3-row d3-crawlrow th"><span>Company</span><span>Bots</span><span class="num pg">Pages read</span></div>
     {% for r in a.rows %}
-    <div class="d3-row d3-airow">
+    <div class="d3-row d3-crawlrow">
       <div class="nmw">
         {% if r.bar.href.is_empty() %}<span class="nm">{% else %}<a class="nm" href="{{ r.bar.href }}" title="Show only {{ r.bar.name }}">{% endif %}
           <span class="ic">{{ r.bar.icon|safe }}</span>
           <span class="tx"><b>{{ r.bar.name }}</b>{% if !r.bar.sub.is_empty() %}<span>{{ r.bar.sub }}</span>{% endif %}</span>
         {% if r.bar.href.is_empty() %}</span>{% else %}</a>{% endif %}
       </div>
-      <span class="num pg"{% if !r.pages_title.is_empty() %} title="{{ r.pages_title }}"{% endif %}>{{ r.pages }}</span>
-      <span class="num v">{{ r.bar.visitors }}</span>
-      <span class="num rv">{{ r.bar.revenue }}</span>
-      <span class="num pv">{{ r.bar.per_visitor }}{% if r.bar.small %}<small>small sample</small>{% endif %}</span>
+      <span class="bots"{% if !r.pages_title.is_empty() %} title="{{ r.pages_title }}"{% endif %}>{% if r.bots.is_empty() %}&ndash;{% else %}{{ r.bots }}{% endif %}</span>
+      <span class="num pg">{{ r.pages }}</span>
     </div>
     {% endfor %}
     {% if !a.crawled %}<p class="d3-hint">AI crawlers never run the script, so the pages they read are not counted yet. <a class="d3-link" href="{{ a.docs }}">Add the server snippet</a></p>{% endif %}
-    <div class="d3-foot">{% if !a.spark.is_empty() %}<div class="d3-spark"><span>AI share of revenue</span><svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><path d="{{ a.spark }}" fill="none" stroke="currentColor" style="color:var(--revenue)" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg></div>{% endif %}<span>{{ a.trend }}</span><a href="{{ a.docs }}">Setup</a></div>
+    <div class="d3-foot">{% if !a.spark.is_empty() %}<div class="d3-spark"><span>AI share of revenue</span><svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><path d="{{ a.spark }}" fill="none" stroke="currentColor" style="color:var(--revenue)" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg></div>{% endif %}<span>{{ a.trend }}</span></div>
     {% endif %}
     </div>
+    {% else if t.panel == "ai-answers" %}
     {% if let Some(n) = a.answers %}
-    <div class="d3-panel" id="ai-p1"{% if !n.on %} hidden{% endif %}>
+    <div class="d3-panel" id="ai-answers"{% if !t.on %} hidden{% endif %}>
     {% if n.rows.is_empty() %}
     <div class="d3-empty"><b>No AI answers yet</b><span>When ChatGPT, Claude or Perplexity open your pages to answer someone, it shows here. They never run JavaScript, so add the server snippet to count them.{% if !n.note.is_empty() %} {{ n.note }}{% endif %}</span><a class="d3-link" href="{{ a.docs }}">Add the snippet</a></div>
     {% else %}
@@ -119,13 +158,13 @@
     {% endif %}
     </div>
     {% endif %}
-  </div>
-  {% if !cash.is_empty() %}
-  <div class="d3-card d3-bc" id="ai-cash">
-    <div class="d3-bc-head"><h2>AI to cash</h2><span class="d3-sub">crawled, named, visited, paid</span></div>
-    <div class="d3-panel">
-    <div class="d3-row d3-cashrow th"><span>Assistant</span><span class="num pg">Pages read</span><span class="num nd">Names you</span><span class="num v">Visitors</span><span class="num rv">Revenue</span></div>
-    {% for r in cash %}
+    {% else %}
+    <div class="d3-panel" id="ai-funnel"{% if !t.on %} hidden{% endif %}>
+    {% if a.cash.is_empty() %}
+    <div class="d3-empty"><b>No AI activity yet</b><span>Crawled, named, visited and paid show here once an assistant reads or sends someone to your site.</span><a class="d3-link" href="{{ a.docs }}">Add the snippet</a></div>
+    {% else %}
+    <div class="d3-row d3-cashrow th"><span>Assistant</span><span class="num pg">Crawled</span><span class="num nd">Named</span><span class="num v">Visited</span><span class="num rv">Revenue</span></div>
+    {% for r in a.cash %}
     <div class="d3-row d3-cashrow">
       <div class="nmw"><span class="nm"><span class="ic">{{ r.icon|safe }}</span><span class="tx"><b>{{ r.name }}</b></span></span></div>
       <span class="num pg">{{ r.pages }}</span>
@@ -134,12 +173,33 @@
       <span class="num rv">{{ r.revenue }}</span>
     </div>
     {% endfor %}
-    <div class="d3-foot"><span>Pages read by its crawler. Names you: answers that mention your site.</span></div>
+    <div class="d3-foot"><span>Pages read by its crawler. Named: answers that mention your site.</span></div>
+    {% endif %}
+    </div>
+    {% endif %}{% endfor %}
+  </div>
+  {% endif %}
+  {% if let Some(c) = customers %}
+  <div class="d3-card d3-bc" id="customers">
+    <div class="d3-bc-head"><h2>Recent customers</h2></div>
+    <div class="d3-panel">
+    {% if c.rows.is_empty() %}
+    <div class="d3-skel"></div><div class="d3-skel s"></div>
+    <div class="d3-empty"><b>No payments yet</b><span>Connect payments to see who paid and how they found you.</span><a class="d3-link" href="{{ c.payments }}">Payments</a></div>
+    {% else %}
+    <div class="d3-row d3-custrow th"><span>Customer</span><span class="num">Paid</span></div>
+    {% for r in c.rows %}
+    {% if r.href.is_empty() %}<div class="d3-row d3-custrow">{% else %}<a class="d3-row d3-custrow" href="{{ r.href }}" title="Open the visitor timeline">{% endif %}
+      <div class="nmw"><span class="nm"><span class="av">{{ r.avatar|safe }}</span><span class="tx"><b>{{ r.name }}</b><span class="path">{% for s in r.path %}{% if !loop.first %}<i>&rarr;</i>{% endif %}<em>{{ s.icon|safe }}{{ s.label }}</em>{% endfor %}</span></span></span></div>
+      <span class="num pay"><b>{{ r.amount }}</b><small>{{ r.visits }}, {{ r.wait }}</small></span>
+    {% if r.href.is_empty() %}</div>{% else %}</a>{% endif %}
+    {% endfor %}
+    <div class="d3-foot"><span>{{ c.foot }}</span><a href="{{ c.payments }}">Payments</a></div>
+    {% endif %}
     </div>
   </div>
   {% endif %}
-  {% endif %}{% endif %}
-  {% endfor %}
+  {% for c in cards %}{% if loop.index > 2 %}{% call tabcard(c) %}{% endcall %}{% endif %}{% endfor %}
   {% if let Some(p) = profit %}
   <div class="d3-card d3-bc" id="profit">
     <div class="d3-bc-head"><h2>Profit by channel</h2><span class="d3-sub">spend is your monthly amount for this range</span></div>

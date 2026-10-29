@@ -175,9 +175,6 @@ pub struct AnswersTab {
     /// The empty state's last sentence about mentions.
     pub(super) note: &'static str,
     pub(super) settings: String,
-    pub(super) on: bool,
-    /// Links to the Visits and Answers tabs.
-    pub(super) tabs: (String, String),
 }
 
 pub fn tab(
@@ -186,7 +183,6 @@ pub fn tab(
     sources: &[BreakdownRow],
     href: impl Fn(Assistant) -> String,
     settings: String,
-    on: bool,
     hosted: bool,
 ) -> AnswersTab {
     let rows = Assistant::ALL
@@ -248,8 +244,6 @@ pub fn tab(
             (false, true) => "",
         },
         settings,
-        on,
-        tabs: (String::new(), String::new()),
     }
 }
 
@@ -612,7 +606,6 @@ mod tests {
             &sources,
             |a| format!("/a/{}", a.as_str()),
             "/s".into(),
-            true,
             false,
         );
         let names: Vec<_> = tab.rows.iter().map(|r| r.name).collect();
@@ -658,7 +651,6 @@ mod tests {
             &[],
             |_| String::new(),
             String::new(),
-            false,
             true,
         );
         assert!(none.rows.is_empty() && none.link.is_empty() && none.note.is_empty());
@@ -675,7 +667,6 @@ mod tests {
             &[],
             |_| String::new(),
             String::new(),
-            false,
             true,
         );
         assert_eq!(free.note, "Mentions are included on paid plans.");

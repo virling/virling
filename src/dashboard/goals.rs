@@ -253,7 +253,7 @@ pub async fn delete(
 }
 
 /// "trial_started" -> "Trial started".
-fn humanize(name: &str) -> String {
+pub(super) fn humanize(name: &str) -> String {
     let s = name.replace(['_', '-'], " ");
     let mut c = s.chars();
     c.next()

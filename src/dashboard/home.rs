@@ -11,8 +11,8 @@ use time::{Date, Duration, OffsetDateTime};
 
 use super::daterange::{Picked, RangeMenu};
 use super::{
-    Ctx, Opt, Shell, answers, blocking, cards, day, delta, encode, goals, group, insight, link,
-    load, money, plural, provider_name, source_of, usd, views, visit_time,
+    Ctx, Opt, Shell, answers, blocking, cards, customers, day, delta, encode, goal_card, goals,
+    group, insight, link, load, money, plural, provider_name, source_of, usd, views, visit_time,
 };
 use crate::alias::Names;
 use crate::app::AppState;
@@ -55,8 +55,8 @@ const FILTERS: [(&str, &str); 13] = [
 ];
 
 /// Params kept by every link besides the range, filters and card tabs.
-const KEEP: [&str; 11] = [
-    "compare", "view", "chart", "gtab", "vtab", "ret", "s1", "s2", "s3", "funnel", "ai",
+const KEEP: [&str; 12] = [
+    "compare", "view", "chart", "gtab", "vtab", "ret", "s1", "s2", "s3", "funnel", "ai", "goals",
 ];
 
 const VIEWS: [(&str, &str); 5] = [
@@ -157,13 +157,14 @@ struct DashboardPage {
     chart_tabs: Vec<Opt>,
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
-    cash: Vec<cards::CashRow>,
     profit: Option<crate::spend::ProfitCard>,
     topay: Option<crate::topay::PayCard>,
     reading: Option<crate::reading::ReadCard>,
     almost: Option<crate::almost::AlmostCard>,
     why: Option<String>,
     goals: Option<goals::GoalsView>,
+    goal_card: Option<goal_card::Card>,
+    customers: Option<customers::Card>,
     visitors: Option<views::VisitorsView>,
     payments: Option<views::PaymentsView>,
     retention: Option<views::RetentionView>,
@@ -190,13 +191,14 @@ struct PublicPage {
     chart_tabs: Vec<Opt>,
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
-    cash: Vec<cards::CashRow>,
     profit: Option<crate::spend::ProfitCard>,
     reading: Option<crate::reading::ReadCard>,
     almost: Option<crate::almost::AlmostCard>,
     topay: Option<crate::topay::PayCard>,
     why: Option<String>,
     retention: Option<views::RetentionView>,
+    goal_card: Option<goal_card::Card>,
+    customers: Option<customers::Card>,
 }
 
 /// One-line code that passes the visitor ID into a provider's checkout.
@@ -753,8 +755,13 @@ async fn page(
             });
             let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
             let pays = tokio::spawn(blocking(move || {
-                store.payment_list(&sid, &per, crate::stats::PaymentFilter::All, 500, 0)
+                let page =
+                    store.payment_list(&sid, &per, crate::stats::PaymentFilter::All, 500, 0)?;
+                let seen = customers::journeys(&*store, &sid, &page.rows, window_days)?;
+                anyhow::Ok((page, seen))
             }));
+            let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
+            let goals = tokio::spawn(blocking(move || goal_card::load(&*store, &sid, &per)));
             let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
             let read = tokio::spawn(blocking(move || store.reading(&sid, &per)));
             let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
@@ -771,7 +778,7 @@ async fn page(
                     store.breakdown(&sid, &before, Dimension::Channel)
                 }))
             });
-            (spend, pays, read, almost, earlier)
+            (spend, pays, goals, read, almost, earlier)
         });
         (links, bots, own)
     });
@@ -964,13 +971,14 @@ async fn page(
         chart_tabs: Vec::new(),
         cards: Vec::new(),
         ai: None,
-        cash: Vec::new(),
         profit: None,
         topay: None,
         reading: None,
         almost: None,
         why: None,
         goals: None,
+        goal_card: None,
+        customers: None,
         visitors: None,
         payments: None,
         retention: None,
@@ -1382,25 +1390,35 @@ async fn page(
                     &sources,
                     drawer,
                     format!("{}#ai-answers", site_url("settings")),
-                    q.rest.get("ai").is_some_and(|v| v == "answers"),
                     state.config.hosted,
                 ));
-                if let Some(n) = ai.answers.as_mut() {
-                    n.tabs = (
-                        format!("{}#ai", href(&[("ai", "")])),
-                        format!("{}#ai", href(&[("ai", "answers")])),
-                    );
-                }
             }
-            if let Some((spend, pays, read, almost, earlier)) = own {
+            if let Some((spend, pays, goals, read, almost, earlier)) = own {
                 let spend = joined(spend.await)?;
                 page.profit = crate::spend::profit_card(
                     &report.channels,
                     &crate::spend::parse(&spend),
                     (to - from).whole_days() + 1,
                 );
-                let pays = joined(pays.await)?;
+                let (pays, seen) = joined(pays.await)?;
                 page.topay = crate::topay::pay_card(&pays.rows);
+                let names = Names::load(&state.db, &ctx.site.id, customers::keys(&pays.rows))
+                    .await
+                    .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+                page.customers = Some(customers::card(
+                    &pays.rows,
+                    &seen,
+                    &names,
+                    &ctx.site.domain,
+                    cur.visitors,
+                ));
+                let goals = joined(goals.await)?;
+                page.goal_card = Some(goal_card::card(
+                    &goals,
+                    q.rest.get("goals").is_some_and(|v| v == "list"),
+                    cur.visitors,
+                    |v| href(&[("goals", v)]),
+                ));
                 let read = joined(read.await)?;
                 page.reading = crate::reading::card(
                     &read,
@@ -1430,7 +1448,9 @@ async fn page(
                     );
                 }
             }
-            page.cash = cards::ai_cash(&ai);
+            cards::ai_tabs(&mut ai, q.rest.get("ai").map(String::as_str), |v| {
+                href(&[("ai", v)])
+            });
             page.ai = Some(ai);
         }
         Data::Goals(g) => {
@@ -1516,13 +1536,14 @@ async fn page(
         chart_tabs: page.chart_tabs,
         cards: page.cards,
         ai: page.ai,
-        cash: page.cash,
         profit: page.profit,
         topay: page.topay,
         reading: None,
         almost: None,
         why: page.why,
         retention: page.retention,
+        goal_card: None,
+        customers: None,
     });
     // Off means gone right away, so nothing may keep a copy.
     res.headers_mut()

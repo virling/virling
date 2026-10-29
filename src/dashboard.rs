@@ -22,7 +22,9 @@ pub(crate) type FilterHref<'a> = dyn Fn(&[(&'static str, String)]) -> String + '
 
 pub mod answers;
 mod cards;
+mod customers;
 pub(crate) mod daterange;
+mod goal_card;
 mod goals;
 mod home;
 mod insight;

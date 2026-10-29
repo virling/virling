@@ -26,7 +26,7 @@ fn pct(n: usize, of: usize) -> u32 {
     (n as f64 * 100.0 / of as f64).round() as u32
 }
 
-fn label(days: f64) -> String {
+pub(crate) fn label(days: f64) -> String {
     if days < 1.0 {
         "same day".into()
     } else {
