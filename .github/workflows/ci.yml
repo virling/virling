@@ -32,7 +32,7 @@ jobs:
           test "$(gzip -9c assets/v.js | wc -c)" -le 1600
       - run: node --test scripts/tracker.test.mjs
 
-  server:
+  clippy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,10 +40,70 @@ jobs:
         with:
           components: clippy
       - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: clippy
+      - run: cargo clippy --all-targets -- -D warnings
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: test
       - uses: taiki-e/install-action@v2
         with:
           tool: nextest@0.9.100
-      - run: cargo nextest run --no-fail-fast 2>&1 | grep -E "PASS|FAIL|SLOW|Summary"
+      - run: cargo nextest archive --archive-file tests.tar.zst
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tests
+          path: tests.tar.zst
+          retention-days: 1
+          compression-level: 0
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: rows
+            expr: test(=index::rows::tests::rows_match_sql)
+          - shard: reads
+            expr: test(=index::tests::index_reads_match_sql)
+          - shard: loads
+            expr: test(=events::payment_tests::events_written_while_the_index_loads_count_once)
+          - shard: order
+            expr: test(=index::tests::index_follows_out_of_order_events)
+          - shard: appends
+            expr: test(=events::payment_tests::concurrent_appends_keep_touches_exact)
+          - shard: goals
+            expr: test(=index::goals::tests::goals_and_funnels_match_sql)
+          - shard: mid
+            expr: test(=events::payment_tests::removing_sample_data_leaves_real_rows_and_the_index_exact) | test(=index::retention::tests::retention_and_mrr_match_sql) | test(=index::tests::store_reads_use_the_index_and_follow_new_events) | test(=index::tests::setup_matches_sql)
+          - shard: rest
+            expr: not (test(=index::rows::tests::rows_match_sql) | test(=index::tests::index_reads_match_sql) | test(=events::payment_tests::events_written_while_the_index_loads_count_once) | test(=index::tests::index_follows_out_of_order_events) | test(=events::payment_tests::concurrent_appends_keep_touches_exact) | test(=index::goals::tests::goals_and_funnels_match_sql) | test(=events::payment_tests::removing_sample_data_leaves_real_rows_and_the_index_exact) | test(=index::retention::tests::retention_and_mrr_match_sql) | test(=index::tests::store_reads_use_the_index_and_follow_new_events) | test(=index::tests::setup_matches_sql))
+    name: test (${{ matrix.shard }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: nextest@0.9.100
+      - uses: actions/download-artifact@v4
+        with:
+          name: tests
+      - run: cargo nextest run --archive-file tests.tar.zst --workspace-remap . -E '${{ matrix.expr }}'
+
+  server:
+    if: always()
+    needs: [clippy, test]
+    runs-on: ubuntu-latest
+    steps:
+      - run: test "${{ needs.clippy.result }}" = success && test "${{ needs.test.result }}" = success
 
   worker:
     runs-on: ubuntu-latest
