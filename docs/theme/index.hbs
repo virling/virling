@@ -62,8 +62,7 @@ window.virlingSearch = { index: "{{ resource "searchindex.js" }}", lunr: "{{ res
       var here = location.pathname.replace(/\/index\.html$|\.html$/, "").replace(/\/$/, "") || "/";
       document.querySelectorAll("#side a[href]").forEach(function (a) {
         var href = a.getAttribute("href");
-        if (/^[a-z]+:|^\//.test(href)) return;
-        a.setAttribute("href", path_to_root + href);
+        if (!/^[a-z]+:|^\//.test(href) && !a.closest("[data-abs]")) a.setAttribute("href", path_to_root + href);
         var p = a.pathname.replace(/\/index\.html$|\.html$/, "").replace(/\/$/, "") || "/";
         if (p === here) { a.classList.add("on"); a.setAttribute("aria-current", "page"); }
       });

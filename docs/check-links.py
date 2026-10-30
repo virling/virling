@@ -13,7 +13,7 @@ class Page(html.parser.HTMLParser):
         a = dict(attrs)
         if "id" in a:
             self.ids.add(a["id"])
-        if tag == "nav" and (self.side or a.get("id") == "side"):
+        if tag == "nav" and (self.side or a.get("id") == "side" and "data-abs" not in a):
             self.side += 1
         for key in ("href", "src"):
             if a.get(key):
@@ -43,6 +43,8 @@ for f, page in pages.items():
         target = (base / urllib.parse.unquote(url.path)).resolve() if url.path else f
         if target.is_dir():
             target = target / "index.html"
+        elif not target.exists() and target.with_name(target.name + ".html").exists():
+            target = target.with_name(target.name + ".html")
         if not target.exists():
             bad.append(f"{f.relative_to(book.resolve())}: {link} (missing file)")
         elif url.fragment and target in pages and url.fragment not in pages[target].ids:

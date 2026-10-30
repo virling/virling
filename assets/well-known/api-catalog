@@ -12,7 +12,7 @@
       "anchor": "https://beta.virling.com/api/v1",
       "service-doc": [
         {
-          "href": "https://docs.virling.com/reference/api.html",
+          "href": "https://docs.virling.com/reference/api",
           "type": "text/html"
         }
       ],
