@@ -587,6 +587,7 @@ a.ctl { text-decoration: none; }
 .chart .xa span.e { transform: translateX(-100%); }
 .hov { position: absolute; top: 0; bottom: 0; }
 .hov:hover { z-index: 3; }
+a.hov { color: inherit; text-decoration: none; }
 .hov .mk { position: absolute; left: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px var(--paper); }
 .hov .mk, .hov .tip { display: none; }
 .hov:hover .mk { display: block; }
@@ -643,6 +644,7 @@ a.ctl { text-decoration: none; }
 .d3-row .nmw { position: relative; min-width: 0; }
 .d3-row .nm { position: relative; height: 42px; display: flex; align-items: center; gap: 10px; padding: 0 10px 0 6px; border-radius: 9px; overflow: hidden; color: var(--ink); text-decoration: none; }
 .d3-row .chev + .nm, .d3-row .nmw:has(.chev) .nm { padding-right: 34px; }
+.d3-row a.nm:hover .tx b { text-decoration: underline; text-decoration-color: var(--ink-4); text-underline-offset: 3px; }
 .d3-row .ic, .d3-grow .ic, .d3-rrow .ic { position: relative; width: 28px; height: 28px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; background: var(--paper); box-shadow: 0 0 0 1px var(--rule); color: var(--ink-2); }
 .d3-row .ic .ico, .d3-rrow .ic .ico, .d3-grow .ic .ico { width: 16px; height: 16px; }
 .d3-row .tx { position: relative; display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
