@@ -1,0 +1,28 @@
+{
+  "api_version": "1.0",
+  "event": {
+    "type": "INITIAL_PURCHASE",
+    "id": "CD489E0E-5D52-4E03-966B-A7F17788E432",
+    "event_timestamp_ms": 1788000001000,
+    "app_id": "app1a2b3c4",
+    "app_user_id": "user_42",
+    "original_app_user_id": "$RCAnonymousID:abc",
+    "aliases": ["$RCAnonymousID:abc", "user_42"],
+    "product_id": "pro_monthly",
+    "period_type": "NORMAL",
+    "purchased_at_ms": 1788000000000,
+    "expiration_at_ms": 1790592000000,
+    "environment": "PRODUCTION",
+    "store": "RC_BILLING",
+    "price": 10.81,
+    "price_in_purchased_currency": 9.99,
+    "currency": "EUR",
+    "transaction_id": "170000123456789",
+    "original_transaction_id": "170000123456789",
+    "country_code": "DE",
+    "subscriber_attributes": {
+      "virling_vid": { "value": "vid_rc", "updated_at_ms": 1787999990000 },
+      "$email": { "value": "buyer@example.com", "updated_at_ms": 1787999990000 }
+    }
+  }
+}

@@ -19,6 +19,15 @@ pub fn minor_to_major(amount_minor: i64, currency: &str) -> f64 {
     }
 }
 
+/// A major-unit price, such as 9.99, in minor units of `currency`.
+pub fn major_to_minor(amount: f64, currency: &str) -> i64 {
+    if ZERO_DECIMAL.contains(&currency.to_ascii_uppercase().as_str()) {
+        amount.round() as i64
+    } else {
+        (amount * 100.0).round() as i64
+    }
+}
+
 /// USD exchange rates from the ECB via frankfurter.dev, refreshed twice a day.
 pub struct Rates {
     client: reqwest::Client,

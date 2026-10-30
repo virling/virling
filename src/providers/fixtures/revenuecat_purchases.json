@@ -1,0 +1,11 @@
+{
+  "object": "list",
+  "items": [
+    {"object": "purchase", "id": "purch1", "customer_id": "cust_1", "original_customer_id": "cust_1", "product_id": "prod1", "purchased_at": 1788000000000, "revenue_in_usd": {"currency": "USD", "gross": 9.99, "commission": 2.99, "tax": 0.75, "proceeds": 6.25}, "quantity": 1, "status": "owned", "environment": "production", "store": "play_store", "store_purchase_identifier": "GPA.1234", "ownership": "purchased", "country": "US"},
+    {"object": "purchase", "id": "purch2", "customer_id": "cust_1", "original_customer_id": "cust_1", "product_id": "prod2", "purchased_at": 1788100000000, "revenue_in_usd": {"currency": "USD", "gross": 4.99, "commission": 1.49, "tax": 0.0, "proceeds": 3.5}, "quantity": 1, "status": "refunded", "environment": "production", "store": "amazon", "store_purchase_identifier": 12345678, "ownership": "purchased", "country": "US"},
+    {"object": "purchase", "id": "purch3", "customer_id": "cust_1", "original_customer_id": "cust_1", "product_id": "prod1", "purchased_at": 1700000000000, "revenue_in_usd": {"currency": "USD", "gross": 9.99, "commission": 2.99, "tax": 0.75, "proceeds": 6.25}, "quantity": 1, "status": "owned", "environment": "production", "store": "app_store", "store_purchase_identifier": "1000001", "ownership": "purchased", "country": "US"},
+    {"object": "purchase", "id": "purch4", "customer_id": "cust_1", "original_customer_id": "cust_1", "product_id": "prod3", "purchased_at": 1788200000000, "revenue_in_usd": {"currency": "USD", "gross": 0, "commission": 0, "tax": 0, "proceeds": 0}, "quantity": 1, "status": "owned", "environment": "production", "store": "app_store", "store_purchase_identifier": "1000002", "ownership": "purchased", "country": "US"}
+  ],
+  "next_page": null,
+  "url": "/v2/projects/proj1/customers/cust_1/purchases"
+}

@@ -68,7 +68,12 @@ const res = await fetch("https://api.creem.io/v1/checkouts", {
     metadata: { virling_vid: req.cookies.virling_vid },
   }),
 });
-// Send the customer to (await res.json()).checkout_url{% else %}// LemonSqueezy: add the visitor ID as checkout custom data.
+// Send the customer to (await res.json()).checkout_url{% else if key == &"revenuecat" %}// RevenueCat (Node): set the customer attribute virling_vid before the purchase
+await fetch(`https://api.revenuecat.com/v2/projects/${projectId}/customers/${appUserId}/attributes`, {
+  method: "POST",
+  headers: { authorization: `Bearer ${process.env.REVENUECAT_SECRET_KEY}`, "content-type": "application/json" },
+  body: JSON.stringify({ attributes: [{ name: "virling_vid", value: req.cookies.virling_vid }] }),
+});{% else %}// LemonSqueezy: add the visitor ID as checkout custom data.
 // Not attributed yet: LemonSqueezy only returns custom data in
 // webhooks, which Virling does not receive yet.
 // Tag checkouts now and they will match once that ships.

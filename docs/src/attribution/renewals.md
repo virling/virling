@@ -11,6 +11,7 @@ A subscription renewal takes the attribution of the customer's first payment. If
 | Polar | The order's billing reason is `subscription_cycle`. |
 | LemonSqueezy | It is a subscription invoice with billing reason `renewal`. |
 | Creem | The customer already had a payment before it. |
+| RevenueCat | It arrives as a `RENEWAL` webhook event. |
 
 Upgrades and other plan changes count as renewals too, so they keep the first payment's channel: Stripe and Polar `subscription_update`, LemonSqueezy `updated`, and any later Dodo subscription payment.
 
