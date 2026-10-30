@@ -2001,6 +2001,8 @@ mod tests {
         assert_eq!(credited(&store).as_deref(), Some("referral"));
         store.rebuild_attribution("s", "first_touch", 90).unwrap();
         assert_eq!(credited(&store).as_deref(), Some("social"));
+        store.rebuild_attribution("s", "last_touch", 90).unwrap();
+        assert_eq!(credited(&store).as_deref(), Some("direct"));
         let touch = store
             .payment_list("s", &period(), PaymentFilter::All, 1, 0)
             .unwrap()
@@ -2099,7 +2101,11 @@ mod tests {
         store
             .upsert_payments(&[pay("p1", T, Some("v1"), Some("cus_1")), renewal])
             .unwrap();
-        for (model, session) in [("last_non_direct", "referral"), ("first_touch", "social")] {
+        for (model, session) in [
+            ("last_non_direct", "referral"),
+            ("first_touch", "social"),
+            ("last_touch", "direct"),
+        ] {
             store.rebuild_attribution("s", model, 90).unwrap();
             let mut got = touches(&store);
             got.sort();
