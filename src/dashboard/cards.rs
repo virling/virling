@@ -89,7 +89,9 @@ impl Tab {
 
     fn foot(self) -> &'static str {
         match self {
-            Tab::Channel => "Click a channel to filter. Open it to see its sites.",
+            Tab::Channel => {
+                "Click a channel to filter. A visitor who came from two channels counts in both."
+            }
             Tab::Source => "Click a source to filter.",
             Tab::Campaign => "Tracked links and utm_campaign tags.",
             Tab::Keyword => "From utm_term on your links.",

@@ -175,6 +175,7 @@ impl Transaction {
                 visitor_id,
                 customer_id: self.customer_id,
                 is_renewal: false,
+                email: None,
             });
         }
         let refunded: i64 = self
@@ -204,6 +205,7 @@ impl Transaction {
                 self.origin.as_str(),
                 "subscription_recurring" | "subscription_update" | "subscription_charge"
             ),
+            email: None,
         })
     }
 }
