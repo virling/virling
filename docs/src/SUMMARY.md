@@ -37,6 +37,7 @@
 - [LemonSqueezy](payments/lemonsqueezy.md)
 - [Creem](payments/creem.md)
 - [RevenueCat](payments/revenuecat.md)
+- [Paddle](payments/paddle.md)
 - [Link checkout to visits](payments/checkout.md)
 
 # Attribution

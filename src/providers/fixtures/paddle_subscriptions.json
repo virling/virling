@@ -1,0 +1,8 @@
+{
+  "data": [
+    {"id": "sub_1", "status": "active", "customer_id": "ctm_2", "currency_code": "USD", "items": [{"quantity": 2, "price": {"id": "pri_1", "unit_price": {"amount": "1500", "currency_code": "USD"}}}], "billing_cycle": {"interval": "month", "frequency": 1}, "scheduled_change": null},
+    {"id": "sub_3", "status": "active", "customer_id": "ctm_6", "currency_code": "USD", "items": [{"quantity": 1, "price": {"id": "pri_2", "unit_price": {"amount": "3000", "currency_code": "USD"}}}], "billing_cycle": {"interval": "month", "frequency": 3}, "scheduled_change": {"action": "cancel", "effective_at": "2026-11-01T00:00:00.000Z", "resume_at": null}},
+    {"id": "sub_4", "status": "canceled", "customer_id": "ctm_7", "currency_code": "EUR", "items": [{"quantity": 1, "price": {"id": "pri_3", "unit_price": {"amount": "2900", "currency_code": "EUR"}}}], "billing_cycle": {"interval": "month", "frequency": 1}, "scheduled_change": null}
+  ],
+  "meta": {"request_id": "req_2", "pagination": {"per_page": 200, "next": "https://api.paddle.com/subscriptions?after=sub_4", "has_more": false, "estimated_total": 3}}
+}
