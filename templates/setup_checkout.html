@@ -58,7 +58,14 @@ const checkout = await polar.checkouts.create({
 
 // Checkout links: add a custom field with the slug virling_vid
 // to the link. The Virling script fills it on click
-// (custom_field_data.virling_vid), so nothing else is needed.{% else %}// LemonSqueezy: add the visitor ID as checkout custom data.
+// (custom_field_data.virling_vid), so nothing else is needed.{% else if key == &"paddle" %}// Paddle (Paddle.js): pass the visitor ID as custom data
+Paddle.Checkout.open({
+  items: [{ priceId: "pri_...", quantity: 1 }],
+  customData: { virling_vid: window.virling?.vid?.() },
+});
+
+// Or on your server, POST /transactions with:
+// custom_data: { virling_vid: req.cookies.virling_vid }{% else %}// LemonSqueezy: add the visitor ID as checkout custom data.
 // Not attributed yet: LemonSqueezy only returns custom data in
 // webhooks, which Virling does not receive yet.
 // Tag checkouts now and they will match once that ships.

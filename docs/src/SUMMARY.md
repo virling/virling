@@ -35,6 +35,7 @@
 - [Dodo Payments](payments/dodo.md)
 - [Polar](payments/polar.md)
 - [LemonSqueezy](payments/lemonsqueezy.md)
+- [Paddle](payments/paddle.md)
 - [Link checkout to visits](payments/checkout.md)
 
 # Attribution

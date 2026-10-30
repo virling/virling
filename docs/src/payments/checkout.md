@@ -22,7 +22,7 @@ async function visitorId() {
 
 ## Per provider
 
-<div class="tabset" data-tabs="Stripe|Dodo Payments|Polar|LemonSqueezy" data-key="provider" aria-label="Payment provider"></div>
+<div class="tabset" data-tabs="Stripe|Dodo Payments|Polar|LemonSqueezy|Paddle" data-key="provider" aria-label="Payment provider"></div>
 
 ```js
 // Stripe Checkout (Node, stripe): pass the visitor ID on the session
@@ -87,6 +87,17 @@ location.href = url.href;
 // data.attributes.checkout_data.custom = { virling_vid: req.cookies.virling_vid }
 ```
 
+```js
+// Paddle (Paddle.js): pass the visitor ID as custom data
+Paddle.Checkout.open({
+  items: [{ priceId: "pri_...", quantity: 1 }],
+  customData: { virling_vid: window.virling?.vid?.() },
+});
+
+// Or on your server, POST /transactions with:
+// custom_data: { virling_vid: req.cookies.virling_vid }
+```
+
 ## Stripe
 
 Virling reads `metadata.virling_vid` on the charge or its PaymentIntent, then `metadata.virling_vid` or `client_reference_id` on the Checkout Session. See [Stripe](stripe.md).
@@ -102,6 +113,10 @@ Virling reads `virling_vid` from the order's `metadata`, its custom field data, 
 ## LemonSqueezy
 
 Tag checkouts with `checkout[custom][virling_vid]` now. Matching them is <span class="na">Not available yet</span> and waits on webhook support. See [LemonSqueezy](lemonsqueezy.md).
+
+## Paddle
+
+Virling reads `virling_vid` from the transaction's `custom_data`. With Paddle.js, pass it as `customData`. See [Paddle](paddle.md).
 
 ## Payment links
 

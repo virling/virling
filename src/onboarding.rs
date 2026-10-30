@@ -370,6 +370,14 @@ fn provider_card(p: Provider, selected: bool) -> ProviderCard {
             "https://docs.lemonsqueezy.com/guides/developer-guide/getting-started",
             "LemonSqueezy API keys cannot be made read-only and cover every store on your account. Virling reads orders and subscription invoices, adds a webhook to each store so payments link to visits, and stores the key encrypted. Delete it in LemonSqueezy at any time to revoke access.",
         ),
+        Provider::Paddle => (
+            "Paddle",
+            "API key",
+            "pdl_live_apikey_...",
+            "How to create a read-only key, 1 minute",
+            "https://developer.paddle.com/api-reference/about/api-keys",
+            "Create an API key with the transaction.read and adjustment.read permissions, plus subscription.read so retention knows who still pays. No other permissions are needed. Live and sandbox keys both work.",
+        ),
     };
     ProviderCard {
         key: p.as_str(),

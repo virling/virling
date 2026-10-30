@@ -20,12 +20,13 @@ A customer is still paying when:
    | Dodo Payments | `active`, `on_hold` |
    | Polar | `active`, `trialing`, `past_due` |
    | LemonSqueezy | `on_trial`, `active`, `past_due`, and `cancelled` until its `ends_at` |
+   | Paddle | `active`, `trialing`, `past_due`, and a scheduled cancellation until it takes effect |
 
    A subscription cancelled at the end of its period stays live until the period ends. When a customer has any subscription with the provider, its status decides, even if they also made one-off payments.
 
 2. **Otherwise, payment recency.** The customer has a payment that was not fully refunded within the last billing interval plus 7 days. The billing interval is the time between their last two such payments, between 7 and 366 days, or 30 days when there is only one.
 
-Subscription status is read with the same read-only key, once an hour. Stripe needs read access to Subscriptions, which the setup already asks for. Dodo Payments and LemonSqueezy keys can always read it. Polar needs the optional `subscriptions:read` scope; without it, Polar customers use payment recency and the page says so.
+Subscription status is read with the same read-only key, once an hour. Stripe needs read access to Subscriptions, which the setup already asks for. Dodo Payments and LemonSqueezy keys can always read it. Polar needs the optional `subscriptions:read` scope and Paddle the optional `subscription.read` permission; without it, their customers use payment recency and the page says so.
 
 ## MRR
 
