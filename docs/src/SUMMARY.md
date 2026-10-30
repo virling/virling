@@ -8,6 +8,7 @@
 - [Quickstart](quickstart.md)
 - [Find which channel pays](guides/channel-revenue.md)
 - [Read your dashboard](guides/dashboard.md)
+- [Use Virling with Paperclip](guides/paperclip.md)
 - [Install](install/index.md)
   - [Docker](install/docker.md)
   - [Release binary](install/binary.md)
