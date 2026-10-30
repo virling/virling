@@ -40,6 +40,7 @@
 - [RevenueCat](payments/revenuecat.md)
 - [Paddle](payments/paddle.md)
 - [WooCommerce](payments/woocommerce.md)
+- [Shopify](payments/shopify.md)
 - [Link checkout to visits](payments/checkout.md)
 
 # Attribution
