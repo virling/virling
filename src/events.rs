@@ -114,6 +114,13 @@ pub trait EventStore: Send + Sync {
         period: &Period,
         now: OffsetDateTime,
     ) -> anyhow::Result<Retention>;
+    /// Net revenue per visitor in the weeks after the first visit, by month of that visit and channel.
+    fn payback(
+        &self,
+        site_id: &str,
+        period: &Period,
+        now: OffsetDateTime,
+    ) -> anyhow::Result<Vec<crate::payback::PaybackRow>>;
     #[cfg(test)]
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64>;
     /// Events and pageviews the site stored since `since`, for plan usage.
@@ -1357,6 +1364,20 @@ impl EventStore for DuckStore {
             return Ok(r);
         }
         retention::retention(&*self.read()?, site_id, period, now)
+    }
+
+    fn payback(
+        &self,
+        site_id: &str,
+        period: &Period,
+        now: OffsetDateTime,
+    ) -> anyhow::Result<Vec<crate::payback::PaybackRow>> {
+        if let Some(r) = self.indexed(site_id, |ix, z, c| {
+            index::retention::read::payback(ix, z, c, period, now)
+        })? {
+            return Ok(r);
+        }
+        crate::payback::payback(&*self.read()?, site_id, period, now)
     }
 
     #[cfg(test)]

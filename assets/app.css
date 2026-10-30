@@ -1213,6 +1213,10 @@ a.hov { color: inherit; text-decoration: none; }
 .ltv-row .rev { color: var(--revenue-text); font-weight: 600; }
 .ltv-row .t { display: flex; align-items: center; gap: 8px; min-width: 0; white-space: nowrap; }
 .ltv-row .lbl { overflow: hidden; text-overflow: ellipsis; }
+.pb-row { grid-template-columns: minmax(0, 1fr) 80px 80px 72px 72px 72px 72px; }
+.pb-month { padding: 12px 0 4px; font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.pb-curve svg { display: block; overflow: visible; }
+.pb-curve polyline { fill: none; stroke: var(--revenue); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
 @media (max-width: 1080px) {
   .rt-sum { grid-template-columns: repeat(3, 1fr); }
   .rt-sum > div:nth-child(4) { border-left: 0; }
@@ -1240,6 +1244,7 @@ a.hov { color: inherit; text-decoration: none; }
   .ltv-row .t { grid-column: 1 / -1; }
   .ltv-row .num { display: flex; flex-direction: column; align-items: flex-start; }
   .ltv-row .num::before { content: attr(data-k); font-size: 11px; font-weight: 500; color: var(--ink-4); }
+  .pb-row .pb-curve { display: none; }
   .rt-foot { flex-direction: column; align-items: flex-start; }
 }
 

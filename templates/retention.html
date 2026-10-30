@@ -68,6 +68,21 @@
   {% endfor %}
 </section>
 {% endif %}
+{% if !payback.is_empty() %}
+<section class="box ltv pb">
+  <div class="ltv-head"><h2>Payback by channel</h2><span class="dim">Net revenue per visitor in the weeks after their first visit, by the month and channel of that visit.</span></div>
+  <div class="ltv-row pb-row th"><span>Channel</span><span class="num">Visitors</span><span class="pb-curve">First 12 weeks</span><span class="num">Week 1</span><span class="num">Week 4</span><span class="num">Week 8</span><span class="num">Week 12</span></div>
+  {% for r in payback %}
+  {% if !r.month.is_empty() %}<div class="pb-month">{{ r.month }}</div>{% endif %}
+  <div class="ltv-row pb-row">
+    <span class="t">{{ r.icon|safe }}<span class="lbl">{{ r.label }}</span></span>
+    <span class="num" data-k="Visitors">{{ r.visitors }}</span>
+    <span class="pb-curve">{% if !r.curve.is_empty() %}<svg width="80" height="24" viewBox="0 0 80 24" aria-hidden="true"><polyline points="{{ r.curve }}"/></svg>{% endif %}</span>
+    {% for (k, w, on) in r.weeks %}<span class="num{% if loop.last && on %} rev{% endif %}" data-k="{{ k }}">{{ w }}</span>{% endfor %}
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
 {% if !status_note.is_empty() %}<p class="dim rt-note">{{ status_note }}</p>{% endif %}
 {% endif %}
 {% endblock %}

@@ -153,6 +153,15 @@ impl<S: EventStore> EventStore for Cached<S> {
         self.inner.retention(site_id, period, now)
     }
 
+    fn payback(
+        &self,
+        site_id: &str,
+        period: &Period,
+        now: OffsetDateTime,
+    ) -> anyhow::Result<Vec<crate::payback::PaybackRow>> {
+        self.inner.payback(site_id, period, now)
+    }
+
     fn mrr(
         &self,
         site_id: &str,

@@ -6,6 +6,7 @@ use duckdb::Connection;
 use time::{Duration, OffsetDateTime};
 
 use super::*;
+use crate::payback::{Cohort as PaybackCohort, Paid, WEEK_US, WEEKS};
 use crate::retention::{Customer, Mrr, Retention, StatusSource, summarize};
 use crate::stats::{from_micros, micros_of};
 
@@ -229,6 +230,67 @@ impl SiteIndex {
         (keys.len(), subs, pays)
     }
 
+    /// Visitors first seen in each (month, lo, hi) by channel, and what they paid in the weeks after, up to `now`.
+    pub fn payback(
+        &self,
+        months: &[(String, i64, i64)],
+        now: i64,
+    ) -> (Vec<PaybackCohort>, Vec<Paid>) {
+        let (Some(lo), Some(hi)) = (months.first().map(|m| m.1), months.last().map(|m| m.2)) else {
+            return Default::default();
+        };
+        let mut keys: HashMap<(usize, u32), usize> = HashMap::new();
+        let mut counts: Vec<u64> = Vec::new();
+        let mut of: FastMap<u32, (usize, i64)> = FastMap::default();
+        let from = self
+            .by_touch
+            .partition_point(|&s| self.sessions[s as usize].touch < lo);
+        for &s in &self.by_touch[from..] {
+            let sess = &self.sessions[s as usize];
+            if sess.touch >= hi {
+                break;
+            }
+            if self.visitors[sess.visitor as usize].first_touch != s {
+                continue;
+            }
+            let m = months.partition_point(|x| x.2 <= sess.touch);
+            let k = *keys.entry((m, sess.cols[CHANNEL])).or_insert_with(|| {
+                counts.push(0);
+                counts.len() - 1
+            });
+            counts[k] += 1;
+            of.insert(sess.visitor, (k, sess.touch));
+        }
+        let mut paid = vec![[0.0; WEEKS]; counts.len()];
+        for p in self.payments.iter().take_while(|p| p.ts <= now) {
+            let Some(net) = p.net else { continue };
+            let v = match p.visitor {
+                Some(k) => self.visitor_ids.get(&k).copied(),
+                None => self
+                    .pay_session(p)
+                    .map(|s| &self.sessions[s as usize])
+                    .filter(|s| s.touch != i64::MAX)
+                    .map(|s| s.visitor),
+            };
+            let Some(&(k, t)) = v.and_then(|v| of.get(&v)) else {
+                continue;
+            };
+            if p.ts >= t && p.ts - t < WEEKS as i64 * WEEK_US {
+                paid[k][((p.ts - t) / WEEK_US) as usize] += net;
+            }
+        }
+        let mut cohorts = Vec::new();
+        let mut weeks = Vec::new();
+        for ((m, ch), k) in keys {
+            let (month, channel) = (months[m].0.clone(), self.path_name(ch));
+            for (w, &usd) in paid[k].iter().enumerate() {
+                weeks.push((month.clone(), channel.clone(), w, usd));
+            }
+            cohorts.push((month, channel, months[m].1, counts[k]));
+        }
+        (cohorts, weeks)
+    }
+
     pub fn mrr(&self, lo: i64, hi: i64, now: OffsetDateTime) -> Option<Mrr> {
         let now = micros_of(now);
         if !self.subs.iter().any(|s| s.mrr_usd.is_some()) {
@@ -276,6 +338,35 @@ pub mod read {
     ) -> anyhow::Result<Option<Retention>> {
         let (lo, hi) = z.bounds(conn, period)?;
         Ok(Some(ix.retention(lo, hi, now)))
+    }
+
+    pub fn payback(
+        ix: &SiteIndex,
+        z: &Zones,
+        conn: &Connection,
+        period: &Period,
+        now: OffsetDateTime,
+    ) -> anyhow::Result<Option<Vec<crate::payback::PaybackRow>>> {
+        let mut months = Vec::new();
+        let mut d = period.from;
+        while d <= period.to {
+            let (y, m) = (d.year(), d.month());
+            let next = time::Date::from_calendar_date(
+                if m == time::Month::December { y + 1 } else { y },
+                m.next(),
+                1,
+            )?;
+            let p = Period {
+                from: d,
+                to: (next - Duration::days(1)).min(period.to),
+                tz: period.tz.clone(),
+            };
+            let (lo, hi) = z.bounds(conn, &p)?;
+            months.push((format!("{y}-{:02}", m as u8), lo, hi));
+            d = next;
+        }
+        let (cohorts, paid) = ix.payback(&months, micros_of(now));
+        Ok(Some(crate::payback::build(cohorts, paid, now)))
     }
 
     pub fn mrr(
@@ -339,6 +430,11 @@ mod tests {
                         &format!("retention {tz} {from}..{to} {at}"),
                         read::retention(&ix, &z, &conn, &p, at).unwrap(),
                         sql,
+                    );
+                    check(
+                        &format!("payback {tz} {from}..{to} {at}"),
+                        read::payback(&ix, &z, &conn, &p, at).unwrap(),
+                        crate::payback::payback(&conn, SITE, &p, at).unwrap(),
                     );
                     check(
                         &format!("mrr {tz} {from}..{to} {at}"),
