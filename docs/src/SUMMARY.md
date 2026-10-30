@@ -38,6 +38,7 @@
 - [LemonSqueezy](payments/lemonsqueezy.md)
 - [Creem](payments/creem.md)
 - [RevenueCat](payments/revenuecat.md)
+- [WooCommerce](payments/woocommerce.md)
 - [Link checkout to visits](payments/checkout.md)
 
 # Attribution

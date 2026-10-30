@@ -1,0 +1,5 @@
+[
+  {"id": 88, "status": "active", "customer_id": 9, "currency": "USD", "total": "20.00", "billing_period": "month", "billing_interval": "1", "end_date_gmt": ""},
+  {"id": 89, "status": "pending-cancel", "customer_id": 10, "currency": "USD", "total": "30.00", "billing_period": "month", "billing_interval": "3", "end_date_gmt": "2026-11-01T00:00:00"},
+  {"id": 90, "status": "cancelled", "customer_id": 11, "currency": "EUR", "total": "29.00", "billing_period": "month", "billing_interval": 1, "end_date_gmt": "2026-09-01T00:00:00"}
+]

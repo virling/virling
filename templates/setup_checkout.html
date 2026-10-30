@@ -72,7 +72,14 @@ await fetch(`https://api.revenuecat.com/v2/projects/${projectId}/customers/${app
   method: "POST",
   headers: { authorization: `Bearer ${process.env.REVENUECAT_SECRET_KEY}`, "content-type": "application/json" },
   body: JSON.stringify({ attributes: [{ name: "virling_vid", value: req.cookies.virling_vid }] }),
-});{% else %}// LemonSqueezy: checkout links (STORE.lemonsqueezy.com/checkout/buy/...)
+});{% else if key == &"woocommerce" %}// WooCommerce: add to your theme's functions.php (or a snippets plugin)
+// so every order keeps the visitor ID from the virling_vid cookie.
+add_action('woocommerce_checkout_create_order', 'virling_vid_on_order');
+add_action('woocommerce_store_api_checkout_update_order_from_request', 'virling_vid_on_order');
+function virling_vid_on_order($order) {
+  $vid = $_COOKIE['virling_vid'] ?? '';
+  if (preg_match('/^[A-Za-z0-9-]{8,64}$/', $vid)) $order->update_meta_data('virling_vid', $vid);
+}{% else %}// LemonSqueezy: checkout links (STORE.lemonsqueezy.com/checkout/buy/...)
 // need nothing: the Virling script adds checkout[custom][virling_vid].
 
 // For checkouts you create on your server, POST /v1/checkouts with:

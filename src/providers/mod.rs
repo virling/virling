@@ -4,6 +4,7 @@ pub mod lemonsqueezy;
 mod polar;
 pub mod revenuecat;
 mod stripe;
+mod woocommerce;
 
 use time::OffsetDateTime;
 
@@ -60,6 +61,23 @@ pub fn months(unit: &str, count: i64) -> Option<f64> {
     Some(one * count.max(1) as f64)
 }
 
+fn need(store: Option<&str>) -> anyhow::Result<&str> {
+    store.ok_or_else(|| anyhow::anyhow!("Enter your store's https address."))
+}
+
+/// A store address as `https://host/path` without a trailing slash; None unless it is an https URL.
+pub fn store_url(input: &str) -> Option<String> {
+    let url = url::Url::parse(input.trim()).ok()?;
+    if url.scheme() != "https" || url.host_str().is_none() || url.query().is_some() {
+        return None;
+    }
+    Some(format!(
+        "{}{}",
+        url.origin().ascii_serialization(),
+        url.path().trim_end_matches('/')
+    ))
+}
+
 /// Product IDs from a comma or space separated list, without duplicates; empty means every product.
 pub fn product_list(text: &str) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
@@ -94,16 +112,18 @@ pub enum Provider {
     LemonSqueezy,
     Creem,
     RevenueCat,
+    WooCommerce,
 }
 
 impl Provider {
-    pub const ALL: [Provider; 6] = [
+    pub const ALL: [Provider; 7] = [
         Provider::Stripe,
         Provider::Dodo,
         Provider::Polar,
         Provider::LemonSqueezy,
         Provider::Creem,
         Provider::RevenueCat,
+        Provider::WooCommerce,
     ];
 
     pub fn as_str(self) -> &'static str {
@@ -114,6 +134,7 @@ impl Provider {
             Provider::LemonSqueezy => "lemonsqueezy",
             Provider::Creem => "creem",
             Provider::RevenueCat => "revenuecat",
+            Provider::WooCommerce => "woocommerce",
         }
     }
 
@@ -121,8 +142,18 @@ impl Provider {
         Self::ALL.into_iter().find(|p| p.as_str() == s)
     }
 
+    /// Whether the connection also needs the store's own URL.
+    pub fn needs_store(self) -> bool {
+        matches!(self, Provider::WooCommerce)
+    }
+
     /// Checks the key works and is read-only. Err carries a message fit to show the user.
-    pub async fn check_key(self, client: &reqwest::Client, key: &str) -> anyhow::Result<()> {
+    pub async fn check_key(
+        self,
+        client: &reqwest::Client,
+        key: &str,
+        store: Option<&str>,
+    ) -> anyhow::Result<()> {
         match self {
             Provider::Stripe => stripe::check_key(client, key).await,
             Provider::Dodo => dodo::check_key(client, key).await,
@@ -130,6 +161,7 @@ impl Provider {
             Provider::LemonSqueezy => lemonsqueezy::check_key(client, key).await,
             Provider::Creem => creem::check_key(client, key).await,
             Provider::RevenueCat => revenuecat::check_key(client, key).await,
+            Provider::WooCommerce => woocommerce::check_key(client, key, need(store)?).await,
         }
     }
 
@@ -141,6 +173,7 @@ impl Provider {
         key: &str,
         cursor: Option<&str>,
         products: &[String],
+        store: Option<&str>,
     ) -> anyhow::Result<Page> {
         match self {
             Provider::Stripe => stripe::fetch(client, key, cursor).await,
@@ -149,6 +182,7 @@ impl Provider {
             Provider::LemonSqueezy => lemonsqueezy::fetch(client, key, cursor).await,
             Provider::Creem => creem::fetch(client, key, cursor).await,
             Provider::RevenueCat => revenuecat::fetch(client, key, cursor).await,
+            Provider::WooCommerce => woocommerce::fetch(client, key, need(store)?, cursor).await,
         }
     }
 
@@ -158,6 +192,7 @@ impl Provider {
         client: &reqwest::Client,
         key: &str,
         products: &[String],
+        store: Option<&str>,
     ) -> anyhow::Result<Option<Vec<Subscription>>> {
         match self {
             Provider::Stripe => stripe::subscriptions(client, key).await,
@@ -166,6 +201,30 @@ impl Provider {
             Provider::LemonSqueezy => lemonsqueezy::subscriptions(client, key).await,
             Provider::Creem => creem::subscriptions(client, key).await,
             Provider::RevenueCat => revenuecat::subscriptions(client, key).await,
+            Provider::WooCommerce => woocommerce::subscriptions(client, key, need(store)?).await,
+        }
+    }
+}
+
+#[cfg(test)]
+mod store_tests {
+    #[test]
+    fn store_url_is_an_https_address() {
+        assert_eq!(
+            super::store_url(" https://Shop.example.com/store/ ").as_deref(),
+            Some("https://shop.example.com/store")
+        );
+        assert_eq!(
+            super::store_url("https://shop.example.com").as_deref(),
+            Some("https://shop.example.com")
+        );
+        for bad in [
+            "http://shop.example.com",
+            "shop.example.com",
+            "https://x.com/?a=1",
+            "",
+        ] {
+            assert_eq!(super::store_url(bad), None, "{bad}");
         }
     }
 }

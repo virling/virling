@@ -28,6 +28,7 @@ struct Integration {
     key_nonce: Vec<u8>,
     sync_cursor: Option<String>,
     products: Option<String>,
+    store_url: Option<String>,
 }
 
 pub async fn add_integration(
@@ -35,8 +36,9 @@ pub async fn add_integration(
     site_id: &str,
     provider: Provider,
     key: &str,
+    store: Option<&str>,
 ) -> anyhow::Result<()> {
-    provider.check_key(&state.http, key).await?;
+    provider.check_key(&state.http, key, store).await?;
     let (ciphertext, nonce) = state.vault.encrypt(key)?;
     // LemonSqueezy, Creem and RevenueCat send checkout data in webhooks, which need a public https address.
     let url = format!(
@@ -62,10 +64,11 @@ pub async fn add_integration(
     let hook = secret.map(|s| state.vault.encrypt(&s)).transpose()?;
     let (hook_ciphertext, hook_nonce) = hook.unzip();
     sqlx::query(
-        "INSERT INTO integrations (id, site_id, provider, key_ciphertext, key_nonce, created_at, webhook_ciphertext, webhook_nonce) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        "INSERT INTO integrations (id, site_id, provider, key_ciphertext, key_nonce, created_at, webhook_ciphertext, webhook_nonce, store_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT (site_id, provider) DO UPDATE SET key_ciphertext = excluded.key_ciphertext,
            key_nonce = excluded.key_nonce, sync_cursor = NULL, last_error = NULL,
-           webhook_ciphertext = excluded.webhook_ciphertext, webhook_nonce = excluded.webhook_nonce",
+           webhook_ciphertext = excluded.webhook_ciphertext, webhook_nonce = excluded.webhook_nonce,
+           store_url = excluded.store_url",
     )
     .bind(uuid::Uuid::new_v4().to_string())
     .bind(site_id)
@@ -75,6 +78,7 @@ pub async fn add_integration(
     .bind(OffsetDateTime::now_utc().unix_timestamp())
     .bind(hook_ciphertext)
     .bind(hook_nonce)
+    .bind(store)
     .execute(&state.db)
     .await?;
     Ok(())
@@ -264,7 +268,7 @@ pub async fn sync_site(state: &AppState, site_id: &str) -> anyhow::Result<()> {
 
 async fn sync_integrations(state: &AppState, site_id: Option<&str>) -> anyhow::Result<()> {
     let integrations: Vec<Integration> = sqlx::query_as(
-        "SELECT id, site_id, provider, key_ciphertext, key_nonce, sync_cursor, products FROM integrations
+        "SELECT id, site_id, provider, key_ciphertext, key_nonce, sync_cursor, products, store_url FROM integrations
          WHERE ?1 IS NULL OR site_id = ?1",
     )
     .bind(site_id)
@@ -343,7 +347,14 @@ async fn sync_subscriptions(state: &AppState, integration: &Integration) -> anyh
         .vault
         .decrypt(&integration.key_ciphertext, &integration.key_nonce)?;
     let products = crate::providers::product_list(integration.products.as_deref().unwrap_or(""));
-    let subscriptions = provider.subscriptions(&state.http, &key, &products).await?;
+    let subscriptions = provider
+        .subscriptions(
+            &state.http,
+            &key,
+            &products,
+            integration.store_url.as_deref(),
+        )
+        .await?;
     SUBSCRIPTIONS_READ
         .lock()
         .unwrap()
@@ -376,7 +387,13 @@ async fn sync_one(state: &AppState, integration: &Integration) -> anyhow::Result
     let mut cursor = integration.sync_cursor.clone();
     for _ in 0..MAX_PAGES_PER_RUN {
         let page = provider
-            .fetch(&state.http, &key, cursor.as_deref(), &products)
+            .fetch(
+                &state.http,
+                &key,
+                cursor.as_deref(),
+                &products,
+                integration.store_url.as_deref(),
+            )
             .await?;
         store(state, &integration.site_id, provider, page.payments).await?;
         if page.cursor.is_some() {

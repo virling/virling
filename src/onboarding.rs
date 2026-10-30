@@ -334,6 +334,8 @@ pub struct ProviderCard {
     help_url: &'static str,
     note: &'static str,
     selected: bool,
+    /// The connection also asks for the store's address.
+    store: bool,
 }
 
 fn provider_card(p: Provider, selected: bool) -> ProviderCard {
@@ -378,6 +380,14 @@ fn provider_card(p: Provider, selected: bool) -> ProviderCard {
             "https://docs.creem.io/api-reference/introduction",
             "Create an API key with the transactions:read and subscriptions:read scopes, plus webhooks:write so Virling can add one webhook that links checkouts to visits. Live and test mode keys both work.",
         ),
+        Provider::WooCommerce => (
+            "WooCommerce",
+            "Consumer key and secret",
+            "ck_...:cs_...",
+            "How to create a read-only key, 1 minute",
+            "https://woocommerce.com/document/woocommerce-rest-api/",
+            "Create a REST API key with Read permission, then paste the consumer key and secret joined by a colon. Virling reads orders, refunds and, with WooCommerce Subscriptions, subscriptions.",
+        ),
         Provider::RevenueCat => (
             "RevenueCat",
             "V2 secret key",
@@ -396,6 +406,7 @@ fn provider_card(p: Provider, selected: bool) -> ProviderCard {
         help_url,
         note,
         selected,
+        store: p.needs_store(),
     }
 }
 
@@ -570,6 +581,7 @@ pub async fn payments_step(
 pub struct ConnectInput {
     provider: String,
     key: String,
+    store: Option<String>,
 }
 
 pub async fn connect_payments(
@@ -585,10 +597,15 @@ pub async fn connect_payments(
         return StatusCode::BAD_REQUEST.into_response();
     };
     let key = input.key.trim();
+    let store = input.store.as_deref().and_then(crate::providers::store_url);
     let result = if key.is_empty() {
         Err(anyhow::anyhow!("Paste your key first."))
+    } else if provider.needs_store() && store.is_none() {
+        Err(anyhow::anyhow!(
+            "Enter your store's address, starting with https://."
+        ))
     } else {
-        sync::add_integration(&state, &site.id, provider, key).await
+        sync::add_integration(&state, &site.id, provider, key, store.as_deref()).await
     };
     if let Err(err) = result {
         let connected = match connected_stats(&state, &site).await {

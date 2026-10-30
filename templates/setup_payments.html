@@ -59,6 +59,9 @@
         <label class="field">{{ c.key_label }}
           <input class="mono" name="key" placeholder="{{ c.placeholder }}" autocomplete="off" spellcheck="false"{% if !c.selected %} disabled{% endif %}{% if c.selected && error.is_some() %} aria-invalid="true" aria-describedby="key-err"{% endif %}>
         </label>
+        {% if c.store %}<label class="field">Store address
+          <input type="url" name="store" placeholder="https://shop.example.com" autocomplete="off"{% if !c.selected %} disabled{% endif %}>
+        </label>{% endif %}
         {% if c.selected %}{% if let Some(error) = error %}<p class="field-err" id="key-err" role="alert" data-key-err>{{ error }}</p>{% endif %}{% endif %}
         <p class="note">{{ c.note }}</p>
         <a class="help" href="{{ c.help_url }}" target="_blank" rel="noopener">{{ c.help }} &#8599;</a>
