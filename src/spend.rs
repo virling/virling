@@ -134,7 +134,7 @@ pub struct ProfitRow {
     pub fees: f64,
     pub revenue: f64,
     pub profit: f64,
-    /// Revenue per dollar spent.
+    /// Revenue per dollar spent; NaN without a recorded spend.
     pub ret: f64,
 }
 
@@ -170,7 +170,11 @@ pub fn profit_card(
                 fees: fee,
                 revenue,
                 profit: revenue - spent - fee,
-                ret: revenue / (spent + fee),
+                ret: if spent > 0.0 {
+                    revenue / (spent + fee)
+                } else {
+                    f64::NAN
+                },
             }
         })
         .collect();
