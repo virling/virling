@@ -45,6 +45,13 @@
     {% if report.pages.is_empty() %}<p class="r2-empty">No page views this week.</p>{% endif %}
   </section>
 
+  {% if !report.verdicts.is_empty() %}
+  <section class="r2-sec">
+    <h2>Each channel this week</h2>
+    {% for v in report.verdicts %}<p class="r2-verdict"><b>{{ v.channel }}</b> <span>{{ v.line }}</span></p>{% endfor %}
+  </section>
+  {% endif %}
+
   {% if !report.insights.is_empty() %}
   <section class="r2-ins">
     {% for i in report.insights %}<div class="ins {{ i.class }}">

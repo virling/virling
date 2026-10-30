@@ -1352,6 +1352,8 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .r2 .ss { font-size: 11px; color: var(--ink-4); display: block; text-align: right; }
 .r2-avg { margin: 6px 0 0; font-size: 13px; color: var(--ink-3); }
 .r2-empty { margin: 0; padding: 12px 0; font-size: 14px; color: var(--ink-3); }
+.r2-verdict { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.r2-verdict b { color: var(--ink); font-weight: 600; }
 .r2-ins { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
 .r2 .ins { border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 8px; }
 .r2 .ins.good { background: var(--up-wash); }
@@ -1556,6 +1558,9 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .d3-botrow { grid-template-columns: minmax(0, 1fr) 60px 72px 90px; }
 .d3-sub { font-size: 12px; color: var(--ink-3); }
 .d3-profrow { grid-template-columns: minmax(0, 1fr) 80px 90px 90px 60px; }
+.d3-row.d3-verdict { grid-template-columns: minmax(0, 1fr); }
+.d3-verdict .nm { height: auto; min-height: 42px; padding-top: 6px; padding-bottom: 6px; }
+.d3-row.d3-verdict .tx span { white-space: normal; }
 .d3-readrow { grid-template-columns: minmax(0, 1fr) 56px 64px 56px 56px; }
 .d3-almostrow { grid-template-columns: minmax(0, 1fr) 70px 60px 100px; }
 .d3-almostpg { grid-template-columns: minmax(0, 1fr) 80px; }

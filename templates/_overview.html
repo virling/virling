@@ -206,7 +206,17 @@
   {% endif %}
   {% for c in cards %}{% if loop.index > 2 %}{% call tabcard(c) %}{% endcall %}{% endif %}{% endfor %}
 </div>
-{% if profit.is_some() || reading.is_some() || almost.is_some() || topay.is_some() %}<div class="d3-cards d3-more">
+{% if profit.is_some() || reading.is_some() || almost.is_some() || topay.is_some() || !verdicts.is_empty() %}<div class="d3-cards d3-more">
+  {% if !verdicts.is_empty() %}
+  <div class="d3-card d3-bc" id="verdicts">
+    <div class="d3-bc-head"><h2>Channel verdicts</h2><span class="d3-sub">against the period before</span></div>
+    <div class="d3-panel">
+    {% for v in verdicts %}
+    <div class="d3-row d3-verdict"><div class="nmw"><span class="nm"><span class="ic">{{ crate::icons::source(v.channel.as_str(), 16)|safe }}</span><span class="tx"><b>{{ v.channel }}</b><span>{{ v.line }}</span></span></span></div></div>
+    {% endfor %}
+    </div>
+  </div>
+  {% endif %}
   {% if let Some(p) = profit %}
   <div class="d3-card d3-bc" id="profit">
     <div class="d3-bc-head"><h2>Profit by channel</h2><span class="d3-sub">spend is your monthly amount for this range</span></div>
