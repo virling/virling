@@ -22,6 +22,7 @@ A customer is still paying when:
    | LemonSqueezy | `on_trial`, `active`, `past_due`, and `cancelled` until its `ends_at` |
    | Creem | `active`, `trialing`, `past_due`, and `scheduled_cancel` until its period ends |
    | Paddle | `active`, `trialing`, `past_due`, and a scheduled cancellation until it takes effect |
+   | WooCommerce | `active`, and `pending-cancel` until its end date (WooCommerce Subscriptions) |
 
    A subscription cancelled at the end of its period stays live until the period ends. When a customer has any subscription with the provider, its status decides, even if they also made one-off payments.
 

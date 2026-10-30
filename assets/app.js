@@ -218,7 +218,7 @@ for (const form of document.querySelectorAll("[data-providers]")) {
     for (const panel of form.querySelectorAll("[data-provider]")) {
       const on = panel.dataset.provider === e.target.value;
       panel.hidden = !on;
-      panel.querySelector("input").disabled = !on;
+      panel.querySelectorAll("input").forEach((input) => { input.disabled = !on; });
     }
   });
 }

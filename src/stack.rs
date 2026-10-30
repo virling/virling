@@ -43,7 +43,7 @@ const PLATFORMS: [(&str, &[&str]); 5] = [
     ("p-shopify", &["cdn.shopify.com", "Shopify.theme"]),
 ];
 
-const PROVIDERS: [(Provider, &[&str]); 7] = [
+const PROVIDERS: [(Provider, &[&str]); 8] = [
     (
         Provider::Stripe,
         &["js.stripe.com", "buy.stripe.com", "checkout.stripe.com"],
@@ -62,6 +62,10 @@ const PROVIDERS: [(Provider, &[&str]); 7] = [
     (
         Provider::Paddle,
         &["cdn.paddle.com/paddle", "@paddle/paddle-js"],
+    ),
+    (
+        Provider::WooCommerce,
+        &["wp-content/plugins/woocommerce", "woocommerce-"],
     ),
 ];
 
