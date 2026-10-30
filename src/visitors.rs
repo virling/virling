@@ -142,6 +142,53 @@ pub struct Visit {
     pub steps: Vec<Step>,
 }
 
+impl Visit {
+    /// A plain verdict on the visit (looks human, unusual or suspect) with the reasons for it.
+    pub fn verdict(&self) -> (&'static str, Vec<String>) {
+        let read: i64 = self
+            .steps
+            .iter()
+            .filter_map(|s| match s {
+                Step::Page { secs, .. } => *secs,
+                _ => None,
+            })
+            .sum();
+        let acted = self.steps.iter().any(|s| {
+            matches!(
+                s,
+                Step::Goal { .. } | Step::Payment(_) | Step::Left { .. } | Step::Back { .. }
+            )
+        });
+        let span = (self.end - self.start).whole_seconds();
+        let mut good = Vec::new();
+        if self.pageviews > 1 {
+            good.push(format!("viewed {} pages", self.pageviews));
+        }
+        if read >= 10 {
+            good.push(format!(
+                "stayed {} on its pages",
+                crate::visitor_pages::stay(read)
+            ));
+        }
+        if acted {
+            good.push("clicked, reached a goal or paid".to_string());
+        }
+        if !good.is_empty() {
+            return ("Looks human", good);
+        }
+        if self.pageviews <= 1 && span < 2 && read < 2 {
+            return (
+                "Suspect",
+                vec!["one page, gone within 2 seconds with no reading".into()],
+            );
+        }
+        (
+            "Unusual",
+            vec!["one page and under 10 seconds on it, no clicks".into()],
+        )
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Entry {
@@ -578,6 +625,30 @@ mod tests {
     use crate::events::{DuckStore, Event, EventStore, Payment};
 
     const T: OffsetDateTime = datetime!(2026-10-01 12:00 UTC);
+
+    #[test]
+    fn each_visit_gets_a_verdict_with_reasons() {
+        let page = |secs| Step::Page {
+            ts: T,
+            path: "/".into(),
+            secs,
+        };
+        let visit = |pageviews, secs: u64, steps| Visit {
+            start: T,
+            end: T + time::Duration::seconds(secs as i64),
+            channel: "Direct".into(),
+            referrer_host: None,
+            source: "Direct".into(),
+            campaign: None,
+            pageviews,
+            steps,
+        };
+        let (v, why) = visit(3, 120, vec![page(Some(40)), page(Some(60))]).verdict();
+        assert_eq!(v, "Looks human");
+        assert_eq!(why, ["viewed 3 pages", "stayed 1m 40s on its pages"]);
+        assert_eq!(visit(1, 0, vec![page(None)]).verdict().0, "Suspect");
+        assert_eq!(visit(1, 5, vec![page(Some(5))]).verdict().0, "Unusual");
+    }
 
     fn store() -> (tempfile::TempDir, DuckStore) {
         let dir = tempfile::tempdir().unwrap();

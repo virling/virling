@@ -582,6 +582,9 @@ pub struct VisitView {
     campaign: String,
     pages: String,
     after_paid: bool,
+    /// Looks human, Unusual or Suspect, with why.
+    verdict: &'static str,
+    why: String,
     steps: Vec<StepView>,
 }
 
@@ -624,7 +627,7 @@ struct VisitorPage {
 }
 
 /// "45s", "3m 05s", "1h 12m"
-fn stay(secs: i64) -> String {
+pub(crate) fn stay(secs: i64) -> String {
     match secs.max(0) {
         s @ 0..60 => format!("{s}s"),
         s @ 60..3600 => format!("{}m {:02}s", s / 60, s % 60),
@@ -689,7 +692,10 @@ fn timeline_view(t: &Timeline, domain: &str, offset: UtcOffset) -> Vec<EntryView
             Entry::Visit(v) => {
                 n += 1;
                 let len = v.end - v.start;
+                let (verdict, why) = v.verdict();
                 EntryView::Visit(VisitView {
+                    verdict,
+                    why: why.join(", "),
                     n,
                     date: local(v.start, offset),
                     length: length(len),
