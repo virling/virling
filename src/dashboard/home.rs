@@ -1717,6 +1717,7 @@ pub async fn public(
             domain,
             timezone,
             cookieless,
+            consent: false,
             same_visit: String::new(),
             return_minutes: 5,
             sample_data: false,

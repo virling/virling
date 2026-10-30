@@ -18,7 +18,7 @@ The [privacy policy](https://virling.com/privacy) covers the hosted service.
 | Scope | First-party, path `/`, on your site's domain |
 | Flags | `SameSite=Lax`, plus `Secure` on HTTPS |
 
-It is readable by your own code on purpose, so you can pass it into checkout. To use no cookie at all, see [Cookieless mode](cookieless.md).
+It is readable by your own code on purpose, so you can pass it into checkout. To use no cookie at all, see [Cookieless mode](cookieless.md). To set it only after consent, see [Cookieless until consent](cookieless.md#cookieless-until-consent).
 
 ## Global Privacy Control
 
@@ -34,4 +34,4 @@ Each site accepts up to 200 events per second by default. Events over the limit 
 
 ## Consent banners
 
-Whether you need consent for the `virling_vid` cookie depends on your jurisdiction and how you use the data. Guidance on consent wording is <span class="na">Not available yet</span>, and these docs are not legal advice. If you only want to load the script after consent, add the tag from your consent tool's callback, and include `data-site` on it as usual.
+Whether you need consent for the `virling_vid` cookie depends on your jurisdiction and how you use the data. Guidance on consent wording is <span class="na">Not available yet</span>, and these docs are not legal advice. To count every visit but set the cookie only after consent, use [Cookieless until consent](cookieless.md#cookieless-until-consent) and call `virling("consent")` from your consent tool. To send nothing at all before consent, add the tag from your consent tool's callback instead, and include `data-site` on it as usual.

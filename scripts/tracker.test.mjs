@@ -44,6 +44,7 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
   const sent = [];
   const urls = [];
   const timers = [];
+  const imports = [];
   const listeners = {};
   const on = (t) => (e, f) => (listeners[t + e] ||= []).push(f);
   const script = {
@@ -78,12 +79,13 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
     ...agent,
   };
   const performance = { getEntriesByType: (t) => (t == "navigation" ? [{ type: nav }] : []) };
-  const ctx = { window, document, navigator, location, history, performance, BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, devicePixelRatio: 2, Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: zone }) }) }, URL, JSON, Date: { now: () => clock.t }, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]) };
+  const ctx = { window, document, navigator, location, history, performance, BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, devicePixelRatio: 2, Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: zone }) }) }, URL, JSON, Date: { now: () => clock.t }, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]), imported: (u) => imports.push(u) };
   vm.createContext(ctx);
-  vm.runInContext(before + SRC, ctx);
+  // import() needs a module loader, so the script's dynamic import is recorded instead.
+  vm.runInContext(before + SRC.replace(/\bimport\(/g, "imported("), ctx);
   if (compat) vm.runInContext(COMPAT, ctx);
   const fire = (t, e, ev = {}) => (listeners[t + e] || []).forEach((f) => f(ev));
-  return { sent, urls, timers, cookie, window, document, history, location, fire, clock };
+  return { sent, urls, timers, imports, cookie, window, document, history, location, fire, clock };
 }
 
 test("pageview with page, screen and language", () => {
@@ -156,6 +158,25 @@ test("cookieless mode sets no cookie", () => {
   const b = browser("https://example.com/", { attrs: { "data-cookieless": "" } });
   assert.equal(b.cookie.cookies.size, 0);
   assert.equal(b.sent[0].v, null);
+});
+
+test("cookieless mode reads a cookie set after consent but never renews it", () => {
+  const cookie = jar("example.com");
+  cookie.set("virling_vid=c-0123456789abcdef;path=/;domain=example.com");
+  const b = browser("https://example.com/", { cookie, attrs: { "data-cookieless": "" } });
+  assert.equal(b.sent[0].v, "c-0123456789abcdef");
+  b.window.virling("consent");
+  assert.deepEqual(b.imports, []);
+  assert.deepEqual([...cookie.cookies.values()].map((c) => c.value), ["c-0123456789abcdef"]);
+});
+
+test("consent asks the server for the ID the visit is counted under", () => {
+  const b = browser("https://example.com/", { attrs: { "data-cookieless": "" } });
+  b.window.virling("consent");
+  b.window.virling("goal", "signup");
+  assert.deepEqual(b.imports, ["https://virling.test/api/event?consent=example.com"]);
+  assert.equal(b.cookie.cookies.size, 0, "the server's module sets the cookie, not the script");
+  assert.deepEqual(b.sent.map((e) => [e.n, e.v]), [["pageview", null], ["goal", null]]);
 });
 
 test("outbound clicks are exits and payment links carry the visitor ID", () => {

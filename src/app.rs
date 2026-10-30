@@ -129,7 +129,9 @@ pub fn router(state: AppState) -> Router {
         )
         .route(
             "/api/event",
-            post(ingest::collect).options(ingest::preflight),
+            post(ingest::collect)
+                .get(ingest::command)
+                .options(ingest::preflight),
         )
         .route("/api/crawl", post(crawlers::collect))
         .route("/health", get(|| async { "ok" }))

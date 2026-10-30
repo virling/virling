@@ -61,8 +61,12 @@
     </div>
   </div>
   <div class="setting">
-    <div><b>Cookieless mode</b><span class="muted">Virling ignores the visitor cookie and counts visitors with a hash of IP address and browser that changes every day. Returning visitors count again each day, and payments can no longer be linked to visits, so new revenue shows as Unattributed. Add <span class="mono">data-cookieless</span> to the script tag so the cookie is never set.</span></div>
-    <label class="switch"><input type="checkbox" role="switch" name="cookieless"{% if cookieless %} checked{% endif %}><span></span><span class="sr">Cookieless mode</span></label>
+    <div><b id="cookie-label">Visitor cookie</b><span class="muted">Cookieless counts visitors with a hash of IP address and browser that changes every day, so returning visitors count again each day and new revenue shows as Unattributed. Until consent starts cookieless and sets the cookie once your consent tool calls <span class="mono">virling("consent")</span>, keeping the current visit. Both need <span class="mono">data-cookieless</span> on the script tag.</span></div>
+    <div class="seg" role="radiogroup" aria-labelledby="cookie-label">
+      <label><input type="radio" name="cookieless" value="off"{% if !cookieless %} checked{% endif %}>Cookie</label>
+      <label><input type="radio" name="cookieless" value="on"{% if cookieless && !consent %} checked{% endif %}>Cookieless</label>
+      <label><input type="radio" name="cookieless" value="consent"{% if consent %} checked{% endif %}>Until consent</label>
+    </div>
   </div>
   <div class="setting">
     <div><b>Bot filtering</b><span class="muted">Visits from automated browsers, such as headless Chrome driven by Playwright or Selenium, from browsers with no languages, from pages with no screen and from browsers posing as a Mac on a screen no Mac has are kept out of every number. Filtered in the last 30 days: {{ bots }}.</span></div>

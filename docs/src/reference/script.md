@@ -13,7 +13,7 @@ The tracking script is served at `/v.js` by every Virling server. It is about 1.
 | --- | --- | --- |
 | `data-site` | Required | The site's domain as added to Virling. Without it the script does nothing. |
 | `data-api` | Optional | Full URL to send events to. Default: `/api/event` on the host the script was loaded from. |
-| `data-cookieless` | Optional | Never read or set the `virling_vid` cookie. See [Cookieless mode](../track/cookieless.md). |
+| `data-cookieless` | Optional | Never set the `virling_vid` cookie. A cookie set after consent is still read. See [Cookieless mode](../track/cookieless.md). |
 | `data-respect-gpc` | Optional | Send nothing when `navigator.globalPrivacyControl` is on. |
 | `data-dev` | Optional | Also track on `localhost`, `127.*` and `[::1]`, which are skipped by default. |
 
@@ -29,9 +29,13 @@ Sends a goal. See [Goals](../track/goals.md).
 virling("goal", "signup");
 ```
 
+### `virling("consent")`
+
+On a site set to **Until consent**, sets the `virling_vid` cookie to the ID the current visit is already counted under, so the visit continues. Call it from your consent tool once the visitor accepts. It does nothing on other sites or when the cookie is already set. See [Cookieless until consent](../track/cookieless.md#cookieless-until-consent).
+
 ### `virling.vid()`
 
-Returns the visitor ID, or `null` in cookieless mode. Pass it into checkout. See [Link checkout to visits](../payments/checkout.md).
+Returns the visitor ID, or `null` in cookieless mode until a page loads with the consent cookie. Pass it into checkout. See [Link checkout to visits](../payments/checkout.md).
 
 Call it as `window.virling?.vid?.()`, which returns nothing instead of throwing when the script is blocked or has not loaded yet:
 

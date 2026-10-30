@@ -6,7 +6,7 @@ In cookieless mode Virling sets no cookie and stores nothing in the browser. Vis
 
 Do both:
 
-1. In the app, open your site's settings and turn on **Cookieless mode**. The server then ignores any visitor ID the browser sends.
+1. In the app, open your site's settings and set **Visitor cookie** to **Cookieless**. The server then ignores any visitor ID the browser sends.
 2. Add `data-cookieless` to the script tag, so the `virling_vid` cookie is never set:
 
 ```html
@@ -32,6 +32,21 @@ The same salted hash is also used for any event that arrives without a valid vis
 - Sessions still work, since they only need 30 minutes of continuity.
 
 Payments imported before you switched keep the attribution they already had.
+
+## Cookieless until consent
+
+Set **Visitor cookie** to **Until consent** to start every visitor cookieless and switch to the cookie once they accept it. Keep `data-cookieless` on the script tag, and call this from your consent tool when the visitor accepts:
+
+```js
+virling("consent");
+```
+
+Before consent, visitors are counted with the daily hash, exactly as above. On consent, the script asks your Virling server for that hash ID and stores it in the `virling_vid` cookie, so the visit that is already running continues as the same visitor and session. From then on the visitor is counted by the cookie, returns are recognised, and checkout can carry the ID, so payments are attributed.
+
+- The script never sets or renews the cookie by itself in this mode. Calling `virling("consent")` again on later pages does nothing once the cookie is there.
+- The call loads a small module from `/api/event` on your Virling server. If you serve the script through your own proxy with `data-api`, forward `GET` requests to that path too.
+- On a site in plain Cookieless mode the call does nothing.
+- If a visitor withdraws consent, delete the `virling_vid` cookie in your consent tool's callback.
 
 ## When to use it
 
