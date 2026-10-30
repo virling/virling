@@ -2929,6 +2929,41 @@ pub(crate) mod tests {
     }
 
     #[test]
+    fn last_touch_reads_match_sql() {
+        let (_dir, store, today) = seeded();
+        store.rebuild_attribution(SITE, "last_touch", 90).unwrap();
+        let ix = store.index_for_test(SITE);
+        let ix = ix.read().unwrap();
+        let conn = store.conn_for_test();
+        let z = Zones::default();
+        for from in [today - Duration::days(29), today - Duration::days(400)] {
+            let p = Period {
+                from,
+                to: today,
+                tz: "UTC".into(),
+            };
+            let f = Filter::default();
+            check(
+                &format!("overview {from}"),
+                read::overview(&ix, &z, &conn, &p, &f).unwrap(),
+                stats::overview(&conn, SITE, &p, &f).unwrap(),
+            );
+            for d in [Dimension::Channel, Dimension::Referrer, Dimension::Country] {
+                check(
+                    &format!("breakdown {d:?} {from}"),
+                    read::breakdown(&ix, &z, &conn, &p, d, &f).unwrap(),
+                    stats::breakdown(&conn, SITE, &p, d, &f).unwrap(),
+                );
+            }
+            check(
+                &format!("payment_split {from}"),
+                read::payment_split(&ix, &z, &conn, &p).unwrap(),
+                stats::payment_split(&conn, SITE, &p).unwrap(),
+            );
+        }
+    }
+
+    #[test]
     fn setup_matches_sql() {
         let (_dir, store, _) = seeded();
         let ix = store.index_for_test(SITE);

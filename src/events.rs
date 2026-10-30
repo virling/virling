@@ -357,6 +357,7 @@ own AS (
         PARTITION BY p.provider, p.provider_payment_id
         ORDER BY
             CASE WHEN $model = 'first_touch' THEN epoch_us(t.ts)
+                 WHEN $model = 'last_touch' THEN 0
                  ELSE (t.channel = 'Direct')::BIGINT END,
             CASE WHEN $model = 'first_touch' THEN 0 ELSE -epoch_us(t.ts) END,
             t.session_id
@@ -705,7 +706,7 @@ impl DuckStore {
         only_dirty: bool,
     ) -> anyhow::Result<bool> {
         anyhow::ensure!(
-            matches!(model, "last_non_direct" | "first_touch"),
+            matches!(model, "last_non_direct" | "first_touch" | "last_touch"),
             "unknown attribution model {model}"
         );
         let mut conn = self.conn.lock().unwrap();
