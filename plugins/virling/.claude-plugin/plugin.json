@@ -7,7 +7,7 @@
     "name": "Virling",
     "url": "https://virling.com"
   },
-  "homepage": "https://docs.virling.com/reference/mcp.html",
+  "homepage": "https://docs.virling.com/reference/mcp",
   "repository": "https://github.com/virling/virling",
   "license": "AGPL-3.0",
   "keywords": [
