@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
 const SRC = readFileSync(new URL("../assets/v.js", import.meta.url), "utf8");
+const COMPAT = readFileSync(new URL("../assets/v-compat.js", import.meta.url), "utf8");
 const SUFFIXES = new Set(["com", "uk", "co.uk", "io"]);
 
 // A cookie jar that, like a browser, rejects public suffixes and domains the host is not under.
@@ -37,7 +38,7 @@ const channel = (bus) =>
   };
 const tick = () => new Promise((r) => setTimeout(r, 5));
 
-function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set(), agent = {}, zone = "Europe/Berlin" } = {}) {
+function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set(), agent = {}, zone = "Europe/Berlin", before = "", compat = false } = {}) {
   const loc = new URL(url);
   const clock = { t: 1_700_000_000_000 };
   const sent = [];
@@ -78,7 +79,9 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
   };
   const performance = { getEntriesByType: (t) => (t == "navigation" ? [{ type: nav }] : []) };
   const ctx = { window, document, navigator, location, history, performance, BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, devicePixelRatio: 2, Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: zone }) }) }, URL, JSON, Date: { now: () => clock.t }, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]) };
-  vm.runInNewContext(SRC, ctx);
+  vm.createContext(ctx);
+  vm.runInContext(before + SRC, ctx);
+  if (compat) vm.runInContext(COMPAT, ctx);
   const fire = (t, e, ev = {}) => (listeners[t + e] || []).forEach((f) => f(ev));
   return { sent, urls, timers, cookie, window, document, history, location, fire, clock };
 }
@@ -294,4 +297,29 @@ test("reading depth sets no cookie in cookieless mode", () => {
   b.fire("w:", "pagehide", { persisted: false });
   assert.equal(b.cookie.cookies.size, 0);
   assert.equal(b.sent.find((e) => e.n == "read").e, 5);
+});
+
+test("the compatibility alias sends goals from its global, its queue and data attributes", () => {
+  const stub = "window.datafast = function () { (window.datafast.q = window.datafast.q || []).push(arguments); }; window.datafast('early', { plan: 'pro' });";
+  const b = browser("https://example.com/", { before: stub, compat: true });
+  b.window.datafast("signup", { email: "a@b.c" });
+  const el = { getAttribute: (k) => (k == "data-fast-goal" ? "initiate_checkout" : null) };
+  b.fire("d:", "click", { target: { closest: (s) => (s == "[data-fast-goal]" ? el : null) } });
+  b.fire("d:", "click", { target: { closest: () => null } });
+  assert.deepEqual(b.sent.filter((e) => e.n == "goal").map((e) => e.g), ["early", "signup", "initiate_checkout"]);
+});
+
+test("the compatibility alias copies the visitor ID to the other cookie name", () => {
+  const b = browser("https://app.example.com/", { compat: true });
+  const vid = b.sent[0].v;
+  assert.deepEqual(b.cookie.cookies.get("datafast_visitor_id@example.com"), { name: "datafast_visitor_id", value: vid, domain: "example.com" });
+  const cl = browser("https://example.com/", { compat: true, attrs: { "data-cookieless": "" } });
+  assert.equal(cl.cookie.cookies.size, 0);
+  cl.window.datafast("signup");
+  assert.deepEqual(cl.sent.filter((e) => e.n == "goal").map((e) => e.g), ["signup"]);
+});
+
+test("the compatibility alias does nothing when the tracker did not start", () => {
+  const b = browser("https://example.com/#virling-ignore", { compat: true });
+  assert.equal(b.window.datafast, undefined);
 });

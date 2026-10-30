@@ -298,11 +298,10 @@ impl DodoPayment {
             currency: self.currency.clone(),
             refunded,
             status: status.to_string(),
-            visitor_id: self
-                .metadata
-                .get("virling_vid")
-                .and_then(|v| v.as_str())
-                .filter(|v| !v.is_empty())
+            visitor_id: super::VID_KEYS
+                .iter()
+                .filter_map(|k| self.metadata.get(*k)?.as_str())
+                .find(|v| !v.is_empty())
                 .map(str::to_string),
             customer_id: Some(self.customer.customer_id.clone()),
             is_renewal,
@@ -720,6 +719,20 @@ mod tests {
         let f = paid[0].to_fetched(0, true);
         assert!(f.is_renewal);
         assert_eq!(f.customer_id.as_deref(), Some("cus_Wn4cTb6Jk1Ps"));
+    }
+
+    #[test]
+    fn compat_metadata_key_is_a_fallback() {
+        let mut p = subscription_payments().remove(0);
+        p.metadata.remove("virling_vid");
+        p.metadata
+            .insert("datafast_visitor_id".into(), "v_alias".into());
+        assert_eq!(
+            p.to_fetched(0, false).visitor_id.as_deref(),
+            Some("v_alias")
+        );
+        p.metadata.insert("virling_vid".into(), "v_own".into());
+        assert_eq!(p.to_fetched(0, false).visitor_id.as_deref(), Some("v_own"));
     }
 
     #[test]

@@ -4,7 +4,7 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
-use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription, months};
+use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription, VID_KEYS, months};
 use crate::events::TRIAL;
 
 const API: &str = "https://api.stripe.com/v1";
@@ -13,7 +13,6 @@ const PAGE_SIZE: &str = "100";
 const BACKFILL_SECS: i64 = 90 * 86_400;
 // Re-read this many seconds below the newest object seen, in case Stripe lists one late.
 const OVERLAP_SECS: i64 = 60;
-const VID_KEY: &str = "virling_vid";
 const REJECTED: &str =
     "Stripe rejected this key. Check it was copied in full and has not been deleted or rolled.";
 const EVENT_TYPES: [&str; 7] = [
@@ -302,7 +301,7 @@ fn trial_starts(events: &[Event]) -> Vec<Fetched> {
                 currency: o.currency.clone().unwrap_or_default(),
                 refunded: 0,
                 status: TRIAL.into(),
-                visitor_id: non_empty(o.metadata.get(VID_KEY))
+                visitor_id: meta_vid(&o.metadata)
                     .or_else(|| non_empty(o.client_reference_id.as_ref())),
                 customer_id: o.customer.clone(),
                 is_renewal: false,
@@ -325,10 +324,7 @@ async fn resolve(
     let Some(fetched) = to_fetched(charge, invoice.as_ref(), None, lost) else {
         return Ok(None);
     };
-    if non_empty(charge.metadata.get(VID_KEY)).is_some()
-        || fetched.is_renewal
-        || fetched.status == "failed"
-    {
+    if meta_vid(&charge.metadata).is_some() || fetched.is_renewal || fetched.status == "failed" {
         return Ok(Some(fetched));
     }
     let filter = match &invoice {
@@ -385,7 +381,7 @@ fn to_fetched(
         currency: charge.currency.to_ascii_lowercase(),
         refunded,
         status: status.to_string(),
-        visitor_id: non_empty(charge.metadata.get(VID_KEY))
+        visitor_id: meta_vid(&charge.metadata)
             .or_else(|| session.and_then(session_visitor))
             .or_else(|| charge.payment_intent.as_ref().and_then(intent_visitor)),
         customer_id: charge.customer.clone(),
@@ -397,19 +393,22 @@ fn to_fetched(
 }
 
 fn session_visitor(session: &Session) -> Option<String> {
-    non_empty(session.metadata.get(VID_KEY))
-        .or_else(|| non_empty(session.client_reference_id.as_ref()))
+    meta_vid(&session.metadata).or_else(|| non_empty(session.client_reference_id.as_ref()))
 }
 
 fn intent_visitor(intent: &IntentRef) -> Option<String> {
     match intent {
-        IntentRef::Expanded(pi) => non_empty(pi.metadata.get(VID_KEY)),
+        IntentRef::Expanded(pi) => meta_vid(&pi.metadata),
         IntentRef::Id(_) => None,
     }
 }
 
 fn non_empty(s: Option<&String>) -> Option<String> {
     s.filter(|s| !s.is_empty()).cloned()
+}
+
+fn meta_vid(m: &HashMap<String, String>) -> Option<String> {
+    VID_KEYS.iter().find_map(|k| non_empty(m.get(*k)))
 }
 
 async fn request(
@@ -709,6 +708,19 @@ mod tests {
         let c = charge("ch_3NmetadataVid000000000");
         let f = fetched(&c, sessions().first(), 0).unwrap();
         assert_eq!(f.visitor_id.as_deref(), Some("v_from_charge_meta"));
+    }
+
+    #[test]
+    fn compat_metadata_key_is_a_fallback() {
+        let mut c = charge("ch_3NmetadataVid000000000");
+        c.metadata.remove("virling_vid");
+        c.metadata
+            .insert("datafast_visitor_id".into(), "v_alias".into());
+        let f = fetched(&c, None, 0).unwrap();
+        assert_eq!(f.visitor_id.as_deref(), Some("v_alias"));
+        c.metadata.insert("virling_vid".into(), "v_own".into());
+        let f = fetched(&c, None, 0).unwrap();
+        assert_eq!(f.visitor_id.as_deref(), Some("v_own"));
     }
 
     #[test]

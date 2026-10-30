@@ -71,9 +71,8 @@
   <section class="band alt"><div class="wrap">
     <div class="txt">
       <h2>Install</h2>
-      <p class="p">The install script picks the right build for your machine and checks its checksum. Then start the server with the app turned on.</p>
-      <div class="code block"><pre>curl -fsSL https://virling.com/install.sh | sh
-VIRLING_BASE_URL=https://stats.example.com virling serve --app</pre></div>
+      <p class="p">One command picks the right build for your machine, checks its checksum, and on a Linux server sets up and starts the service, then prints the URL.</p>
+      <div class="code block"><pre>curl -fsSL https://virling.com/install.sh | sh</pre></div>
       <p class="p">Or run the container:</p>
       <div class="code block"><pre>docker run -d --name virling -p 8080:8080 -v virling-data:/data \
   -e VIRLING_BASE_URL=https://stats.example.com \

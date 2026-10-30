@@ -14,7 +14,7 @@ cp ../assets/vs.html ../assets/about.html ../assets/privacy.html ../assets/terms
 curl -fsSL https://api.github.com/repos/virling/virling/releases | perl ../scripts/changelog.pl ../assets/changelog.html > public/changelog.html
 cp ../assets/site.css ../assets/site.js ../assets/app.css ../assets/app.js ../assets/email-logo.png public/assets/
 cp ../assets/auth.md public/auth.md
-cp ../assets/favicon.svg ../assets/favicon.ico ../assets/v.js ../assets/robots.txt ../assets/sitemap.xml ../assets/llms.txt ../assets/llms-full.txt ../scripts/install.sh public/
+cp ../assets/favicon.svg ../assets/favicon.ico ../assets/v.js ../assets/v-compat.js ../assets/robots.txt ../assets/sitemap.xml ../assets/llms.txt ../assets/llms-full.txt ../scripts/install.sh public/
 cp -R ../assets/art public/assets/art
 mkdir -p public/assets/icons && cp ../assets/icons/stripe.svg ../assets/icons/dodo.svg ../assets/icons/polar.svg ../assets/icons/lemonsqueezy.svg public/assets/icons/
 cp -R ../assets/fonts public/assets/fonts

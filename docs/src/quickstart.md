@@ -15,7 +15,13 @@ You need a Linux or macOS server with Docker or one of the release binaries, and
 
 Pick one way to run it. Each starts the server with the app turned on, which serves sign-in, the dashboard and payment sync.
 
-<div class="tabset" data-tabs="Docker|Binary|systemd" data-key="run" aria-label="How to run"></div>
+<div class="tabset" data-tabs="One command|Docker|systemd" data-key="run" aria-label="How to run"></div>
+
+```sh
+curl -fsSL https://virling.com/install.sh | sh
+```
+
+<div class="cb-foot">About three minutes on a Linux server with systemd. The script downloads the latest release for x86_64 or arm64, checks its checksum, sets up and starts the <code>virling</code> service with its data in <code>/var/lib/virling</code>, and prints the URL. It asks for sudo once if you are not root, and running it again upgrades in place. Then set <code>VIRLING_BASE_URL</code> in <code>/etc/virling/virling.env</code> and run <code>sudo systemctl restart virling</code>. On macOS it installs the binary to <code>~/.local/bin</code>; start it with <code>VIRLING_BASE_URL=https://stats.example.com virling serve --app</code>.</div>
 
 ```sh
 docker run -d --name virling \
@@ -24,13 +30,6 @@ docker run -d --name virling \
   -e VIRLING_BASE_URL=https://stats.example.com \
   ghcr.io/virling/virling:latest serve --app
 ```
-
-```sh
-curl -fsSL https://virling.com/install.sh | sh
-VIRLING_BASE_URL=https://stats.example.com virling serve --app
-```
-
-<div class="cb-foot">The script picks the build for Linux x86_64 or arm64, or macOS on Intel or Apple silicon, and checks its checksum.</div>
 
 ```ini
 [Unit]

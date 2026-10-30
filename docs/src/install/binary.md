@@ -19,18 +19,17 @@ Builds for Windows are <span class="na">Not available yet</span>. Use [Docker](d
 curl -fsSL https://virling.com/install.sh | sh
 ```
 
-The script picks the right tarball for your system, checks its SHA-256 and installs `virling` to `~/.local/bin`. Pass options after `sh -s --`:
+The script picks the right tarball for your system and checks its SHA-256. On Linux with systemd it installs `virling` to `/usr/local/bin`, creates a `virling` user, the data folder `/var/lib/virling` and `/etc/virling/virling.env`, sets up the [systemd service](../self-host/systemd.md), starts it, waits for it to answer and prints the URL. It uses sudo only when you are not root. Running it again upgrades the binary and restarts the service, and keeps your environment file. Elsewhere, such as macOS, it installs `virling` to `~/.local/bin`. It sends nothing anywhere except the downloads from GitHub.
+
+Pass options after `sh -s --`:
 
 | Option | Effect |
 | --- | --- |
+| `--no-systemd` | On Linux, install the binary to `~/.local/bin` only, without the service |
 | `--system` | Install to `/usr/local/bin` with sudo |
-| `--systemd` | With `--system` on Linux, also set up the [systemd service](../self-host/systemd.md) without asking |
-| `--no-systemd` | Never offer the systemd service |
 | `--version X.Y.Z` | Install a specific release instead of the latest |
-| `--dir PATH` | Install to another folder |
+| `--dir PATH` | Install to another folder, without the service |
 | `--dry-run` | Print what it would do and change nothing |
-
-With `--system` on Linux and a terminal attached, it asks before setting up the service. It never sets one up silently.
 
 ## Download and verify
 

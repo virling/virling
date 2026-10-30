@@ -22,7 +22,7 @@ const RETURNS: [i64; 3] = [1, 5, 30];
 
 type IntegrationRow = (String, Option<i64>, Option<String>);
 type AiKeyRow = (String, Vec<u8>, Vec<u8>, Option<String>);
-type AiSettingsRow = (String, String, Option<i64>, i64, i64);
+type AiSettingsRow = (String, String, Option<i64>, i64, i64, i64);
 
 /// One assistant in the AI answers settings: its saved key's last four characters, or a key form.
 pub struct AiKeyView {
@@ -54,6 +54,9 @@ pub struct AiSettings {
     /// Empty on the hosted service, where runs are included.
     cost: String,
     run: String,
+    /// Days between scheduled runs, and the choices.
+    every: i64,
+    frequencies: &'static [(i64, &'static str)],
     can_run: bool,
     note: &'static str,
     error: &'static str,
@@ -368,7 +371,7 @@ async fn ai_settings(
         .await?
     };
     let saved: Option<AiSettingsRow> = sqlx::query_as(
-        "SELECT questions, names, last_run_at, run_day, manual_runs FROM ai_settings WHERE site_id = ?",
+        "SELECT questions, names, last_run_at, run_day, manual_runs, every_days FROM ai_settings WHERE site_id = ?",
     )
     .bind(site_id)
     .fetch_optional(&state.db)
@@ -379,8 +382,18 @@ async fn ai_settings(
             .fetch_optional(&state.db)
             .await?
             .flatten();
-    let (questions, names, last_run, run_day, manual) =
-        saved.unwrap_or((String::new(), String::new(), None, 0, 0));
+    let (questions, names, last_run, run_day, manual, every) = saved.unwrap_or((
+        String::new(),
+        String::new(),
+        None,
+        0,
+        0,
+        answers::EVERY_DAYS,
+    ));
+    let often = answers::FREQUENCIES
+        .iter()
+        .find(|f| f.0 == every)
+        .map_or("week", |f| f.1);
     let suggested = questions.is_empty();
     let (questions, names) = match typed {
         Some((q, n)) => (q.clone(), n.clone()),
@@ -431,7 +444,7 @@ async fn ai_settings(
         format!(
             "About {} a run, {} a month, for {} on {}, billed by each provider to its key.",
             cents(run),
-            cents(run * answers::RUNS_PER_MONTH),
+            cents(run * answers::runs_per_month(every)),
             plural(n as u64, "question"),
             plural(usable.len() as u64, "assistant"),
         )
@@ -443,18 +456,18 @@ async fn ai_settings(
         answers::MANUAL_PER_DAY
     };
     let now = OffsetDateTime::now_utc();
-    let next = (run_day + answers::EVERY_DAYS - today).max(0);
+    let next = (run_day + every - today).max(0);
     let run = match last_run.and_then(|t| OffsetDateTime::from_unix_timestamp(t).ok()) {
         _ if !paid => "Mentions are included on paid plans.".into(),
         _ if usable.is_empty() && hosted => "AI answers are not set up on this server.".into(),
-        _ if usable.is_empty() => "Add a key to start. Questions run once a week.".into(),
-        Some(t) if next > 0 && next <= answers::EVERY_DAYS => format!(
-            "Runs once a week. Last run {}; the next in {}.",
+        _ if usable.is_empty() => format!("Add a key to start. Questions run every {often}."),
+        Some(t) if next > 0 && next <= every => format!(
+            "Runs every {often}. Last run {}; the next in {}.",
             ago(t, now),
             plural(next as u64, "day")
         ),
-        Some(t) => format!("Runs once a week. Last run {}.", ago(t, now)),
-        None => "Runs once a week. The first run starts once the site has visits.".into(),
+        Some(t) => format!("Runs every {often}. Last run {}.", ago(t, now)),
+        None => format!("Runs every {often}. The first run starts once the site has visits."),
     };
     Ok(AiSettings {
         keys: views,
@@ -465,6 +478,8 @@ async fn ai_settings(
         suggested,
         cost,
         run,
+        every,
+        frequencies: &answers::FREQUENCIES,
         can_run: !usable.is_empty() && left > 0,
         note: match q.saved.as_deref() {
             Some("ai") => "Saved. The next run asks these questions.",
@@ -585,7 +600,15 @@ pub async fn save_ai(
         )
         .await;
     }
-    if let Err(err) = answers::save_settings(&state.db, &ctx.site.id, &questions, &names).await {
+    let every = field("every")
+        .concat()
+        .parse()
+        .unwrap_or(answers::EVERY_DAYS);
+    let saved = match answers::save_settings(&state.db, &ctx.site.id, &questions, &names).await {
+        Ok(()) => answers::save_every(&state.db, &ctx.site.id, every).await,
+        Err(err) => Err(err),
+    };
+    if let Err(err) = saved {
         tracing::error!(%err, "saving AI questions failed");
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     }
