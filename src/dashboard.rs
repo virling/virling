@@ -451,6 +451,7 @@ pub fn provider_name(provider: &str) -> &'static str {
         "polar" => "Polar",
         "lemonsqueezy" => "LemonSqueezy",
         "creem" => "Creem",
+        "revenuecat" => "RevenueCat",
         _ => "Other",
     }
 }
@@ -1241,16 +1242,23 @@ pub async fn payments(
             .first()
             .map(|p| provider_name(p).to_string())
             .unwrap_or_default(),
-        providers: ["dodo", "stripe", "polar", "lemonsqueezy", "creem"]
-            .into_iter()
-            .map(|pr| {
-                (
-                    icons::provider(pr, 12),
-                    provider_name(pr),
-                    providers.iter().any(|c| c == pr),
-                )
-            })
-            .collect(),
+        providers: [
+            "dodo",
+            "stripe",
+            "polar",
+            "lemonsqueezy",
+            "creem",
+            "revenuecat",
+        ]
+        .into_iter()
+        .map(|pr| {
+            (
+                icons::provider(pr, 12),
+                provider_name(pr),
+                providers.iter().any(|c| c == pr),
+            )
+        })
+        .collect(),
         shell: ctx.shell,
     })
 }

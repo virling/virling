@@ -378,6 +378,14 @@ fn provider_card(p: Provider, selected: bool) -> ProviderCard {
             "https://docs.creem.io/api-reference/introduction",
             "Create an API key with the transactions:read and subscriptions:read scopes, plus webhooks:write so Virling can add one webhook that links checkouts to visits. Live and test mode keys both work.",
         ),
+        Provider::RevenueCat => (
+            "RevenueCat",
+            "V2 secret key",
+            "sk_...",
+            "How to create a V2 key, 1 minute",
+            "https://www.revenuecat.com/docs/projects/authentication",
+            "Create a V2 secret API key with read access to Project configuration and Customer information, plus read and write access to Integrations so Virling can add one webhook. Purchases, renewals and refunds arrive by that webhook.",
+        ),
     };
     ProviderCard {
         key: p.as_str(),

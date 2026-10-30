@@ -164,6 +164,11 @@ const BRANDS: &[(&str, &str, &str)] = &[
         "Reddit",
         include_str!("../assets/icons/reddit.svg"),
     ),
+    (
+        "revenuecat",
+        "RevenueCat",
+        include_str!("../assets/icons/revenuecat.svg"),
+    ),
     ("slack", "Slack", include_str!("../assets/icons/slack.svg")),
     (
         "startpage",
@@ -494,7 +499,9 @@ pub fn device(name: &str) -> String {
 
 pub fn provider(provider: &str, size: u32) -> String {
     match provider {
-        "stripe" | "lemonsqueezy" | "dodo" | "polar" | "creem" => brand(provider, size),
+        "stripe" | "lemonsqueezy" | "dodo" | "polar" | "creem" | "revenuecat" => {
+            brand(provider, size)
+        }
         _ => glyph("card", size, "var(--ink)"),
     }
 }
@@ -561,6 +568,7 @@ mod tests {
         assert!(a.contains(r#"aria-label="Dodo Payments""#));
         assert!(provider("polar", 14).contains(r#"aria-label="Polar""#));
         assert!(provider("creem", 14).contains(r#"aria-label="Creem""#));
+        assert!(provider("revenuecat", 14).contains(r#"aria-label="RevenueCat""#));
         let id = |s: &str| {
             s.split("mask id=\"")
                 .nth(1)

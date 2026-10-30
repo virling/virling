@@ -380,6 +380,10 @@ pub fn router(state: AppState) -> Router {
                 "/api/webhooks/creem/{site_id}",
                 post(crate::sync::creem_webhook),
             )
+            .route(
+                "/api/webhooks/revenuecat/{site_id}",
+                post(crate::sync::revenuecat_webhook),
+            )
             .route("/r/{token}", get(dashboard::report::shared))
             .route("/share/{domain}", get(dashboard::public))
             .route("/share/{domain}/globe", get(crate::globe::public_page))

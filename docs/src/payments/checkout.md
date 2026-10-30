@@ -22,7 +22,7 @@ async function visitorId() {
 
 ## Per provider
 
-<div class="tabset" data-tabs="Stripe|Dodo Payments|Polar|LemonSqueezy|Creem" data-key="provider" aria-label="Payment provider"></div>
+<div class="tabset" data-tabs="Stripe|Dodo Payments|Polar|LemonSqueezy|Creem|RevenueCat" data-key="provider" aria-label="Payment provider"></div>
 
 ```js
 // Stripe Checkout (Node, stripe): pass the visitor ID on the session
@@ -101,6 +101,15 @@ const res = await fetch("https://api.creem.io/v1/checkouts", {
 // Send the customer to (await res.json()).checkout_url
 ```
 
+```js
+// RevenueCat (Node): set the customer attribute virling_vid before the purchase
+await fetch(`https://api.revenuecat.com/v2/projects/${projectId}/customers/${appUserId}/attributes`, {
+  method: "POST",
+  headers: { authorization: `Bearer ${process.env.REVENUECAT_SECRET_KEY}`, "content-type": "application/json" },
+  body: JSON.stringify({ attributes: [{ name: "virling_vid", value: req.cookies.virling_vid }] }),
+});
+```
+
 ## Stripe
 
 Virling reads `metadata.virling_vid` on the charge or its PaymentIntent, then `metadata.virling_vid` or `client_reference_id` on the Checkout Session. See [Stripe](stripe.md).
@@ -120,6 +129,10 @@ Tag checkouts with `checkout[custom][virling_vid]` now. Matching them is <span c
 ## Creem
 
 Virling reads `virling_vid` from the checkout's `metadata` in the `checkout.completed` webhook, then from the subscription's or customer's `metadata`. See [Creem](creem.md).
+
+## RevenueCat
+
+Virling reads the customer attribute `virling_vid` from each webhook event. Set it from your app with the SDK's `setAttributes`, or from your server. See [RevenueCat](revenuecat.md).
 
 ## Payment links
 

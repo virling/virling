@@ -9,7 +9,7 @@ use time::OffsetDateTime;
 
 use crate::app::AppState;
 use crate::events::Payment;
-use crate::providers::{Fetched, Provider, creem, lemonsqueezy};
+use crate::providers::{Fetched, Provider, creem, lemonsqueezy, revenuecat};
 
 const INTERVAL: Duration = Duration::from_secs(60);
 const MAX_PAGES_PER_RUN: usize = 50;
@@ -37,7 +37,7 @@ pub async fn add_integration(
 ) -> anyhow::Result<()> {
     provider.check_key(&state.http, key).await?;
     let (ciphertext, nonce) = state.vault.encrypt(key)?;
-    // LemonSqueezy and Creem send checkout metadata only in webhooks, which need a public https address.
+    // LemonSqueezy, Creem and RevenueCat send checkout data in webhooks, which need a public https address.
     let url = format!(
         "{}/api/webhooks/{}/{site_id}",
         state.config.base_url,
@@ -51,6 +51,11 @@ pub async fn add_integration(
             Some(secret)
         }
         Provider::Creem => Some(creem::register_webhook(&state.http, key, &url).await?),
+        Provider::RevenueCat => {
+            let secret = crate::auth::random_token();
+            revenuecat::register_webhook(&state.http, key, &url, &secret).await?;
+            Some(secret)
+        }
         _ => None,
     };
     let hook = secret.map(|s| state.vault.encrypt(&s)).transpose()?;
@@ -145,6 +150,54 @@ async fn webhook(
         return StatusCode::SERVICE_UNAVAILABLE;
     }
     attribute(state, Some(site_id), false).await;
+    StatusCode::NO_CONTENT
+}
+
+/// Receives a RevenueCat purchase, renewal or refund with its visitor ID, sent with the site's webhook secret.
+pub async fn revenuecat_webhook(
+    State(state): State<AppState>,
+    Path(site_id): Path<String>,
+    headers: HeaderMap,
+    body: Bytes,
+) -> StatusCode {
+    let hook: Option<(Vec<u8>, Vec<u8>)> = sqlx::query_as(
+        "SELECT webhook_ciphertext, webhook_nonce FROM integrations
+         WHERE site_id = ? AND provider = 'revenuecat' AND webhook_ciphertext IS NOT NULL",
+    )
+    .bind(&site_id)
+    .fetch_optional(&state.db)
+    .await
+    .ok()
+    .flatten();
+    let Some(secret) = hook.and_then(|(c, n)| state.vault.decrypt(&c, &n).ok()) else {
+        return StatusCode::NOT_FOUND;
+    };
+    let sent = headers
+        .get("authorization")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("");
+    let same = sent.len() == secret.len()
+        && sent
+            .bytes()
+            .zip(secret.bytes())
+            .fold(0, |acc, (a, b)| acc | (a ^ b))
+            == 0;
+    if !same {
+        return StatusCode::UNAUTHORIZED;
+    }
+    let payment = match revenuecat::webhook_payment(&body) {
+        Ok(Some(p)) => p,
+        Ok(None) => return StatusCode::NO_CONTENT,
+        Err(err) => {
+            tracing::warn!(%err, site = %site_id, "unreadable RevenueCat webhook");
+            return StatusCode::BAD_REQUEST;
+        }
+    };
+    if let Err(err) = store(&state, &site_id, Provider::RevenueCat, vec![payment]).await {
+        tracing::error!(%err, site = %site_id, "storing a RevenueCat webhook payment failed");
+        return StatusCode::SERVICE_UNAVAILABLE;
+    }
+    attribute(&state, Some(&site_id), false).await;
     StatusCode::NO_CONTENT
 }
 

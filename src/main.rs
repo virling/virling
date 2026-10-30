@@ -574,6 +574,54 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn revenuecat_webhook_checks_its_header() {
+        let (_dir, state, store) = setup().await;
+        let site = site_id(&state).await;
+        let (key, key_nonce) = state.vault.encrypt("sk_fixture_key").unwrap();
+        let (hook, hook_nonce) = state.vault.encrypt("rc_secret_1234").unwrap();
+        sqlx::query(
+            "INSERT INTO integrations (id, site_id, provider, key_ciphertext, key_nonce, created_at, webhook_ciphertext, webhook_nonce)
+             VALUES ('rc', ?, 'revenuecat', ?, ?, 1, ?, ?)",
+        )
+        .bind(&site)
+        .bind(key)
+        .bind(key_nonce)
+        .bind(hook)
+        .bind(hook_nonce)
+        .execute(&state.db)
+        .await
+        .unwrap();
+        let body = include_str!("providers/fixtures/revenuecat_webhook.json");
+        let send = |auth: &'static str| {
+            let app = router(state.clone())
+                .layer(MockConnectInfo(SocketAddr::from(([203, 0, 113, 9], 5555))));
+            let req = Request::post(format!("/api/webhooks/revenuecat/{site}"))
+                .header("authorization", auth)
+                .body(Body::from(body))
+                .unwrap();
+            async move { app.oneshot(req).await.unwrap().status() }
+        };
+        assert_eq!(send("rc_secret_9999").await, StatusCode::UNAUTHORIZED);
+        assert_eq!(send("rc_secret_1234").await, StatusCode::NO_CONTENT);
+        let period = Period {
+            from: time::macros::date!(2026 - 08 - 01),
+            to: time::macros::date!(2026 - 08 - 31),
+            tz: "UTC".into(),
+        };
+        let rows: Vec<(String, Option<String>)> = store
+            .payment_list(&site, &period, PaymentFilter::All, 10, 0)
+            .unwrap()
+            .rows
+            .into_iter()
+            .map(|p| (p.provider_payment_id, p.visitor_id))
+            .collect();
+        assert_eq!(
+            rows,
+            [("170000123456789".to_string(), Some("vid_rc".to_string()))]
+        );
+    }
+
+    #[tokio::test]
     async fn lemonsqueezy_webhook_attaches_the_visitor() {
         let (_dir, state, store) = setup().await;
         let site = site_id(&state).await;
@@ -1334,7 +1382,14 @@ mod tests {
         assert_eq!(page.status(), StatusCode::OK);
         let body = body_text(page).await;
         assert!(body.contains("Restricted key"));
-        for name in ["Stripe", "Dodo Payments", "Polar", "Lemon Squeezy", "Creem"] {
+        for name in [
+            "Stripe",
+            "Dodo Payments",
+            "Polar",
+            "Lemon Squeezy",
+            "Creem",
+            "RevenueCat",
+        ] {
             assert!(
                 body.contains(&format!(r#"aria-label="{name}""#)),
                 "{name} logo"
@@ -2299,7 +2354,7 @@ mod tests {
         assert!(body.contains("Save new key"));
         assert!(!body.contains("HIDDEN"));
 
-        for p in ["stripe", "polar", "lemonsqueezy", "creem"] {
+        for p in ["stripe", "polar", "lemonsqueezy", "creem", "revenuecat"] {
             connect_fake(&state, &site, p, "fake_test_value_1234").await;
         }
         let body = body_text(call(&state, get(&uri, Some(&cookie))).await).await;
