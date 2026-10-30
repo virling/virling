@@ -35,6 +35,7 @@
           <span class="grow"></span>
           <span class="dim">Visit {{ v.n }}<i class="sep"></i>{{ v.date }}<i class="sep"></i>{{ v.pages }}, {{ v.length }}</span>
         </div>
+        <p class="vt-verdict"><b>{{ v.verdict }}</b> {{ v.why }}</p>
         <ol class="vt-steps">
           {% for s in v.steps %}
           {% match s %}
