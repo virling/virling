@@ -3,6 +3,7 @@ mod dodo;
 pub mod lemonsqueezy;
 mod polar;
 pub mod revenuecat;
+mod shopify;
 mod stripe;
 mod woocommerce;
 
@@ -113,10 +114,11 @@ pub enum Provider {
     Creem,
     RevenueCat,
     WooCommerce,
+    Shopify,
 }
 
 impl Provider {
-    pub const ALL: [Provider; 7] = [
+    pub const ALL: [Provider; 8] = [
         Provider::Stripe,
         Provider::Dodo,
         Provider::Polar,
@@ -124,6 +126,7 @@ impl Provider {
         Provider::Creem,
         Provider::RevenueCat,
         Provider::WooCommerce,
+        Provider::Shopify,
     ];
 
     pub fn as_str(self) -> &'static str {
@@ -135,6 +138,7 @@ impl Provider {
             Provider::Creem => "creem",
             Provider::RevenueCat => "revenuecat",
             Provider::WooCommerce => "woocommerce",
+            Provider::Shopify => "shopify",
         }
     }
 
@@ -144,7 +148,7 @@ impl Provider {
 
     /// Whether the connection also needs the store's own URL.
     pub fn needs_store(self) -> bool {
-        matches!(self, Provider::WooCommerce)
+        matches!(self, Provider::WooCommerce | Provider::Shopify)
     }
 
     /// Checks the key works and is read-only. Err carries a message fit to show the user.
@@ -162,6 +166,7 @@ impl Provider {
             Provider::Creem => creem::check_key(client, key).await,
             Provider::RevenueCat => revenuecat::check_key(client, key).await,
             Provider::WooCommerce => woocommerce::check_key(client, key, need(store)?).await,
+            Provider::Shopify => shopify::check_key(client, key, need(store)?).await,
         }
     }
 
@@ -183,6 +188,7 @@ impl Provider {
             Provider::Creem => creem::fetch(client, key, cursor).await,
             Provider::RevenueCat => revenuecat::fetch(client, key, cursor).await,
             Provider::WooCommerce => woocommerce::fetch(client, key, need(store)?, cursor).await,
+            Provider::Shopify => shopify::fetch(client, key, need(store)?, cursor).await,
         }
     }
 
@@ -202,6 +208,7 @@ impl Provider {
             Provider::Creem => creem::subscriptions(client, key).await,
             Provider::RevenueCat => revenuecat::subscriptions(client, key).await,
             Provider::WooCommerce => woocommerce::subscriptions(client, key, need(store)?).await,
+            Provider::Shopify => shopify::subscriptions(client, key, need(store)?).await,
         }
     }
 }

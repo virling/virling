@@ -1,0 +1,10 @@
+{
+  "orders": [
+    {"id": 1001, "created_at": "2026-09-28T12:00:00+02:00", "processed_at": "2026-09-28T12:05:00+02:00", "total_price": "49.00", "currency": "EUR", "financial_status": "paid", "test": false, "source_name": "web", "customer": {"id": 207119551}, "note_attributes": [{"name": "virling_vid", "value": "vid_shop"}], "refunds": []},
+    {"id": 1002, "created_at": "2026-09-29T00:00:00Z", "processed_at": "2026-09-29T00:00:00Z", "total_price": "20.00", "currency": "USD", "financial_status": "partially_refunded", "source_name": "web", "customer": {"id": 3}, "note_attributes": [{"name": "datafast_visitor_id", "value": "vid_alias"}], "refunds": [{"id": 1, "transactions": [{"amount": "5.00", "kind": "refund", "status": "success"}, {"amount": "3.00", "kind": "refund", "status": "failure"}]}]},
+    {"id": 1003, "created_at": "2026-09-29T01:00:00Z", "processed_at": "2026-09-29T01:00:00Z", "total_price": "19.00", "currency": "USD", "financial_status": "refunded", "source_name": "web", "customer": null, "note_attributes": [], "refunds": []},
+    {"id": 1004, "created_at": "2026-09-29T02:00:00Z", "processed_at": null, "total_price": "9.00", "currency": "USD", "financial_status": "voided", "source_name": "web", "customer": {"id": 4}, "note_attributes": [], "refunds": []},
+    {"id": 1005, "created_at": "2026-09-29T03:00:00Z", "processed_at": null, "total_price": "5.00", "currency": "USD", "financial_status": "pending", "source_name": "web", "customer": {"id": 5}, "note_attributes": [], "refunds": []},
+    {"id": 1006, "created_at": "2026-10-05T00:00:00Z", "processed_at": "2026-10-05T00:00:00Z", "total_price": "20.00", "currency": "EUR", "financial_status": "paid", "source_name": "subscription_contract", "customer": {"id": 207119551}, "note_attributes": [], "refunds": []}
+  ]
+}

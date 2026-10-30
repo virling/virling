@@ -1469,6 +1469,7 @@ mod tests {
             "Creem",
             "RevenueCat",
             "WooCommerce",
+            "Shopify",
         ] {
             assert!(
                 body.contains(&format!(r#"aria-label="{name}""#)),
@@ -2512,6 +2513,7 @@ mod tests {
             "creem",
             "revenuecat",
             "woocommerce",
+            "shopify",
         ] {
             connect_fake(&state, &site, p, "fake_test_value_1234").await;
         }
