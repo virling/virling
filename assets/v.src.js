@@ -43,17 +43,22 @@
   });
   on(w, "popstate", pageview);
 
-  // Record outbound clicks as exits, and carry the visitor ID into Stripe, Polar and Dodo payment links.
+  // Record outbound clicks as exits, and carry the visitor ID into hosted checkout links, on load and on click.
   var bare = (h) => h.replace(/^www\./, "");
-  var pay = { "buy.stripe.com": "client_reference_id", "buy.polar.sh": "custom_field_data.virling_vid", "checkout.dodopayments.com": "metadata_virling_vid" };
+  var pay = { "buy.stripe.com": "client_reference_id", "buy.polar.sh": "reference_id", "checkout.dodopayments.com": "metadata_virling_vid" },
+    tag = (a, u, k) => {
+      u = new URL(a.href);
+      k = vid && (pay[u.hostname] || /\.lemonsqueezy\.com$/.test(u.hostname) && "checkout[custom][virling_vid]");
+      if (k && !u.searchParams.has(k)) u.searchParams.set(k, vid), a.href = u.href;
+      return u;
+    };
+  d.querySelectorAll("a[href]").forEach((a) => { try { tag(a); } catch {} });
   on(d, "click", (e) => {
-    var a = e.target.closest?.("a[href]"), u, k;
+    var a = e.target.closest?.("a[href]"), u;
     if (!a) return;
     try {
-      u = new URL(a.href);
+      u = tag(a);
       if (/^http/.test(u.protocol) && bare(u.hostname) != bare(L.hostname)) send("exit", u.origin + u.pathname);
-      k = vid && pay[u.hostname];
-      if (k && !u.searchParams.has(k)) u.searchParams.set(k, vid), a.href = u.href;
     } catch {}
   }, true);
   // Count the site's other open tabs, so closing one of several tabs or switching tabs is not a leave.

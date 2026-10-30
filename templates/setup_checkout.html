@@ -56,9 +56,8 @@ const checkout = await polar.checkouts.create({
 });
 // Send the customer to checkout.url
 
-// Checkout links: add a custom field with the slug virling_vid
-// to the link. The Virling script fills it on click
-// (custom_field_data.virling_vid), so nothing else is needed.{% else if key == &"creem" %}// Creem (Node): checkout with metadata
+// Checkout links (buy.polar.sh) need nothing:
+// the Virling script adds reference_id.{% else if key == &"creem" %}// Creem (Node): checkout with metadata
 const res = await fetch("https://api.creem.io/v1/checkouts", {
   method: "POST",
   headers: { "x-api-key": process.env.CREEM_API_KEY, "content-type": "application/json" },
@@ -73,18 +72,10 @@ await fetch(`https://api.revenuecat.com/v2/projects/${projectId}/customers/${app
   method: "POST",
   headers: { authorization: `Bearer ${process.env.REVENUECAT_SECRET_KEY}`, "content-type": "application/json" },
   body: JSON.stringify({ attributes: [{ name: "virling_vid", value: req.cookies.virling_vid }] }),
-});{% else %}// LemonSqueezy: add the visitor ID as checkout custom data.
-// Not attributed yet: LemonSqueezy only returns custom data in
-// webhooks, which Virling does not receive yet.
-// Tag checkouts now and they will match once that ships.
+});{% else %}// LemonSqueezy: checkout links (STORE.lemonsqueezy.com/checkout/buy/...)
+// need nothing: the Virling script adds checkout[custom][virling_vid].
 
-// In the browser, on a checkout URL:
-const url = new URL("https://STORE.lemonsqueezy.com/checkout/buy/VARIANT_ID");
-const vid = window.virling?.vid?.();
-if (vid) url.searchParams.set("checkout[custom][virling_vid]", vid);
-location.href = url.href;
-
-// Or on your server, POST /v1/checkouts with:
+// For checkouts you create on your server, POST /v1/checkouts with:
 // data.attributes.checkout_data.custom = { virling_vid: req.cookies.virling_vid }{% endif %}</pre>
       {% endfor %}
     </div>

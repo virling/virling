@@ -22,7 +22,7 @@ LemonSqueezy only returns checkout custom data in webhooks. When you connect Lem
 
 The webhook needs `VIRLING_BASE_URL` to be a public `https://` address that LemonSqueezy can reach. Without one, no webhook is registered and LemonSqueezy payments show as Unattributed.
 
-Pass the visitor ID into checkout as custom data. In the browser:
+Checkout links on `STORE.lemonsqueezy.com` need no code: the script adds `checkout[custom][virling_vid]` to them. For a checkout you build yourself, pass the visitor ID as custom data. In the browser:
 
 ```js
 const url = new URL("https://STORE.lemonsqueezy.com/checkout/buy/VARIANT_ID");

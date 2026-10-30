@@ -38,7 +38,7 @@ const channel = (bus) =>
   };
 const tick = () => new Promise((r) => setTimeout(r, 5));
 
-function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set(), agent = {}, zone = "Europe/Berlin", before = "", compat = false } = {}) {
+function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set(), agent = {}, zone = "Europe/Berlin", links = [], before = "", compat = false } = {}) {
   const loc = new URL(url);
   const clock = { t: 1_700_000_000_000 };
   const sent = [];
@@ -59,6 +59,7 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
     hidden: false,
     documentElement: { scrollHeight: 2000 },
     addEventListener: on("d:"),
+    querySelectorAll: () => links,
     get cookie() { return cookie.get(); },
     set cookie(v) { cookie.set(v); },
   };
@@ -188,7 +189,7 @@ test("outbound clicks are exits and payment links carry the visitor ID", () => {
     return a.href;
   };
   assert.equal(link("https://buy.stripe.com/abc"), `https://buy.stripe.com/abc?client_reference_id=${vid}`);
-  assert.equal(link("https://buy.polar.sh/p"), `https://buy.polar.sh/p?custom_field_data.virling_vid=${vid}`);
+  assert.equal(link("https://buy.polar.sh/p"), `https://buy.polar.sh/p?reference_id=${vid}`);
   assert.equal(link("https://checkout.dodopayments.com/buy/p"), `https://checkout.dodopayments.com/buy/p?metadata_virling_vid=${vid}`);
   link("https://x.com/virling");
   link("https://example.com/about");
@@ -197,6 +198,30 @@ test("outbound clicks are exits and payment links carry the visitor ID", () => {
     b.sent.filter((e) => e.n == "exit").map((e) => e.g),
     ["https://buy.stripe.com/abc", "https://buy.polar.sh/p", "https://checkout.dodopayments.com/buy/p", "https://x.com/virling"],
   );
+});
+
+test("checkout links carry the visitor ID from page load, and an existing value is kept", () => {
+  const links = [
+    { href: "https://buy.stripe.com/abc" },
+    { href: "https://store.lemonsqueezy.com/buy/v1" },
+    { href: "https://checkout.dodopayments.com/buy/p?metadata_virling_vid=mine" },
+    { href: "https://example.com/pricing" },
+  ];
+  const b = browser("https://example.com/", { links });
+  const vid = b.sent[0].v;
+  assert.deepEqual(links.map((a) => a.href), [
+    `https://buy.stripe.com/abc?client_reference_id=${vid}`,
+    `https://store.lemonsqueezy.com/buy/v1?checkout%5Bcustom%5D%5Bvirling_vid%5D=${vid}`,
+    "https://checkout.dodopayments.com/buy/p?metadata_virling_vid=mine",
+    "https://example.com/pricing",
+  ]);
+  assert.equal(b.sent.length, 1, "decorating sends nothing");
+});
+
+test("cookieless pages leave checkout links alone", () => {
+  const links = [{ href: "https://buy.stripe.com/abc" }];
+  browser("https://example.com/", { links, attrs: { "data-cookieless": "" } });
+  assert.equal(links[0].href, "https://buy.stripe.com/abc");
 });
 
 test("www and the bare domain are one site", () => {

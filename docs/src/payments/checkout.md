@@ -66,24 +66,15 @@ const checkout = await polar.checkouts.create({
 });
 // Send the customer to checkout.url
 
-// Checkout links: add a custom field with the slug virling_vid
-// to the link. The Virling script fills it on click
-// (custom_field_data.virling_vid), so nothing else is needed.
+// Checkout links (buy.polar.sh) need nothing:
+// the Virling script adds reference_id.
 ```
 
 ```js
-// LemonSqueezy: add the visitor ID as checkout custom data.
-// Not attributed yet: LemonSqueezy only returns custom data in
-// webhooks, which Virling does not receive yet.
-// Tag checkouts now and they will match once that ships.
+// LemonSqueezy: checkout links (STORE.lemonsqueezy.com/checkout/buy/...)
+// need nothing: the Virling script adds checkout[custom][virling_vid].
 
-// In the browser, on a checkout URL:
-const url = new URL("https://STORE.lemonsqueezy.com/checkout/buy/VARIANT_ID");
-const vid = window.virling?.vid?.();
-if (vid) url.searchParams.set("checkout[custom][virling_vid]", vid);
-location.href = url.href;
-
-// Or on your server, POST /v1/checkouts with:
+// For checkouts you create on your server, POST /v1/checkouts with:
 // data.attributes.checkout_data.custom = { virling_vid: req.cookies.virling_vid }
 ```
 
@@ -124,7 +115,7 @@ Virling reads `virling_vid` from the order's `metadata`, its custom field data, 
 
 ## LemonSqueezy
 
-Virling reads `virling_vid` from the checkout's custom data, which LemonSqueezy only returns in webhooks. Tag checkouts with `checkout[custom][virling_vid]`. See [LemonSqueezy](lemonsqueezy.md).
+Virling reads `virling_vid` from the checkout custom data in its webhook. Checkout links need no code; for checkouts you create, set `checkout_data.custom.virling_vid`. See [LemonSqueezy](lemonsqueezy.md).
 
 ## Creem
 
@@ -134,17 +125,18 @@ Virling reads `virling_vid` from the checkout's `metadata` in the `checkout.comp
 
 Virling reads the customer attribute `virling_vid` from each webhook event. Set it from your app with the SDK's `setAttributes`, or from your server. See [RevenueCat](revenuecat.md).
 
-## Payment links
+## Checkout links need no code
 
-The script tags three kinds of hosted links when a visitor clicks them, so no code is needed:
+Hosted checkout links carry the visitor ID by themselves. The script adds it to every such link on the page when the page loads, and again when a visitor clicks one, so links added later by your own code are covered too:
 
-| Link host | Parameter added |
-| --- | --- |
-| `buy.stripe.com` | `client_reference_id=<visitor ID>` |
-| `buy.polar.sh` | `custom_field_data.virling_vid=<visitor ID>`, which needs a `virling_vid` custom field on the link |
-| `checkout.dodopayments.com` | `metadata_virling_vid=<visitor ID>` |
+| Link host | Parameter added | Virling reads it from |
+| --- | --- | --- |
+| `buy.stripe.com` | `client_reference_id=<visitor ID>` | The Checkout Session's `client_reference_id` |
+| `buy.polar.sh` | `reference_id=<visitor ID>` | The order's `metadata.reference_id` |
+| `checkout.dodopayments.com` | `metadata_virling_vid=<visitor ID>` | The payment's `metadata.virling_vid` |
+| `*.lemonsqueezy.com` | `checkout[custom][virling_vid]=<visitor ID>` | The webhook's custom data |
 
-The parameter is only added when the link does not already have it, and only when there is a visitor ID, so not in cookieless mode. Links to other providers are left alone.
+A parameter that is already on the link is never replaced, and nothing is added without a visitor ID, so not in cookieless mode. Links must be normal `<a href>` links on a page that runs the script. Links to other providers are left alone.
 
 ## Check that it works
 

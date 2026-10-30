@@ -34,9 +34,4 @@ const checkout = await polar.checkouts.create({
 
 ## Checkout links
 
-Checkout links on `buy.polar.sh` need no code beyond one setting:
-
-1. In Polar, add a custom field with the slug `virling_vid` to the checkout link.
-2. Keep the link as a normal `<a href>` on a page that runs the script.
-
-When a visitor clicks it, the script adds `custom_field_data.virling_vid=<visitor ID>` to the link, unless it is already there, and Polar prefills the field.
+Checkout links on `buy.polar.sh` need no code. Keep the link as a normal `<a href>` on a page that runs the script: the script adds `reference_id=<visitor ID>` to it, unless it is already there, and Polar stores it in the order's metadata, where Virling reads it. A `virling_vid` custom field on the link still works too.

@@ -387,7 +387,8 @@ fn map_order(order: Order) -> Mapped {
     };
     let visitor_id = vid(&order.metadata)
         .or_else(|| order.custom_field_data.as_ref().and_then(vid))
-        .or_else(|| order.customer.as_ref().and_then(|c| vid(&c.metadata)));
+        .or_else(|| order.customer.as_ref().and_then(|c| vid(&c.metadata)))
+        .or_else(|| reference(&order.metadata));
     if order.net_amount == 0 {
         if status != "paid" || order.billing_reason != "subscription_create" {
             return Mapped::Skip;
@@ -425,6 +426,14 @@ fn vid(map: &Map<String, Value>) -> Option<String> {
         Some(Value::String(s)) if !s.trim().is_empty() => Some(s.trim().to_string()),
         _ => None,
     })
+}
+
+/// A checkout link's `reference_id`, which the script sets to the visitor ID, when it has a visitor ID's shape.
+fn reference(map: &Map<String, Value>) -> Option<String> {
+    map.get("reference_id")?
+        .as_str()
+        .filter(|s| crate::ingest::valid_visitor_id(s))
+        .map(str::to_owned)
 }
 
 fn format_ts(ts: OffsetDateTime) -> anyhow::Result<String> {
@@ -624,6 +633,22 @@ mod tests {
             ),
             (TRIAL, 0, Some("vid_trial"))
         );
+    }
+
+    #[test]
+    fn checkout_link_reference_is_the_visitor() {
+        let mut v = orders_json_items()[0].clone();
+        v["metadata"] = serde_json::json!({ "reference_id": "vlink1234567" });
+        let Mapped::Payment(p) = map_order(serde_json::from_value(v.clone()).unwrap()) else {
+            panic!("a paid order is a payment");
+        };
+        assert_eq!(p.visitor_id.as_deref(), Some("vlink1234567"));
+        v["metadata"] =
+            serde_json::json!({ "reference_id": "not a visitor!", "virling_vid": "vown12345678" });
+        let Mapped::Payment(p) = map_order(serde_json::from_value(v).unwrap()) else {
+            panic!("a paid order is a payment");
+        };
+        assert_eq!(p.visitor_id.as_deref(), Some("vown12345678"));
     }
 
     #[test]
