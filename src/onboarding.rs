@@ -390,6 +390,14 @@ fn provider_card(p: Provider, selected: bool) -> ProviderCard {
             "https://woocommerce.com/document/woocommerce-rest-api/",
             "Create a REST API key with Read permission, then paste the consumer key and secret joined by a colon. Virling reads orders, refunds and, with WooCommerce Subscriptions, subscriptions.",
         ),
+        Provider::Shopify => (
+            "Shopify",
+            "Admin API access token",
+            "shpat_...",
+            "How to create a read-only token, 2 minutes",
+            "https://help.shopify.com/en/manual/apps/app-types/custom-apps",
+            "Create a custom app in your Shopify admin with only the read_orders scope, install it, and paste its Admin API access token with your store's myshopify.com address.",
+        ),
         Provider::RevenueCat => (
             "RevenueCat",
             "V2 secret key",

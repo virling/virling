@@ -22,7 +22,7 @@ async function visitorId() {
 
 ## Per provider
 
-<div class="tabset" data-tabs="Stripe|Dodo Payments|Polar|LemonSqueezy|Creem|RevenueCat|Paddle|WooCommerce" data-key="provider" aria-label="Payment provider"></div>
+<div class="tabset" data-tabs="Stripe|Dodo Payments|Polar|LemonSqueezy|Creem|RevenueCat|Paddle|WooCommerce|Shopify" data-key="provider" aria-label="Payment provider"></div>
 
 ```js
 // Stripe Checkout (Node, stripe): pass the visitor ID on the session
@@ -123,6 +123,22 @@ function virling_vid_on_order($order) {
 }
 ```
 
+```html
+<script>
+// Shopify: in your theme's theme.liquid, after the Virling script.
+// It stores the visitor ID on the cart, and Shopify copies cart
+// attributes onto the order as note attributes.
+addEventListener("load", function () {
+  var vid = window.virling && virling.vid && virling.vid();
+  if (vid) fetch("/cart/update.js", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ attributes: { virling_vid: vid } })
+  });
+});
+</script>
+```
+
 ## Stripe
 
 Virling reads `metadata.virling_vid` on the charge or its PaymentIntent, then `metadata.virling_vid` or `client_reference_id` on the Checkout Session. See [Stripe](stripe.md).
@@ -154,6 +170,10 @@ Virling reads `virling_vid` from the transaction's `custom_data`. With Paddle.js
 ## WooCommerce
 
 Virling reads `virling_vid` from the order's meta data. Add the snippet above to your theme once, and every order keeps the visitor ID from the cookie. See [WooCommerce](woocommerce.md).
+
+## Shopify
+
+Virling reads `virling_vid` from the order's note attributes. The theme snippet above sets it as a cart attribute, which Shopify copies onto the order. See [Shopify](shopify.md).
 
 ## Checkout links need no code
 

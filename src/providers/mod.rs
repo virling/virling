@@ -4,6 +4,7 @@ pub mod lemonsqueezy;
 mod paddle;
 mod polar;
 pub mod revenuecat;
+mod shopify;
 mod stripe;
 mod woocommerce;
 
@@ -117,10 +118,11 @@ pub enum Provider {
     RevenueCat,
     Paddle,
     WooCommerce,
+    Shopify,
 }
 
 impl Provider {
-    pub const ALL: [Provider; 8] = [
+    pub const ALL: [Provider; 9] = [
         Provider::Stripe,
         Provider::Dodo,
         Provider::Polar,
@@ -129,6 +131,7 @@ impl Provider {
         Provider::RevenueCat,
         Provider::Paddle,
         Provider::WooCommerce,
+        Provider::Shopify,
     ];
 
     pub fn as_str(self) -> &'static str {
@@ -141,6 +144,7 @@ impl Provider {
             Provider::RevenueCat => "revenuecat",
             Provider::Paddle => "paddle",
             Provider::WooCommerce => "woocommerce",
+            Provider::Shopify => "shopify",
         }
     }
 
@@ -150,7 +154,7 @@ impl Provider {
 
     /// Whether the connection also needs the store's own URL.
     pub fn needs_store(self) -> bool {
-        matches!(self, Provider::WooCommerce)
+        matches!(self, Provider::WooCommerce | Provider::Shopify)
     }
 
     /// Checks the key works and is read-only. Err carries a message fit to show the user.
@@ -169,6 +173,7 @@ impl Provider {
             Provider::RevenueCat => revenuecat::check_key(client, key).await,
             Provider::Paddle => paddle::check_key(client, key).await,
             Provider::WooCommerce => woocommerce::check_key(client, key, need(store)?).await,
+            Provider::Shopify => shopify::check_key(client, key, need(store)?).await,
         }
     }
 
@@ -191,6 +196,7 @@ impl Provider {
             Provider::RevenueCat => revenuecat::fetch(client, key, cursor).await,
             Provider::Paddle => paddle::fetch(client, key, cursor).await,
             Provider::WooCommerce => woocommerce::fetch(client, key, need(store)?, cursor).await,
+            Provider::Shopify => shopify::fetch(client, key, need(store)?, cursor).await,
         }
     }
 
@@ -211,6 +217,7 @@ impl Provider {
             Provider::RevenueCat => revenuecat::subscriptions(client, key).await,
             Provider::Paddle => paddle::subscriptions(client, key).await,
             Provider::WooCommerce => woocommerce::subscriptions(client, key, need(store)?).await,
+            Provider::Shopify => shopify::subscriptions(client, key, need(store)?).await,
         }
     }
 }

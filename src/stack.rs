@@ -43,7 +43,7 @@ const PLATFORMS: [(&str, &[&str]); 5] = [
     ("p-shopify", &["cdn.shopify.com", "Shopify.theme"]),
 ];
 
-const PROVIDERS: [(Provider, &[&str]); 8] = [
+const PROVIDERS: [(Provider, &[&str]); 9] = [
     (
         Provider::Stripe,
         &["js.stripe.com", "buy.stripe.com", "checkout.stripe.com"],
@@ -67,6 +67,7 @@ const PROVIDERS: [(Provider, &[&str]); 8] = [
         Provider::WooCommerce,
         &["wp-content/plugins/woocommerce", "woocommerce-"],
     ),
+    (Provider::Shopify, &["cdn.shopify.com", "Shopify.theme"]),
 ];
 
 pub fn detect(html: &str, script_host: &str) -> Stack {

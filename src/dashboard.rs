@@ -459,6 +459,7 @@ pub fn provider_name(provider: &str) -> &'static str {
         "revenuecat" => "RevenueCat",
         "paddle" => "Paddle",
         "woocommerce" => "WooCommerce",
+        "shopify" => "Shopify",
         _ => "Other",
     }
 }
@@ -1271,6 +1272,7 @@ pub async fn payments(
             "revenuecat",
             "paddle",
             "woocommerce",
+            "shopify",
         ]
         .into_iter()
         .map(|pr| {
