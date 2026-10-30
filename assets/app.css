@@ -611,11 +611,16 @@ a.ctl { text-decoration: none; }
 .chart .end { position: absolute; width: 10px; height: 10px; margin: 0 0 -5px -5px; border-radius: 50%; background: var(--revenue); box-shadow: 0 0 0 3px var(--paper); pointer-events: none; }
 .chart .end-l { position: absolute; right: 0; padding: 3px 8px; border-radius: 6px; background: var(--ink); color: var(--on-ink); font-size: 12px; font-weight: 600; white-space: nowrap; pointer-events: none; }
 .d3-note { margin: 10px 0 0; font-size: 13px; color: var(--ink-2); }
+.d3-stack { display: flex; flex-direction: column; gap: 16px; }
 .d3-cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 .d3-body { container-type: inline-size; }
 @container (min-width: 1000px) {
   .d3-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .d3-cards > .d3-wide { grid-column: span 2; }
+  .d3-more { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .d3-more > .d3-card { grid-column: span 2; }
+  .d3-more > .d3-card:last-child:nth-child(3n+1) { grid-column: span 6; }
+  .d3-more > .d3-card:nth-last-child(2):nth-child(3n+1), .d3-more > .d3-card:last-child:nth-child(3n+2) { grid-column: span 3; }
 }
 .d3-bc { padding: 14px 14px 8px; display: flex; flex-direction: column; container: card / inline-size; }
 .d3-bc-head { padding: 0 2px 10px; }
@@ -852,6 +857,15 @@ a.ctl { text-decoration: none; }
   @container card (max-width: 440px) {
     .d3-row .tm, .d3-row .rf, .d3-row .x { display: none; }
     .d3-row, .d3-row.hasrf, .d3-panel.timed .d3-row, .d3-panel.timed .d3-row.hasrf { grid-template-columns: minmax(0, 1fr) 44px 60px 64px; column-gap: 8px; }
+  }
+}
+@media (min-width: 721px) {
+  @container card (min-width: 520px) {
+    .d3-row.d3-profrow { grid-template-columns: minmax(0, 240px) repeat(4, minmax(64px, 1fr)); }
+    .d3-row.d3-readrow { grid-template-columns: minmax(0, 240px) repeat(4, minmax(64px, 1fr)); }
+    .d3-row.d3-almostrow { grid-template-columns: minmax(0, 240px) repeat(3, minmax(64px, 1fr)); }
+    .d3-row.d3-almostpg { grid-template-columns: minmax(0, 240px) minmax(64px, 1fr); }
+    .d3-row.d3-payrow { grid-template-columns: minmax(0, 240px) repeat(5, minmax(64px, 1fr)); }
   }
 }
 @media (max-width: 720px) {
