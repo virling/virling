@@ -119,6 +119,26 @@ To try the tools before any traffic arrives, open a new site and choose **Try wi
 
 Errors such as an unknown site come back as a tool result with `isError: true` and a message, so the assistant can correct itself.
 
+## Prompts
+
+Clients that support MCP prompts list three, each taking an optional `site`:
+
+| Prompt | What it asks for |
+|---|---|
+| `weekly_brief` | The last 7 days against the week before, the best and the silent channel, and one thing to do. |
+| `channel_review` | Keep, fix or cut for each channel, by revenue, value per visitor and retention. |
+| `trust_check` | How much revenue is matched to a visit, why the rest is not, and the fix that matches the most. |
+
+## What it refuses
+
+The server only reads, and only what the dashboard shows:
+
+- Anything that changes data: no tool adds sites, goals, keys or payments.
+- Sites outside the account the key or sign-in belongs to. Another domain answers "site not found".
+- Who a visitor is. There are no names, emails or IP addresses to return; visitors are IDs and generated names.
+- Raw events or bulk exports. Payments come at most 200 per call and breakdowns at most 1,000 rows.
+- Ranges over 10 years, or dates that are not `YYYY-MM-DD`.
+
 ## Not available yet
 
 - Tools that change data <span class="na">Not available yet</span>
