@@ -917,6 +917,14 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
     .bind(now.unix_timestamp())
     .execute(&db)
     .await?;
+    sqlx::query(
+        "INSERT INTO launches (site_id, name, channel, day, created_at) VALUES (?, 'New pricing page', '', ?, ?)",
+    )
+    .bind(&site)
+    .bind((now.date() - Duration::days(3)).to_string())
+    .bind(now.unix_timestamp())
+    .execute(&db)
+    .await?;
     sqlx::query("INSERT INTO report_brands (site_id, agency_name) VALUES (?, ?)")
         .bind(&site)
         .bind("Fieldwork Studio")

@@ -737,6 +737,10 @@ async fn page(
     let now = OffsetDateTime::now_utc();
     let tz = ctx.site.timezone.clone();
     let online = state.presence.ids(&ctx.site.id);
+    let notes = (view.is_empty() && public.is_none()).then(|| {
+        let (db, site) = (state.db.clone(), ctx.site.id.clone());
+        tokio::spawn(async move { crate::launches::between(&db, &site, from, to).await })
+    });
     // The Overview cards that read their own tables run while the main pass builds the charts.
     let early = view.is_empty().then(|| {
         let at = |d: Date| d.midnight().assume_offset(ctx.offset).unix_timestamp();
@@ -1223,15 +1227,17 @@ async fn page(
                 Some("total") => 3,
                 _ => 0,
             };
-            let (s, prev) = match &hours {
+            let (mut s, prev) = match &hours {
                 Some((h, ph)) => (
                     chart::Series {
                         points: h.clone(),
                         weekly: false,
+                        notes: Vec::new(),
                     },
                     chart::Series {
                         points: ph.clone(),
                         weekly: false,
+                        notes: Vec::new(),
                     },
                 ),
                 None => (
@@ -1239,6 +1245,9 @@ async fn page(
                     chart::series(&report.previous_days),
                 ),
             };
+            if let Some(n) = notes {
+                s.notes = joined(n.await)?;
+            }
             let show_prev = compare && !young && filters.is_empty();
             let hatch = pre(&p, since, &report.days);
             let unit = if hours.is_some() {

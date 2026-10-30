@@ -24,6 +24,8 @@ fn tick(t: f64, step: f64) -> String {
 pub struct Series {
     pub points: Vec<DayPoint>,
     pub weekly: bool,
+    /// Launches and other notes, by local day.
+    pub notes: Vec<(Date, String)>,
 }
 
 pub fn series(days: &[DayPoint]) -> Series {
@@ -31,6 +33,7 @@ pub fn series(days: &[DayPoint]) -> Series {
         return Series {
             points: days.to_vec(),
             weekly: false,
+            notes: Vec::new(),
         };
     }
     let points = days
@@ -62,6 +65,7 @@ pub fn series(days: &[DayPoint]) -> Series {
     Series {
         points,
         weekly: true,
+        notes: Vec::new(),
     }
 }
 
@@ -482,11 +486,24 @@ pub fn revenue(
                 &group(p.visitors),
             );
         }
+        let next = pts.get(i + 1).map(|q| q.date);
+        let notes: Vec<&str> = cur
+            .notes
+            .iter()
+            .filter(|(d, _)| p.hour.is_none() && *d >= p.date && next.is_none_or(|n| *d < n))
+            .map(|(_, name)| name.as_str())
+            .collect();
+        for name in &notes {
+            let _ = write!(cols, r#"<div class="nt">{}</div>"#, esc(name));
+        }
         let foot = top_channel(p);
         if !foot.is_empty() {
             let _ = write!(cols, r#"<div class="foot">{}</div>"#, esc(&foot));
         }
         cols.push_str("</div>");
+        if !notes.is_empty() {
+            cols.push_str(r#"<i class="nt"></i>"#);
+        }
         match kind {
             Kind::Bars if p.visitors > 0 => {
                 let _ = write!(
@@ -669,6 +686,7 @@ mod tests {
         let s = Series {
             points: vec![day(0, 3, 0.0), day(1, 1, 0.0), day(2, 0, 0.0)],
             weekly: false,
+            notes: Vec::new(),
         };
         let bars = revenue(&s, None, Kind::Bars, None, None, false, None);
         assert!(bars.contains(r#"class="chart rev bars dual""#));
@@ -682,6 +700,7 @@ mod tests {
         let empty = Series {
             points: vec![day(0, 0, 0.0)],
             weekly: false,
+            notes: Vec::new(),
         };
         assert!(!revenue(&empty, None, Kind::Bars, None, None, false, None).contains("dual"));
     }
@@ -717,5 +736,25 @@ mod tests {
         let linked = revenue(&s, None, Kind::Bars, None, None, false, Some(&link));
         assert_eq!(count(&linked, r#"<a class="hov bar" href="?from="#), 7);
         assert_eq!(count(&bars, "<a "), 0);
+    }
+
+    #[test]
+    fn notes_mark_their_day_or_week() {
+        let d = days(7);
+        let mut s = series(&d);
+        s.notes = vec![(d[2].date, "Show HN <post>".into())];
+        let bars = revenue(&s, None, Kind::Bars, None, None, false);
+        assert_eq!(count(&bars, r#"<i class="nt">"#), 1);
+        assert!(bars.contains(r#"<div class="nt">Show HN &lt;post&gt;</div>"#));
+        let long = days(200);
+        let mut w = series(&long);
+        w.notes = vec![(long[9].date, "Price change".into())];
+        let bars = revenue(&w, None, Kind::Bars, None, None, false);
+        let at = bars.find(r#"<div class="nt">"#).unwrap();
+        assert_eq!(
+            bars[..at].matches(r#"class="hov bar""#).count(),
+            2,
+            "second week"
+        );
     }
 }

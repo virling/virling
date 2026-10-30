@@ -1,10 +1,10 @@
 # Read API
 
-A read-only JSON API over the same numbers as the dashboard: totals, breakdowns with revenue, retention by channel, AI answers, payments and visitor timelines. The [CLI](cli.md) and AI agents use it, and assistants such as claude.ai can read the same data through the [MCP server](mcp.md). It is served when the app is on (`--app`).
+A JSON API over the same numbers as the dashboard: totals, breakdowns with revenue, retention by channel, AI answers, payments and visitor timelines, plus chart notes. The [CLI](cli.md) and AI agents use it, and assistants such as claude.ai can read the same data through the [MCP server](mcp.md). It is served when the app is on (`--app`).
 
 ## API keys
 
-Create a key in **Account settings > API keys** in the app. The key is shown once, so copy it then. Virling stores only a hash of it. A key reads every site of the account that made it and cannot change anything. Revoke it in the same place; requests with it fail right away.
+Create a key in **Account settings > API keys** in the app. The key is shown once, so copy it then. Virling stores only a hash of it. A key reads every site of the account that made it and can only add chart notes. Revoke it in the same place; requests with it fail right away.
 
 Send the key as a bearer token:
 
@@ -216,6 +216,18 @@ Everything one visitor did, oldest first: each visit with its pages, goals, how 
 ```
 
 An entry is `{"type": "visit", ...}` or `{"type": "payment", ...}`. A step is `page` (with seconds on the page, `null` when unknown), `goal`, `exit` (the last page and the link clicked out, if any) or `payment`. Payment entries and steps have the same fields as payment rows.
+
+## POST `/api/v1/sites/{domain}/annotations`
+
+Marks a launch, post, deploy or price change on the revenue chart, and adds it to **Launches** in the app. `url` and `channel` are optional; `channel` is one of the dashboard channels.
+
+```sh
+curl -X POST -H "Authorization: Bearer $VIRLING_API_KEY" -H "Content-Type: application/json" \
+  -d '{"name": "Deploy 2.1", "day": "2026-10-15"}' \
+  https://stats.example.com/api/v1/sites/example.com/annotations
+```
+
+Answers `{"id": 12}`, or a 400 with the reason.
 
 ## Not available yet
 

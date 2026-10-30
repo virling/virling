@@ -610,6 +610,25 @@ pub async fn visitor(
     ))
 }
 
+#[derive(Debug, Serialize)]
+pub struct AnnotationOut {
+    pub id: i64,
+}
+
+/// Marks a launch, post, deploy or price change on the revenue chart.
+pub async fn annotate(
+    State(state): State<AppState>,
+    key: KeyAccount,
+    Path(domain): Path<String>,
+    Json(input): Json<crate::launches::LaunchInput>,
+) -> ApiResult<AnnotationOut> {
+    let site = site(&state, &key.id, &domain).await?;
+    let id = crate::launches::add(&state.db, &site.id, &input)
+        .await
+        .map_err(|(code, msg)| ApiError::new(code, msg))?;
+    Ok(Json(AnnotationOut { id }))
+}
+
 #[cfg(test)]
 pub(crate) mod tests {
     use std::sync::Arc;
@@ -750,6 +769,46 @@ pub(crate) mod tests {
             status,
             serde_json::from_slice(&bytes).unwrap_or(Value::Null),
         )
+    }
+
+    #[tokio::test]
+    async fn annotations_are_added_with_a_key() {
+        let f = fixture().await;
+        let post = |body: &'static str, key: &str| {
+            Request::post("/api/v1/sites/example.com/annotations")
+                .header("authorization", format!("Bearer {key}"))
+                .header("content-type", "application/json")
+                .body(Body::from(body))
+                .unwrap()
+        };
+        let app = router(f.state.clone());
+        let ok = app
+            .clone()
+            .oneshot(post(r#"{"name":"Deploy 2.1","day":"2026-10-01"}"#, &f.key))
+            .await
+            .unwrap();
+        assert_eq!(ok.status(), StatusCode::OK);
+        let bad = app
+            .clone()
+            .oneshot(post(r#"{"name":"Deploy","day":"soon"}"#, &f.key))
+            .await
+            .unwrap();
+        assert_eq!(bad.status(), StatusCode::BAD_REQUEST);
+        let anon = app
+            .oneshot(post(r#"{"name":"Deploy","day":"2026-10-01"}"#, "vk_nope"))
+            .await
+            .unwrap();
+        assert_eq!(anon.status(), StatusCode::UNAUTHORIZED);
+        let site: String = sqlx::query_scalar("SELECT id FROM sites WHERE domain = 'example.com'")
+            .fetch_one(&f.state.db)
+            .await
+            .unwrap();
+        let day = |s| Date::parse(s, format_description!("[year]-[month]-[day]")).unwrap();
+        let notes =
+            crate::launches::between(&f.state.db, &site, day("2026-09-30"), day("2026-10-01"))
+                .await
+                .unwrap();
+        assert_eq!(notes, vec![(day("2026-10-01"), "Deploy 2.1".to_string())]);
     }
 
     #[tokio::test]
