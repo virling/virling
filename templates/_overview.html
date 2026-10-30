@@ -126,7 +126,7 @@
       <div class="nmw">
         {% if r.bar.href.is_empty() %}<span class="nm">{% else %}<a class="nm" href="{{ r.bar.href }}" title="Show only {{ r.bar.name }}">{% endif %}
           <span class="ic">{{ r.bar.icon|safe }}</span>
-          <span class="tx"><b>{{ r.bar.name }}</b>{% if !r.bar.sub.is_empty() %}<span>{{ r.bar.sub }}</span>{% endif %}</span>
+          <span class="tx"><b>{{ r.bar.name }}</b></span>
         {% if r.bar.href.is_empty() %}</span>{% else %}</a>{% endif %}
       </div>
       <span class="bots"{% if !r.pages_title.is_empty() %} title="{{ r.pages_title }}"{% endif %}>{% if r.bots.is_empty() %}&ndash;{% else %}{{ r.bots }}{% endif %}</span>
