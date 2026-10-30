@@ -8,10 +8,13 @@ Each site has one attribution model and one lookback window. Change both in the 
 | --- | --- | --- |
 | Last non-direct | `last_non_direct`, the default | The latest session in the window that was not Direct. If every session was Direct, the latest Direct session. |
 | First touch | `first_touch` | The earliest session in the window. |
+| Last touch | `last_touch` | The latest session in the window, Direct included. |
 
 Last non-direct suits most products: a visitor who found you on Hacker News and came back a week later by typing your URL is credited to Hacker News, not Direct.
 
 First touch shows which channels introduce people who later pay, and fits longer buying cycles.
+
+Last touch credits the visit right before the payment, even when it was Direct. Use it to see how people arrive when they are ready to buy.
 
 ## Lookback window
 

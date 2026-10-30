@@ -17,7 +17,7 @@ use crate::sites::{app_path, normalize_domain};
 use crate::sync;
 
 const WINDOWS: [i64; 4] = [30, 60, 90, 365];
-const MODELS: [&str; 2] = ["last_non_direct", "first_touch"];
+const MODELS: [&str; 3] = ["last_non_direct", "first_touch", "last_touch"];
 const RETURNS: [i64; 3] = [1, 5, 30];
 
 type IntegrationRow = (String, Option<i64>, Option<String>);

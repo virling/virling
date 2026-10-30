@@ -2010,6 +2010,8 @@ mod tests {
             .unwrap();
         assert_eq!(touch.source, "Hacker News");
         assert_eq!(touch.landing_page.as_deref(), Some("/social"));
+        store.rebuild_attribution("s", "last_touch", 90).unwrap();
+        assert_eq!(credited(&store).as_deref(), Some("direct"));
         assert!(store.rebuild_attribution("s", "linear", 90).is_err());
     }
 
@@ -2099,7 +2101,11 @@ mod tests {
         store
             .upsert_payments(&[pay("p1", T, Some("v1"), Some("cus_1")), renewal])
             .unwrap();
-        for (model, session) in [("last_non_direct", "referral"), ("first_touch", "social")] {
+        for (model, session) in [
+            ("last_non_direct", "referral"),
+            ("first_touch", "social"),
+            ("last_touch", "direct"),
+        ] {
             store.rebuild_attribution("s", model, 90).unwrap();
             let mut got = touches(&store);
             got.sort();
