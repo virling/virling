@@ -172,6 +172,10 @@ pub fn checkout(host: &str, path: &str) -> bool {
             | "sandbox-checkout.paddle.com"
     ) || host.ends_with(".lemonsqueezy.com")
         || (host == "polar.sh" && path.starts_with("/checkout"))
+        || (matches!(host, "creem.io" | "www.creem.io")
+            && ["/checkout", "/payment", "/test/checkout", "/test/payment"]
+                .iter()
+                .any(|p| path.starts_with(p)))
 }
 
 /// Checkout and sign-in pages a visitor returns from in the middle of a visit.

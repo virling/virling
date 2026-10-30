@@ -9,7 +9,7 @@ use time::OffsetDateTime;
 
 use crate::app::AppState;
 use crate::events::Payment;
-use crate::providers::{Fetched, Provider, lemonsqueezy};
+use crate::providers::{Fetched, Provider, creem, lemonsqueezy};
 
 const INTERVAL: Duration = Duration::from_secs(60);
 const MAX_PAGES_PER_RUN: usize = 50;
@@ -37,19 +37,23 @@ pub async fn add_integration(
 ) -> anyhow::Result<()> {
     provider.check_key(&state.http, key).await?;
     let (ciphertext, nonce) = state.vault.encrypt(key)?;
-    // LemonSqueezy sends checkout custom data only in webhooks, which need a public https address.
-    let hook =
-        if provider == Provider::LemonSqueezy && state.config.base_url.starts_with("https://") {
+    // LemonSqueezy and Creem send checkout metadata only in webhooks, which need a public https address.
+    let url = format!(
+        "{}/api/webhooks/{}/{site_id}",
+        state.config.base_url,
+        provider.as_str()
+    );
+    let secret = match provider {
+        _ if !state.config.base_url.starts_with("https://") => None,
+        Provider::LemonSqueezy => {
             let secret = crate::auth::random_token();
-            let url = format!(
-                "{}/api/webhooks/lemonsqueezy/{site_id}",
-                state.config.base_url
-            );
             lemonsqueezy::register_webhook(&state.http, key, &url, &secret).await?;
-            Some(state.vault.encrypt(&secret)?)
-        } else {
-            None
-        };
+            Some(secret)
+        }
+        Provider::Creem => Some(creem::register_webhook(&state.http, key, &url).await?),
+        _ => None,
+    };
+    let hook = secret.map(|s| state.vault.encrypt(&s)).transpose()?;
     let (hook_ciphertext, hook_nonce) = hook.unzip();
     sqlx::query(
         "INSERT INTO integrations (id, site_id, provider, key_ciphertext, key_nonce, created_at, webhook_ciphertext, webhook_nonce) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -77,11 +81,35 @@ pub async fn lemonsqueezy_webhook(
     headers: HeaderMap,
     body: Bytes,
 ) -> StatusCode {
+    let sent = headers.get("x-signature");
+    webhook(&state, &site_id, Provider::LemonSqueezy, sent, &body).await
+}
+
+/// Receives a completed Creem checkout with its visitor ID, signed with the site's webhook secret.
+pub async fn creem_webhook(
+    State(state): State<AppState>,
+    Path(site_id): Path<String>,
+    headers: HeaderMap,
+    body: Bytes,
+) -> StatusCode {
+    let sent = headers.get("creem-signature");
+    webhook(&state, &site_id, Provider::Creem, sent, &body).await
+}
+
+/// Both sign the raw body with HMAC-SHA256 in hex.
+async fn webhook(
+    state: &AppState,
+    site_id: &str,
+    provider: Provider,
+    sent: Option<&axum::http::HeaderValue>,
+    body: &[u8],
+) -> StatusCode {
     let hook: Option<(Vec<u8>, Vec<u8>)> = sqlx::query_as(
         "SELECT webhook_ciphertext, webhook_nonce FROM integrations
-         WHERE site_id = ? AND provider = 'lemonsqueezy' AND webhook_ciphertext IS NOT NULL",
+         WHERE site_id = ? AND provider = ? AND webhook_ciphertext IS NOT NULL",
     )
-    .bind(&site_id)
+    .bind(site_id)
+    .bind(provider.as_str())
     .fetch_optional(&state.db)
     .await
     .ok()
@@ -89,11 +117,8 @@ pub async fn lemonsqueezy_webhook(
     let Some(secret) = hook.and_then(|(c, n)| state.vault.decrypt(&c, &n).ok()) else {
         return StatusCode::NOT_FOUND;
     };
-    let sent = headers
-        .get("x-signature")
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("");
-    let want = lemonsqueezy::signature(&secret, &body);
+    let sent = sent.and_then(|v| v.to_str().ok()).unwrap_or("");
+    let want = lemonsqueezy::signature(&secret, body);
     let same = sent.len() == want.len()
         && sent
             .bytes()
@@ -103,19 +128,23 @@ pub async fn lemonsqueezy_webhook(
     if !same {
         return StatusCode::UNAUTHORIZED;
     }
-    let payment = match lemonsqueezy::webhook_payment(&body) {
+    let parsed = match provider {
+        Provider::Creem => creem::webhook_payment(body),
+        _ => lemonsqueezy::webhook_payment(body),
+    };
+    let payment = match parsed {
         Ok(Some(p)) => p,
         Ok(None) => return StatusCode::NO_CONTENT,
         Err(err) => {
-            tracing::warn!(%err, site = %site_id, "unreadable LemonSqueezy webhook");
+            tracing::warn!(%err, site = %site_id, provider = provider.as_str(), "unreadable webhook");
             return StatusCode::BAD_REQUEST;
         }
     };
-    if let Err(err) = store(&state, &site_id, Provider::LemonSqueezy, vec![payment]).await {
-        tracing::error!(%err, site = %site_id, "storing a LemonSqueezy webhook payment failed");
+    if let Err(err) = store(state, site_id, provider, vec![payment]).await {
+        tracing::error!(%err, site = %site_id, provider = provider.as_str(), "storing a webhook payment failed");
         return StatusCode::SERVICE_UNAVAILABLE;
     }
-    attribute(&state, Some(&site_id), false).await;
+    attribute(state, Some(site_id), false).await;
     StatusCode::NO_CONTENT
 }
 

@@ -1,0 +1,8 @@
+{
+  "items": [
+    {"id": "sub_1", "mode": "prod", "object": "subscription", "product": {"id": "prod_1", "price": 1500, "currency": "USD", "billing_type": "recurring", "billing_period": "every-month"}, "customer": {"id": "cust_1", "email": "a@example.com"}, "items": [{"id": "sitem_1", "product_id": "prod_1", "units": 1}], "collection_method": "charge_automatically", "status": "active", "current_period_end_date": "2026-11-01T00:00:00.000Z", "canceled_at": null, "metadata": {}, "created_at": "2026-09-01T00:00:00.000Z", "updated_at": "2026-10-01T00:00:00.000Z"},
+    {"id": "sub_2", "mode": "prod", "object": "subscription", "product": {"id": "prod_2", "price": 3000, "currency": "USD", "billing_type": "recurring", "billing_period": "every-three-months"}, "customer": "cust_2", "items": [], "collection_method": "charge_automatically", "status": "scheduled_cancel", "current_period_end_date": "2026-11-01T00:00:00.000Z", "canceled_at": null, "metadata": null, "created_at": "2026-08-01T00:00:00.000Z", "updated_at": "2026-10-01T00:00:00.000Z"},
+    {"id": "sub_3", "mode": "prod", "object": "subscription", "product": {"id": "prod_3", "price": 2900, "currency": "EUR", "billing_type": "recurring", "billing_period": "custom", "recurring_interval": "month", "recurring_interval_count": 1}, "customer": "cust_3", "items": [], "collection_method": "charge_automatically", "status": "canceled", "current_period_end_date": null, "canceled_at": "2026-09-01T00:00:00.000Z", "metadata": null, "created_at": "2026-07-01T00:00:00.000Z", "updated_at": "2026-09-01T00:00:00.000Z"}
+  ],
+  "pagination": {"total_records": 3, "total_pages": 1, "current_page": 1, "next_page": null, "prev_page": null}
+}

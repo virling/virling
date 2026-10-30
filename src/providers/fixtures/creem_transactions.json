@@ -1,0 +1,10 @@
+{
+  "items": [
+    {"id": "tran_paid", "mode": "prod", "object": "transaction", "amount": 2900, "amount_paid": 2900, "discount_amount": 0, "currency": "USD", "type": "payment", "tax_country": "US", "tax_amount": 0, "status": "paid", "refunded_amount": null, "order": "ord_1", "subscription": null, "customer": "cust_1", "description": "Pro plan", "created_at": 1790769600000},
+    {"id": "tran_partial", "mode": "prod", "object": "transaction", "amount": 4900, "amount_paid": 4900, "currency": "USD", "type": "invoice", "status": "partialRefund", "refunded_amount": 1000, "order": "ord_2", "subscription": "sub_1", "customer": "cust_2", "created_at": 1790553600000},
+    {"id": "tran_refunded", "mode": "prod", "object": "transaction", "amount": 1900, "amount_paid": 1900, "currency": "EUR", "type": "payment", "status": "refunded", "refunded_amount": 1900, "order": "ord_3", "subscription": null, "customer": "cust_3", "created_at": 1789862400000},
+    {"id": "tran_declined", "mode": "prod", "object": "transaction", "amount": 900, "amount_paid": null, "currency": "USD", "type": "payment", "status": "declined", "refunded_amount": null, "order": "ord_4", "subscription": null, "customer": "cust_4", "created_at": 1788998400000},
+    {"id": "tran_pending", "mode": "prod", "object": "transaction", "amount": 900, "amount_paid": null, "currency": "USD", "type": "payment", "status": "pending", "refunded_amount": null, "order": "ord_5", "subscription": null, "customer": "cust_5", "created_at": 1788566400000}
+  ],
+  "pagination": {"total_records": 5, "total_pages": 1, "current_page": 1, "next_page": null, "prev_page": null}
+}
