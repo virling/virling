@@ -19,6 +19,7 @@
 - [Add the script](track/script.md)
 - [Framework guides](track/frameworks.md)
 - [Goals](track/goals.md)
+- [Switch in two minutes](track/switch.md)
 - [Tracked links](track/links.md)
 - [AI crawlers](track/ai-crawlers.md)
 - [AI answers](track/ai-answers.md)
