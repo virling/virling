@@ -3683,6 +3683,88 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn weekly_report_posts_to_slack() {
+        use crate::dashboard::schedule;
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        make_agency(&state).await;
+        let site = site_id(&state).await;
+        let monday = seed_last_week(&store, &site);
+        crate::sync::rebuild_attribution(&state, Some(&site)).await;
+        let path = "/app/example.com/report/schedule";
+        let bad = call(
+            &state,
+            form(
+                path,
+                "on=on&weekday=0&minute=540&recipients=&slack=https%3A%2F%2Fexample.com%2Fhook&week="
+                    .into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            bad.headers()["location"],
+            "/app/example.com/report?error=slack"
+        );
+        let ok = call(
+            &state,
+            form(
+                path,
+                "on=on&weekday=0&minute=540&recipients=&slack=https%3A%2F%2Fhooks.slack.com%2Fservices%2FT1%2FB1%2Fx&week="
+                    .into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            ok.headers()["location"],
+            "/app/example.com/report?saved=schedule",
+            "Slack alone is enough"
+        );
+        let page =
+            body_text(call(&state, get("/app/example.com/report", Some(&cookie))).await).await;
+        assert!(page.contains("Sent every Monday at 9:00 to <b>Slack</b>."));
+
+        let posts: Arc<std::sync::Mutex<Vec<serde_json::Value>>> = Arc::default();
+        let seen = posts.clone();
+        let app = axum::Router::new().fallback(move |body: axum::body::Bytes| {
+            let seen = seen.clone();
+            async move {
+                seen.lock()
+                    .unwrap()
+                    .push(serde_json::from_slice(&body).unwrap());
+                "ok"
+            }
+        });
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("http://{}/hook", listener.local_addr().unwrap());
+        tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+        schedule::set_slack(&state, &site, Some(&url))
+            .await
+            .unwrap();
+        sqlx::query("UPDATE report_brands SET send_from = 0 WHERE site_id = ?")
+            .bind(&site)
+            .execute(&state.db)
+            .await
+            .unwrap();
+        let before = sent(&state).len();
+        let at = time::PrimitiveDateTime::new(
+            monday + time::Duration::days(7),
+            time::macros::time!(9:01),
+        )
+        .assume_utc();
+        assert_eq!(schedule::tick(&state, at).await.unwrap(), 1);
+        assert_eq!(sent(&state).len(), before, "no email without recipients");
+        let posts = posts.lock().unwrap();
+        let text = posts[0]["text"].as_str().unwrap();
+        assert!(
+            text.starts_with("*Weekly report for example.com*"),
+            "{text}"
+        );
+        assert!(text.contains("|Open the full report>"));
+    }
+
+    #[tokio::test]
     async fn personal_plan_gets_a_weekly_email_to_itself() {
         use crate::dashboard::schedule;
         let (_dir, state, store) = setup().await;

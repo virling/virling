@@ -133,8 +133,9 @@ fn moment(monday: Date, s: &Schedule, offset: UtcOffset) -> OffsetDateTime {
 }
 
 /// Monday of the week to send at `now`: last week, once this week's send time has passed since the schedule was saved.
+/// Who receives it, by email or Slack, is the caller's to check.
 pub fn due(now: OffsetDateTime, offset: UtcOffset, s: &Schedule) -> Option<Date> {
-    if !s.on || s.recipients.is_empty() {
+    if !s.on {
         return None;
     }
     let monday = week_start(now.to_offset(offset).date());
@@ -205,7 +206,8 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
         "SELECT s.id, s.domain, s.timezone, s.cookieless, b.send_weekday, b.send_minute, b.recipients, b.send_from,
             a.account_type = 'agency', a.email
          FROM report_brands b JOIN sites s ON s.id = b.site_id JOIN accounts a ON a.id = s.account_id
-         WHERE b.send_on = 1 AND s.sample_data = 0 AND (b.recipients <> '' OR a.account_type <> 'agency')",
+         WHERE b.send_on = 1 AND s.sample_data = 0
+           AND (b.recipients <> '' OR a.account_type <> 'agency' OR b.slack_ciphertext IS NOT NULL)",
     )
     .fetch_all(&state.db)
     .await?;
@@ -328,6 +330,10 @@ pub async fn send(
     .fetch_one(&state.db)
     .await?;
     let (subject, text, html) = email(&r, base, &link)?;
+    let posted = match slack_url(state, &site.id).await {
+        Some(url) => post_slack(state, &url, &slack_text(&r, &link)).await,
+        None => false,
+    };
     let mut n = 0;
     for to in recipients {
         match state
@@ -339,8 +345,93 @@ pub async fn send(
             Err(err) => tracing::warn!(%err, %to, "report email failed"),
         }
     }
-    anyhow::ensure!(n > 0, "no report email went out");
+    anyhow::ensure!(n > 0 || posted, "no report email or Slack post went out");
     Ok(n)
+}
+
+/// A Slack incoming webhook address.
+pub fn valid_slack(url: &str) -> bool {
+    url.starts_with("https://hooks.slack.com/")
+        && url.len() <= 300
+        && !url.contains(char::is_whitespace)
+}
+
+/// The site's Slack webhook, if one is set.
+pub async fn slack_url(state: &AppState, site_id: &str) -> Option<String> {
+    let row: Option<(Vec<u8>, Vec<u8>)> = sqlx::query_as(
+        "SELECT slack_ciphertext, slack_nonce FROM report_brands
+         WHERE site_id = ? AND slack_ciphertext IS NOT NULL",
+    )
+    .bind(site_id)
+    .fetch_optional(&state.db)
+    .await
+    .ok()
+    .flatten();
+    row.and_then(|(c, n)| state.vault.decrypt(&c, &n).ok())
+}
+
+/// Stores the Slack webhook encrypted, or removes it with None.
+pub async fn set_slack(state: &AppState, site_id: &str, url: Option<&str>) -> anyhow::Result<()> {
+    let sealed = url.map(|u| state.vault.encrypt(u)).transpose()?;
+    let (ciphertext, nonce) = sealed.unzip();
+    sqlx::query(
+        "INSERT INTO report_brands (site_id, slack_ciphertext, slack_nonce) VALUES (?, ?, ?)
+         ON CONFLICT(site_id) DO UPDATE SET slack_ciphertext = excluded.slack_ciphertext,
+           slack_nonce = excluded.slack_nonce",
+    )
+    .bind(site_id)
+    .bind(ciphertext)
+    .bind(nonce)
+    .execute(&state.db)
+    .await?;
+    Ok(())
+}
+
+/// The weekly summary as a Slack message: headline, numbers, top sources and the report link.
+pub fn slack_text(r: &ReportView, link: &str) -> String {
+    let mut out = format!(
+        "*Weekly report for {}*, {}\n{}\n",
+        r.site, r.week, r.headline
+    );
+    for k in &r.kpis {
+        out.push_str(&format!("{}: {}", k.label, k.value));
+        if !k.change.is_empty() {
+            out.push_str(&format!(", {} {}", k.change, k.note));
+        }
+        out.push('\n');
+    }
+    if !r.sources.is_empty() {
+        out.push_str("Top sources:\n");
+        for s in r.sources.iter().take(3) {
+            out.push_str(&format!(
+                "• {}: {} visitors, {}\n",
+                s.name, s.visitors, s.revenue
+            ));
+        }
+    }
+    out.push_str(&format!("<{link}|Open the full report>"));
+    out
+}
+
+/// Posts to a Slack incoming webhook; false when Slack does not accept it.
+async fn post_slack(state: &AppState, url: &str, text: &str) -> bool {
+    match state
+        .http
+        .post(url)
+        .json(&serde_json::json!({ "text": text }))
+        .send()
+        .await
+    {
+        Ok(res) if res.status().is_success() => true,
+        Ok(res) => {
+            tracing::warn!(status = %res.status(), "Slack did not accept the weekly report");
+            false
+        }
+        Err(err) => {
+            tracing::warn!(%err, "posting the weekly report to Slack failed");
+            false
+        }
+    }
 }
 
 #[cfg(test)]
@@ -398,11 +489,6 @@ mod tests {
             ..s.clone()
         };
         assert_eq!(due(datetime!(2026-10-19 10:00 UTC), utc, &off), None);
-        let nobody = Schedule {
-            recipients: Vec::new(),
-            ..s.clone()
-        };
-        assert_eq!(due(datetime!(2026-10-19 10:00 UTC), utc, &nobody), None);
     }
 
     #[test]
