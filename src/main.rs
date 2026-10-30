@@ -215,7 +215,7 @@ struct ServeArgs {
     /// Add-on billed for each Agency user past the 3 included
     #[arg(long, env = "VIRLING_DODO_SEAT_ADDON")]
     dodo_seat_addon: Option<String>,
-    /// Personal at the founding price, $11.40 a month
+    /// Personal at the founding price, $9 a month
     #[arg(long, env = "VIRLING_DODO_PERSONAL_FOUNDING_PRODUCT")]
     dodo_personal_founding_product: Option<String>,
     /// Agency at the founding price, $29 a month
