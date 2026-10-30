@@ -27,7 +27,7 @@ const REFRESH_PREFIX: &str = "vr_";
 /// The one scope: read every site of the account, like an API key.
 const SCOPE: &str = "read";
 const NEXT_COOKIE: &str = "virling_next";
-const DOCS: &str = "https://docs.virling.com/reference/mcp.html";
+const DOCS: &str = "https://docs.virling.com/reference/mcp";
 const REGISTER_PER_SECOND: u32 = 3;
 const TOKEN_PER_SECOND: u32 = 20;
 const METADATA_MAX_BYTES: usize = 5 * 1024;

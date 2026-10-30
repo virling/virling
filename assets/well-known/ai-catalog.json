@@ -31,7 +31,7 @@
       "identifier": "urn:air:virling.com:api:read",
       "displayName": "Virling read API",
       "type": "text/html",
-      "url": "https://docs.virling.com/reference/api.html",
+      "url": "https://docs.virling.com/reference/api",
       "representativeQueries": [
         "Virling API for revenue attribution",
         "Get payments with their source visit"

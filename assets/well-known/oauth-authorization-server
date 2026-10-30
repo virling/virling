@@ -18,7 +18,7 @@
   "scopes_supported": [
     "read"
   ],
-  "service_documentation": "https://docs.virling.com/reference/mcp.html",
+  "service_documentation": "https://docs.virling.com/reference/mcp",
   "token_endpoint": "https://beta.virling.com/oauth/token",
   "token_endpoint_auth_methods_supported": [
     "none"

@@ -6,6 +6,16 @@ site = "https://docs.virling.com/"
 skip = {"404.html", "toc.html", "print.html"}
 urls = []
 
+
+def clean(url):
+    base, hash_, frag = url.partition("#")
+    if not base.endswith(".html") or re.match(r"[a-z]+:", base) and not base.startswith(site):
+        return url
+    base = base[: -len(".html")]
+    if base.endswith("index"):
+        base = base[: -len("index")] or "./"
+    return base + hash_ + frag
+
 for f in sorted(book.rglob("*.html")):
     rel = f.relative_to(book).as_posix()
     if rel in skip:
@@ -26,6 +36,7 @@ for f in sorted(book.rglob("*.html")):
     if root:
         fix = lambda m: m.group(1) + (m.group(2) if re.match(r"[a-z]+:|/|#", m.group(2)) else root.group(1) + m.group(2)) + '"'
         page = re.sub(r'(<nav class="side"[^>]*?)>(.*?)</nav>', lambda n: re.sub(r'(href=")([^"]*)"', fix, n.group(1) + " data-abs>" + n.group(2) + "</nav>"), page, count=1, flags=re.S)
+    page = re.sub(r'(<a [^>]*?href=")([^"]*)"', lambda m: m.group(1) + clean(m.group(2)) + '"', page)
     page = page.replace("</head>", f'<link rel="canonical" href="{url}">\n</head>', 1)
     f.write_text(page)
 

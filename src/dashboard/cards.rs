@@ -1430,7 +1430,7 @@ pub fn ai_card(
             .iter()
             .map(|l| icons::source(l, 18))
             .collect(),
-        docs: "https://docs.virling.com/track/ai-crawlers.html",
+        docs: "https://docs.virling.com/track/ai-crawlers",
         crawled: !bots.is_empty(),
         answers: None,
         cash: Vec::new(),

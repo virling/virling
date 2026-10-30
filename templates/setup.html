@@ -113,7 +113,7 @@ export default function App({ Component, pageProps }) {
     </div>
     <details class="ai-fetch">
       <summary>Also count AI assistants that read your pages</summary>
-      <p>When someone asks an assistant about {{ domain }}, it fetches the page without a browser, so the script never runs. To see those visits, forward them from your server. This Cloudflare Worker sends only the user agent and URL of AI crawlers. <a href="https://docs.virling.com/track/ai-crawlers.html" target="_blank" rel="noopener">Other stacks</a></p>
+      <p>When someone asks an assistant about {{ domain }}, it fetches the page without a browser, so the script never runs. To see those visits, forward them from your server. This Cloudflare Worker sends only the user agent and URL of AI crawlers. <a href="https://docs.virling.com/track/ai-crawlers" target="_blank" rel="noopener">Other stacks</a></p>
       <div class="code"><pre>const AI = /gptbot|oai-searchbot|chatgpt-user|claudebot|claude-|anthropic-ai|perplexity|google-extended|googleother|applebot-extended|amazonbot|meta-external|ccbot|bytespider|duckassistbot/i;
 
 export default {

@@ -27,7 +27,7 @@ This plugin adds the Virling tracking script (under 1 KB) to your site. You need
 
 == External services ==
 
-The plugin loads the tracking script from the Virling server you enter and sends page views to it. No data goes anywhere else. See https://docs.virling.com/track/privacy.html for what is collected.
+The plugin loads the tracking script from the Virling server you enter and sends page views to it. No data goes anywhere else. See https://docs.virling.com/track/privacy for what is collected.
 
 == Changelog ==
 

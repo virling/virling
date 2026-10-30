@@ -79,7 +79,7 @@ await stripe.paymentIntents.create({
 <h3>How do I see which channel a Stripe payment came from?</h3><p class="p">Connect Stripe to Virling with a restricted, read-only key. Virling ties each charge to the visit before it through Checkout Sessions, PaymentIntents or Payment Links, then shows revenue by channel, referrer and page.</p>
 <h3>Does Virling need write access to Stripe?</h3><p class="p">No. It asks for a restricted key with Read on Charges, Checkout Sessions, Customers, Events, Invoices, Subscriptions and PaymentIntents, and refuses secret keys.</p>
 <h3>Are Stripe renewals counted?</h3><p class="p">Yes. A charge whose invoice has billing reason subscription_cycle is marked as a renewal, and renewals keep the channel of the customer&#x27;s first payment.</p>
-      <p class="p">Full reference: <a href="https://docs.virling.com/payments/stripe.html">Stripe in the docs</a>.</p>
+      <p class="p">Full reference: <a href="https://docs.virling.com/payments/stripe">Stripe in the docs</a>.</p>
     </div>
   </div></section>
   <section class="band"><div class="wrap"><div class="txt post"><h2>Related reading</h2><ul class="post-list"><li><a href="/blog/track-stripe-revenue-by-traffic-source">How to track Stripe revenue by traffic source</a></li><li><a href="/blog/utm-parameters-for-revenue-tracking">Which UTM parameters to use to trace revenue</a></li><li><a href="/blog/first-touch-vs-last-touch-attribution-saas">First-touch or last-touch attribution for a SaaS</a></li></ul></div></div></section>

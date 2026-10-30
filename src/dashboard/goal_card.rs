@@ -176,7 +176,7 @@ pub fn card(d: &Data, on_list: bool, visitors: u64, href: impl Fn(&str) -> Strin
         steps,
         goals,
         foot,
-        docs: "https://docs.virling.com/track/goals.html",
+        docs: "https://docs.virling.com/track/goals",
     }
 }
 

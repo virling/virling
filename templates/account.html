@@ -111,7 +111,7 @@
 <section class="set-sec" id="api">
 <div class="set-intro"><h2>API keys</h2><p class="muted">A key lets a script, the CLI or an AI agent read the reports of every site on your account. Keys can't change anything.</p></div>
 <div class="card">
-  <div class="card-head"><span class="muted">{% if api_keys.is_empty() %}No keys yet{% else %}{{ api_keys.len() }} active{% endif %}</span><a class="btn secondary" href="https://docs.virling.com/reference/api.html">API docs</a></div>
+  <div class="card-head"><span class="muted">{% if api_keys.is_empty() %}No keys yet{% else %}{{ api_keys.len() }} active{% endif %}</span><a class="btn secondary" href="https://docs.virling.com/reference/api">API docs</a></div>
   {% if let Some(key) = new_key %}
   <div class="notice ok-note" role="status">Copy this key now. It is shown only once.</div>
   <div class="code" data-tabs>
@@ -138,7 +138,7 @@
 <section class="set-sec" id="apps">
 <div class="set-intro"><h2>Connected apps</h2><p class="muted">Apps such as Claude and ChatGPT that you connected with Virling sign-in. Like keys, they read every site on your account and can't change anything.</p></div>
 <div class="card">
-  <div class="card-head"><span class="muted">{% if apps.is_empty() %}No apps yet{% else %}{{ apps.len() }} connected{% endif %}</span><a class="btn secondary" href="https://docs.virling.com/reference/mcp.html">MCP docs</a></div>
+  <div class="card-head"><span class="muted">{% if apps.is_empty() %}No apps yet{% else %}{{ apps.len() }} connected{% endif %}</span><a class="btn secondary" href="https://docs.virling.com/reference/mcp">MCP docs</a></div>
   {% for a in apps %}
   <div class="conn">
     <div class="grow"><b>{{ a.name }}</b> <span class="mono small">{{ a.host }}</span> <span class="muted small">{{ a.created }}. {{ a.used }}.</span></div>

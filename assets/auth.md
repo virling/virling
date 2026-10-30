@@ -33,6 +33,6 @@ The person can revoke any connected app under Account, Connected apps.
 - Anonymous agent credentials and self-service agent signup.
 - Write access. Every tool only reads.
 
-Self-hosted servers use API keys from Account, API keys instead. See https://docs.virling.com/reference/mcp.html.
+Self-hosted servers use API keys from Account, API keys instead. See https://docs.virling.com/reference/mcp.
 
 Skill for agents: https://virling.com/.well-known/agent-skills/virling/SKILL.md
