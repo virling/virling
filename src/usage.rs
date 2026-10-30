@@ -212,7 +212,7 @@ mod tests {
             .fetch_one(db)
             .await
             .unwrap();
-        assert!(used >= 0 && used < 80_000);
+        assert!((0..80_000).contains(&used));
         match &*f.state.mailer {
             Mailer::Capture(sent) => assert!(sent.lock().unwrap().is_empty()),
             _ => unreachable!(),
