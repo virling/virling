@@ -925,6 +925,7 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
     .bind(now.unix_timestamp())
     .execute(&db)
     .await?;
+    crate::spend::save(&db, &site, "Paid 300\nFees 2.9% + 0.30").await?;
     sqlx::query("INSERT INTO report_brands (site_id, agency_name) VALUES (?, ?)")
         .bind(&site)
         .bind("Fieldwork Studio")

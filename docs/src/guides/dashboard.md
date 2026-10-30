@@ -35,6 +35,8 @@ Click a row to filter the whole page by it. Revenue per visitor is the number to
 
 In **Site settings**, under **Monthly spend per channel**, put one channel per line with what you spend on it each month in dollars, such as `Paid 300` or `Social 50`. The channels are Paid, Email, AI, Organic search, Communities, Social, Referral and Direct. When any channel has a spend, a **Profit by channel** card appears on the dashboard. For the range you pick it shows each channel's spend (the monthly amount scaled to the range), the revenue credited to it, the profit, and the return per dollar spent. Nothing connects to an ad platform, and the numbers are only as good as the amounts you type.
 
+Revenue is already net of refunds and lost disputes. To take payment fees off too, add a line such as `Fees 2.9% + 0.30`: the percent of each channel's revenue plus the fixed amount for each of its payments. The card then lists every channel with revenue, its costs are spend plus fees, and profit is what is left.
+
 ## Time to pay
 
 The **Time to pay** card shows, for each channel that brought at least three first payments in the range, the median time from the customer's first visit to their first payment, and the share who paid within 1, 7 and 30 days. A channel with a long median is not failing, so give it the time its customers need before you cut it. Renewals do not count, and it reads the 500 newest payments in the range.

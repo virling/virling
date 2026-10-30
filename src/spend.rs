@@ -49,6 +49,29 @@ pub fn parse(input: &str) -> Vec<(&'static str, f64)> {
     out
 }
 
+/// Payment fees as (percent, fixed dollars per payment) from a `Fees 2.9% + 0.30` line.
+pub fn fees(input: &str) -> Option<(f64, f64)> {
+    let line = input
+        .lines()
+        .map(str::trim)
+        .rfind(|l| l.get(..4).is_some_and(|h| h.eq_ignore_ascii_case("fees")))?;
+    let (pct, fixed) = line[4..].split_once('%')?;
+    let num = |s: &str| -> Option<f64> {
+        let s: String = s
+            .chars()
+            .filter(|c| !matches!(c, '$' | ' ' | '+'))
+            .collect();
+        if s.is_empty() {
+            Some(0.0)
+        } else {
+            s.parse().ok()
+        }
+    };
+    let (pct, fixed) = (num(pct)?, num(fixed)?);
+    ((0.0..=50.0).contains(&pct) && (0.0..=100.0).contains(&fixed) && pct + fixed > 0.0)
+        .then_some((pct, fixed))
+}
+
 /// The lines as stored and shown: one `Channel amount` per line.
 pub fn lines(entries: &[(&str, f64)]) -> String {
     entries
@@ -70,7 +93,15 @@ pub async fn load(db: &SqlitePool, site_id: &str) -> sqlx::Result<String> {
 
 /// Replaces the site's spend with the valid lines of `input`.
 pub async fn save(db: &SqlitePool, site_id: &str, input: &str) -> sqlx::Result<()> {
-    let text = lines(&parse(input));
+    let mut text = lines(&parse(input));
+    if let Some((pct, fixed)) = fees(input) {
+        let line = format!("Fees {pct}% + {fixed:.2}");
+        text = if text.is_empty() {
+            line
+        } else {
+            format!("{text}\n{line}")
+        };
+    }
     if text.is_empty() {
         sqlx::query("DELETE FROM channel_spend WHERE site_id = ?")
             .bind(site_id)
@@ -92,42 +123,62 @@ pub async fn save(db: &SqlitePool, site_id: &str, input: &str) -> sqlx::Result<(
 /// Spend, revenue, profit and return of each channel with a monthly spend.
 pub struct ProfitCard {
     pub rows: Vec<ProfitRow>,
+    /// Costs include payment fees.
+    pub fees: bool,
 }
 
 pub struct ProfitRow {
     pub name: String,
     pub spend: f64,
+    /// Estimated payment fees, from the site's fee rate.
+    pub fees: f64,
     pub revenue: f64,
     pub profit: f64,
     /// Revenue per dollar spent.
     pub ret: f64,
 }
 
-/// The profit of every channel with a spend, for a range of `days` days; None when no channel has one.
+/// The profit of every channel with a spend, or with revenue once fees are set, for a range of `days` days; None when there is none.
 pub fn profit_card(
     channels: &[BreakdownRow],
     spend: &[(&str, f64)],
+    fees: Option<(f64, f64)>,
     days: i64,
 ) -> Option<ProfitCard> {
-    let mut rows: Vec<ProfitRow> = spend
+    let earning = channels
         .iter()
-        .map(|(name, monthly)| {
+        .filter(|r| fees.is_some() && !r.unattributed && r.revenue_usd > 0.0)
+        .map(|r| r.label.as_str());
+    let mut names: Vec<&str> = spend.iter().map(|s| s.0).collect();
+    for n in earning {
+        if !names.contains(&n) {
+            names.push(n);
+        }
+    }
+    let mut rows: Vec<ProfitRow> = names
+        .into_iter()
+        .map(|name| {
+            let monthly = spend.iter().find(|s| s.0 == name).map_or(0.0, |s| s.1);
             let spent = monthly * days.max(1) as f64 / MONTH_DAYS;
-            let revenue = channels
-                .iter()
-                .find(|r| !r.unattributed && r.label == *name)
-                .map_or(0.0, |r| r.revenue_usd);
+            let row = channels.iter().find(|r| !r.unattributed && r.label == name);
+            let revenue = row.map_or(0.0, |r| r.revenue_usd);
+            let paid = row.map_or(0, |r| r.payments) as f64;
+            let fee = fees.map_or(0.0, |(pct, fixed)| revenue * pct / 100.0 + paid * fixed);
             ProfitRow {
-                name: (*name).to_string(),
+                name: name.to_string(),
                 spend: spent,
+                fees: fee,
                 revenue,
-                profit: revenue - spent,
-                ret: revenue / spent,
+                profit: revenue - spent - fee,
+                ret: revenue / (spent + fee),
             }
         })
         .collect();
     rows.sort_by(|a, b| b.profit.total_cmp(&a.profit));
-    (!rows.is_empty()).then_some(ProfitCard { rows })
+    (!rows.is_empty()).then_some(ProfitCard {
+        rows,
+        fees: fees.is_some(),
+    })
 }
 
 #[cfg(test)]
@@ -170,6 +221,7 @@ mod tests {
         let card = profit_card(
             &[row("Paid", 600.0), row("Social", 0.0)],
             &[("Paid", 304.375), ("Social", 100.0)],
+            None,
             30,
         )
         .unwrap();
@@ -177,6 +229,16 @@ mod tests {
         assert!((card.rows[0].spend - 300.0).abs() < 1.0);
         assert!(card.rows[0].profit > 290.0 && card.rows[0].ret > 1.9);
         assert!(card.rows[1].profit < 0.0 && card.rows[1].ret == 0.0);
-        assert!(profit_card(&[], &[], 30).is_none());
+        assert!(profit_card(&[], &[], None, 30).is_none());
+        let fees = fees("Paid 10\nfees 2.9% + $0.30").unwrap();
+        assert_eq!(fees, (2.9, 0.3));
+        let card = profit_card(&[row("Email", 100.0)], &[], Some(fees), 30).unwrap();
+        assert_eq!(card.rows[0].name, "Email");
+        assert!(
+            (card.rows[0].fees - 3.5).abs() < 1e-9 && (card.rows[0].profit - 96.5).abs() < 1e-9
+        );
+        assert_eq!(super::fees("Fees 5%"), Some((5.0, 0.0)));
+        assert_eq!(super::fees("Fees 80% + 1"), None);
+        assert_eq!(super::fees("Fees lots"), None);
     }
 }
