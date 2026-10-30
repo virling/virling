@@ -221,16 +221,17 @@ a.more:hover svg { transform: translateX(2px); }
 .closer { padding: 72px 0; }
 .closer .wrap { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; }
 
-.foot { padding: 40px 0 56px; border-top: 1px solid var(--rule); font-size: 14px; color: var(--ink-3); }
-.foot .wrap { display: flex; flex-direction: column; gap: 20px; }
-.foot .links { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-.foot .links a { color: var(--ink-2); }
-.foot .links a:hover { color: var(--ink); }
-.foot .fine { display: flex; gap: 8px 32px; flex-wrap: wrap; align-items: center; }
-.foot .fine > :first-child { flex: 1 1 auto; }
+.foot { padding: 56px 0 40px; border-top: 1px solid var(--rule); font-size: 14px; color: var(--ink-3); }
+.foot .wrap { display: flex; flex-direction: column; gap: 40px; }
+.foot-grid { display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 32px; }
+.foot-brand p { margin: 12px 0 16px; max-width: 320px; line-height: 1.5; }
+.foot nav { display: flex; flex-direction: column; gap: 10px; }
+.foot nav b { color: var(--ink); font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.foot nav a, .foot .legal a { color: var(--ink-2); }
+.foot nav a:hover, .foot .legal a:hover { color: var(--ink); }
+.foot .fine { display: flex; gap: 8px 32px; flex-wrap: wrap; align-items: center; justify-content: space-between; padding-top: 20px; border-top: 1px solid var(--rule); }
 .foot .legal { display: flex; gap: 20px; flex-wrap: wrap; }
-.foot .legal a { color: var(--ink-2); }
-.foot .legal a:hover { color: var(--ink); }
+@media (max-width: 720px) { .foot-grid { grid-template-columns: 1fr 1fr; } .foot-brand { grid-column: 1 / -1; } }
 
 .card { background: #fff; border: 1px solid var(--rule); border-radius: 16px; overflow: hidden; }
 .card.lifted { box-shadow: 0 40px 80px -48px rgba(14,17,22,.35); }
