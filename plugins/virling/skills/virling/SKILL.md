@@ -5,11 +5,11 @@ description: Answer revenue attribution questions from a Virling server with its
 
 # Virling
 
-Virling links website visits to payments (Stripe, Polar, Dodo Payments, LemonSqueezy). Each payment is credited to one visit by the site's attribution model, so every report can show revenue, not just traffic. The bundled `virling` MCP server reads it, read-only.
+Virling links website visits to payments (Stripe, Polar, Dodo Payments, LemonSqueezy, Creem, RevenueCat). Each payment is credited to one visit by the site's attribution model, so every report can show revenue, not just traffic. The bundled `virling` MCP server reads it, read-only.
 
 ## Setup
 
-The user signs in to Virling when Claude asks; see [setup.md](setup.md). Then call `list_sites`. With one site, `site` can be left out of the other tools. With several, pass `site` with the domain from `list_sites`.
+The user connects Virling once, in Claude or Paperclip; see [setup.md](setup.md). Then call `list_sites`. With one site, `site` can be left out of the other tools. With several, pass `site` with the domain from `list_sites`.
 
 ## Tools
 
@@ -35,6 +35,15 @@ Every tool except `list_sites` and `get_visitor_timeline` takes a range: `range`
 - A visitor timeline is `entries` of `visit` (with `steps`: `page` with `secs` on page, `goal`, `exit`, `payment`) or a standalone `payment` such as a renewal.
 - Retention groups customers by their first payment's channel, referrer and campaign; renewals stay with it. `still_paying` comes from the provider's subscription status, else a recent payment. `churn_30d` covers customers who first paid 30 to 60 days ago. Under 60 days of payments (`day_one: true`) talk about refunds and churn, not LTV.
 - Channels include Search, Communities (Hacker News, Reddit, Product Hunt and similar), Social, AI (ChatGPT, Perplexity, Claude and similar), Email, Paid, Referral and Direct.
+
+## Weekly channel review
+
+When asked for a weekly review, or run on a schedule:
+
+1. `get_overview` with `range` `7d` for revenue, payments and the change against the week before.
+2. `get_breakdown` with `dimension` `channel` and `range` `7d`, and again with `30d` for context.
+3. `get_retention` for which channels bring customers who keep paying.
+4. Report the channel that made the most money, the biggest drop, the share of revenue that is Unattributed, and one concrete next step, such as doing more of what paid or fixing checkout linking when Unattributed is high.
 
 Report numbers with their range and site, and say when the data is thin (a handful of payments) instead of drawing strong conclusions.
 
