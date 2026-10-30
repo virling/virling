@@ -317,9 +317,9 @@ fn matching(split: &[ProviderSplit], sync: Option<bool>, domain: &str, window: i
 }
 
 /// Share of revenue matched to a visit and the reasons for the rest; empty when nothing is missing.
-fn unmatched_line(cur: &Totals, split: &[ProviderSplit], window: i64) -> String {
-    let gap = cur.revenue_usd - cur.matched_revenue_usd;
-    if cur.revenue_usd <= 0.0 || gap < 0.005 {
+/// The share of revenue credited to a visit, with why the Unattributed rest was not; `unattributed` is that row's revenue.
+fn unmatched_line(cur: &Totals, unattributed: f64, split: &[ProviderSplit], window: i64) -> String {
+    if cur.revenue_usd <= 0.0 || unattributed < 0.005 {
         return String::new();
     }
     let sum = |f: fn(&ProviderSplit) -> u64| split.iter().map(f).sum::<u64>();
@@ -337,7 +337,7 @@ fn unmatched_line(cur: &Totals, split: &[ProviderSplit], window: i64) -> String 
             plural(unseen, "payment")
         ));
     }
-    let pct = (cur.matched_revenue_usd / cur.revenue_usd * 100.0).floor();
+    let pct = ((cur.revenue_usd - unattributed) / cur.revenue_usd * 100.0).floor();
     let head = format!("{pct:.0}% of revenue is matched to a visit.");
     if why.is_empty() {
         return head;
@@ -417,7 +417,7 @@ fn kpis(
 ) -> Vec<Kpi> {
     let conv = |t: &Totals| {
         t.conversion
-            .map(|c| format!("{:.1}% became customers", c * 100.0))
+            .map(|c| format!("{:.1}% of them paid", c * 100.0))
             .unwrap_or_else(|| {
                 if t.visitors == 0 {
                     "no visits in this range".into()
@@ -1254,7 +1254,13 @@ async fn page(
                 );
             }
             if public.is_none() && filters.is_empty() {
-                page.unmatched = unmatched_line(cur, &split, window_days);
+                let unattributed: f64 = report
+                    .channels
+                    .iter()
+                    .filter(|r| r.unattributed)
+                    .map(|r| r.revenue_usd)
+                    .sum();
+                page.unmatched = unmatched_line(cur, unattributed, &split, window_days);
             }
 
             let picked = match q.chart.as_deref() {
@@ -1690,7 +1696,7 @@ fn hide_amounts(page: &mut DashboardPage, cur: &Totals, prev: &Totals) {
                         .map_or_else(|| "–".into(), |c| format!("{:.1}%", c * 100.0)),
                     String::new(),
                     "",
-                    "of visitors became customers".into(),
+                    "of visitors paid".into(),
                 );
             }
             "Visitors" => k.note = String::new(),
@@ -1957,18 +1963,14 @@ mod tests {
         }];
         let t = Totals {
             revenue_usd: 200.0,
-            matched_revenue_usd: 150.0,
+            matched_revenue_usd: 120.0,
             ..Default::default()
         };
         assert_eq!(
-            unmatched_line(&t, &split, 30),
+            unmatched_line(&t, 50.0, &split, 30),
             "75% of revenue is matched to a visit. 2 payments had no visitor ID, 1 payment had no visit in the 30 days before paying."
         );
-        let all = Totals {
-            matched_revenue_usd: 200.0,
-            ..t
-        };
-        assert_eq!(unmatched_line(&all, &split, 30), "");
-        assert_eq!(unmatched_line(&Totals::default(), &[], 30), "");
+        assert_eq!(unmatched_line(&t, 0.0, &split, 30), "");
+        assert_eq!(unmatched_line(&Totals::default(), 0.0, &[], 30), "");
     }
 }
