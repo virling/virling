@@ -1792,6 +1792,7 @@ mod tests {
             got.contains(r#""device":"Mobile""#) && got.contains(r#""path":"/""#),
             "{got}"
         );
+        assert!(got.contains(r#""online":1"#), "{got}");
     }
 
     #[tokio::test]
