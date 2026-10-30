@@ -51,6 +51,7 @@
     <div class="auth-copy">
       <h1>Sign in to Virling</h1>
       <p>We'll email you a link. No password. New here? The same link creates your account.</p>
+      {% if trial %}<p class="muted">Plans start with 14 days free. You add a card at checkout, and nothing is charged if you cancel before day 15.</p>{% endif %}
     </div>
     {% if let Some(error) = error %}
     <div class="alert" role="alert">

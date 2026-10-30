@@ -1214,6 +1214,33 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn sign_in_mentions_the_trial_only_where_plans_are_sold() {
+        let t = setup().await;
+        assert!(
+            page(&t, "/login")
+                .await
+                .contains("Plans start with 14 days free")
+        );
+        let mut state = t.state.clone();
+        let mut config = (*state.config).clone();
+        config.billing = None;
+        state.config = Arc::new(config);
+        let res = crate::app::router(state)
+            .layer(MockConnectInfo(SocketAddr::from(([203, 0, 113, 7], 5555))))
+            .oneshot(Request::get("/login").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+        let bytes = axum::body::to_bytes(res.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        assert!(
+            !String::from_utf8(bytes.to_vec())
+                .unwrap()
+                .contains("14 days free")
+        );
+    }
+
+    #[tokio::test]
     async fn checkout_carries_the_signup_visitor() {
         let t = setup().await;
         sqlx::query("UPDATE accounts SET vid = 'vmarketing12' WHERE id = ?")

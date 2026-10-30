@@ -49,6 +49,8 @@ pub struct LoginPage {
     pub vid: String,
     /// (script host, site) of the tracking script on the sign-in page.
     pub track: Option<(String, String)>,
+    /// Hosted plans with a free trial are sold on this server.
+    pub trial: bool,
     pub error: Option<&'static str>,
     pub turnstile: Option<String>,
 }
@@ -87,6 +89,7 @@ pub async fn login_form(State(state): State<AppState>, Query(q): Query<LoginQuer
         token: String::new(),
         vid: q.vid.filter(|v| valid_visitor_id(v)).unwrap_or_default(),
         track: track(&state),
+        trial: state.config.billing.is_some(),
         error: None,
     })
 }
@@ -171,6 +174,7 @@ pub async fn send_link(
             token: String::new(),
             vid: vid.clone(),
             track: track(&state),
+            trial: state.config.billing.is_some(),
             error: Some("Enter a valid email."),
         });
     }
@@ -182,6 +186,7 @@ pub async fn send_link(
             token: String::new(),
             vid: vid.clone(),
             track: track(&state),
+            trial: state.config.billing.is_some(),
             error: Some("Use a permanent email address, not a temporary one."),
         });
     }
@@ -193,6 +198,7 @@ pub async fn send_link(
             token: String::new(),
             vid: vid.clone(),
             track: track(&state),
+            trial: state.config.billing.is_some(),
             error: Some("Confirm you are human and try again."),
         });
     }
@@ -237,6 +243,7 @@ pub async fn send_link(
                 token: String::new(),
                 vid: vid.clone(),
                 track: track(&state),
+                trial: state.config.billing.is_some(),
                 error: Some("Something went wrong. Try again."),
             });
         }
@@ -263,6 +270,7 @@ pub async fn send_link(
                 token: String::new(),
                 vid: vid.clone(),
                 track: track(&state),
+                trial: state.config.billing.is_some(),
                 error: Some("We couldn't send the email. Try again in a minute."),
             });
         }
@@ -276,6 +284,7 @@ pub async fn send_link(
         token: String::new(),
         vid: vid.clone(),
         track: track(&state),
+        trial: state.config.billing.is_some(),
         error: None,
     })
 }
@@ -307,6 +316,7 @@ pub async fn confirm(State(state): State<AppState>, Query(input): Query<TokenInp
             token: input.token,
             vid: String::new(),
             track: track(&state),
+            trial: state.config.billing.is_some(),
             error: None,
         }),
         None => page(LoginPage {
@@ -316,6 +326,7 @@ pub async fn confirm(State(state): State<AppState>, Query(input): Query<TokenInp
             token: String::new(),
             vid: String::new(),
             track: track(&state),
+            trial: state.config.billing.is_some(),
             error: Some(EXPIRED),
         }),
     }
@@ -344,6 +355,7 @@ pub async fn verify(
             token: String::new(),
             vid: String::new(),
             track: track(&state),
+            trial: state.config.billing.is_some(),
             error: Some(EXPIRED),
         });
     };
@@ -386,6 +398,7 @@ pub async fn verify(
                 token: String::new(),
                 vid: String::new(),
                 track: track(&state),
+                trial: state.config.billing.is_some(),
                 error: Some("Something went wrong. Try again."),
             })
         }
