@@ -457,6 +457,7 @@ pub fn provider_name(provider: &str) -> &'static str {
         "lemonsqueezy" => "LemonSqueezy",
         "creem" => "Creem",
         "revenuecat" => "RevenueCat",
+        "paddle" => "Paddle",
         _ => "Other",
     }
 }
@@ -1267,6 +1268,7 @@ pub async fn payments(
             "lemonsqueezy",
             "creem",
             "revenuecat",
+            "paddle",
         ]
         .into_iter()
         .map(|pr| {

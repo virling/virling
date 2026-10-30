@@ -1489,6 +1489,7 @@ mod tests {
             "Lemon Squeezy",
             "Creem",
             "RevenueCat",
+            "Paddle",
         ] {
             assert!(
                 body.contains(&format!(r#"aria-label="{name}""#)),
@@ -2507,7 +2508,14 @@ mod tests {
         assert!(body.contains("Save new key"));
         assert!(!body.contains("HIDDEN"));
 
-        for p in ["stripe", "polar", "lemonsqueezy", "creem", "revenuecat"] {
+        for p in [
+            "stripe",
+            "polar",
+            "lemonsqueezy",
+            "creem",
+            "revenuecat",
+            "paddle",
+        ] {
             connect_fake(&state, &site, p, "fake_test_value_1234").await;
         }
         let body = body_text(call(&state, get(&uri, Some(&cookie))).await).await;

@@ -10,6 +10,7 @@ Every host a Virling server connects to. Your visitors' browsers only connect to
 | `api.creem.io`, `test-api.creem.io` | With Creem connected, every minute | Read transactions, and subscriptions hourly when the key allows. Both are tried when connecting, and the webhook is added once. |
 | `api.lemonsqueezy.com` | With LemonSqueezy connected, every minute | Read orders and subscription invoices, and subscriptions hourly |
 | `api.revenuecat.com` | With RevenueCat connected | Check the key and add the webhook when connecting, then read one-time purchases from the last 90 days once |
+| `api.paddle.com`, `sandbox-api.paddle.com` | With Paddle connected, every minute | Read transactions with their refunds, and subscriptions hourly when the key allows. Both are tried when connecting. |
 | `api.openai.com`, `api.anthropic.com`, `api.perplexity.ai`, `generativelanguage.googleapis.com` | With [AI answers](../track/ai-answers.md) keys set, on each site's schedule (weekly by default) and on **Run now** | Ask the site's buyer questions with web search |
 | `api.frankfurter.dev` | When converting a non-USD payment, at most every 12 hours | ECB exchange rates. See [Currencies](../attribution/currencies.md). |
 | Your SMTP server | When someone requests a sign-in link | Send the email, if `VIRLING_SMTP_URL` is set |

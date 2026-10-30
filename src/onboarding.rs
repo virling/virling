@@ -388,6 +388,14 @@ fn provider_card(p: Provider, selected: bool) -> ProviderCard {
             "https://www.revenuecat.com/docs/projects/authentication",
             "Create a V2 secret API key with read access to Project configuration and Customer information, plus read and write access to Integrations so Virling can add one webhook. Purchases, renewals and refunds arrive by that webhook.",
         ),
+        Provider::Paddle => (
+            "Paddle",
+            "API key",
+            "pdl_live_apikey_...",
+            "How to create a read-only key, 1 minute",
+            "https://developer.paddle.com/api-reference/about/api-keys",
+            "Create an API key with the transaction.read and adjustment.read permissions, plus subscription.read so retention knows who still pays. No other permissions are needed. Live and sandbox keys both work.",
+        ),
     };
     ProviderCard {
         key: p.as_str(),
