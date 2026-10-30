@@ -42,13 +42,28 @@ pub struct Dodo {
     pub founders_token: String,
 }
 
+/// Customers per plan who get the founding price for life.
+pub const FOUNDING_SPOTS: i64 = 50;
+
+/// Whether a founding spot is still open on `plan`, counting pre-order founders and founding subscriptions.
+async fn founding_open(db: &sqlx::SqlitePool, plan: &str) -> sqlx::Result<bool> {
+    let taken: i64 = sqlx::query_scalar(
+        "SELECT count(*) FROM accounts WHERE founder = ?1
+           OR id IN (SELECT account_id FROM billing WHERE founding = 1 AND product = ?1)",
+    )
+    .bind(plan)
+    .fetch_one(db)
+    .await?;
+    Ok(taken < FOUNDING_SPOTS)
+}
+
 /// Monthly price in cents of a plan with `extra` paid seats.
 pub fn price(product: &str, extra: i64, founding: bool) -> i64 {
     match (product, founding) {
         ("agency", false) => 7900 + 900 * extra,
         ("agency", true) => 2900 + 900 * extra,
         (_, false) => 1900,
-        (_, true) => 1140,
+        (_, true) => 900,
     }
 }
 
@@ -633,9 +648,10 @@ pub async fn start(
             .as_ref()
             .expect("checked in owner_page");
         let extra = extra_seats(&state.db, &account.id).await?;
-        let founding = founder.as_deref() == Some(input.plan.as_str());
+        let founder = founder.as_deref() == Some(input.plan.as_str());
+        let founding = founder || founding_open(&state.db, &input.plan).await?;
         // A founder's prepaid month runs as the trial, so the first charge comes when it ends.
-        let days = match (founding, old.is_some()) {
+        let days = match (founder, old.is_some()) {
             (true, _) => days_left(prepaid.unwrap_or(0), now()),
             (false, true) => 0,
             (false, false) => TRIAL_DAYS,
@@ -1160,7 +1176,7 @@ mod tests {
         assert_eq!(price("agency", 2, false), 9700);
         assert_eq!(price("personal", 0, false), 1900);
         assert_eq!(price("agency", 1, true), 3800);
-        assert_eq!(price("personal", 0, true), 1140);
+        assert_eq!(price("personal", 0, true), 900);
     }
 
     #[tokio::test]
@@ -1202,7 +1218,10 @@ mod tests {
         );
         let (method, uri, body) = t.calls.lock().unwrap()[0].clone();
         assert_eq!((method.as_str(), uri.as_str()), ("POST", "/checkouts"));
-        assert_eq!(body["product_cart"][0]["product_id"], "pdt_agency");
+        assert_eq!(
+            body["product_cart"][0]["product_id"], "pdt_agency_founding",
+            "the first 50 get the founding price"
+        );
         assert!(body["product_cart"][0].get("addons").is_none());
         assert_eq!(body["subscription_data"]["trial_period_days"], 14);
         assert_eq!(body["customer"]["email"], "owner@agency.com");
@@ -1244,6 +1263,28 @@ mod tests {
             t.calls.lock().unwrap().len(),
             1,
             "no second checkout while subscribed"
+        );
+    }
+
+    #[tokio::test]
+    async fn founding_price_closes_after_50_customers() {
+        let t = setup().await;
+        sqlx::query(
+            "WITH RECURSIVE n(i) AS (SELECT 1 UNION ALL SELECT i + 1 FROM n WHERE i < 50)
+             INSERT INTO accounts (id, email, created_at, founder)
+             SELECT 'f' || i, 'f' || i || '@x.com', '2026-10-01', 'agency' FROM n",
+        )
+        .execute(&t.state.db)
+        .await
+        .unwrap();
+        post(&t, "/app/agency.com/account/billing", "plan=agency").await;
+        post(&t, "/app/agency.com/account/billing", "plan=personal").await;
+        let calls = t.calls.lock().unwrap().clone();
+        assert_eq!(calls[0].2["product_cart"][0]["product_id"], "pdt_agency");
+        assert_eq!(calls[0].2["subscription_data"]["trial_period_days"], 14);
+        assert_eq!(
+            calls[1].2["product_cart"][0]["product_id"], "pdt_personal_founding",
+            "spots are counted per plan"
         );
     }
 
@@ -1291,7 +1332,10 @@ mod tests {
             body["subscription_data"]["trial_period_days"], 0,
             "one trial per account"
         );
-        assert_eq!(body["product_cart"][0]["product_id"], "pdt_personal");
+        assert_eq!(
+            body["product_cart"][0]["product_id"],
+            "pdt_personal_founding"
+        );
     }
 
     #[tokio::test]
