@@ -22,6 +22,7 @@ pub(crate) type FilterHref<'a> = dyn Fn(&[(&'static str, String)]) -> String + '
 
 pub mod answers;
 mod cards;
+pub mod clients;
 mod customers;
 pub(crate) mod daterange;
 mod goal_card;
@@ -80,6 +81,8 @@ pub struct Shell {
 
 /// A site in the switcher.
 pub struct SiteOpt {
+    /// The client name above the first site of each client, else empty.
+    pub heading: String,
     pub label: String,
     pub href: String,
     pub on: bool,
@@ -260,13 +263,23 @@ async fn load_in(
     };
     let fetched = icons.iter().find(|i| i.0 == site.id).map(|i| (i.1, i.2));
     favicon::refresh(state, &site.id, &site.domain, fetched);
+    let mut prev: Option<Option<String>> = None;
     let mut shell = Shell {
         domain: site.domain.clone(),
         initial: site.domain[..1].to_ascii_uppercase(),
         icon: icon_of(&site),
-        sites: all
+        sites: clients::by_client(all.clone())
             .iter()
             .map(|s| SiteOpt {
+                heading: match &s.client {
+                    Some(c) if prev.replace(s.client.clone()) != Some(s.client.clone()) => {
+                        c.clone()
+                    }
+                    _ => {
+                        prev = Some(s.client.clone());
+                        String::new()
+                    }
+                },
                 label: s.domain.clone(),
                 href: sites::app_path(&s.domain, nav),
                 on: s.id == site.id,

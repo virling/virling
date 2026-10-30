@@ -1780,6 +1780,7 @@ pub async fn public(
             timezone,
             cookieless,
             consent: false,
+            client: None,
             same_visit: String::new(),
             return_minutes: 5,
             sample_data: false,

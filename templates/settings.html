@@ -35,6 +35,15 @@
   <div class="actions end"><button class="btn" type="submit">Save timezone</button></div>
 </form>
 </section>
+{% if shell.agency %}
+<section class="set-sec" id="client">
+<div class="set-intro"><h2>Client</h2><p class="muted">Sites with the same client are grouped in the site switcher and on <a href="/app/{{ shell.domain }}/clients">All clients</a>.</p></div>
+<form class="card" method="post" action="/app/{{ shell.domain }}/settings/client">
+  <label class="field">Client name<input name="client" value="{{ client }}" maxlength="80" placeholder="No client" autocomplete="off"></label>
+  <div class="actions end"><button class="btn" type="submit">Save client</button></div>
+</form>
+</section>
+{% endif %}
 <section class="set-sec">
 <div class="set-intro"><h2>Attribution</h2><p class="muted">How a payment is credited to the visit that brought it, and what Virling stores about visitors.</p></div>
 <form class="card" method="post" action="/app/{{ shell.domain }}/settings">

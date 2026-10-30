@@ -85,6 +85,7 @@ Places are shown at the country level, so visitors from the same country sit clo
 - **Retention:** customers who still pay, by the channel of their first payment, with lifetime value by first source and the path to purchase: how many days and visits customers took before paying. See [Retention by channel](../attribution/retention.md).
 - **Launches:** a ledger of the posts, threads and launch days you log by hand, each with a name, an optional link, a channel and a day. Next to each one Virling shows the visitors, new customers and revenue of that day and the day after, in your site's timezone, so you can see whether a launch made money or only traffic. The figures are all traffic on those two days, not only the visitors the launch sent, so they show what the days brought and not proof of cause.
 - **Client report:** a shareable report for one site. See below.
+- **All clients** (Agency): every site of the account grouped by client, with each site's visitors and revenue over the last 30 days and a total per client. Set a site's client under **Site settings**, **Client**; the site switcher groups sites the same way.
 - **Site settings:** the script, payment connections, attribution model, goals and sharing.
 
 ## Sample data

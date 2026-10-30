@@ -1580,6 +1580,10 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .ll-form label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--ink-2); }
 .ll-row { display: grid; grid-template-columns: minmax(0, 2fr) 120px 100px 80px 110px 90px 70px; gap: 10px; align-items: center; padding: 10px 4px; border-top: 1px solid var(--rule-2); font-size: 14px; }
 .ll-row.th { font-size: 12px; color: var(--ink-3); border-top: 0; }
+.cl-row { display: grid; grid-template-columns: minmax(0, 1fr) 110px 110px; gap: 10px; align-items: center; padding: 10px 4px; border-top: 1px solid var(--rule-2); font-size: 14px; }
+.cl-row.th { margin-top: 14px; font-size: 13px; font-weight: 600; color: var(--ink); }
+.cl-note { margin-top: 12px; }
+.menu .menu-group { display: block; padding: 8px 10px 2px; font-size: 12px; color: var(--ink-3); }
 .ll-name { display: flex; flex-direction: column; min-width: 0; }
 .ll-name a { font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ll-note { margin: 12px 0 0; font-size: 12px; }

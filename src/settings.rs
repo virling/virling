@@ -97,6 +97,8 @@ struct SettingsPage {
     timezone: String,
     timezones: Vec<(String, bool)>,
     tz_saved: bool,
+    /// The client this site belongs to, for agencies.
+    client: String,
     brand: Brand,
     brand_saved: bool,
     brand_error: &'static str,
@@ -326,6 +328,7 @@ async fn show(
         timezones: crate::onboarding::tz_options(&ctx.site.timezone),
         timezone: ctx.site.timezone.clone(),
         tz_saved: q.saved.as_deref() == Some("timezone"),
+        client: ctx.site.client.clone().unwrap_or_default(),
         brand,
         public_link: format!("{}/share/{}", state.config.base_url, ctx.site.domain),
         public_on,
@@ -904,6 +907,41 @@ pub async fn save_timezone(
     state.sites.invalidate(&ctx.site.domain);
     Redirect::to(&format!(
         "{}?saved=timezone#timezone",
+        app_path(&ctx.site.domain, "settings")
+    ))
+    .into_response()
+}
+
+#[derive(Deserialize)]
+pub struct ClientInput {
+    #[serde(default)]
+    client: String,
+}
+
+/// Groups the site under a client in the switcher and on the all-clients page; empty removes it.
+pub async fn save_client(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(input): Form<ClientInput>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "settings").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    let client: String = input.client.trim().chars().take(80).collect();
+    if let Err(err) = sqlx::query("UPDATE sites SET client = ? WHERE id = ?")
+        .bind(Some(client).filter(|c| !c.is_empty()))
+        .bind(&ctx.site.id)
+        .execute(&state.db)
+        .await
+    {
+        tracing::error!(%err, "saving the client failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    state.sites.invalidate(&ctx.site.domain);
+    Redirect::to(&format!(
+        "{}#client",
         app_path(&ctx.site.domain, "settings")
     ))
     .into_response()

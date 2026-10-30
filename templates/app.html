@@ -15,8 +15,10 @@
     </button>
     <div class="menu" hidden>
       {% for s in shell.sites %}
+      {% if !s.heading.is_empty() %}<span class="menu-group">{{ s.heading }}</span>{% endif %}
       <a href="{{ s.href }}{{ shell.keep }}"{% if s.on %} aria-current="true"{% endif %}>{% if s.icon.is_empty() %}<span class="favicon sm">{{ s.initial }}</span>{% else %}<img class="favicon sm" src="{{ s.icon }}" width="16" height="16" alt="">{% endif %}{{ s.label }}</a>
       {% endfor %}
+      {% if shell.agency %}<a class="add" href="/app/{{ shell.domain }}/clients">All clients</a>{% endif %}
       <a class="add" href="/app/setup">+ Add a site</a>
     </div>
   </div>
