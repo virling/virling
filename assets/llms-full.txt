@@ -10,7 +10,7 @@ Virling is open-source, self-hosted revenue attribution for SaaS. It joins every
 
 ## Status
 
-Virling is in early development. Releases are published on GitHub and run on your own server today. Expect breaking changes until a stable release. Hosted plans start with a 14-day free trial at https://app.virling.com/login with no application. Paid hosted plans are not available yet.
+Releases are published on GitHub and run on your own server today. Hosted plans start with a 14-day free trial at https://app.virling.com/login with no application.
 
 ## Who it is for
 
@@ -82,4 +82,4 @@ That depends on your jurisdiction. In cookieless mode Virling sets no cookie, bu
 
 ### What does Virling not do yet?
 
-Paid hosted plans, team members and roles, imports from other analytics tools, and attribution models beyond last non-direct and first touch are not available yet. Windows builds are not available; use Docker.
+Attribution models beyond last non-direct, last touch and first touch are not available yet. Windows builds are not available; use Docker.
