@@ -2,7 +2,7 @@
 
 Run Virling on your own server, add the tracking script to your site and connect a payment provider. From then on, every new payment shows the visit that brought it.
 
-<div class="meta"><span class="chip"><i></i>Self-host</span><span class="chip">6 steps</span><span class="chip mono" style="font-size:12px">v0.1.1</span></div>
+<div class="meta"><span class="chip"><i></i>Self-host</span><span class="chip">6 steps</span><span class="chip mono" style="font-size:12px">vVIRLING_VERSION</span></div>
 
 > [!NOTE]
 > **Hosted plan coming soon.** app.virling.com is not open yet, so this guide covers self-hosting. Steps 4 to 6 will be the same on the hosted plan.
