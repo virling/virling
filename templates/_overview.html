@@ -69,7 +69,8 @@
     {% endfor %}
   </div>
 {% endmacro %}
-<section class="d3-cards" id="cards" data-sync>
+<section class="d3-stack" id="cards" data-sync>
+<div class="d3-cards">
   {% for c in cards %}{% if loop.index <= 2 %}{% call tabcard(c) %}{% endcall %}{% endif %}{% endfor %}
   {% if let Some(g) = goal_card %}
   <div class="d3-card d3-bc" id="goals">
@@ -204,6 +205,8 @@
   </div>
   {% endif %}
   {% for c in cards %}{% if loop.index > 2 %}{% call tabcard(c) %}{% endcall %}{% endif %}{% endfor %}
+</div>
+{% if profit.is_some() || reading.is_some() || almost.is_some() || topay.is_some() %}<div class="d3-cards d3-more">
   {% if let Some(p) = profit %}
   <div class="d3-card d3-bc" id="profit">
     <div class="d3-bc-head"><h2>Profit by channel</h2><span class="d3-sub">spend is your monthly amount for this range</span></div>
@@ -266,4 +269,5 @@
     </div>
   </div>
   {% endif %}
+</div>{% endif %}
 </section>
