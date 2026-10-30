@@ -9,7 +9,7 @@ claude plugin marketplace add virling/virling
 claude plugin install virling@virling
 ```
 
-The plugin connects to hosted Virling at https://beta.virling.com. Claude opens the sign-in page, so no API key is needed. If you self-host, add your own server in Claude as a custom connector with the URL https://your-server/mcp instead.
+The plugin connects to hosted Virling at https://app.virling.com. Claude opens the sign-in page, so no API key is needed. If you self-host, add your own server in Claude as a custom connector with the URL https://your-server/mcp instead.
 
 ## What it does
 
