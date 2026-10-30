@@ -1111,12 +1111,52 @@ pub struct AiCard {
     pub(super) crawled: bool,
     /// The Answers tab, signed in only.
     pub(super) answers: Option<crate::dashboard::answers::AnswersTab>,
+    /// The Funnel tab: one row per AI company, filled once the Answers tab is known.
+    pub(super) cash: Vec<CashRow>,
+    pub(super) tabs: Vec<AiTab>,
+}
+
+/// One tab of the AI card; `panel` is the id of the panel it shows.
+pub struct AiTab {
+    pub(super) label: &'static str,
+    pub(super) href: String,
+    pub(super) panel: &'static str,
+    pub(super) on: bool,
+}
+
+/// Fills the AI card's tabs and its Funnel rows; `pick` is the `ai` query value.
+pub fn ai_tabs(ai: &mut AiCard, pick: Option<&str>, href: impl Fn(&str) -> String) {
+    ai.cash = ai_cash(ai);
+    let all = [
+        ("Crawls", "", "ai-crawls"),
+        ("Answers", "answers", "ai-answers"),
+        ("Funnel", "funnel", "ai-funnel"),
+    ];
+    let shown: Vec<_> = all
+        .into_iter()
+        .filter(|t| t.1 != "answers" || ai.answers.is_some())
+        .collect();
+    let on = shown.iter().position(|t| Some(t.1) == pick).unwrap_or(0);
+    ai.tabs = shown
+        .into_iter()
+        .enumerate()
+        .map(|(i, (label, key, panel))| AiTab {
+            label,
+            href: format!("{}#ai", href(key)),
+            panel,
+            on: i == on,
+        })
+        .collect();
 }
 
 /// One AI company: visitors and revenue from its assistants, pages its crawlers read.
 pub struct AiRow {
     pub(super) bar: BarRow,
+    /// Name of the company's logo, for rendering it again elsewhere.
+    pub(super) logo: String,
     pub(super) pages: String,
+    /// "GPTBot, ChatGPT-User", empty without a crawler.
+    pub(super) bots: String,
     /// Each crawler's kind, hits, pages, most read page and last visit.
     pub(super) pages_title: String,
 }
@@ -1157,7 +1197,7 @@ pub fn ai_cash(ai: &AiCard) -> Vec<CashRow> {
         .rows
         .iter()
         .map(|r| CashRow {
-            icon: r.bar.icon.clone(),
+            icon: icons::source(&r.logo, 16),
             name: r.bar.name.clone(),
             pages: r.pages.clone(),
             named: answers
@@ -1289,7 +1329,7 @@ pub fn ai_card(
             .partial_cmp(&(a.row.visitors, a.row.revenue_usd, a.pages))
             .unwrap_or(std::cmp::Ordering::Equal)
     });
-    let items: Vec<(Item, u64, String)> = companies
+    let items: Vec<(Item, u64, String, String, String)> = companies
         .into_iter()
         .take(SHOWN)
         .map(|c| {
@@ -1308,7 +1348,13 @@ pub fn ai_card(
                 filter: top.map(|h| vec![("source", h)]).unwrap_or_default(),
                 row: c.row,
             };
-            (item, c.pages, c.detail.join("; "))
+            (
+                item,
+                c.pages,
+                c.detail.join("; "),
+                c.bots.join(", "),
+                c.logo,
+            )
         })
         .collect();
     // The AI channel row counts each visitor once, even one who came from two assistants.
@@ -1319,7 +1365,7 @@ pub fn ai_card(
     let share = |n: f64, t: f64| if t > 0.0 { n / t * 100.0 } else { 0.0 };
     let rows: Vec<AiRow> = items
         .iter()
-        .map(|(i, pages, title)| {
+        .map(|(i, pages, title, bots, logo)| {
             let href = if i.filter.is_empty() {
                 String::new()
             } else {
@@ -1328,6 +1374,8 @@ pub fn ai_card(
             AiRow {
                 bar: bar(i, base, false, href, String::new()),
                 pages: group(*pages),
+                bots: bots.clone(),
+                logo: logo.clone(),
                 pages_title: title.clone(),
             }
         })
@@ -1385,6 +1433,8 @@ pub fn ai_card(
         docs: "https://docs.virling.com/track/ai-crawlers.html",
         crawled: !bots.is_empty(),
         answers: None,
+        cash: Vec::new(),
+        tabs: Vec::new(),
     }
 }
 
@@ -1508,8 +1558,6 @@ mod tests {
             link: "",
             note: "",
             settings: String::new(),
-            on: false,
-            tabs: (String::new(), String::new()),
         });
         let rows = ai_cash(&ai);
         let seen: Vec<_> = rows

@@ -699,10 +699,10 @@ fn goal(events: &mut Vec<Event>, visitor: &str, name: &str, after: Duration) -> 
     g.ts += after;
     g.kind = "goal".into();
     g.name = Some(name.into());
-    g.path = if name == "signup" {
-        "/signup"
-    } else {
-        "/welcome"
+    g.path = match name {
+        "signup" => "/signup",
+        "checkout_started" => "/checkout",
+        _ => "/welcome",
     }
     .into();
     g.referrer_host = None;
@@ -791,6 +791,12 @@ pub(crate) fn seed(
                 }
             }
             goal(&mut events, &v.id, "signup", Duration::seconds(50));
+            goal(
+                &mut events,
+                &v.id,
+                "checkout_started",
+                Duration::seconds(80),
+            );
             let trial = goal(&mut events, &v.id, "trial", Duration::seconds(110));
             let paid = trial + Duration::minutes(3 + rng.below(12) as i64);
             if paid > now {
@@ -1255,7 +1261,10 @@ fn target(url: &str) -> Option<String> {
         .map(|kv| kv.split_once('=').unwrap_or((kv, "")))
         .collect();
     let (page, keys): (&str, &[&str]) = match path {
-        "" => ("", &["range", "sources", "location", "pages"]),
+        "" => (
+            "",
+            &["range", "sources", "location", "pages", "ai", "goals"],
+        ),
         "/payments" => ("payments/", &["range", "filter"]),
         "/report" => ("report/", &[]),
         "/globe" => ("globe/", &["range"]),
