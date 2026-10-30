@@ -637,8 +637,8 @@ pub async fn start(
         if old.as_ref().is_some_and(live) {
             return Ok(None);
         }
-        let (email, founder, prepaid): (String, Option<String>, Option<i64>) =
-            sqlx::query_as("SELECT email, founder, founder_until FROM accounts WHERE id = ?")
+        let (email, founder, prepaid, vid): (String, Option<String>, Option<i64>, Option<String>) =
+            sqlx::query_as("SELECT email, founder, founder_until, vid FROM accounts WHERE id = ?")
                 .bind(&account.id)
                 .fetch_one(&state.db)
                 .await?;
@@ -656,12 +656,16 @@ pub async fn start(
             (false, true) => 0,
             (false, false) => TRIAL_DAYS,
         };
+        let mut metadata = json!({ "account_id": account.id });
+        if let Some(vid) = vid {
+            metadata["virling_vid"] = vid.into();
+        }
         let body = json!({
             "product_cart": [cart(dodo, &input.plan, extra, founding)],
             "customer": { "email": email },
             "subscription_data": { "trial_period_days": days },
             "return_url": format!("{}{page}?billing=started#plan", state.config.base_url),
-            "metadata": { "account_id": account.id },
+            "metadata": metadata,
         });
         let session = call(&state, Method::POST, "/checkouts", body).await?;
         anyhow::Ok(session["checkout_url"].as_str().map(str::to_string))
@@ -1023,6 +1027,7 @@ mod tests {
                 founders_url,
                 founders_token: "founders_test".into(),
             }),
+            self_track_site: None,
         };
         let store =
             Arc::new(crate::events::DuckStore::open(&dir.path().join("events.duckdb")).unwrap());
@@ -1209,6 +1214,20 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn checkout_carries_the_signup_visitor() {
+        let t = setup().await;
+        sqlx::query("UPDATE accounts SET vid = 'vmarketing12' WHERE id = ?")
+            .bind(&t.account)
+            .execute(&t.state.db)
+            .await
+            .unwrap();
+        post(&t, "/app/agency.com/account/billing", "plan=agency").await;
+        let (_, _, body) = t.calls.lock().unwrap()[0].clone();
+        assert_eq!(body["metadata"]["virling_vid"], "vmarketing12");
+        assert_eq!(body["metadata"]["account_id"], json!(t.account));
+    }
+
+    #[tokio::test]
     async fn trial_starts_with_a_card_and_converts_on_day_15() {
         let t = setup().await;
         let res = post(&t, "/app/agency.com/account/billing", "plan=agency").await;
@@ -1226,6 +1245,7 @@ mod tests {
         assert_eq!(body["subscription_data"]["trial_period_days"], 14);
         assert_eq!(body["customer"]["email"], "owner@agency.com");
         assert_eq!(body["metadata"]["account_id"], json!(t.account));
+        assert!(body["metadata"].get("virling_vid").is_none());
         assert_eq!(
             body["return_url"],
             "https://app.virling.com/app/agency.com/account?billing=started#plan"

@@ -45,6 +45,8 @@ pub struct Config {
     pub turnstile: Option<Turnstile>,
     /// Dodo billing for the hosted plans; None on self-hosted servers.
     pub billing: Option<crate::billing::Dodo>,
+    /// Site whose script the sign-in page loads, so visits that start on the app are tracked too.
+    pub self_track_site: Option<String>,
 }
 
 #[derive(Clone)]
@@ -393,6 +395,7 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/settings/disconnect",
                 post(settings::disconnect),
             )
+            .route("/app/{domain}/settings/products", post(settings::products))
             .route("/app/{domain}/settings/alerts", post(crate::alerts::save))
             .route(
                 "/app/{domain}/settings/telegram",

@@ -17,6 +17,7 @@ Every setting can be given as a flag or an environment variable. See [CLI](cli.m
 | `VIRLING_TURNSTILE_SITE_KEY` | unset | Cloudflare Turnstile site key. With the secret, the sign-in form asks visitors to pass a Turnstile check before a link is emailed. Unset: no check. |
 | `VIRLING_MCP_URL` | unset | Optional separate `https` origin with no path, such as `https://mcp.example.com`, that serves only the [MCP server](mcp.md#a-dedicated-mcp-host). The app and sign-in stay on `VIRLING_BASE_URL`. |
 | `VIRLING_TURNSTILE_SECRET` | unset | Cloudflare Turnstile secret key. Needs the site key too. When the check is on and Cloudflare cannot confirm a visitor, no link is sent. The widget must be created for the hostname of `VIRLING_BASE_URL`. |
+| `VIRLING_SELF_TRACK_SITE` | unset | A site tracked on this server, such as `virling.com`. When set, the sign-in page loads `<VIRLING_BASE_URL>/v.js` for that site, so visits that start on the sign-in page are counted, and a new account keeps the visitor ID it signed up from. Unset: the sign-in page loads no script. |
 | `VIRLING_MARKETING` | `false` | Serve the virling.com landing pages and waitlist. |
 | `VIRLING_WAITLIST_FROM` | `Rahul at Virling <hello@virling.com>` | Sender for waitlist emails. |
 | `VIRLING_OPENAI_KEY` | unset | OpenAI key every site's [AI answers](../track/ai-answers.md) ask ChatGPT with. |

@@ -113,6 +113,13 @@
       <button class="btn ghost" type="submit">Disconnect</button>
     </form>
   </div>
+  {% if c.provider == "dodo" %}
+  <form class="conn-products" method="post" action="/app/{{ shell.domain }}/settings/products">
+    <input type="hidden" name="provider" value="{{ c.provider }}">
+    <label class="field">Only these product IDs<input name="products" value="{{ c.products }}" placeholder="All products" autocomplete="off"></label>
+    <button class="btn ghost" type="submit">Save</button>
+  </form>
+  {% endif %}
   {% endfor %}
   {% if connections.is_empty() %}<p class="empty">No payment provider connected yet.</p>{% endif %}
 </div>

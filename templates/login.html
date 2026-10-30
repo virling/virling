@@ -3,6 +3,7 @@
 <head>
 {% include "_head.html" %}
 <title>Sign in · Virling</title>
+{% if let Some((host, site)) = track %}<script defer src="{{ host }}/v.js" data-site="{{ site }}" data-respect-gpc></script>{% endif %}
 </head>
 <body class="auth">
 <header class="auth-top">
@@ -19,6 +20,7 @@
     <form class="notice" method="post" action="/login">
       <span>Not there? Check spam, or</span>
       <input type="hidden" name="email" value="{{ email }}">
+      {% if !vid.is_empty() %}<input type="hidden" name="vid" value="{{ vid }}">{% endif %}
       {% if let Some(key) = turnstile %}
       <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
       <div class="cf-turnstile" data-sitekey="{{ key }}" data-action="login" data-appearance="interaction-only" data-size="flexible" data-callback="vReady"></div>
@@ -60,6 +62,7 @@
       <label class="field">Email
         <input type="email" name="email" value="{{ email }}" placeholder="you@company.com" autocomplete="email" required autofocus>
       </label>
+      {% if !vid.is_empty() %}<input type="hidden" name="vid" value="{{ vid }}">{% endif %}
       {% if let Some(key) = turnstile %}
       <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
       <div class="cf-turnstile" data-sitekey="{{ key }}" data-action="login" data-appearance="interaction-only" data-size="flexible" data-callback="vReady"></div>

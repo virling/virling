@@ -20,7 +20,7 @@ const WINDOWS: [i64; 4] = [30, 60, 90, 365];
 const MODELS: [&str; 3] = ["last_non_direct", "first_touch", "last_touch"];
 const RETURNS: [i64; 3] = [1, 5, 30];
 
-type IntegrationRow = (String, Option<i64>, Option<String>);
+type IntegrationRow = (String, Option<i64>, Option<String>, Option<String>);
 type AiKeyRow = (String, Vec<u8>, Vec<u8>, Option<String>);
 type AiSettingsRow = (String, String, Option<i64>, i64, i64, i64);
 
@@ -69,6 +69,8 @@ pub struct Connection {
     status_class: &'static str,
     error: String,
     synced: String,
+    /// Product IDs the connection imports, comma separated; empty imports all.
+    products: String,
 }
 
 #[derive(Template)]
@@ -224,7 +226,7 @@ async fn show(
     .fetch_one(&state.db)
     .await;
     let integrations: Result<Vec<IntegrationRow>, _> = sqlx::query_as(
-        "SELECT provider, last_synced_at, last_error FROM integrations WHERE site_id = ? ORDER BY created_at",
+        "SELECT provider, last_synced_at, last_error, products FROM integrations WHERE site_id = ? ORDER BY created_at",
     )
     .bind(&ctx.site.id)
     .fetch_all(&state.db)
@@ -298,7 +300,7 @@ async fn show(
         window_days,
         connections: integrations
             .into_iter()
-            .map(|(provider, synced_at, error)| {
+            .map(|(provider, synced_at, error, products)| {
                 let synced_at = synced_at.and_then(|t| OffsetDateTime::from_unix_timestamp(t).ok());
                 let (status, status_class) = match (&error, synced_at) {
                     (Some(_), _) => ("Error", "bad"),
@@ -315,6 +317,8 @@ async fn show(
                         || "Importing the last 90 days".into(),
                         |t| format!("Last synced {}", ago(t, now)),
                     ),
+                    products: crate::providers::product_list(products.as_deref().unwrap_or(""))
+                        .join(", "),
                 }
             })
             .collect(),
@@ -938,6 +942,40 @@ pub async fn save_public(
         app_path(&ctx.site.domain, "settings")
     ))
     .into_response()
+}
+
+#[derive(Deserialize)]
+pub struct ProductsInput {
+    provider: String,
+    #[serde(default)]
+    products: String,
+}
+
+/// Limits a connection to some product IDs and imports the last 90 days again with the new list.
+pub async fn products(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(input): Form<ProductsInput>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "settings").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    let list = crate::providers::product_list(&input.products).join(",");
+    let saved = sqlx::query(
+        "UPDATE integrations SET products = ?, sync_cursor = NULL WHERE site_id = ? AND provider = ?",
+    )
+    .bind(Some(list).filter(|l| !l.is_empty()))
+    .bind(&ctx.site.id)
+    .bind(&input.provider)
+    .execute(&state.db)
+    .await;
+    if let Err(err) = saved {
+        tracing::error!(%err, "saving connection products failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    Redirect::to(&app_path(&ctx.site.domain, "settings#payments")).into_response()
 }
 
 #[derive(Deserialize)]

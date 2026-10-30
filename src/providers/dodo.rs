@@ -197,10 +197,23 @@ struct DodoPayment {
     refund_status: Option<String>,
     dispute_status: Option<String>,
     subscription_id: Option<String>,
+    /// Only on the detail endpoint, and empty for subscription payments.
+    #[serde(default)]
+    product_cart: Option<Vec<CartItem>>,
     #[serde(default)]
     refunds: Vec<DodoRefund>,
     #[serde(default)]
     disputes: Vec<DodoDispute>,
+}
+
+#[derive(Debug, Deserialize)]
+struct CartItem {
+    product_id: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct SubscriptionProduct {
+    product_id: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -224,6 +237,8 @@ struct DodoSubscriptionRow {
     currency: Option<String>,
     payment_frequency_interval: Option<String>,
     payment_frequency_count: Option<i64>,
+    #[serde(default)]
+    product_id: Option<String>,
 }
 
 impl DodoSubscriptionRow {
@@ -405,6 +420,10 @@ struct Api<'a> {
     base: &'static str,
     lookups: usize,
     first_paid: HashMap<String, Option<(OffsetDateTime, String)>>,
+    /// Product IDs to import; empty imports every product.
+    products: &'a [String],
+    /// Product of each subscription looked up so far.
+    sub_products: HashMap<String, Option<String>>,
 }
 
 impl Api<'_> {
@@ -459,10 +478,44 @@ impl Api<'_> {
         Ok(is_renewal(p, self.first_paid[sub].as_ref()))
     }
 
+    /// Whether the payment is for a product in the list: from its cart, else its subscription, else the detail endpoint.
+    async fn wanted(&mut self, p: &DodoPayment) -> anyhow::Result<bool> {
+        if self.products.is_empty() {
+            return Ok(true);
+        }
+        let ids: Vec<String> = match (&p.product_cart, &p.subscription_id) {
+            (Some(cart), _) if !cart.is_empty() => {
+                cart.iter().map(|c| c.product_id.clone()).collect()
+            }
+            (_, Some(sub)) => {
+                if !self.sub_products.contains_key(sub) {
+                    self.lookups += 1;
+                    let s: SubscriptionProduct =
+                        self.get(&format!("/subscriptions/{sub}"), &[]).await?;
+                    self.sub_products.insert(sub.clone(), Some(s.product_id));
+                }
+                self.sub_products[sub].iter().cloned().collect()
+            }
+            _ => {
+                let detail = self.payment(&p.payment_id).await?;
+                detail
+                    .product_cart
+                    .unwrap_or_default()
+                    .into_iter()
+                    .map(|c| c.product_id)
+                    .collect()
+            }
+        };
+        Ok(ids.iter().any(|id| self.products.contains(id)))
+    }
+
     async fn payments_page(&mut self, w: Window) -> anyhow::Result<(usize, Vec<Fetched>)> {
         let items: Vec<DodoPayment> = self.list("/payments", w).await?;
         let mut out = Vec::with_capacity(items.len());
         for item in &items {
+            if !self.wanted(item).await? {
+                continue;
+            }
             out.extend(trial_start(item));
             if item.total_amount <= 0 {
                 continue;
@@ -482,7 +535,10 @@ impl Api<'_> {
         let mut out = Vec::new();
         for id in refunded_payment_ids(&items) {
             let p = self.payment(&id).await?;
-            if p.status.as_deref() != Some("succeeded") || p.total_amount <= 0 {
+            if p.status.as_deref() != Some("succeeded")
+                || p.total_amount <= 0
+                || !self.wanted(&p).await?
+            {
                 continue;
             }
             let renewal = self.renewal(&p).await?;
@@ -520,6 +576,7 @@ pub async fn check_key(client: &reqwest::Client, key: &str) -> anyhow::Result<()
 pub async fn subscriptions(
     client: &reqwest::Client,
     key: &str,
+    products: &[String],
 ) -> anyhow::Result<Option<Vec<Subscription>>> {
     let key = key.trim();
     let base = detect_mode(client, key).await?.base();
@@ -543,6 +600,7 @@ pub async fn subscriptions(
         out.extend(
             list.items
                 .into_iter()
+                .filter(|s| in_products(s.product_id.as_deref(), products))
                 .map(DodoSubscriptionRow::into_subscription),
         );
         if n < SUBSCRIPTION_PAGE {
@@ -552,10 +610,16 @@ pub async fn subscriptions(
     Ok(Some(out))
 }
 
+/// Whether a subscription's product is imported; every product when the list is empty.
+fn in_products(product: Option<&str>, products: &[String]) -> bool {
+    products.is_empty() || product.is_some_and(|p| products.iter().any(|q| q == p))
+}
+
 pub async fn fetch(
     client: &reqwest::Client,
     key: &str,
     cursor: Option<&str>,
+    products: &[String],
 ) -> anyhow::Result<Page> {
     let key = key.trim();
     let now = OffsetDateTime::now_utc();
@@ -573,6 +637,8 @@ pub async fn fetch(
         base: cursor.mode.base(),
         lookups: 0,
         first_paid: HashMap::new(),
+        products,
+        sub_products: HashMap::new(),
     };
     let (n, payments) = match cursor.phase {
         Phase::Payments => api.payments_page(w).await?,
@@ -861,6 +927,89 @@ mod tests {
         assert!(err.contains("HTTP 200"), "{err}");
         let ok: List<DodoRefund> = parse("/refunds", StatusCode::OK, r#"{"items":[]}"#).unwrap();
         assert!(ok.items.is_empty());
+    }
+
+    /// A local Dodo API with three payments: a one-time one for prod_keep, a subscription to prod_keep, and one for prod_other.
+    async fn product_mock() -> String {
+        let pay = |id: &str, sub: Option<&str>| {
+            serde_json::json!({
+                "payment_id": id, "total_amount": 1000, "currency": "USD", "status": "succeeded",
+                "customer": { "customer_id": format!("cus_{id}") }, "created_at": "2026-10-10T10:00:00Z",
+                "metadata": {}, "subscription_id": sub
+            })
+        };
+        let list = serde_json::json!({ "items": [pay("p1", None), pay("p2", Some("sub_a")), pay("p3", None)] });
+        let detail = move |id: &str, product: &str| {
+            let mut p = pay(id, None);
+            p["product_cart"] = serde_json::json!([{ "product_id": product, "quantity": 1 }]);
+            p
+        };
+        let app = axum::Router::new().fallback(move |uri: axum::http::Uri| {
+            let list = list.clone();
+            let (p1, p3) = (detail("p1", "prod_keep"), detail("p3", "prod_other"));
+            async move {
+                axum::Json(match uri.path() {
+                    "/payments/p1" => p1,
+                    "/payments/p3" => p3,
+                    "/subscriptions/sub_a" => serde_json::json!({ "product_id": "prod_keep" }),
+                    _ => list,
+                })
+            }
+        });
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("http://{}", listener.local_addr().unwrap());
+        tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+        url
+    }
+
+    async fn imported(base: &str, products: &[String]) -> Vec<String> {
+        let base: &'static str = Box::leak(base.to_string().into_boxed_str());
+        let client = reqwest::Client::new();
+        let mut api = Api {
+            client: &client,
+            key: "k",
+            base,
+            lookups: 0,
+            first_paid: HashMap::new(),
+            products,
+            sub_products: HashMap::new(),
+        };
+        let w = Window {
+            gte: 1_790_000_000,
+            lte: 1_790_086_400,
+            page: 0,
+        };
+        let (n, payments) = api.payments_page(w).await.unwrap();
+        assert_eq!(n, 3);
+        payments
+            .into_iter()
+            .map(|p| p.provider_payment_id)
+            .collect()
+    }
+
+    #[tokio::test]
+    async fn product_list_keeps_only_its_products() {
+        let base = product_mock().await;
+        assert_eq!(imported(&base, &[]).await, ["p1", "p2", "p3"]);
+        assert_eq!(
+            imported(&base, &["prod_keep".to_string()]).await,
+            ["p1", "p2"],
+            "the subscription's product counts for its payments"
+        );
+        assert!(imported(&base, &["prod_none".to_string()]).await.is_empty());
+    }
+
+    #[test]
+    fn subscriptions_follow_the_product_list() {
+        let keep = ["prod_keep".to_string()];
+        assert!(in_products(Some("prod_keep"), &keep));
+        assert!(!in_products(Some("prod_other"), &keep));
+        assert!(!in_products(None, &keep));
+        assert!(in_products(None, &[]));
+        assert_eq!(
+            crate::providers::product_list(" pdt_a, pdt_b\npdt_a,,"),
+            ["pdt_a", "pdt_b"]
+        );
     }
 
     #[test]

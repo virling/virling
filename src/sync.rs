@@ -27,6 +27,7 @@ struct Integration {
     key_ciphertext: Vec<u8>,
     key_nonce: Vec<u8>,
     sync_cursor: Option<String>,
+    products: Option<String>,
 }
 
 pub async fn add_integration(
@@ -263,7 +264,7 @@ pub async fn sync_site(state: &AppState, site_id: &str) -> anyhow::Result<()> {
 
 async fn sync_integrations(state: &AppState, site_id: Option<&str>) -> anyhow::Result<()> {
     let integrations: Vec<Integration> = sqlx::query_as(
-        "SELECT id, site_id, provider, key_ciphertext, key_nonce, sync_cursor FROM integrations
+        "SELECT id, site_id, provider, key_ciphertext, key_nonce, sync_cursor, products FROM integrations
          WHERE ?1 IS NULL OR site_id = ?1",
     )
     .bind(site_id)
@@ -341,7 +342,8 @@ async fn sync_subscriptions(state: &AppState, integration: &Integration) -> anyh
     let key = state
         .vault
         .decrypt(&integration.key_ciphertext, &integration.key_nonce)?;
-    let subscriptions = provider.subscriptions(&state.http, &key).await?;
+    let products = crate::providers::product_list(integration.products.as_deref().unwrap_or(""));
+    let subscriptions = provider.subscriptions(&state.http, &key, &products).await?;
     SUBSCRIPTIONS_READ
         .lock()
         .unwrap()
@@ -370,9 +372,12 @@ async fn sync_one(state: &AppState, integration: &Integration) -> anyhow::Result
     let key = state
         .vault
         .decrypt(&integration.key_ciphertext, &integration.key_nonce)?;
+    let products = crate::providers::product_list(integration.products.as_deref().unwrap_or(""));
     let mut cursor = integration.sync_cursor.clone();
     for _ in 0..MAX_PAGES_PER_RUN {
-        let page = provider.fetch(&state.http, &key, cursor.as_deref()).await?;
+        let page = provider
+            .fetch(&state.http, &key, cursor.as_deref(), &products)
+            .await?;
         store(state, &integration.site_id, provider, page.payments).await?;
         if page.cursor.is_some() {
             cursor = page.cursor;

@@ -450,7 +450,7 @@ pub(crate) fn host_belongs(host: &str, domain: &str) -> bool {
     host == domain || host.ends_with(&format!(".{domain}"))
 }
 
-fn valid_visitor_id(v: &str) -> bool {
+pub(crate) fn valid_visitor_id(v: &str) -> bool {
     (8..=64).contains(&v.len()) && v.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
 }
 
