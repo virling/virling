@@ -383,10 +383,10 @@ fn meta_vid(v: Option<&Value>) -> Option<String> {
 }
 
 fn vid(map: &Map<String, Value>) -> Option<String> {
-    match map.get("virling_vid") {
+    super::VID_KEYS.iter().find_map(|k| match map.get(*k) {
         Some(Value::String(s)) if !s.trim().is_empty() => Some(s.trim().to_string()),
         _ => None,
-    }
+    })
 }
 
 /// Creem timestamps are Unix milliseconds; small values are read as seconds.
@@ -534,6 +534,9 @@ mod tests {
         assert_eq!(p.customer_id.as_deref(), Some("cust_1"));
         assert_eq!((p.amount, p.status.as_str()), (2900, "paid"));
         let mut v: Value = serde_json::from_str(CHECKOUT).unwrap();
+        v["object"]["metadata"] = json!({ "datafast_visitor_id": "vid_compat" });
+        let p = webhook_payment(v.to_string().as_bytes()).unwrap().unwrap();
+        assert_eq!(p.visitor_id.as_deref(), Some("vid_compat"));
         v["eventType"] = "refund.created".into();
         assert!(webhook_payment(v.to_string().as_bytes()).unwrap().is_none());
     }
