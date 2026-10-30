@@ -7,7 +7,7 @@ It has two layers:
 | Column | What it counts | Needs |
 | --- | --- | --- |
 | Used in | Answers where the assistant opened one of your pages live, because someone asked it a question | The [server snippet](ai-crawlers.md#count-every-crawler-optional) |
-| Mentioned | Of your buyer questions, asked once a week, how many answers named your site | A paid hosted plan; keys when self-hosting |
+| Mentioned | Of your buyer questions, asked on your schedule, how many answers named your site | A paid hosted plan; keys when self-hosting |
 | Visitors, Revenue | Visits that came from the assistant, and the revenue credited to them | Nothing extra |
 
 ## Used in
@@ -29,7 +29,7 @@ Answers change from run to run, so the dashboard shows a rate, such as "7 of 32"
 
 ### Nothing to set up
 
-Once your site has visits, Virling writes 8 buyer questions from your homepage title, your top landing pages and search keywords, and picks the names to look for from your domain and title. The first run follows within the hour, then once a week.
+Once your site has visits, Virling writes 8 buyer questions from your homepage title, your top landing pages and search keywords, and picks the names to look for from your domain and title. The first run follows within the hour, then every week. In settings, **How often** switches it to every day or every month.
 
 To change them, open **Site settings > AI answers**. Keep 5 to 20 questions, each what a buyer would ask without your name: "best invoicing app for freelancers", not "is Tallybird good". **Run now** asks them again right away, once a day. The runs happen in the background and never while a page loads.
 
