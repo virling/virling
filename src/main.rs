@@ -53,6 +53,7 @@ mod team;
 mod telegram;
 mod topay;
 mod ua;
+mod usage;
 mod verdict;
 mod visitor_pages;
 mod visitors;
@@ -363,6 +364,9 @@ async fn main() -> anyhow::Result<()> {
                 tokio::spawn(dashboard::schedule::run(state.clone()));
                 if state.config.billing.is_some() {
                     tokio::spawn(billing::run(state.clone()));
+                }
+                if state.config.hosted {
+                    tokio::spawn(usage::run(state.clone()));
                 }
             }
             let listener = tokio::net::TcpListener::bind(args.addr)
