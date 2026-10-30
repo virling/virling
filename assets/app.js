@@ -158,12 +158,15 @@ for (const live of document.querySelectorAll("[data-live]")) {
     try {
       const res = await fetch(live.dataset.live, { headers: { accept: "application/json" } });
       const e = res.ok ? await res.json() : null;
-      if (!e) return setTimeout(check, 3000);
+      if (!e) return setTimeout(check, 1500);
       live.classList.add("got");
       live.querySelectorAll("[data-waiting]").forEach((el) => (el.hidden = true));
       live.querySelectorAll("[data-got]").forEach((el) => (el.hidden = false));
       live.querySelector("[data-detail]").textContent =
         [e.path, e.country, e.device, e.referrer ? "from " + e.referrer : "direct"].filter(Boolean).join(" · ");
+      const online = live.querySelector("[data-online]");
+      if (online) online.textContent = `${e.online} visitor${e.online === 1 ? "" : "s"} on the site now`;
+      if (online) setTimeout(check, 3000);
     } catch {
       setTimeout(check, 5000);
     }

@@ -308,6 +308,7 @@ pub async fn latest_event(
     if site.sample_data {
         return Json(json!(null)).into_response();
     }
+    let online = state.presence.count(&site.id);
     let store = state.events.clone();
     match tokio::task::spawn_blocking(move || store.latest_pageview(&site.id)).await {
         Ok(Ok(Some(e))) => Json(json!({
@@ -315,6 +316,7 @@ pub async fn latest_event(
             "country": e.country,
             "device": e.device,
             "referrer": e.referrer_host,
+            "online": online,
         }))
         .into_response(),
         Ok(Ok(None)) => Json(json!(null)).into_response(),
