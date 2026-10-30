@@ -1,4 +1,4 @@
-//! AI answers: asks the site's buyer questions to assistants with web search once a week.
+//! AI answers: asks the site's buyer questions to assistants with web search every day, week or month, weekly by default.
 
 use std::collections::HashSet;
 use std::sync::Mutex;
@@ -14,8 +14,10 @@ use crate::ingest::host_belongs;
 use crate::stats::{Dimension, Period};
 
 const EVERY: Duration = Duration::from_secs(3600);
-/// Days between scheduled runs of a site.
+/// Days between scheduled runs of a site, unless it picked another frequency.
 pub const EVERY_DAYS: i64 = 7;
+/// Frequencies a site can pick: days between runs and how the settings page says it.
+pub const FREQUENCIES: [(i64, &str); 3] = [(1, "day"), (7, "week"), (30, "month")];
 /// Runs a user may start by hand per site and UTC day.
 pub const MANUAL_PER_DAY: i64 = 1;
 pub const MIN_QUESTIONS: usize = 5;
@@ -445,7 +447,9 @@ pub fn run_cost(questions: usize, assistants: &[Assistant]) -> f64 {
 }
 
 /// Weekly runs in an average month.
-pub const RUNS_PER_MONTH: f64 = 52.0 / 12.0;
+pub fn runs_per_month(every_days: i64) -> f64 {
+    365.0 / 12.0 / every_days.max(1) as f64
+}
 
 /// Byte offset of `needle` in `hay` as a whole word, both lowercase.
 fn find_word(hay: &str, needle: &str) -> Option<usize> {
@@ -729,7 +733,7 @@ pub async fn usable(state: &AppState, site_id: &str) -> sqlx::Result<Vec<Assista
         .collect())
 }
 
-/// Suggests questions for new sites with visits and asks every due site's questions once a week, forever.
+/// Suggests questions for new sites with visits and asks every due site's questions on its schedule, forever.
 pub async fn run(state: AppState) {
     loop {
         if let Err(err) = prepare(&state).await {
@@ -798,9 +802,9 @@ async fn run_due(state: &AppState) -> anyhow::Result<()> {
         .execute(&state.db)
         .await?;
     let due: Vec<String> = sqlx::query_scalar(
-        "SELECT site_id FROM ai_settings WHERE questions != '' AND run_day <= ?",
+        "SELECT site_id FROM ai_settings WHERE questions != '' AND run_day <= ? - every_days",
     )
-    .bind(today() - EVERY_DAYS)
+    .bind(today())
     .fetch_all(&state.db)
     .await?;
     for site in due {
@@ -811,20 +815,19 @@ async fn run_due(state: &AppState) -> anyhow::Result<()> {
     Ok(())
 }
 
-/// Takes a run for a site: a scheduled one a week after the last, a manual one once a day.
+/// Takes a run for a site: a scheduled one its frequency after the last, a manual one once a day.
 pub async fn claim(db: &SqlitePool, site_id: &str, manual: bool) -> sqlx::Result<bool> {
     let manual = i64::from(manual);
     let done = sqlx::query(
         "UPDATE ai_settings SET manual_runs = CASE WHEN run_day = ?1 THEN manual_runs + ?2 ELSE ?2 END,
            run_day = ?1, last_run_at = ?3
-         WHERE site_id = ?4 AND (run_day <= ?1 - ?6 OR (?2 = 1 AND (run_day < ?1 OR manual_runs < ?5)))",
+         WHERE site_id = ?4 AND (run_day <= ?1 - every_days OR (?2 = 1 AND (run_day < ?1 OR manual_runs < ?5)))",
     )
     .bind(today())
     .bind(manual)
     .bind(OffsetDateTime::now_utc().unix_timestamp())
     .bind(site_id)
     .bind(MANUAL_PER_DAY)
-    .bind(EVERY_DAYS)
     .execute(db)
     .await?;
     Ok(done.rows_affected() == 1)
@@ -1062,6 +1065,20 @@ pub async fn save_settings(
     .bind(names.trim())
     .execute(db)
     .await?;
+    Ok(())
+}
+
+/// Saves how many days apart scheduled runs are; anything not offered falls back to weekly.
+pub async fn save_every(db: &SqlitePool, site_id: &str, every_days: i64) -> sqlx::Result<()> {
+    let every = FREQUENCIES
+        .iter()
+        .find(|f| f.0 == every_days)
+        .map_or(EVERY_DAYS, |f| f.0);
+    sqlx::query("UPDATE ai_settings SET every_days = ? WHERE site_id = ?")
+        .bind(every)
+        .bind(site_id)
+        .execute(db)
+        .await?;
     Ok(())
 }
 
@@ -1393,6 +1410,17 @@ mod tests {
         let (base, calls) = mock().await;
         assert!(claim(db, &site, false).await.unwrap());
         assert!(!claim(db, &site, false).await.unwrap(), "once a week");
+        save_every(db, &site, 1).await.unwrap();
+        sqlx::query("UPDATE ai_settings SET run_day = run_day - 1 WHERE site_id = ?")
+            .bind(&site)
+            .execute(db)
+            .await
+            .unwrap();
+        assert!(
+            claim(db, &site, false).await.unwrap(),
+            "daily runs the next day"
+        );
+        save_every(db, &site, 7).await.unwrap();
         run_site(state, &site, &|_| base.clone()).await;
         assert_eq!(
             calls.load(std::sync::atomic::Ordering::Relaxed),

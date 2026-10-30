@@ -203,6 +203,10 @@
       <div><b><label for="ai-names">Names to look for</label></b><span class="muted">An answer counts as a mention when it names any of these. Separate with commas.</span></div>
       <input class="input" id="ai-names" name="names" value="{{ ai.names }}" placeholder="{{ ai.placeholder }}" maxlength="300">
     </div>
+    <div class="setting">
+      <div><b><label for="ai-every">How often</label></b><span class="muted">How often the questions are asked. More often costs more.</span></div>
+      <select class="input" id="ai-every" name="every">{% for (days, word) in ai.frequencies %}<option value="{{ days }}"{% if *days == ai.every %} selected{% endif %}>Every {{ word }}</option>{% endfor %}</select>
+    </div>
     {% if !ai.cost.is_empty() %}<p class="muted small">{{ ai.cost }} Gemini's free tier includes Google Search grounding for up to 500 requests a day.</p>{% endif %}
     <p class="muted small">{{ ai.run }}</p>
     <div class="actions end">
