@@ -101,6 +101,28 @@ fn server_info() -> Value {
     json!({ "name": "virling", "title": "Virling", "version": env!("CARGO_PKG_VERSION") })
 }
 
+/// Saved prompts as (name, title, description, text); `{site}` becomes the site argument.
+const PROMPTS: [(&str, &str, &str, &str); 3] = [
+    (
+        "weekly_brief",
+        "Weekly brief",
+        "What happened on the site in the last 7 days and what to do next.",
+        "Write a weekly brief for {site} from Virling. Call get_overview with range 7d, get_channel_verdicts with range 7d and list_payments with range 7d. In under 150 words: revenue and visitors against the week before, the channel that earned most, one that brought visitors but no revenue, and one thing to do this week. Quote only numbers the tools return.",
+    ),
+    (
+        "channel_review",
+        "Channel review",
+        "Which channels to keep, fix or cut, by revenue, value per visitor and retention.",
+        "Review the channels of {site} with Virling. Call get_breakdown with dimension channel and range 30d, then get_retention with range 90d. For each channel give keep, fix or cut with one reason: revenue, revenue per visitor against the site average, and whether its customers keep paying. Say when a channel has too few visitors to judge.",
+    ),
+    (
+        "trust_check",
+        "Can I trust these numbers",
+        "How much revenue is matched to a visit, and what to fix when it is not.",
+        "Check whether the Virling numbers for {site} can be trusted. Call get_overview with range 30d and list_payments with range 30d and filter unattributed. Report the share of revenue matched to a visit, how many payments had no credited visit, and the likely cause: checkout not passing the visitor ID, cookieless mode, or payments from links opened elsewhere. End with the one fix that would match the most revenue.",
+    ),
+];
+
 /// One message's reply; None for notifications and responses.
 async fn handle(state: &AppState, account: &str, msg: Value, modern: bool) -> Option<Value> {
     let Some(method) = msg["method"].as_str() else {
@@ -118,14 +140,14 @@ async fn handle(state: &AppState, account: &str, msg: Value, modern: bool) -> Op
             let version = legacy.iter().find(|v| **v == asked).unwrap_or(&legacy[0]);
             json!({
                 "protocolVersion": version,
-                "capabilities": { "tools": {} },
+                "capabilities": { "tools": {}, "prompts": {} },
                 "serverInfo": server_info(),
                 "instructions": INSTRUCTIONS,
             })
         }
         "server/discover" => json!({
             "supportedVersions": VERSIONS,
-            "capabilities": { "tools": {} },
+            "capabilities": { "tools": {}, "prompts": {} },
             "instructions": INSTRUCTIONS,
             "ttlMs": 3_600_000,
             "cacheScope": "private",
@@ -135,6 +157,26 @@ async fn handle(state: &AppState, account: &str, msg: Value, modern: bool) -> Op
             json!({ "tools": tools(), "ttlMs": 3_600_000, "cacheScope": "private" })
         }
         "tools/list" => json!({ "tools": tools() }),
+        "prompts/list" => json!({ "prompts": PROMPTS.iter().map(|p| json!({
+            "name": p.0,
+            "title": p.1,
+            "description": p.2,
+            "arguments": [{ "name": "site", "description": "Site domain, such as example.com. Optional when the account has one site.", "required": false }],
+        })).collect::<Vec<_>>() }),
+        "prompts/get" => {
+            let name = params["name"].as_str().unwrap_or_default();
+            let Some(p) = PROMPTS.iter().find(|p| p.0 == name) else {
+                return Some(error(id, -32602, &format!("unknown prompt {name:?}")));
+            };
+            let site = match params["arguments"]["site"].as_str().map(str::trim) {
+                Some(s) if !s.is_empty() => s.to_string(),
+                _ => "my site".to_string(),
+            };
+            json!({
+                "description": p.2,
+                "messages": [{ "role": "user", "content": { "type": "text", "text": p.3.replace("{site}", &site) } }],
+            })
+        }
         "tools/call" => {
             let name = params["name"].as_str().unwrap_or_default();
             let args = match &params["arguments"] {
@@ -359,6 +401,40 @@ mod tests {
 
     async fn rpc(state: &AppState, key: Option<&str>, body: Value) -> (StatusCode, Value) {
         rpc_with(state, key, &[], body).await
+    }
+
+    #[tokio::test]
+    async fn serves_saved_prompts() {
+        let f = fixture().await;
+        let (_, r) = rpc(
+            &f.state,
+            Some(&f.key),
+            json!({ "jsonrpc": "2.0", "id": 1, "method": "prompts/list" }),
+        )
+        .await;
+        let names: Vec<&str> = r["result"]["prompts"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|p| p["name"].as_str().unwrap())
+            .collect();
+        assert_eq!(names, ["weekly_brief", "channel_review", "trust_check"]);
+        let (_, r) = rpc(
+            &f.state,
+            Some(&f.key),
+            json!({ "jsonrpc": "2.0", "id": 2, "method": "prompts/get",
+            "params": { "name": "weekly_brief", "arguments": { "site": "example.com" } } }),
+        )
+        .await;
+        let text = r["result"]["messages"][0]["content"]["text"]
+            .as_str()
+            .unwrap();
+        assert!(
+            text.starts_with("Write a weekly brief for example.com")
+                && text.contains("get_channel_verdicts")
+        );
+        let (_, r) = rpc(&f.state, Some(&f.key), json!({ "jsonrpc": "2.0", "id": 3, "method": "prompts/get", "params": { "name": "nope" } })).await;
+        assert_eq!(r["error"]["code"], -32602);
     }
 
     async fn rpc_with(
