@@ -9,7 +9,7 @@ use axum::response::{IntoResponse, Response};
 use serde::Deserialize;
 use time::{Date, Duration, OffsetDateTime};
 
-use super::daterange::{Picked, RangeMenu};
+use super::daterange::{Picked, RangeMenu, span};
 use super::{
     Ctx, Opt, Shell, answers, blocking, cards, customers, day, delta, encode, goal_card, goals,
     group, insight, link, load, money, plural, provider_name, source_of, usd, views, visit_time,
@@ -659,13 +659,17 @@ async fn page(
     public: Option<bool>,
 ) -> Result<Response, StatusCode> {
     let today = ctx.today;
+    let chosen = match (q.rest.get("cfrom"), q.rest.get("cto")) {
+        (Some(a), Some(b)) => Some(format!("{a}..{b}")),
+        _ => q.compare.clone(),
+    };
     let picked = Picked::read(
         today,
         ctx.first_day,
         q.range.as_deref(),
         q.from.as_deref(),
         q.to.as_deref(),
-        q.compare.as_deref(),
+        chosen.as_deref(),
     );
     let (rkey, from, to, compare) = (picked.key, picked.from, picked.to, picked.compare);
     let p = picked.period(&ctx.site.timezone);
@@ -723,6 +727,12 @@ async fn page(
     let id = ctx.site.id.clone();
     let wanted = filters.clone();
     let pq = p.clone();
+    let vs_dates = picked.vs;
+    let vs = vs_dates.map(|_| picked.against(&ctx.site.timezone));
+    let hour_vs = vs
+        .clone()
+        .filter(|v| v.from == v.to)
+        .unwrap_or_else(|| p.previous());
     let funnels = if view == "goals" {
         goals::saved(&state.db, &ctx.site.id)
             .await
@@ -816,7 +826,10 @@ async fn page(
             f.first.push((col, vals));
         }
         let split = store.payment_split(&id, &pq)?;
-        let overview = store.overview_in(&id, &pq, &f)?;
+        let mut overview = store.overview_in(&id, &pq, &f)?;
+        if let Some(vs) = &vs {
+            overview.previous = store.overview_in(&id, vs, &f)?.current;
+        }
         let all = if f.is_empty() {
             None
         } else {
@@ -824,7 +837,10 @@ async fn page(
         };
         let data = match view {
             "" => {
-                let report = store.report_in(&id, &pq, &f)?;
+                let mut report = store.report_in(&id, &pq, &f)?;
+                if let Some(vs) = &vs {
+                    report.previous_days = store.timeseries_in(&id, vs, &f)?;
+                }
                 let mut cache: Vec<(Option<Dimension>, Vec<BreakdownRow>)> = vec![
                     (Some(Dimension::Channel), report.channels.clone()),
                     (Some(Dimension::LandingPage), report.landing_pages.clone()),
@@ -863,7 +879,7 @@ async fn page(
                 let hours = if pq.from == pq.to {
                     Some((
                         store.hourly(&id, &pq, &f)?,
-                        store.hourly(&id, &pq.previous(), &f)?,
+                        store.hourly(&id, &hour_vs, &f)?,
                     ))
                 } else {
                     None
@@ -957,7 +973,10 @@ async fn page(
             &ctx.site.domain,
             window_days,
         ),
-        range: picked.menu(today, ctx.first_day, &base, &raw),
+        range: RangeMenu {
+            vs_form: view.is_empty() && public.is_none(),
+            ..picked.menu(today, ctx.first_day, &base, &raw)
+        },
         report_href: site_url("report"),
         chips,
         privacy: ctx.site.cookieless,
@@ -1259,6 +1278,7 @@ async fn page(
                 let title = match kind {
                     Kind::Bars if hours.is_some() => "Revenue per hour",
                     Kind::Bars => "Revenue",
+                    Kind::Line if show_prev && vs_dates.is_some() => "Revenue against other dates",
                     Kind::Line if show_prev => "Revenue against the previous period",
                     Kind::Line => "Revenue over time",
                     Kind::Channel => "Revenue by channel",
@@ -1295,8 +1315,11 @@ async fn page(
                             None => String::new(),
                         },
                         Kind::Line if show_prev => format!(
-                            "The dashed line is the previous {} {unit}s, lined up by {unit}. Hover for both values.",
-                            s.points.len()
+                            "The dashed line is {}, lined up by {unit}. Hover for both values.",
+                            match vs_dates {
+                                Some((a, b)) => span(a, b),
+                                None => format!("the previous {} {unit}s", s.points.len()),
+                            }
                         ),
                         Kind::Line => format!("Hover the chart for each {unit}."),
                         Kind::Channel if !filters.is_empty() => format!(
@@ -1306,10 +1329,14 @@ async fn page(
                         Kind::Total if show_prev && prev_total > 0.0 => {
                             let pct = (total / prev_total - 1.0) * 100.0;
                             format!(
-                                "You are at {}, {:.0}% {} the previous period ({}).",
+                                "You are at {}, {:.0}% {} {} ({}).",
                                 money(total),
                                 pct.abs(),
                                 if pct >= 0.0 { "ahead of" } else { "behind" },
+                                match vs_dates {
+                                    Some((a, b)) => span(a, b),
+                                    None => "the previous period".into(),
+                                },
                                 money(prev_total)
                             )
                         }
