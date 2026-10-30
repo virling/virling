@@ -209,11 +209,11 @@
 {% if profit.is_some() || reading.is_some() || almost.is_some() || topay.is_some() %}<div class="d3-cards d3-more">
   {% if let Some(p) = profit %}
   <div class="d3-card d3-bc" id="profit">
-    <div class="d3-bc-head"><h2>Profit by channel</h2><span class="d3-sub">spend is your monthly amount for this range</span></div>
+    <div class="d3-bc-head"><h2>Profit by channel</h2><span class="d3-sub">{% if p.fees %}after payment fees and your monthly spend{% else %}spend is your monthly amount for this range{% endif %}</span></div>
     <div class="d3-panel">
-    <div class="d3-row d3-profrow th"><span>Channel</span><span class="num">Spend</span><span class="num rv">Revenue</span><span class="num">Profit</span><span class="num">Return</span></div>
+    <div class="d3-row d3-profrow th"><span>Channel</span><span class="num">{% if p.fees %}Costs{% else %}Spend{% endif %}</span><span class="num rv">Revenue</span><span class="num">Profit</span><span class="num">Return</span></div>
     {% for r in p.rows %}
-    <div class="d3-row d3-profrow"><div class="nmw"><span class="nm"><span class="tx"><b>{{ r.name }}</b></span></span></div><span class="num">{{ crate::dashboard::money(*r.spend) }}</span><span class="num rv">{{ crate::dashboard::money(*r.revenue) }}</span><span class="num">{{ crate::dashboard::money(*r.profit) }}</span><span class="num">{{ "{:.1}"|format(r.ret) }}x</span></div>
+    <div class="d3-row d3-profrow"><div class="nmw"><span class="nm"><span class="tx"><b>{{ r.name }}</b></span></span></div><span class="num cost">{{ crate::dashboard::money(r.spend + r.fees) }}{% if r.spend > 0.0 && r.fees > 0.0 %}<small>{{ crate::dashboard::money(*r.fees) }} fees</small>{% endif %}</span><span class="num rv">{{ crate::dashboard::money(*r.revenue) }}</span><span class="num">{{ crate::dashboard::money(*r.profit) }}</span><span class="num">{% if r.ret.is_finite() %}{{ "{:.1}"|format(r.ret) }}x{% else %}&ndash;{% endif %}</span></div>
     {% endfor %}
     </div>
   </div>

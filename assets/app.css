@@ -1553,7 +1553,9 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .d3-hint { margin: 8px 8px 0; font-size: 12px; color: var(--ink-3); }
 .d3-botrow { grid-template-columns: minmax(0, 1fr) 60px 72px 90px; }
 .d3-sub { font-size: 12px; color: var(--ink-3); }
-.d3-profrow { grid-template-columns: minmax(0, 1fr) 80px 90px 90px 60px; }
+.d3-profrow { grid-template-columns: minmax(0, 1fr) 68px 64px 64px 44px; }
+.d3-profrow .cost { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.d3-profrow .cost small { font-size: 11px; color: var(--ink-3); }
 .d3-readrow { grid-template-columns: minmax(0, 1fr) 56px 64px 56px 56px; }
 .d3-almostrow { grid-template-columns: minmax(0, 1fr) 70px 60px 100px; }
 .d3-almostpg { grid-template-columns: minmax(0, 1fr) 80px; }

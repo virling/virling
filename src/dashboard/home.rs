@@ -1398,6 +1398,7 @@ async fn page(
                 page.profit = crate::spend::profit_card(
                     &report.channels,
                     &crate::spend::parse(&spend),
+                    crate::spend::fees(&spend),
                     (to - from).whole_days() + 1,
                 );
                 let (pays, seen) = joined(pays.await)?;
