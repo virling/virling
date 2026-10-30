@@ -1,6 +1,7 @@
 pub mod creem;
 mod dodo;
 pub mod lemonsqueezy;
+mod paddle;
 mod polar;
 mod stripe;
 
@@ -81,15 +82,17 @@ pub enum Provider {
     Polar,
     LemonSqueezy,
     Creem,
+    Paddle,
 }
 
 impl Provider {
-    pub const ALL: [Provider; 5] = [
+    pub const ALL: [Provider; 6] = [
         Provider::Stripe,
         Provider::Dodo,
         Provider::Polar,
         Provider::LemonSqueezy,
         Provider::Creem,
+        Provider::Paddle,
     ];
 
     pub fn as_str(self) -> &'static str {
@@ -99,6 +102,7 @@ impl Provider {
             Provider::Polar => "polar",
             Provider::LemonSqueezy => "lemonsqueezy",
             Provider::Creem => "creem",
+            Provider::Paddle => "paddle",
         }
     }
 
@@ -114,6 +118,7 @@ impl Provider {
             Provider::Polar => polar::check_key(client, key).await,
             Provider::LemonSqueezy => lemonsqueezy::check_key(client, key).await,
             Provider::Creem => creem::check_key(client, key).await,
+            Provider::Paddle => paddle::check_key(client, key).await,
         }
     }
 
@@ -130,6 +135,7 @@ impl Provider {
             Provider::Polar => polar::fetch(client, key, cursor).await,
             Provider::LemonSqueezy => lemonsqueezy::fetch(client, key, cursor).await,
             Provider::Creem => creem::fetch(client, key, cursor).await,
+            Provider::Paddle => paddle::fetch(client, key, cursor).await,
         }
     }
 
@@ -145,6 +151,7 @@ impl Provider {
             Provider::Polar => polar::subscriptions(client, key).await,
             Provider::LemonSqueezy => lemonsqueezy::subscriptions(client, key).await,
             Provider::Creem => creem::subscriptions(client, key).await,
+            Provider::Paddle => paddle::subscriptions(client, key).await,
         }
     }
 }

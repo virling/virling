@@ -1334,7 +1334,14 @@ mod tests {
         assert_eq!(page.status(), StatusCode::OK);
         let body = body_text(page).await;
         assert!(body.contains("Restricted key"));
-        for name in ["Stripe", "Dodo Payments", "Polar", "Lemon Squeezy", "Creem"] {
+        for name in [
+            "Stripe",
+            "Dodo Payments",
+            "Polar",
+            "Lemon Squeezy",
+            "Creem",
+            "Paddle",
+        ] {
             assert!(
                 body.contains(&format!(r#"aria-label="{name}""#)),
                 "{name} logo"
@@ -2299,7 +2306,7 @@ mod tests {
         assert!(body.contains("Save new key"));
         assert!(!body.contains("HIDDEN"));
 
-        for p in ["stripe", "polar", "lemonsqueezy", "creem"] {
+        for p in ["stripe", "polar", "lemonsqueezy", "creem", "paddle"] {
             connect_fake(&state, &site, p, "fake_test_value_1234").await;
         }
         let body = body_text(call(&state, get(&uri, Some(&cookie))).await).await;

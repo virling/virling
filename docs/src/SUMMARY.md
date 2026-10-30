@@ -36,6 +36,7 @@
 - [Polar](payments/polar.md)
 - [LemonSqueezy](payments/lemonsqueezy.md)
 - [Creem](payments/creem.md)
+- [Paddle](payments/paddle.md)
 - [Link checkout to visits](payments/checkout.md)
 
 # Attribution

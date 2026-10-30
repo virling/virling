@@ -378,6 +378,14 @@ fn provider_card(p: Provider, selected: bool) -> ProviderCard {
             "https://docs.creem.io/api-reference/introduction",
             "Create an API key with the transactions:read and subscriptions:read scopes, plus webhooks:write so Virling can add one webhook that links checkouts to visits. Live and test mode keys both work.",
         ),
+        Provider::Paddle => (
+            "Paddle",
+            "API key",
+            "pdl_live_apikey_...",
+            "How to create a read-only key, 1 minute",
+            "https://developer.paddle.com/api-reference/about/api-keys",
+            "Create an API key with the transaction.read and adjustment.read permissions, plus subscription.read so retention knows who still pays. No other permissions are needed. Live and sandbox keys both work.",
+        ),
     };
     ProviderCard {
         key: p.as_str(),

@@ -43,7 +43,7 @@ const PLATFORMS: [(&str, &[&str]); 5] = [
     ("p-shopify", &["cdn.shopify.com", "Shopify.theme"]),
 ];
 
-const PROVIDERS: [(Provider, &[&str]); 5] = [
+const PROVIDERS: [(Provider, &[&str]); 6] = [
     (
         Provider::Stripe,
         &["js.stripe.com", "buy.stripe.com", "checkout.stripe.com"],
@@ -55,6 +55,10 @@ const PROVIDERS: [(Provider, &[&str]); 5] = [
     ),
     (Provider::LemonSqueezy, &["lemonsqueezy.com", "lemon.js"]),
     (Provider::Creem, &["creem.io/payment", "creem.io/checkout"]),
+    (
+        Provider::Paddle,
+        &["cdn.paddle.com/paddle", "@paddle/paddle-js"],
+    ),
 ];
 
 pub fn detect(html: &str, script_host: &str) -> Stack {

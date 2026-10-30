@@ -22,7 +22,7 @@ async function visitorId() {
 
 ## Per provider
 
-<div class="tabset" data-tabs="Stripe|Dodo Payments|Polar|LemonSqueezy|Creem" data-key="provider" aria-label="Payment provider"></div>
+<div class="tabset" data-tabs="Stripe|Dodo Payments|Polar|LemonSqueezy|Creem|Paddle" data-key="provider" aria-label="Payment provider"></div>
 
 ```js
 // Stripe Checkout (Node, stripe): pass the visitor ID on the session
@@ -101,6 +101,17 @@ const res = await fetch("https://api.creem.io/v1/checkouts", {
 // Send the customer to (await res.json()).checkout_url
 ```
 
+```js
+// Paddle (Paddle.js): pass the visitor ID as custom data
+Paddle.Checkout.open({
+  items: [{ priceId: "pri_...", quantity: 1 }],
+  customData: { virling_vid: window.virling?.vid?.() },
+});
+
+// Or on your server, POST /transactions with:
+// custom_data: { virling_vid: req.cookies.virling_vid }
+```
+
 ## Stripe
 
 Virling reads `metadata.virling_vid` on the charge or its PaymentIntent, then `metadata.virling_vid` or `client_reference_id` on the Checkout Session. See [Stripe](stripe.md).
@@ -120,6 +131,10 @@ Tag checkouts with `checkout[custom][virling_vid]` now. Matching them is <span c
 ## Creem
 
 Virling reads `virling_vid` from the checkout's `metadata` in the `checkout.completed` webhook, then from the subscription's or customer's `metadata`. See [Creem](creem.md).
+
+## Paddle
+
+Virling reads `virling_vid` from the transaction's `custom_data`. With Paddle.js, pass it as `customData`. See [Paddle](paddle.md).
 
 ## Payment links
 
