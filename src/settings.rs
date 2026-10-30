@@ -78,6 +78,7 @@ struct SettingsPage {
     title: &'static str,
     script_host: String,
     cookieless: bool,
+    consent: bool,
     /// Same-visit domains, one per line.
     same_visit: String,
     return_minutes: i64,
@@ -278,6 +279,7 @@ async fn show(
         title: "Site settings",
         script_host: state.config.base_url.clone(),
         cookieless: ctx.site.cookieless,
+        consent: ctx.site.consent,
         same_visit: ctx.site.same_visit.replace(' ', "\n"),
         return_minutes: ctx.site.return_minutes,
         ignore_ips: ctx.site.ignore_ips.replace(' ', "\n"),
@@ -838,11 +840,12 @@ pub async fn save(
         return StatusCode::BAD_REQUEST.into_response();
     }
     let updated = sqlx::query(
-        "UPDATE sites SET attribution_model = ?, window_days = ?, cookieless = ?, same_visit = ?, return_minutes = ?, ignore_ips = ? WHERE id = ?",
+        "UPDATE sites SET attribution_model = ?, window_days = ?, cookieless = ?, consent = ?, same_visit = ?, return_minutes = ?, ignore_ips = ? WHERE id = ?",
     )
     .bind(&input.model)
     .bind(input.window_days)
-    .bind(input.cookieless.is_some())
+    .bind(matches!(input.cookieless.as_deref(), Some("on" | "consent")))
+    .bind(input.cookieless.as_deref() == Some("consent"))
     .bind(same_visit_domains(&input.same_visit, &ctx.site.domain))
     .bind(input.return_minutes)
     .bind(ignore_list(&input.ignore_ips))

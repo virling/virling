@@ -6,10 +6,11 @@
   /^#virling-(ignore|track)$/.test(L.hash) && (d.cookie = "virling_ignore=1;path=/;max-age=" + (L.hash[9] == "i" ? 31536e3 : 0));
   if (!site || /virling_ignore=1/.test(d.cookie) || (/^(localhost|127\.|\[::1\])/.test(L.hostname) && !has("data-dev")) || (has("data-respect-gpc") && n.globalPrivacyControl)) return;
   var endpoint = s.getAttribute("data-api") || new URL("/api/event", s.src);
-  var ref = d.referrer, last, vid = null, nav = performance.getEntriesByType("navigation")[0]?.type;
+  // A cookie set after consent is read even in cookieless mode, but only cookie mode creates or renews one.
+  var ref = d.referrer, last, vid = (d.cookie.match(/virling_vid=([^;]+)/) || [])[1] || null, nav = performance.getEntriesByType("navigation")[0]?.type;
 
   if (!has("data-cookieless")) {
-    vid = (d.cookie.match(/virling_vid=([^;]+)/) || [])[1] || "v" + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+    vid = vid || "v" + Date.now().toString(36) + Math.random().toString(36).slice(2);
     var dom, ck = (a) => (d.cookie = "virling_vid=" + vid + ";path=/;SameSite=Lax;max-age=" + a + (dom ? ";domain=" + dom : "") + (L.protocol == "https:" ? ";Secure" : ""), d.cookie.includes("virling_vid=" + vid));
     // Drop a host-only cookie, then walk up the hostname until the cookie sticks, so the ID lives on the registrable domain.
     ck(0);
@@ -28,7 +29,7 @@
     depth = () => deep = Math.max(deep, (w.scrollY + w.innerHeight) * 100 / d.documentElement.scrollHeight | 0),
     report = () => { tick(); act > 1e3 && (depth(), send("read", 0, href, act / 1e3 | 0, deep)); act = deep = 0; };
   on(d, "visibilitychange", tick);
-  on(w, "scroll", depth, { passive: true });
+  on(w, "scroll", depth);
 
   var pageview = () => {
     var path = L.pathname + L.search;
@@ -74,7 +75,8 @@
   on(w, "pageshow", (e) => { if (e.persisted) { tabs(); nav = "back_forward"; send("pageview"); } });
 
   var q = w.virling?.q || [];
-  w.virling = (cmd, arg) => { cmd == "goal" && arg && send("goal", "" + arg); };
+  // Other commands, such as virling("consent"), load a module from the server that acts on them.
+  w.virling = (cmd, arg) => { cmd == "goal" ? arg && send(cmd, "" + arg) : vid || import(endpoint + "?" + cmd + "=" + site); };
   w.virling.vid = () => vid;
   q.forEach((a) => w.virling.apply(0, a));
   pageview();

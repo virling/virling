@@ -13,6 +13,9 @@ pub struct Site {
     pub domain: String,
     pub timezone: String,
     pub cookieless: bool,
+    /// Cookieless until the consent tool calls virling("consent"); only set together with cookieless.
+    #[sqlx(default)]
+    pub consent: bool,
     /// Other domains of the same visit, space-separated.
     pub same_visit: String,
     /// Minutes away after which a return is a new visit.
@@ -38,7 +41,7 @@ impl SiteCache {
             return site.clone();
         }
         let site = sqlx::query_as::<_, Site>(
-            "SELECT id, domain, timezone, cookieless, same_visit, return_minutes, sample_data, ignore_ips FROM sites WHERE domain = ?",
+            "SELECT id, domain, timezone, cookieless, consent, same_visit, return_minutes, sample_data, ignore_ips FROM sites WHERE domain = ?",
         )
         .bind(domain)
         .fetch_optional(db)
@@ -69,7 +72,7 @@ pub fn app_path(domain: &str, page: &str) -> String {
 
 pub async fn for_account(db: &SqlitePool, account_id: &str) -> anyhow::Result<Vec<Site>> {
     Ok(sqlx::query_as::<_, Site>(
-        "SELECT id, domain, timezone, cookieless, same_visit, return_minutes, sample_data, ignore_ips FROM sites WHERE account_id = ? ORDER BY created_at",
+        "SELECT id, domain, timezone, cookieless, consent, same_visit, return_minutes, sample_data, ignore_ips FROM sites WHERE account_id = ? ORDER BY created_at",
     )
     .bind(account_id)
     .fetch_all(db)

@@ -713,6 +713,63 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn consent_keeps_the_visit_under_one_id() {
+        let (_dir, state, store) = setup().await;
+        sqlx::query("UPDATE sites SET cookieless = 1, consent = 1 WHERE domain = 'example.com'")
+            .execute(&state.db)
+            .await
+            .unwrap();
+        let page = |path: &str, v: &str| {
+            format!(
+                r#"{{"n":"pageview","u":"https://example.com{path}","s":"example.com","w":1440{v}}}"#
+            )
+        };
+        let consent = || async {
+            let app = router(state.clone())
+                .layer(MockConnectInfo(SocketAddr::from(([162, 158, 0, 7], 5555))));
+            let req = Request::get("/api/event?consent=example.com")
+                .header("user-agent", UA)
+                .body(Body::empty())
+                .unwrap();
+            let res = app.oneshot(req).await.unwrap();
+            assert_eq!(
+                res.headers()["content-type"],
+                "text/javascript; charset=utf-8"
+            );
+            body_text(res).await
+        };
+        assert_eq!(post(&state, &page("/", ""), UA).await, StatusCode::ACCEPTED);
+        let js = consent().await;
+        let id = js.split('"').nth(1).unwrap().to_string();
+        assert!(id.starts_with("c-") && js.contains("virling_vid="), "{js}");
+        let v = format!(r#","v":"{id}""#);
+        assert_eq!(
+            post(&state, &page("/pricing", &v), UA).await,
+            StatusCode::ACCEPTED
+        );
+        let rows: Vec<(String, String)> = {
+            let conn = store.conn_for_test();
+            let mut stmt = conn
+                .prepare("SELECT visitor_id, session_id FROM events ORDER BY ts")
+                .unwrap();
+            stmt.query_map([], |r| Ok((r.get(0)?, r.get(1)?)))
+                .unwrap()
+                .map(Result::unwrap)
+                .collect()
+        };
+        assert_eq!(rows.len(), 2);
+        assert_eq!(rows[0], rows[1], "same visitor and visit across consent");
+        assert_eq!(rows[0].0, id);
+
+        sqlx::query("UPDATE sites SET consent = 0 WHERE domain = 'example.com'")
+            .execute(&state.db)
+            .await
+            .unwrap();
+        state.sites.invalidate("example.com");
+        assert_eq!(consent().await, "", "plain cookieless sets nothing");
+    }
+
+    #[tokio::test]
     async fn ingests_and_classifies_events() {
         let (_dir, state, store) = setup().await;
         let vid = "0b7c2d1e-aaaa-bbbb-cccc-1234567890ab";
@@ -1304,11 +1361,13 @@ mod tests {
         let cookie = sign_in(&state, "me%40example.com").await;
         let site =
             body_text(call(&state, get("/app/example.com/settings", Some(&cookie))).await).await;
-        assert_eq!(site.matches(r#"type="checkbox" role="switch""#).count(), 5);
-        assert_eq!(site.matches(r#"type="checkbox""#).count(), 5);
-        assert!(
-            site.contains(r#"<div class="seg" role="radiogroup" aria-labelledby="model-label">"#)
-        );
+        assert_eq!(site.matches(r#"type="checkbox" role="switch""#).count(), 4);
+        assert_eq!(site.matches(r#"type="checkbox""#).count(), 4);
+        for label in ["model-label", "cookie-label"] {
+            assert!(site.contains(&format!(
+                r#"<div class="seg" role="radiogroup" aria-labelledby="{label}">"#
+            )));
+        }
         let account =
             body_text(call(&state, get("/app/example.com/account", Some(&cookie))).await).await;
         assert!(
@@ -2267,6 +2326,24 @@ mod tests {
 
         let page = body_text(call(&state, get(&uri, Some(&cookie))).await).await;
         assert!(page.contains("data-cookieless") && page.contains("30 days"));
+        call(
+            &state,
+            form(
+                &uri,
+                "model=first_touch&window_days=30&cookieless=consent".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        let modes: (bool, bool) =
+            sqlx::query_as("SELECT cookieless, consent FROM sites WHERE id = ?")
+                .bind(&site)
+                .fetch_one(&state.db)
+                .await
+                .unwrap();
+        assert_eq!(modes, (true, true));
+        let page = body_text(call(&state, get(&uri, Some(&cookie))).await).await;
+        assert!(page.contains(r#"value="consent" checked"#));
         let bad = call(
             &state,
             form(&uri, "model=linear&window_days=30".into(), Some(&cookie)),

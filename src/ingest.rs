@@ -4,7 +4,7 @@ use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::sync::{LazyLock, Mutex};
 
 use axum::body::Bytes;
-use axum::extract::{ConnectInfo, State};
+use axum::extract::{ConnectInfo, Query, State};
 use axum::http::{HeaderMap, StatusCode, header};
 use axum::response::{IntoResponse, Response};
 use serde::Deserialize;
@@ -612,7 +612,10 @@ pub async fn collect(
             referrer_host.as_deref(),
         );
 
-        let visitor_id = match e.v.filter(|v| !site.cookieless && valid_visitor_id(v)) {
+        let visitor_id = match e
+            .v
+            .filter(|v| (!site.cookieless || site.consent) && valid_visitor_id(v))
+        {
             Some(v) => v,
             None => state.salt.visitor_id(&site.id, ip, user_agent),
         };
@@ -759,6 +762,44 @@ fn accepted() -> Response {
         StatusCode::ACCEPTED,
         [(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")],
         "",
+    )
+        .into_response()
+}
+
+/// Stores the given ID in the first-party cookie on the registrable domain, as the script does.
+const CONSENT_JS: &str = r#"var v="ID",d=document,L=location,c="virling_vid="+v,a=";path=/;SameSite=Lax;max-age=31536000"+(L.protocol=="https:"?";Secure":"");for(var p=L.hostname.split("."),i=p.length-1;i-->0&&(d.cookie=c+a+";domain="+p.slice(i).join("."),!d.cookie.includes(c)););i<0&&(d.cookie=c+a);"#;
+
+/// The module behind virling("consent"): in consent mode it keeps the ID the visit is counted under, so the visit continues.
+pub async fn command(
+    State(state): State<AppState>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    Query(query): Query<HashMap<String, String>>,
+) -> Response {
+    let user_agent = headers
+        .get(header::USER_AGENT)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("");
+    let mut js = String::new();
+    if let Some(domain) = query.get("consent")
+        && !is_bot(user_agent)
+        && let Some(site) = state
+            .sites
+            .by_domain(&state.db, &domain.to_ascii_lowercase())
+            .await
+        && site.consent
+    {
+        let cf = via_cloudflare(peer.ip(), state.config.trust_proxy);
+        let ip = client_ip(&headers, peer, state.config.trust_proxy, cf);
+        js = CONSENT_JS.replace("ID", &state.salt.visitor_id(&site.id, ip, user_agent));
+    }
+    (
+        [
+            (header::CONTENT_TYPE, "text/javascript; charset=utf-8"),
+            (header::ACCESS_CONTROL_ALLOW_ORIGIN, "*"),
+            (header::CACHE_CONTROL, "no-store"),
+        ],
+        js,
     )
         .into_response()
 }
