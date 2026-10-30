@@ -475,6 +475,39 @@ pub struct RetentionOut {
     pub retention: Retention,
 }
 
+#[derive(Debug, Serialize)]
+pub struct VerdictsOut {
+    pub site: String,
+    pub range: RangeOut,
+    pub previous_range: RangeOut,
+    pub verdicts: Vec<crate::verdict::Verdict>,
+}
+
+/// One rule-based line per channel against the period before.
+pub async fn verdicts_for(
+    state: &AppState,
+    account: &str,
+    domain: &str,
+    q: &RangeQuery,
+) -> Result<VerdictsOut, ApiError> {
+    let (site, period) = site_period(state, account, domain, q).await?;
+    let store = state.events.clone();
+    let (id, p) = (site.id.clone(), period.clone());
+    let (cur, prev) = blocking(move || {
+        Ok((
+            store.breakdown(&id, &p, Dimension::Channel)?,
+            store.breakdown(&id, &p.previous(), Dimension::Channel)?,
+        ))
+    })
+    .await?;
+    Ok(VerdictsOut {
+        site: site.domain,
+        range: RangeOut::of(&period),
+        previous_range: RangeOut::of(&period.previous()),
+        verdicts: crate::verdict::verdicts(&cur, &prev),
+    })
+}
+
 pub async fn retention_for(
     state: &AppState,
     account: &str,

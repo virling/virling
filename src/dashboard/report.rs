@@ -109,6 +109,8 @@ pub(crate) struct Data {
     pub sources: Vec<BreakdownRow>,
     /// Landing pages of the week before, to tell new pages apart.
     pub prev_pages: Vec<BreakdownRow>,
+    /// Channels of the week before, for each channel's verdict.
+    pub prev_channels: Vec<BreakdownRow>,
 }
 
 pub(crate) async fn data(
@@ -123,6 +125,7 @@ pub(crate) async fn data(
             report: store.report(&id, &period)?,
             sources: store.breakdown(&id, &period, Dimension::ChannelSource)?,
             prev_pages: store.breakdown(&id, &period.previous(), Dimension::LandingPage)?,
+            prev_channels: store.breakdown(&id, &period.previous(), Dimension::Channel)?,
         })
     })
     .await
@@ -210,6 +213,7 @@ pub struct ReportView {
     pub avg_note: String,
     pub pages: Vec<Row>,
     pub insights: Vec<Insight>,
+    pub verdicts: Vec<crate::verdict::Verdict>,
     pub note: String,
     pub editable: bool,
     pub footer: String,
@@ -892,6 +896,7 @@ pub(crate) fn build(site: &str, monday: Date, d: &Data, o: &Options) -> ReportVi
         .into_iter()
         .flatten()
         .collect(),
+        verdicts: crate::verdict::verdicts(&r.channels, &d.prev_channels),
         sources: source_rows,
         pages: page_rows,
         note: o.note.to_string(),

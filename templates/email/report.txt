@@ -10,7 +10,10 @@
 
 Where the money came from
 {% for s in r.sources %}- {{ s.name }}: {{ s.visitors }} visitor{% if s.visitors != "1" %}s{% endif %}, {{ s.revenue }}, {{ s.per_visitor }} per visitor
-{% endfor %}{% for i in r.insights %}
+{% endfor %}{% if !r.verdicts.is_empty() %}
+Each channel this week
+{% for v in r.verdicts %}- {{ v.channel }}: {{ v.line }}
+{% endfor %}{% endif %}{% for i in r.insights %}
 {{ i.kind }}: {{ i.title }}. {{ i.text }}{% endfor %}
 {% if !r.note.is_empty() %}
 A note from {% if r.agency.is_empty() %}your agency{% else %}{{ r.agency }}{% endif %}:
