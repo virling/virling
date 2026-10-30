@@ -1416,7 +1416,12 @@ mod tests {
             .unwrap();
         let body = body_text(call(&state, get("/app/example.com", Some(&cookie))).await).await;
         assert!(body.contains("<span class=\"num pg\">Pages read</span>"));
-        assert!(body.contains("<b>Perplexity</b><span>PerplexityBot</span>"));
+        assert!(body.contains("<b>Perplexity</b></span>"));
+        assert!(body.contains(">PerplexityBot</span>"));
+        assert!(
+            !body.contains("<b>Perplexity</b><span>"),
+            "bot names show once"
+        );
         assert!(!body.contains("<b>No AI activity yet</b>"));
     }
 
