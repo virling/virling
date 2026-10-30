@@ -64,13 +64,23 @@ pub(crate) struct Picked {
     pub from: Date,
     pub to: Date,
     pub compare: bool,
+    /// A chosen period to compare against instead of the previous one, from ?compare=2026-09-01..2026-09-30.
+    pub vs: Option<(Date, Date)>,
 }
 
 /// The range control in a page's top bar.
 pub struct RangeMenu {
     pub label: String,
-    /// Shows "vs previous" on the button.
+    /// Shows "vs previous" or "vs Sep 1 to 30" on the button.
     pub vs: bool,
+    pub vs_label: String,
+    /// Offers a custom comparison, on the pages that show one.
+    pub vs_form: bool,
+    pub vs_custom: bool,
+    pub vs_from: String,
+    pub vs_to: String,
+    /// Params the comparison form keeps, as raw values.
+    pub vs_hidden: Vec<(&'static str, String)>,
     pub compare: bool,
     pub compare_href: String,
     pub ranges: Vec<Opt>,
@@ -108,6 +118,10 @@ impl Picked {
                 None => ("30d", preset("30d", today, None).unwrap_or((today, today))),
             },
         };
+        let vs = compare
+            .and_then(|c| c.split_once(".."))
+            .and_then(|(a, b)| Some((ymd(Some(a))?, ymd(Some(b))?)))
+            .filter(|(a, b)| a <= b && *b <= today);
         Picked {
             key,
             default,
@@ -118,6 +132,7 @@ impl Picked {
             from,
             to,
             compare: compare != Some("off"),
+            vs,
         }
     }
 
@@ -138,10 +153,24 @@ impl Picked {
         } else if self.key != self.default {
             out.push(("range", self.key.to_string()));
         }
-        if !self.compare {
+        if let Some((a, b)) = self.vs {
+            out.push(("compare", format!("{a}..{b}")));
+        } else if !self.compare {
             out.push(("compare", "off".into()));
         }
         out
+    }
+
+    /// The period to compare against: the chosen one, or the one just before.
+    pub(crate) fn against(&self, tz: &str) -> Period {
+        match self.vs {
+            Some((from, to)) => Period {
+                from,
+                to,
+                tz: tz.to_string(),
+            },
+            None => self.period(tz).previous(),
+        }
     }
 
     /// "?range=7d" style query that keeps this range on another page, or "".
@@ -181,13 +210,32 @@ impl Picked {
         let enc: Vec<(&str, String)> = all.iter().map(|(k, v)| (*k, encode(v))).collect();
         let params: Vec<(&str, &str)> = enc.iter().map(|(k, v)| (*k, v.as_str())).collect();
         let go = |set: &[(&str, &str)]| link(base, &params, set);
+        let mut vs_hidden: Vec<(&'static str, String)> = self
+            .params()
+            .into_iter()
+            .filter(|(k, _)| *k != "compare")
+            .collect();
+        vs_hidden.extend(others.iter().cloned());
         let mut hidden = others;
-        if !self.compare {
+        if let Some((a, b)) = self.vs {
+            hidden.push(("compare", format!("{a}..{b}")));
+        } else if !self.compare {
             hidden.push(("compare", "off".into()));
         }
+        let before = self.period("").previous();
+        let (vs_from, vs_to) = self.vs.unwrap_or((before.from, before.to));
         RangeMenu {
             label: self.label.clone(),
-            vs: self.compare && self.key != "all",
+            vs: self.compare && (self.key != "all" || self.vs.is_some()),
+            vs_label: match self.vs {
+                Some((a, b)) => span(a, b),
+                None => "previous".into(),
+            },
+            vs_form: false,
+            vs_custom: self.vs.is_some(),
+            vs_from: vs_from.to_string(),
+            vs_to: vs_to.to_string(),
+            vs_hidden,
             compare: self.compare,
             compare_href: go(&[("compare", if self.compare { "off" } else { "" })]),
             ranges: PRESETS
@@ -267,5 +315,16 @@ mod tests {
             m.compare_href,
             "/app/x.com/visitors?from=2026-10-02&to=2026-10-09&channel=A+B&compare=off"
         );
+        let v = Picked::read(t, first, None, None, None, Some("2026-09-01..2026-09-07"));
+        assert_eq!(v.vs, Some((date!(2026 - 09 - 01), date!(2026 - 09 - 07))));
+        assert_eq!(v.query(), "?compare=2026-09-01..2026-09-07");
+        assert_eq!(v.against("UTC").to, date!(2026 - 09 - 07));
+        let m = v.menu(t, first, "/app/x.com", &[]);
+        assert!(
+            m.vs && m.vs_label == "Sep 1 to 7" && !m.vs_hidden.iter().any(|h| h.0 == "compare")
+        );
+        assert_eq!(m.compare_href, "/app/x.com?compare=off");
+        let bad = Picked::read(t, first, None, None, None, Some("2026-09-07..2026-09-01"));
+        assert_eq!((bad.vs, bad.compare), (None, true));
     }
 }

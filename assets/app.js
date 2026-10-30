@@ -387,7 +387,7 @@ document.addEventListener("click", (e) => {
 });
 
 for (const form of document.querySelectorAll("[data-cal]")) {
-  const [from, to] = [form.elements.from, form.elements.to];
+  const [from, to] = form.querySelectorAll("input[type=date]");
   const max = from.max;
   const iso = (d) => d.toISOString().slice(0, 10);
   const parse = (s) => new Date(s + "T00:00:00Z");

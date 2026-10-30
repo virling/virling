@@ -167,6 +167,12 @@ pub trait EventStore: Send + Sync {
         self.overview_in(site_id, period, &Filter::default())
     }
     fn overview_in(&self, site_id: &str, period: &Period, f: &Filter) -> anyhow::Result<Overview>;
+    fn timeseries_in(
+        &self,
+        site_id: &str,
+        period: &Period,
+        f: &Filter,
+    ) -> anyhow::Result<Vec<stats::DayPoint>>;
     #[cfg(test)]
     fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<stats::DayPoint>>;
     fn breakdown(
@@ -1630,6 +1636,18 @@ impl EventStore for DuckStore {
             sums.apply_totals(&mut o);
         }
         Ok(o)
+    }
+
+    fn timeseries_in(
+        &self,
+        site_id: &str,
+        period: &Period,
+        f: &Filter,
+    ) -> anyhow::Result<Vec<stats::DayPoint>> {
+        if let Some(d) = self.indexed(site_id, |ix, z, c| read::timeseries(ix, z, c, period, f))? {
+            return Ok(d);
+        }
+        stats::timeseries(&*self.read()?, site_id, period, f)
     }
 
     #[cfg(test)]

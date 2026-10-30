@@ -1,12 +1,23 @@
   <div class="menu-wrap d3-range" data-menu>
     <button type="button" class="d3-btn" aria-haspopup="true" aria-expanded="false">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>{{ range.label }}{% if range.vs %}<span class="dim">vs previous</span>{% endif %}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>{{ range.label }}{% if range.vs %}<span class="dim">vs {{ range.vs_label }}</span>{% endif %}
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
     </button>
     <div class="menu right d3-rmenu" hidden>
       {% for r in range.ranges %}<a href="{{ r.href }}"{% if r.on %} aria-current="true"{% endif %}><span>{{ r.label }}</span><span class="hint">{{ r.count }}</span></a>{% endfor %}
       <hr>
       <a class="d3-switch" role="switch" aria-checked="{{ range.compare }}" href="{{ range.compare_href }}"><span>Compare to previous period</span><i></i></a>
+      {% if range.vs_form %}
+      <details{% if range.vs_custom %} open{% endif %}>
+        <summary>Compare to other dates…</summary>
+        <form class="d3-custom" method="get" action="{{ range.base }}" data-cal>
+          {% for (k, v) in range.vs_hidden %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+          <label>From<input type="date" name="cfrom" value="{{ range.vs_from }}" max="{{ range.today }}" required></label>
+          <label>To<input type="date" name="cto" value="{{ range.vs_to }}" max="{{ range.today }}" required></label>
+          <button class="d3-btn dark" type="submit">Compare</button>
+        </form>
+      </details>
+      {% endif %}
       <details{% if range.custom %} open{% endif %}>
         <summary>Custom range…</summary>
         <form class="d3-custom" method="get" action="{{ range.base }}" data-cal>
