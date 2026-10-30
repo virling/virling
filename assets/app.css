@@ -601,6 +601,9 @@ a.ctl { text-decoration: none; }
 .tip .row span { display: inline-flex; align-items: center; gap: 7px; color: var(--ink-2); }
 .tip .row b { font-weight: 600; }
 .tip .foot { border-top: 1px solid var(--rule-2); padding-top: 6px; margin-top: 2px; font-size: 12px; color: var(--ink-3); }
+.tip .nt { font-size: 12px; font-weight: 600; color: var(--ink); }
+.hov > i.nt { position: absolute; left: 50%; top: 0; bottom: 0; border-left: 1px dashed var(--ink-4); pointer-events: none; }
+.hov > i.nt::before { content: ""; position: absolute; top: -3px; left: -4px; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3); }
 .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; font-size: 12px; color: var(--ink-2); }
 .legend span { display: inline-flex; align-items: center; gap: 7px; }
 .sw.vd, .chart .vd { width: 8px; height: 8px; border-radius: 50%; background: var(--paper); border: 1.5px solid var(--visitors); }

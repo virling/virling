@@ -6,6 +6,7 @@ use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Redirect, Response};
 use serde::Deserialize;
+use sqlx::SqlitePool;
 use time::macros::format_description;
 use time::{Date, Duration, OffsetDateTime};
 use url::Url;
@@ -52,6 +53,69 @@ struct LaunchesPage {
     today: String,
     channels: &'static [&'static str],
     error: &'static str,
+}
+
+/// Launch names by day from `from` to `to`, for the revenue chart.
+pub async fn between(
+    db: &SqlitePool,
+    site_id: &str,
+    from: Date,
+    to: Date,
+) -> sqlx::Result<Vec<(Date, String)>> {
+    let rows: Vec<(String, String)> = sqlx::query_as(
+        "SELECT day, name FROM launches WHERE site_id = ? AND day BETWEEN ? AND ? ORDER BY day, id LIMIT ?",
+    )
+    .bind(site_id)
+    .bind(from.to_string())
+    .bind(to.to_string())
+    .bind(MAX_SHOWN)
+    .fetch_all(db)
+    .await?;
+    Ok(rows
+        .into_iter()
+        .filter_map(|(day, name)| Some((parse_day(&day)?, name)))
+        .collect())
+}
+
+/// Checks and saves a launch, or says what is wrong with it.
+pub async fn add(
+    db: &SqlitePool,
+    site_id: &str,
+    input: &LaunchInput,
+) -> Result<i64, (StatusCode, &'static str)> {
+    let bad = |msg| Err((StatusCode::BAD_REQUEST, msg));
+    let name = input.name.trim();
+    if name.is_empty() || name.chars().count() > 80 {
+        return bad("Give the launch a name of up to 80 characters.");
+    }
+    let Some(url) = http_url(&input.url) else {
+        return bad("The link must be a web address starting with http or https.");
+    };
+    let Some(day) = parse_day(&input.day) else {
+        return bad("Pick the day of the launch.");
+    };
+    let channel = input.channel.trim();
+    if !channel.is_empty() && !CHANNELS.contains(&channel) {
+        return bad("Pick one of the listed channels.");
+    }
+    let inserted = sqlx::query(
+        "INSERT INTO launches (site_id, name, url, channel, day, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+    )
+    .bind(site_id)
+    .bind(name)
+    .bind(url)
+    .bind(channel)
+    .bind(day.to_string())
+    .bind(OffsetDateTime::now_utc().unix_timestamp())
+    .execute(db)
+    .await;
+    match inserted {
+        Ok(r) => Ok(r.last_insert_rowid()),
+        Err(err) => {
+            tracing::error!(%err, "saving a launch failed");
+            Err((StatusCode::SERVICE_UNAVAILABLE, "try again"))
+        }
+    }
 }
 
 fn parse_day(raw: &str) -> Option<Date> {
@@ -147,12 +211,12 @@ pub async fn page(
 
 #[derive(Deserialize)]
 pub struct LaunchInput {
-    name: String,
+    pub name: String,
     #[serde(default)]
-    url: String,
+    pub url: String,
     #[serde(default)]
-    channel: String,
-    day: String,
+    pub channel: String,
+    pub day: String,
 }
 
 pub async fn create(
@@ -165,54 +229,11 @@ pub async fn create(
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
-    let name = input.name.trim();
-    if name.is_empty() || name.chars().count() > 80 {
-        return show(
-            &state,
-            &account,
-            &domain,
-            "Give the launch a name of up to 80 characters.",
-        )
-        .await;
+    match add(&state.db, &ctx.site.id, &input).await {
+        Ok(_) => Redirect::to(&app_path(&ctx.site.domain, "launches")).into_response(),
+        Err((StatusCode::BAD_REQUEST, error)) => show(&state, &account, &domain, error).await,
+        Err((code, _)) => code.into_response(),
     }
-    let Some(url) = http_url(&input.url) else {
-        return show(
-            &state,
-            &account,
-            &domain,
-            "The link must be a web address starting with http or https.",
-        )
-        .await;
-    };
-    let Some(day) = parse_day(&input.day) else {
-        return show(&state, &account, &domain, "Pick the day of the launch.").await;
-    };
-    let channel = input.channel.trim();
-    if !channel.is_empty() && !CHANNELS.contains(&channel) {
-        return show(
-            &state,
-            &account,
-            &domain,
-            "Pick one of the listed channels.",
-        )
-        .await;
-    }
-    let inserted = sqlx::query(
-        "INSERT INTO launches (site_id, name, url, channel, day, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-    )
-    .bind(&ctx.site.id)
-    .bind(name)
-    .bind(url)
-    .bind(channel)
-    .bind(day.to_string())
-    .bind(OffsetDateTime::now_utc().unix_timestamp())
-    .execute(&state.db)
-    .await;
-    if let Err(err) = inserted {
-        tracing::error!(%err, "saving a launch failed");
-        return StatusCode::SERVICE_UNAVAILABLE.into_response();
-    }
-    Redirect::to(&app_path(&ctx.site.domain, "launches")).into_response()
 }
 
 #[derive(Deserialize)]

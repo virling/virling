@@ -2,7 +2,7 @@
 {% block content %}
 <section class="box ll-add">
   <h2>Log a launch</h2>
-  <p class="dim">A post, a thread, a Product Hunt day. Virling shows the visitors, new customers and revenue of that day and the next, so you can see whether it made money or only traffic.</p>
+  <p class="dim">A post, a thread, a deploy, a price change. It is marked on the revenue chart, and Virling shows the visitors, new customers and revenue of that day and the next, so you can see whether it made money or only traffic.</p>
   {% if !error.is_empty() %}<div class="notice" role="alert">{{ error }}</div>{% endif %}
   <form method="post" action="/app/{{ shell.domain }}/launches" class="ll-form">
     <label>Name<input class="input" name="name" maxlength="80" placeholder="Show HN post" required></label>

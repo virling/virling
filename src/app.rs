@@ -363,6 +363,7 @@ pub fn router(state: AppState) -> Router {
             .route("/api/v1/sites/{domain}/payments", get(api::payments))
             .route("/api/v1/sites/{domain}/retention", get(api::retention))
             .route("/api/v1/sites/{domain}/ai-answers", get(api::ai_answers))
+            .route("/api/v1/sites/{domain}/annotations", post(api::annotate))
             .route(
                 "/api/v1/sites/{domain}/visitors/{visitor_id}",
                 get(api::visitor),
