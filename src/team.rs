@@ -327,6 +327,7 @@ pub async fn confirm(State(state): State<AppState>, Query(input): Query<TokenInp
             token: input.token,
             vid: String::new(),
             track: None,
+            trial: state.config.billing.is_some(),
             error: None,
         }),
         None => auth::page(LoginPage {
@@ -336,6 +337,7 @@ pub async fn confirm(State(state): State<AppState>, Query(input): Query<TokenInp
             token: String::new(),
             vid: String::new(),
             track: None,
+            trial: state.config.billing.is_some(),
             error: Some(EXPIRED),
         }),
     }
@@ -351,6 +353,7 @@ pub async fn accept(State(state): State<AppState>, Form(input): Form<TokenInput>
             token: String::new(),
             vid: String::new(),
             track: None,
+            trial: state.config.billing.is_some(),
             error: Some(error),
         })
     };
