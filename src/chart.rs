@@ -743,13 +743,13 @@ mod tests {
         let d = days(7);
         let mut s = series(&d);
         s.notes = vec![(d[2].date, "Show HN <post>".into())];
-        let bars = revenue(&s, None, Kind::Bars, None, None, false);
+        let bars = revenue(&s, None, Kind::Bars, None, None, false, None);
         assert_eq!(count(&bars, r#"<i class="nt">"#), 1);
         assert!(bars.contains(r#"<div class="nt">Show HN &lt;post&gt;</div>"#));
         let long = days(200);
         let mut w = series(&long);
         w.notes = vec![(long[9].date, "Price change".into())];
-        let bars = revenue(&w, None, Kind::Bars, None, None, false);
+        let bars = revenue(&w, None, Kind::Bars, None, None, false, None);
         let at = bars.find(r#"<div class="nt">"#).unwrap();
         assert_eq!(
             bars[..at].matches(r#"class="hov bar""#).count(),
