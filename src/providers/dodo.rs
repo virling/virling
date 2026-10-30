@@ -320,6 +320,7 @@ impl DodoPayment {
                 .map(str::to_string),
             customer_id: Some(self.customer.customer_id.clone()),
             is_renewal,
+            email: None,
         }
     }
 }
@@ -721,6 +722,7 @@ mod tests {
                 visitor_id: Some("v_3f9a1c".into()),
                 customer_id: Some("cus_Gq9lbBQ4pZ7c".into()),
                 is_renewal: false,
+                email: None,
             }
         );
     }

@@ -151,6 +151,7 @@ impl Transaction {
             visitor_id: None,
             customer_id: self.customer,
             is_renewal: false,
+            email: None,
         })
     }
 }
@@ -366,6 +367,7 @@ pub fn webhook_payment(body: &[u8]) -> anyhow::Result<Option<Fetched>> {
         visitor_id,
         customer_id: checkout.customer.as_ref().and_then(id_of),
         is_renewal: false,
+        email: None,
     }))
 }
 

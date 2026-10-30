@@ -19,6 +19,8 @@ pub struct Fetched {
     pub visitor_id: Option<String>,
     pub customer_id: Option<String>,
     pub is_renewal: bool,
+    /// Payer's email, only to find a visitor who identified with it; never stored.
+    pub email: Option<String>,
 }
 
 /// A subscription's current state as the provider reports it.

@@ -16,7 +16,7 @@ User-Agent: Mozilla/5.0 ...
 
 | Field | Type | | Meaning |
 | --- | --- | --- | --- |
-| `n` | string | Required | `"pageview"`, `"goal"`, `"exit"`, `"leave"`, `"read"` or `"ping"`. A ping only keeps the visitor live and is not stored. Other values are dropped. |
+| `n` | string | Required | `"pageview"`, `"goal"`, `"exit"`, `"leave"`, `"read"`, `"identify"` or `"ping"`. A ping only keeps the visitor live and is not stored. Other values are dropped. |
 | `u` | string | Required | Full page URL. Its host must be the site's domain or a subdomain. |
 | `s` | string | Required | The site's domain, as in `data-site`. |
 | `r` | string or null | Optional | Referrer URL. Only its host is kept, and only when it is another site. |
@@ -30,6 +30,7 @@ User-Agent: Mozilla/5.0 ...
 | `e` | number | For reads | Seconds the page was visible while it was open. Cut to one hour. |
 | `x` | number | For reads | Furthest scroll as a percent of the page height. Cut to 100. A read without `e` and `x` is dropped. |
 | `g` | string | For goals and exits | Goal name, trimmed and cut to 64 bytes, or the link URL for an exit. Goals without one are dropped. |
+| `m` | string | For identify | The visitor's email, such as the one typed at signup. It is trimmed and lowercased, then only a SHA-256 hash with a salt of this site is kept, never the email. A payment that arrives with no visitor ID but with the same payer email is then credited to this visitor. Matching is exact and per site. |
 
 When a pageview comes back to the visit after a leave, the server also stores a `back` event just before it, shown as "Came back" on the timeline. The server adds the time, the channel, the session, the country from `cf-ipcountry`, `x-vercel-ip-country` or `x-country-code` (or from `z` when none is sent), and the browser from `User-Agent`.
 

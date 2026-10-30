@@ -544,6 +544,7 @@ a.ctl { text-decoration: none; }
 .d3-code pre { margin: 0; padding: 14px 16px; color: #e6e8eb; font-size: 13px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
 .d3-setup { padding: 14px 20px 18px; }
 .d3-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px 20px; }
+.d3-setup-warn { margin: 10px 0 0; font-size: 13px; color: var(--rev-deep); }
 .d3-setup-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding-bottom: 6px; }
 .d3-setup-head .dim { margin-left: auto; font-size: 13px; }
 .d3-setup-head form { display: contents; }

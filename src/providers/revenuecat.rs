@@ -202,6 +202,7 @@ fn map_purchase(p: Purchase, floor: i64, visitor_id: Option<String>) -> Option<F
         visitor_id,
         customer_id: Some(p.customer_id),
         is_renewal: false,
+        email: None,
     })
 }
 
@@ -281,6 +282,7 @@ pub fn webhook_payment(body: &[u8]) -> anyhow::Result<Option<Fetched>> {
         visitor_id,
         customer_id: e.original_app_user_id.or(e.app_user_id),
         is_renewal: renewal,
+        email: None,
     }))
 }
 

@@ -25,6 +25,7 @@ mod fx;
 mod globe;
 mod html_md;
 mod icons;
+mod identify;
 mod imported;
 mod index;
 mod ingest;
@@ -494,6 +495,22 @@ mod tests {
             .body(Body::from(body.to_string()))
             .unwrap();
         app.oneshot(req).await.unwrap().status()
+    }
+
+    #[tokio::test]
+    async fn identify_keeps_only_a_hash_of_the_email() {
+        let (_dir, state, _store) = setup().await;
+        let mac = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
+        let body = r#"{"n":"identify","u":"https://example.com/signup","s":"example.com","v":"vsignup01","m":" Ann@Example.com"}"#;
+        assert_eq!(post(&state, body, mac).await, StatusCode::ACCEPTED);
+        let rows: Vec<(String, String)> =
+            sqlx::query_as("SELECT visitor_id, email_hash FROM visitor_emails")
+                .fetch_all(&state.db)
+                .await
+                .unwrap();
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].0, "vsignup01");
+        assert!(rows[0].1.len() == 64 && !rows[0].1.contains("ann"));
     }
 
     #[tokio::test]

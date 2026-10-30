@@ -75,6 +75,7 @@
   </div>
   {% endfor %}
   </div>
+  {% if !s.warning.is_empty() %}<p class="d3-setup-warn">{{ s.warning }}</p>{% endif %}
 </section>
 {% endif %}
 {% include "_overview.html" %}

@@ -305,6 +305,7 @@ fn trial_starts(events: &[Event]) -> Vec<Fetched> {
                     .or_else(|| non_empty(o.client_reference_id.as_ref())),
                 customer_id: o.customer.clone(),
                 is_renewal: false,
+                email: None,
             })
         })
         .collect()
@@ -389,6 +390,11 @@ fn to_fetched(
             billing_reason,
             Some("subscription_cycle" | "subscription_update")
         ),
+        email: charge
+            .billing_details
+            .as_ref()
+            .and_then(|b| non_empty(b.email.as_ref()))
+            .or_else(|| non_empty(charge.receipt_email.as_ref())),
     })
 }
 
@@ -482,6 +488,13 @@ struct Charge {
     #[serde(default)]
     metadata: HashMap<String, String>,
     payment_intent: Option<IntentRef>,
+    billing_details: Option<BillingDetails>,
+    receipt_email: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct BillingDetails {
+    email: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -683,6 +696,24 @@ mod tests {
     fn lost_dispute_counts_as_refunded() {
         let f = fetched(&charge("ch_3MmlLrLkdIwHu7ix0snN0B15"), None, 1099).unwrap();
         assert_eq!((f.refunded, f.status.as_str()), (1099, "refunded"));
+    }
+
+    #[test]
+    fn payer_email_from_billing_details_or_receipt() {
+        let mut c = charge("ch_3NmetadataVid000000000");
+        assert_eq!(fetched(&c, None, 0).unwrap().email, None);
+        c.receipt_email = Some("Receipt@Example.com".into());
+        assert_eq!(
+            fetched(&c, None, 0).unwrap().email.as_deref(),
+            Some("Receipt@Example.com")
+        );
+        c.billing_details = Some(BillingDetails {
+            email: Some("pay@example.com".into()),
+        });
+        assert_eq!(
+            fetched(&c, None, 0).unwrap().email.as_deref(),
+            Some("pay@example.com")
+        );
     }
 
     #[test]

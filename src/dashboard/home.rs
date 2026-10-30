@@ -113,7 +113,9 @@ pub struct SetupCard {
     title: String,
     count: String,
     steps: Vec<SetupStep>,
-    /// Hides the card for good; empty while the site has no data.
+    /// Shown while no payment has matched a visit.
+    warning: String,
+    /// Hides the card for good; empty while the site has no data or checkout is not linked.
     dismiss: String,
 }
 
@@ -1134,6 +1136,15 @@ async fn page(
                     site_url("setup/checkout"),
                 ),
             });
+            let linked = setup.first_match.is_some();
+            let warning = match (linked, paid_total) {
+                (true, _) => String::new(),
+                (false, 0) => "Required: until checkout is linked, payments cannot be credited to the visit that brought them.".into(),
+                (false, n) => format!(
+                    "Required: {} arrived and none matched a visit, so no channel gets credit. Pass the visitor ID at checkout.",
+                    plural(n, "payment")
+                ),
+            };
             if !fresh {
                 steps.push(step(
                     setup.has_goals,
@@ -1147,7 +1158,9 @@ async fn page(
                 s.num = i + 1;
             }
             let done = steps.iter().filter(|s| s.done).count();
-            if public.is_none() && (fresh || (age <= 14 && !dismissed && done < steps.len())) {
+            if public.is_none()
+                && (fresh || !linked || (age <= 14 && !dismissed && done < steps.len()))
+            {
                 page.setup = Some(SetupCard {
                     title: if fresh {
                         format!("Get {} tracking", ctx.site.domain)
@@ -1156,7 +1169,8 @@ async fn page(
                     },
                     count: format!("{done} of {} done", steps.len()),
                     steps,
-                    dismiss: if fresh {
+                    warning,
+                    dismiss: if fresh || !linked {
                         String::new()
                     } else {
                         site_url("setup/dismiss")
