@@ -100,7 +100,11 @@ pub fn plausible(dir: &Path) -> anyhow::Result<Vec<Imported>> {
         out.push(r.clone().to("channel", Some(channel.as_str().to_string())));
         out.push(r.to("referrer", host.map(|h| channel::source_domain(&h))));
     }
-    // Rows of one key on one day are summed, as the export may split them by UTM tags.
+    Ok(merge(out))
+}
+
+/// Rows of one key on one day summed, as an export may split them by UTM tags or other columns.
+fn merge(out: Vec<Imported>) -> Vec<Imported> {
     let mut merged: HashMap<(Date, &'static str, Option<String>), Imported> = HashMap::new();
     for i in out {
         merged
@@ -114,7 +118,154 @@ pub fn plausible(dir: &Path) -> anyhow::Result<Vec<Imported>> {
     }
     let mut rows: Vec<Imported> = merged.into_values().collect();
     rows.sort_by(|a, b| (a.day, a.kind, &a.label).cmp(&(b.day, b.kind, &b.label)));
-    Ok(rows)
+    rows
+}
+
+/// A Google Analytics column, by the names GA4 reports and the BigQuery query in the docs use.
+fn ga_column(names: &[String], wanted: &[&str]) -> Option<usize> {
+    names
+        .iter()
+        .position(|n| wanted.iter().any(|w| n.trim().eq_ignore_ascii_case(w)))
+}
+
+/// A GA4 day, as 20241001 or 2024-10-01.
+fn ga_date(s: &str) -> Option<Date> {
+    let s = s.trim();
+    if s.len() == 8 && s.bytes().all(|b| b.is_ascii_digit()) {
+        return date(&format!("{}-{}-{}", &s[..4], &s[4..6], &s[6..]));
+    }
+    date(s)
+}
+
+/// Reads every CSV file in `dir` exported from Google Analytics 4: each has a date column, at most one
+/// dimension (source, page, country or device) and users, views and sessions.
+pub fn google_analytics(dir: &Path) -> anyhow::Result<Vec<Imported>> {
+    let conn = Connection::open_in_memory()?;
+    let mut out = Vec::new();
+    for entry in std::fs::read_dir(dir)? {
+        let path = entry?.path();
+        if path.extension().and_then(|e| e.to_str()) != Some("csv") {
+            continue;
+        }
+        // GA4 report exports start with "#" comment lines before the header.
+        let text = std::fs::read_to_string(&path)?;
+        let body: String = text
+            .lines()
+            .filter(|l| !l.starts_with('#') && !l.trim().is_empty())
+            .map(|l| format!("{l}\n"))
+            .collect();
+        let clean = std::env::temp_dir().join(format!("virling-ga-{}.csv", std::process::id()));
+        std::fs::write(&clean, body)?;
+        let file = format!("'{}'", clean.to_string_lossy().replace('\'', "''"));
+        let mut stmt = conn.prepare(&format!(
+            "SELECT * FROM read_csv({file}, header = true, all_varchar = true)"
+        ))?;
+        let mut rows = stmt.query([])?;
+        let names: Vec<String> = rows.as_ref().map(|s| s.column_names()).unwrap_or_default();
+        let Some(day) = ga_column(&names, &["Date", "date"]) else {
+            continue;
+        };
+        let users = ga_column(&names, &["Active users", "Total users", "Users", "users"]);
+        let views = ga_column(
+            &names,
+            &["Views", "Screen page views", "pageviews", "views"],
+        );
+        let sessions = ga_column(&names, &["Sessions", "sessions"]);
+        let source = ga_column(
+            &names,
+            &[
+                "Session source / medium",
+                "Session source",
+                "First user source",
+                "Source",
+                "source",
+            ],
+        );
+        let medium = ga_column(
+            &names,
+            &["Session medium", "First user medium", "Medium", "medium"],
+        );
+        let page = ga_column(
+            &names,
+            &[
+                "Page path and screen class",
+                "Page path",
+                "Landing page",
+                "page",
+            ],
+        );
+        let country = ga_column(&names, &["Country", "country", "country_code"]);
+        let device = ga_column(&names, &["Device category", "device"]);
+        let num = |v: Option<String>| -> u64 {
+            v.and_then(|s| s.replace(',', "").trim().parse::<f64>().ok())
+                .map_or(0, |n| n.max(0.0) as u64)
+        };
+        while let Some(r) = rows.next()? {
+            let get = |i: Option<usize>| -> Option<String> {
+                r.get::<_, Option<String>>(i?).ok().flatten()
+            };
+            let Some(day) = get(Some(day)).as_deref().and_then(ga_date) else {
+                continue;
+            };
+            let row = Row {
+                day,
+                label: None,
+                visitors: num(get(users)),
+                pageviews: num(get(views)),
+                visits: num(get(sessions)),
+                medium: None,
+                utm_source: None,
+                referrer: None,
+            };
+            if let Some(raw) = get(source) {
+                let (src, med) = match raw.split_once(" / ") {
+                    Some((s, m)) => (s.trim().to_string(), Some(m.trim().to_string())),
+                    None => (raw.trim().to_string(), get(medium)),
+                };
+                let src = src.to_ascii_lowercase();
+                let direct = src.is_empty() || src.starts_with('(');
+                let host = (!direct && src.contains('.')).then(|| src.clone());
+                let med = med.filter(|m| !m.starts_with('('));
+                let channel = channel::classify(
+                    med.as_deref(),
+                    (!direct).then_some(src.as_str()),
+                    host.as_deref(),
+                );
+                let referrer = if direct {
+                    None
+                } else {
+                    Some(host.as_deref().map_or(src.clone(), channel::source_domain))
+                };
+                out.push(
+                    row.clone()
+                        .to("channel", Some(channel.as_str().to_string())),
+                );
+                out.push(row.to("referrer", referrer));
+            } else if let Some(p) = get(page) {
+                out.push(row.to("page", Some(p.trim().to_string())));
+            } else if let Some(c) = get(country) {
+                let c = c.trim();
+                let code = if c.len() == 2 {
+                    Some(c.to_ascii_uppercase())
+                } else {
+                    crate::flags::FLAGS
+                        .iter()
+                        .find(|f| f.1.eq_ignore_ascii_case(c))
+                        .map(|f| f.0.to_string())
+                };
+                out.push(row.to("country", code));
+            } else if let Some(d) = get(device) {
+                let mut d = d.trim().to_ascii_lowercase();
+                if let Some(first) = d.get_mut(..1) {
+                    first.make_ascii_uppercase();
+                }
+                out.push(row.to("device", Some(d)));
+            } else {
+                out.push(row.to("total", None));
+            }
+        }
+    }
+    Ok(merge(out))
 }
 
 /// A YYYY-MM-DD date.
@@ -283,6 +434,34 @@ mod tests {
         assert_eq!(sum("country", Some("DE")), 20);
         assert_eq!(sum("page", Some("/pricing")), 7);
         assert_eq!(sum("device", Some("Mobile")), 20);
+    }
+
+    #[test]
+    fn reads_google_analytics_exports() {
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("src/fixtures/ga4");
+        let rows = google_analytics(&dir).unwrap();
+        let sum = |kind: &str, label: Option<&str>| -> u64 {
+            rows.iter()
+                .filter(|r| r.kind == kind && r.label.as_deref() == label)
+                .map(|r| r.visitors)
+                .sum()
+        };
+        assert_eq!(sum("total", None), 30);
+        assert_eq!(sum("channel", Some("Organic search")), 6);
+        assert_eq!(sum("channel", Some("Direct")), 4);
+        assert_eq!(sum("channel", Some("Communities")), 15);
+        assert_eq!(sum("channel", Some("Email")), 5);
+        assert_eq!(sum("referrer", Some("news.ycombinator.com")), 15);
+        assert_eq!(sum("referrer", None), 4);
+        assert_eq!(sum("page", Some("/pricing")), 7);
+        assert_eq!(sum("country", Some("US")), 10);
+        assert_eq!(sum("country", Some("DE")), 20);
+        assert_eq!(sum("device", Some("Mobile")), 20);
+        let day1 = rows
+            .iter()
+            .find(|r| r.kind == "total" && r.day == time::macros::date!(2024 - 01 - 01))
+            .unwrap();
+        assert_eq!((day1.pageviews, day1.visits), (25, 12));
     }
 
     #[test]

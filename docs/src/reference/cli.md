@@ -78,6 +78,16 @@ Added example.com. Script tag:
 
 It fails if the domain is not valid, the email is not valid, or the site already exists. It works while the server is running. New sites are picked up within a minute.
 
+## import-ga
+
+Imports daily traffic from Google Analytics 4 CSV exports in one folder as history before tracking began. See [Import from Google Analytics](../track/import-google-analytics.md).
+
+```sh
+virling import-ga <DOMAIN> <DIR>
+```
+
+Stop the server first, as for `import-plausible` below.
+
 ## import-plausible
 
 Imports daily traffic from an unzipped Plausible CSV export as history before tracking began. See [Import from Plausible](../track/import-plausible.md).

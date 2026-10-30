@@ -28,6 +28,7 @@
 - [Cookieless mode](track/cookieless.md)
 - [Privacy and consent](track/privacy.md)
 - [Import from Plausible](track/import-plausible.md)
+- [Import from Google Analytics](track/import-google-analytics.md)
 
 # Payments
 

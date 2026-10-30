@@ -1,0 +1,10 @@
+# ----------------------------------------
+# Reports snapshot
+# Account: Example
+# Start date: 20240101
+# End date: 20240102
+# ----------------------------------------
+
+Date,Active users,Views,Sessions
+20240101,10,25,12
+20240102,20,40,22
