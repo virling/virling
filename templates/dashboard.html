@@ -39,6 +39,7 @@
 <div class="d3-filter">
   <span class="dim">Showing only</span>
   {% for c in chips %}<span class="d3-fchip">{{ c.icon|safe }}{{ c.label }}<a href="{{ c.href }}" aria-label="Remove filter {{ c.label }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></a></span>{% endfor %}
+  {% if !visitors_href.is_empty() %}<a class="d3-link" href="{{ visitors_href }}">See these visitors</a>{% endif %}
   <span class="hint">Click any row in a card to filter by it.</span>
 </div>
 {% endif %}

@@ -144,6 +144,8 @@ struct DashboardPage {
     range: RangeMenu,
     report_href: String,
     chips: Vec<FilterChip>,
+    /// The Visitors list with the same filters, when it can apply them all.
+    visitors_href: String,
     privacy: bool,
     waiting: Option<Waiting>,
     setup: Option<SetupCard>,
@@ -943,6 +945,19 @@ async fn page(
             }
         })
         .collect();
+    let visitors_href = match filters.as_slice() {
+        [(k @ ("channel" | "source"), v)] => {
+            let mut set: Vec<(&str, String)> = picked
+                .params()
+                .into_iter()
+                .map(|(k, v)| (k, encode(&v)))
+                .collect();
+            set.push((k, encode(v)));
+            let set: Vec<(&str, &str)> = set.iter().map(|(k, v)| (*k, v.as_str())).collect();
+            super::href(&site_url("visitors"), &set)
+        }
+        _ => String::new(),
+    };
     let mut shell = ctx.shell;
     shell.usage = picked.usage(cur.visitors);
     shell.keep = picked.query();
@@ -960,6 +975,7 @@ async fn page(
         range: picked.menu(today, ctx.first_day, &base, &raw),
         report_href: site_url("report"),
         chips,
+        visitors_href,
         privacy: ctx.site.cookieless,
         waiting: None,
         setup: None,
@@ -1246,6 +1262,18 @@ async fn page(
                 ("channel", "By channel", Kind::Channel),
                 ("total", "Cumulative", Kind::Total),
             ];
+            let weekly = s.weekly;
+            let day_href = |d: Date| {
+                let end = if weekly { d + Duration::days(6) } else { d };
+                let set = [
+                    ("range", String::new()),
+                    ("from", d.to_string()),
+                    ("to", end.min(to).to_string()),
+                ];
+                filter_href(&set)
+            };
+            let day_link: Option<&(dyn Fn(Date) -> String + Sync)> =
+                (public.is_none() && hours.is_none()).then_some(&day_href);
             // Every chart type is rendered so switching needs no reload.
             for (i, (k, label, kind)) in kinds.into_iter().enumerate() {
                 let svg = chart::revenue(
@@ -1255,6 +1283,7 @@ async fn page(
                     hatch.as_ref().map(|(f, l)| (*f, l.as_str())),
                     (!filters.is_empty()).then_some(filter_label.as_str()),
                     hide,
+                    day_link,
                 );
                 let title = match kind {
                     Kind::Bars if hours.is_some() => "Revenue per hour",
@@ -1279,7 +1308,7 @@ async fn page(
                     match kind {
                         Kind::Bars => match best {
                             Some(b) => format!(
-                                "Best {unit}{}: {}, {} from {}. Hover a bar for the details.",
+                                "Best {unit}{}: {}, {} from {}. Hover a bar for the details{}.",
                                 if filters.is_empty() {
                                     String::new()
                                 } else {
@@ -1290,7 +1319,12 @@ async fn page(
                                     None => day(b.date),
                                 },
                                 money(b.revenue_usd),
-                                plural(b.payments, "payment")
+                                plural(b.payments, "payment"),
+                                if day_link.is_some() {
+                                    format!(", or click it to see that {unit}")
+                                } else {
+                                    String::new()
+                                }
                             ),
                             None => String::new(),
                         },

@@ -275,7 +275,7 @@ fn running(points: &[DayPoint]) -> Vec<f64> {
 
 /// The dashboard's revenue chart and its legend. `prev` lines up the previous period by position,
 /// `pre` hatches the first fraction of the plot with a note, `only` names an active filter,
-/// and `hidden` shows shares of the period's revenue instead of amounts.
+/// `hidden` shows shares of the period's revenue instead of amounts, and `day` links each day or week.
 pub fn revenue(
     cur: &Series,
     prev: Option<&Series>,
@@ -283,6 +283,7 @@ pub fn revenue(
     pre: Option<(f64, &str)>,
     only: Option<&str>,
     hidden: bool,
+    day: Option<&(dyn Fn(Date) -> String + Sync)>,
 ) -> String {
     let pts = &cur.points;
     let sum: f64 = pts.iter().map(|p| p.revenue_usd).sum();
@@ -429,9 +430,21 @@ pub fn revenue(
     };
     for (i, p) in pts.iter().enumerate() {
         let xf = (i as f64 + 0.5) / n as f64;
+        let link = day.filter(|_| p.hour.is_none()).map(|f| f(p.date));
+        let (tag, attr) = match &link {
+            Some(h) => (
+                "a",
+                format!(
+                    r#" href="{}" aria-label="Show {}""#,
+                    esc(h),
+                    esc(&tip_date(p, cur.weekly))
+                ),
+            ),
+            None => ("div", String::new()),
+        };
         let _ = write!(
             cols,
-            r#"<div class="hov bar" style="left:{:.3}%;width:{:.3}%"><div class="tip{}"><span class="d">{}</span>"#,
+            r#"<{tag} class="hov bar"{attr} style="left:{:.3}%;width:{:.3}%"><div class="tip{}"><span class="d">{}</span>"#,
             i as f64 / n as f64 * 100.0,
             1.0 / n as f64 * 100.0,
             if xf < 0.6 { "" } else { " l" },
@@ -487,7 +500,7 @@ pub fn revenue(
             }
             _ => {}
         }
-        cols.push_str("</div>");
+        let _ = write!(cols, "</{tag}>");
     }
     if matches!(kind, Kind::Line | Kind::Total) && top_val > 0.0 {
         let last = *vals.last().unwrap_or(&0.0);
@@ -657,34 +670,34 @@ mod tests {
             points: vec![day(0, 3, 0.0), day(1, 1, 0.0), day(2, 0, 0.0)],
             weekly: false,
         };
-        let bars = revenue(&s, None, Kind::Bars, None, None, false);
+        let bars = revenue(&s, None, Kind::Bars, None, None, false, None);
         assert!(bars.contains(r#"class="chart rev bars dual""#));
         assert!(bars.contains(r#"<div class="ya r">"#));
         // Three visitors on a 0..4 count axis, not on the dollar axis.
         assert!(bars.contains(r#"<span class="vd" style="bottom:75.0%">"#));
         assert!(bars.contains(r#"<span style="top:25.00%">3</span>"#));
         assert_eq!(count(&bars, r#"<i class="sw vd"></i>Visitors"#), 3 + 1);
-        let line = revenue(&s, None, Kind::Line, None, None, false);
+        let line = revenue(&s, None, Kind::Line, None, None, false, None);
         assert!(!line.contains("ya r") && !line.contains("dual"));
         let empty = Series {
             points: vec![day(0, 0, 0.0)],
             weekly: false,
         };
-        assert!(!revenue(&empty, None, Kind::Bars, None, None, false).contains("dual"));
+        assert!(!revenue(&empty, None, Kind::Bars, None, None, false, None).contains("dual"));
     }
 
     #[test]
     fn revenue_kinds() {
         let d = days(7);
         let s = series(&d);
-        let bars = revenue(&s, None, Kind::Bars, None, None, false);
+        let bars = revenue(&s, None, Kind::Bars, None, None, false, None);
         assert_eq!(count(&bars, r#"class="vd""#), 7);
         assert_eq!(
             count(&bars, ORANGE),
             1 + 7 + 1,
             "best bar, tooltips, legend"
         );
-        let line = revenue(&s, Some(&s), Kind::Line, None, None, false);
+        let line = revenue(&s, Some(&s), Kind::Line, None, None, false, None);
         assert!(line.contains("stroke-dasharray") && line.contains("Previous 7 days"));
         let total = revenue(
             &s,
@@ -693,11 +706,16 @@ mod tests {
             Some((0.5, "Not tracking yet")),
             None,
             false,
+            None,
         );
         assert!(total.contains("$210 so far") && total.contains(r#"class="pre""#));
-        let split = revenue(&s, None, Kind::Channel, None, None, false);
+        let split = revenue(&s, None, Kind::Channel, None, None, false, None);
         assert!(split.contains("Referral") && split.contains("Unmatched"));
-        let hidden = revenue(&s, None, Kind::Total, None, None, true);
+        let hidden = revenue(&s, None, Kind::Total, None, None, true, None);
         assert!(hidden.contains("100% so far") && !hidden.contains('$'));
+        let link = |d: Date| format!("?from={d}");
+        let linked = revenue(&s, None, Kind::Bars, None, None, false, Some(&link));
+        assert_eq!(count(&linked, r#"<a class="hov bar" href="?from="#), 7);
+        assert_eq!(count(&bars, "<a "), 0);
     }
 }
