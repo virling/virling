@@ -174,7 +174,7 @@ struct ServeArgs {
         default_value = "Rahul at Virling <hello@virling.com>"
     )]
     waitlist_from: String,
-    /// URL of the website's beta applications feed, listed in the admin panel
+    /// URL of the website's applications feed, listed in the admin panel
     #[arg(long, env = "VIRLING_APPLICATIONS_URL")]
     applications_url: Option<String>,
     /// Bearer token for the applications feed

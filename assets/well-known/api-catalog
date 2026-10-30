@@ -4,12 +4,12 @@
       "anchor": "https://virling.com/.well-known/api-catalog",
       "item": [
         {
-          "href": "https://beta.virling.com/api/v1"
+          "href": "https://app.virling.com/api/v1"
         }
       ]
     },
     {
-      "anchor": "https://beta.virling.com/api/v1",
+      "anchor": "https://app.virling.com/api/v1",
       "service-doc": [
         {
           "href": "https://docs.virling.com/reference/api",
