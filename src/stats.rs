@@ -2001,8 +2001,6 @@ mod tests {
         assert_eq!(credited(&store).as_deref(), Some("referral"));
         store.rebuild_attribution("s", "first_touch", 90).unwrap();
         assert_eq!(credited(&store).as_deref(), Some("social"));
-        store.rebuild_attribution("s", "last_touch", 90).unwrap();
-        assert_eq!(credited(&store).as_deref(), Some("direct"));
         let touch = store
             .payment_list("s", &period(), PaymentFilter::All, 1, 0)
             .unwrap()
@@ -2012,6 +2010,8 @@ mod tests {
             .unwrap();
         assert_eq!(touch.source, "Hacker News");
         assert_eq!(touch.landing_page.as_deref(), Some("/social"));
+        store.rebuild_attribution("s", "last_touch", 90).unwrap();
+        assert_eq!(credited(&store).as_deref(), Some("direct"));
         assert!(store.rebuild_attribution("s", "linear", 90).is_err());
     }
 
