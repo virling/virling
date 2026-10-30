@@ -75,18 +75,44 @@ Without the plugin, open Appearance, Theme File Editor, open `header.php` and pa
 
 ## Framer
 
-Site settings, General, Custom code, then "End of `<head>` tag". Publish the site afterwards.
-
-## Webflow
-
-Site settings, Custom code, then Head code. Publish the site afterwards.
+1. In Framer, open **Site settings**, **General**, then **Custom code**.
+2. Paste the tag into **End of `<head>` tag** so it loads on every page.
+3. Publish the site. Custom code only runs on the published site, not in the editor preview.
 
 ```html
 <script defer src="https://stats.example.com/v.js"
   data-site="yourdomain.com"></script>
 ```
 
+Framer moves between pages without a full reload; the script counts each page change on its own. For a payment button that links to Stripe, Polar, Dodo Payments or LemonSqueezy checkout, nothing else is needed: see [Checkout links need no code](../payments/checkout.md#checkout-links-need-no-code).
+
+## Webflow
+
+1. In Webflow, open **Site settings**, then **Custom code**.
+2. Paste the tag into **Head code**. Custom code needs a paid site plan.
+3. Publish the site to your domain.
+
+```html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+## Google Tag Manager
+
+Import the ready-made container, or add one tag by hand.
+
+**Import.** Download [`integrations/gtm/virling-container.json`](https://github.com/virling/virling/blob/main/integrations/gtm/virling-container.json). In Tag Manager, open **Admin**, **Import Container**, choose the file, pick your workspace and **Merge**. It adds a **Virling** tag that fires on all pages and two constants, **Virling server** and **Virling site**. Set those two to your Virling address and site domain, then **Submit** to publish.
+
+**By hand.** Add a tag of type **Custom HTML** with the tag below, set its trigger to **All Pages**, and publish.
+
+```html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+Tag Manager keeps the tag's attributes when it injects it, which is what the script reads `data-site` from. Ad blockers that block Tag Manager block the script with it; adding the tag directly to the page avoids that.
+
 ## Other setups
 
-- **Tag managers.** The script reads `data-site` and the other attributes from its own `<script>` tag. If a tag manager injects it, make sure the injected tag keeps those attributes.
+- **Other tag managers.** The script reads `data-site` and the other attributes from its own `<script>` tag. If a tag manager injects it, make sure the injected tag keeps those attributes.
 - **Several domains.** Add each domain as its own site and use its own `data-site`. Subdomains of a site are included automatically.
