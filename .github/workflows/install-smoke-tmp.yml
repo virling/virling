@@ -1,0 +1,28 @@
+name: install-smoke-tmp
+on:
+  push:
+    branches: [install-smoke-tmp]
+jobs:
+  run:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: First run
+        run: |
+          start=$(date +%s)
+          cat scripts/install.sh | sh
+          echo "FIRST RUN SECONDS: $(( $(date +%s) - start ))"
+          curl -fsS http://127.0.0.1:8080/health; echo
+          curl -fsS -o /dev/null -w 'login %{http_code}\n' http://127.0.0.1:8080/login
+      - name: Second run
+        run: |
+          start=$(date +%s)
+          cat scripts/install.sh | sh
+          echo "SECOND RUN SECONDS: $(( $(date +%s) - start ))"
+          systemctl is-active virling
+          systemctl show -p NRestarts virling
+          sudo ls -la /var/lib/virling
+          sudo journalctl -u virling --no-pager | tail -20
