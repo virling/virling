@@ -1,0 +1,5 @@
+date,source,referrer,utm_source,utm_medium,utm_campaign,utm_content,utm_term,pageviews,visitors,visits,visit_duration,bounces
+2024-01-01,Google,google.com,,,,,,10,6,7,300,1
+2024-01-01,Direct / None,,,,,,,15,4,5,300,2
+2024-01-02,Hacker News,news.ycombinator.com,,,,,,30,15,16,600,3
+2024-01-02,Newsletter,,newsletter,email,"launch, day",,,10,5,6,300,2

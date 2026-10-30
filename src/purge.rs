@@ -1,6 +1,6 @@
 use duckdb::{Connection, params};
 
-const TABLES: [&str; 10] = [
+const TABLES: [&str; 11] = [
     "events",
     "bot_events",
     "reads",
@@ -11,6 +11,7 @@ const TABLES: [&str; 10] = [
     "subscriptions",
     "touches",
     "first_touches",
+    "imported",
 ];
 
 /// Removes everything stored for a site from the event database.
