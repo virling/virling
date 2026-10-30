@@ -432,9 +432,28 @@ pub fn router(state: AppState) -> Router {
     .layer(axum::middleware::from_fn_with_state(state.clone(), theme))
     .layer(axum::middleware::from_fn_with_state(
         state.clone(),
+        keep_out_of_search,
+    ))
+    .layer(axum::middleware::from_fn_with_state(
+        state.clone(),
         mcp_host_only,
     ))
     .with_state(state)
+}
+
+/// The app and its sign-in page are not for search results; only the marketing pages are.
+async fn keep_out_of_search(
+    State(state): State<AppState>,
+    req: axum::extract::Request,
+    next: axum::middleware::Next,
+) -> Response {
+    let mut res = next.run(req).await;
+    if !state.config.marketing {
+        res.headers_mut()
+            .entry("x-robots-tag")
+            .or_insert(axum::http::HeaderValue::from_static("noindex"));
+    }
+    res
 }
 
 /// On the MCP host only the MCP endpoint and its metadata answer; everything else is a bare 404.
