@@ -22,7 +22,7 @@ async function visitorId() {
 
 ## Per provider
 
-<div class="tabset" data-tabs="Stripe|Dodo Payments|Polar|LemonSqueezy|Creem|RevenueCat|Paddle" data-key="provider" aria-label="Payment provider"></div>
+<div class="tabset" data-tabs="Stripe|Dodo Payments|Polar|LemonSqueezy|Creem|RevenueCat|Paddle|WooCommerce" data-key="provider" aria-label="Payment provider"></div>
 
 ```js
 // Stripe Checkout (Node, stripe): pass the visitor ID on the session
@@ -112,6 +112,17 @@ Paddle.Checkout.open({
 // custom_data: { virling_vid: req.cookies.virling_vid }
 ```
 
+```php
+// WooCommerce: add to your theme's functions.php (or a snippets plugin)
+// so every order keeps the visitor ID from the virling_vid cookie.
+add_action('woocommerce_checkout_create_order', 'virling_vid_on_order');
+add_action('woocommerce_store_api_checkout_update_order_from_request', 'virling_vid_on_order');
+function virling_vid_on_order($order) {
+  $vid = $_COOKIE['virling_vid'] ?? '';
+  if (preg_match('/^[A-Za-z0-9-]{8,64}$/', $vid)) $order->update_meta_data('virling_vid', $vid);
+}
+```
+
 ## Stripe
 
 Virling reads `metadata.virling_vid` on the charge or its PaymentIntent, then `metadata.virling_vid` or `client_reference_id` on the Checkout Session. See [Stripe](stripe.md).
@@ -139,6 +150,10 @@ Virling reads the customer attribute `virling_vid` from each webhook event. Set 
 ## Paddle
 
 Virling reads `virling_vid` from the transaction's `custom_data`. With Paddle.js, pass it as `customData`. See [Paddle](paddle.md).
+
+## WooCommerce
+
+Virling reads `virling_vid` from the order's meta data. Add the snippet above to your theme once, and every order keeps the visitor ID from the cookie. See [WooCommerce](woocommerce.md).
 
 ## Checkout links need no code
 

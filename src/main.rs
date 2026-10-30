@@ -1490,6 +1490,7 @@ mod tests {
             "Creem",
             "RevenueCat",
             "Paddle",
+            "WooCommerce",
         ] {
             assert!(
                 body.contains(&format!(r#"aria-label="{name}""#)),
@@ -1518,6 +1519,25 @@ mod tests {
             "the error sits under the field"
         );
         assert!(!body.contains(r#"class="alert""#));
+        assert!(
+            body.contains(r#"name="store""#),
+            "WooCommerce asks for the store"
+        );
+        for store in ["", "http%3A%2F%2Fshop.example.com", "not+a+url"] {
+            let body = body_text(
+                call(
+                    &state,
+                    form(
+                        &uri,
+                        format!("provider=woocommerce&key=ck_a%3Acs_b&store={store}"),
+                        Some(&cookie),
+                    ),
+                )
+                .await,
+            )
+            .await;
+            assert!(body.contains("starting with https://"), "{store}");
+        }
         let n: i64 = sqlx::query_scalar("SELECT count(*) FROM integrations")
             .fetch_one(&state.db)
             .await
@@ -2515,6 +2535,7 @@ mod tests {
             "creem",
             "revenuecat",
             "paddle",
+            "woocommerce",
         ] {
             connect_fake(&state, &site, p, "fake_test_value_1234").await;
         }
