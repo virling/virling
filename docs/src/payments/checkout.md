@@ -124,7 +124,7 @@ Virling reads `virling_vid` from the order's `metadata`, its custom field data, 
 
 ## LemonSqueezy
 
-Tag checkouts with `checkout[custom][virling_vid]` now. Matching them is <span class="na">Not available yet</span> and waits on webhook support. See [LemonSqueezy](lemonsqueezy.md).
+Virling reads `virling_vid` from the checkout's custom data, which LemonSqueezy only returns in webhooks. Tag checkouts with `checkout[custom][virling_vid]`. See [LemonSqueezy](lemonsqueezy.md).
 
 ## Creem
 
