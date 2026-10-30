@@ -4,7 +4,82 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [0.2.1] - 2026-10-26
+## [0.3.0] - 2026-10-30
+
+### Added
+
+- Add path to purchase to the Payments page
+- Add lifetime value by first source to Retention
+- Add email alerts for sales and a daily digest
+- Add Timing card and default to last 7 days
+- Add AI to cash card
+- Add Almost paid card to the dashboard
+- Add HSTS, CSP and permissions headers to the site
+- Add Creem payment provider
+- Add see visitors link, chart day filter, row underline
+- Add cookieless-until-consent mode
+- Add last-touch attribution model
+- Add RevenueCat payment provider
+- Add a rule-based verdict per channel
+- Add the DataBull comparison page
+- Add Paperclip setup and a weekly review to the skill
+
+### Changed
+
+- Move hosted to app.virling.com with a 14-day trial
+
+### Other
+
+- Compute Timing in one cached pass
+- Record reading time and scroll depth per page
+- Hide the scrollbar on the dashboard tab strip
+- Start dashboard card work early and set 20 ms budget
+- Split Direct traffic by how visitors arrived
+- Build direct_kind for the server only
+- Give Other sources a globe icon on Retention
+- Trim the heavy index tests outside CI
+- Time tests with nextest
+- Run server tests in parallel shards
+- Optimize bundled duckdb in dev and test builds
+- Reorder dashboard cards and merge the AI cards
+- Fill the AI card height with its revenue share chart
+- Write docs sidebar links relative to each page
+- Link docs pages without .html so they skip the redirect
+- Let the docs link check follow clean URLs
+- Keep the app out of search results
+- Fill the last row of extra dashboard cards
+- Let sites pick how often AI answers run
+- Accept another tool's script API as a drop-in switch
+- Install and start the service with one command
+- Plain homepage headline, switch FAQ, price rows
+- Use the app menu for the AI answers frequency
+- Give the first 50 per plan the founding price
+- Import daily traffic history from a CSV export
+- Lead pricing with the founding price
+- Show bot names once in the AI crawls table
+- Load the docs tracker from app.virling.com
+- Expect bot names once in the AI card test
+- Match the AI answers schedule wording on main
+- List Creem before LemonSqueezy in outbound hosts
+- Read the Creem visitor ID through the shared key list
+- Describe the switch page for any previous provider
+- Mark launches and notes on the revenue chart
+- Let the API docs test read POST routes
+- Pass the day link in the chart notes test
+- Check last touch after the first-touch assertions
+- Compare the dashboard against any date range
+- Pass the day link to the chart notes test
+- Take payment fees off channel revenue in profit card
+- Pass the test archive through the cache, not artifacts
+- Say LemonSqueezy checkouts match through webhooks
+- Point the Claude plugin at app.virling.com
+- Track our own hosted sales by channel
+- Pass the visitor ID to hosted checkout links
+- Redesign the site footer in columns
+- List Creem and RevenueCat with the other providers
+- Bring the docs up to date with this month's features
+
+## [0.2.1] - 2026-10-27
 
 ### Added
 
