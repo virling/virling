@@ -421,10 +421,10 @@ fn map_order(order: Order) -> Mapped {
 }
 
 fn vid(map: &Map<String, Value>) -> Option<String> {
-    match map.get("virling_vid") {
+    super::VID_KEYS.iter().find_map(|k| match map.get(*k) {
         Some(Value::String(s)) if !s.trim().is_empty() => Some(s.trim().to_string()),
         _ => None,
-    }
+    })
 }
 
 fn format_ts(ts: OffsetDateTime) -> anyhow::Result<String> {
@@ -514,6 +514,16 @@ fn api_error(status: StatusCode, scope: &str) -> anyhow::Error {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn compat_metadata_key_is_a_fallback() {
+        let map = |v: Value| v.as_object().unwrap().clone();
+        let alias = map(serde_json::json!({"datafast_visitor_id": "v_alias"}));
+        assert_eq!(vid(&alias).as_deref(), Some("v_alias"));
+        let both =
+            map(serde_json::json!({"datafast_visitor_id": "v_alias", "virling_vid": "v_own"}));
+        assert_eq!(vid(&both).as_deref(), Some("v_own"));
+    }
 
     #[test]
     fn subscription_status_decides_live() {

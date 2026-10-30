@@ -61,6 +61,9 @@ pub fn months(unit: &str, count: i64) -> Option<f64> {
 /// Most subscriptions read per round, newest first; older ones fall back to payment recency.
 pub const MAX_SUBSCRIPTION_PAGES: u32 = 50;
 
+/// Payment metadata keys that hold the visitor ID, in order; the second is a compatibility alias.
+pub const VID_KEYS: [&str; 2] = ["virling_vid", "datafast_visitor_id"];
+
 /// A batch of payments plus the opaque cursor to resume from next time.
 #[derive(Debug, Default)]
 pub struct Page {
