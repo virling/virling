@@ -1729,6 +1729,22 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn the_dashboard_compares_any_two_ranges() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let today = time::OffsetDateTime::now_utc().date();
+        let (a, b) = (
+            today - time::Duration::days(40),
+            today - time::Duration::days(34),
+        );
+        let url = format!("/app/example.com?cfrom={a}&cto={b}");
+        let body = body_text(call(&state, get(&url, Some(&cookie))).await).await;
+        let label = crate::dashboard::daterange::span(a, b);
+        assert!(body.contains(&format!("<span class=\"dim\">vs {label}</span>")));
+        assert!(body.contains(&format!("compare={a}..{b}")) && body.contains("name=\"cfrom\""));
+    }
+
+    #[tokio::test]
     async fn live_counts_open_tabs_and_wakes_the_dashboard() {
         let (dir, state, _store) = setup().await;
         let cached =

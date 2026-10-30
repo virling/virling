@@ -317,6 +317,14 @@ pub fn revenue(
                 s.points.iter().map(|p| p.revenue_usd).collect()
             }
         });
+    // A chosen comparison period, rather than the one just before, is labelled by its dates.
+    let gap = if cur.weekly { 7 } else { 1 };
+    let chosen = prev
+        .and_then(|s| Some((s.points.first()?.date, s.points.last()?.date)))
+        .filter(|(_, last)| {
+            pts.first()
+                .is_some_and(|f| (f.date - *last).whole_days() != gap)
+        });
     let top_val = vals
         .iter()
         .chain(prev_vals.iter().flatten())
@@ -461,10 +469,14 @@ pub fn revenue(
             &amount(vals[i]),
         );
         if let Some(pv) = prev_vals.as_ref().and_then(|v| v.get(i)) {
+            let name = match (chosen, prev.and_then(|s| s.points.get(i))) {
+                (Some(_), Some(q)) => short(q.date),
+                _ => "Previous period".into(),
+            };
             row(
                 &mut cols,
                 &swatch("var(--ink-4)", "ln"),
-                "Previous period",
+                &name,
                 &amount(*pv),
             );
         }
@@ -565,7 +577,13 @@ pub fn revenue(
         },
         Kind::Line | Kind::Total => vec![format!("{}This period", swatch(ORANGE, "ln"))],
     };
-    if prev_vals.is_some() {
+    if let Some((a, b)) = chosen.filter(|_| prev_vals.is_some()) {
+        legend.push(format!(
+            r#"<i class="sw ln dash"></i>{} to {}"#,
+            short(a),
+            short(b)
+        ));
+    } else if prev_vals.is_some() {
         legend.push(format!(
             r#"<i class="sw ln dash"></i>Previous {}"#,
             if pts.len() == 1 {
@@ -716,8 +734,13 @@ mod tests {
             1 + 7 + 1,
             "best bar, tooltips, legend"
         );
-        let line = revenue(&s, Some(&s), Kind::Line, None, None, false, None);
+        let before = series(&(-7..0).map(|i| day(i, 1, 1.0)).collect::<Vec<_>>());
+        let line = revenue(&s, Some(&before), Kind::Line, None, None, false, None);
         assert!(line.contains("stroke-dasharray") && line.contains("Previous 7 days"));
+        assert!(line.contains("Previous period"));
+        let other = series(&(-40..-33).map(|i| day(i, 1, 1.0)).collect::<Vec<_>>());
+        let line = revenue(&s, Some(&other), Kind::Line, None, None, false, None);
+        assert!(line.contains("Aug 6 to Aug 12") && !line.contains("Previous"));
         let total = revenue(
             &s,
             None,

@@ -232,6 +232,17 @@ impl<S: EventStore> EventStore for Cached<S> {
         })
     }
 
+    fn timeseries_in(
+        &self,
+        site_id: &str,
+        period: &Period,
+        f: &Filter,
+    ) -> anyhow::Result<Vec<stats::DayPoint>> {
+        self.get(site_id, format!("timeseries {period:?} {f:?}"), || {
+            self.inner.timeseries_in(site_id, period, f)
+        })
+    }
+
     #[cfg(test)]
     fn timeseries(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<stats::DayPoint>> {
         self.inner.timeseries(site_id, period)
