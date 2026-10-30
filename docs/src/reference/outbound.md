@@ -7,8 +7,8 @@ Every host a Virling server connects to. Your visitors' browsers only connect to
 | `api.stripe.com` | With Stripe connected, every minute | Read charges, events and Checkout Sessions, and subscriptions hourly |
 | `live.dodopayments.com`, `test.dodopayments.com` | With Dodo Payments connected, every minute | Read payments, refunds and subscriptions. Both are tried when connecting to detect the key's mode. |
 | `api.polar.sh`, `sandbox-api.polar.sh` | With Polar connected, every minute | Read orders and refunds, and subscriptions hourly when the token allows. Both are tried when connecting. |
-| `api.lemonsqueezy.com` | With LemonSqueezy connected, every minute | Read orders and subscription invoices, and subscriptions hourly |
 | `api.creem.io`, `test-api.creem.io` | With Creem connected, every minute | Read transactions, and subscriptions hourly when the key allows. Both are tried when connecting, and the webhook is added once. |
+| `api.lemonsqueezy.com` | With LemonSqueezy connected, every minute | Read orders and subscription invoices, and subscriptions hourly |
 | `api.openai.com`, `api.anthropic.com`, `api.perplexity.ai`, `generativelanguage.googleapis.com` | With [AI answers](../track/ai-answers.md) keys set, on each site's schedule (weekly by default) and on **Run now** | Ask the site's buyer questions with web search |
 | `api.frankfurter.dev` | When converting a non-USD payment, at most every 12 hours | ECB exchange rates. See [Currencies](../attribution/currencies.md). |
 | Your SMTP server | When someone requests a sign-in link | Send the email, if `VIRLING_SMTP_URL` is set |
