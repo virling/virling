@@ -58,7 +58,12 @@ const checkout = await polar.checkouts.create({
 
 // Checkout links: add a custom field with the slug virling_vid
 // to the link. The Virling script fills it on click
-// (custom_field_data.virling_vid), so nothing else is needed.{% else %}// LemonSqueezy: add the visitor ID as checkout custom data.
+// (custom_field_data.virling_vid), so nothing else is needed.{% else if key == &"revenuecat" %}// RevenueCat (Node): set the customer attribute virling_vid before the purchase
+await fetch(`https://api.revenuecat.com/v2/projects/${projectId}/customers/${appUserId}/attributes`, {
+  method: "POST",
+  headers: { authorization: `Bearer ${process.env.REVENUECAT_SECRET_KEY}`, "content-type": "application/json" },
+  body: JSON.stringify({ attributes: [{ name: "virling_vid", value: req.cookies.virling_vid }] }),
+});{% else %}// LemonSqueezy: add the visitor ID as checkout custom data.
 // Not attributed yet: LemonSqueezy only returns custom data in
 // webhooks, which Virling does not receive yet.
 // Tag checkouts now and they will match once that ships.

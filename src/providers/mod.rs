@@ -1,6 +1,7 @@
 mod dodo;
 pub mod lemonsqueezy;
 mod polar;
+pub mod revenuecat;
 mod stripe;
 
 use time::OffsetDateTime;
@@ -79,14 +80,16 @@ pub enum Provider {
     Dodo,
     Polar,
     LemonSqueezy,
+    RevenueCat,
 }
 
 impl Provider {
-    pub const ALL: [Provider; 4] = [
+    pub const ALL: [Provider; 5] = [
         Provider::Stripe,
         Provider::Dodo,
         Provider::Polar,
         Provider::LemonSqueezy,
+        Provider::RevenueCat,
     ];
 
     pub fn as_str(self) -> &'static str {
@@ -95,6 +98,7 @@ impl Provider {
             Provider::Dodo => "dodo",
             Provider::Polar => "polar",
             Provider::LemonSqueezy => "lemonsqueezy",
+            Provider::RevenueCat => "revenuecat",
         }
     }
 
@@ -109,6 +113,7 @@ impl Provider {
             Provider::Dodo => dodo::check_key(client, key).await,
             Provider::Polar => polar::check_key(client, key).await,
             Provider::LemonSqueezy => lemonsqueezy::check_key(client, key).await,
+            Provider::RevenueCat => revenuecat::check_key(client, key).await,
         }
     }
 
@@ -124,6 +129,7 @@ impl Provider {
             Provider::Dodo => dodo::fetch(client, key, cursor).await,
             Provider::Polar => polar::fetch(client, key, cursor).await,
             Provider::LemonSqueezy => lemonsqueezy::fetch(client, key, cursor).await,
+            Provider::RevenueCat => revenuecat::fetch(client, key, cursor).await,
         }
     }
 
@@ -138,6 +144,7 @@ impl Provider {
             Provider::Dodo => dodo::subscriptions(client, key).await,
             Provider::Polar => polar::subscriptions(client, key).await,
             Provider::LemonSqueezy => lemonsqueezy::subscriptions(client, key).await,
+            Provider::RevenueCat => revenuecat::subscriptions(client, key).await,
         }
     }
 }

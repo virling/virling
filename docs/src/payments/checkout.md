@@ -22,7 +22,7 @@ async function visitorId() {
 
 ## Per provider
 
-<div class="tabset" data-tabs="Stripe|Dodo Payments|Polar|LemonSqueezy" data-key="provider" aria-label="Payment provider"></div>
+<div class="tabset" data-tabs="Stripe|Dodo Payments|Polar|LemonSqueezy|RevenueCat" data-key="provider" aria-label="Payment provider"></div>
 
 ```js
 // Stripe Checkout (Node, stripe): pass the visitor ID on the session
@@ -87,6 +87,15 @@ location.href = url.href;
 // data.attributes.checkout_data.custom = { virling_vid: req.cookies.virling_vid }
 ```
 
+```js
+// RevenueCat (Node): set the customer attribute virling_vid before the purchase
+await fetch(`https://api.revenuecat.com/v2/projects/${projectId}/customers/${appUserId}/attributes`, {
+  method: "POST",
+  headers: { authorization: `Bearer ${process.env.REVENUECAT_SECRET_KEY}`, "content-type": "application/json" },
+  body: JSON.stringify({ attributes: [{ name: "virling_vid", value: req.cookies.virling_vid }] }),
+});
+```
+
 ## Stripe
 
 Virling reads `metadata.virling_vid` on the charge or its PaymentIntent, then `metadata.virling_vid` or `client_reference_id` on the Checkout Session. See [Stripe](stripe.md).
@@ -102,6 +111,10 @@ Virling reads `virling_vid` from the order's `metadata`, its custom field data, 
 ## LemonSqueezy
 
 Tag checkouts with `checkout[custom][virling_vid]` now. Matching them is <span class="na">Not available yet</span> and waits on webhook support. See [LemonSqueezy](lemonsqueezy.md).
+
+## RevenueCat
+
+Virling reads the customer attribute `virling_vid` from each webhook event. Set it from your app with the SDK's `setAttributes`, or from your server. See [RevenueCat](revenuecat.md).
 
 ## Payment links
 

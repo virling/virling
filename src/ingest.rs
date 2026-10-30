@@ -170,6 +170,7 @@ pub fn checkout(host: &str, path: &str) -> bool {
             | "checkout.paddle.com"
             | "buy.paddle.com"
             | "sandbox-checkout.paddle.com"
+            | "pay.rev.cat"
     ) || host.ends_with(".lemonsqueezy.com")
         || (host == "polar.sh" && path.starts_with("/checkout"))
 }

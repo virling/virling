@@ -34,6 +34,7 @@
 - [Dodo Payments](payments/dodo.md)
 - [Polar](payments/polar.md)
 - [LemonSqueezy](payments/lemonsqueezy.md)
+- [RevenueCat](payments/revenuecat.md)
 - [Link checkout to visits](payments/checkout.md)
 
 # Attribution

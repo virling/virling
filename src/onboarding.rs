@@ -370,6 +370,14 @@ fn provider_card(p: Provider, selected: bool) -> ProviderCard {
             "https://docs.lemonsqueezy.com/guides/developer-guide/getting-started",
             "LemonSqueezy API keys cannot be made read-only and cover every store on your account. Virling reads orders and subscription invoices, adds a webhook to each store so payments link to visits, and stores the key encrypted. Delete it in LemonSqueezy at any time to revoke access.",
         ),
+        Provider::RevenueCat => (
+            "RevenueCat",
+            "V2 secret key",
+            "sk_...",
+            "How to create a V2 key, 1 minute",
+            "https://www.revenuecat.com/docs/projects/authentication",
+            "Create a V2 secret API key with read access to Project configuration and Customer information, plus read and write access to Integrations so Virling can add one webhook. Purchases, renewals and refunds arrive by that webhook.",
+        ),
     };
     ProviderCard {
         key: p.as_str(),
