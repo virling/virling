@@ -6,10 +6,11 @@
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/demo/app.css?v=72be1091">
+<link rel="stylesheet" href="/demo/app.css?v=11afde1b">
 <title>Visitor · tallybird.app · Virling</title>
+<meta name="robots" content="noindex,follow">
 </head>
-<body class="app">
+<body class="app" data-poll="/app/tallybird.app/live">
 <aside class="side" id="side">
   <a class="brand" href="/"><svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" style="fill:var(--ink)"/><circle cx="13.3" cy="19" r="3.4" style="fill:var(--ink)"/><circle cx="18.6" cy="29" r="3.4" style="fill:var(--ink)"/><path d="M24 39 L40 8" stroke="currentColor" style="color:var(--ink)" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" style="fill:var(--revenue)"/></svg><b>virling</b></a>
   <div class="menu-wrap switcher" data-menu>
@@ -30,58 +31,67 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="9" rx="2"/><rect x="13.5" y="3.5" width="7" height="5" rx="2"/><rect x="13.5" y="11.5" width="7" height="9" rx="2"/><rect x="3.5" y="15.5" width="7" height="5" rx="2"/></svg>Dashboard</a>
     <a href="/demo/visitors/" aria-current="page">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M3 19.5c.8-3.2 3.2-5 6-5s5.2 1.8 6 5M16 4.8a3.3 3.3 0 0 1 0 6.4M18 14.6c1.6.7 2.6 2.3 3 4.9"/></svg>Visitors</a>
+    <a href="/demo/globe/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.5 5.2 3.5 8.5s-1.1 6.1-3.5 8.5c-2.4-2.4-3.5-5.2-3.5-8.5s1.1-6.1 3.5-8.5z"/></svg>Live globe</a>
     <a href="/demo/payments/">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 14.5h3"/></svg>Payments</a>
     <a href="/demo/retention/">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M4 13l5-3 5 4 6-6"/><circle cx="20" cy="8" r="1"/></svg>Retention</a>
+    
     <a href="/demo/report/">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>Client report</a>
     
   </nav>
-  <div class="usage">
-    <span>3,506 visitors in the last 30 days</span>
+  <div class="usage" id="usage" data-sync>
+    <span>3,512 visitors in the last 30 days</span>
   </div>
   <div class="menu-wrap account" data-menu>
     <button type="button" aria-haspopup="true" aria-expanded="false">
       <span class="favicon avatar">MC</span>
-      <span class="grow who"><b>maya.chen@tallybird.app</b><span>Agency</span></span>
+      <span class="grow who" title="maya.chen@tallybird.app"><b>Maya Chen</b><span>Agency</span></span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
     </button>
     <div class="menu up" hidden>
-      <a href="/#join">Account settings</a>
-      <a href="/#join">Sign out</a>
+      <a href="https://app.virling.com/login">Account settings</a>
+      <a href="https://app.virling.com/login">Sign out</a>
     </div>
   </div>
 </aside>
 <div class="main">
+  
   
   <header class="top">
     <button class="burger" type="button" aria-controls="side" aria-expanded="false" aria-label="Menu" data-burger>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
     </button>
     <h1>Visitor</h1>
-    <span class="live-pill idle" title="Visitors in the last 5 minutes"><span class="dot"></span>0 live</span>
+    <span class="live-pill idle" id="live-pill" data-sync title="Visitors in the last 5 minutes"><span class="dot"></span>0 live</span>
     <span class="grow"></span>
     
   </header>
   
   <main class="content">
-<div class="notice row"><span>Demo with sample data.</span><a class="b" href="/#join">Join the waitlist</a></div>
+<div class="notice row"><span>Demo with sample data.</span><a class="b" href="https://app.virling.com/login">Start free trial</a></div>
+  
   
 <a class="link-quiet" href="/demo/visitors/">&#8592; All visitors</a>
 <section class="box vt-head">
   <div class="vt-id">
-    <span class="av lg"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" fill="#FFC9B0"/><circle cx="9.5" cy="21" r="4" fill="#8A5A3A"/><circle cx="30.5" cy="21" r="4" fill="#8A5A3A"/><circle cx="9.5" cy="21" r="2.2" fill="#E6C29C"/><circle cx="30.5" cy="21" r="2.2" fill="#E6C29C"/><circle cx="20" cy="22" r="10" fill="#8A5A3A"/><path d="M20 15c-3-2-7.5 0-7 4 .3 2 1.5 3 1.5 4 0 4 2.5 7 5.5 7s5.5-3 5.5-7c0-1 1.2-2 1.5-4 .5-4-4-6-7-4z" fill="#E6C29C"/><circle cx="17" cy="20.5" r="1.4" fill="#1F1A17"/><circle cx="23" cy="20.5" r="1.4" fill="#1F1A17"/><path d="M17.5 26.5q2.5 2 5 0" stroke="#1F1A17" stroke-width="1.1" fill="none" stroke-linecap="round"/><circle cx="19" cy="24" r=".5" fill="#1F1A17"/><circle cx="21" cy="24" r=".5" fill="#1F1A17"/></svg></span>
+    <span class="av lg"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" fill="#FFE066"/><ellipse cx="13" cy="10" rx="2" ry="4" fill="#EFE6DA" transform="rotate(-15 13 10)"/><ellipse cx="27" cy="10" rx="2" ry="4" fill="#EFE6DA" transform="rotate(15 27 10)"/><g fill="#F7F1E8"><circle cx="15" cy="11" r="4"/><circle cx="20" cy="9" r="4.5"/><circle cx="25" cy="11" r="4"/></g><ellipse cx="20" cy="23" rx="7.5" ry="10" fill="#F2E9DD"/><ellipse cx="20" cy="29" rx="4.6" ry="3.6" fill="#E3D3C0"/><circle cx="16.6" cy="21.5" r="1.3" fill="#1F1A17"/><circle cx="23.4" cy="21.5" r="1.3" fill="#1F1A17"/><path d="M18.6 29.5q1.4 1 2.8 0" stroke="#6A5848" stroke-width=".9" fill="none" stroke-linecap="round"/></svg></span>
     <div class="vt-name">
-      <h2>Rapid Monkey</h2>
-      <span class="j-meta"><img class="flag" src="/demo/flags/gb.svg" width="16" height="12" alt="United Kingdom flag">United Kingdom<i class="sep"></i>Chrome on Desktop<i class="sep"></i>First seen Oct 16<i class="sep"></i>Last seen 23h ago</span>
+      <h2>Bright Alpaca</h2>
+      <span class="j-meta"><img class="flag" src="/demo/flags/gb.svg" width="16" height="12" alt="United Kingdom flag">United Kingdom<i class="sep"></i>Desktop<i class="sep"></i><img class="ico" src="/demo/icons/apple.svg" width="12" height="12" alt="">macOS<i class="sep"></i><img class="ico" src="/demo/icons/googlechrome.svg" width="12" height="12" alt="">Chrome<i class="sep"></i>First seen Oct 26<i class="sep"></i>Last seen 4h ago</span>
+      <span class="vt-vid"><span class="mono">v4f991ad05368da08</span><button type="button" class="vt-copy" data-copy-text="v4f991ad05368da08" title="Copy visitor ID" aria-label="Copy visitor ID"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7.5a2 2 0 0 0 2 2h2.5"/></svg></button></span>
     </div>
     <span class="badge paid-b">Paid</span>
   </div>
+  <p class="vt-sum">First came from Indie Hackers (Communities), landed on /blog/we-stopped-chasing-invoices. Last seen leaving from /compare 4h ago. 2 visits, 11m 58s on site in total.</p>
   <div class="vt-stats">
     <div><span class="k">First source</span><b><svg class="ico" width="16" height="16" role="img" aria-label="Indie Hackers" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0E2439" d="M0 0h24v24H0V0Zm5.4 17.2h2.4V6.8H5.4v10.4Zm4.8 0h2.4v-4h3.6v4h2.4V6.8h-2.4v4h-3.6v-4h-2.4v10.4Z"/></svg><span class="lbl">Indie Hackers</span></b><span class="s">Communities</span></div>
-    <div><span class="k">Visits</span><b>2</b><span class="s">9 pageviews</span></div>
-    <div><span class="k">Goals</span><b>2</b><span class="s">reached</span></div>
+    <div><span class="k">Visits</span><b>2</b><span class="s">&nbsp;</span></div>
+    <div><span class="k">Pageviews</span><b>9</b><span class="s">&nbsp;</span></div>
+    <div><span class="k">Time on site</span><b>11m 58s</b><span class="s">all visits</span></div>
+    <div><span class="k">Goals</span><b>3</b><span class="s">reached</span></div>
     <div class="vt-rev"><span class="k">Lifetime revenue</span><b>$31.32</b><span class="s">1 payment</span></div>
     <div class="vt-exit"><span class="k">Last exit</span><b><span class="lbl">Left from /compare</span></b><span class="s">&nbsp;</span></div>
   </div>
@@ -96,8 +106,9 @@
         <div class="vt-vh">
           <b>Indie Hackers</b><span class="ch">Communities</span>
           <span class="grow"></span>
-          <span class="dim">Visit 1<i class="sep"></i>Oct 16, 10:28<i class="sep"></i>3 pages, 3 minutes</span>
+          <span class="dim">Visit 1<i class="sep"></i>Oct 26, 10:28<i class="sep"></i>3 pages, 3 minutes</span>
         </div>
+        <p class="vt-verdict"><b>Looks human</b> viewed 3 pages, stayed 3m 31s on its pages</p>
         <ol class="vt-steps">
           
           
@@ -130,8 +141,9 @@
         <div class="vt-vh">
           <b>ChatGPT</b><span class="ch">AI</span>
           <span class="grow"></span>
-          <span class="dim">Visit 2<i class="sep"></i>Oct 20, 16:28<i class="sep"></i>6 pages, 8 minutes</span>
+          <span class="dim">Visit 2<i class="sep"></i>Oct 30, 16:28<i class="sep"></i>6 pages, 8 minutes</span>
         </div>
+        <p class="vt-verdict"><b>Looks human</b> viewed 6 pages, stayed 6m 37s on its pages, clicked, reached a goal or paid</p>
         <ol class="vt-steps">
           
           
@@ -163,6 +175,10 @@
           
           
           
+          <li class="st-goal"><span class="t">16:36:35</span><span class="p"><span class="chip goal">Goal: checkout_started</span></span><span class="d"></span></li>
+          
+          
+          
           <li class="st-goal"><span class="t">16:37:05</span><span class="p"><span class="chip goal">Goal: trial</span></span><span class="d"></span></li>
           
           
@@ -173,7 +189,7 @@
           
           
           
-          <li class="st-pay"><span class="t">16:47:05</span><a class="p" href="/demo/payments/stripe/pi_55b0116ce72c073a/" data-drawer="/demo/payments/stripe/pi_55b0116ce72c073a/drawer.html"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><b>Paid $31.32</b><span class="prov-inline"><svg class="ico" width="14" height="14" role="img" aria-label="Stripe" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#635BFF" d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z"/></svg>Stripe</span></a><span class="d"></span></li>
+          <li class="st-pay"><span class="t">16:47:05</span><a class="p" href="/demo/payments/stripe/pi_55b0116ce72c073a/" data-drawer="/demo/payments/stripe/pi_55b0116ce72c073a/drawer.html"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><b>Paid $31.32</b><span class="prov-inline"><svg class="ico" width="14" height="14" role="img" aria-label="Stripe" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#635BFF" d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z"/></svg>Stripe</span><span class="credit-line">Credited to ChatGPT by visitor ID</span></a><span class="d"></span></li>
           
           
         </ol>
@@ -198,6 +214,6 @@
 
   </main>
 </div>
-<script src="/demo/app.js?v=72be1091"></script>
+<script src="/demo/app.js?v=11afde1b"></script>
 </body>
 </html>

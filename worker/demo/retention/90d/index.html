@@ -6,10 +6,11 @@
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/demo/app.css?v=72be1091">
+<link rel="stylesheet" href="/demo/app.css?v=11afde1b">
 <title>Retention · tallybird.app · Virling</title>
+<meta name="robots" content="noindex,follow">
 </head>
-<body class="app">
+<body class="app" data-poll="/app/tallybird.app/live">
 <aside class="side" id="side">
   <a class="brand" href="/"><svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" style="fill:var(--ink)"/><circle cx="13.3" cy="19" r="3.4" style="fill:var(--ink)"/><circle cx="18.6" cy="29" r="3.4" style="fill:var(--ink)"/><path d="M24 39 L40 8" stroke="currentColor" style="color:var(--ink)" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" style="fill:var(--revenue)"/></svg><b>virling</b></a>
   <div class="menu-wrap switcher" data-menu>
@@ -30,37 +31,41 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="9" rx="2"/><rect x="13.5" y="3.5" width="7" height="5" rx="2"/><rect x="13.5" y="11.5" width="7" height="9" rx="2"/><rect x="3.5" y="15.5" width="7" height="5" rx="2"/></svg>Dashboard</a>
     <a href="/demo/visitors/90d/">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M3 19.5c.8-3.2 3.2-5 6-5s5.2 1.8 6 5M16 4.8a3.3 3.3 0 0 1 0 6.4M18 14.6c1.6.7 2.6 2.3 3 4.9"/></svg>Visitors</a>
+    <a href="/demo/globe/90d/">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.5 5.2 3.5 8.5s-1.1 6.1-3.5 8.5c-2.4-2.4-3.5-5.2-3.5-8.5s1.1-6.1 3.5-8.5z"/></svg>Live globe</a>
     <a href="/demo/payments/90d/">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 14.5h3"/></svg>Payments</a>
     <a href="/demo/retention/90d/" aria-current="page">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M4 13l5-3 5 4 6-6"/><circle cx="20" cy="8" r="1"/></svg>Retention</a>
+    
     <a href="/demo/report/">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>Client report</a>
     
   </nav>
-  <div class="usage">
-    <span>8,364 visitors in the last 90 days</span>
+  <div class="usage" id="usage" data-sync>
+    <span>8,355 visitors in the last 90 days</span>
   </div>
   <div class="menu-wrap account" data-menu>
     <button type="button" aria-haspopup="true" aria-expanded="false">
       <span class="favicon avatar">MC</span>
-      <span class="grow who"><b>maya.chen@tallybird.app</b><span>Agency</span></span>
+      <span class="grow who" title="maya.chen@tallybird.app"><b>Maya Chen</b><span>Agency</span></span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
     </button>
     <div class="menu up" hidden>
-      <a href="/#join">Account settings</a>
-      <a href="/#join">Sign out</a>
+      <a href="https://app.virling.com/login">Account settings</a>
+      <a href="https://app.virling.com/login">Sign out</a>
     </div>
   </div>
 </aside>
 <div class="main">
+  
   
   <header class="top">
     <button class="burger" type="button" aria-controls="side" aria-expanded="false" aria-label="Menu" data-burger>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
     </button>
     <h1>Retention</h1>
-    <span class="live-pill idle" title="Visitors in the last 5 minutes"><span class="dot"></span>0 live</span>
+    <span class="live-pill idle" id="live-pill" data-sync title="Visitors in the last 5 minutes"><span class="dot"></span>0 live</span>
     <span class="grow"></span>
       <div class="menu-wrap d3-range" data-menu>
     <button type="button" class="d3-btn" aria-haspopup="true" aria-expanded="false">
@@ -68,9 +73,10 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
     </button>
     <div class="menu right d3-rmenu" hidden>
-      <a href="/demo/retention/7d/"><span>Last 7 days</span><span class="hint">Oct 15 to 21</span></a><a href="/demo/retention/"><span>Last 30 days</span><span class="hint">Sep 22 to Oct 21</span></a><a href="/demo/retention/90d/" aria-current="true"><span>Last 90 days</span><span class="hint">Jul 24 to Oct 21</span></a>
+      <a href="/demo/retention/"><span>Last 7 days</span><span class="hint">Oct 24 to 30</span></a><a href="/demo/retention/90d/" aria-current="true"><span>Last 90 days</span><span class="hint">Aug 2 to Oct 30</span></a>
       <hr>
       <a class="d3-switch" role="switch" aria-checked="true"><span>Compare to previous period</span><i></i></a>
+      
       <details>
         <summary>Custom range…</summary>
         
@@ -80,13 +86,14 @@
   </header>
   
   <main class="content">
-<div class="notice row"><span>Demo with sample data.</span><a class="b" href="/#join">Join the waitlist</a></div>
+<div class="notice row"><span>Demo with sample data.</span><a class="b" href="https://app.virling.com/login">Start free trial</a></div>
+  
   
 
 
 
 <section class="box summary rt-sum">
-  <div><span class="sn"><i class="dot blue"></i>Customers acquired</span><b class="blue">189</b><span class="dim">$5,264 in first payments</span></div><div><span class="sn"><i class="dot blue"></i>Still paying</span><b class="blue">153</b><span class="dim">81% of them</span></div><div><span class="sn"><i class="dot orange"></i>Net LTV</span><b class="orange">$9,147</b><span class="dim">$48.40 per customer</span></div><div><span class="sn">Refund rate</span><b>5%</b><span class="dim">$240 refunded</span></div><div><span class="sn">30-day churn</span><b>9%</b><span class="dim">Of 58 customers who started 30 to 60 days ago</span></div>
+  <div><span class="sn"><i class="dot blue"></i>Customers acquired</span><b class="blue">196</b><span class="dim">$5,458 in first payments</span></div><div><span class="sn"><i class="dot blue"></i>Still paying</span><b class="blue">160</b><span class="dim">82% of them</span></div><div><span class="sn"><i class="dot orange"></i>Net LTV</span><b class="orange">$9,530</b><span class="dim">$48.62 per customer</span></div><div><span class="sn">Refund rate</span><b>5%</b><span class="dim">$259 refunded</span></div><div><span class="sn">30-day churn</span><b>12%</b><span class="dim">Of 60 customers who started 30 to 60 days ago</span></div>
 </section>
 <section class="box rt">
   <div class="rt-top">
@@ -96,88 +103,185 @@
   <div class="rt-row th"><span>Channel</span><span class="num c-cust">Customers</span><span class="num c-net">Net LTV</span><span class="num c-avg">Avg LTV</span><span class="num c-ref">Refund rate</span><span class="num c-churn">30-day churn</span></div>
   
   <div class="rt-row">
-    <span class="rt-name"><span class="rt-bar" style="width:100.0%"><i style="width:75.5%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><span class="lbl">Organic search</span></span></span>
-    <span class="num c-cust" data-k="Customers"><b>53</b><span class="dim">40 paying</span></span>
-    <span class="num c-net rev" data-k="Net LTV">$2,780</span>
-    <span class="num c-avg" data-k="Avg LTV">$52.46</span>
-    <span class="num c-ref" data-k="Refunds">8%</span>
-    <span class="num c-churn" data-k="30-day churn" title="0 of 11 who started 30 to 60 days ago stopped paying">0%</span>
-  </div>
-  
-  <div class="rt-row">
-    <span class="rt-name"><span class="rt-bar" style="width:94.3%"><i style="width:90.0%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.2 5.6L20 11l-5.8 2.4L12 19l-2.2-5.6L4 11l5.8-2.4zM19 17v4M17 19h4"/></svg><span class="lbl">AI</span></span></span>
-    <span class="num c-cust" data-k="Customers"><b>50</b><span class="dim">45 paying</span></span>
-    <span class="num c-net rev" data-k="Net LTV">$2,655</span>
-    <span class="num c-avg" data-k="Avg LTV">$53.11</span>
-    <span class="num c-ref" data-k="Refunds">2%</span>
-    <span class="num c-churn" data-k="30-day churn" title="0 of 18 who started 30 to 60 days ago stopped paying">0%</span>
-  </div>
-  
-  <div class="rt-row">
-    <span class="rt-name"><span class="rt-bar" style="width:56.6%"><i style="width:86.7%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/></svg><span class="lbl">Email</span></span></span>
-    <span class="num c-cust" data-k="Customers"><b>30</b><span class="dim">26 paying</span></span>
-    <span class="num c-net rev" data-k="Net LTV">$1,186</span>
-    <span class="num c-avg" data-k="Avg LTV">$39.53</span>
-    <span class="num c-ref" data-k="Refunds">10%</span>
-    <span class="num c-churn" data-k="30-day churn" title="1 of 13 who started 30 to 60 days ago stopped paying">8%</span>
-  </div>
-  
-  <div class="rt-row">
-    <span class="rt-name"><span class="rt-bar" style="width:37.7%"><i style="width:70.0%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 11l7.6-3.8M8.2 13l7.6 3.8"/></svg><span class="lbl">Social</span></span></span>
-    <span class="num c-cust" data-k="Customers"><b>20</b><span class="dim">14 paying</span></span>
-    <span class="num c-net rev" data-k="Net LTV">$628</span>
-    <span class="num c-avg" data-k="Avg LTV">$31.38</span>
+    <span class="rt-name"><span class="rt-bar" style="width:100.0%"><i style="width:84.2%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.2 5.6L20 11l-5.8 2.4L12 19l-2.2-5.6L4 11l5.8-2.4zM19 17v4M17 19h4"/></svg><span class="lbl">AI</span></span></span>
+    <span class="num c-cust" data-k="Customers"><b>57</b><span class="dim">48 paying</span></span>
+    <span class="num c-net rev" data-k="Net LTV">$2,700</span>
+    <span class="num c-avg" data-k="Avg LTV">$47.36</span>
     <span class="num c-ref" data-k="Refunds">5%</span>
-    <span class="num c-churn" data-k="30-day churn" title="3 of 4 who started 30 to 60 days ago stopped paying">75%</span>
+    <span class="num c-churn" data-k="30-day churn" title="1 of 19 who started 30 to 60 days ago stopped paying">5%</span>
   </div>
   
   <div class="rt-row">
-    <span class="rt-name"><span class="rt-bar" style="width:32.1%"><i style="width:76.5%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 8-6 2-3 6z"/></svg><span class="lbl">Direct</span></span></span>
-    <span class="num c-cust" data-k="Customers"><b>17</b><span class="dim">13 paying</span></span>
-    <span class="num c-net rev" data-k="Net LTV">$786</span>
-    <span class="num c-avg" data-k="Avg LTV">$46.25</span>
+    <span class="rt-name"><span class="rt-bar" style="width:98.2%"><i style="width:78.6%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><span class="lbl">Organic search</span></span></span>
+    <span class="num c-cust" data-k="Customers"><b>56</b><span class="dim">44 paying</span></span>
+    <span class="num c-net rev" data-k="Net LTV">$2,925</span>
+    <span class="num c-avg" data-k="Avg LTV">$52.23</span>
+    <span class="num c-ref" data-k="Refunds">5%</span>
+    <span class="num c-churn" data-k="30-day churn" title="1 of 17 who started 30 to 60 days ago stopped paying">6%</span>
+  </div>
+  
+  <div class="rt-row">
+    <span class="rt-name"><span class="rt-bar" style="width:57.9%"><i style="width:81.8%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/></svg><span class="lbl">Email</span></span></span>
+    <span class="num c-cust" data-k="Customers"><b>33</b><span class="dim">27 paying</span></span>
+    <span class="num c-net rev" data-k="Net LTV">$1,216</span>
+    <span class="num c-avg" data-k="Avg LTV">$36.86</span>
+    <span class="num c-ref" data-k="Refunds">9%</span>
+    <span class="num c-churn" data-k="30-day churn" title="4 of 11 who started 30 to 60 days ago stopped paying">36%</span>
+  </div>
+  
+  <div class="rt-row">
+    <span class="rt-name"><span class="rt-bar" style="width:28.1%"><i style="width:87.5%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M6.3 17.7L17.7 6.3"/></svg><span class="lbl">Direct</span></span></span>
+    <span class="num c-cust" data-k="Customers"><b>16</b><span class="dim">14 paying</span></span>
+    <span class="num c-net rev" data-k="Net LTV">$1,038</span>
+    <span class="num c-avg" data-k="Avg LTV">$64.87</span>
     <span class="num c-ref" data-k="Refunds">0%</span>
-    <span class="num c-churn" data-k="30-day churn" title="1 of 6 who started 30 to 60 days ago stopped paying">17%</span>
+    <span class="num c-churn" data-k="30-day churn" title="0 of 4 who started 30 to 60 days ago stopped paying">0%</span>
   </div>
   
   <div class="rt-row">
-    <span class="rt-name"><span class="rt-bar" style="width:9.4%"><i style="width:40.0%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 10a6 6 0 0 1-8.7 5.4L2 16.5l1-3.2A6 6 0 1 1 14 10z"/><path d="M16.5 8.6A6 6 0 0 1 21 18.3l1 3.2-3.3-1.1A6 6 0 0 1 10.6 18"/></svg><span class="lbl">Communities</span></span></span>
-    <span class="num c-cust" data-k="Customers"><b>5</b><span class="dim">2 paying</span></span>
-    <span class="num c-net rev" data-k="Net LTV">$181</span>
-    <span class="num c-avg" data-k="Avg LTV">$36.13</span>
-    <span class="num c-ref" data-k="Refunds">20%</span>
-    <span class="num c-churn" data-k="30-day churn" title="0 of 3 who started 30 to 60 days ago stopped paying">0%</span>
-  </div>
-  
-  <div class="rt-row">
-    <span class="rt-name"><span class="rt-bar" style="width:1.9%"><i style="width:100.0%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><span class="lbl">Referral</span></span></span>
-    <span class="num c-cust" data-k="Customers"><b>1</b><span class="dim">1 paying</span></span>
-    <span class="num c-net rev" data-k="Net LTV">$12</span>
-    <span class="num c-avg" data-k="Avg LTV">$12</span>
+    <span class="rt-name"><span class="rt-bar" style="width:24.6%"><i style="width:71.4%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 11l7.6-3.8M8.2 13l7.6 3.8"/></svg><span class="lbl">Social</span></span></span>
+    <span class="num c-cust" data-k="Customers"><b>14</b><span class="dim">10 paying</span></span>
+    <span class="num c-net rev" data-k="Net LTV">$381</span>
+    <span class="num c-avg" data-k="Avg LTV">$27.23</span>
     <span class="num c-ref" data-k="Refunds">0%</span>
-    <span class="num c-churn" data-k="30-day churn" title="No customers started 30 to 60 days ago">n/a</span>
+    <span class="num c-churn" data-k="30-day churn" title="1 of 5 who started 30 to 60 days ago stopped paying">20%</span>
+  </div>
+  
+  <div class="rt-row">
+    <span class="rt-name"><span class="rt-bar" style="width:3.5%"><i style="width:50.0%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><span class="lbl">Referral</span></span></span>
+    <span class="num c-cust" data-k="Customers"><b>2</b><span class="dim">1 paying</span></span>
+    <span class="num c-net rev" data-k="Net LTV">$183</span>
+    <span class="num c-avg" data-k="Avg LTV">$91.32</span>
+    <span class="num c-ref" data-k="Refunds">0%</span>
+    <span class="num c-churn" data-k="30-day churn" title="0 of 1 who started 30 to 60 days ago stopped paying">0%</span>
+  </div>
+  
+  <div class="rt-row">
+    <span class="rt-name"><span class="rt-bar" style="width:3.5%"><i style="width:50.0%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 10a6 6 0 0 1-8.7 5.4L2 16.5l1-3.2A6 6 0 1 1 14 10z"/><path d="M16.5 8.6A6 6 0 0 1 21 18.3l1 3.2-3.3-1.1A6 6 0 0 1 10.6 18"/></svg><span class="lbl">Communities</span></span></span>
+    <span class="num c-cust" data-k="Customers"><b>2</b><span class="dim">1 paying</span></span>
+    <span class="num c-net rev" data-k="Net LTV">$74.64</span>
+    <span class="num c-avg" data-k="Avg LTV">$37.32</span>
+    <span class="num c-ref" data-k="Refunds">0%</span>
+    <span class="num c-churn" data-k="30-day churn" title="0 of 1 who started 30 to 60 days ago stopped paying">0%</span>
   </div>
   
   <div class="rt-row unattr">
-    <span class="rt-name"><span class="rt-bar" style="width:24.5%"><i style="width:92.3%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-4)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.2M12 17h.01"/></svg><span class="lbl">Unattributed</span></span></span>
-    <span class="num c-cust" data-k="Customers"><b>13</b><span class="dim">12 paying</span></span>
-    <span class="num c-net rev" data-k="Net LTV">$919</span>
-    <span class="num c-avg" data-k="Avg LTV">$70.71</span>
+    <span class="rt-name"><span class="rt-bar" style="width:28.1%"><i style="width:93.8%"></i></span><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-4)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.2M12 17h.01"/></svg><span class="lbl">Unattributed</span></span></span>
+    <span class="num c-cust" data-k="Customers"><b>16</b><span class="dim">15 paying</span></span>
+    <span class="num c-net rev" data-k="Net LTV">$1,013</span>
+    <span class="num c-avg" data-k="Avg LTV">$63.29</span>
     <span class="num c-ref" data-k="Refunds">0%</span>
-    <span class="num c-churn" data-k="30-day churn" title="0 of 3 who started 30 to 60 days ago stopped paying">0%</span>
+    <span class="num c-churn" data-k="30-day churn" title="0 of 2 who started 30 to 60 days ago stopped paying">0%</span>
   </div>
   
   
   <div class="rt-foot">
     <span class="rt-key"><i class="sw acq"></i>Acquired in range<i class="sw pay"></i>Still paying</span>
-    <a href="https://docs.virling.com/attribution/retention.html">How this is counted</a>
+    <a href="https://docs.virling.com/attribution/retention">How this is counted</a>
   </div>
 </section>
+
+<section class="box ltv">
+  <div class="ltv-head"><h2>Lifetime value by first source</h2><span class="dim">Customers who first paid in this range, by where their first visit came from. Net of refunds.</span></div>
+  <div class="ltv-row th"><span>Source</span><span class="num">Customers</span><span class="num">Lifetime revenue</span><span class="num">Avg value</span><span class="num">Renewals</span><span class="num">Repeat share</span></div>
+  
+  <div class="ltv-row">
+    <span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M6.3 17.7L17.7 6.3"/></svg><span class="lbl">Direct</span></span>
+    <span class="num" data-k="Customers">31</span>
+    <span class="num rev" data-k="Lifetime revenue">$1,684</span>
+    <span class="num" data-k="Avg value">$54.33</span>
+    <span class="num" data-k="Renewals">20</span>
+    <span class="num" data-k="Repeat share">42%</span>
+  </div>
+  
+  <div class="ltv-row">
+    <span class="t"><svg class="ico" width="16" height="16" role="img" aria-label="ChatGPT" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg><span class="lbl">ChatGPT</span></span>
+    <span class="num" data-k="Customers">27</span>
+    <span class="num rev" data-k="Lifetime revenue">$1,565</span>
+    <span class="num" data-k="Avg value">$57.97</span>
+    <span class="num" data-k="Renewals">24</span>
+    <span class="num" data-k="Repeat share">59%</span>
+  </div>
+  
+  <div class="ltv-row">
+    <span class="t"><svg class="ico" width="16" height="16" role="img" aria-label="Google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.98-3.09z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/></svg><span class="lbl">Google</span></span>
+    <span class="num" data-k="Customers">35</span>
+    <span class="num rev" data-k="Lifetime revenue">$1,402</span>
+    <span class="num" data-k="Avg value">$40.06</span>
+    <span class="num" data-k="Renewals">32</span>
+    <span class="num" data-k="Repeat share">66%</span>
+  </div>
+  
+  <div class="ltv-row">
+    <span class="t"><svg class="ico" width="16" height="16" role="img" aria-label="X" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#000000" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg><span class="lbl">X</span></span>
+    <span class="num" data-k="Customers">14</span>
+    <span class="num rev" data-k="Lifetime revenue">$835</span>
+    <span class="num" data-k="Avg value">$59.63</span>
+    <span class="num" data-k="Renewals">20</span>
+    <span class="num" data-k="Repeat share">86%</span>
+  </div>
+  
+  <div class="ltv-row">
+    <span class="t"><svg class="ico" width="16" height="16" role="img" aria-label="Claude" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#D97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg><span class="lbl">Claude</span></span>
+    <span class="num" data-k="Customers">15</span>
+    <span class="num rev" data-k="Lifetime revenue">$715</span>
+    <span class="num" data-k="Avg value">$47.65</span>
+    <span class="num" data-k="Renewals">7</span>
+    <span class="num" data-k="Repeat share">40%</span>
+  </div>
+  
+  <div class="ltv-row">
+    <span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/></svg><span class="lbl">Email</span></span>
+    <span class="num" data-k="Customers">13</span>
+    <span class="num rev" data-k="Lifetime revenue">$666</span>
+    <span class="num" data-k="Avg value">$51.20</span>
+    <span class="num" data-k="Renewals">12</span>
+    <span class="num" data-k="Repeat share">54%</span>
+  </div>
+  
+  <div class="ltv-row">
+    <span class="t"><svg class="ico" width="16" height="16" role="img" aria-label="Perplexity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#1FB8CD" d="M22.3977 7.0896h-2.3106V.0676l-7.5094 6.3542V.1577h-1.1554v6.1966L4.4904 0v7.0896H1.6023v10.3976h2.8882V24l6.932-6.3591v6.2005h1.1554v-6.0469l6.9318 6.1807v-6.4879h2.8882V7.0896zm-3.4657-4.531v4.531h-5.355l5.355-4.531zm-13.2862.0676 4.8691 4.4634H5.6458V2.6262zM2.7576 16.332V8.245h7.8476l-6.1149 6.1147v1.9723H2.7576zm2.8882 5.0404v-3.8852h.0001v-2.6488l5.7763-5.7764v7.0111l-5.7764 5.2993zm12.7086.0248-5.7766-5.1509V9.0618l5.7766 5.7766v6.5588zm2.8882-5.0652h-1.733v-1.9723L13.3948 8.245h7.8478v8.087z"/></svg><span class="lbl">Perplexity</span></span>
+    <span class="num" data-k="Customers">13</span>
+    <span class="num rev" data-k="Lifetime revenue">$525</span>
+    <span class="num" data-k="Avg value">$40.35</span>
+    <span class="num" data-k="Renewals">8</span>
+    <span class="num" data-k="Repeat share">46%</span>
+  </div>
+  
+  <div class="ltv-row">
+    <span class="t"><svg class="ico" width="16" height="16" role="img" aria-label="Indie Hackers" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0E2439" d="M0 0h24v24H0V0Zm5.4 17.2h2.4V6.8H5.4v10.4Zm4.8 0h2.4v-4h3.6v4h2.4V6.8h-2.4v4h-3.6v-4h-2.4v10.4Z"/></svg><span class="lbl">Indie Hackers</span></span>
+    <span class="num" data-k="Customers">5</span>
+    <span class="num rev" data-k="Lifetime revenue">$249</span>
+    <span class="num" data-k="Avg value">$49.86</span>
+    <span class="num" data-k="Renewals">3</span>
+    <span class="num" data-k="Repeat share">40%</span>
+  </div>
+  
+  <div class="ltv-row">
+    <span class="t"><img class="ico" src="/demo/icons/stackoverflow.com.ico" width="16" height="16" alt=""><span class="lbl">stackoverflow.com</span></span>
+    <span class="num" data-k="Customers">2</span>
+    <span class="num rev" data-k="Lifetime revenue">$183</span>
+    <span class="num" data-k="Avg value">$91.32</span>
+    <span class="num" data-k="Renewals">1</span>
+    <span class="num" data-k="Repeat share">50%</span>
+  </div>
+  
+  <div class="ltv-row">
+    <span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.4 5.2 3.4 8.5s-1 6.1-3.4 8.5c-2.4-2.4-3.4-5.2-3.4-8.5s1-6.1 3.4-8.5z"/></svg><span class="lbl">Other sources</span></span>
+    <span class="num" data-k="Customers">41</span>
+    <span class="num rev" data-k="Lifetime revenue">$1,707</span>
+    <span class="num" data-k="Avg value">$41.63</span>
+    <span class="num" data-k="Renewals">32</span>
+    <span class="num" data-k="Repeat share">51%</span>
+  </div>
+  
+</section>
+
 
 
 
   </main>
 </div>
-<script src="/demo/app.js?v=72be1091"></script>
+<script src="/demo/app.js?v=11afde1b"></script>
 </body>
 </html>
