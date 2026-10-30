@@ -43,7 +43,7 @@ const PLATFORMS: [(&str, &[&str]); 5] = [
     ("p-shopify", &["cdn.shopify.com", "Shopify.theme"]),
 ];
 
-const PROVIDERS: [(Provider, &[&str]); 6] = [
+const PROVIDERS: [(Provider, &[&str]); 7] = [
     (
         Provider::Stripe,
         &["js.stripe.com", "buy.stripe.com", "checkout.stripe.com"],
@@ -58,6 +58,10 @@ const PROVIDERS: [(Provider, &[&str]); 6] = [
     (
         Provider::RevenueCat,
         &["@revenuecat/purchases-js", "pay.rev.cat"],
+    ),
+    (
+        Provider::Paddle,
+        &["cdn.paddle.com/paddle", "@paddle/paddle-js"],
     ),
 ];
 

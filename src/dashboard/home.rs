@@ -1102,7 +1102,7 @@ async fn page(
                 None => step(
                     false,
                     "Connect payments",
-                    "Read-only key for Stripe, Dodo Payments, Polar, LemonSqueezy, Creem or RevenueCat".into(),
+                    "Read-only key for Stripe, Dodo Payments, Polar, LemonSqueezy, Creem, RevenueCat or Paddle".into(),
                     "Connect",
                     site_url("setup/payments"),
                 ),

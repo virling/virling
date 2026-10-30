@@ -72,7 +72,14 @@ await fetch(`https://api.revenuecat.com/v2/projects/${projectId}/customers/${app
   method: "POST",
   headers: { authorization: `Bearer ${process.env.REVENUECAT_SECRET_KEY}`, "content-type": "application/json" },
   body: JSON.stringify({ attributes: [{ name: "virling_vid", value: req.cookies.virling_vid }] }),
-});{% else %}// LemonSqueezy: checkout links (STORE.lemonsqueezy.com/checkout/buy/...)
+});{% else if key == &"paddle" %}// Paddle (Paddle.js): pass the visitor ID as custom data
+Paddle.Checkout.open({
+  items: [{ priceId: "pri_...", quantity: 1 }],
+  customData: { virling_vid: window.virling?.vid?.() },
+});
+
+// Or on your server, POST /transactions with:
+// custom_data: { virling_vid: req.cookies.virling_vid }{% else %}// LemonSqueezy: checkout links (STORE.lemonsqueezy.com/checkout/buy/...)
 // need nothing: the Virling script adds checkout[custom][virling_vid].
 
 // For checkouts you create on your server, POST /v1/checkouts with:
