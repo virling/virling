@@ -307,6 +307,8 @@ img.favicon { background: none; object-fit: contain; }
 .conn { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--rule-2); }
 .conn .grow { display: flex; flex: 1 1 280px; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 .conn .err { flex-basis: 100%; color: var(--error-text); }
+.conn-products { display: flex; align-items: flex-end; gap: 12px; padding: 0 0 12px; }
+.conn-products .field { flex: 1 1 280px; }
 .card > .conn:first-child { border-top: 0; padding-top: 0; }
 .card > form:first-child > .setting:first-child { border-top: 0; padding-top: 0; }
 .conn .ai-key { flex: 1 1 200px; max-width: 280px; height: 40px; font-size: 14px; }

@@ -1223,6 +1223,7 @@ mod tests {
             ai_budget_usd: None,
             turnstile: None,
             billing: None,
+            self_track_site: None,
         };
         let state = AppState::new(
             config,

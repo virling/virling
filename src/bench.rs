@@ -198,6 +198,7 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         ai_budget_usd: None,
         turnstile: None,
         billing: None,
+        self_track_site: None,
     };
     let state = AppState::new(
         config,

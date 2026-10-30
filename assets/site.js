@@ -271,3 +271,17 @@ if (modelContext && modelContext.registerTool) {
     },
   }, { signal: stop.signal });
 }
+
+// Links into the app carry the visitor ID, so a new account and its plan are credited to the visit that brought it.
+const toApp = (a) => {
+  const vid = document.cookie.match(/(?:^|; )virling_vid=([^;]+)/)?.[1];
+  if (!vid || !/^[A-Za-z0-9-]{8,64}$/.test(vid)) return;
+  const url = new URL(a.href);
+  url.searchParams.set("vid", vid);
+  a.href = url.href;
+};
+document.querySelectorAll('a[href^="https://app.virling.com"]').forEach(toApp);
+document.addEventListener("click", (e) => {
+  const a = e.target.closest?.('a[href^="https://app.virling.com"]');
+  if (a) toApp(a);
+}, true);

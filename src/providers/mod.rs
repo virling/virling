@@ -60,6 +60,17 @@ pub fn months(unit: &str, count: i64) -> Option<f64> {
     Some(one * count.max(1) as f64)
 }
 
+/// Product IDs from a comma or space separated list, without duplicates; empty means every product.
+pub fn product_list(text: &str) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    for id in text.split([',', ' ', '\n', '\r', '\t']).map(str::trim) {
+        if !id.is_empty() && id.len() <= 100 && !out.iter().any(|o| o == id) && out.len() < 50 {
+            out.push(id.to_string());
+        }
+    }
+    out
+}
+
 /// Most subscriptions read per round, newest first; older ones fall back to payment recency.
 pub const MAX_SUBSCRIPTION_PAGES: u32 = 50;
 
@@ -123,15 +134,17 @@ impl Provider {
     }
 
     /// Fetches the next page after `cursor`. With no cursor, starts 90 days back.
+    /// With `products`, only payments for those product IDs; providers other than Dodo ignore it for now.
     pub async fn fetch(
         self,
         client: &reqwest::Client,
         key: &str,
         cursor: Option<&str>,
+        products: &[String],
     ) -> anyhow::Result<Page> {
         match self {
             Provider::Stripe => stripe::fetch(client, key, cursor).await,
-            Provider::Dodo => dodo::fetch(client, key, cursor).await,
+            Provider::Dodo => dodo::fetch(client, key, cursor, products).await,
             Provider::Polar => polar::fetch(client, key, cursor).await,
             Provider::LemonSqueezy => lemonsqueezy::fetch(client, key, cursor).await,
             Provider::Creem => creem::fetch(client, key, cursor).await,
@@ -144,10 +157,11 @@ impl Provider {
         self,
         client: &reqwest::Client,
         key: &str,
+        products: &[String],
     ) -> anyhow::Result<Option<Vec<Subscription>>> {
         match self {
             Provider::Stripe => stripe::subscriptions(client, key).await,
-            Provider::Dodo => dodo::subscriptions(client, key).await,
+            Provider::Dodo => dodo::subscriptions(client, key, products).await,
             Provider::Polar => polar::subscriptions(client, key).await,
             Provider::LemonSqueezy => lemonsqueezy::subscriptions(client, key).await,
             Provider::Creem => creem::subscriptions(client, key).await,

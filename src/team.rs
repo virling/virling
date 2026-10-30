@@ -325,6 +325,8 @@ pub async fn confirm(State(state): State<AppState>, Query(input): Query<TokenInp
             turnstile: None,
             email,
             token: input.token,
+            vid: String::new(),
+            track: None,
             error: None,
         }),
         None => auth::page(LoginPage {
@@ -332,6 +334,8 @@ pub async fn confirm(State(state): State<AppState>, Query(input): Query<TokenInp
             turnstile: None,
             email: String::new(),
             token: String::new(),
+            vid: String::new(),
+            track: None,
             error: Some(EXPIRED),
         }),
     }
@@ -345,6 +349,8 @@ pub async fn accept(State(state): State<AppState>, Form(input): Form<TokenInput>
             turnstile: None,
             email: String::new(),
             token: String::new(),
+            vid: String::new(),
+            track: None,
             error: Some(error),
         })
     };

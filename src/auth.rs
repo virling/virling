@@ -10,6 +10,7 @@ use std::net::SocketAddr;
 use time::OffsetDateTime;
 
 use crate::app::AppState;
+use crate::ingest::valid_visitor_id;
 use crate::sites;
 use crate::waitlist::valid_email;
 
@@ -44,6 +45,10 @@ pub struct LoginPage {
     pub view: &'static str,
     pub email: String,
     pub token: String,
+    /// The visitor ID from the marketing site, kept through the sign-in form.
+    pub vid: String,
+    /// (script host, site) of the tracking script on the sign-in page.
+    pub track: Option<(String, String)>,
     pub error: Option<&'static str>,
     pub turnstile: Option<String>,
 }
@@ -69,12 +74,19 @@ pub fn page(p: LoginPage) -> Response {
     }
 }
 
-pub async fn login_form(State(state): State<AppState>) -> Response {
+#[derive(Deserialize)]
+pub struct LoginQuery {
+    vid: Option<String>,
+}
+
+pub async fn login_form(State(state): State<AppState>, Query(q): Query<LoginQuery>) -> Response {
     page(LoginPage {
         view: "enter",
         turnstile: site_key(&state),
         email: String::new(),
         token: String::new(),
+        vid: q.vid.filter(|v| valid_visitor_id(v)).unwrap_or_default(),
+        track: track(&state),
         error: None,
     })
 }
@@ -82,8 +94,15 @@ pub async fn login_form(State(state): State<AppState>) -> Response {
 #[derive(Deserialize)]
 pub struct LoginInput {
     email: String,
+    vid: Option<String>,
     #[serde(rename = "cf-turnstile-response")]
     turnstile: Option<String>,
+}
+
+/// The script tag's host and site when the server tracks its own sign-in page.
+fn track(state: &AppState) -> Option<(String, String)> {
+    let site = state.config.self_track_site.clone()?;
+    Some((state.config.base_url.clone(), site))
 }
 
 fn site_key(state: &AppState) -> Option<String> {
@@ -140,12 +159,18 @@ pub async fn send_link(
     .to_string();
     let key = site_key(&state);
     let email = input.email.trim().to_ascii_lowercase();
+    let vid = input
+        .vid
+        .filter(|v| valid_visitor_id(v))
+        .unwrap_or_default();
     if !valid_email(&email) {
         return page(LoginPage {
             view: "enter",
             turnstile: key.clone(),
             email,
             token: String::new(),
+            vid: vid.clone(),
+            track: track(&state),
             error: Some("Enter a valid email."),
         });
     }
@@ -155,6 +180,8 @@ pub async fn send_link(
             turnstile: key,
             email,
             token: String::new(),
+            vid: vid.clone(),
+            track: track(&state),
             error: Some("Use a permanent email address, not a temporary one."),
         });
     }
@@ -164,6 +191,8 @@ pub async fn send_link(
             turnstile: key,
             email,
             token: String::new(),
+            vid: vid.clone(),
+            track: track(&state),
             error: Some("Confirm you are human and try again."),
         });
     }
@@ -190,12 +219,13 @@ pub async fn send_link(
             .unwrap_or(LINKS_PER_IP_10_MIN);
     if recent < LINKS_PER_HOUR && from_ip < LINKS_PER_IP_HOUR && burst < LINKS_PER_IP_10_MIN {
         let token = random_token();
-        let inserted = sqlx::query("INSERT INTO login_tokens (token_hash, email, created_at, expires_at, ip) VALUES (?, ?, ?, ?, ?)")
+        let inserted = sqlx::query("INSERT INTO login_tokens (token_hash, email, created_at, expires_at, ip, vid) VALUES (?, ?, ?, ?, ?, ?)")
             .bind(hash_token(&token))
             .bind(&email)
             .bind(now())
             .bind(now() + LINK_TTL_SECS)
             .bind(&ip)
+            .bind(Some(&vid).filter(|v| !v.is_empty()))
             .execute(&state.db)
             .await;
         if let Err(err) = inserted {
@@ -205,6 +235,8 @@ pub async fn send_link(
                 turnstile: key.clone(),
                 email,
                 token: String::new(),
+                vid: vid.clone(),
+                track: track(&state),
                 error: Some("Something went wrong. Try again."),
             });
         }
@@ -229,6 +261,8 @@ pub async fn send_link(
                 turnstile: key.clone(),
                 email,
                 token: String::new(),
+                vid: vid.clone(),
+                track: track(&state),
                 error: Some("We couldn't send the email. Try again in a minute."),
             });
         }
@@ -240,6 +274,8 @@ pub async fn send_link(
         turnstile: key.clone(),
         email,
         token: String::new(),
+        vid: vid.clone(),
+        track: track(&state),
         error: None,
     })
 }
@@ -269,6 +305,8 @@ pub async fn confirm(State(state): State<AppState>, Query(input): Query<TokenInp
             turnstile: None,
             email,
             token: input.token,
+            vid: String::new(),
+            track: track(&state),
             error: None,
         }),
         None => page(LoginPage {
@@ -276,6 +314,8 @@ pub async fn confirm(State(state): State<AppState>, Query(input): Query<TokenInp
             turnstile: None,
             email: String::new(),
             token: String::new(),
+            vid: String::new(),
+            track: track(&state),
             error: Some(EXPIRED),
         }),
     }
@@ -286,8 +326,8 @@ pub async fn verify(
     headers: HeaderMap,
     Form(input): Form<TokenInput>,
 ) -> Response {
-    let email: Option<String> = sqlx::query_scalar(
-        "UPDATE login_tokens SET used_at = ? WHERE token_hash = ? AND used_at IS NULL AND expires_at > ? RETURNING email",
+    let row: Option<(String, Option<String>)> = sqlx::query_as(
+        "UPDATE login_tokens SET used_at = ? WHERE token_hash = ? AND used_at IS NULL AND expires_at > ? RETURNING email, vid",
     )
     .bind(now())
     .bind(hash_token(&input.token))
@@ -296,17 +336,33 @@ pub async fn verify(
     .await
     .ok()
     .flatten();
-    let Some(email) = email else {
+    let Some((email, vid)) = row else {
         return page(LoginPage {
             view: "enter",
             turnstile: None,
             email: String::new(),
             token: String::new(),
+            vid: String::new(),
+            track: track(&state),
             error: Some(EXPIRED),
         });
     };
     let started = async {
+        let existed: bool =
+            sqlx::query_scalar("SELECT EXISTS (SELECT 1 FROM accounts WHERE email = ?)")
+                .bind(&email)
+                .fetch_one(&state.db)
+                .await?;
         let account = sites::find_or_create_account(&state.db, &email).await?;
+        // A visit that began on the sign-in page itself has the cookie but no carried ID.
+        let vid = vid.or_else(|| cookie(&headers, "virling_vid").filter(|v| valid_visitor_id(v)));
+        if !existed && let Some(vid) = vid {
+            sqlx::query("UPDATE accounts SET vid = ? WHERE id = ? AND vid IS NULL")
+                .bind(vid)
+                .bind(&account)
+                .execute(&state.db)
+                .await?;
+        }
         let suspended: bool =
             sqlx::query_scalar("SELECT suspended_at IS NOT NULL FROM accounts WHERE id = ?")
                 .bind(&account)
@@ -328,6 +384,8 @@ pub async fn verify(
                 turnstile: None,
                 email,
                 token: String::new(),
+                vid: String::new(),
+                track: track(&state),
                 error: Some("Something went wrong. Try again."),
             })
         }

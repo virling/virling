@@ -170,6 +170,9 @@ struct ServeArgs {
     /// Cloudflare Turnstile secret key; needs the site key too
     #[arg(long, env = "VIRLING_TURNSTILE_SECRET", hide_env_values = true)]
     turnstile_secret: Option<String>,
+    /// Site, such as virling.com, whose Virling script the sign-in page loads
+    #[arg(long, env = "VIRLING_SELF_TRACK_SITE")]
+    self_track_site: Option<String>,
     #[arg(
         long,
         env = "VIRLING_MAIL_FROM",
@@ -341,6 +344,7 @@ async fn main() -> anyhow::Result<()> {
                     },
                 ),
                 billing,
+                self_track_site: args.self_track_site.filter(|s| !s.trim().is_empty()),
             };
             let mailer = mail::Mailer::new(args.smtp_url.as_deref(), &args.mail_from)?;
             let vault = crypto::Vault::load(&cli.data_dir, args.secret_key.as_deref())?;
@@ -469,6 +473,7 @@ mod tests {
             ai_budget_usd: None,
             turnstile: None,
             billing: None,
+            self_track_site: None,
         };
         let state = AppState::new(
             config,
@@ -1297,6 +1302,79 @@ mod tests {
         let res = call(state, form("/auth/verify", format!("token={token}"), None)).await;
         let set_cookie = res.headers()["set-cookie"].to_str().unwrap();
         set_cookie.split(';').next().unwrap().to_string()
+    }
+
+    #[tokio::test]
+    async fn signup_keeps_the_visitor_it_came_from() {
+        let (_dir, state, _store) = setup().await;
+        let page = body_text(call(&state, get("/login?vid=vsite1234567", None)).await).await;
+        assert!(page.contains(r#"name="vid" value="vsite1234567""#));
+        let bad = body_text(call(&state, get("/login?vid=bad%21id%21", None)).await).await;
+        assert!(!bad.contains(r#"name="vid""#), "an invalid ID is dropped");
+        let sign_up = |email: &'static str, vid: &'static str, cookie: Option<&'static str>| {
+            let state = state.clone();
+            async move {
+                call(
+                    &state,
+                    form("/login", format!("email={email}&vid={vid}"), None),
+                )
+                .await;
+                let link = link_in(
+                    &sent(&state).last().unwrap().2,
+                    "http://localhost:8080/auth/verify?token=",
+                );
+                let token = link.split("token=").nth(1).unwrap().to_string();
+                call(
+                    &state,
+                    form("/auth/verify", format!("token={token}"), cookie),
+                )
+                .await;
+            }
+        };
+        let vid = |email: &'static str| {
+            let db = state.db.clone();
+            async move {
+                sqlx::query_scalar::<_, Option<String>>("SELECT vid FROM accounts WHERE email = ?")
+                    .bind(email)
+                    .fetch_one(&db)
+                    .await
+                    .unwrap()
+            }
+        };
+        sign_up(
+            "new%40example.com",
+            "vsite1234567",
+            Some("virling_vid=vcookie12345"),
+        )
+        .await;
+        assert_eq!(
+            vid("new@example.com").await.as_deref(),
+            Some("vsite1234567")
+        );
+        sign_up("new%40example.com", "vother123456", None).await;
+        assert_eq!(
+            vid("new@example.com").await.as_deref(),
+            Some("vsite1234567"),
+            "never overwritten"
+        );
+        sign_up("me%40example.com", "vsite1234567", None).await;
+        assert_eq!(
+            vid("me@example.com").await,
+            None,
+            "an existing account is not tagged"
+        );
+        sign_up(
+            "cookie%40example.com",
+            "bad%21",
+            Some("virling_vid=vcookie12345"),
+        )
+        .await;
+        assert_eq!(
+            vid("cookie@example.com").await.as_deref(),
+            Some("vcookie12345")
+        );
+        sign_up("plain%40example.com", "", Some("virling_vid=bad!")).await;
+        assert_eq!(vid("plain@example.com").await, None);
     }
 
     async fn site_id(state: &AppState) -> String {
@@ -2295,6 +2373,58 @@ mod tests {
         .execute(&state.db)
         .await
         .unwrap();
+    }
+
+    #[tokio::test]
+    async fn dodo_connection_keeps_a_product_list() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        connect_fake(&state, &site, "dodo", "fake_test_value_1234").await;
+        connect_fake(&state, &site, "stripe", "fake_test_value_1234").await;
+        let settings = "/app/example.com/settings";
+        let res = call(
+            &state,
+            form(
+                "/app/example.com/settings/products",
+                "provider=dodo&products=pdt_a%2C+pdt_b%2C+pdt_a".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(res.status(), StatusCode::SEE_OTHER);
+        let saved: Option<String> = sqlx::query_scalar(
+            "SELECT products FROM integrations WHERE site_id = ? AND provider = 'dodo'",
+        )
+        .bind(&site)
+        .fetch_one(&state.db)
+        .await
+        .unwrap();
+        assert_eq!(saved.as_deref(), Some("pdt_a,pdt_b"));
+        let body = body_text(call(&state, get(settings, Some(&cookie))).await).await;
+        assert!(body.contains(r#"name="products" value="pdt_a, pdt_b""#));
+        assert_eq!(
+            body.matches(r#"name="products""#).count(),
+            1,
+            "only Dodo has the field"
+        );
+        call(
+            &state,
+            form(
+                "/app/example.com/settings/products",
+                "provider=dodo&products=".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        let cleared: Option<String> = sqlx::query_scalar(
+            "SELECT products FROM integrations WHERE site_id = ? AND provider = 'dodo'",
+        )
+        .bind(&site)
+        .fetch_one(&state.db)
+        .await
+        .unwrap();
+        assert_eq!(cleared, None, "empty imports every product");
     }
 
     #[tokio::test]

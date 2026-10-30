@@ -17,6 +17,12 @@ Live mode and test mode keys both work. Virling tries the key against `live.dodo
 
 To stay inside Dodo's limit of 240 requests per minute, Virling makes at most a couple of extra lookups per round and continues on the next round. A large backfill can take a few minutes to finish.
 
+## Only some products
+
+When one Dodo account sells more than this site's products, list the site's product IDs in site settings, under Payment connections, in **Only these product IDs**, separated by commas. Virling then imports only payments, refunds and subscriptions for those products. A subscription payment counts for its subscription's product. Leave it empty to import every product.
+
+Saving the list imports the last 90 days again with it. Payments already imported for other products stay; disconnect and connect again to start clean.
+
 ## How a payment finds its visitor
 
 Virling reads `metadata.virling_vid` on the payment.
