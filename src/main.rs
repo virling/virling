@@ -1595,8 +1595,13 @@ mod tests {
         let routes = include_str!("app.rs");
         let docs = include_str!("../docs/src/reference/api.md");
         let mut documented = Vec::new();
-        for line in docs.lines().filter(|l| l.starts_with("## GET ")) {
-            let path = line.trim_start_matches("## GET ");
+        for line in docs.lines() {
+            let Some(path) = line
+                .strip_prefix("## GET ")
+                .or_else(|| line.strip_prefix("## POST "))
+            else {
+                continue;
+            };
             assert!(
                 path.starts_with('`') && path.ends_with('`'),
                 "{line}: braces at the end of a heading are read as attributes"
