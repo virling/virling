@@ -4,10 +4,10 @@ Each release on [GitHub](https://github.com/virling/virling/releases) has a tarb
 
 | Target | Platform | File |
 | --- | --- | --- |
-| `x86_64-unknown-linux-gnu` | Linux x86_64 | `virling-v0.1.1-x86_64-unknown-linux-gnu.tar.gz` |
-| `aarch64-unknown-linux-gnu` | Linux arm64 | `virling-v0.1.1-aarch64-unknown-linux-gnu.tar.gz` |
-| `x86_64-apple-darwin` | macOS on Intel | `virling-v0.1.1-x86_64-apple-darwin.tar.gz` |
-| `aarch64-apple-darwin` | macOS on Apple silicon | `virling-v0.1.1-aarch64-apple-darwin.tar.gz` |
+| `x86_64-unknown-linux-gnu` | Linux x86_64 | `virling-vVIRLING_VERSION-x86_64-unknown-linux-gnu.tar.gz` |
+| `aarch64-unknown-linux-gnu` | Linux arm64 | `virling-vVIRLING_VERSION-aarch64-unknown-linux-gnu.tar.gz` |
+| `x86_64-apple-darwin` | macOS on Intel | `virling-vVIRLING_VERSION-x86_64-apple-darwin.tar.gz` |
+| `aarch64-apple-darwin` | macOS on Apple silicon | `virling-vVIRLING_VERSION-aarch64-apple-darwin.tar.gz` |
 
 The name is always `virling-vX.Y.Z-<target>.tar.gz`, with the checksum at the same name plus `.sha256`. Each tarball holds one folder with the `virling` binary and the `LICENSE` file.
 
@@ -34,7 +34,7 @@ Pass options after `sh -s --`:
 ## Download and verify
 
 ```sh
-V=0.1.1
+V=VIRLING_VERSION
 T=x86_64-unknown-linux-gnu
 curl -LO https://github.com/virling/virling/releases/download/v$V/virling-v$V-$T.tar.gz
 curl -LO https://github.com/virling/virling/releases/download/v$V/virling-v$V-$T.tar.gz.sha256
@@ -51,7 +51,7 @@ The Linux builds link against glibc 2.35 or newer, built on Ubuntu 22.04. They r
 
 ```sh
 $ virling --version
-virling 0.1.1
+virling VIRLING_VERSION
 ```
 
 Next: [run the binary in production](../self-host/binary.md), optionally as a [systemd service](../self-host/systemd.md).

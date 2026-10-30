@@ -12,7 +12,7 @@ docker run -d --name virling --restart unless-stopped \
   -e VIRLING_TRUST_PROXY=true \
   -e VIRLING_SMTP_URL='smtps://user:pass@smtp.example.com:465' \
   -e VIRLING_MAIL_FROM='Virling <stats@example.com>' \
-  ghcr.io/virling/virling:0.1.1 serve --app
+  ghcr.io/virling/virling:VIRLING_VERSION serve --app
 ```
 
 - Port `8080` is bound to localhost only, so it is reachable through your [reverse proxy](reverse-proxy.md) and not directly. Drop `127.0.0.1:` if nothing sits in front.
@@ -26,7 +26,7 @@ The repo does not ship a Compose file yet <span class="na">Not available yet</sp
 ```yaml,file:compose.yaml
 services:
   virling:
-    image: ghcr.io/virling/virling:0.1.1
+    image: ghcr.io/virling/virling:VIRLING_VERSION
     command: serve --app
     restart: unless-stopped
     ports:
@@ -75,7 +75,7 @@ The key that encrypts provider keys is created as `/data/secret.key` on first st
 ## Upgrade
 
 ```sh
-docker pull ghcr.io/virling/virling:0.1.1
+docker pull ghcr.io/virling/virling:VIRLING_VERSION
 docker rm -f virling
 # then the same docker run command with the new tag
 ```

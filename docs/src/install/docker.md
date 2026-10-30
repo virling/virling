@@ -10,7 +10,7 @@ docker pull ghcr.io/virling/virling:latest
 
 | Tag | Example | Points to |
 | --- | --- | --- |
-| `X.Y.Z` | `0.1.1` | One exact release |
+| `X.Y.Z` | `VIRLING_VERSION` | One exact release |
 | `X.Y` | `0.1` | The newest patch release of that minor version |
 | `latest` | `latest` | The newest release |
 
@@ -36,7 +36,7 @@ docker run -d --name virling \
   -p 8080:8080 \
   -v virling-data:/data \
   -e VIRLING_BASE_URL=https://stats.example.com \
-  ghcr.io/virling/virling:0.1.1 serve --app
+  ghcr.io/virling/virling:VIRLING_VERSION serve --app
 ```
 
 > [!WARNING]
@@ -47,7 +47,7 @@ If you bind-mount a host folder instead of a named volume, make it writable by u
 ```sh
 sudo mkdir -p /srv/virling && sudo chown 10001 /srv/virling
 docker run -d --name virling -p 8080:8080 -v /srv/virling:/data \
-  ghcr.io/virling/virling:0.1.1 serve --app
+  ghcr.io/virling/virling:VIRLING_VERSION serve --app
 ```
 
 ## Run CLI commands
