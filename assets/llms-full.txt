@@ -14,7 +14,7 @@ Releases are published on GitHub and run on your own server today. Hosted plans 
 
 ## Who it is for
 
-- Indie founders and small SaaS teams who take payments through Stripe, Dodo Payments, Polar or LemonSqueezy (Lemon Squeezy) and want to know which marketing channel actually pays.
+- Indie founders and small SaaS teams who take payments through Stripe, Paddle, Shopify, WooCommerce, Dodo Payments, Polar or LemonSqueezy (Lemon Squeezy) and want to know which marketing channel actually pays.
 - Teams that want revenue analytics on their own server, with their data next to the binary.
 - Agencies that report to clients and want each client to see revenue by channel every week.
 
@@ -66,7 +66,7 @@ A read-only JSON API and a read-only MCP server let assistants such as Claude an
 
 ### How do I see which marketing channel brings paying customers?
 
-Track visits with a first-party visitor ID, pass that ID into checkout, and join payments back to visits. Virling does this for Stripe, Dodo Payments, Polar, LemonSqueezy, Creem and RevenueCat and shows revenue and revenue per visitor for each channel.
+Track visits with a first-party visitor ID, pass that ID into checkout, and join payments back to visits. Virling does this for Stripe, Paddle, Shopify, WooCommerce, Dodo Payments, Polar, LemonSqueezy, Creem and RevenueCat and shows revenue and revenue per visitor for each channel.
 
 ### Is there an open-source way to attribute Stripe revenue to traffic sources?
 
