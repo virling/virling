@@ -4,7 +4,7 @@ The dashboard shows what each channel earns, not only how many visitors it sends
 
 ## The range
 
-The date picker at the top right sets the period for every page: Today, Yesterday, Last 7 days, Last 30 days, Last 90 days, This month, Last 12 months, or Since tracking started. Each number shows its change against the previous period of the same length. The range stays in the address, so a link keeps it.
+The date picker at the top right sets the period for every page: Today, Yesterday, Last 7 days, Last 30 days, Last 90 days, This month, Last 12 months, or Since tracking started. Each number shows its change against the previous period of the same length. The range stays in the address, so a link keeps it. **Custom range** picks exact dates, and **Compare to other dates** compares the range against any other period you choose instead of the one just before it.
 
 ## Overview
 
@@ -12,7 +12,8 @@ The date picker at the top right sets the period for every page: Today, Yesterda
 - **Avg visit time:** the average time from a visit's first event to its last. A visit ends after 30 minutes without activity. Only visits with two or more events count, so a visitor who views one page and leaves is not averaged in as zero. It shows a dash when no visit in the range has two events.
 - **Why revenue moved:** when revenue changes by at least 20% and $20 against the previous period, one line under the numbers names the channel that moved it most, such as "Revenue is up 41% ($2,000) on the previous period, mostly from Organic search (+$1,300)." It appears only when that one channel explains at least 40% of the move, and not while a filter is on.
 - **Matched revenue:** under the five numbers, one line gives the share of revenue matched to a visit and why the rest was not, such as payments with no visitor ID or with no visit inside the lookback window. It disappears when every payment is matched. See [Link checkout to visits](../payments/checkout.md).
-- **Revenue chart:** bars for revenue per day, with a dot per day for visitors on the right axis. Hover a bar for the day's payments.
+- **Revenue chart:** bars for revenue per day, with a dot per day for visitors on the right axis. Hover a bar for the day's payments, and click it to filter the page to that day. Launches you log, and notes added through the [API](../reference/api.md), show as markers on their day.
+- **Filters:** every filter you click shows as a chip at the top. **See visitors** opens the Visitors page with the same filters, so you can see the people behind a number.
 - **Insight line:** the biggest finding in the period, such as what an AI assistant visitor is worth compared with your average.
 
 ## The breakdown cards
@@ -21,15 +22,27 @@ Each card lists visitors, revenue and revenue per visitor for every row, with a 
 
 | Card | What it shows | Tabs |
 | --- | --- | --- |
-| Channels | Where visitors came from. The Channel tab also shows each channel's average visit time. Open a channel to see its sources. | Channel, Source, Campaign, Keyword |
-| AI | Visits from AI assistants such as ChatGPT, Claude and Perplexity, and the pages AI crawlers read. See [AI crawlers](../track/ai-crawlers.md) and [AI answers](../track/ai-answers.md). | Visits, Answers |
+| Channels | Where visitors came from. The Channel tab also shows each channel's average visit time. Open a channel to see its sources. Direct is split by how visitors arrived: typed or bookmarked, a shared link, or a return from checkout. | Channel, Source, Campaign, Keyword |
 | Pages | The first page of the visit, or the last page before paying. | Landing page, Before paying |
+| Goals | Funnel: Visit, Signup, Checkout started and Paid, with the share that reached each step and the drop between steps. Goals: every custom goal with its count. | Funnel, Goals |
+| AI | Crawls: which AI companies' bots read your pages, and how many. Answers: how often assistants name your site, see [AI answers](../track/ai-answers.md). Funnel: crawled, named, visited and paid, with revenue per assistant. | Crawls, Answers, Funnel |
+| Recent customers | The last 10 paying customers, newest first: amount, first source, visits before paying, time to convert and a short path. Click one for their timeline. | |
 | Location | Where visitors are. | Country, City, Language |
 | Devices | What they use. | Device, Browser, OS |
+| Timing | Visitors and revenue by weekday or by hour, in your site's timezone, with the best times to post. | Weekday, Hour |
 
 The Channels card also shows **Refunded**, the share of a row's payments that were refunded in whole or part. A dash means none. Virling does not store disputes apart from refunds: a lost dispute counts as a refund where the provider reports it, and a dispute still open does not count.
 
 Click a row to filter the whole page by it. Revenue per visitor is the number to watch: a channel with many visitors and a low chip is loud but does not pay, and a small one with a high chip is worth more of your time. See [Find which channel pays](channel-revenue.md).
+
+## More cards
+
+These appear below the main grid when they have something to show.
+
+- **Channel verdicts:** one plain line per channel against the period before, such as what earned most, what to do more of, and what earned nothing. The same lines are in the weekly email and the client report.
+- **Reading:** for each page, how long it stays visible and how far it is scrolled, for every visitor or only for buyers.
+- **Almost paid:** visitors who reached pricing or checkout and did not pay, by channel or by their last page, with the revenue left on the table.
+- **Profit by channel** and **Time to pay**, described below.
 
 ## Profit by channel
 
@@ -69,7 +82,7 @@ Places are shown at the country level, so visitors from the same country sit clo
 - **Visitors:** every visitor with their first source, pages, goals and what they paid. Open one to see their full journey. Filter by source and goal, search pages, or use **Filters** to pick visitors who left through a link or without one, and who paid or did not. The name stands alone, with country, browser and system in a muted column beside it, and goals, exit links and intents all show as the same kind of chip. Direct visits show a neutral no-referrer icon. The account menu shows a name made from your email (maya.chen@example.com reads Maya Chen); hover it for the full address.
   A visitor page opens with their device, OS, browser and visitor ID (click the copy icon to copy it), a one-line summary, and stats for first source, visits, pageviews, time on site, goals, spent and last exit. Time on site adds up each visit from its first to its last event, and a visit ends after 30 minutes of no activity. A dash means nothing later is known, not zero. The timeline lists every visit with the time on each page, and each payment sits where it happened with its amount, provider and the source it was credited to: by visitor ID when the payment carried one, or through the customer when it did not.
 - **Payments:** every payment with its source, status and time to complete. Open one to see the visits before it. Filter by goal, attributed, unattributed or refunded.
-- **Retention:** customers who still pay, by the channel of their first payment. See [Retention by channel](../attribution/retention.md).
+- **Retention:** customers who still pay, by the channel of their first payment, with lifetime value by first source and the path to purchase: how many days and visits customers took before paying. See [Retention by channel](../attribution/retention.md).
 - **Launches:** a ledger of the posts, threads and launch days you log by hand, each with a name, an optional link, a channel and a day. Next to each one Virling shows the visitors, new customers and revenue of that day and the day after, in your site's timezone, so you can see whether a launch made money or only traffic. The figures are all traffic on those two days, not only the visitors the launch sent, so they show what the days brought and not proof of cause.
 - **Client report:** a shareable report for one site. See below.
 - **Site settings:** the script, payment connections, attribution model, goals and sharing.

@@ -119,7 +119,7 @@ const session = await stripe.checkout.sessions.create({
 > [!NOTE]
 > **Payment links need nothing.** Stripe Payment Links, Polar checkout links and Dodo payment links are tagged by the script when a visitor clicks them. Payments without a visitor ID still count, as Unattributed.
 
-See [Link checkout to visits](payments/checkout.md) for Dodo Payments, Polar and LemonSqueezy.
+See [Link checkout to visits](payments/checkout.md) for Dodo Payments, Polar, LemonSqueezy and Creem.
 
 <div data-steps-end></div>
 
