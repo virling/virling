@@ -260,7 +260,7 @@ async fn load_in(
     };
     let fetched = icons.iter().find(|i| i.0 == site.id).map(|i| (i.1, i.2));
     favicon::refresh(state, &site.id, &site.domain, fetched);
-    let shell = Shell {
+    let mut shell = Shell {
         domain: site.domain.clone(),
         initial: site.domain[..1].to_ascii_uppercase(),
         icon: icon_of(&site),
@@ -306,6 +306,11 @@ async fn load_in(
             _ => String::new(),
         },
     };
+    if shell.banner.is_empty() && state.config.hosted && account.owner {
+        shell.banner = crate::usage::banner(&state.db, &account.id, &account_type)
+            .await
+            .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+    }
     let ctx = Ctx {
         site,
         shell,

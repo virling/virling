@@ -167,6 +167,10 @@ impl<S: EventStore> EventStore for Cached<S> {
         self.inner.count_events(site_id)
     }
 
+    fn usage_since(&self, site_id: &str, since: OffsetDateTime) -> anyhow::Result<(u64, u64)> {
+        self.inner.usage_since(site_id, since)
+    }
+
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>> {
         self.get(site_id, "latest_pageview".into(), || {
             self.inner.latest_pageview(site_id)

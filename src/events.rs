@@ -116,6 +116,8 @@ pub trait EventStore: Send + Sync {
     ) -> anyhow::Result<Retention>;
     #[cfg(test)]
     fn count_events(&self, site_id: &str) -> anyhow::Result<u64>;
+    /// Events and pageviews the site stored since `since`, for plan usage.
+    fn usage_since(&self, site_id: &str, since: OffsetDateTime) -> anyhow::Result<(u64, u64)>;
     /// Removes every sample row of the site: events and visitors tagged by ID, payments of the sample provider.
     fn remove_sample(&self, site_id: &str) -> anyhow::Result<()>;
     /// The first pageview of the newest visitor, as the dashboard shows that visitor.
@@ -1366,6 +1368,16 @@ impl EventStore for DuckStore {
             |r| r.get(0),
         )?;
         Ok(n as u64)
+    }
+
+    fn usage_since(&self, site_id: &str, since: OffsetDateTime) -> anyhow::Result<(u64, u64)> {
+        let conn = self.read()?;
+        let (all, views): (i64, i64) = conn.query_row(
+            "SELECT count(*), count(*) FILTER (WHERE kind = 'pageview') FROM events WHERE site_id = ? AND ts >= ?",
+            params![site_id, ts_value(since)],
+            |r| Ok((r.get(0)?, r.get(1)?)),
+        )?;
+        Ok((all as u64, views as u64))
     }
 
     fn upsert_payments(&self, payments: &[Payment]) -> anyhow::Result<()> {
