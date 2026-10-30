@@ -190,6 +190,17 @@ for (const wrap of document.querySelectorAll("[data-menu]")) {
   document.addEventListener("click", (e) => { if (!wrap.contains(e.target)) open(false); });
 }
 
+for (const pick of document.querySelectorAll("[data-pick]")) {
+  pick.addEventListener("click", (e) => {
+    e.preventDefault();
+    const wrap = pick.closest("[data-menu]");
+    wrap.querySelector("input[type=hidden]").value = pick.dataset.pick;
+    wrap.querySelector("[data-picked]").textContent = pick.textContent;
+    for (const o of wrap.querySelectorAll("[data-pick]")) o.toggleAttribute("aria-current", o === pick);
+    wrap.querySelector("button").click();
+  });
+}
+
 document.querySelector("[data-burger]")?.addEventListener("click", (e) => {
   const side = document.getElementById("side");
   side.classList.toggle("open");
