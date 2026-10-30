@@ -223,7 +223,7 @@
     <div class="d3-panel">
     <div class="d3-row d3-profrow th"><span>Channel</span><span class="num">{% if p.fees %}Costs{% else %}Spend{% endif %}</span><span class="num rv">Revenue</span><span class="num">Profit</span><span class="num">Return</span></div>
     {% for r in p.rows %}
-    <div class="d3-row d3-profrow"><div class="nmw"><span class="nm"><span class="tx"><b>{{ r.name }}</b></span></span></div><span class="num cost">{{ crate::dashboard::money(r.spend + r.fees) }}{% if r.spend > 0.0 && r.fees > 0.0 %}<small>{{ crate::dashboard::money(*r.fees) }} fees</small>{% endif %}</span><span class="num rv">{{ crate::dashboard::money(*r.revenue) }}</span><span class="num">{{ crate::dashboard::money(*r.profit) }}</span><span class="num">{% if r.ret.is_finite() %}{{ "{:.1}"|format(r.ret) }}x{% else %}&ndash;{% endif %}</span></div>
+    <div class="d3-row d3-profrow"><div class="nmw"><span class="nm"><span class="tx"><b>{{ r.name }}</b></span></span></div><span class="num cost">{% if r.spend > 0.0 %}{{ crate::dashboard::money(r.spend + r.fees) }}{% if r.fees > 0.0 %}<small>{{ crate::dashboard::money(*r.fees) }} fees</small>{% endif %}{% else %}{{ crate::dashboard::money(*r.fees) }}{% endif %}</span><span class="num rv">{{ crate::dashboard::money(*r.revenue) }}</span><span class="num">{{ crate::dashboard::money(*r.profit) }}</span><span class="num">{% if r.ret.is_finite() %}{{ "{:.1}"|format(r.ret) }}x{% else %}<span class="dim">No data</span>{% endif %}</span></div>
     {% endfor %}
     </div>
   </div>

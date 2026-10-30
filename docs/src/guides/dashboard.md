@@ -48,7 +48,7 @@ These appear below the main grid when they have something to show.
 
 In **Site settings**, under **Monthly spend per channel**, put one channel per line with what you spend on it each month in dollars, such as `Paid 300` or `Social 50`. The channels are Paid, Email, AI, Organic search, Communities, Social, Referral and Direct. When any channel has a spend, a **Profit by channel** card appears on the dashboard. For the range you pick it shows each channel's spend (the monthly amount scaled to the range), the revenue credited to it, the profit, and the return per dollar spent. Nothing connects to an ad platform, and the numbers are only as good as the amounts you type.
 
-Revenue is already net of refunds and lost disputes. To take payment fees off too, add a line such as `Fees 2.9% + 0.30`: the percent of each channel's revenue plus the fixed amount for each of its payments. The card then lists every channel with revenue, its costs are spend plus fees, and profit is what is left.
+Revenue is already net of refunds and lost disputes. To take payment fees off too, add a line such as `Fees 2.9% + 0.30`: the percent of each channel's revenue plus the fixed amount for each of its payments. The card then lists every channel with revenue, its costs are spend plus fees, and profit is what is left. A channel with no spend entered shows only its fees as costs, and its return shows No data rather than an endless return.
 
 ## Time to pay
 
