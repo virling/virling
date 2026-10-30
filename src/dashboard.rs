@@ -450,6 +450,7 @@ pub fn provider_name(provider: &str) -> &'static str {
         "dodo" => "Dodo Payments",
         "polar" => "Polar",
         "lemonsqueezy" => "LemonSqueezy",
+        "creem" => "Creem",
         _ => "Other",
     }
 }
@@ -1240,7 +1241,7 @@ pub async fn payments(
             .first()
             .map(|p| provider_name(p).to_string())
             .unwrap_or_default(),
-        providers: ["dodo", "stripe", "polar", "lemonsqueezy"]
+        providers: ["dodo", "stripe", "polar", "lemonsqueezy", "creem"]
             .into_iter()
             .map(|pr| {
                 (

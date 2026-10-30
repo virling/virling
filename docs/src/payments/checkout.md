@@ -22,7 +22,7 @@ async function visitorId() {
 
 ## Per provider
 
-<div class="tabset" data-tabs="Stripe|Dodo Payments|Polar|LemonSqueezy" data-key="provider" aria-label="Payment provider"></div>
+<div class="tabset" data-tabs="Stripe|Dodo Payments|Polar|LemonSqueezy|Creem" data-key="provider" aria-label="Payment provider"></div>
 
 ```js
 // Stripe Checkout (Node, stripe): pass the visitor ID on the session
@@ -87,6 +87,20 @@ location.href = url.href;
 // data.attributes.checkout_data.custom = { virling_vid: req.cookies.virling_vid }
 ```
 
+```js
+// Creem (Node): checkout with metadata
+const res = await fetch("https://api.creem.io/v1/checkouts", {
+  method: "POST",
+  headers: { "x-api-key": process.env.CREEM_API_KEY, "content-type": "application/json" },
+  body: JSON.stringify({
+    product_id: "prod_...",
+    success_url: "https://yourdomain.com/thanks",
+    metadata: { virling_vid: req.cookies.virling_vid },
+  }),
+});
+// Send the customer to (await res.json()).checkout_url
+```
+
 ## Stripe
 
 Virling reads `metadata.virling_vid` on the charge or its PaymentIntent, then `metadata.virling_vid` or `client_reference_id` on the Checkout Session. See [Stripe](stripe.md).
@@ -102,6 +116,10 @@ Virling reads `virling_vid` from the order's `metadata`, its custom field data, 
 ## LemonSqueezy
 
 Tag checkouts with `checkout[custom][virling_vid]` now. Matching them is <span class="na">Not available yet</span> and waits on webhook support. See [LemonSqueezy](lemonsqueezy.md).
+
+## Creem
+
+Virling reads `virling_vid` from the checkout's `metadata` in the `checkout.completed` webhook, then from the subscription's or customer's `metadata`. See [Creem](creem.md).
 
 ## Payment links
 

@@ -1,0 +1,35 @@
+{
+  "id": "evt_1",
+  "eventType": "checkout.completed",
+  "created_at": 1790769601000,
+  "object": {
+    "id": "ch_1",
+    "object": "checkout",
+    "request_id": null,
+    "order": {
+      "object": "order",
+      "id": "ord_1",
+      "customer": "cust_1",
+      "product": "prod_1",
+      "amount": 2900,
+      "currency": "USD",
+      "sub_total": 2900,
+      "tax_amount": 0,
+      "amount_due": 2900,
+      "amount_paid": 2900,
+      "status": "paid",
+      "type": "onetime",
+      "transaction": "tran_paid",
+      "created_at": "2026-09-30T12:00:00.000Z",
+      "updated_at": "2026-09-30T12:00:00.000Z",
+      "mode": "prod"
+    },
+    "product": {"id": "prod_1", "object": "product", "name": "Pro", "price": 2900, "currency": "USD", "billing_type": "onetime", "billing_period": "once"},
+    "units": 1,
+    "customer": {"id": "cust_1", "object": "customer", "email": "buyer@example.com", "name": "Buyer", "country": "CA", "metadata": null, "created_at": "2026-09-30T11:59:00.000Z", "updated_at": "2026-09-30T11:59:00.000Z", "mode": "prod"},
+    "custom_fields": [],
+    "status": "completed",
+    "metadata": {"virling_vid": "vid_creem"},
+    "mode": "prod"
+  }
+}

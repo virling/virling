@@ -58,7 +58,17 @@ const checkout = await polar.checkouts.create({
 
 // Checkout links: add a custom field with the slug virling_vid
 // to the link. The Virling script fills it on click
-// (custom_field_data.virling_vid), so nothing else is needed.{% else %}// LemonSqueezy: add the visitor ID as checkout custom data.
+// (custom_field_data.virling_vid), so nothing else is needed.{% else if key == &"creem" %}// Creem (Node): checkout with metadata
+const res = await fetch("https://api.creem.io/v1/checkouts", {
+  method: "POST",
+  headers: { "x-api-key": process.env.CREEM_API_KEY, "content-type": "application/json" },
+  body: JSON.stringify({
+    product_id: "prod_...",
+    success_url: "https://{{ domain }}/thanks",
+    metadata: { virling_vid: req.cookies.virling_vid },
+  }),
+});
+// Send the customer to (await res.json()).checkout_url{% else %}// LemonSqueezy: add the visitor ID as checkout custom data.
 // Not attributed yet: LemonSqueezy only returns custom data in
 // webhooks, which Virling does not receive yet.
 // Tag checkouts now and they will match once that ships.
