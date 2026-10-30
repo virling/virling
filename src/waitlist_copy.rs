@@ -16,7 +16,7 @@ pub const SELFHOST: Copy = Copy {
     intro: "Thanks for joining. Virling shows which channels bring paying customers, not just visitors, and runs as one Rust binary you can host yourself.",
     steps: [
         "Build updates every couple of weeks, nothing more.",
-        "Early access to the self-host binary and the hosted beta.",
+        "Early access to the self-host binary and hosted Virling.",
         "You pick: run it yourself for free, or let us host it.",
     ],
     offer: "Self-hosting is free forever. Hosted is $19/month; the first 50 customers get 40% off for life ($11.40/month).",

@@ -1,7 +1,7 @@
 {
   "resource": "https://virling.com",
   "authorization_servers": [
-    "https://beta.virling.com"
+    "https://app.virling.com"
   ],
   "scopes_supported": [
     "read"

@@ -262,12 +262,12 @@ if (modelContext && modelContext.registerTool) {
     },
   }, { signal: stop.signal });
   modelContext.registerTool({
-    name: "start_beta",
-    description: "Open the sign-in page of the hosted Virling beta. A person signs in there with their email; no application is needed.",
+    name: "start_trial",
+    description: "Open the sign-in page of hosted Virling to start a 14-day free trial. A person signs in there with their email.",
     inputSchema: { type: "object", properties: {} },
     execute: async () => {
-      location.href = "https://beta.virling.com/login";
-      return say("Opening the beta sign-in page.");
+      location.href = "https://app.virling.com/login";
+      return say("Opening the sign-in page.");
     },
   }, { signal: stop.signal });
 }

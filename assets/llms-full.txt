@@ -10,7 +10,7 @@ Virling is open-source, self-hosted revenue attribution for SaaS. It joins every
 
 ## Status
 
-Virling is in early development. Releases are published on GitHub and run on your own server today. Expect breaking changes until a stable release. The hosted beta is open to everyone at https://beta.virling.com/login with no application. Paid hosted plans are not available yet.
+Virling is in early development. Releases are published on GitHub and run on your own server today. Expect breaking changes until a stable release. Hosted plans start with a 14-day free trial at https://app.virling.com/login with no application. Paid hosted plans are not available yet.
 
 ## Who it is for
 

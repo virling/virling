@@ -114,8 +114,8 @@ pub fn routes() -> Router<AppState> {
         .route("/admin/sites", get(sites))
         .route("/admin/sites/{id}/delete", post(delete_site))
         .route("/admin/signups", get(signups))
-        .route("/admin/beta", get(beta))
-        .route("/admin/beta/invite", post(invite))
+        .route("/admin/applications", get(beta))
+        .route("/admin/applications/invite", post(invite))
         .route("/admin/audit", get(audit_page))
         .route("/admin/stop", post(stop))
         .layer(axum::middleware::map_response(private))
@@ -692,7 +692,7 @@ pub async fn beta(State(state): State<AppState>, admin: Admin, Query(v): Query<V
     let Ok(invited) = invited else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
-    let mut page = v.page(&state, &admin, "beta");
+    let mut page = v.page(&state, &admin, "applications");
     page.note = match (&state.admin.applications, failed, rows.is_empty()) {
         (None, ..) => "Applications live with the website. Set VIRLING_APPLICATIONS_URL and VIRLING_APPLICATIONS_TOKEN to list them here.",
         (_, true, _) => "The applications feed did not answer. Showing the last list; reload to retry.",
@@ -1082,18 +1082,18 @@ pub struct Invite {
 async fn send_invite(state: &AppState, to: &str) -> anyhow::Result<()> {
     let link = format!("{}/login", state.config.base_url);
     let text = format!(
-        "You are in the Virling beta.\n\nSign in with this email address:\n{link}\n\nWe email you a one-time sign-in link that works for 15 minutes."
+        "Your Virling account is ready.\n\nSign in with this email address:\n{link}\n\nWe email you a one-time sign-in link that works for 15 minutes."
     );
     let html = format!(
-        "<p>You are in the Virling beta.</p><p><a href=\"{link}\">Sign in to Virling</a> with this email address. We email you a one-time sign-in link that works for 15 minutes.</p>"
+        "<p>Your Virling account is ready.</p><p><a href=\"{link}\">Sign in to Virling</a> with this email address. We email you a one-time sign-in link that works for 15 minutes.</p>"
     );
     state
         .mailer
-        .send(to, "You are in the Virling beta", text, html)
+        .send(to, "Your Virling account is ready", text, html)
         .await
 }
 
-/// Approves a beta applicant and emails the invite.
+/// Approves an applicant and emails the invite.
 pub async fn invite(
     State(state): State<AppState>,
     admin: Admin,
@@ -1112,10 +1112,10 @@ pub async fn invite(
         .iter()
         .any(|a| a.email.eq_ignore_ascii_case(&email));
     if !applied || !valid_email(&email) {
-        return back("/admin/beta", "nomatch");
+        return back("/admin/applications", "nomatch");
     }
     if matches!(*state.mailer, crate::mail::Mailer::Log) {
-        return back("/admin/beta", "nomail");
+        return back("/admin/applications", "nomail");
     }
     let recorded = async {
         let mut tx = state.db.begin().await?;
@@ -1137,11 +1137,11 @@ pub async fn invite(
     .await;
     match recorded {
         Ok(true) => {}
-        Ok(false) => return back("/admin/beta", "already"),
+        Ok(false) => return back("/admin/applications", "already"),
         Err(err) => return unavailable(err, "recording the invite"),
     }
     if let Err(err) = send_invite(&state, &email).await {
-        tracing::error!(%err, "sending the beta invite failed");
+        tracing::error!(%err, "sending the invite failed");
         let undo = async {
             let mut tx = state.db.begin().await?;
             sqlx::query("DELETE FROM beta_invites WHERE email = ?")
@@ -1153,11 +1153,11 @@ pub async fn invite(
         }
         .await;
         if let Err(err) = undo {
-            tracing::error!(%err, "undoing the beta invite failed");
+            tracing::error!(%err, "undoing the invite failed");
         }
-        return back("/admin/beta", "failed");
+        return back("/admin/applications", "failed");
     }
-    back("/admin/beta", "invited")
+    back("/admin/applications", "invited")
 }
 
 #[cfg(test)]
@@ -1374,7 +1374,12 @@ mod tests {
     async fn only_listed_admins_get_in() {
         let f = setup().await;
         let user = f.user_cookie.trim_start_matches("virling_session=");
-        for path in ["/admin", "/admin/accounts", "/admin/audit", "/admin/beta"] {
+        for path in [
+            "/admin",
+            "/admin/accounts",
+            "/admin/audit",
+            "/admin/applications",
+        ] {
             assert_eq!(
                 call(&f.state, get(path, None)).await.status(),
                 StatusCode::NOT_FOUND
@@ -1703,7 +1708,11 @@ mod tests {
         };
         let unknown = call(
             &f.state,
-            change("/admin/beta/invite", &f.admin, "email=ann%40example.com"),
+            change(
+                "/admin/applications/invite",
+                &f.admin,
+                "email=ann%40example.com",
+            ),
         )
         .await;
         assert!(
@@ -1716,7 +1725,7 @@ mod tests {
                 .to_ascii_lowercase()
                 .contains("authorization: bearer feed_secret")
         );
-        let page = text(call(&f.state, get("/admin/beta", Some(&f.admin))).await).await;
+        let page = text(call(&f.state, get("/admin/applications", Some(&f.admin))).await).await;
         assert!(
             page.contains("Ann@Example.com")
                 && page.contains("ann.dev")
@@ -1725,14 +1734,22 @@ mod tests {
         assert!(!page.contains("feed_secret"));
         let stranger = call(
             &f.state,
-            change("/admin/beta/invite", &f.admin, "email=eve%40example.com"),
+            change(
+                "/admin/applications/invite",
+                &f.admin,
+                "email=eve%40example.com",
+            ),
         )
         .await;
         assert!(location(&stranger).ends_with("?n=nomatch"));
         assert!(sent_mail(&f).is_empty());
         let sent = call(
             &f.state,
-            change("/admin/beta/invite", &f.admin, "email=ann%40example.com"),
+            change(
+                "/admin/applications/invite",
+                &f.admin,
+                "email=ann%40example.com",
+            ),
         )
         .await;
         assert!(location(&sent).ends_with("?n=invited"));
@@ -1742,12 +1759,16 @@ mod tests {
         assert!(mail[0].2.contains("localhost:8080/login"));
         let twice = call(
             &f.state,
-            change("/admin/beta/invite", &f.admin, "email=ann%40example.com"),
+            change(
+                "/admin/applications/invite",
+                &f.admin,
+                "email=ann%40example.com",
+            ),
         )
         .await;
         assert!(location(&twice).ends_with("?n=already"));
         assert_eq!(sent_mail(&f).len(), 1);
-        let page = text(call(&f.state, get("/admin/beta", Some(&f.admin))).await).await;
+        let page = text(call(&f.state, get("/admin/applications", Some(&f.admin))).await).await;
         assert!(page.contains("Invited"));
         fetch_applications(&f.state).await;
         f.state.mailer = Arc::new(
@@ -1756,7 +1777,11 @@ mod tests {
         );
         let failed = call(
             &f.state,
-            change("/admin/beta/invite", &f.admin, "email=bob%40example.com"),
+            change(
+                "/admin/applications/invite",
+                &f.admin,
+                "email=bob%40example.com",
+            ),
         )
         .await;
         assert!(location(&failed).ends_with("?n=failed"));
@@ -1769,7 +1794,11 @@ mod tests {
         f.state.mailer = Arc::new(crate::mail::Mailer::Log);
         let unset = call(
             &f.state,
-            change("/admin/beta/invite", &f.admin, "email=bob%40example.com"),
+            change(
+                "/admin/applications/invite",
+                &f.admin,
+                "email=bob%40example.com",
+            ),
         )
         .await;
         assert!(location(&unset).ends_with("?n=nomail"));

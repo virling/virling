@@ -94,7 +94,7 @@ claude plugin marketplace add virling/virling
 claude plugin install virling@virling
 ```
 
-In a session, `/plugin marketplace add virling/virling` and `/plugin install virling@virling` do the same. The plugin connects to hosted Virling at `https://beta.virling.com`. Run `/mcp`, choose **virling** and sign in. If you self-host, add your own server instead, with the steps above. OAuth sign-in needs `https`; on `http`, use an API key.
+In a session, `/plugin marketplace add virling/virling` and `/plugin install virling@virling` do the same. The plugin connects to hosted Virling at `https://app.virling.com`. Run `/mcp`, choose **virling** and sign in. If you self-host, add your own server instead, with the steps above. OAuth sign-in needs `https`; on `http`, use an API key.
 
 ## Other clients
 

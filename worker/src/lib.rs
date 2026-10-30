@@ -247,7 +247,7 @@ fn signup_of(key: &str) -> Option<(&str, &str)> {
     key.strip_prefix("signup:")?.split_once(':')
 }
 
-/// Beta applications for the operator panel, behind a bearer ADMIN_TOKEN.
+/// Applications for the operator panel, behind a bearer ADMIN_TOKEN.
 async fn applications(req: Request, ctx: RouteContext<()>) -> Result<Response> {
     let given = req
         .headers()
@@ -781,7 +781,7 @@ fn forward_ai(req: &Request, ctx: &Context) {
         init.with_method(Method::Post)
             .with_headers(headers)
             .with_body(Some(worker::wasm_bindgen::JsValue::from_str(&body)));
-        if let Ok(post) = Request::new_with_init("https://beta.virling.com/api/crawl", &init) {
+        if let Ok(post) = Request::new_with_init("https://app.virling.com/api/crawl", &init) {
             let _ = Fetch::Request(post).send().await;
         }
     });

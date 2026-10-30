@@ -6,8 +6,8 @@ Virling's API for agents is its MCP server at `https://mcp.virling.com/mcp`. It 
 
 ## Authorization server
 
-- Issuer: `https://beta.virling.com`
-- Metadata: `https://beta.virling.com/.well-known/oauth-authorization-server`
+- Issuer: `https://app.virling.com`
+- Metadata: `https://app.virling.com/.well-known/oauth-authorization-server`
 - Protected resource metadata: `https://mcp.virling.com/.well-known/oauth-protected-resource`
 - Scope: `read`
 - Flow: authorization code with PKCE (`S256`), public clients (`token_endpoint_auth_method: none`)
@@ -17,13 +17,13 @@ Virling's API for agents is its MCP server at `https://mcp.virling.com/mcp`. It 
 An agent can identify itself in either way. No credentials are issued ahead of time.
 
 1. **Client ID Metadata Document.** Use an https URL that serves your client metadata as the `client_id`. The server fetches it.
-2. **Dynamic client registration.** `POST https://beta.virling.com/oauth/register` with `client_name`, `redirect_uris` and `token_endpoint_auth_method: none`.
+2. **Dynamic client registration.** `POST https://app.virling.com/oauth/register` with `client_name`, `redirect_uris` and `token_endpoint_auth_method: none`.
 
 ## Getting a token
 
-1. Send the person to `https://beta.virling.com/oauth/authorize` with your `client_id`, `redirect_uri`, `code_challenge` and `scope=read`.
+1. Send the person to `https://app.virling.com/oauth/authorize` with your `client_id`, `redirect_uri`, `code_challenge` and `scope=read`.
 2. The person signs in with an email link, if they are not already, and approves the access on the consent screen.
-3. Exchange the code at `https://beta.virling.com/oauth/token`.
+3. Exchange the code at `https://app.virling.com/oauth/token`.
 4. Call the MCP server with `Authorization: Bearer <access_token>`.
 
 The person can revoke any connected app under Account, Connected apps.

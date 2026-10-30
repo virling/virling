@@ -14,7 +14,7 @@
     <a href="/admin/accounts"{% if tab == "accounts" || tab == "account" %} aria-current="page"{% endif %}>Accounts</a>
     <a href="/admin/sites"{% if tab == "sites" %} aria-current="page"{% endif %}>Sites</a>
     <a href="/admin/signups"{% if tab == "signups" %} aria-current="page"{% endif %}>Signups</a>
-    <a href="/admin/beta"{% if tab == "beta" %} aria-current="page"{% endif %}>Beta</a>
+    <a href="/admin/applications"{% if tab == "applications" %} aria-current="page"{% endif %}>Applications</a>
     <a href="/admin/audit"{% if tab == "audit" %} aria-current="page"{% endif %}>Audit log</a>
   </nav>
   <span class="grow"></span>
@@ -151,7 +151,7 @@
 </div>
 {% include "_admin_pager.html" %}
 
-{% else if tab == "beta" %}
+{% else if tab == "applications" %}
 {% if !note.is_empty() %}<p class="muted">{{ note }}</p>{% endif %}
 <div class="card flush">
 <table class="adm-table">
@@ -159,7 +159,7 @@
   <tbody>
   {% for a in applications %}
   <tr><td>{{ a.email }}</td><td>{{ a.wedge }}</td><td>{{ a.site }}</td><td>{{ a.payments }}</td><td>{{ a.revenue }}</td><td>{{ a.audience }}</td><td>{{ a.created }}</td><td>
-    {% if a.invited %}<span class="badge ok">Invited</span>{% else %}<form method="post" action="/admin/beta/invite"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="email" value="{{ a.email }}"><button class="btn secondary" type="submit">Approve and invite</button></form>{% endif %}
+    {% if a.invited %}<span class="badge ok">Invited</span>{% else %}<form method="post" action="/admin/applications/invite"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="email" value="{{ a.email }}"><button class="btn secondary" type="submit">Approve and invite</button></form>{% endif %}
   </td></tr>
   {% endfor %}
   </tbody>

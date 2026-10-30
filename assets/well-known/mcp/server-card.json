@@ -12,7 +12,7 @@
   },
   "transport": {
     "type": "streamable-http",
-    "endpoint": "https://beta.virling.com/mcp"
+    "endpoint": "https://app.virling.com/mcp"
   },
   "authentication": {
     "required": true,

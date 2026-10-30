@@ -152,16 +152,16 @@ mod tests {
     #[test]
     fn known_sites_are_detected() {
         let next = r#"<script src="/_next/static/chunks/main.js"></script><script src="https://js.stripe.com/v3"></script>"#;
-        let s = detect(next, "https://beta.virling.com");
+        let s = detect(next, "https://app.virling.com");
         assert_eq!(s.platform, Some("p-next"));
         assert_eq!(s.providers, [Provider::Stripe]);
         assert!(!s.installed);
-        let wp = r#"<link href="/wp-content/themes/x.css"><script defer src="https://beta.virling.com/v.js" data-site="a.com"></script>"#;
-        let s = detect(wp, "https://beta.virling.com/");
+        let wp = r#"<link href="/wp-content/themes/x.css"><script defer src="https://app.virling.com/v.js" data-site="a.com"></script>"#;
+        let s = detect(wp, "https://app.virling.com/");
         assert_eq!(s.platform, Some("p-wp"));
         assert!(s.installed);
         let framer = r#"<meta name="generator" content="Framer 2a"><a href="https://app.lemonsqueezy.com/checkout">"#;
-        let s = detect(framer, "https://beta.virling.com");
+        let s = detect(framer, "https://app.virling.com");
         assert_eq!(s.platform, Some("p-nocode"));
         assert_eq!(s.providers, [Provider::LemonSqueezy]);
         assert_eq!(detect("<html></html>", "https://x"), Stack::default());
