@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - "docs/**"
+      - "Cargo.toml"
       - ".github/workflows/deploy-docs.yml"
   push:
     branches: [main]
     paths:
       - "docs/**"
+      - "Cargo.toml"
       - ".github/workflows/deploy-docs.yml"
   workflow_dispatch:
 

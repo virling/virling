@@ -5,6 +5,7 @@ book = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "book")
 site = "https://docs.virling.com/"
 skip = {"404.html", "toc.html", "print.html"}
 urls = []
+version = re.search(r'^version = "([^"]+)"', (pathlib.Path(__file__).resolve().parent.parent / "Cargo.toml").read_text(), re.M).group(1)
 
 
 def clean(url):
@@ -37,8 +38,12 @@ for f in sorted(book.rglob("*.html")):
         fix = lambda m: m.group(1) + (m.group(2) if re.match(r"[a-z]+:|/|#", m.group(2)) else root.group(1) + m.group(2)) + '"'
         page = re.sub(r'(<nav class="side"[^>]*?)>(.*?)</nav>', lambda n: re.sub(r'(href=")([^"]*)"', fix, n.group(1) + " data-abs>" + n.group(2) + "</nav>"), page, count=1, flags=re.S)
     page = re.sub(r'(<a [^>]*?href=")([^"]*)"', lambda m: m.group(1) + clean(m.group(2)) + '"', page)
+    page = page.replace("VIRLING_VERSION", version)
     page = page.replace("</head>", f'<link rel="canonical" href="{url}">\n</head>', 1)
     f.write_text(page)
+
+for f in book.glob("searchindex*.js*"):
+    f.write_text(f.read_text().replace("VIRLING_VERSION", version))
 
 rows = "".join(f"  <url><loc>{u}</loc></url>\n" for u in urls)
 (book / "sitemap.xml").write_text(
