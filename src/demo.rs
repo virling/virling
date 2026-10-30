@@ -1342,11 +1342,11 @@ fn rewrite(html: &str, built: &HashSet<String>) -> String {
     let html = html
         .replace(
             &format!(r#"<a href="/app/{DOMAIN}/account">Account settings</a>"#),
-            r#"<a href="/#join">Account settings</a>"#,
+            r#"<a href="https://app.virling.com/login">Account settings</a>"#,
         )
         .replace(
             r#"<form method="post" action="/logout"><button type="submit">Sign out</button></form>"#,
-            r#"<a href="/#join">Sign out</a>"#,
+            r#"<a href="https://app.virling.com/login">Sign out</a>"#,
         );
     let mut out = String::with_capacity(html.len());
     let mut rest = html.as_str();
