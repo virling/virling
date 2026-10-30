@@ -163,6 +163,7 @@ struct DashboardPage {
     topay: Option<crate::topay::PayCard>,
     reading: Option<crate::reading::ReadCard>,
     almost: Option<crate::almost::AlmostCard>,
+    verdicts: Vec<crate::verdict::Verdict>,
     why: Option<String>,
     goals: Option<goals::GoalsView>,
     goal_card: Option<goal_card::Card>,
@@ -196,6 +197,7 @@ struct PublicPage {
     profit: Option<crate::spend::ProfitCard>,
     reading: Option<crate::reading::ReadCard>,
     almost: Option<crate::almost::AlmostCard>,
+    verdicts: Vec<crate::verdict::Verdict>,
     topay: Option<crate::topay::PayCard>,
     why: Option<String>,
     retention: Option<views::RetentionView>,
@@ -1014,6 +1016,7 @@ async fn page(
         topay: None,
         reading: None,
         almost: None,
+        verdicts: Vec::new(),
         why: None,
         goals: None,
         goal_card: None,
@@ -1517,6 +1520,7 @@ async fn page(
                         &report.channels,
                         &earlier,
                     );
+                    page.verdicts = crate::verdict::verdicts(&report.channels, &earlier);
                 }
             }
             cards::ai_tabs(&mut ai, q.rest.get("ai").map(String::as_str), |v| {
@@ -1611,6 +1615,7 @@ async fn page(
         topay: page.topay,
         reading: None,
         almost: None,
+        verdicts: Vec::new(),
         why: page.why,
         retention: page.retention,
         goal_card: None,

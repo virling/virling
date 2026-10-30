@@ -74,6 +74,11 @@
 </table>
 {% endif %}
 
+{% if !r.verdicts.is_empty() %}
+<div style="margin-top:32px;font-weight:700;font-size:16px">Each channel this week</div>
+{% for v in r.verdicts %}<p style="margin:8px 0 0;font-size:14px;line-height:1.5"><b>{{ v.channel }}</b> <span style="color:#4B515C">{{ v.line }}</span></p>{% endfor %}
+{% endif %}
+
 {% for i in r.insights %}
 <div style="margin-top:{% if loop.first %}32px{% else %}12px{% endif %};border-radius:12px;padding:16px 18px;background:{% if i.class == "good" %}#F3FAF6{% else if i.class == "bad" %}#FDF3EF{% else %}#F2F5FD{% endif %}">
 <div style="font-size:12px;font-weight:700;color:{% if i.class == "good" %}#1E7A4C{% else if i.class == "bad" %}#C2380F{% else %}#2F5BEA{% endif %}">{{ i.kind }}</div>

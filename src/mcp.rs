@@ -222,6 +222,10 @@ async fn run(state: &AppState, account: &str, name: &str, a: &Value) -> Result<V
             let q: BreakdownQuery = args(a)?;
             to_value(api::breakdown_for(state, account, &site, dimension, &q).await?)
         }
+        "get_channel_verdicts" => {
+            let q: RangeQuery = args(a)?;
+            to_value(api::verdicts_for(state, account, &site, &q).await?)
+        }
         "get_retention" => {
             let q: RangeQuery = args(a)?;
             to_value(api::retention_for(state, account, &site, &q).await?)
@@ -296,6 +300,13 @@ fn tools() -> Vec<Value> {
                 "limit": { "type": "integer", "minimum": 1, "maximum": MAX_ROWS, "description": "Rows to return, default 100." }
             }), &["dimension"]),
             "annotations": read_only("Break down revenue"),
+        }),
+        json!({
+            "name": "get_channel_verdicts",
+            "title": "Get channel verdicts",
+            "description": "One plain, rule-based line per channel against the period of the same length before: which earned the most, which pays best per visitor and is worth doubling, which brought visitors but no revenue, and which moved a lot. Each has channel, tone (good, bad or plain) and line. Use 7d for the weekly verdict.",
+            "inputSchema": with(json!({}), &[]),
+            "annotations": read_only("Channel verdicts"),
         }),
         json!({
             "name": "get_retention",
@@ -421,6 +432,7 @@ mod tests {
                 "list_sites",
                 "get_overview",
                 "get_breakdown",
+                "get_channel_verdicts",
                 "get_retention",
                 "get_ai_answers",
                 "list_payments",
@@ -489,7 +501,7 @@ mod tests {
         );
 
         let (_, r) = modern(&f, "tools/list", json!({})).await;
-        assert_eq!(r["result"]["tools"].as_array().unwrap().len(), 7);
+        assert_eq!(r["result"]["tools"].as_array().unwrap().len(), 8);
         assert_eq!(r["result"]["resultType"], "complete");
         assert_eq!(r["result"]["cacheScope"], "private");
         assert!(r["result"]["ttlMs"].as_u64().unwrap() > 0);

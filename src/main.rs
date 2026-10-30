@@ -53,6 +53,7 @@ mod team;
 mod telegram;
 mod topay;
 mod ua;
+mod verdict;
 mod visitor_pages;
 mod visitors;
 mod waitlist;
