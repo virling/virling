@@ -13,6 +13,19 @@ An Unattributed payment counts toward revenue but is not credited to any visit. 
 - **A renewal of an unattributed first payment.** See [Renewals](renewals.md).
 - **Imported history.** Payments in the 90-day backfill were made before the script was on your site.
 
+## Recover payments by email
+
+When checkout cannot carry the visitor ID, send the visitor's email once you know it, for example right after signup, as an `identify` event:
+
+```js
+fetch("https://stats.example.com/api/event", {
+  method: "POST",
+  body: JSON.stringify({ n: "identify", u: location.href, s: "example.com", v: window.virling?.vid?.(), m: email }),
+});
+```
+
+Virling keeps only a SHA-256 hash of the trimmed, lowercased email with a salt of this site. A Stripe payment with no visitor ID whose payer email (billing details or receipt email) matches is credited to that visitor. Matching is exact and never crosses sites. On the Payments page such a payment shows **Matched by email**. It applies to payments synced after the identify, and to Stripe for now.
+
 ## Checking a single payment
 
 Open the payment from `/app/yourdomain.com/payments`. Its details list the visitor ID when checkout carried one. A visitor ID with no journey means the visitor's sessions are outside the window. No visitor ID means checkout did not carry one.

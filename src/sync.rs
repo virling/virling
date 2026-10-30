@@ -209,7 +209,9 @@ async fn store(
     fetched: Vec<Fetched>,
 ) -> anyhow::Result<()> {
     let mut payments = Vec::with_capacity(fetched.len());
+    let mut emails = Vec::with_capacity(fetched.len());
     for f in fetched {
+        emails.push(f.email);
         let amount_usd = state
             .rates
             .to_usd(f.amount, &f.currency)
@@ -230,6 +232,7 @@ async fn store(
             is_renewal: f.is_renewal,
         });
     }
+    crate::identify::fill(&state.db, site_id, &mut payments, &emails).await?;
     if !payments.is_empty() {
         let store = state.events.clone();
         tokio::task::spawn_blocking(move || store.upsert_payments(&payments)).await??;

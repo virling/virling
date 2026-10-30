@@ -49,6 +49,8 @@ pub struct Incoming {
     e: Option<u32>,
     /// Furthest scroll in percent, on a read.
     x: Option<u32>,
+    /// Email on an identify; only its salted hash is kept.
+    m: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -552,6 +554,7 @@ pub async fn collect(
             "leave" => "leave",
             "ping" => "ping",
             "read" => "read",
+            "identify" => "identify",
             _ => continue,
         };
         let name = match kind {
@@ -634,6 +637,15 @@ pub async fn collect(
         } else {
             None
         };
+        if kind == "identify" {
+            if let (None, Some(email)) = (bot, e.m.as_deref())
+                && let Err(err) =
+                    crate::identify::save(&state.db, &site.id, &visitor_id, email).await
+            {
+                tracing::error!(%err, "saving an identify failed");
+            }
+            continue;
+        }
         if kind == "read" {
             if let (None, Some(secs), Some(scroll)) = (bot, e.e, e.x) {
                 reads.push(Read {

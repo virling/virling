@@ -992,6 +992,9 @@ pub async fn payments(
     let store = state.events.clone();
     let id = ctx.site.id.clone();
     let query = search.clone();
+    let Ok(by_email) = crate::identify::matched(&state.db, &ctx.site.id).await else {
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    };
     let result = blocking(move || {
         let s = store.payment_summary(&id, &p)?;
         let path = store.path_to_purchase(&id, &p)?;
@@ -1034,8 +1037,18 @@ pub async fn payments(
                     let (source, channel) = source_of(&r);
                     let hay = hay(&source, &channel, &a);
                     let key = payer_key(&r);
-                    let view: View =
-                        Box::new(move |domain, offset| payment_customer(&r, &a, domain, offset));
+                    let email =
+                        by_email.contains(&(r.provider.clone(), r.provider_payment_id.clone()));
+                    let view: View = Box::new(move |domain, offset| {
+                        let mut v = payment_customer(&r, &a, domain, offset);
+                        if email {
+                            v.chips.push((
+                                icons::glyph("email", 14, "var(--ink-3)"),
+                                "Matched by email".into(),
+                            ));
+                        }
+                        v
+                    });
                     (key, hay, view)
                 });
                 (list.total, found.collect())

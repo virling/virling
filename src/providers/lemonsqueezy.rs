@@ -337,6 +337,7 @@ fn to_fetched(r: Resource, invoice: bool) -> Option<Fetched> {
         visitor_id,
         customer_id: a.customer_id.map(|id| id.to_string()),
         is_renewal: invoice && matches!(a.billing_reason.as_deref(), Some("renewal" | "updated")),
+        email: None,
     })
 }
 
@@ -604,6 +605,7 @@ mod tests {
                     visitor_id: Some("v_8c1f2e".into()),
                     customer_id: Some("31".into()),
                     is_renewal: false,
+                    email: None,
                 },
                 Fetched {
                     provider_payment_id: "order_103".into(),
@@ -615,6 +617,7 @@ mod tests {
                     visitor_id: None,
                     customer_id: Some("30".into()),
                     is_renewal: false,
+                    email: None,
                 },
                 Fetched {
                     provider_payment_id: "order_102".into(),
@@ -626,6 +629,7 @@ mod tests {
                     visitor_id: None,
                     customer_id: Some("29".into()),
                     is_renewal: false,
+                    email: None,
                 },
             ]
         );

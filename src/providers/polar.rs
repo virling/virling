@@ -402,6 +402,7 @@ fn map_order(order: Order) -> Mapped {
             visitor_id,
             customer_id: Some(order.customer_id),
             is_renewal: false,
+            email: None,
         });
     }
     Mapped::Payment(Fetched {
@@ -417,6 +418,7 @@ fn map_order(order: Order) -> Mapped {
             order.billing_reason.as_str(),
             "subscription_cycle" | "subscription_update"
         ),
+        email: None,
     })
 }
 
