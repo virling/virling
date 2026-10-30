@@ -279,6 +279,34 @@ pub trait EventStore: Send + Sync {
     fn timeline(&self, site_id: &str, visitor_id: &str) -> anyhow::Result<Option<Timeline>>;
 }
 
+/// First and last imported day of every site, or of one.
+fn imported_spans(
+    conn: &Connection,
+    site_id: Option<&str>,
+) -> anyhow::Result<HashMap<String, (time::Date, time::Date)>> {
+    let mut stmt = conn.prepare(
+        "SELECT site_id, min(day)::VARCHAR, max(day)::VARCHAR FROM imported
+        WHERE site_id = coalesce(?, site_id) GROUP BY site_id",
+    )?;
+    let rows = stmt.query_map(params![site_id], |r| {
+        Ok((
+            r.get::<_, String>(0)?,
+            r.get::<_, String>(1)?,
+            r.get::<_, String>(2)?,
+        ))
+    })?;
+    let mut out = HashMap::new();
+    for row in rows {
+        let (site, first, last) = row?;
+        if let (Some(first), Some(last)) =
+            (crate::imported::date(&first), crate::imported::date(&last))
+        {
+            out.insert(site, (first, last));
+        }
+    }
+    Ok(out)
+}
+
 /// Payments whose credit is recomputed: all of a site's, or with `$only_dirty` the changed ones and every payment of their customers.
 macro_rules! attribution_targets {
     () => {
@@ -391,6 +419,8 @@ pub struct DuckStore {
     /// Events waiting to be written, so concurrent inserts share one transaction.
     queue: Mutex<Queue>,
     written: Condvar,
+    /// First and last imported day per site, so ranges outside them skip looking.
+    imported_sites: Mutex<HashMap<String, (time::Date, time::Date)>>,
 }
 
 #[derive(Default)]
@@ -766,6 +796,15 @@ impl DuckStore {
                 language VARCHAR,
                 reason VARCHAR NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS imported (
+                site_id VARCHAR NOT NULL,
+                day DATE NOT NULL,
+                kind VARCHAR NOT NULL,
+                label VARCHAR,
+                visitors UBIGINT NOT NULL,
+                pageviews UBIGINT NOT NULL,
+                visits UBIGINT NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS reads (
                 site_id VARCHAR NOT NULL,
                 ts TIMESTAMPTZ NOT NULL,
@@ -870,7 +909,9 @@ impl DuckStore {
         if changed > 0 {
             tracing::info!(changed, "moved stored visits to their current channel");
         }
+        let imported_sites = imported_spans(&conn, None)?;
         Ok(Self {
+            imported_sites: Mutex::new(imported_sites),
             touch_conn: Arc::new(Mutex::new(conn.try_clone()?)),
             conn: Mutex::new(conn),
             pending: Arc::default(),
@@ -884,6 +925,135 @@ impl DuckStore {
             }),
             written: Condvar::new(),
         })
+    }
+
+    /// Replaces a site's imported history with `rows`, dropping days on or after its first tracked event.
+    pub fn replace_imported(
+        &self,
+        site_id: &str,
+        rows: &[crate::imported::Imported],
+    ) -> anyhow::Result<usize> {
+        let mut conn = self.conn.lock().unwrap();
+        let first: Option<String> = conn.query_row(
+            "SELECT min(ts)::DATE::VARCHAR FROM events WHERE site_id = ?",
+            params![site_id],
+            |r| r.get(0),
+        )?;
+        let first = first.as_deref().and_then(crate::imported::date);
+        let tx = conn.transaction()?;
+        tx.execute("DELETE FROM imported WHERE site_id = ?", params![site_id])?;
+        // Rows go through a text-dated staging table, since the appender takes no dates.
+        tx.execute_batch(
+            "CREATE TEMP TABLE imported_load (site_id VARCHAR, day VARCHAR, kind VARCHAR, label VARCHAR,
+                visitors UBIGINT, pageviews UBIGINT, visits UBIGINT)",
+        )?;
+        let mut kept = 0;
+        {
+            let mut app = tx.appender("imported_load")?;
+            for r in rows.iter().filter(|r| first.is_none_or(|f| r.day < f)) {
+                app.append_row(params![
+                    site_id,
+                    r.day.to_string(),
+                    r.kind,
+                    r.label,
+                    r.visitors,
+                    r.pageviews,
+                    r.visits
+                ])?;
+                kept += 1;
+            }
+        }
+        tx.execute_batch(
+            "INSERT INTO imported SELECT site_id, day::DATE, kind, label, visitors, pageviews, visits
+                FROM imported_load;
+            DROP TABLE imported_load;",
+        )?;
+        let span = imported_spans(&tx, Some(site_id))?.remove(site_id);
+        tx.commit()?;
+        let mut sites = self.imported_sites.lock().unwrap();
+        match span {
+            Some(span) => sites.insert(site_id.to_string(), span),
+            None => sites.remove(site_id),
+        };
+        Ok(kept)
+    }
+
+    /// Whether imported history overlaps the days from `from` to `to` and no filter is set.
+    fn has_imported(&self, site_id: &str, from: time::Date, to: time::Date, f: &Filter) -> bool {
+        *f == Filter::default()
+            && self
+                .imported_sites
+                .lock()
+                .unwrap()
+                .get(site_id)
+                .is_some_and(|(first, last)| *first <= to && from <= *last)
+    }
+
+    /// Imported rows of the period and the one before: totals per day, then (kind, label) sums of the period.
+    fn imported(
+        &self,
+        site_id: &str,
+        period: &Period,
+        f: &Filter,
+        kinds: &[&str],
+    ) -> anyhow::Result<Option<crate::imported::Sums>> {
+        let previous = period.previous();
+        if !self.has_imported(site_id, previous.from, period.to, f) {
+            return Ok(None);
+        }
+        let conn = self.reader()?;
+        let mut stmt = conn.prepare_cached(
+            "SELECT kind, label, CASE WHEN kind = 'total' THEN day::VARCHAR END, day >= ?::DATE,
+                sum(visitors)::UBIGINT, sum(visits)::UBIGINT
+            FROM imported
+            WHERE site_id = ? AND day BETWEEN ?::DATE AND ?::DATE AND list_contains(?::VARCHAR[], kind)
+            GROUP BY ALL",
+        )?;
+        let kinds = format!("[{}]", kinds.join(","));
+        let rows = stmt.query_map(
+            params![
+                period.from.to_string(),
+                site_id,
+                previous.from.to_string(),
+                period.to.to_string(),
+                kinds
+            ],
+            |r| {
+                Ok((
+                    r.get::<_, String>(0)?,
+                    r.get::<_, Option<String>>(1)?,
+                    r.get::<_, Option<String>>(2)?,
+                    r.get::<_, bool>(3)?,
+                    r.get::<_, u64>(4)?,
+                    r.get::<_, u64>(5)?,
+                ))
+            },
+        )?;
+        let mut sums = crate::imported::Sums::default();
+        for row in rows {
+            sums.add(row?);
+        }
+        Ok(Some(sums))
+    }
+
+    /// Adds imported history to tracked totals, days and breakdowns.
+    fn with_imported(
+        &self,
+        site_id: &str,
+        period: &Period,
+        f: &Filter,
+        mut r: Report,
+    ) -> anyhow::Result<Report> {
+        let kinds = ["total", "channel", "referrer", "country"];
+        if let Some(sums) = self.imported(site_id, period, f, &kinds)? {
+            sums.apply_totals(&mut r.overview);
+            crate::imported::add_days(&mut r.days, &sums.days);
+            crate::imported::add_days(&mut r.previous_days, &sums.days);
+            sums.apply_rows("channel", &mut r.channels);
+            sums.apply_rows("referrer", &mut r.referrers);
+            sums.apply_rows("country", &mut r.countries);
+        }
+        Ok(r)
     }
 
     /// `read` over the site's session index, when it is loaded and fits the question.
@@ -1451,10 +1621,14 @@ impl EventStore for DuckStore {
     }
 
     fn overview_in(&self, site_id: &str, period: &Period, f: &Filter) -> anyhow::Result<Overview> {
-        if let Some(o) = self.indexed(site_id, |ix, z, c| read::overview(ix, z, c, period, f))? {
-            return Ok(o);
+        let mut o = match self.indexed(site_id, |ix, z, c| read::overview(ix, z, c, period, f))? {
+            Some(o) => o,
+            None => stats::overview(&*self.read()?, site_id, period, f)?,
+        };
+        if let Some(sums) = self.imported(site_id, period, f, &["total"])? {
+            sums.apply_totals(&mut o);
         }
-        stats::overview(&*self.read()?, site_id, period, f)
+        Ok(o)
     }
 
     #[cfg(test)]
@@ -1469,12 +1643,18 @@ impl EventStore for DuckStore {
         dimension: Dimension,
         f: &Filter,
     ) -> anyhow::Result<Vec<BreakdownRow>> {
-        if let Some(rows) = self.indexed(site_id, |ix, z, c| {
+        let mut rows = match self.indexed(site_id, |ix, z, c| {
             read::breakdown(ix, z, c, period, dimension, f)
         })? {
-            return Ok(rows);
+            Some(rows) => rows,
+            None => stats::breakdown(&*self.read()?, site_id, period, dimension, f)?,
+        };
+        if let Some(kind) = crate::imported::kind(dimension)
+            && let Some(sums) = self.imported(site_id, period, f, &[kind])?
+        {
+            sums.apply_rows(kind, &mut rows);
         }
-        stats::breakdown(&*self.read()?, site_id, period, dimension, f)
+        Ok(rows)
     }
 
     fn last_pages_in(
@@ -1552,10 +1732,11 @@ impl EventStore for DuckStore {
                 setup: read::setup(ix),
             }))
         })?;
-        if let Some(r) = indexed {
-            return Ok(r);
-        }
-        stats::report(&|| self.read(), site_id, period, f)
+        let r = match indexed {
+            Some(r) => r,
+            None => stats::report(&|| self.read(), site_id, period, f)?,
+        };
+        self.with_imported(site_id, period, f, r)
     }
 
     fn hourly(

@@ -78,6 +78,26 @@ Added example.com. Script tag:
 
 It fails if the domain is not valid, the email is not valid, or the site already exists. It works while the server is running. New sites are picked up within a minute.
 
+## import-plausible
+
+Imports daily traffic from an unzipped Plausible CSV export as history before tracking began. See [Import from Plausible](../track/import-plausible.md).
+
+```sh
+virling import-plausible <DOMAIN> <DIR>
+```
+
+| Argument | What it does |
+| --- | --- |
+| `<DOMAIN>` | A site already added to Virling. |
+| `<DIR>` | The folder holding the export's `imported_*.csv` files. |
+
+```sh
+$ virling import-plausible example.com ./plausible-export
+Imported 4210 daily rows for example.com.
+```
+
+Stop the server first: the import writes to the event database, which the server holds open.
+
 ## query
 
 Reads reports from a running Virling server through the [Read API](api.md): totals, revenue by channel, referrer, campaign or page, payments and visitor timelines. It runs anywhere, not only on the server, and does not touch the data folder.

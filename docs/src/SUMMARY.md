@@ -26,6 +26,7 @@
 - [Single-page apps](track/spa.md)
 - [Cookieless mode](track/cookieless.md)
 - [Privacy and consent](track/privacy.md)
+- [Import from Plausible](track/import-plausible.md)
 
 # Payments
 
