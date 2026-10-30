@@ -24,6 +24,10 @@ The webhook needs Virling to be reachable over https. Without it, only the one-t
 - **One-time purchases from the last 90 days**, once, when you connect. Virling reads about 40 customers a minute, to stay well under RevenueCat's rate limit. Subscription payments from before you connected are not imported, since RevenueCat lists them per subscription only for some stores.
 - **Subscription status** is not read, so [Retention](../attribution/retention.md) uses payment recency for RevenueCat customers.
 
+## What gets credited
+
+A RevenueCat purchase is credited to a visit only when it carries a visitor ID. That covers purchases from a web paywall on a page that runs the script, and app users whose `virling_vid` attribute was set from a web visit. In-app purchases from people who never came through your site have no visit to credit, so they count toward revenue as Unattributed.
+
 ## How a payment finds its visitor
 
 Virling reads the customer attribute `virling_vid`. Set it before the purchase, from your app with the RevenueCat SDK's `setAttributes`, or from your server:
