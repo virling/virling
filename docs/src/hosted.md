@@ -7,7 +7,7 @@ It runs the same open-source code, so the [script](track/script.md), [payment co
 ## Plans
 
 - **Personal:** $19 a month. The same open-source app, run for you, with unlimited sites, 100,000 events a month and a weekly email report.
-- **Agency:** $79 a month. Unlimited client sites, 1M pageviews a month, white-label weekly client reports and a team of 3.
+- **Agency:** $79 a month. Unlimited client sites, 1M events a month, white-label weekly client reports and a team of 3.
 
 The first 50 customers of each plan keep a founding price for life: $9 a month for Personal and $29 a month for Agency. It is applied at checkout while spots last, after the same free trial.
 

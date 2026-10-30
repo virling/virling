@@ -13,7 +13,7 @@ const INTERVAL: std::time::Duration = std::time::Duration::from_secs(3600);
 /// The monthly allowance of a plan and what it counts.
 pub fn limit(account_type: &str) -> (u64, &'static str) {
     match account_type {
-        "agency" => (1_000_000, "pageviews"),
+        "agency" => (1_000_000, "events"),
         _ => (100_000, "events"),
     }
 }
@@ -68,7 +68,7 @@ fn line(level: i64, used: u64, cap: u64, unit: &str, upgrade: bool) -> String {
         )
     };
     let tail = if upgrade {
-        " Over the last three months you averaged more than Personal includes; Agency includes 1,000,000 pageviews."
+        " Over the last three months you averaged more than Personal includes; Agency includes 1,000,000 events."
     } else {
         ""
     };
@@ -114,11 +114,10 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<()> {
         };
         let store = state.events.clone();
         let ids: Vec<String> = sites.into_iter().map(|s| s.0).collect();
-        let agency = kind == "agency";
         let used = tokio::task::spawn_blocking(move || {
             ids.iter().try_fold(0u64, |n, id| {
-                let (all, views) = store.usage_since(id, since)?;
-                anyhow::Ok(n + if agency { views } else { all })
+                let (all, _) = store.usage_since(id, since)?;
+                anyhow::Ok(n + all)
             })
         })
         .await??;
@@ -137,7 +136,7 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<()> {
         if lvl <= warned {
             continue;
         }
-        let upgrade = !agency && outgrown(&state.db, &account, &m).await?;
+        let upgrade = kind != "agency" && outgrown(&state.db, &account, &m).await?;
         let lines = [line(lvl, used, cap, unit, upgrade)];
         let link = format!(
             "{}{}#plan",
@@ -194,9 +193,7 @@ mod tests {
             l.starts_with("You have used 85% of this month's 100,000 events.")
                 && l.contains("Nothing is dropped")
         );
-        assert!(
-            line(100, 1, 100_000, "events", true).contains("Agency includes 1,000,000 pageviews")
-        );
+        assert!(line(100, 1, 100_000, "events", true).contains("Agency includes 1,000,000 events"));
         let now = time::macros::datetime!(2026-01-15 10:00 UTC);
         assert_eq!(months(now), ["2026-01", "2025-12", "2025-11"]);
     }
