@@ -30,7 +30,7 @@ You can connect more than one provider to the same site. Each site has at most o
 ## What Virling reads
 
 - **Backfill.** The first sync imports the last 90 days of payments.
-- **Polling.** After that, every connected provider is polled once a minute. Only LemonSqueezy and Creem also send a webhook, because they return the checkout's visitor ID nowhere else.
+- **Polling.** After that, every connected provider is polled once a minute. LemonSqueezy, Creem and RevenueCat also send a webhook: LemonSqueezy and Creem return the checkout's visitor ID nowhere else, and RevenueCat delivers its purchases that way.
 - **Per payment** it keeps the provider's payment ID, time, amount and currency, the refunded amount, the status, the customer ID, whether it is a renewal, and the visitor ID if checkout carried one.
 - **Refunds and disputes** update the payment's refunded amount, so revenue is shown after refunds.
 - **Currency.** Amounts are converted to USD for reports. See [Currencies](../attribution/currencies.md).
