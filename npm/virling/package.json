@@ -1,0 +1,28 @@
+{
+  "name": "virling",
+  "version": "0.3.0",
+  "description": "Revenue attribution: see which post, search or AI answer brought each payment. Runs the open-source Virling binary.",
+  "bin": {
+    "virling": "bin/virling.js"
+  },
+  "files": [
+    "bin/"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "AGPL-3.0",
+  "homepage": "https://virling.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/virling/virling.git",
+    "directory": "npm/virling"
+  },
+  "keywords": [
+    "analytics",
+    "revenue",
+    "attribution",
+    "stripe",
+    "mcp"
+  ]
+}

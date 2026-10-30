@@ -1432,6 +1432,54 @@ fn rewrite(html: &str, built: &HashSet<String>) -> String {
 mod tests {
     use super::*;
 
+    #[tokio::test]
+    async fn demo_totals_reconcile() {
+        let dir = tempfile::tempdir().unwrap();
+        let (state, _) = seeded(dir.path(), "maya.chen@tallybird.app").await.unwrap();
+        let site: String = sqlx::query_scalar("SELECT id FROM sites")
+            .fetch_one(&state.db)
+            .await
+            .unwrap();
+        let today = OffsetDateTime::now_utc().date();
+        for days in [7, 30, 90] {
+            let p = crate::stats::Period {
+                from: today - Duration::days(days - 1),
+                to: today,
+                tz: "UTC".into(),
+            };
+            let r = state.events.report(&site, &p).unwrap();
+            let split = state.events.payment_split(&site, &p).unwrap();
+            let c = &r.overview.current;
+            let un = r.channels.iter().find(|x| x.unattributed);
+            let chan_v: u64 = r.channels.iter().map(|x| x.visitors).sum();
+            let chan_rev: f64 = r.channels.iter().map(|x| x.revenue_usd).sum();
+            let chan_pay: u64 = r.channels.iter().map(|x| x.payments).sum();
+            let near = |a: f64, b: f64| (a - b).abs() < 0.01;
+            assert!(
+                near(chan_rev, c.revenue_usd),
+                "{days}d channels add up to revenue"
+            );
+            assert_eq!(chan_pay, c.payments, "{days}d channels add up to payments");
+            let (un_pay, un_rev) = un.map_or((0, 0.0), |u| (u.payments, u.revenue_usd));
+            let no_visit: u64 = split.iter().map(|s| s.no_visitor + s.unseen).sum();
+            assert_eq!(
+                un_pay, no_visit,
+                "{days}d unmatched payments are the Unattributed row"
+            );
+            assert!(
+                un_rev <= c.revenue_usd && c.matched_revenue_usd <= c.revenue_usd - un_rev + 0.01
+            );
+            assert!(c.converted <= c.customers && c.customers <= c.payments);
+            assert!(c.new_customers <= c.customers && c.matched_payments <= c.payments);
+            let rpv = c.matched_revenue_usd / c.visitors as f64;
+            assert!(
+                c.revenue_per_visitor.is_some_and(|v| near(v, rpv)),
+                "{days}d revenue per visitor"
+            );
+            assert!(chan_v >= c.visitors && r.channels.iter().all(|x| x.visitors <= c.visitors));
+        }
+    }
+
     #[test]
     fn only_the_demo_home_can_be_indexed() {
         let page = "<html><head></head><body></body></html>";
