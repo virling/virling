@@ -119,6 +119,15 @@ pub fn router(state: AppState) -> Router {
     let mut app = Router::new()
         .route("/v.js", get(tracker))
         .route(
+            "/v-compat.js",
+            get(|| {
+                asset(
+                    "text/javascript; charset=utf-8",
+                    include_str!("../assets/v-compat.js"),
+                )
+            }),
+        )
+        .route(
             "/api/event",
             post(ingest::collect).options(ingest::preflight),
         )

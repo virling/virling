@@ -7,7 +7,9 @@ VERSION="${VIRLING_VERSION:-}"
 DOWNLOAD_URL="${VIRLING_DOWNLOAD_URL:-https://github.com/$REPO/releases/download}"
 BIN_DIR="${VIRLING_INSTALL_DIR:-$HOME/.local/bin}"
 SYSTEM=0
-SYSTEMD=ask
+SYSTEMD=auto
+DIR_SET=0
+SERVICE=0
 DRY_RUN=0
 
 usage() {
@@ -17,10 +19,12 @@ Usage: install.sh [options]
   --system         Install to /usr/local/bin with sudo
   --dir DIR        Install to DIR (default: ~/.local/bin)
   --version X.Y.Z  Install this version instead of the latest
-  --systemd        Also set up a systemd service (Linux, needs --system)
-  --no-systemd     Do not ask about a systemd service
+  --no-systemd     On Linux, install the binary only, without the service
   --dry-run        Print what would happen without changing anything
   -h, --help       Show this help
+
+On Linux with systemd it installs to /usr/local/bin, sets up and starts the
+virling service with its data in /var/lib/virling, and prints the URL.
 
 Pass options through the pipe with: curl -fsSL https://virling.com/install.sh | sh -s -- --system
 EOF
@@ -38,7 +42,7 @@ while [ $# -gt 0 ]; do
 	--system) SYSTEM=1 BIN_DIR=/usr/local/bin ;;
 	--dir)
 		[ $# -ge 2 ] || err "--dir needs a value"
-		BIN_DIR="$2"
+		BIN_DIR="$2" DIR_SET=1
 		shift
 		;;
 	--version)
@@ -46,7 +50,7 @@ while [ $# -gt 0 ]; do
 		VERSION="$2"
 		shift
 		;;
-	--systemd) SYSTEMD=yes ;;
+	--systemd) ;;
 	--no-systemd) SYSTEMD=no ;;
 	--dry-run) DRY_RUN=1 ;;
 	-h | --help)
@@ -66,14 +70,6 @@ run() {
 	fi
 }
 
-[ "$SYSTEMD" = yes ] && [ "$SYSTEM" != 1 ] && err "--systemd needs --system so the service runs the binary from /usr/local/bin"
-
-SUDO=""
-if [ "$SYSTEM" = 1 ] && [ "$(id -u)" != 0 ]; then
-	has sudo || err "--system needs root or sudo"
-	SUDO="sudo"
-fi
-
 case "$(uname -s)" in
 Linux) os=unknown-linux-gnu ;;
 Darwin) os=apple-darwin ;;
@@ -89,6 +85,16 @@ if [ "$os" = apple-darwin ] && [ "$arch" = x86_64 ] && [ "$(sysctl -n sysctl.pro
 	arch=aarch64
 fi
 TARGET="$arch-$os"
+
+if [ "$os" = unknown-linux-gnu ] && [ "$SYSTEMD" != no ] && [ "$DIR_SET" = 0 ] && has systemctl && [ -d /run/systemd/system ]; then
+	SYSTEM=1 BIN_DIR=/usr/local/bin SERVICE=1
+fi
+
+SUDO=""
+if [ "$SYSTEM" = 1 ] && [ "$(id -u)" != 0 ]; then
+	has sudo || err "installing to $BIN_DIR needs root or sudo; use --dir to install elsewhere"
+	SUDO="sudo"
+fi
 
 if has curl; then
 	fetch() { curl -fsSL --proto '=https,file' -o "$2" "$1"; }
@@ -175,27 +181,39 @@ WantedBy=multi-user.target
 EOF
 	run $SUDO install -m 644 "$TMP/virling.service" "$unit"
 	run $SUDO systemctl daemon-reload
-	run $SUDO systemctl enable --now virling
+	run $SUDO systemctl enable virling
+	run $SUDO systemctl restart virling
+	[ "$DRY_RUN" = 1 ] && return
+	port=$($SUDO sed -n 's/^VIRLING_ADDR=.*://p' "$envfile")
+	url=$($SUDO sed -n 's/^VIRLING_BASE_URL=//p' "$envfile")
+	i=0
+	until up "http://127.0.0.1:${port:-8080}/health"; do
+		i=$((i + 1))
+		[ "$i" -lt 30 ] || err "the service did not answer on port ${port:-8080}; see: journalctl -u virling"
+		sleep 1
+	done
+	if [ -z "$url" ]; then
+		ip=$(hostname -I 2>/dev/null | cut -d' ' -f1)
+		url="http://${ip:-localhost}:${port:-8080}"
+	fi
 	say ""
-	say "Virling is running as a systemd service on port 8080."
-	say "Set VIRLING_BASE_URL in $envfile, then: sudo systemctl restart virling"
+	say "Virling is running: $url/login"
+	say "Data: /var/lib/virling. Settings: $envfile"
+	say "Set VIRLING_BASE_URL in $envfile to your public address, then: sudo systemctl restart virling"
 	say "Logs, including sign-in links without SMTP: journalctl -u virling -f"
 }
 
-if [ "$os" = unknown-linux-gnu ] && [ "$SYSTEM" = 1 ] && [ "$SYSTEMD" != no ] && has systemctl && [ -d /run/systemd/system ]; then
-	if [ "$SYSTEMD" = ask ] && (: </dev/tty) 2>/dev/null; then
-		printf 'Set up and start a systemd service for Virling? [y/N] '
-		read -r answer </dev/tty || answer=""
-		case "$answer" in
-		[yY]*) SYSTEMD=yes ;;
-		esac
+up() {
+	if has curl; then
+		curl -fsS -o /dev/null "$1" 2>/dev/null
+	else
+		wget -q -O /dev/null "$1"
 	fi
-	if [ "$SYSTEMD" = yes ]; then
-		setup_systemd
-		exit 0
-	fi
-elif [ "$SYSTEMD" = yes ]; then
-	say "systemd was not found, so no service was set up"
+}
+
+if [ "$SERVICE" = 1 ]; then
+	setup_systemd
+	exit 0
 fi
 
 say ""
@@ -206,9 +224,6 @@ case ":$PATH:" in
 	say "$BIN_DIR is not on your PATH. Add it with: export PATH=\"$BIN_DIR:\$PATH\""
 	;;
 esac
-if [ "$os" = unknown-linux-gnu ] && [ "$SYSTEM" != 1 ] && has systemctl; then
-	say "To run it as a systemd service instead, rerun with: sh -s -- --system --systemd"
-fi
 say "Start Virling with:"
 say ""
 say "  $cmd serve --app"

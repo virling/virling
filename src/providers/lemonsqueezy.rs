@@ -322,10 +322,11 @@ fn to_fetched(r: Resource, invoice: bool) -> Option<Fetched> {
     } else {
         a.refunded_amount
     };
-    let visitor_id = r
-        .meta
-        .and_then(|m| m.custom_data.get("virling_vid").cloned())
-        .and_then(|v| v.as_str().map(str::to_owned));
+    let visitor_id = r.meta.and_then(|m| {
+        super::VID_KEYS
+            .iter()
+            .find_map(|k| m.custom_data.get(*k)?.as_str().map(str::to_owned))
+    });
     Some(Fetched {
         provider_payment_id: format!("{}_{}", if invoice { "invoice" } else { "order" }, r.id),
         ts: a.created_at,
@@ -494,6 +495,14 @@ mod tests {
         );
         let long = "k".repeat(100);
         assert_eq!(signature(&long, b"x").len(), 64);
+    }
+
+    #[test]
+    fn compat_custom_data_key_is_a_fallback() {
+        let body = include_str!("fixtures/lemonsqueezy_webhook_order.json")
+            .replace("virling_vid", "datafast_visitor_id");
+        let f = webhook_payment(body.as_bytes()).unwrap().unwrap();
+        assert_eq!(f.visitor_id.as_deref(), Some("v_8c1f2e"));
     }
 
     #[test]
