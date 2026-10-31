@@ -12,6 +12,7 @@ use crate::dashboard::{
 };
 use crate::icons;
 use crate::onboarding::render;
+use crate::payback::{PaybackRow, WEEKS};
 use crate::retention::{By, LTV_DAYS, RetentionRow};
 use crate::sites;
 
@@ -58,6 +59,81 @@ pub struct SourceView {
     repeat: String,
 }
 
+pub struct PaybackView {
+    /// Month name on the first row of each month, else empty.
+    month: String,
+    icon: String,
+    label: String,
+    visitors: String,
+    /// SVG polyline points of the curve, scaled to the highest row.
+    curve: String,
+    /// (column name, net revenue per visitor by then, whether that week was reached).
+    weeks: Vec<(String, String, bool)>,
+}
+
+/// Weeks after the first visit shown as columns.
+const PAYBACK_COLS: [usize; 4] = [1, 4, 8, 12];
+
+fn month_name(ym: &str) -> String {
+    let (y, m) = ym.split_once('-').unwrap_or((ym, "1"));
+    let m = m
+        .parse::<u8>()
+        .ok()
+        .and_then(|m| time::Month::try_from(m).ok());
+    m.map_or_else(|| ym.to_string(), |m| format!("{m} {y}"))
+}
+
+fn payback_views(rows: &[PaybackRow]) -> Vec<PaybackView> {
+    let max = rows
+        .iter()
+        .flat_map(|r| r.per_visitor.iter().flatten())
+        .fold(0.0_f64, |a, &b| a.max(b));
+    let mut last = "";
+    rows.iter()
+        .map(|r| {
+            let month = if r.month != last {
+                month_name(&r.month)
+            } else {
+                String::new()
+            };
+            last = &r.month;
+            let curve = r
+                .per_visitor
+                .iter()
+                .enumerate()
+                .filter_map(|(w, v)| v.map(|v| (w, v)))
+                .map(|(w, v)| {
+                    let y = if max > 0.0 {
+                        22.0 - v / max * 20.0
+                    } else {
+                        22.0
+                    };
+                    format!("{:.1},{:.1}", w as f64 * 80.0 / (WEEKS - 1) as f64, y)
+                })
+                .collect::<Vec<_>>()
+                .join(" ");
+            PaybackView {
+                month,
+                icon: icons::source(&r.channel, 16),
+                label: r.channel.clone(),
+                visitors: group(r.visitors),
+                curve,
+                weeks: PAYBACK_COLS
+                    .iter()
+                    .map(|&w| {
+                        let v = r.per_visitor[w - 1];
+                        (
+                            format!("Week {w}"),
+                            v.map_or_else(|| "–".into(), money),
+                            v.is_some(),
+                        )
+                    })
+                    .collect(),
+            }
+        })
+        .collect()
+}
+
 #[derive(Template)]
 #[template(path = "retention.html")]
 struct RetentionPage {
@@ -73,6 +149,7 @@ struct RetentionPage {
     head: &'static str,
     rows: Vec<RowView>,
     sources: Vec<SourceView>,
+    payback: Vec<PaybackView>,
     empty: String,
     no_payments: bool,
     /// None when no provider is connected, else whether one is still on its first sync.
@@ -211,9 +288,15 @@ pub async fn page(
     };
     let store = state.events.clone();
     let id = ctx.site.id.clone();
-    let r = match blocking(move || store.retention(&id, &p, OffsetDateTime::now_utc())).await {
-        Ok(r) => r,
-        Err(code) => return code.into_response(),
+    let now = OffsetDateTime::now_utc();
+    let (store2, id2, p2) = (store.clone(), id.clone(), p.clone());
+    let (r, payback) = tokio::join!(
+        blocking(move || store.retention(&id, &p, now)),
+        blocking(move || store2.payback(&id2, &p2, now)),
+    );
+    let (r, payback) = match (r, payback) {
+        (Ok(r), Ok(b)) => (r, b),
+        (Err(code), _) | (_, Err(code)) => return code.into_response(),
     };
     let base = sites::app_path(&ctx.site.domain, "retention");
     let by_q = if tab == "channel" { "" } else { tab };
@@ -287,6 +370,7 @@ pub async fn page(
                 repeat: pct(Some(x.repeat_share)),
             })
             .collect(),
+        payback: payback_views(&payback),
         empty: format!(
             "No customers made their first payment in {}.",
             if picked.key == "custom" {
@@ -349,6 +433,7 @@ mod tests {
         assert!(html.contains(r#"class="on" aria-current="true">Referrer</a>"#));
         assert!(html.contains("ChatGPT"));
         assert!(html.contains("1 day of payments so far."));
+        assert!(html.contains("Payback by channel"));
         assert!(html.contains(r#"aria-current="page">"#) && html.contains("Retention</a>"));
         let (code, _) = get("/app/other.com/retention").await;
         assert_eq!(code, StatusCode::NOT_FOUND);
