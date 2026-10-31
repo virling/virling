@@ -219,6 +219,7 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
             timezone,
             cookieless,
             consent: false,
+            client: None,
             same_visit: String::new(),
             return_minutes: 5,
             sample_data: false,

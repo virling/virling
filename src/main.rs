@@ -1398,6 +1398,66 @@ mod tests {
         assert_eq!(vid("plain@example.com").await, None);
     }
 
+    #[tokio::test]
+    async fn agency_sites_group_by_client() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let account: String =
+            sqlx::query_scalar("SELECT id FROM accounts WHERE email = 'me@example.com'")
+                .fetch_one(&state.db)
+                .await
+                .unwrap();
+        sqlx::query("UPDATE accounts SET account_type = 'agency' WHERE id = ?")
+            .bind(&account)
+            .execute(&state.db)
+            .await
+            .unwrap();
+        crate::sites::create_site(&state.db, &account, "acme-shop.com", "UTC")
+            .await
+            .unwrap();
+        crate::sites::create_site(&state.db, &account, "acme-blog.com", "UTC")
+            .await
+            .unwrap();
+        for site in ["acme-shop.com", "acme-blog.com"] {
+            let res = call(
+                &state,
+                form(
+                    &format!("/app/{site}/settings/client"),
+                    "client=+Acme+Inc+".into(),
+                    Some(&cookie),
+                ),
+            )
+            .await;
+            assert_eq!(res.status(), StatusCode::SEE_OTHER);
+        }
+        let saved: Option<String> =
+            sqlx::query_scalar("SELECT client FROM sites WHERE domain = 'acme-shop.com'")
+                .fetch_one(&state.db)
+                .await
+                .unwrap();
+        assert_eq!(saved.as_deref(), Some("Acme Inc"));
+        let page =
+            body_text(call(&state, get("/app/example.com/clients", Some(&cookie))).await).await;
+        let acme = page
+            .find("<span>Acme Inc</span>")
+            .expect("a group per client");
+        let none = page
+            .find("<span>No client</span>")
+            .expect("sites without a client");
+        assert!(acme < none, "named clients come first");
+        assert!(
+            page[acme..none].contains("acme-shop.com")
+                && page[acme..none].contains("acme-blog.com")
+        );
+        assert!(page[none..].contains("example.com"));
+        assert_eq!(
+            page.matches(r#"<span class="menu-group">Acme Inc</span>"#)
+                .count(),
+            1
+        );
+        assert!(page.contains(r#"href="/app/example.com/clients">All clients</a>"#));
+    }
+
     async fn site_id(state: &AppState) -> String {
         sqlx::query_scalar("SELECT id FROM sites WHERE domain = 'example.com'")
             .fetch_one(&state.db)

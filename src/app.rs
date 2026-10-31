@@ -269,6 +269,10 @@ pub fn router(state: AppState) -> Router {
             .route("/app/{domain}/globe/data", get(crate::globe::data))
             .route("/app/{domain}/retention", get(retention_page::page))
             .route(
+                "/app/{domain}/clients",
+                get(crate::dashboard::clients::page),
+            )
+            .route(
                 "/app/{domain}/launches",
                 get(crate::launches::page).post(crate::launches::create),
             )
@@ -315,6 +319,7 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/settings/timezone",
                 post(settings::save_timezone),
             )
+            .route("/app/{domain}/settings/client", post(settings::save_client))
             .route("/app/{domain}/settings/ai", post(settings::save_ai))
             .route("/app/{domain}/settings/ai/key", post(settings::save_ai_key))
             .route(

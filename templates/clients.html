@@ -1,0 +1,14 @@
+{% extends "app.html" %}
+{% block content %}
+<section class="box cl-list">
+  <h2>All clients</h2>
+  <p class="dim">Every site on this account, grouped by client, over the last 30 days. Set a site's client in its settings.</p>
+  {% for g in groups %}
+  <div class="cl-row th"><span>{% if g.name.is_empty() %}No client{% else %}{{ g.name }}{% endif %}</span><span class="num">{{ g.visitors }}</span><span class="num">{{ g.revenue }}</span></div>
+  {% for s in g.sites %}
+  <div class="cl-row"><a href="{{ s.href }}">{{ s.domain }}</a><span class="num">{{ s.visitors }}</span><span class="num">{{ s.revenue }}</span></div>
+  {% endfor %}
+  {% endfor %}
+  <p class="dim cl-note">Visitors and revenue are each site's own, in its timezone. A client's line adds up its sites.</p>
+</section>
+{% endblock %}
