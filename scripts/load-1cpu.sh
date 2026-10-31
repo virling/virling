@@ -10,7 +10,18 @@ SCALE="${SCALE:-1}"
 # The base image has no CA certificates and the server needs them at startup.
 LIMITS="--cpus 1 --memory 1g --memory-swap 1g -v /etc/ssl/certs:/etc/ssl/certs:ro"
 work=$(mktemp -d)
-trap 'docker rm -f virling-load >/dev/null 2>&1 || true' EXIT
+report() {
+  if docker inspect virling-load >/dev/null 2>&1; then
+    echo "oom killed: $(docker inspect --format '{{.State.OOMKilled}} exit {{.State.ExitCode}}' virling-load)"
+    docker logs --tail 20 virling-load 2>&1 | tail -20
+  fi
+  if [ -s "$work/mem.txt" ]; then
+    echo "== Memory every 30 s (cgroup anon is the process, file is page cache)"
+    cat "$work/mem.txt"
+  fi
+  docker rm -f virling-load >/dev/null 2>&1 || true
+}
+trap report EXIT
 run() {
   dir=$1
   shift
@@ -42,10 +53,6 @@ for c in 16 32 64 128 256 512; do
   grep -q "Failed requests: *0$" "$work/peak.txt" || break
 done
 docker stats --no-stream --format "memory after peak: {{.MemUsage}}" virling-load
-echo "oom killed: $(docker inspect --format '{{.State.OOMKilled}} exit {{.State.ExitCode}}' virling-load)"
-docker logs --tail 20 virling-load 2>&1 | tail -20
-echo "== Memory every 30 s (cgroup anon is the process, file is page cache)"
-cat "$work/mem.txt"
 docker rm -f virling-load >/dev/null
 
 echo "== Reads: every dashboard route on the demo data at ${SCALE}x, without the result cache"
