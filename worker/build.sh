@@ -9,6 +9,7 @@ cp ../assets/agency.html public/agency.html
 cp ../assets/pricing.html ../assets/self-host.html ../assets/demo.html public/
 cp ../assets/integrations.html ../assets/blog.html public/
 cp -R ../assets/integrations ../assets/blog ../assets/vs ../assets/tools public/
+cp ../assets/404.html ../assets/500.html public/
 cp ../assets/vs.html ../assets/about.html ../assets/privacy.html ../assets/terms.html ../assets/refunds.html ../assets/what-we-dont-do.html ../assets/tools.html public/
 # The changelog is rendered from the GitHub releases at build time.
 curl -fsSL https://api.github.com/repos/virling/virling/releases | perl ../scripts/changelog.pl ../assets/changelog.html > public/changelog.html
@@ -23,7 +24,7 @@ cp -R ../assets/fonts public/assets/fonts
 cp -R ../assets/dia public/assets/dia
 cp -R demo public/demo
 # Inline the landing stylesheet so the first paint needs no extra request.
-perl -0pi -e 'BEGIN { local $/; open F, "<", "public/assets/site.css"; $css = <F>; close F } s#<link rel="stylesheet" href="/assets/site.css">#<style>$css</style>#' public/index.html public/agency.html public/pricing.html public/self-host.html public/demo.html public/changelog.html public/integrations.html public/blog.html public/integrations/*.html public/blog/*.html public/vs.html public/about.html public/privacy.html public/terms.html public/refunds.html public/what-we-dont-do.html public/tools.html public/tools/*.html public/vs/*.html
+perl -0pi -e 'BEGIN { local $/; open F, "<", "public/assets/site.css"; $css = <F>; close F } s#<link rel="stylesheet" href="/assets/site.css">#<style>$css</style>#' public/index.html public/agency.html public/pricing.html public/self-host.html public/demo.html public/changelog.html public/integrations.html public/blog.html public/integrations/*.html public/blog/*.html public/vs.html public/about.html public/privacy.html public/terms.html public/refunds.html public/what-we-dont-do.html public/tools.html public/tools/*.html public/vs/*.html public/404.html public/500.html
 # Stamp CSS and JS links with a content hash so they can be cached for a year.
 for f in site.css site.js app.css app.js; do
   v=$(cksum "public/assets/$f" | cut -d' ' -f1)

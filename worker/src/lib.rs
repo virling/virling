@@ -814,6 +814,9 @@ async fn fetch(req: Request, env: Env, ctx: Context) -> Result<Response> {
         .or_else_any_method_async("/*path", pages)
         .run(req, env)
         .await
+        .or_else(|_| {
+            Ok(Response::from_html(include_str!("../../assets/500.html"))?.with_status(500))
+        })
 }
 
 #[cfg(test)]
