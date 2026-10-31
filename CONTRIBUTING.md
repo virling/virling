@@ -46,9 +46,15 @@ The tracking script source is `assets/v.src.js`. Run `scripts/build-tracker.sh` 
 - Never store visitor IP addresses or personal data from visitors.
 - Payment-provider keys must stay read-only where the provider allows it, and are always encrypted at rest.
 
-## Contributor License Agreement
+## Sign off your commits
 
-Virling is licensed under AGPL-3.0. Before we can merge your first pull request, you will be asked to sign a Contributor License Agreement. It lets Stacklance Infotech LLP keep offering the hosted version and other licenses while the code stays open source. You keep the copyright to your work.
+Contributions are accepted under the [Developer Certificate of Origin](https://developercertificate.org/): by signing off, you confirm you wrote the change or have the right to submit it under the project's license (AGPL-3.0). Add the sign-off with `git commit -s`, which appends a line like:
+
+```
+Signed-off-by: Your Name <you@example.com>
+```
+
+Pull requests from forks are checked for it on every commit. To fix a missing one, run `git commit --amend -s` for the last commit or `git rebase --signoff main` for all of them, then push again.
 
 ## Releases
 
