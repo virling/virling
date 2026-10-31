@@ -25,6 +25,10 @@ docker run -d --name virling-load $LIMITS -p 18080:8080 -v "$BIN:/usr/local/bin/
   virling serve >/dev/null
 timeout 60 sh -c 'until curl -sf http://127.0.0.1:18080/health >/dev/null; do sleep 0.5; done' || { docker logs virling-load; exit 1; }
 printf '{"n":"pageview","u":"https://example.com/pricing","r":"https://news.ycombinator.com/","s":"example.com","w":1440}' > "$work/event.json"
+( while docker exec virling-load true 2>/dev/null; do
+    docker exec virling-load sh -c 'awk "/^(anon|file|file_dirty|file_writeback) /{printf \"%s %dMB  \", \$1, \$2/1048576}" /sys/fs/cgroup/memory.stat; awk "/VmRSS/{printf \"rss %dMB\\n\", \$2/1024}" /proc/1/status' 2>/dev/null
+    sleep 30
+  done ) > "$work/mem.txt" 2>&1 &
 timeout 1800 ab -q -n "$EVENTS" -c 16 -p "$work/event.json" -T text/plain http://127.0.0.1:18080/api/event \
   | grep -E "Complete requests|Failed requests|Requests per second|Time per request.*\(mean\)|  50%|  99%|100%"
 docker stats --no-stream --format "memory after ingest: {{.MemUsage}}" virling-load
@@ -38,6 +42,10 @@ for c in 16 32 64 128 256 512; do
   grep -q "Failed requests: *0$" "$work/peak.txt" || break
 done
 docker stats --no-stream --format "memory after peak: {{.MemUsage}}" virling-load
+echo "oom killed: $(docker inspect --format '{{.State.OOMKilled}} exit {{.State.ExitCode}}' virling-load)"
+docker logs --tail 20 virling-load 2>&1 | tail -20
+echo "== Memory every 30 s (cgroup anon is the process, file is page cache)"
+cat "$work/mem.txt"
 docker rm -f virling-load >/dev/null
 
 echo "== Reads: every dashboard route on the demo data at ${SCALE}x, without the result cache"
