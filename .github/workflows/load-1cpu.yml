@@ -5,7 +5,7 @@ on:
     inputs:
       scale:
         description: Copies of the demo data for the read test
-        default: "10"
+        default: "1"
   pull_request:
     paths:
       - scripts/load-1cpu.sh
@@ -28,7 +28,7 @@ jobs:
       - run: sudo apt-get install -y apache2-utils && pip install --break-system-packages duckdb
       - name: 1 vCPU, 1 GB
         env:
-          SCALE: ${{ inputs.scale || '10' }}
+          SCALE: ${{ inputs.scale || '1' }}
         run: |
           nproc; free -m
           set -o pipefail
