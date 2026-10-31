@@ -31,5 +31,6 @@ jobs:
           SCALE: ${{ inputs.scale || '10' }}
         run: |
           nproc; free -m
+          set -o pipefail
           ./scripts/load-1cpu.sh | tee load.txt
           { echo '```'; cat load.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
