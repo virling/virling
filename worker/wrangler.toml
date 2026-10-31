@@ -12,6 +12,7 @@ command = "./build.sh"
 [assets]
 directory = "./public"
 html_handling = "auto-trailing-slash"
+not_found_handling = "404-page"
 binding = "ASSETS"
 run_worker_first = ["/*", "!/assets/*", "!/.well-known/*", "!/*.md", "!/*.txt", "!/*.xml", "!/*.ico", "!/*.svg", "!/*.js", "!/*.sh"]
 

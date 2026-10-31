@@ -1065,6 +1065,20 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn unknown_pages_get_an_error_page_only_in_a_browser() {
+        let (_dir, state, _store) = setup().await;
+        let mut page = get("/no-such-page", None);
+        page.headers_mut()
+            .insert("accept", "text/html,*/*".parse().unwrap());
+        let res = call(&state, page).await;
+        assert_eq!(res.status(), StatusCode::NOT_FOUND);
+        assert!(body_text(res).await.contains("Page not found"));
+        let res = call(&state, get("/no-such-page", None)).await;
+        assert_eq!(res.status(), StatusCode::NOT_FOUND);
+        assert_eq!(body_text(res).await, "");
+    }
+
+    #[tokio::test]
     async fn magic_link_sign_in_and_onboarding() {
         let (_dir, state, _store) = setup().await;
 

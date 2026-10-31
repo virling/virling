@@ -453,20 +453,55 @@ pub fn router(state: AppState) -> Router {
     } else if state.config.app {
         app = app.route("/", get(|| async { Redirect::temporary("/app") }));
     }
-    app.layer(axum::middleware::from_fn_with_state(
-        state.clone(),
-        crate::markdown::negotiate,
-    ))
-    .layer(axum::middleware::from_fn_with_state(state.clone(), theme))
-    .layer(axum::middleware::from_fn_with_state(
-        state.clone(),
-        keep_out_of_search,
-    ))
-    .layer(axum::middleware::from_fn_with_state(
-        state.clone(),
-        mcp_host_only,
-    ))
-    .with_state(state)
+    app.layer(axum::middleware::from_fn(error_page))
+        .layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            crate::markdown::negotiate,
+        ))
+        .layer(axum::middleware::from_fn_with_state(state.clone(), theme))
+        .layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            keep_out_of_search,
+        ))
+        .layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            mcp_host_only,
+        ))
+        .with_state(state)
+}
+
+#[derive(Template)]
+#[template(path = "error.html")]
+struct ErrorPage {
+    title: &'static str,
+    message: &'static str,
+}
+
+/// Gives a browser a readable page for a bare 404 or 5xx; API and JSON responses keep their own bodies.
+async fn error_page(req: axum::extract::Request, next: axum::middleware::Next) -> Response {
+    let html = req
+        .headers()
+        .get(axum::http::header::ACCEPT)
+        .and_then(|a| a.to_str().ok())
+        .is_some_and(|a| a.contains("text/html"));
+    let res = next.run(req).await;
+    let status = res.status();
+    if !html
+        || res.headers().contains_key(axum::http::header::CONTENT_TYPE)
+        || !(status == StatusCode::NOT_FOUND || status.is_server_error())
+    {
+        return res;
+    }
+    let (title, message) = if status == StatusCode::NOT_FOUND {
+        ("Page not found", "This page does not exist or has moved.")
+    } else {
+        (
+            "Something went wrong",
+            "We could not load this page. Try again in a minute.",
+        )
+    };
+    let page = ErrorPage { title, message }.render().unwrap_or_default();
+    (status, Html(page)).into_response()
 }
 
 /// The app and its sign-in page are not for search results; only the marketing pages are.
