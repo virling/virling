@@ -1326,7 +1326,43 @@ pub(crate) fn last_pages(
     period: &Period,
     f: &Filter,
 ) -> anyhow::Result<Vec<BreakdownRow>> {
+    pages_before(conn, site_id, period, f, false)
+}
+
+/// Pages by the revenue of payments whose payer viewed them at any point before paying, then pages viewed in range with none.
+pub(crate) fn money_pages(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+    f: &Filter,
+) -> anyhow::Result<Vec<BreakdownRow>> {
+    pages_before(conn, site_id, period, f, true)
+}
+
+fn pages_before(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+    f: &Filter,
+    every: bool,
+) -> anyhow::Result<Vec<BreakdownRow>> {
     let (scope, within, paid) = (f.cte(), f.within("session_id"), f.paid());
+    let (last, join) = if every {
+        (
+            "SELECT DISTINCT y.provider, y.provider_payment_id, y.usd, y.customer, v.path
+            FROM pays y JOIN viewed v USING (provider, provider_payment_id)",
+            "FULL",
+        )
+    } else {
+        (
+            "SELECT y.usd, y.customer, l.path FROM pays y
+            LEFT JOIN (
+                SELECT provider, provider_payment_id, path FROM viewed
+                QUALIFY row_number() OVER (PARTITION BY provider, provider_payment_id ORDER BY ts DESC, path DESC) = 1
+            ) l USING (provider, provider_payment_id)",
+            "LEFT",
+        )
+    };
     let sql = format!(
         "WITH {BOUNDS}{scope},
         pays AS (
@@ -1344,23 +1380,17 @@ pub(crate) fn last_pages(
             SELECT y.provider, y.provider_payment_id, e.ts, e.path FROM pays y
             JOIN events e ON e.site_id = $site AND e.kind = 'pageview' AND e.session_id = y.session_id AND e.ts <= y.ts
         ),
-        last AS (
-            SELECT y.usd, y.customer, l.path FROM pays y
-            LEFT JOIN (
-                SELECT provider, provider_payment_id, path FROM viewed
-                QUALIFY row_number() OVER (PARTITION BY provider, provider_payment_id ORDER BY ts DESC, path DESC) = 1
-            ) l USING (provider, provider_payment_id)
-        ),
+        last AS ({last}),
         seen AS (
             SELECT path, count(DISTINCT visitor_id) AS visitors FROM events, bounds
             WHERE site_id = $site AND kind = 'pageview' AND ts >= lo AND ts < hi{within}
             GROUP BY path
         )
-        SELECT l.path, coalesce(any_value(s.visitors), 0)::BIGINT, count(*), coalesce(sum(l.usd), 0),
-            count(DISTINCT l.customer)
-        FROM last l LEFT JOIN seen s ON s.path = l.path
-        WHERE l.path IS NOT NULL
-        GROUP BY l.path"
+        SELECT coalesce(l.path, s.path), coalesce(any_value(s.visitors), 0)::BIGINT, count(l.path),
+            coalesce(sum(l.usd), 0), count(DISTINCT l.customer)
+        FROM last l {join} JOIN seen s ON s.path = l.path
+        WHERE coalesce(l.path, s.path) IS NOT NULL
+        GROUP BY 1"
     );
     let mut stmt = conn.prepare(&sql)?;
     let rows = stmt.query_map(

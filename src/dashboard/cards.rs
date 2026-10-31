@@ -25,6 +25,7 @@ pub enum Tab {
     Keyword,
     Landing,
     Before,
+    Money,
     Country,
     City,
     Language,
@@ -44,7 +45,7 @@ impl Tab {
             Tab::Campaign => Dimension::Campaign,
             Tab::Keyword => Dimension::Keyword,
             Tab::Landing => Dimension::LandingPage,
-            Tab::Before => return None,
+            Tab::Before | Tab::Money => return None,
             Tab::Country => Dimension::Country,
             Tab::City => Dimension::CountryCity,
             Tab::Language => Dimension::Language,
@@ -76,6 +77,7 @@ impl Tab {
             Tab::Keyword => "Search term",
             Tab::Landing => "First page of the visit",
             Tab::Before => "Last page before checkout",
+            Tab::Money => "Page read before paying",
             Tab::Country => "Country",
             Tab::City => "City",
             Tab::Language => "Browser language",
@@ -97,6 +99,9 @@ impl Tab {
             Tab::Keyword => "From utm_term on your links.",
             Tab::Landing => "Click a page to filter. Open it to see where its visitors came from.",
             Tab::Before => "Visitors here means everyone who viewed the page.",
+            Tab::Money => {
+                "Revenue of buyers who viewed the page before paying. Pages with no revenue come last."
+            }
             Tab::Country => "Click a country to filter. Open it to see its cities.",
             Tab::City => "Located from IP, approximate.",
             Tab::Language => "Click a language to filter. From the browser setting.",
@@ -139,6 +144,7 @@ pub const SPECS: [Spec; 5] = [
         tabs: &[
             ("landing", "Landing page", Tab::Landing),
             ("before", "Before paying", Tab::Before),
+            ("money", "Money pages", Tab::Money),
         ],
         empty: (
             "No pages yet",
@@ -457,14 +463,21 @@ fn item(tab: Tab, r: &BreakdownRow) -> Item {
                     ),
                 }
             }
-            Tab::Landing | Tab::Before => {
+            Tab::Landing | Tab::Before | Tab::Money => {
                 let path = v("");
-                let sub = if tab == Tab::Before {
-                    format!("{} before paying", super::plural(r.payments, "payment"))
-                } else {
-                    String::new()
+                let sub = match tab {
+                    Tab::Before => {
+                        format!("{} before paying", super::plural(r.payments, "payment"))
+                    }
+                    Tab::Money if r.payments == 0 => "No revenue yet".into(),
+                    Tab::Money => format!("Read before {}", super::plural(r.payments, "payment")),
+                    _ => String::new(),
                 };
-                let param = if tab == Tab::Before { "viewed" } else { "page" };
+                let param = if tab == Tab::Landing {
+                    "page"
+                } else {
+                    "viewed"
+                };
                 (
                     icons::glyph("page", 16, "var(--ink-2)"),
                     path.clone(),
@@ -1012,7 +1025,7 @@ pub fn card(
                         "No cities for these visits",
                         "Cities come from your proxy's location headers. On Cloudflare, turn on the Add visitor location headers Managed Transform.",
                     ),
-                    Tab::Before => (
+                    Tab::Before | Tab::Money => (
                         "No payments matched to visits yet",
                         "Pages people view before paying will show here.",
                     ),

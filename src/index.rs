@@ -1683,6 +1683,77 @@ impl SiteIndex {
             .collect()
     }
 
+    /// (path, visitors, payments, revenue, customers) of pages viewed at any point before paying, then pages viewed in range with none.
+    pub fn money_pages(
+        &self,
+        lo: i64,
+        hi: i64,
+        scope: &Scope,
+    ) -> Vec<(String, u64, u64, f64, u64)> {
+        let seen = self.page_visitors(lo, hi, scope);
+        let mut rows: HashMap<u32, (u64, f64, u64)> = HashMap::new();
+        let mut paid: Vec<(u32, u32)> = Vec::new();
+        let mut paths: Vec<u32> = Vec::new();
+        let from = self.payments.partition_point(|p| p.ts < lo);
+        let to = self.payments.partition_point(|p| p.ts < hi);
+        for p in &self.payments[from..to] {
+            if !(scope.all() || self.pay_session(p).is_some_and(|s| scope.has(s))) {
+                continue;
+            }
+            paths.clear();
+            let mut walk = |s: u32| {
+                let mut i = self.sessions[s as usize].pv;
+                while i != NONE {
+                    let pv = &self.pageviews[i as usize];
+                    if pv.ts <= p.ts {
+                        paths.push(pv.path);
+                    }
+                    i = pv.prev;
+                }
+            };
+            let visitor = self.pay_visitor(p);
+            if let Some(v) = visitor {
+                let mut s = self.visitors[v as usize].last_session;
+                while s != NONE {
+                    walk(s);
+                    s = self.sessions[s as usize].prev;
+                }
+            }
+            if let Some(s) = self.pay_session(p)
+                && visitor != Some(self.sessions[s as usize].visitor)
+            {
+                walk(s);
+            }
+            paths.sort_unstable();
+            paths.dedup();
+            for &path in &paths {
+                let e = rows.entry(path).or_default();
+                e.0 += 1;
+                e.1 += p.net.unwrap_or(0.0);
+                paid.push((path, p.customer));
+            }
+        }
+        paid.sort_unstable();
+        paid.dedup();
+        for (path, _) in paid {
+            rows.get_mut(&path).unwrap().2 += 1;
+        }
+        for &path in seen.keys() {
+            rows.entry(path).or_default();
+        }
+        rows.into_iter()
+            .map(|(path, (n, r, c))| {
+                (
+                    self.path_name(path),
+                    seen.get(&path).copied().unwrap_or(0) as u64,
+                    n,
+                    r,
+                    c,
+                )
+            })
+            .collect()
+    }
+
     /// (channel, referrer host) of each session's first pageview in [lo, hi), by distinct visitors.
     pub fn channel_sources(&self, lo: i64, hi: i64, scope: &Scope) -> Vec<(String, String, u64)> {
         if let Some(rows) = self.linked_sources(lo, hi, scope) {
@@ -2428,10 +2499,35 @@ pub mod read {
         period: &Period,
         f: &Filter,
     ) -> anyhow::Result<Option<Vec<BreakdownRow>>> {
+        pages_before(ix, z, conn, period, f, false)
+    }
+
+    pub fn money_pages(
+        ix: &SiteIndex,
+        z: &Zones,
+        conn: &Connection,
+        period: &Period,
+        f: &Filter,
+    ) -> anyhow::Result<Option<Vec<BreakdownRow>>> {
+        pages_before(ix, z, conn, period, f, true)
+    }
+
+    fn pages_before(
+        ix: &SiteIndex,
+        z: &Zones,
+        conn: &Connection,
+        period: &Period,
+        f: &Filter,
+        every: bool,
+    ) -> anyhow::Result<Option<Vec<BreakdownRow>>> {
         let scope = ix.scope(f);
         let (lo, hi) = z.bounds(conn, period)?;
-        let mut out: Vec<BreakdownRow> = ix
-            .last_pages(lo, hi, &scope)
+        let rows = if every {
+            ix.money_pages(lo, hi, &scope)
+        } else {
+            ix.last_pages(lo, hi, &scope)
+        };
+        let mut out: Vec<BreakdownRow> = rows
             .into_iter()
             .map(
                 |(path, visitors, payments, revenue_usd, customers)| BreakdownRow {
@@ -2751,6 +2847,11 @@ pub(crate) mod tests {
                         stats::last_pages(&conn, SITE, &p, &f).unwrap(),
                     );
                     check(
+                        &format!("money_pages {at}"),
+                        read::money_pages(&ix, &z, &conn, &p, &f).unwrap(),
+                        stats::money_pages(&conn, SITE, &p, &f).unwrap(),
+                    );
+                    check(
                         &format!("channel_sources {at}"),
                         read::channel_sources(&ix, &z, &conn, &p, &f).unwrap(),
                         stats::channel_sources(&conn, SITE, &p, &f).unwrap(),
@@ -2913,6 +3014,11 @@ pub(crate) mod tests {
                     &format!("last_pages {at}"),
                     read::last_pages(&ix, &z, &conn, &p, &f).unwrap(),
                     stats::last_pages(&conn, SITE, &p, &f).unwrap(),
+                );
+                check(
+                    &format!("money_pages {at}"),
+                    read::money_pages(&ix, &z, &conn, &p, &f).unwrap(),
+                    stats::money_pages(&conn, SITE, &p, &f).unwrap(),
                 );
                 check(
                     &format!("channel_sources {at}"),
