@@ -16,6 +16,8 @@ cp ../assets/site.css ../assets/site.js ../assets/app.css ../assets/app.js ../as
 cp ../assets/auth.md public/auth.md
 cp ../assets/favicon.svg ../assets/favicon.ico ../assets/v.js ../assets/v-compat.js ../assets/robots.txt ../assets/sitemap.xml ../assets/llms.txt ../assets/llms-full.txt ../scripts/install.sh public/
 cp -R ../assets/art public/assets/art
+# Date each sitemap URL by the last commit that touched its page.
+perl -pi -e 's#<loc>https://virling\.com(/[^<]*)</loc>#my $p = $1; my $f = $p eq "/" ? "selfhost" : substr($p, 1); my $d = `git log -1 --format=%cs -- ../assets/$f.html`; chomp $d; "<loc>https://virling.com$p</loc>" . ($d ? "<lastmod>$d</lastmod>" : "")#e' public/sitemap.xml
 mkdir -p public/assets/icons && cp ../assets/icons/stripe.svg ../assets/icons/dodo.svg ../assets/icons/polar.svg ../assets/icons/lemonsqueezy.svg ../assets/icons/revenuecat.svg ../assets/icons/paddle.svg ../assets/icons/shopify.svg ../assets/icons/woocommerce.svg ../assets/icons/creem.svg public/assets/icons/
 cp -R ../assets/fonts public/assets/fonts
 cp -R ../assets/dia public/assets/dia
