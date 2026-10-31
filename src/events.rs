@@ -199,6 +199,13 @@ pub trait EventStore: Send + Sync {
         period: &Period,
         f: &Filter,
     ) -> anyhow::Result<Vec<BreakdownRow>>;
+    /// Pages viewed at any point before paying, by the revenue of those payments, then pages with no revenue.
+    fn money_pages_in(
+        &self,
+        site_id: &str,
+        period: &Period,
+        f: &Filter,
+    ) -> anyhow::Result<Vec<BreakdownRow>>;
     fn payment_list(
         &self,
         site_id: &str,
@@ -1686,6 +1693,20 @@ impl EventStore for DuckStore {
             sums.apply_rows(kind, &mut rows);
         }
         Ok(rows)
+    }
+
+    fn money_pages_in(
+        &self,
+        site_id: &str,
+        period: &Period,
+        f: &Filter,
+    ) -> anyhow::Result<Vec<BreakdownRow>> {
+        if let Some(rows) =
+            self.indexed(site_id, |ix, z, c| read::money_pages(ix, z, c, period, f))?
+        {
+            return Ok(rows);
+        }
+        stats::money_pages(&*self.read()?, site_id, period, f)
     }
 
     fn last_pages_in(

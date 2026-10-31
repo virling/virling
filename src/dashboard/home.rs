@@ -869,7 +869,11 @@ async fn page(
                 };
                 let mut tabs = Vec::new();
                 for t in cards::all_tabs() {
-                    let rows = rows_of(t.dimension())?;
+                    let rows = if t == cards::Tab::Money {
+                        store.money_pages_in(&id, &pq, &f)?
+                    } else {
+                        rows_of(t.dimension())?
+                    };
                     let mut kids = match t.kids() {
                         Some(d) => rows_of(Some(d))?,
                         None => Vec::new(),

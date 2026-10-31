@@ -266,6 +266,17 @@ impl<S: EventStore> EventStore for Cached<S> {
         )
     }
 
+    fn money_pages_in(
+        &self,
+        site_id: &str,
+        period: &Period,
+        f: &Filter,
+    ) -> anyhow::Result<Vec<BreakdownRow>> {
+        self.get(site_id, format!("money_pages {period:?} {f:?}"), || {
+            self.inner.money_pages_in(site_id, period, f)
+        })
+    }
+
     fn last_pages_in(
         &self,
         site_id: &str,
