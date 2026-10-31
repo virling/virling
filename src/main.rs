@@ -117,6 +117,13 @@ enum Command {
         /// Folder holding the imported_*.csv files
         dir: PathBuf,
     },
+    /// Import daily traffic from Google Analytics 4 CSV exports, as history before tracking began
+    ImportGa {
+        /// The site's domain in Virling
+        domain: String,
+        /// Folder holding the exported .csv files
+        dir: PathBuf,
+    },
     /// Render the sample-data demo to static HTML
     #[command(hide = true)]
     Demo {
@@ -403,26 +410,49 @@ async fn main() -> anyhow::Result<()> {
             );
         }
         Command::ImportPlausible { domain, dir } => {
-            let domain = sites::normalize_domain(&domain).context("not a valid domain")?;
-            let site: String = sqlx::query_scalar("SELECT id FROM sites WHERE domain = ?")
-                .bind(&domain)
-                .fetch_optional(&db)
-                .await?
-                .with_context(|| format!("no site {domain}; add it first"))?;
             let rows = imported::plausible(&dir)?;
             anyhow::ensure!(
                 !rows.is_empty(),
                 "no imported_*.csv files in {}",
                 dir.display()
             );
-            let events = DuckStore::open(&cli.data_dir.join("events.duckdb"))?;
-            let kept = events.replace_imported(&site, &rows)?;
-            println!("Imported {kept} daily rows for {domain}.");
+            import_history(&db, &cli.data_dir, &domain, rows).await?
+        }
+        Command::ImportGa { domain, dir } => {
+            let (rows, skipped) = imported::google_analytics(&dir)?;
+            for why in &skipped {
+                eprintln!("skipped {why}");
+            }
+            anyhow::ensure!(
+                !rows.is_empty(),
+                "no Google Analytics CSV export with a Date column in {}",
+                dir.display()
+            );
+            import_history(&db, &cli.data_dir, &domain, rows).await?
         }
         Command::Demo { .. } | Command::Query(_) | Command::Bench(_) => {
             unreachable!("handled before the data dir is opened")
         }
     }
+    Ok(())
+}
+
+/// Replaces a site's imported history with `rows` and says how many daily rows were kept.
+async fn import_history(
+    db: &SqlitePool,
+    data_dir: &std::path::Path,
+    domain: &str,
+    rows: Vec<imported::Imported>,
+) -> anyhow::Result<()> {
+    let domain = sites::normalize_domain(domain).context("not a valid domain")?;
+    let site: String = sqlx::query_scalar("SELECT id FROM sites WHERE domain = ?")
+        .bind(&domain)
+        .fetch_optional(db)
+        .await?
+        .with_context(|| format!("no site {domain}; add it first"))?;
+    let events = DuckStore::open(&data_dir.join("events.duckdb"))?;
+    let kept = events.replace_imported(&site, &rows)?;
+    println!("Imported {kept} daily rows for {domain}.");
     Ok(())
 }
 

@@ -100,7 +100,11 @@ pub fn plausible(dir: &Path) -> anyhow::Result<Vec<Imported>> {
         out.push(r.clone().to("channel", Some(channel.as_str().to_string())));
         out.push(r.to("referrer", host.map(|h| channel::source_domain(&h))));
     }
-    // Rows of one key on one day are summed, as the export may split them by UTM tags.
+    Ok(merge(out))
+}
+
+/// Rows of one key on one day summed, as an export may split them by UTM tags or other columns.
+fn merge(out: Vec<Imported>) -> Vec<Imported> {
     let mut merged: HashMap<(Date, &'static str, Option<String>), Imported> = HashMap::new();
     for i in out {
         merged
@@ -114,7 +118,252 @@ pub fn plausible(dir: &Path) -> anyhow::Result<Vec<Imported>> {
     }
     let mut rows: Vec<Imported> = merged.into_values().collect();
     rows.sort_by(|a, b| (a.day, a.kind, &a.label).cmp(&(b.day, b.kind, &b.label)));
-    Ok(rows)
+    rows
+}
+
+/// A Google Analytics column by any of its names, ignoring case.
+fn ga_column(names: &[String], wanted: &[&str]) -> Option<usize> {
+    names
+        .iter()
+        .position(|n| wanted.iter().any(|w| n.eq_ignore_ascii_case(w)))
+}
+
+/// A GA4 day, as 20241001 or 2024-10-01.
+fn ga_date(s: &str) -> Option<Date> {
+    let s = s.trim();
+    if s.len() == 8 && s.bytes().all(|b| b.is_ascii_digit()) {
+        return date(&format!("{}-{}-{}", &s[..4], &s[4..6], &s[6..]));
+    }
+    date(s)
+}
+
+/// The fields of one CSV line, with quotes removed and doubled quotes kept as one.
+fn csv_fields(line: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut field = String::new();
+    let mut quoted = false;
+    let mut chars = line.chars().peekable();
+    while let Some(c) = chars.next() {
+        match c {
+            '"' if quoted && chars.peek() == Some(&'"') => {
+                field.push('"');
+                chars.next();
+            }
+            '"' => quoted = !quoted,
+            ',' if !quoted => out.push(std::mem::take(&mut field)),
+            _ => field.push(c),
+        }
+    }
+    out.push(field);
+    out.into_iter().map(|f| f.trim().to_string()).collect()
+}
+
+/// The ISO code of a country as GA4 names it.
+fn ga_country(name: &str) -> Option<String> {
+    let name = name.trim();
+    if name.len() == 2 && name.bytes().all(|b| b.is_ascii_alphabetic()) {
+        return Some(name.to_ascii_uppercase());
+    }
+    let norm = |s: &str| -> String {
+        s.to_lowercase()
+            .replace('&', "and")
+            .replace("st. ", "saint ")
+            .replace(['’', '\'', '.', ',', '(', ')'], "")
+            .replace('å', "a")
+            .split_whitespace()
+            .collect::<Vec<_>>()
+            .join(" ")
+    };
+    let aliases = [
+        ("czechia", "CZ"),
+        ("turkey", "TR"),
+        ("macao", "MO"),
+        ("myanmar burma", "MM"),
+        ("congo - kinshasa", "CD"),
+        ("congo - brazzaville", "CG"),
+        ("palestine", "PS"),
+        ("brunei", "BN"),
+        ("cape verde", "CV"),
+        ("micronesia", "FM"),
+        ("us virgin islands", "VI"),
+        ("british virgin islands", "VG"),
+        ("caribbean netherlands", "BQ"),
+        ("vatican city", "VA"),
+        ("heard and mcdonald islands", "HM"),
+        ("saint helena", "SH"),
+        ("us outlying islands", "UM"),
+        ("pitcairn islands", "PN"),
+        ("hong kong sar china", "HK"),
+        ("macao sar china", "MO"),
+    ];
+    let n = norm(name);
+    if let Some((_, code)) = aliases.iter().find(|(a, _)| *a == n) {
+        return Some((*code).to_string());
+    }
+    crate::flags::FLAGS
+        .iter()
+        .find(|f| norm(f.1) == n)
+        .map(|f| f.0.to_string())
+}
+
+/// The dimension a GA4 file breaks down by, from its columns; Err names a column Virling does not import.
+fn ga_dimension(names: &[String]) -> Result<Option<(&'static str, usize)>, String> {
+    let known = [
+        "date",
+        "active users",
+        "total users",
+        "users",
+        "views",
+        "screen page views",
+        "pageviews",
+        "sessions",
+        "session medium",
+        "first user medium",
+        "medium",
+    ];
+    let dims: [(&str, &[&str]); 4] = [
+        (
+            "source",
+            &[
+                "Session source / medium",
+                "Session source",
+                "First user source",
+                "Source",
+            ],
+        ),
+        (
+            "page",
+            &[
+                "Page path and screen class",
+                "Page path",
+                "Landing page",
+                "Page",
+            ],
+        ),
+        ("country", &["Country", "Country_code"]),
+        ("device", &["Device category", "Device"]),
+    ];
+    let mut found = None;
+    for (i, n) in names.iter().enumerate() {
+        if known.contains(&n.to_lowercase().as_str()) {
+            continue;
+        }
+        match dims
+            .iter()
+            .find(|(_, d)| d.iter().any(|w| n.eq_ignore_ascii_case(w)))
+        {
+            Some((kind, _)) if found.is_none() => found = Some((*kind, i)),
+            _ => return Err(format!("it has a column Virling does not import: {n}")),
+        }
+    }
+    Ok(found)
+}
+
+/// Rows of every CSV file in `dir` exported from Google Analytics 4, and each file skipped with why.
+pub fn google_analytics(dir: &Path) -> anyhow::Result<(Vec<Imported>, Vec<String>)> {
+    let mut out = Vec::new();
+    let mut skipped = Vec::new();
+    let mut paths: Vec<_> = std::fs::read_dir(dir)?
+        .filter_map(|e| e.ok().map(|e| e.path()))
+        .filter(|p| p.extension().and_then(|e| e.to_str()) == Some("csv"))
+        .collect();
+    paths.sort();
+    for path in paths {
+        let file = path.file_name().unwrap_or_default().to_string_lossy();
+        let text = std::fs::read_to_string(&path)?;
+        // GA4 downloads open with "#" comments and may hold several tables; only the first is read.
+        let mut lines = text
+            .trim_start_matches('\u{feff}')
+            .lines()
+            .skip_while(|l| l.starts_with('#') || l.trim().is_empty());
+        let Some(header) = lines.next() else {
+            skipped.push(format!("{file}: it has no header row"));
+            continue;
+        };
+        let names = csv_fields(header);
+        let Some(day) = ga_column(&names, &["Date"]) else {
+            skipped.push(format!("{file}: it has no Date column"));
+            continue;
+        };
+        let dimension = match ga_dimension(&names) {
+            Ok(d) => d,
+            Err(why) => {
+                skipped.push(format!("{file}: {why}"));
+                continue;
+            }
+        };
+        let users = ga_column(&names, &["Active users", "Total users", "Users"]);
+        let views = ga_column(&names, &["Views", "Screen page views", "Pageviews"]);
+        let sessions = ga_column(&names, &["Sessions"]);
+        let medium = ga_column(&names, &["Session medium", "First user medium", "Medium"]);
+        let num = |v: Option<&String>| -> u64 {
+            v.and_then(|s| s.replace(',', "").parse::<f64>().ok())
+                .map_or(0, |n| n.max(0.0) as u64)
+        };
+        for line in lines.take_while(|l| !l.trim().is_empty() && !l.starts_with('#')) {
+            let f = csv_fields(line);
+            let get = |i: Option<usize>| i.and_then(|i| f.get(i)).filter(|s| !s.is_empty());
+            let Some(day) = get(Some(day)).and_then(|d| ga_date(d)) else {
+                continue;
+            };
+            let row = Row {
+                day,
+                label: None,
+                visitors: num(get(users)),
+                pageviews: num(get(views)),
+                visits: num(get(sessions)),
+                medium: None,
+                utm_source: None,
+                referrer: None,
+            };
+            let cell = dimension.and_then(|(_, i)| get(Some(i))).cloned();
+            match dimension.map(|(kind, _)| kind) {
+                None => out.push(row.to("total", None)),
+                Some("source") => {
+                    let raw = cell.unwrap_or_default();
+                    let (src, med) = match raw.split_once(" / ") {
+                        Some((s, m)) => (s.trim().to_string(), Some(m.trim().to_string())),
+                        None => (raw.trim().to_string(), get(medium).cloned()),
+                    };
+                    let src = src.to_ascii_lowercase();
+                    let direct = src.is_empty() || src.starts_with('(');
+                    let host = (!direct).then(|| {
+                        if src.contains('.') {
+                            src.clone()
+                        } else {
+                            channel::name_host(&src).map_or(src.clone(), str::to_string)
+                        }
+                    });
+                    let med = med.filter(|m| !m.starts_with('('));
+                    let channel = channel::classify(
+                        med.as_deref(),
+                        (!direct).then_some(src.as_str()),
+                        host.as_deref().filter(|h| h.contains('.')),
+                    );
+                    out.push(
+                        row.clone()
+                            .to("channel", Some(channel.as_str().to_string())),
+                    );
+                    out.push(row.to("referrer", host.map(|h| channel::source_domain(&h))));
+                }
+                Some("country") => {
+                    out.push(row.to("country", cell.as_deref().and_then(ga_country)))
+                }
+                Some("device") => {
+                    let device = cell.map(|d| {
+                        let d = d.to_ascii_lowercase();
+                        let mut c = d.chars();
+                        c.next().map_or(String::new(), |f| {
+                            f.to_ascii_uppercase().to_string() + c.as_str()
+                        })
+                    });
+                    out.push(row.to("device", device));
+                }
+                Some(kind) => out.push(row.to(kind, cell)),
+            }
+        }
+    }
+    Ok((merge(out), skipped))
 }
 
 /// A YYYY-MM-DD date.
@@ -283,6 +532,122 @@ mod tests {
         assert_eq!(sum("country", Some("DE")), 20);
         assert_eq!(sum("page", Some("/pricing")), 7);
         assert_eq!(sum("device", Some("Mobile")), 20);
+    }
+
+    #[test]
+    fn reads_google_analytics_exports() {
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("src/fixtures/ga4");
+        let (rows, skipped) = google_analytics(&dir).unwrap();
+        assert!(skipped.is_empty(), "{skipped:?}");
+        let sum = |kind: &str, label: Option<&str>| -> u64 {
+            rows.iter()
+                .filter(|r| r.kind == kind && r.label.as_deref() == label)
+                .map(|r| r.visitors)
+                .sum()
+        };
+        assert_eq!(sum("total", None), 30);
+        assert_eq!(sum("channel", Some("Organic search")), 6);
+        assert_eq!(sum("channel", Some("Direct")), 4);
+        assert_eq!(sum("channel", Some("Communities")), 15);
+        assert_eq!(sum("channel", Some("Email")), 5);
+        assert_eq!(sum("referrer", Some("news.ycombinator.com")), 15);
+        assert_eq!(sum("referrer", None), 4);
+        assert_eq!(sum("page", Some("/pricing")), 7);
+        assert_eq!(sum("country", Some("US")), 10);
+        assert_eq!(sum("country", Some("DE")), 20);
+        assert_eq!(sum("device", Some("Mobile")), 20);
+        let day1 = rows
+            .iter()
+            .find(|r| r.kind == "total" && r.day == time::macros::date!(2024 - 01 - 01))
+            .unwrap();
+        assert_eq!((day1.pageviews, day1.visits), (25, 12));
+    }
+
+    fn ga_folder(files: &[(&str, &str)]) -> (Vec<Imported>, Vec<String>) {
+        let dir = tempfile::tempdir().unwrap();
+        for (name, body) in files {
+            std::fs::write(dir.path().join(name), body).unwrap();
+        }
+        google_analytics(dir.path()).unwrap()
+    }
+
+    fn visitors(rows: &[Imported], kind: &str, label: Option<&str>) -> u64 {
+        rows.iter()
+            .filter(|r| r.kind == kind && r.label.as_deref() == label)
+            .map(|r| r.visitors)
+            .sum()
+    }
+
+    #[test]
+    fn ga_files_with_other_dimensions_are_skipped_not_counted_as_totals() {
+        let (rows, skipped) = ga_folder(&[
+            ("total.csv", "Date,Active users\n20240101,10\n"),
+            (
+                "channels.csv",
+                "Date,Session default channel group,Active users\n20240101,Organic Search,6\n",
+            ),
+            ("cities.csv", "Date,City,Active users\n20240101,Berlin,4\n"),
+        ]);
+        assert_eq!(
+            visitors(&rows, "total", None),
+            10,
+            "only the file without a dimension is a total"
+        );
+        assert_eq!(skipped.len(), 2, "{skipped:?}");
+        assert!(
+            skipped
+                .iter()
+                .any(|s| s.starts_with("cities.csv") && s.contains("City"))
+        );
+    }
+
+    #[test]
+    fn ga_empty_dimension_cells_stay_in_their_breakdown() {
+        let (rows, _) = ga_folder(&[
+            (
+                "countries.csv",
+                "date,country,users\n2024-01-01,,3\n2024-01-01,Germany,2\n",
+            ),
+            ("sources.csv", "date,source,medium,users\n2024-01-01,,,4\n"),
+        ]);
+        assert_eq!(visitors(&rows, "total", None), 0);
+        assert_eq!(visitors(&rows, "country", None), 3);
+        assert_eq!(visitors(&rows, "country", Some("DE")), 2);
+        assert_eq!(visitors(&rows, "channel", Some("Direct")), 4);
+    }
+
+    #[test]
+    fn ga_reads_the_first_table_and_a_bom_header() {
+        let (rows, skipped) = ga_folder(&[(
+            "report.csv",
+            "\u{feff}# Report\n#\n\n\"Date\",\"Active users\"\n20240101,10\n\n# Second table\nDate,Views\n20240101,999\n",
+        )]);
+        assert!(skipped.is_empty(), "{skipped:?}");
+        assert_eq!(visitors(&rows, "total", None), 10);
+        assert_eq!(rows.iter().map(|r| r.pageviews).sum::<u64>(), 0);
+    }
+
+    #[test]
+    fn ga_names_map_to_tracked_labels() {
+        for (name, code) in [
+            ("Czechia", "CZ"),
+            ("Turkey", "TR"),
+            ("Bosnia & Herzegovina", "BA"),
+            ("St. Lucia", "LC"),
+            ("Côte d’Ivoire", "CI"),
+            ("Myanmar (Burma)", "MM"),
+            ("United States", "US"),
+        ] {
+            assert_eq!(ga_country(name).as_deref(), Some(code), "{name}");
+        }
+        let (rows, _) = ga_folder(&[(
+            "sources.csv",
+            "Date,Session source / medium,Active users\n20240101,google / organic,5\n20240101,facebook / referral,2\n20240101,hn / social,1\n",
+        )]);
+        assert_eq!(visitors(&rows, "referrer", Some("google.com")), 5);
+        assert_eq!(visitors(&rows, "referrer", Some("facebook.com")), 2);
+        assert_eq!(visitors(&rows, "referrer", Some("news.ycombinator.com")), 1);
+        assert_eq!(visitors(&rows, "channel", Some("Organic search")), 5);
     }
 
     #[test]

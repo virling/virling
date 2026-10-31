@@ -254,6 +254,48 @@ pub fn source_domain(host: &str) -> String {
     h.to_string()
 }
 
+/// The host a bare source name such as "google" or "hn" stands for, as tracked referrers record it.
+pub fn name_host(name: &str) -> Option<&'static str> {
+    Some(match name {
+        "google" => "google.com",
+        "bing" => "bing.com",
+        "duckduckgo" => "duckduckgo.com",
+        "yahoo" => "yahoo.com",
+        "ecosia" => "ecosia.org",
+        "brave" => "search.brave.com",
+        "yandex" => "yandex.com",
+        "baidu" => "baidu.com",
+        "chatgpt" | "openai" => "chatgpt.com",
+        "perplexity" => "perplexity.ai",
+        "claude" => "claude.ai",
+        "gemini" => "gemini.google.com",
+        "copilot" => "copilot.microsoft.com",
+        "hackernews" | "hn" | "ycombinator" => "news.ycombinator.com",
+        "reddit" => "reddit.com",
+        "producthunt" => "producthunt.com",
+        "indiehackers" => "indiehackers.com",
+        "devto" => "dev.to",
+        "hashnode" => "hashnode.com",
+        "lobsters" => "lobste.rs",
+        "twitter" | "x" => "x.com",
+        "facebook" | "fb" => "facebook.com",
+        "instagram" | "ig" => "instagram.com",
+        "linkedin" => "linkedin.com",
+        "youtube" => "youtube.com",
+        "threads" => "threads.com",
+        "bluesky" => "bsky.app",
+        "tiktok" => "tiktok.com",
+        "pinterest" => "pinterest.com",
+        "discord" => "discord.com",
+        "slack" => "slack.com",
+        "telegram" => "t.me",
+        "whatsapp" => "whatsapp.com",
+        "substack" => "substack.com",
+        "medium" => "medium.com",
+        _ => return None,
+    })
+}
+
 /// Human name for a referrer host, used in breakdowns ("news.ycombinator.com" -> "Hacker News").
 pub fn source_name(host: &str) -> String {
     let h = host.strip_prefix("www.").unwrap_or(host);
