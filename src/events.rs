@@ -774,6 +774,7 @@ impl DuckStore {
             "INSTALL icu;
             LOAD icu;
             SET TimeZone = 'UTC';
+            SET memory_limit = '256MB';
             CREATE TABLE IF NOT EXISTS events (
                 site_id VARCHAR NOT NULL,
                 ts TIMESTAMPTZ NOT NULL,
