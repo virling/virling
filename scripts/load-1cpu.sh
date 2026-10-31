@@ -32,7 +32,7 @@ echo "== Ingest: $EVENTS pageviews, 16 at a time"
 mkdir "$work/ingest"
 run "$work/ingest" virling add-site example.com --owner load@example.com >/dev/null
 docker run -d --name virling-load $LIMITS -p 18080:8080 -v "$BIN:/usr/local/bin/virling:ro" \
-  -v "$work/ingest:/data" -e VIRLING_DATA=/data -e VIRLING_EVENTS_PER_SECOND=100000 "$IMAGE" \
+  -v "$work/ingest:/data" -e VIRLING_DATA=/data -e VIRLING_EVENTS_PER_SECOND=100000 -e MALLOC_ARENA_MAX="${MALLOC_ARENA_MAX:-}" "$IMAGE" \
   virling serve >/dev/null
 timeout 60 sh -c 'until curl -sf http://127.0.0.1:18080/health >/dev/null; do sleep 0.5; done' || { docker logs virling-load; exit 1; }
 printf '{"n":"pageview","u":"https://example.com/pricing","r":"https://news.ycombinator.com/","s":"example.com","w":1440}' > "$work/event.json"
