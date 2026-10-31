@@ -11,14 +11,42 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 ## Product
 
 - [Home](https://virling.com/): what Virling does, how attribution works, and the self-host spec
+- [Pricing](https://virling.com/pricing): free to self-host; hosted Personal $19 and Agency $79 a month after a 14-day free trial, founding price $9 and $29 for the first 50 customers of each plan
+- [Self-host](https://virling.com/self-host): one Rust binary with embedded storage for Linux, macOS or Docker, free under AGPLv3
 - [For agencies](https://virling.com/agency): weekly branded reports that show each client which channels brought paying customers
 - [Integrations](https://virling.com/integrations): one page per payment provider, for Stripe, Paddle, Shopify, WooCommerce, Dodo Payments, Polar, LemonSqueezy, Creem and RevenueCat
 - [Live demo](https://virling.com/demo/): a static demo dashboard with made-up data
+- [Free tools](https://virling.com/tools): browser tools with no signup
+- [UTM builder](https://virling.com/tools/utm-builder): add utm_source, utm_medium and utm_campaign to any link
+- [Revenue per visitor and ROI calculator](https://virling.com/tools/revenue-per-visitor): revenue per visitor, return on ad spend and break-even per channel
+- [AI crawler checker](https://virling.com/tools/ai-crawler-checker): see which AI crawlers a robots.txt allows or blocks
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
 - [Terms of service](https://virling.com/terms): the rules for using the hosted service
-- [Refund and cancellation](https://virling.com/refunds): 14-day trial, how to cancel, no refunds after the trial, founding pre-orders
+- [Refund and cancellation](https://virling.com/refunds): 14-day trial, how to cancel, no refunds after the trial, founding price
+
+## Integrations
+
+- [Stripe](https://virling.com/integrations/stripe): read-only restricted key
+- [Paddle](https://virling.com/integrations/paddle): Paddle Billing, read-only API key
+- [Shopify](https://virling.com/integrations/shopify): read-only order token and a theme snippet
+- [WooCommerce](https://virling.com/integrations/woocommerce): read-only REST API key, works with WooCommerce Subscriptions
+- [Dodo Payments](https://virling.com/integrations/dodo-payments): API key, payment links need no code
+- [Polar](https://virling.com/integrations/polar): read-only organization token
+- [LemonSqueezy](https://virling.com/integrations/lemonsqueezy): API key and a signed webhook
+- [Creem](https://virling.com/integrations/creem): scoped API key and a signed webhook
+- [RevenueCat](https://virling.com/integrations/revenuecat): web purchases and renewals by webhook, credited when they carry a visitor ID
+
+## Compare
+
+- [How Virling compares](https://virling.com/vs): all comparisons
+- [Virling vs DataBull](https://virling.com/vs/databull)
+- [Virling vs DataFast](https://virling.com/vs/datafast)
+- [Virling vs Google Analytics](https://virling.com/vs/google-analytics)
+- [Virling vs Plausible](https://virling.com/vs/plausible)
+- [Virling vs PostHog](https://virling.com/vs/posthog)
+- [Virling vs Umami](https://virling.com/vs/umami)
 
 ## Docs
 
@@ -26,7 +54,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Quickstart](https://docs.virling.com/quickstart): from an empty server to the first attributed payment
 - [How Virling works](https://docs.virling.com/how-it-works)
 - [Payments overview](https://docs.virling.com/payments/): which read-only key each provider needs
-- [Stripe](https://docs.virling.com/payments/stripe), [Dodo Payments](https://docs.virling.com/payments/dodo), [Polar](https://docs.virling.com/payments/polar), [LemonSqueezy](https://docs.virling.com/payments/lemonsqueezy)
+- [Stripe](https://docs.virling.com/payments/stripe), [Paddle](https://docs.virling.com/payments/paddle), [Shopify](https://docs.virling.com/payments/shopify), [WooCommerce](https://docs.virling.com/payments/woocommerce), [Dodo Payments](https://docs.virling.com/payments/dodo), [Polar](https://docs.virling.com/payments/polar), [LemonSqueezy](https://docs.virling.com/payments/lemonsqueezy), [Creem](https://docs.virling.com/payments/creem), [RevenueCat](https://docs.virling.com/payments/revenuecat)
 - [Link checkout to visits](https://docs.virling.com/payments/checkout): pass the visitor ID into checkout
 - [How attribution works](https://docs.virling.com/attribution/)
 - [Model and lookback window](https://docs.virling.com/attribution/model)
