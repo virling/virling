@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RevenueCat web purchase attribution: which channel paid</title>
+<meta name="description" content="See which website channel led to each RevenueCat purchase. Purchases and renewals arrive by webhook and are credited when they carry a visitor ID.">
+<link rel="canonical" href="https://virling.com/integrations/revenuecat">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/revenuecat">
+<meta property="og:title" content="RevenueCat web purchase attribution: which channel paid">
+<meta property="og:description" content="See which website channel led to each RevenueCat purchase. Purchases and renewals arrive by webhook and are credited when they carry a visitor ID.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"RevenueCat","item":"https://virling.com/integrations/revenuecat"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can I see which website channel drove a RevenueCat purchase?","acceptedAnswer":{"@type":"Answer","text":"Yes, when the purchase carries a visitor ID: from a web paywall on a page that runs the script, or from an app user whose virling_vid attribute was set from a web visit."}},{"@type":"Question","name":"What happens to in-app purchases with no web visit?","acceptedAnswer":{"@type":"Answer","text":"They count toward revenue as Unattributed, because there is no visit to credit."}},{"@type":"Question","name":"Which RevenueCat key does Virling need?","acceptedAnswer":{"@type":"Answer","text":"A V2 secret key with read access to Project configuration and Customer information, and read and write access to Integrations so Virling can add its webhook."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / revenuecat</span>
+      <h1>RevenueCat purchases, joined to the web visits behind them.</h1>
+      <p class="lead">Virling ties RevenueCat purchases from web paywalls, and from app users linked to a web visit, to the visit that came before them. See which channel brings paying subscribers. Open source, one Rust binary, or hosted.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">Virling reads RevenueCat purchases, renewals and refunds through a webhook it adds with your key, and imports earlier one-time purchases once when you connect.</p>
+<h2>Create a key</h2>
+<ol class="post-list"><li>In RevenueCat, open your project's settings, then <b>API keys</b>, and create a <b>V2 secret key</b>. RevenueCat's guide: <a href="https://www.revenuecat.com/docs/projects/authentication">authentication</a>.</li><li>Give it read access to <b>Project configuration</b> and <b>Customer information</b>, and read and write access to <b>Integrations</b>, so Virling can add its webhook. Leave everything else without access.</li><li>Paste it into Virling.</li></ol>
+<p class="p">The key covers one project. Connect each project to its own site.</p>
+<h2>The webhook</h2>
+<p class="p">When you connect, Virling adds one webhook to the project for initial purchases, renewals, non-renewing purchases and cancellations. It points at <code>https://&lt;your Virling&gt;/api/webhooks/revenuecat/&lt;site ID&gt;</code> and sends a random secret as its <code>Authorization</code> header, which Virling checks on every delivery and keeps encrypted.</p>
+<p class="p">The webhook needs Virling to be reachable over https. Without it, only the one-time purchases from the first import arrive.</p>
+<h2>What is imported</h2>
+<ul class="post-list"><li><b>Purchases and renewals</b> as they happen, in the currency the customer paid. A renewal keeps the channel of the first payment. See <a href="https://docs.virling.com/attribution/renewals">Renewals</a>.</li><li><b>Free trials.</b> A trial start is kept, and the first paid renewal is credited to the visit that started the trial.</li><li><b>Refunds.</b> A cancellation by customer support, or with a negative price, marks the payment refunded.</li><li><b>One-time purchases from the last 90 days</b>, once, when you connect. Virling reads about 40 customers a minute, to stay well under RevenueCat's rate limit. Subscription payments from before you connected are not imported, since RevenueCat lists them per subscription only for some stores.</li><li><b>Subscription status</b> is not read, so <a href="https://docs.virling.com/attribution/retention">Retention</a> uses payment recency for RevenueCat customers.</li></ul>
+<h2>What gets credited</h2>
+<p class="p">A RevenueCat purchase is credited to a visit only when it carries a visitor ID. That covers purchases from a web paywall on a page that runs the script, and app users whose <code>virling_vid</code> attribute was set from a web visit. In-app purchases from people who never came through your site have no visit to credit, so they count toward revenue as Unattributed.</p>
+<h2>How a payment finds its visitor</h2>
+<p class="p">Virling reads the customer attribute <code>virling_vid</code>. Set it before the purchase, from your app with the RevenueCat SDK's <code>setAttributes</code>, or from your server:</p>
+<div class="code block"><pre>await fetch(`https://api.revenuecat.com/v2/projects/${projectId}/customers/${appUserId}/attributes`, {
+  method: &quot;POST&quot;,
+  headers: { authorization: `Bearer ${process.env.REVENUECAT_SECRET_KEY}`, &quot;content-type&quot;: &quot;application/json&quot; },
+  body: JSON.stringify({ attributes: [{ name: &quot;virling_vid&quot;, value: req.cookies.virling_vid }] }),
+});</pre></div>
+<p class="p">That call needs a key with write access to Customer information, separate from the one you give Virling.</p>
+<h2>Frequently asked questions</h2>
+<h3>Can I see which website channel drove a RevenueCat purchase?</h3><p class="p">Yes, when the purchase carries a visitor ID: from a web paywall on a page that runs the script, or from an app user whose virling_vid attribute was set from a web visit.</p>
+<h3>What happens to in-app purchases with no web visit?</h3><p class="p">They count toward revenue as Unattributed, because there is no visit to credit.</p>
+<h3>Which RevenueCat key does Virling need?</h3><p class="p">A V2 secret key with read access to Project configuration and Customer information, and read and write access to Integrations so Virling can add its webhook.</p>
+      <p class="p">Full reference: <a href="https://docs.virling.com/payments/revenuecat">RevenueCat in the docs</a>.</p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post"><h2>Related reading</h2><ul class="post-list"><li><a href="/blog/find-which-channel-pays">How to find which marketing channel pays for your SaaS</a></li><li><a href="/blog/what-is-revenue-per-visitor">What is revenue per visitor, and how to work it out</a></li><li><a href="/blog/utm-parameters-for-revenue-tracking">Which UTM parameters to use to trace revenue</a></li></ul></div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

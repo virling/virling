@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shopify revenue attribution: sales by traffic source</title>
+<meta name="description" content="Join every Shopify order to the visit before it and see sales by channel, referrer and page. A small theme snippet and a read-only order token.">
+<link rel="canonical" href="https://virling.com/integrations/shopify">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/shopify">
+<meta property="og:title" content="Shopify revenue attribution: sales by traffic source">
+<meta property="og:description" content="Join every Shopify order to the visit before it and see sales by channel, referrer and page. A small theme snippet and a read-only order token.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"Shopify","item":"https://virling.com/integrations/shopify"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I see Shopify sales by traffic source?","acceptedAnswer":{"@type":"Answer","text":"Connect your store to Virling with a custom app token that can only read orders, and add a short snippet to theme.liquid that stores the visitor ID on the cart. Shopify copies it onto the order, and Virling ties the order to the visit before it."}},{"@type":"Question","name":"Which Shopify scope does Virling need?","acceptedAnswer":{"@type":"Answer","text":"Only read_orders. Virling cannot change products, customers or orders."}},{"@type":"Question","name":"How far back does Virling import Shopify orders?","acceptedAnswer":{"@type":"Answer","text":"60 days on the first run, the most Shopify allows without the read_all_orders permission, then new orders every minute."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / shopify</span>
+      <h1>Shopify sales, joined to the visits behind them.</h1>
+      <p class="lead">Virling ties each Shopify order to the visit that came before it, so your store sees which channel, campaign and landing page bring buyers, not just traffic. Open source, one Rust binary, or hosted.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">Virling reads Shopify orders and their refunds with the Admin API token of a custom app that can only read orders.</p>
+<h2>Create a token</h2>
+<ol class="post-list"><li>In your Shopify admin, open <b>Settings</b>, <b>Apps and sales channels</b>, <b>Develop apps</b>, and create an app. Shopify's guide: <a href="https://help.shopify.com/en/manual/apps/app-types/custom-apps">custom apps</a>.</li><li>Under <b>Admin API integration</b>, give it only the <code>read_orders</code> scope, then install the app.</li><li>In Virling, paste the <b>Admin API access token</b>, which starts with <code>shpat_</code>, and your store's <code>https://your-store.myshopify.com</code> address. A custom domain does not work here; the Admin API only answers on the myshopify.com address.</li></ol>
+<h2>What is imported</h2>
+<ul class="post-list"><li><b>Orders</b> from the last 60 days on the first run, the most Shopify gives without the extra <code>read_all_orders</code> permission, then new ones every minute. Paid, partially refunded and refunded orders count; voided ones count as failed; pending and authorized orders wait until they are paid.</li><li><b>Refunds.</b> Every round also reads the orders updated since the last one, so refunds show up within a minute or two.</li><li><b>Renewals.</b> An order from a Shopify Subscriptions renewal (source <code>subscription_contract</code>) is marked as a renewal and keeps the channel of the first payment. See <a href="https://docs.virling.com/attribution/renewals">Renewals</a>.</li><li><b>Subscription status</b> is not read, so <a href="https://docs.virling.com/attribution/retention">Retention</a> uses payment recency for Shopify customers.</li></ul>
+<h2>How a payment finds its visitor</h2>
+<p class="p">Virling reads <code>virling_vid</code> from the order's note attributes. Add this to your theme's <code>theme.liquid</code>, after the Virling script, so the visitor ID is stored on the cart, which Shopify copies onto the order:</p>
+<div class="code block"><pre>&lt;script&gt;
+// Shopify: in your theme&#x27;s theme.liquid, after the Virling script.
+// It stores the visitor ID on the cart, and Shopify copies cart
+// attributes onto the order as note attributes.
+addEventListener(&quot;load&quot;, function () {
+  var vid = window.virling &amp;&amp; virling.vid &amp;&amp; virling.vid();
+  if (vid) fetch(&quot;/cart/update.js&quot;, {
+    method: &quot;POST&quot;,
+    headers: { &quot;Content-Type&quot;: &quot;application/json&quot; },
+    body: JSON.stringify({ attributes: { virling_vid: vid } })
+  });
+});
+&lt;/script&gt;</pre></div>
+<h2>Frequently asked questions</h2>
+<h3>How do I see Shopify sales by traffic source?</h3><p class="p">Connect your store to Virling with a custom app token that can only read orders, and add a short snippet to theme.liquid that stores the visitor ID on the cart. Shopify copies it onto the order, and Virling ties the order to the visit before it.</p>
+<h3>Which Shopify scope does Virling need?</h3><p class="p">Only read_orders. Virling cannot change products, customers or orders.</p>
+<h3>How far back does Virling import Shopify orders?</h3><p class="p">60 days on the first run, the most Shopify allows without the read_all_orders permission, then new orders every minute.</p>
+      <p class="p">Full reference: <a href="https://docs.virling.com/payments/shopify">Shopify in the docs</a>.</p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post"><h2>Related reading</h2><ul class="post-list"><li><a href="/blog/find-which-channel-pays">How to find which marketing channel pays for your SaaS</a></li><li><a href="/blog/what-is-revenue-per-visitor">What is revenue per visitor, and how to work it out</a></li><li><a href="/blog/utm-parameters-for-revenue-tracking">Which UTM parameters to use to trace revenue</a></li></ul></div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
