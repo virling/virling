@@ -15,6 +15,6 @@ The plugin connects to hosted Virling at https://app.virling.com. Claude opens t
 
 The plugin bundles a skill and the read-only Virling MCP server. Ask in plain words, for example "which channel made the most money last month" or "what did my last paying customer do before paying".
 
-Docs: https://docs.virling.com/reference/mcp.html
+Docs: https://docs.virling.com/reference/mcp
 Privacy: https://virling.com/privacy
 License: AGPL-3.0
