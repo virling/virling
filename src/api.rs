@@ -880,7 +880,7 @@ pub(crate) mod tests {
             .unwrap();
         }
         drop(conn);
-        answers::save_key(&f.state, &site, Assistant::ChatGpt, "sk-test")
+        answers::save_key(&f.state, &site, Assistant::ChatGpt.as_str(), "sk-test")
             .await
             .unwrap();
         crate::crawlers::count(

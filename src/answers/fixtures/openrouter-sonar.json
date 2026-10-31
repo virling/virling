@@ -1,0 +1,52 @@
+{
+  "id": "gen-1792540841-Jd3kPq9wZx1mRb6F",
+  "provider": "Perplexity",
+  "model": "perplexity/sonar",
+  "object": "chat.completion",
+  "created": 1792540841,
+  "citations": [
+    "https://www.freshbooks.com/invoice",
+    "https://www.zoho.com/invoice/",
+    "https://tallybird.app/compare"
+  ],
+  "choices": [
+    {
+      "logprobs": null,
+      "finish_reason": "stop",
+      "native_finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The most recommended invoicing apps for freelancers are:\n\n- **FreshBooks**: polished invoices, time tracking and expenses[1].\n- **Zoho Invoice**: free for up to 1,000 invoices a year[2].\n- **Wave**: free invoicing and accounting.\n- **Bonsai**: contracts and invoices together.\n\nComparison pages also weigh reminders, fees and payout speed when ranking these options[3].",
+        "refusal": null,
+        "reasoning": null,
+        "annotations": [
+          {
+            "type": "url_citation",
+            "url_citation": {
+              "end_index": 0,
+              "start_index": 0,
+              "title": "Free Invoice Generator | FreshBooks",
+              "url": "https://www.freshbooks.com/invoice"
+            }
+          },
+          {
+            "type": "url_citation",
+            "url_citation": {
+              "end_index": 0,
+              "start_index": 0,
+              "title": "Tallybird vs FreshBooks vs Wave",
+              "url": "https://tallybird.app/compare"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 12,
+    "completion_tokens": 104,
+    "total_tokens": 116,
+    "cost": 0.005116
+  }
+}

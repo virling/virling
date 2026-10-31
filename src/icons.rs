@@ -143,6 +143,11 @@ const BRANDS: &[(&str, &str, &str)] = &[
         include_str!("../assets/icons/medium.svg"),
     ),
     (
+        "openrouter",
+        "OpenRouter",
+        include_str!("../assets/icons/openrouter.svg"),
+    ),
+    (
         "paddle",
         "Paddle",
         include_str!("../assets/icons/paddle.svg"),
@@ -265,6 +270,7 @@ pub fn brand_slug(source: &str) -> Option<&'static str> {
         "copilot" | "copilot.microsoft.com" => "copilot",
         "deepseek" | "deepseek.com" | "chat.deepseek.com" => "deepseek",
         "perplexity" | "perplexity.ai" => "perplexity",
+        "openrouter" | "openrouter.ai" => "openrouter",
         "gemini" | "gemini.google.com" => "googlegemini",
         "bluesky" | "bsky.app" | "go.bsky.app" => "bluesky",
         "threads" | "threads.com" | "threads.net" | "l.threads.com" => "threads",

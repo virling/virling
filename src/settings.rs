@@ -414,7 +414,7 @@ async fn ai_settings(
     };
     let server = &state.config.ai_keys;
     let replace = q.replace.as_deref().and_then(Assistant::parse);
-    let views: Vec<AiKeyView> = Assistant::ALL
+    let mut views: Vec<AiKeyView> = Assistant::ALL
         .into_iter()
         .filter(|_| !hosted)
         .map(|a| {
@@ -437,11 +437,38 @@ async fn ai_settings(
             }
         })
         .collect();
+    let row = keys.iter().find(|k| k.0 == answers::ROUTER);
+    if !hosted {
+        views.push(AiKeyView {
+            key: answers::ROUTER,
+            name: "OpenRouter",
+            icon: crate::icons::source("openrouter", 20),
+            about: "Asks for every assistant above without its own key".into(),
+            placeholder: "sk-or-...",
+            help_url: "https://openrouter.ai/settings/keys",
+            hint: row
+                .and_then(|k| state.vault.decrypt(&k.1, &k.2).ok())
+                .map(|k| crate::onboarding::key_hint(&k))
+                .unwrap_or_default(),
+            error: row.and_then(|k| k.3.clone()).unwrap_or_default(),
+            server: server.router().is_some(),
+            connected: row.is_some(),
+            replacing: row.is_some() && q.replace.as_deref() == Some(answers::ROUTER),
+        });
+    }
     let paid = answers::paid(state, site_id).await?;
-    let usable: Vec<Assistant> = Assistant::ALL
+    let routed = server.router().is_some() || row.is_some();
+    // Cost per question of each assistant that runs, through OpenRouter when it has no own key.
+    let usable: Vec<f64> = Assistant::ALL
         .into_iter()
         .filter(|_| paid)
-        .filter(|a| server.get(*a).is_some() || keys.iter().any(|k| k.0 == a.as_str()))
+        .filter_map(|a| {
+            if server.get(a).is_some() || keys.iter().any(|k| k.0 == a.as_str()) {
+                Some(a.cost())
+            } else {
+                routed.then(|| a.router_cost())
+            }
+        })
         .collect();
     let n = questions.len();
     let cost = if hosted {
@@ -530,10 +557,12 @@ pub async fn save_ai_key(
         Ok(ctx) => ctx,
         Err(code) => return code.into_response(),
     };
-    let Some(a) = Assistant::parse(&input.provider) else {
-        return StatusCode::BAD_REQUEST.into_response();
+    let server = match Assistant::parse(&input.provider) {
+        Some(a) => state.config.ai_keys.get(a),
+        None if input.provider == answers::ROUTER => state.config.ai_keys.router(),
+        None => return StatusCode::BAD_REQUEST.into_response(),
     };
-    if state.config.hosted || state.config.ai_keys.get(a).is_some() {
+    if state.config.hosted || server.is_some() {
         return StatusCode::FORBIDDEN.into_response();
     }
     let settings = app_path(&ctx.site.domain, "settings");
@@ -541,7 +570,7 @@ pub async fn save_ai_key(
     if key.is_empty() {
         return Redirect::to(&format!("{settings}?error=ai-key#ai-answers")).into_response();
     }
-    if let Err(err) = answers::save_key(&state, &ctx.site.id, a, key).await {
+    if let Err(err) = answers::save_key(&state, &ctx.site.id, &input.provider, key).await {
         tracing::error!(%err, "saving an AI key failed");
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     }
@@ -647,9 +676,12 @@ pub async fn run_ai(
     match claimed {
         Ok(true) => {
             let (bg, id) = (state.clone(), ctx.site.id.clone());
-            tokio::spawn(
-                async move { answers::run_site(&bg, &id, &|a| a.base().to_string()).await },
-            );
+            tokio::spawn(async move {
+                answers::run_site(&bg, &id, &|a| {
+                    a.map_or(answers::ROUTER_BASE, Assistant::base).to_string()
+                })
+                .await
+            });
             Redirect::to(&format!("{settings}?saved=ai-run#ai-answers")).into_response()
         }
         Ok(false) => Redirect::to(&format!("{settings}?error=ai-limit#ai-answers")).into_response(),

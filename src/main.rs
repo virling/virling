@@ -214,6 +214,9 @@ struct ServeArgs {
     /// Google Gemini key for AI answers on every site
     #[arg(long, env = "VIRLING_GEMINI_KEY", hide_env_values = true)]
     gemini_key: Option<String>,
+    /// OpenRouter key for AI answers on every site, used for each assistant without its own key
+    #[arg(long, env = "VIRLING_OPENROUTER_KEY", hide_env_values = true)]
+    openrouter_key: Option<String>,
     /// Estimated USD a month after which AI answer runs pause
     #[arg(long, env = "VIRLING_AI_ANSWERS_BUDGET_USD")]
     ai_answers_budget_usd: Option<f64>,
@@ -339,12 +342,15 @@ async fn main() -> anyhow::Result<()> {
                     .transpose()?,
                 waitlist_from: args.waitlist_from,
                 hosted: args.hosted,
-                ai_keys: answers::ServerKeys([
-                    args.openai_key,
-                    args.anthropic_key,
-                    args.perplexity_key,
-                    args.gemini_key,
-                ]),
+                ai_keys: answers::ServerKeys(
+                    [
+                        args.openai_key,
+                        args.anthropic_key,
+                        args.perplexity_key,
+                        args.gemini_key,
+                    ],
+                    args.openrouter_key,
+                ),
                 ai_budget_usd: args.ai_answers_budget_usd,
                 turnstile: args.turnstile_site_key.zip(args.turnstile_secret).map(
                     |(site_key, secret)| app::Turnstile {
@@ -1759,7 +1765,10 @@ mod tests {
         let hosted = AppState {
             config: Arc::new(Config {
                 hosted: true,
-                ai_keys: crate::answers::ServerKeys([Some("sk-test".into()), None, None, None]),
+                ai_keys: crate::answers::ServerKeys(
+                    [Some("sk-test".into()), None, None, None],
+                    None,
+                ),
                 ..(*state.config).clone()
             }),
             ..state.clone()
