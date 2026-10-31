@@ -756,7 +756,15 @@ async fn pages(req: Request, ctx: RouteContext<()>) -> Result<Response> {
             return Ok(res);
         }
     }
-    assets.fetch_request(req).await
+    let url = req.url()?;
+    let res = assets.fetch_request(req).await?;
+    // Assets redirect /page.html and /page/ with a temporary 307; search engines need a permanent one.
+    if res.status_code() == 307
+        && let Some(to) = res.headers().get("Location")?
+    {
+        return Response::redirect_with_status(url.join(&to)?, 301);
+    }
+    Ok(res)
 }
 
 /// Tells the Virling server about a bot reading a page, since bots never run the tracking script.
