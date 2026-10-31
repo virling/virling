@@ -81,7 +81,17 @@ pub struct LoginQuery {
     vid: Option<String>,
 }
 
-pub async fn login_form(State(state): State<AppState>, Query(q): Query<LoginQuery>) -> Response {
+pub async fn login_form(
+    State(state): State<AppState>,
+    Query(q): Query<LoginQuery>,
+    mut parts: Parts,
+) -> Response {
+    if Account::from_request_parts(&mut parts, &state)
+        .await
+        .is_ok()
+    {
+        return Redirect::to("/app").into_response();
+    }
     page(LoginPage {
         view: "enter",
         turnstile: site_key(&state),
