@@ -6,7 +6,8 @@ BIN="$(pwd)/target/release/virling"
 IMAGE=ubuntu:24.04
 EVENTS="${EVENTS:-100000}"
 SCALE="${SCALE:-1}"
-LIMITS="--cpus 1 --memory 1g --memory-swap 1g"
+# The base image has no CA certificates and the server needs them at startup.
+LIMITS="--cpus 1 --memory 1g --memory-swap 1g -v /etc/ssl/certs:/etc/ssl/certs:ro"
 work=$(mktemp -d)
 trap 'docker rm -f virling-load >/dev/null 2>&1 || true' EXIT
 run() {
