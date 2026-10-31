@@ -13,7 +13,7 @@
 <meta property="og:description" content="Join your payments to the visits before them, then ask Claude or any MCP assistant which channel made the most money per visitor.">
 <meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"I asked Claude which marketing channel actually pays. Here's the setup.","item":"https://virling.com/blog/ask-claude-which-channel-pays"}]},{"@type":"BlogPosting","headline":"I asked Claude which marketing channel actually pays. Here's the setup.","description":"Join your payments to the visits before them, then ask Claude or any MCP assistant which channel made the most money per visitor.","datePublished":"2026-10-22","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"mainEntityOfPage":"https://virling.com/blog/ask-claude-which-channel-pays"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"I asked Claude which marketing channel actually pays. Here's the setup.","item":"https://virling.com/blog/ask-claude-which-channel-pays"}]},{"@type":"BlogPosting","headline":"I asked Claude which marketing channel actually pays. Here's the setup.","description":"Join your payments to the visits before them, then ask Claude or any MCP assistant which channel made the most money per visitor.","datePublished":"2026-10-22","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"mainEntityOfPage":"https://virling.com/blog/ask-claude-which-channel-pays"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can Claude tell me which marketing channel makes money?","acceptedAnswer":{"@type":"Answer","text":"Yes, if your analytics links payments to visits and exposes that data over MCP. Claude can then answer questions like which channel made the most revenue per visitor in the last 30 days."}},{"@type":"Question","name":"What is an MCP server for analytics?","acceptedAnswer":{"@type":"Answer","text":"MCP (Model Context Protocol) is a standard way for AI assistants to read data from other tools. An analytics MCP server gives the assistant tools such as an overview, revenue by channel and the path behind each payment."}},{"@type":"Question","name":"Can the assistant change my analytics data?","acceptedAnswer":{"@type":"Answer","text":"Not with Virling. Its MCP tools are read-only, and each connection uses an API key you can revoke."}}]}]}</script>
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
@@ -52,7 +52,7 @@
 <h2>Step 1: give every visitor an ID</h2>
 <p class="p">Your tracking script sets one first-party ID per visitor and remembers the first source: referrer, UTM tags or "direct".</p>
 <h2>Step 2: pass that ID into checkout</h2>
-<p class="p">When someone clicks Buy, put the visitor ID in the checkout's metadata. On Stripe that's <code>metadata</code>, on Dodo Payments and Polar it's the same idea. One line where you create the checkout.</p>
+<p class="p">When someone clicks Buy, put the visitor ID in the checkout's metadata. On Stripe that's <code>metadata</code>, on Dodo Payments and Polar it's the same idea. One line where you create the checkout. The Stripe steps are in <a href="/blog/track-stripe-revenue-by-traffic-source">tracking Stripe revenue by traffic source</a>.</p>
 <h2>Step 3: join payments to visits</h2>
 <p class="p">When the payment webhook arrives, look up the visitor ID and credit the payment to the channel of the visit before it. Now every dollar has a source.</p>
 <h2>Step 4: expose it over MCP</h2>
@@ -61,15 +61,19 @@
 <p class="p">Add it to Claude Code with one command:</p>
 <div class="code block"><pre>claude mcp add --transport http virling https://your-server/mcp \
   --header &quot;Authorization: Bearer vk_...&quot;</pre></div>
-<p class="p">On claude.ai it's a custom connector with the same URL and header.</p>
+<p class="p">On claude.ai it's a custom connector with the same URL and header. Setup details are in the <a href="https://docs.virling.com/reference/mcp">MCP docs</a>.</p>
 <h2>Step 5: ask questions</h2>
 <p class="p">Things I ask now instead of clicking through dashboards:</p>
 <ul class="post-list"><li>"Which channel made the most money per visitor in the last 30 days?"</li><li>"Is AI traffic worth more than search traffic for me?"</li><li>"Show me the path of the last 5 customers who paid."</li><li>"Which channel's customers churn the fastest?"</li></ul>
-<p class="p">On the demo site, the answer to the first one: Direct brought twice the visitors of AI, but AI visitors were worth almost 7x more each. You would never guess that from a traffic chart.</p>
+<p class="p">On the demo site, the answer to the first one: Direct brought twice the visitors of AI, but AI visitors were worth almost 7x more each. You would never guess that from a traffic chart. More on that in <a href="/blog/is-ai-search-traffic-worth-anything">is AI search traffic worth anything</a>.</p>
 <h2>Why this matters</h2>
 <p class="p">Traffic tells you which channel is loud. Revenue per visitor tells you which one pays. Once your assistant can see both, you stop arguing about channels and just ask.</p>
-<p class="p">Virling is open source and free to self-host today. The hosted version opens soon: the first 50 customers get 40% off for life. virling.com</p>
+<p class="p">Virling is open source and free to self-host. Hosted plans start at $19 a month with a 14-day free trial at <a href="https://app.virling.com/login">app.virling.com</a>.</p>
 <p class="p">Which channel brings you the most paying customers right now? Curious if anyone else is seeing AI traffic convert better than search.</p>
+<h2>Frequently asked questions</h2>
+<h3>Can Claude tell me which marketing channel makes money?</h3><p class="p">Yes, if your analytics links payments to visits and exposes that data over MCP. Claude can then answer questions like which channel made the most revenue per visitor in the last 30 days.</p>
+<h3>What is an MCP server for analytics?</h3><p class="p">MCP (Model Context Protocol) is a standard way for AI assistants to read data from other tools. An analytics MCP server gives the assistant tools such as an overview, revenue by channel and the path behind each payment.</p>
+<h3>Can the assistant change my analytics data?</h3><p class="p">Not with Virling. Its MCP tools are read-only, and each connection uses an API key you can revoke.</p>
   </div></div></section>
 </main>
 
