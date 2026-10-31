@@ -75,7 +75,7 @@ pub fn plausible(dir: &Path) -> anyhow::Result<Vec<Imported>> {
         })?;
         Ok(rows.collect::<Result<_, _>>()?)
     };
-    for r in read("visitors", "NULL", "")? {
+    for r in read("visitors", "NULL::VARCHAR", "")? {
         out.push(r.to("total", None));
     }
     for r in read("pages", "page", "")? {
