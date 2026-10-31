@@ -1,6 +1,6 @@
 {
   "name": "virling",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "displayName": "Virling",
   "description": "Ask which channels, referrers, campaigns and pages make money, from your Virling server. Bundles the Virling skill and the read-only MCP server.",
   "author": {
