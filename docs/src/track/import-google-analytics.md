@@ -11,7 +11,7 @@ GA4's standard reports download totals for the whole range, so use an exploratio
 3. Export it as CSV (**Download file**, **CSV**). This file is the daily total.
 4. For each breakdown you want, add one more dimension to Rows next to **Date** and export again: **Session source / medium**, **Page path and screen class**, **Country** and **Device category**. Use one breakdown per file.
 
-Put all the files in one folder. Each file needs a date column; GA4's comment lines at the top are skipped.
+Put all the files in one folder. Each file needs a Date column and at most one of the breakdowns above. GA4's comment lines at the top are skipped, and when a download holds several tables only the first is read. A file with any other breakdown, such as City or Session default channel group, is skipped and the import says which and why, so it is never counted as a total.
 
 ### From BigQuery
 

@@ -409,16 +409,25 @@ async fn main() -> anyhow::Result<()> {
             );
         }
         Command::ImportPlausible { domain, dir } => {
-            import_history(&db, &cli.data_dir, &domain, imported::plausible(&dir)?).await?
+            let rows = imported::plausible(&dir)?;
+            anyhow::ensure!(
+                !rows.is_empty(),
+                "no imported_*.csv files in {}",
+                dir.display()
+            );
+            import_history(&db, &cli.data_dir, &domain, rows).await?
         }
         Command::ImportGa { domain, dir } => {
-            import_history(
-                &db,
-                &cli.data_dir,
-                &domain,
-                imported::google_analytics(&dir)?,
-            )
-            .await?
+            let (rows, skipped) = imported::google_analytics(&dir)?;
+            for why in &skipped {
+                eprintln!("skipped {why}");
+            }
+            anyhow::ensure!(
+                !rows.is_empty(),
+                "no Google Analytics CSV export with a Date column in {}",
+                dir.display()
+            );
+            import_history(&db, &cli.data_dir, &domain, rows).await?
         }
         Command::Demo { .. } | Command::Query(_) | Command::Bench(_) => {
             unreachable!("handled before the data dir is opened")
@@ -440,7 +449,6 @@ async fn import_history(
         .fetch_optional(db)
         .await?
         .with_context(|| format!("no site {domain}; add it first"))?;
-    anyhow::ensure!(!rows.is_empty(), "no export files found in that folder");
     let events = DuckStore::open(&data_dir.join("events.duckdb"))?;
     let kept = events.replace_imported(&site, &rows)?;
     println!("Imported {kept} daily rows for {domain}.");
