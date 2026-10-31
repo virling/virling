@@ -1,5 +1,5 @@
 {
-  "specVersion": "0.91",
+  "specVersion": "1.0",
   "host": {
     "name": "Virling",
     "domain": "virling.com",
@@ -9,7 +9,7 @@
     {
       "identifier": "urn:air:virling.com:mcp:virling",
       "displayName": "Virling MCP server",
-      "type": "application/mcp-server-card+json",
+      "type": "application/json",
       "url": "https://virling.com/.well-known/mcp/server-card.json",
       "representativeQueries": [
         "Which marketing channel made the most money last month?",
@@ -20,7 +20,7 @@
     {
       "identifier": "urn:air:virling.com:skill:virling",
       "displayName": "Virling agent skill",
-      "type": "application/agent-skills+md",
+      "type": "text/markdown",
       "url": "https://virling.com/.well-known/agent-skills/virling/SKILL.md",
       "representativeQueries": [
         "Show revenue by channel from Virling",

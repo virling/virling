@@ -1,6 +1,6 @@
 # Virling
 
-Virling is open-source, self-hosted revenue attribution for SaaS. It joins every website visit to the payment that followed, so you can see which traffic channel brings paying customers, not just visitors.
+Virling is open-source revenue attribution for SaaS products, online stores and agencies, self-hosted or hosted. It joins every website visit to the payment that followed, so you can see which traffic channel brings paying customers, not just visitors.
 
 - Website: https://virling.com
 - Docs: https://docs.virling.com
@@ -10,11 +10,22 @@ Virling is open-source, self-hosted revenue attribution for SaaS. It joins every
 
 ## Status
 
-Releases are published on GitHub and run on your own server today. Hosted plans start with a 14-day free trial at https://app.virling.com/login with no application.
+Releases are published on GitHub and run on your own server today. Hosted plans start with a 14-day free trial at https://app.virling.com/login.
+
+## Pricing
+
+- Self-hosted: free under AGPLv3, every feature, on your own server.
+- Hosted Personal: $19 a month after a 14-day free trial. A card is required to start the trial.
+- Hosted Agency: $79 a month after a 14-day free trial, with a team of 3 included.
+- Founding price: the first 50 customers of each plan pay $9 (Personal) or $29 (Agency) a month for life.
+- Both hosted plans include unlimited sites.
+- Details: https://virling.com/pricing
 
 ## Who it is for
 
-- Indie founders and small SaaS teams who take payments through Stripe, Paddle, Shopify, WooCommerce, Dodo Payments, Polar or LemonSqueezy (Lemon Squeezy) and want to know which marketing channel actually pays.
+- B2B SaaS marketing teams and founders who want to know which marketing channel brings paying customers, not just signups or traffic.
+- Ecommerce stores on Shopify or WooCommerce that want sales by channel, campaign and landing page.
+- Anyone taking payments through Stripe, Paddle, Shopify, WooCommerce, Dodo Payments, Polar, LemonSqueezy (Lemon Squeezy), Creem or RevenueCat.
 - Teams that want revenue analytics on their own server, with their data next to the binary.
 - Agencies that report to clients and want each client to see revenue by channel every week.
 
@@ -28,8 +39,8 @@ Releases are published on GitHub and run on your own server today. Hosted plans 
 
 ## How it works
 
-1. Add a tracking script to your site. It is about 1.2 KB gzipped and records pageviews, referrers, UTM tags, single-page-app route changes and custom goals, with a first-party visitor ID.
-2. Connect a payment provider with a read-only key. Virling backfills the last 90 days of payments, then polls every minute. It never creates, changes or refunds anything.
+1. Add a tracking script to your site. It is about 1.4 KB gzipped and records pageviews, referrers, UTM tags, single-page-app route changes and custom goals, with a first-party visitor ID.
+2. Connect a payment provider with a read-only key. Virling backfills the last 90 days of payments (60 for Shopify), then polls every minute. It never creates, changes or refunds anything.
 3. Pass the visitor ID into checkout. Stripe Payment Links, Polar checkout links and Dodo payment links get it added automatically by the script. Payments without it still count toward revenue, as Unattributed.
 4. Virling credits each payment to a session. The default model is last non-direct: the latest session in the lookback window that was not Direct. First touch is the other option. The lookback window is 30, 60, 90 or 365 days, 90 by default. Renewals keep the channel of the customer's first payment.
 
@@ -37,10 +48,15 @@ Every session gets one channel from its first pageview: Paid, Email, AI, Organic
 
 ## Payment providers
 
-- Stripe: restricted key (rk_live_ or rk_test_) with read access. Secret keys are refused.
-- Dodo Payments: API key, live or test mode.
-- Polar: organization access token with orders:read and refunds:read, plus subscriptions:read for retention.
-- LemonSqueezy (Lemon Squeezy): API key, which cannot be limited to read-only. Virling registers a webhook to link payments to visits, which needs Virling on an https address.
+- Stripe: restricted key (rk_live_ or rk_test_) with read access. Secret keys are refused. https://virling.com/integrations/stripe
+- Paddle: Paddle Billing API key with transaction.read and adjustment.read, plus subscription.read for retention. https://virling.com/integrations/paddle
+- Shopify: Admin API token of a custom app with only the read_orders scope. Imports the last 60 days of orders. https://virling.com/integrations/shopify
+- WooCommerce: REST API key with Read permission; the store must be on https. https://virling.com/integrations/woocommerce
+- Dodo Payments: API key, live or test mode. https://virling.com/integrations/dodo-payments
+- Polar: organization access token with orders:read and refunds:read, plus subscriptions:read for retention. https://virling.com/integrations/polar
+- LemonSqueezy (Lemon Squeezy): API key, which cannot be limited to read-only. Virling registers a webhook to link payments to visits, which needs Virling on an https address. https://virling.com/integrations/lemonsqueezy
+- Creem: API key with transactions:read, plus subscriptions:read and webhooks:write. Virling adds a webhook to link checkouts to visits, which needs an https address. https://virling.com/integrations/creem
+- RevenueCat: V2 secret key. Virling adds a webhook for purchases, renewals and refunds, which needs an https address. Purchases are credited when they carry a visitor ID, from a web paywall or an app user linked to a web visit. https://virling.com/integrations/revenuecat
 
 ## Self-hosting
 
