@@ -52,7 +52,7 @@
 <h2>Step 1: give every visitor an ID</h2>
 <p class="p">Your tracking script sets one first-party ID per visitor and remembers the first source: referrer, UTM tags or "direct".</p>
 <h2>Step 2: pass that ID into checkout</h2>
-<p class="p">When someone clicks Buy, put the visitor ID in the checkout's metadata. On Stripe that's <code>metadata</code>, on Dodo Payments and Polar it's the same idea. One line where you create the checkout.</p>
+<p class="p">When someone clicks Buy, put the visitor ID in the checkout's metadata. On Stripe that's <code>metadata</code>, on Dodo Payments and Polar it's the same idea. One line where you create the checkout. The Stripe steps are in <a href="/blog/track-stripe-revenue-by-traffic-source">tracking Stripe revenue by traffic source</a>.</p>
 <h2>Step 3: join payments to visits</h2>
 <p class="p">When the payment webhook arrives, look up the visitor ID and credit the payment to the channel of the visit before it. Now every dollar has a source.</p>
 <h2>Step 4: expose it over MCP</h2>
@@ -61,11 +61,11 @@
 <p class="p">Add it to Claude Code with one command:</p>
 <div class="code block"><pre>claude mcp add --transport http virling https://your-server/mcp \
   --header &quot;Authorization: Bearer vk_...&quot;</pre></div>
-<p class="p">On claude.ai it's a custom connector with the same URL and header.</p>
+<p class="p">On claude.ai it's a custom connector with the same URL and header. Setup details are in the <a href="https://docs.virling.com/reference/mcp">MCP docs</a>.</p>
 <h2>Step 5: ask questions</h2>
 <p class="p">Things I ask now instead of clicking through dashboards:</p>
 <ul class="post-list"><li>"Which channel made the most money per visitor in the last 30 days?"</li><li>"Is AI traffic worth more than search traffic for me?"</li><li>"Show me the path of the last 5 customers who paid."</li><li>"Which channel's customers churn the fastest?"</li></ul>
-<p class="p">On the demo site, the answer to the first one: Direct brought twice the visitors of AI, but AI visitors were worth almost 7x more each. You would never guess that from a traffic chart.</p>
+<p class="p">On the demo site, the answer to the first one: Direct brought twice the visitors of AI, but AI visitors were worth almost 7x more each. You would never guess that from a traffic chart. More on that in <a href="/blog/is-ai-search-traffic-worth-anything">is AI search traffic worth anything</a>.</p>
 <h2>Why this matters</h2>
 <p class="p">Traffic tells you which channel is loud. Revenue per visitor tells you which one pays. Once your assistant can see both, you stop arguing about channels and just ask.</p>
 <p class="p">Virling is open source and free to self-host. Hosted plans start at $19 a month with a 14-day free trial at <a href="https://app.virling.com/login">app.virling.com</a>.</p>

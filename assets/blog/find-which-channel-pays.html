@@ -51,14 +51,14 @@
 <h2>Step 1: give every visitor an ID</h2>
 <p class="p">Your analytics script should set one first-party ID per visitor (or a daily hash if you run cookieless). Store the first source you saw them from: referrer, UTM tags, or "direct".</p>
 <h2>Step 2: pass the ID into checkout</h2>
-<p class="p">This is the step everyone skips. When someone clicks Buy, put the visitor ID into the checkout's metadata. On Stripe that is <code>metadata</code> on the Checkout Session or <code>client_reference_id</code>. Dodo Payments and Polar have the same idea.</p>
+<p class="p">This is the step everyone skips. When someone clicks Buy, put the visitor ID into the checkout's metadata. On Stripe that is <code>metadata</code> on the Checkout Session or <code>client_reference_id</code>. Dodo Payments and Polar have the same idea. The full Stripe setup is in <a href="/blog/track-stripe-revenue-by-traffic-source">tracking Stripe revenue by traffic source</a>.</p>
 <p class="p">Now every payment carries the visitor who made it.</p>
 <h2>Step 3: join payments to visits</h2>
 <p class="p">For each payment, find that visitor's visits before the payment date. Pick a rule and stick to it:</p>
 <ul class="post-list"><li>Last non-direct visit: credit the last real source before they paid (the common default)</li><li>First touch: credit whatever first brought them</li></ul>
-<p class="p">Use a lookback window, 30 to 90 days for most SaaS.</p>
+<p class="p">Use a lookback window, 30 to 90 days for most SaaS. The trade-offs are in <a href="/blog/first-touch-vs-last-touch-attribution-saas">first-touch or last-touch attribution</a>.</p>
 <h2>Step 4: read revenue per visitor, not visitors</h2>
-<p class="p">For each channel: revenue divided by visitors. Compare it with your site average.</p>
+<p class="p">For each channel: revenue divided by visitors. Compare it with your site average. The <a href="/tools/revenue-per-visitor">revenue per visitor calculator</a> does the sums for you.</p>
 <ul class="post-list"><li>1.8x average: double down</li><li>0.3x average: stop spending time there, or fix the page those visitors land on</li></ul>
 <p class="p">The landing page with lots of visitors and a low ratio is usually your cheapest fix.</p>
 <h2>Step 5: check it weekly</h2>
