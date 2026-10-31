@@ -3252,6 +3252,83 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn segments_save_apply_and_scope_the_report() {
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        seed(&store, &site);
+        let res = call(
+            &state,
+            form(
+                "/app/example.com/segments",
+                "range=30d&country=US&channel=AI&bogus=1&name=AI+in+the+US".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        assert_eq!(
+            res.headers()["location"],
+            "/app/example.com?range=30d&channel=AI&country=US"
+        );
+        let (id, filters): (String, String) = sqlx::query_as("SELECT id, filters FROM segments")
+            .fetch_one(&state.db)
+            .await
+            .unwrap();
+        assert_eq!(filters, "channel=AI\ncountry=US");
+        let page = |q: &'static str| {
+            let (state, cookie) = (state.clone(), cookie.clone());
+            async move { body_text(call(&state, get(q, Some(&cookie))).await).await }
+        };
+        let body = page("/app/example.com?view=payments").await;
+        assert!(
+            body.contains(">AI in the US</a>") && !body.contains("aria-current=\"true\">AI in")
+        );
+        let body = page("/app/example.com?country=US&channel=AI").await;
+        assert!(body.contains(r#"aria-current="true">AI in the US</a>"#));
+        assert!(body.contains("Delete segment") && !body.contains("Save as segment"));
+
+        let other = sign_in(&state, "other%40example.com").await;
+        let pick = format!("segment={id}");
+        call(
+            &state,
+            form(
+                "/app/example.com/report/segment",
+                pick.clone(),
+                Some(&other),
+            ),
+        )
+        .await;
+        let body = page("/app/example.com/report").await;
+        assert!(
+            !body.contains("Segment: AI in the US"),
+            "only the owner picks"
+        );
+        call(
+            &state,
+            form("/app/example.com/report/segment", pick, Some(&cookie)),
+        )
+        .await;
+        let body = page("/app/example.com/report").await;
+        assert!(body.contains("Segment: AI in the US"));
+        assert!(body.contains(r#"aria-current="true">AI in the US</button>"#));
+
+        call(
+            &state,
+            form(
+                "/app/example.com/segments/delete",
+                format!("segment={id}"),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        let body = page("/app/example.com/report").await;
+        assert!(
+            !body.contains("AI in the US"),
+            "a deleted segment leaves the report"
+        );
+    }
+
+    #[tokio::test]
     async fn visitors_and_timeline_render() {
         let (_dir, state, store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;

@@ -181,6 +181,19 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         .bind(&share)
         .execute(&db)
         .await?;
+    // The client report reads a saved segment, the slower path.
+    let segment = uuid::Uuid::new_v4().to_string();
+    sqlx::query("INSERT INTO segments (id, site_id, name, filters, created_at) VALUES (?, ?, 'US', 'country=US', ?)")
+        .bind(&segment)
+        .bind(&site_id)
+        .bind(now)
+        .execute(&db)
+        .await?;
+    sqlx::query("UPDATE report_brands SET segment_id = ? WHERE site_id = ?")
+        .bind(&segment)
+        .bind(&site_id)
+        .execute(&db)
+        .await?;
     sqlx::query("UPDATE sites SET public_dashboard = 1 WHERE id = ?")
         .bind(&site_id)
         .execute(&db)

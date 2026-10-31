@@ -287,6 +287,15 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/funnels/delete",
                 post(dashboard::delete_funnel),
             )
+            .route("/app/{domain}/segments", post(dashboard::segments::save))
+            .route(
+                "/app/{domain}/segments/delete",
+                post(dashboard::segments::delete),
+            )
+            .route(
+                "/app/{domain}/report/segment",
+                post(dashboard::report::save_segment),
+            )
             .route("/l/{slug}", get(links::follow))
             .route(
                 "/app/{domain}/visitors/{visitor_id}",

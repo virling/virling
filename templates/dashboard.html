@@ -35,12 +35,23 @@
   {% if !matching.connected %}<div><a class="d3-btn dark" href="/app/{{ shell.domain }}/setup/payments">Connect payments</a></div>{% endif %}
 </section>
 
-{% if !chips.is_empty() %}
+{% if !chips.is_empty() || !segments.is_empty() %}
 <div class="d3-filter">
+  {% if !segments.is_empty() %}<span class="dim">Segments</span><nav class="d3-tabs" aria-label="Saved segments">{% for t in segments %}<a href="{{ t.href }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav>{% endif %}
+  {% if !chips.is_empty() %}
   <span class="dim">Showing only</span>
   {% for c in chips %}<span class="d3-fchip">{{ c.icon|safe }}{{ c.label }}<a href="{{ c.href }}" aria-label="Remove filter {{ c.label }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></a></span>{% endfor %}
   {% if !visitors_href.is_empty() %}<a class="d3-link" href="{{ visitors_href }}">See these visitors</a>{% endif %}
+  {% if segment_id.is_empty() %}<details class="d3-edit"><summary class="d3-link">Save as segment</summary>
+    <form method="post" action="/app/{{ shell.domain }}/segments">
+      {% for (k, v) in segment_fields %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+      <span class="dim">Reuse these filters on every view and in the client report.</span>
+      <label class="sr" for="segname">Segment name</label><input id="segname" name="name" placeholder="AI visitors in the US" maxlength="60" required>
+      <span class="acts"><button class="d3-btn dark sm" type="submit">Save segment</button></span>
+    </form>
+  </details>{% else %}<form method="post" action="/app/{{ shell.domain }}/segments/delete">{% for (k, v) in segment_fields %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}<input type="hidden" name="segment" value="{{ segment_id }}"><button class="d3-link" type="submit">Delete segment</button></form>{% endif %}
   <span class="hint">Click any row in a card to filter by it.</span>
+  {% endif %}
 </div>
 {% endif %}
 
