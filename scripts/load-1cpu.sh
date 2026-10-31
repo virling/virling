@@ -4,7 +4,8 @@
 set -eu
 BIN="$(pwd)/target/release/virling"
 IMAGE=ubuntu:24.04
-EVENTS="${EVENTS:-100000}"
+EVENTS="${EVENTS:-1000000}"
+PEAK_REQUESTS="${PEAK_REQUESTS:-50000}"
 SCALE="${SCALE:-1}"
 # The base image has no CA certificates and the server needs them at startup.
 LIMITS="--cpus 1 --memory 1g --memory-swap 1g -v /etc/ssl/certs:/etc/ssl/certs:ro"
@@ -24,9 +25,19 @@ docker run -d --name virling-load $LIMITS -p 18080:8080 -v "$BIN:/usr/local/bin/
   virling serve >/dev/null
 timeout 60 sh -c 'until curl -sf http://127.0.0.1:18080/health >/dev/null; do sleep 0.5; done' || { docker logs virling-load; exit 1; }
 printf '{"n":"pageview","u":"https://example.com/pricing","r":"https://news.ycombinator.com/","s":"example.com","w":1440}' > "$work/event.json"
-timeout 900 ab -q -n "$EVENTS" -c 16 -p "$work/event.json" -T text/plain http://127.0.0.1:18080/api/event \
+timeout 1800 ab -q -n "$EVENTS" -c 16 -p "$work/event.json" -T text/plain http://127.0.0.1:18080/api/event \
   | grep -E "Complete requests|Failed requests|Requests per second|Time per request.*\(mean\)|  50%|  99%|100%"
 docker stats --no-stream --format "memory after ingest: {{.MemUsage}}" virling-load
+
+echo "== Peak: $PEAK_REQUESTS pageviews per step, doubling concurrency until requests fail"
+for c in 16 32 64 128 256 512; do
+  timeout 600 ab -q -r -n "$PEAK_REQUESTS" -c "$c" -p "$work/event.json" -T text/plain http://127.0.0.1:18080/api/event > "$work/peak.txt" 2>&1 || true
+  awk -v c="$c" '/Requests per second/ {r=$4} /Failed requests/ {f=$3} /Non-2xx responses/ {n=$3} /  99%/ {p=$2}
+    END {printf "concurrency %4d: %8s req/s, p99 %5s ms, failed %s, non-2xx %s\n", c, r, p, f, (n == "" ? 0 : n)}' "$work/peak.txt"
+  grep -q "Non-2xx responses" "$work/peak.txt" && break
+  grep -q "Failed requests: *0$" "$work/peak.txt" || break
+done
+docker stats --no-stream --format "memory after peak: {{.MemUsage}}" virling-load
 docker rm -f virling-load >/dev/null
 
 echo "== Reads: every dashboard route on the demo data at ${SCALE}x, without the result cache"
