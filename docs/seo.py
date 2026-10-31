@@ -72,4 +72,7 @@ print(f"{len(urls)} pages in sitemap.xml")
     "# Virling docs\n\n> How to run Virling, open-source revenue attribution, add the tracking script, connect payments and read attribution. Product site: https://virling.com/llms.txt\n\n"
     + "\n".join(llms) + "\n"
 )
-(book / "_redirects").write_text("\n".join(redirects) + "\n")
+# Relative links followed from a wrong URL nest real paths under junk prefixes; send them home.
+deep = [r.split()[0] for r in redirects]
+splats = [f"/*{src} /{src[1:-5].removesuffix('index')} 301" for src in sorted(deep, key=lambda x: -x.count("/"))]
+(book / "_redirects").write_text("\n".join(redirects + splats) + "\n")

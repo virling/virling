@@ -2,6 +2,7 @@
 <html lang="{{ language }}">
 <head>
 <meta charset="UTF-8">
+{{#if base_url}}<base href="{{ base_url }}">{{/if}}
 <title>{{#if (eq path "index.md")}}Virling docs{{else}}{{ chapter_title }} · Virling docs{{/if}}</title>
 <meta name="description" content="{{ description }}">
 <meta name="viewport" content="width=device-width, initial-scale=1">
