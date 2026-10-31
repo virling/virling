@@ -1,0 +1,36 @@
+name: Load 1 vCPU
+
+on:
+  workflow_dispatch:
+    inputs:
+      scale:
+        description: Copies of the demo data for the read test
+        default: "1"
+  pull_request:
+    paths:
+      - scripts/load-1cpu.sh
+      - .github/workflows/load-1cpu.yml
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: perf
+      - run: cargo build --release
+      - run: sudo apt-get install -y apache2-utils && pip install --break-system-packages duckdb
+      - name: 1 vCPU, 1 GB
+        env:
+          SCALE: ${{ inputs.scale || '1' }}
+        run: |
+          nproc; free -m
+          set -o pipefail
+          ./scripts/load-1cpu.sh | tee load.txt
+          { echo '```'; cat load.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
