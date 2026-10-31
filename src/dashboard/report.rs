@@ -983,6 +983,8 @@ pub struct SchedView {
     times: Vec<Opt>,
     recipients: String,
     tz: String,
+    /// The Slack webhook the report is also posted to; empty when none.
+    slack: String,
 }
 
 #[derive(Template)]
@@ -1009,10 +1011,10 @@ struct SharedPage {
     week_param: String,
 }
 
-fn sched_view(s: &Schedule, ctx: &Ctx) -> SchedView {
+fn sched_view(s: &Schedule, ctx: &Ctx, slack: Option<String>) -> SchedView {
     let now = OffsetDateTime::now_utc();
     SchedView {
-        on: s.on && !s.recipients.is_empty(),
+        on: s.on && (!s.recipients.is_empty() || slack.is_some()),
         day: schedule::DAYS[usize::from(s.weekday)].1,
         time: schedule::clock(s.minute),
         first: s.recipients.first().cloned().unwrap_or_default(),
@@ -1038,6 +1040,7 @@ fn sched_view(s: &Schedule, ctx: &Ctx) -> SchedView {
             .collect(),
         recipients: s.recipients.join("\n"),
         tz: ctx.site.timezone.clone(),
+        slack: slack.unwrap_or_default(),
     }
 }
 
@@ -1070,6 +1073,9 @@ pub async fn page(
     render(ReportPage {
         alert: match q.error.as_deref() {
             Some("recipients") => "Add one or more valid email addresses, up to 10.",
+            Some("slack") => {
+                "Paste a Slack incoming webhook URL, starting with https://hooks.slack.com/."
+            }
             Some("none") => "Add who gets the report first: open Change schedule.",
             Some("send") => "The email could not be sent. Check the mail settings and try again.",
             _ => "",
@@ -1085,7 +1091,11 @@ pub async fn page(
         } else {
             monday.to_string()
         },
-        sched: sched_view(&sched, &ctx),
+        sched: sched_view(
+            &sched,
+            &ctx,
+            schedule::slack_url(&state, &ctx.site.id).await,
+        ),
         report,
     })
 }
@@ -1187,6 +1197,8 @@ pub struct ScheduleInput {
     weekday: u8,
     minute: u16,
     recipients: String,
+    #[serde(default)]
+    slack: String,
     week: Option<String>,
 }
 
@@ -1202,9 +1214,13 @@ pub async fn save_schedule(
     };
     let week = week_param(input.week.as_deref());
     let on = input.on.is_some();
+    let slack = input.slack.trim();
+    if !slack.is_empty() && !schedule::valid_slack(slack) {
+        return back(&ctx.site.domain, &week, "error=slack").into_response();
+    }
     let recipients = match schedule::recipients(&input.recipients) {
         _ if !ctx.shell.agency => vec![ctx.shell.email.clone()],
-        Some(r) if !(on && r.is_empty()) => r,
+        Some(r) if !(on && r.is_empty() && slack.is_empty()) => r,
         _ => return back(&ctx.site.domain, &week, "error=recipients").into_response(),
     };
     let s = Schedule {
@@ -1216,6 +1232,11 @@ pub async fn save_schedule(
     };
     if let Err(err) = schedule::save(&state.db, &ctx.site.id, &s).await {
         tracing::error!(%err, "saving the report schedule failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    let slack = Some(slack).filter(|s| !s.is_empty());
+    if let Err(err) = schedule::set_slack(&state, &ctx.site.id, slack).await {
+        tracing::error!(%err, "saving the Slack webhook failed");
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     }
     back(&ctx.site.domain, &week, "saved=schedule").into_response()
@@ -1246,7 +1267,7 @@ pub async fn send_now(
     } else {
         vec![ctx.shell.email.clone()]
     };
-    if to.is_empty() {
+    if to.is_empty() && schedule::slack_url(&state, &ctx.site.id).await.is_none() {
         return back(&ctx.site.domain, &week, "error=none").into_response();
     }
     let monday = pick_week(ctx.today, input.week.as_deref());

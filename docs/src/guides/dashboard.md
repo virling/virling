@@ -104,7 +104,7 @@ In **Site settings**:
 
 - **Public dashboard** turns on a read-only page anyone can open without signing in, for building in public. It never shows emails or customer IDs. Turn it off and the link stops working at once.
 - **Client link** gives an agency's client a read-only report page, with your name, logo, accent colour and footer. Revoke the link to stop access at once. **Download PDF** saves the same report.
-- **Weekly email** sends the report every week. Personal emails it to you with Virling branding; Agency adds white-label client reports.
+- **Weekly email** sends the report every week. Personal emails it to you with Virling branding; Agency adds white-label client reports. Paste a Slack incoming webhook URL under **Change schedule** to also post a short summary (the headline, the week's numbers and the top three sources, with a link to the full report) to a Slack channel at the same time; Slack alone also works. The webhook URL is stored encrypted.
 
 ## Account settings
 

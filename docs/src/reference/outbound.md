@@ -16,6 +16,7 @@ Every host a Virling server connects to. Your visitors' browsers only connect to
 | `api.openai.com`, `api.anthropic.com`, `api.perplexity.ai`, `generativelanguage.googleapis.com` | With [AI answers](../track/ai-answers.md) keys set, on each site's schedule (weekly by default) and on **Run now** | Ask the site's buyer questions with web search |
 | `api.frankfurter.dev` | When converting a non-USD payment, at most every 12 hours | ECB exchange rates. See [Currencies](../attribution/currencies.md). |
 | Your SMTP server | When someone requests a sign-in link | Send the email, if `VIRLING_SMTP_URL` is set |
+| `hooks.slack.com` | When a site's weekly report is due and a Slack webhook is set | Post the weekly summary to that Slack channel |
 | Your sites and their referrers, `https://<host>/` | When the app shows a site, or a referrer without a bundled logo. Site icons at most daily, referrer icons at most every 30 days. | Fetch the homepage's favicon, and for your sites its title to suggest AI answer questions, from public addresses only. Nothing about visitors is sent, and pages, including shared reports, load the cached copy from Virling. |
 | `extensions.duckdb.org` | First start | DuckDB downloads its ICU extension into `~/.duckdb/extensions`. Later starts use the cached copy. |
 
