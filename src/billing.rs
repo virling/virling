@@ -1216,9 +1216,17 @@ mod tests {
     #[tokio::test]
     async fn sign_in_mentions_the_trial_only_where_plans_are_sold() {
         let t = setup().await;
+        let res = crate::app::router(t.state.clone())
+            .layer(MockConnectInfo(SocketAddr::from(([203, 0, 113, 7], 5555))))
+            .oneshot(Request::get("/login").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+        let bytes = axum::body::to_bytes(res.into_body(), usize::MAX)
+            .await
+            .unwrap();
         assert!(
-            page(&t, "/login")
-                .await
+            String::from_utf8(bytes.to_vec())
+                .unwrap()
                 .contains("Plans start with 14 days free")
         );
         let mut state = t.state.clone();
@@ -1501,10 +1509,7 @@ mod tests {
         .await
         .unwrap();
         let dash = page(&t, "/app/agency.com/settings").await;
-        assert!(
-            dash.contains("Trial: 9 days left. Connect payments to see which visits pay."),
-            "{dash}"
-        );
+        assert!(!dash.contains("days left"), "{dash}");
         let account = page(&t, "/app/agency.com/account").await;
         assert!(account.contains("Personal trial, 9 days left"));
         assert!(account.contains("Cancel trial"));

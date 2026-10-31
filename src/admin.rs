@@ -1311,6 +1311,19 @@ mod tests {
         String::from_utf8_lossy(&bytes).into_owned()
     }
 
+    #[tokio::test]
+    async fn signed_in_users_skip_the_sign_in_page() {
+        let f = setup().await;
+        let user = f
+            .user_cookie
+            .trim_start_matches("virling_session=")
+            .to_string();
+        let res = call(&f.state, get("/login?vid=abc", Some(&user))).await;
+        assert_eq!(location(&res), "/app");
+        let res = call(&f.state, get("/login", None)).await;
+        assert_eq!(res.status(), StatusCode::OK);
+    }
+
     fn location(res: &Response) -> String {
         res.headers()
             .get("location")
