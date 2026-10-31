@@ -1,6 +1,7 @@
 {% if !r.agency.is_empty() %}{{ r.agency }}: w{% else %}W{% endif %}eekly revenue report for {{ r.site }}
 {{ r.week }}
-
+{% if !r.segment.is_empty() %}Segment: {{ r.segment }}
+{% endif %}
 {{ r.headline }}
 {% if !r.subline.is_empty() %}{{ r.subline }}
 {% endif %}

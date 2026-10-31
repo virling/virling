@@ -38,7 +38,7 @@ pub struct DashboardQuery {
 }
 
 /// Filter params, and the first-pageview column each one matches; "viewed" matches any page of the visit.
-const FILTERS: [(&str, &str); 13] = [
+pub(super) const FILTERS: [(&str, &str); 13] = [
     ("channel", "channel"),
     ("source", "referrer_host"),
     ("campaign", "utm_campaign"),
@@ -146,6 +146,12 @@ struct DashboardPage {
     range: RangeMenu,
     report_href: String,
     chips: Vec<FilterChip>,
+    /// Saved segments, on when the filters match one.
+    segments: Vec<Opt>,
+    /// The saved segment the filters match; empty when none.
+    segment_id: String,
+    /// Hidden fields of the segment forms: the range and the filters.
+    segment_fields: Vec<(&'static str, String)>,
     /// The Visitors list with the same filters, when it can apply them all.
     visitors_href: String,
     privacy: bool,
@@ -345,7 +351,49 @@ fn unmatched_line(cur: &Totals, unattributed: f64, split: &[ProviderSplit], wind
     format!("{head} {}.", why.join(", "))
 }
 
-fn chip_view(key: &str, value: &str) -> (String, String) {
+/// The Filter for dashboard filter params; a source name matches each of its referrer hosts.
+pub(super) fn filter_of(
+    store: &dyn crate::events::EventStore,
+    id: &str,
+    pq: &Period,
+    wanted: &[(&'static str, String)],
+) -> anyhow::Result<Filter> {
+    let mut f = Filter::default();
+    for (k, v) in wanted {
+        let col = FILTERS
+            .iter()
+            .find(|x| x.0 == *k)
+            .map(|x| x.1)
+            .unwrap_or("");
+        if *k == "viewed" {
+            f.viewed = Some(v.clone());
+            continue;
+        }
+        let vals: Vec<Option<String>> = if *k == "source" {
+            let mut hosts: Vec<Option<String>> = store
+                .visitor_facets(id, pq)?
+                .sources
+                .into_iter()
+                .filter_map(|(_, h, _)| h)
+                .filter(|h| source_domain(h) == *v)
+                .map(Some)
+                .collect();
+            hosts.dedup();
+            if hosts.is_empty() {
+                hosts.push(Some(v.clone()));
+            }
+            hosts
+        } else if v == "(none)" {
+            vec![None]
+        } else {
+            vec![Some(v.clone())]
+        };
+        f.first.push((col, vals));
+    }
+    Ok(f)
+}
+
+pub(super) fn chip_view(key: &str, value: &str) -> (String, String) {
     let none = value == "(none)";
     match key {
         "channel" | "source" => (icons::source(value, 16), value.to_string()),
@@ -729,6 +777,12 @@ async fn page(
         link(&base, &params, &set)
     };
 
+    let saved_segments = match public {
+        Some(_) => Vec::new(),
+        None => super::segments::list(&state.db, &ctx.site.id)
+            .await
+            .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?,
+    };
     let store = state.events.clone();
     let id = ctx.site.id.clone();
     let wanted = filters.clone();
@@ -803,38 +857,7 @@ async fn page(
         (links, bots, own)
     });
     let data = blocking(move || {
-        let mut f = Filter::default();
-        for (k, v) in &wanted {
-            let col = FILTERS
-                .iter()
-                .find(|x| x.0 == *k)
-                .map(|x| x.1)
-                .unwrap_or("");
-            if *k == "viewed" {
-                f.viewed = Some(v.clone());
-                continue;
-            }
-            let vals: Vec<Option<String>> = if *k == "source" {
-                let mut hosts: Vec<Option<String>> = store
-                    .visitor_facets(&id, &pq)?
-                    .sources
-                    .into_iter()
-                    .filter_map(|(_, h, _)| h)
-                    .filter(|h| source_domain(h) == *v)
-                    .map(Some)
-                    .collect();
-                hosts.dedup();
-                if hosts.is_empty() {
-                    hosts.push(Some(v.clone()));
-                }
-                hosts
-            } else if v == "(none)" {
-                vec![None]
-            } else {
-                vec![Some(v.clone())]
-            };
-            f.first.push((col, vals));
-        }
+        let f = filter_of(&*store, &id, &pq, &wanted)?;
         let split = store.payment_split(&id, &pq)?;
         let mut overview = store.overview_in(&id, &pq, &f)?;
         if let Some(vs) = &vs {
@@ -973,6 +996,31 @@ async fn page(
             }
         })
         .collect();
+    let cleared: Vec<(&'static str, String)> =
+        FILTERS.iter().map(|(k, _)| (*k, String::new())).collect();
+    let segments: Vec<Opt> = saved_segments
+        .iter()
+        .map(|sg| {
+            let mut set = cleared.clone();
+            set.extend(sg.filters.iter().cloned());
+            Opt {
+                label: sg.name.clone(),
+                href: filter_href(&set),
+                on: sg.filters == filters,
+                count: String::new(),
+            }
+        })
+        .collect();
+    let segment_id = saved_segments
+        .iter()
+        .find(|sg| sg.filters == filters)
+        .map(|sg| sg.id.clone())
+        .unwrap_or_default();
+    let mut segment_fields = picked.params();
+    if !view.is_empty() {
+        segment_fields.push(("view", view.into()));
+    }
+    segment_fields.extend(filters.iter().cloned());
     let visitors_href = match filters.as_slice() {
         [(k @ ("channel" | "source"), v)] => {
             let mut set: Vec<(&str, String)> = picked
@@ -1006,6 +1054,9 @@ async fn page(
         },
         report_href: site_url("report"),
         chips,
+        segments,
+        segment_id,
+        segment_fields,
         visitors_href,
         privacy: ctx.site.cookieless,
         waiting: None,

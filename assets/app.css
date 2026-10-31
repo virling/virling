@@ -215,6 +215,10 @@ body.app { display: flex; min-height: 100vh; font-size: 14px; line-height: 1.4; 
 .menu-wrap .menu a:hover, .menu-wrap .menu a:focus { background: var(--hover); outline: none; }
 .menu-wrap .menu a[aria-current] { font-weight: 600; }
 .menu-wrap .menu a[aria-current]::after { content: " \2713"; color: var(--revenue); }
+.menu-wrap .menu form button { width: 100%; padding: 9px 10px; border: 0; border-radius: 8px; background: none; color: var(--ink); font: inherit; font-size: 14px; text-align: left; white-space: nowrap; cursor: pointer; }
+.menu-wrap .menu form button:hover, .menu-wrap .menu form button:focus { background: var(--hover); outline: none; }
+.menu-wrap .menu form button[aria-current] { font-weight: 600; }
+.menu-wrap .menu form button[aria-current]::after { content: " \2713"; color: var(--revenue); }
 .menu-wrap .menu a.add { color: var(--ink-2); border-top: 1px solid var(--rule-2); border-radius: 0 0 8px 8px; margin-top: 4px; }
 .favicon { width: 22px; height: 22px; flex: none; border-radius: 6px; background: var(--ink); color: var(--on-ink); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
 img.favicon { background: none; object-fit: contain; }
@@ -772,6 +776,8 @@ a.hov { color: inherit; text-decoration: none; }
 .d3-goals .d3-foot { margin-top: 6px; }
 .d3-edit form { position: absolute; right: 0; bottom: 48px; z-index: 20; width: 280px; padding: 12px; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper); box-shadow: var(--shadow-pop); }
 .d3-edit { position: relative; }
+.d3-filter .d3-edit form { top: 44px; bottom: auto; left: 0; right: auto; }
+.d3-filter form { margin: 0; }
 .d3-edit summary { list-style: none; }
 .d3-edit summary::-webkit-details-marker { display: none; }
 .d3-edit .acts { display: flex; gap: 8px; }

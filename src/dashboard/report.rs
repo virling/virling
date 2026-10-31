@@ -117,15 +117,18 @@ pub(crate) async fn data(
     state: &AppState,
     period: Period,
     site_id: &str,
+    filters: Vec<(&'static str, String)>,
 ) -> Result<Data, StatusCode> {
     let store = state.events.clone();
     let id = site_id.to_string();
     blocking(move || {
+        let f = super::home::filter_of(&*store, &id, &period, &filters)?;
+        let prev = period.previous();
         Ok(Data {
-            report: store.report(&id, &period)?,
-            sources: store.breakdown(&id, &period, Dimension::ChannelSource)?,
-            prev_pages: store.breakdown(&id, &period.previous(), Dimension::LandingPage)?,
-            prev_channels: store.breakdown(&id, &period.previous(), Dimension::Channel)?,
+            report: store.report_in(&id, &period, &f)?,
+            sources: store.breakdown_in(&id, &period, Dimension::ChannelSource, &f)?,
+            prev_pages: store.breakdown_in(&id, &prev, Dimension::LandingPage, &f)?,
+            prev_channels: store.breakdown_in(&id, &prev, Dimension::Channel, &f)?,
         })
     })
     .await
@@ -220,6 +223,8 @@ pub struct ReportView {
     pub credit: String,
     pub powered_by: bool,
     pub personal: bool,
+    /// The saved segment the numbers are limited to; empty for all visitors.
+    pub segment: String,
 }
 
 /// A credited source: a channel, with the referrer host when there is one.
@@ -897,6 +902,7 @@ pub(crate) fn build(site: &str, monday: Date, d: &Data, o: &Options) -> ReportVi
         .flatten()
         .collect(),
         verdicts: crate::verdict::verdicts(&r.channels, &d.prev_channels),
+        segment: String::new(),
         sources: source_rows,
         pages: page_rows,
         note: o.note.to_string(),
@@ -946,8 +952,18 @@ pub(crate) async fn view(
         (brand, String::new())
     };
     let (model, window_days) = attribution(state, &site.id).await?;
-    let d = data(state, week_period(monday, &site.timezone), &site.id).await?;
-    Ok(build(
+    let segment = super::segments::of_report(&state.db, &site.id)
+        .await
+        .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+    let (name, filters) = segment.map(|s| (s.name, s.filters)).unwrap_or_default();
+    let d = data(
+        state,
+        week_period(monday, &site.timezone),
+        &site.id,
+        filters,
+    )
+    .await?;
+    let mut view = build(
         &site.domain,
         monday,
         &d,
@@ -959,7 +975,9 @@ pub(crate) async fn view(
             editable: editable && agency,
             personal: !agency,
         },
-    ))
+    );
+    view.segment = name;
+    Ok(view)
 }
 
 #[derive(Deserialize, Default)]
@@ -1000,6 +1018,8 @@ struct ReportPage {
     alert: &'static str,
     branded: bool,
     agency: bool,
+    /// "All visitors" then each saved segment, on for the one the report shows.
+    segments: Vec<Opt>,
 }
 
 #[derive(Template)]
@@ -1062,12 +1082,37 @@ pub async fn page(
     let Ok((sched, _)) = schedule::load(&state.db, &ctx.site.id).await else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
+    let saved = match super::segments::list(&state.db, &ctx.site.id).await {
+        Ok(s) => s,
+        Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
+    };
+    let mut segments: Vec<Opt> = Vec::new();
+    if !saved.is_empty() {
+        segments.push(Opt {
+            label: "All visitors".into(),
+            href: String::new(),
+            on: report.segment.is_empty(),
+            count: String::new(),
+        });
+    }
+    let current = super::segments::of_report(&state.db, &ctx.site.id)
+        .await
+        .ok()
+        .flatten()
+        .map(|s| s.id);
+    segments.extend(saved.into_iter().map(|s| Opt {
+        on: current.as_deref() == Some(s.id.as_str()),
+        label: s.name,
+        href: s.id,
+        count: String::new(),
+    }));
     let base = sites::app_path(&ctx.site.domain, "report");
     let notice = match (q.sent, q.saved.as_deref()) {
         (Some(1), _) => "Sent the report to 1 person.".into(),
         (Some(n), _) => format!("Sent the report to {n} people."),
         (_, Some("note")) => "Saved your note.".into(),
         (_, Some("schedule")) => "Saved the schedule.".into(),
+        (_, Some("segment")) => "The report now shows the picked segment.".into(),
         _ => String::new(),
     };
     render(ReportPage {
@@ -1083,6 +1128,7 @@ pub async fn page(
         notice,
         branded: !report.agency.is_empty() || !report.logo.is_empty(),
         agency: ctx.shell.agency,
+        segments,
         domain: ctx.site.domain.clone(),
         weeks: week_opts(ctx.today, monday, &base),
         week: week_short(monday),
@@ -1240,6 +1286,40 @@ pub async fn save_schedule(
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     }
     back(&ctx.site.domain, &week, "saved=schedule").into_response()
+}
+
+#[derive(Deserialize)]
+pub struct SegmentInput {
+    segment: String,
+    week: Option<String>,
+}
+
+/// Limits the report, the shared link and the weekly email to a saved segment, or none.
+pub async fn save_segment(
+    State(state): State<AppState>,
+    account: Account,
+    Path(domain): Path<String>,
+    Form(input): Form<SegmentInput>,
+) -> Response {
+    let ctx = match load(&state, &account, &domain, "report").await {
+        Ok(ctx) => ctx,
+        Err(code) => return code.into_response(),
+    };
+    let week = week_param(input.week.as_deref());
+    let res = sqlx::query(
+        "INSERT INTO report_brands (site_id, segment_id)
+         SELECT ?1, (SELECT id FROM segments WHERE id = ?2 AND site_id = ?1)
+         ON CONFLICT(site_id) DO UPDATE SET segment_id = excluded.segment_id",
+    )
+    .bind(&ctx.site.id)
+    .bind(&input.segment)
+    .execute(&state.db)
+    .await;
+    if let Err(err) = res {
+        tracing::error!(%err, "saving the report segment failed");
+        return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    back(&ctx.site.domain, &week, "saved=segment").into_response()
 }
 
 #[derive(Deserialize)]

@@ -32,6 +32,7 @@ mod insight;
 mod path;
 pub mod report;
 pub mod schedule;
+pub mod segments;
 mod views;
 
 pub(crate) use daterange::{Picked, RangeMenu};
