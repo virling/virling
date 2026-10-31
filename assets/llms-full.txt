@@ -14,7 +14,7 @@ Releases are published on GitHub and run on your own server today. Hosted plans 
 
 ## Who it is for
 
-- Indie founders and small SaaS teams who take payments through Stripe, Paddle, Shopify, WooCommerce, Dodo Payments, Polar or LemonSqueezy (Lemon Squeezy) and want to know which marketing channel actually pays.
+- Indie founders and small SaaS teams who take payments through Stripe, Paddle, Shopify, WooCommerce, Dodo Payments, Polar, LemonSqueezy (Lemon Squeezy), Creem or RevenueCat and want to know which marketing channel actually pays.
 - Teams that want revenue analytics on their own server, with their data next to the binary.
 - Agencies that report to clients and want each client to see revenue by channel every week.
 
