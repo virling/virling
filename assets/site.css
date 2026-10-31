@@ -87,9 +87,13 @@ h3 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.025em; }
 .hero { padding: 56px 0 0; }
 .hero .wrap { display: flex; flex-direction: column; gap: 22px; }
 .hero .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 56px; align-items: start; padding-bottom: 88px; }
-.hero-copy { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.hero-copy { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 .hero-copy h1 { font-size: 56px; }
 .stack { display: flex; flex-direction: column; gap: 8px; }
+.works { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; }
+.works-logos { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; }
+.works-logos img { height: 22px; width: auto; filter: grayscale(1); opacity: .55; transition: filter .15s, opacity .15s; }
+.works-logos img:hover { filter: none; opacity: 1; }
 .art-below { margin-top: 40px; padding: 0 32px 56px; border-bottom: 1px solid var(--rule-2); }
 .art-below img { display: block; width: 100%; max-width: 960px; height: auto; margin: 0 auto; }
 
