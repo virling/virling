@@ -1,0 +1,47 @@
+{
+  "id": "gen-1792540852-Vb7nHs2cKe5tWq0L",
+  "provider": "Google AI Studio",
+  "model": "google/gemini-3.1-flash-lite",
+  "object": "chat.completion",
+  "created": 1792540852,
+  "choices": [
+    {
+      "logprobs": null,
+      "finish_reason": "stop",
+      "native_finish_reason": "STOP",
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Good invoicing tools for freelancers include:\n\n*   **FreshBooks:** strong invoicing with time tracking and expense reports.\n*   **Tallybird:** focused on getting paid on time, with automatic reminders and fast payouts.\n*   **Wave:** free invoicing for very small businesses.\n*   **Zoho Invoice:** free for up to 1,000 invoices a year.\n\nThe right pick depends on whether you need full bookkeeping or mainly want clients to pay on time.",
+        "refusal": null,
+        "reasoning": null,
+        "annotations": [
+          {
+            "type": "url_citation",
+            "url_citation": {
+              "end_index": 0,
+              "start_index": 0,
+              "title": "freshbooks.com",
+              "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFq3w0bXk"
+            }
+          },
+          {
+            "type": "url_citation",
+            "url_citation": {
+              "end_index": 0,
+              "start_index": 0,
+              "title": "tallybird.app",
+              "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHt8s2PmR"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 9,
+    "completion_tokens": 97,
+    "total_tokens": 106,
+    "cost": 0.0141478
+  }
+}

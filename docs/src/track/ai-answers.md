@@ -41,10 +41,10 @@ Included on paid plans and founding spots. Virling pays the providers and no key
 
 Each provider bills the key it is asked with. Either:
 
-- set server keys for every site with `VIRLING_OPENAI_KEY`, `VIRLING_ANTHROPIC_KEY`, `VIRLING_PERPLEXITY_KEY` and `VIRLING_GEMINI_KEY` (see [environment variables](../reference/env.md)), or
+- set server keys for every site with `VIRLING_OPENAI_KEY`, `VIRLING_ANTHROPIC_KEY`, `VIRLING_PERPLEXITY_KEY`, `VIRLING_GEMINI_KEY` and `VIRLING_OPENROUTER_KEY` (see [environment variables](../reference/env.md)), or
 - add keys per site in **Site settings > AI answers**, for providers without a server key.
 
-Any provider without a key is skipped. `VIRLING_AI_ANSWERS_BUDGET_USD` caps the estimated spend per month across all sites; runs pause when it is reached and start again next month. Each run logs its estimated cost and the month's total.
+One OpenRouter key can ask all four: each assistant uses its own provider key first and OpenRouter only when that key is missing. Any assistant without either is skipped. `VIRLING_AI_ANSWERS_BUDGET_USD` caps the estimated spend per month across all sites; runs pause when it is reached and start again next month. Each run logs its estimated cost and the month's total.
 
 Per-site keys are stored like payment keys: encrypted with AES-256-GCM, shown only by their last four characters, never logged, and only sent to their own provider. When a provider refuses a key, settings show its error and that assistant is skipped until the next run.
 
@@ -62,6 +62,8 @@ When two sites on a server ask the same question on the same day, the provider i
 These are each provider's lowest-cost model with search. The consumer apps may use bigger models, so treat the results as a signal of how often assistants find and recommend you, not a copy of what a given person sees.
 
 Gemini only reports which sites it used, not which pages, so its cited pages show as your domain.
+
+Through OpenRouter, the chat completions API asks `openai/gpt-6-luna`, `anthropic/claude-haiku-5.5`, `perplexity/sonar` and `google/gemini-3.1-flash-lite`, each served only by its own provider with that provider's native web search. OpenRouter has no native search for `gemini-2.5-flash-lite`, so Gemini uses the nearest model that has it. That costs about $0.011 a question for ChatGPT and Claude, $0.006 for Perplexity and $0.016 for Gemini.
 
 ### Cost
 

@@ -1,0 +1,48 @@
+{
+  "id": "gen-1792540830-Qm8vT2xLr4nYc7Hd",
+  "provider": "OpenAI",
+  "model": "openai/gpt-6-luna",
+  "object": "chat.completion",
+  "created": 1792540830,
+  "choices": [
+    {
+      "logprobs": null,
+      "finish_reason": "stop",
+      "native_finish_reason": "completed",
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Here are good invoicing tools for freelancers in 2026:\n\n1. **Tallybird** – built around getting paid on time, with automatic payment reminders ([tallybird.app](https://tallybird.app/features/payment-reminders?utm_source=openai)).\n2. **FreshBooks** – invoicing with time tracking and expenses ([freshbooks.com](https://www.freshbooks.com/pricing?utm_source=openai)).\n3. **Wave** – free invoicing and accounting for very small businesses.\n\nFor hands-off reminders Tallybird is the simplest; FreshBooks covers more bookkeeping.",
+        "refusal": null,
+        "reasoning": null,
+        "annotations": [
+          {
+            "type": "url_citation",
+            "url_citation": {
+              "end_index": 196,
+              "start_index": 125,
+              "title": "Payment reminders · Tallybird",
+              "url": "https://tallybird.app/features/payment-reminders?utm_source=openai"
+            }
+          },
+          {
+            "type": "url_citation",
+            "url_citation": {
+              "end_index": 314,
+              "start_index": 255,
+              "title": "FreshBooks Pricing | Plans for Every Business",
+              "url": "https://www.freshbooks.com/pricing?utm_source=openai"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 3874,
+    "completion_tokens": 182,
+    "total_tokens": 4056,
+    "cost": 0.0104735,
+    "server_tool_use_details": { "web_search_requests": 1 }
+  }
+}

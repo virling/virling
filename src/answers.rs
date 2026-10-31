@@ -26,6 +26,9 @@ pub const DEFAULT_QUESTIONS: usize = 8;
 pub const MAX_QUESTIONS: usize = 20;
 /// Characters of each answer kept for the drill-down.
 const KEEP_CHARS: usize = 4000;
+/// Provider of an OpenRouter key, which asks for every assistant without its own key.
+pub const ROUTER: &str = "openrouter";
+pub const ROUTER_BASE: &str = "https://openrouter.ai/api";
 
 /// Sites with a run in progress.
 static RUNNING: Mutex<Option<HashSet<String>>> = Mutex::new(None);
@@ -116,6 +119,52 @@ impl Assistant {
         }
     }
 
+    /// OpenRouter's id for the model, or the nearest one that has the provider's own web search there.
+    pub fn router_model(self) -> &'static str {
+        match self {
+            Assistant::ChatGpt => "openai/gpt-6-luna",
+            Assistant::Claude => "anthropic/claude-haiku-5.5",
+            Assistant::Perplexity => "perplexity/sonar",
+            Assistant::Gemini => "google/gemini-3.1-flash-lite",
+        }
+    }
+
+    /// Estimated USD per question through OpenRouter, from its list prices.
+    pub fn router_cost(self) -> f64 {
+        match self {
+            Assistant::ChatGpt | Assistant::Claude => 0.011,
+            Assistant::Perplexity => 0.006,
+            Assistant::Gemini => 0.016,
+        }
+    }
+
+    /// An OpenRouter chat completion with the provider's own web search, served only by that provider.
+    fn router_body(self, question: &str) -> Value {
+        let (provider, reasoning) = match self {
+            Assistant::ChatGpt => ("openai", json!({ "effort": "none" })),
+            Assistant::Claude => ("anthropic", json!({ "enabled": false })),
+            Assistant::Perplexity => ("perplexity", Value::Null),
+            Assistant::Gemini => ("google-ai-studio", Value::Null),
+        };
+        let mut body = json!({
+            "model": self.router_model(),
+            "max_tokens": 1200,
+            "messages": [{ "role": "user", "content": question }],
+            "provider": { "only": [provider] },
+        });
+        if !reasoning.is_null() {
+            body["reasoning"] = reasoning;
+        }
+        // Perplexity models always search; the tool would add a second search that is not theirs.
+        if self != Assistant::Perplexity {
+            body["tools"] = json!([{
+                "type": "openrouter:web_search",
+                "parameters": { "engine": "native", "max_uses": 1 },
+            }]);
+        }
+        body
+    }
+
     pub fn placeholder(self) -> &'static str {
         match self {
             Assistant::ChatGpt => "sk-proj-...",
@@ -150,8 +199,13 @@ impl Assistant {
         base: &str,
         key: &str,
         question: &str,
+        router: bool,
     ) -> anyhow::Result<Reply> {
         let req = match self {
+            _ if router => http
+                .post(format!("{base}/v1/chat/completions"))
+                .bearer_auth(key)
+                .json(&self.router_body(question)),
             Assistant::ChatGpt => http
                 .post(format!("{base}/v1/responses"))
                 .bearer_auth(key)
@@ -196,10 +250,21 @@ impl Assistant {
             let msg = body["error"]["message"]
                 .as_str()
                 .map(str::to_string)
-                .unwrap_or_else(|| format!("{} answered HTTP {status}", self.provider_name()));
+                .unwrap_or_else(|| {
+                    let name = if router {
+                        "OpenRouter"
+                    } else {
+                        self.provider_name()
+                    };
+                    format!("{name} answered HTTP {status}")
+                });
             anyhow::bail!(msg.replace(key, "[key]"));
         }
-        Ok(self.reply(&body))
+        Ok(if router {
+            Reply::router(&body)
+        } else {
+            self.reply(&body)
+        })
     }
 
     /// The answer text and every URL or site the provider says it used.
@@ -259,6 +324,30 @@ pub struct Reply {
 }
 
 impl Reply {
+    /// An OpenRouter chat completion: the message, its url_citation annotations and Perplexity's citations.
+    pub fn router(v: &Value) -> Self {
+        let mut r = Reply::default();
+        let list = |v: &Value| v.as_array().cloned().unwrap_or_default();
+        let m = &v["choices"][0]["message"];
+        r.text = m["content"].as_str().unwrap_or_default().to_string();
+        for a in list(&m["annotations"]) {
+            let c = &a["url_citation"];
+            // Gemini cites through Google redirects; the title is the cited site.
+            if c["url"]
+                .as_str()
+                .is_some_and(|u| u.contains("vertexaisearch.cloud.google.com"))
+            {
+                r.push(&c["title"]);
+            } else {
+                r.push(&c["url"]);
+            }
+        }
+        for c in list(&v["citations"]) {
+            r.push(&c);
+        }
+        r
+    }
+
     fn push(&mut self, v: &Value) {
         if let Some(u) = v.as_str().filter(|u| !u.is_empty())
             && !self.urls.iter().any(|x| x == u)
@@ -441,9 +530,9 @@ pub fn clean_questions(input: &str) -> Vec<String> {
     out
 }
 
-/// USD for asking `questions` to each of `assistants` once.
-pub fn run_cost(questions: usize, assistants: &[Assistant]) -> f64 {
-    questions as f64 * assistants.iter().map(|a| a.cost()).sum::<f64>()
+/// USD for asking `questions` once to each assistant, given each one's cost per question.
+pub fn run_cost(questions: usize, costs: &[f64]) -> f64 {
+    questions as f64 * costs.iter().sum::<f64>()
 }
 
 /// Weekly runs in an average month.
@@ -655,32 +744,42 @@ fn today() -> i64 {
     OffsetDateTime::now_utc().unix_timestamp().div_euclid(86400)
 }
 
-/// Server-wide assistant keys from the environment; Debug only says which are set.
+/// Server-wide assistant keys and OpenRouter key from the environment; Debug only says which are set.
 #[derive(Clone, Default)]
-pub struct ServerKeys(pub [Option<String>; 4]);
+pub struct ServerKeys(pub [Option<String>; 4], pub Option<String>);
 
 impl ServerKeys {
     pub fn get(&self, a: Assistant) -> Option<&str> {
         let i = Assistant::ALL.iter().position(|x| *x == a)?;
         self.0[i].as_deref().filter(|k| !k.is_empty())
     }
+
+    pub fn router(&self) -> Option<&str> {
+        self.1.as_deref().filter(|k| !k.is_empty())
+    }
 }
 
 impl std::fmt::Debug for ServerKeys {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let set: Vec<&str> = Assistant::ALL
+        let mut set: Vec<&str> = Assistant::ALL
             .iter()
             .filter(|a| self.get(**a).is_some())
             .map(|a| a.as_str())
             .collect();
+        if self.router().is_some() {
+            set.push(ROUTER);
+        }
         write!(f, "ServerKeys([{}])", set.join(", "))
     }
 }
 
 type KeyRow = (String, Vec<u8>, Vec<u8>);
 
-/// The key each assistant asks with: the server's, else the site's own on a self-hosted server.
-async fn keys_for(state: &AppState, site_id: &str) -> anyhow::Result<Vec<(Assistant, String)>> {
+/// The key each assistant asks with: the server's, else the site's own on a self-hosted server, else an OpenRouter key, flagged true.
+async fn keys_for(
+    state: &AppState,
+    site_id: &str,
+) -> anyhow::Result<Vec<(Assistant, String, bool)>> {
     let rows: Vec<KeyRow> = if state.config.hosted {
         Vec::new()
     } else {
@@ -689,12 +788,22 @@ async fn keys_for(state: &AppState, site_id: &str) -> anyhow::Result<Vec<(Assist
             .fetch_all(&state.db)
             .await?
     };
+    let router = match state.config.ai_keys.router() {
+        Some(k) => Some(k.to_string()),
+        None => rows
+            .iter()
+            .find(|r| r.0 == ROUTER)
+            .map(|r| state.vault.decrypt(&r.1, &r.2))
+            .transpose()?,
+    };
     let mut out = Vec::new();
     for a in Assistant::ALL {
         if let Some(k) = state.config.ai_keys.get(a) {
-            out.push((a, k.to_string()));
+            out.push((a, k.to_string(), false));
         } else if let Some(r) = rows.iter().find(|r| r.0 == a.as_str()) {
-            out.push((a, state.vault.decrypt(&r.1, &r.2)?));
+            out.push((a, state.vault.decrypt(&r.1, &r.2)?, false));
+        } else if let Some(k) = &router {
+            out.push((a, k.clone(), true));
         }
     }
     Ok(out)
@@ -729,7 +838,11 @@ pub async fn usable(state: &AppState, site_id: &str) -> sqlx::Result<Vec<Assista
     };
     Ok(Assistant::ALL
         .into_iter()
-        .filter(|a| state.config.ai_keys.get(*a).is_some() || own.iter().any(|o| o == a.as_str()))
+        .filter(|a| {
+            state.config.ai_keys.get(*a).is_some()
+                || state.config.ai_keys.router().is_some()
+                || own.iter().any(|o| o == a.as_str() || o == ROUTER)
+        })
         .collect())
 }
 
@@ -809,7 +922,10 @@ async fn run_due(state: &AppState) -> anyhow::Result<()> {
     .await?;
     for site in due {
         if !usable(state, &site).await?.is_empty() && claim(&state.db, &site, false).await? {
-            run_site(state, &site, &|a| a.base().to_string()).await;
+            run_site(state, &site, &|a| {
+                a.map_or(ROUTER_BASE, Assistant::base).to_string()
+            })
+            .await;
         }
     }
     Ok(())
@@ -860,11 +976,11 @@ async fn add_spend(db: &SqlitePool, usd: f64) -> sqlx::Result<()> {
     Ok(())
 }
 
-/// Asks each question to each assistant with a key and stores the answers; a failing key stops at its first error.
+/// Asks each question to each assistant with a key and stores the answers; a failing key stops at its first error; `base` is OpenRouter's for None.
 pub async fn run_site(
     state: &AppState,
     site_id: &str,
-    base: &(dyn Fn(Assistant) -> String + Sync),
+    base: &(dyn Fn(Option<Assistant>) -> String + Sync),
 ) {
     if !RUNNING
         .lock()
@@ -901,7 +1017,7 @@ async fn cached(db: &SqlitePool, day: i64, a: Assistant, q: &str) -> sqlx::Resul
 async fn ask_all(
     state: &AppState,
     site_id: &str,
-    base: &(dyn Fn(Assistant) -> String + Sync),
+    base: &(dyn Fn(Option<Assistant>) -> String + Sync),
 ) -> anyhow::Result<()> {
     let (questions, saved, domain): (String, String, String) = sqlx::query_as(
         "SELECT a.questions, a.names, s.domain FROM ai_settings a JOIN sites s ON s.id = a.site_id WHERE a.site_id = ?",
@@ -912,7 +1028,10 @@ async fn ask_all(
     let names = names(&saved, &domain);
     let day = today();
     let (mut asked, mut reused, mut cost) = (0, 0, 0.0);
-    'keys: for (a, key) in keys_for(state, site_id).await? {
+    let mut routed: Option<Option<String>> = None;
+    'keys: for (a, key, router) in keys_for(state, site_id).await? {
+        let price = if router { a.router_cost() } else { a.cost() };
+        let url = base((!router).then_some(a));
         let mut error = None;
         for q in clean_questions(&questions) {
             let reply = match cached(&state.db, day, a, &q).await? {
@@ -922,16 +1041,16 @@ async fn ask_all(
                 }
                 None => {
                     if let Some(budget) = state.config.ai_budget_usd
-                        && spent(&state.db).await? + a.cost() > budget
+                        && spent(&state.db).await? + price > budget
                     {
                         tracing::warn!(budget, "AI answers paused: this month's budget is used");
                         break 'keys;
                     }
-                    match a.ask(&state.http, &base(a), &key, &q).await {
+                    match a.ask(&state.http, &url, &key, &q, router).await {
                         Ok(r) => {
                             asked += 1;
-                            cost += a.cost();
-                            add_spend(&state.db, a.cost()).await?;
+                            cost += price;
+                            add_spend(&state.db, price).await?;
                             sqlx::query(
                                 "INSERT OR REPLACE INTO ai_replies (day, provider, question, text, urls) VALUES (?, ?, ?, ?, ?)",
                             )
@@ -956,10 +1075,22 @@ async fn ask_all(
             let mut conn = state.db.acquire().await?;
             save(&mut conn, site_id, day, a, &q, &found, &reply.text).await?;
         }
+        if router {
+            routed = Some(routed.flatten().or(error));
+            continue;
+        }
         sqlx::query("UPDATE ai_keys SET last_error = ? WHERE site_id = ? AND provider = ?")
             .bind(error)
             .bind(site_id)
             .bind(a.as_str())
+            .execute(&state.db)
+            .await?;
+    }
+    if let Some(error) = routed {
+        sqlx::query("UPDATE ai_keys SET last_error = ? WHERE site_id = ? AND provider = ?")
+            .bind(error)
+            .bind(site_id)
+            .bind(ROUTER)
             .execute(&state.db)
             .await?;
     }
@@ -1030,7 +1161,7 @@ pub async fn save(
 pub async fn save_key(
     state: &AppState,
     site_id: &str,
-    a: Assistant,
+    provider: &str,
     key: &str,
 ) -> anyhow::Result<()> {
     let (ciphertext, nonce) = state.vault.encrypt(key)?;
@@ -1040,7 +1171,7 @@ pub async fn save_key(
            key_nonce = excluded.key_nonce, last_error = NULL",
     )
     .bind(site_id)
-    .bind(a.as_str())
+    .bind(provider)
     .bind(ciphertext)
     .bind(nonce)
     .bind(OffsetDateTime::now_utc().unix_timestamp())
@@ -1272,6 +1403,24 @@ mod tests {
     }
 
     #[test]
+    fn openrouter_answers_are_read() {
+        let read = |file: &str| {
+            let reply = Reply::router(&fixture(file));
+            assert!(reply.text.len() > 100, "{file} has text");
+            analyze(&reply, &names("", DOMAIN), DOMAIN)
+        };
+        let f = read("openrouter-chatgpt");
+        assert_eq!((f.mentioned, f.position), (true, Some(1)));
+        assert_eq!(f.cited, ["/features/payment-reminders"]);
+        let f = read("openrouter-sonar");
+        assert!(!f.mentioned);
+        assert_eq!(f.cited, ["/compare"]);
+        let f = read("openrouter-gemini");
+        assert_eq!((f.mentioned, f.position), (true, Some(2)));
+        assert_eq!(f.cited, ["tallybird.app"], "Gemini redirects give the site");
+    }
+
+    #[test]
     fn mentions_are_whole_words() {
         let r = |t: &str| Reply {
             text: t.into(),
@@ -1327,10 +1476,13 @@ mod tests {
         assert_eq!(q, ["a", "b"]);
         let many: String = (0..30).map(|i| format!("q{i}\n")).collect();
         assert_eq!(clean_questions(&many).len(), MAX_QUESTIONS);
-        let cost = run_cost(8, &Assistant::ALL);
+        let cost = run_cost(8, &Assistant::ALL.map(Assistant::cost));
         assert!((cost - 0.1936).abs() < 1e-9, "{cost}");
-        let keys = ServerKeys([Some("sk-secret".into()), None, Some(String::new()), None]);
-        assert_eq!(format!("{keys:?}"), "ServerKeys([openai])");
+        let keys = ServerKeys(
+            [Some("sk-secret".into()), None, Some(String::new()), None],
+            Some("sk-or-secret".into()),
+        );
+        assert_eq!(format!("{keys:?}"), "ServerKeys([openai, openrouter])");
         assert_eq!(keys.get(Assistant::Perplexity), None);
     }
 
@@ -1378,6 +1530,121 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn an_openrouter_key_asks_for_assistants_without_their_own() {
+        use axum::http::{HeaderMap, StatusCode};
+        let f = crate::api::tests::fixture().await;
+        let (state, db) = (&f.state, &f.state.db);
+        let site: String = sqlx::query_scalar("SELECT id FROM sites WHERE domain = 'example.com'")
+            .fetch_one(db)
+            .await
+            .unwrap();
+        let questions: Vec<String> = (1..=5).map(|i| format!("Router {i}?")).collect();
+        save_settings(db, &site, &questions, "Tallybird")
+            .await
+            .unwrap();
+        save_key(state, &site, ROUTER, "sk-or-test").await.unwrap();
+        assert_eq!(usable(state, &site).await.unwrap(), Assistant::ALL);
+        let with_claude = AppState {
+            config: std::sync::Arc::new(crate::app::Config {
+                ai_keys: ServerKeys([None, Some("sk-ant-test".into()), None, None], None),
+                ..(*state.config).clone()
+            }),
+            ..state.clone()
+        };
+        let routes: Vec<(Assistant, String, bool)> = keys_for(&with_claude, &site).await.unwrap();
+        assert_eq!(
+            routes.iter().map(|k| (k.0, k.2)).collect::<Vec<_>>(),
+            [
+                (Assistant::ChatGpt, true),
+                (Assistant::Claude, false),
+                (Assistant::Perplexity, true),
+                (Assistant::Gemini, true)
+            ],
+            "a provider's own key comes first"
+        );
+        assert_eq!(routes[1].1, "sk-ant-test");
+        assert_eq!(routes[0].1, "sk-or-test");
+
+        let bodies = std::sync::Arc::new(Mutex::new(Vec::<Value>::new()));
+        let seen = bodies.clone();
+        let app = axum::Router::new().route(
+            "/v1/chat/completions",
+            axum::routing::post(move |h: HeaderMap, axum::Json(body): axum::Json<Value>| {
+                let seen = seen.clone();
+                async move {
+                    let auth = h["authorization"].to_str().unwrap_or_default().to_string();
+                    let model = body["model"].as_str().unwrap_or_default().to_string();
+                    seen.lock().unwrap().push(body);
+                    if auth != "Bearer sk-or-test" {
+                        let msg = format!("No auth credentials found for {auth}");
+                        return (
+                            StatusCode::UNAUTHORIZED,
+                            axum::Json(json!({ "error": { "code": 401, "message": msg } })),
+                        );
+                    }
+                    let file = match model.split('/').next() {
+                        Some("perplexity") => "openrouter-sonar",
+                        Some("google") => "openrouter-gemini",
+                        _ => "openrouter-chatgpt",
+                    };
+                    (StatusCode::OK, axum::Json(fixture(file)))
+                }
+            }),
+        );
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let base = format!("http://{}", listener.local_addr().unwrap());
+        tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+
+        run_site(state, &site, &|a| {
+            assert_eq!(a, None, "every assistant goes through OpenRouter");
+            base.clone()
+        })
+        .await;
+        let sent: Vec<Value> = std::mem::take(&mut *bodies.lock().unwrap());
+        assert_eq!(sent.len(), 20);
+        for a in Assistant::ALL {
+            let b = sent
+                .iter()
+                .find(|b| b["model"] == a.router_model())
+                .unwrap();
+            assert_eq!(b["provider"]["only"].as_array().unwrap().len(), 1);
+            if a == Assistant::Perplexity {
+                assert!(b["tools"].is_null(), "Perplexity searches by itself");
+            } else {
+                assert_eq!(b["tools"][0]["type"], "openrouter:web_search");
+                assert_eq!(b["tools"][0]["parameters"]["engine"], "native");
+            }
+        }
+        let today = today();
+        let t = tallies(db, &site, today, today).await.unwrap();
+        assert_eq!(t.len(), 4);
+        assert!(t.iter().all(|r| r.1.answers == 5));
+        let spent_once = spent(db).await.unwrap();
+        assert!((spent_once - 0.22).abs() < 1e-9, "{spent_once}");
+
+        save_key(state, &site, ROUTER, "sk-or-wrong").await.unwrap();
+        let fresh: Vec<String> = (1..=5).map(|i| format!("Wrong {i}?")).collect();
+        save_settings(db, &site, &fresh, "").await.unwrap();
+        run_site(state, &site, &|_| base.clone()).await;
+        assert_eq!(
+            bodies.lock().unwrap().len(),
+            4,
+            "each assistant stops at once"
+        );
+        let error: Option<String> =
+            sqlx::query_scalar("SELECT last_error FROM ai_keys WHERE provider = ?")
+                .bind(ROUTER)
+                .fetch_one(db)
+                .await
+                .unwrap();
+        assert_eq!(
+            error.as_deref(),
+            Some("No auth credentials found for Bearer [key]")
+        );
+        assert_eq!(spent(db).await.unwrap(), spent_once);
+    }
+
+    #[tokio::test]
     async fn the_daily_run_stores_answers_from_every_keyed_assistant() {
         let f = crate::api::tests::fixture().await;
         let (state, db) = (&f.state, &f.state.db);
@@ -1395,7 +1662,7 @@ mod tests {
             (Assistant::Perplexity, "pplx-wrong"),
             (Assistant::Gemini, "AIza-test"),
         ] {
-            save_key(state, &site, a, key).await.unwrap();
+            save_key(state, &site, a.as_str(), key).await.unwrap();
         }
         let stored: Vec<u8> =
             sqlx::query_scalar("SELECT key_ciphertext FROM ai_keys WHERE provider = 'openai'")
@@ -1489,7 +1756,7 @@ mod tests {
         let hosted = AppState {
             config: std::sync::Arc::new(crate::app::Config {
                 hosted: true,
-                ai_keys: ServerKeys([Some("sk-test-openai".into()), None, None, None]),
+                ai_keys: ServerKeys([Some("sk-test-openai".into()), None, None, None], None),
                 ai_budget_usd: Some(spent_once + 0.025),
                 billing: None,
                 self_track_site: None,
