@@ -1,30 +1,39 @@
 {% extends "app.html" %}
 {% block content %}
-<section class="box help-box">
-  <h2>Find an answer</h2>
-  <ul class="help-links">
-    <li><a href="https://docs.virling.com/troubleshooting" target="_blank" rel="noopener">Troubleshooting</a><span class="dim">Unattributed payments, checkout not linked, script not detected, event limits.</span></li>
-    <li><a href="https://docs.virling.com/quickstart" target="_blank" rel="noopener">Setup guide</a><span class="dim">Add the script, connect payments and link checkout.</span></li>
-    <li><a href="https://docs.virling.com/faq" target="_blank" rel="noopener">FAQ</a><span class="dim">Attribution, cookies, privacy and plans.</span></li>
-    <li><a href="https://virling.com/changelog" target="_blank" rel="noopener">Changelog</a><span class="dim">What changed and when.</span></li>
-  </ul>
+<div class="settings">
+{% if sent %}<div class="notice ok-note" role="status">Thanks, your message is sent. We reply within one business day, by email.</div>{% endif %}
+<section class="set-sec">
+<div class="set-intro"><h2>Find an answer</h2><p class="muted">Most setup questions are answered in the docs.</p></div>
+<div class="card help-links">
+  <a class="setting" href="https://docs.virling.com/troubleshooting" target="_blank" rel="noopener"><div><b>Troubleshooting</b><span class="muted">Unattributed payments, checkout not linked, no visitors, event limits.</span></div><span class="help-go" aria-hidden="true">&rarr;</span></a>
+  <a class="setting" href="https://docs.virling.com/quickstart" target="_blank" rel="noopener"><div><b>Setup guide</b><span class="muted">Add the script, connect payments and link checkout.</span></div><span class="help-go" aria-hidden="true">&rarr;</span></a>
+  <a class="setting" href="https://docs.virling.com/faq" target="_blank" rel="noopener"><div><b>FAQ</b><span class="muted">Attribution, cookies, privacy and plans.</span></div><span class="help-go" aria-hidden="true">&rarr;</span></a>
+  <a class="setting" href="https://virling.com/changelog" target="_blank" rel="noopener"><div><b>Changelog</b><span class="muted">What changed and when.</span></div><span class="help-go" aria-hidden="true">&rarr;</span></a>
+</div>
 </section>
 {% if hosted %}
-<section class="box help-box">
-  <h2>Contact support</h2>
-  {% if sent %}<div class="notice" role="status">Thanks, your message is sent. We reply within one business day, by email.</div>{% endif %}
+<section class="set-sec" id="contact">
+<div class="set-intro"><h2>Contact support</h2><p class="muted">We reply within one business day from {{ support }}. Your account, plan and site are added for you.</p></div>
+<form class="card" method="post" action="/app/{{ shell.domain }}/help">
   {% if !error.is_empty() %}<div class="notice" role="alert">{{ error }}</div>{% endif %}
-  <p class="dim">We reply within one business day from {{ support }}. Your account, plan and site are added to the message so you don't have to explain them.</p>
-  <form method="post" action="/app/{{ shell.domain }}/help" class="help-form">
-    <label>Topic<select class="input" name="topic">{% for t in topics %}<option value="{{ t }}">{{ t }}</option>{% endfor %}</select></label>
-    <label>Message<textarea class="input set-area" name="message" rows="6" maxlength="5000" required placeholder="What happened, and what did you expect?"></textarea></label>
-    <button class="btn" type="submit">Send message</button>
-  </form>
+  <div class="setting">
+    <div><b>Topic</b><span class="muted">So the right person answers.</span></div>
+    <select class="input" name="topic" aria-label="Topic">{% for t in topics %}<option value="{{ t }}">{{ t }}</option>{% endfor %}</select>
+  </div>
+  <div class="setting stacked">
+    <div><b>Message</b><span class="muted">What happened, what you expected, and the page or payment if there is one.</span></div>
+    <textarea class="input set-area help-msg" name="message" rows="6" maxlength="5000" required aria-label="Message"></textarea>
+  </div>
+  <div class="actions end"><button class="btn" type="submit">Send message</button></div>
+</form>
 </section>
 {% else %}
-<section class="box help-box">
-  <h2>Report a problem</h2>
-  <p class="dim">Self-hosted Virling is supported in the open. Search or open an issue on <a href="https://github.com/virling/virling/issues" target="_blank" rel="noopener">github.com/virling/virling/issues</a>.</p>
+<section class="set-sec">
+<div class="set-intro"><h2>Report a problem</h2><p class="muted">Self-hosted Virling is supported in the open.</p></div>
+<div class="card help-links">
+  <a class="setting" href="https://github.com/virling/virling/issues" target="_blank" rel="noopener"><div><b>GitHub issues</b><span class="muted">Search known problems or open a new issue at github.com/virling/virling/issues.</span></div><span class="help-go" aria-hidden="true">&rarr;</span></a>
+</div>
 </section>
 {% endif %}
+</div>
 {% endblock %}
