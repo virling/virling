@@ -101,10 +101,11 @@ In **Site settings > Telegram alerts**, paste a bot token from @BotFather and yo
 
 ## Share a site
 
-In **Site settings**:
+In **Site settings**, unless noted:
 
 - **Public dashboard** turns on a read-only page anyone can open without signing in, for building in public. It never shows emails or customer IDs. Turn it off and the link stops working at once.
 - **Client link** gives an agency's client a read-only report page, with your name, logo, accent colour and footer. Revoke the link to stop access at once. **Download PDF** saves the same report.
+- **Share card:** on the dashboard's Channels card, **Share card** opens an image of revenue by channel for the range you picked, for posting on social. Pick whether it shows revenue amounts (off by default, so only each channel's share shows), the site name, and a dark look. **Download PNG** saves it. The card is drawn by Virling and holds only channel names, shares and the amounts you chose, never customers or emails.
 - **Weekly email** sends the report every week. Personal emails it to you with Virling branding; Agency adds white-label client reports. Paste a Slack incoming webhook URL under **Change schedule** to also post a short summary (the headline, the week's numbers and the top three sources, with a link to the full report) to a Slack channel at the same time; Slack alone also works. The webhook URL is stored encrypted.
 
 ## Account settings

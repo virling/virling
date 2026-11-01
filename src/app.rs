@@ -272,6 +272,11 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/clients",
                 get(crate::dashboard::clients::page),
             )
+            .route("/app/{domain}/share-card", get(crate::share_card::page))
+            .route(
+                "/app/{domain}/share-card.svg",
+                get(crate::share_card::image),
+            )
             .route(
                 "/app/{domain}/launches",
                 get(crate::launches::page).post(crate::launches::create),

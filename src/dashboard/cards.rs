@@ -262,6 +262,8 @@ pub struct Panel {
     pub(super) foot: String,
     /// Where the "Tracked link" form posts; empty on tabs without one.
     pub(super) new_link: String,
+    /// The share card page for this range; empty off the Channel tab and on public dashboards.
+    pub(super) share: String,
     /// Title and text shown when the panel has no rows.
     pub(super) empty: (&'static str, &'static str),
     /// Draws the Hour tab's grid in place of rows.
@@ -881,6 +883,7 @@ fn panel(
             openable: false,
             foot: tab.foot().into(),
             new_link: String::new(),
+            share: String::new(),
             empty,
             grid: any.then(|| heat(&visitors, &revenue, base)),
         };
@@ -972,6 +975,7 @@ fn panel(
         rows,
         foot,
         new_link: String::new(),
+        share: String::new(),
         empty,
         grid: None,
     }

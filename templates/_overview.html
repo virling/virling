@@ -49,7 +49,7 @@
     {% if !r.kids.is_empty() %}<div class="d3-kids" id="{{ r.id }}" hidden>{% for k in r.kids %}{% call d3::row(k, p.timed) %}{% endcall %}{% endfor %}</div>{% endif %}
     {% endfor %}
     {% endif %}
-    <div class="d3-foot"><span>{{ p.foot }}</span>{% if p.openable %}<button type="button" class="d3-link" data-expand-all>Expand all</button>{% endif %}{% if !p.new_link.is_empty() %}<button type="button" class="d3-link" data-open="new-link">+ Tracked link</button>{% endif %}</div>
+    <div class="d3-foot"><span>{{ p.foot }}</span>{% if p.openable %}<button type="button" class="d3-link" data-expand-all>Expand all</button>{% endif %}{% if !p.share.is_empty() %}<a class="d3-link" href="{{ p.share }}">Share card</a>{% endif %}{% if !p.new_link.is_empty() %}<button type="button" class="d3-link" data-open="new-link">+ Tracked link</button>{% endif %}</div>
     {% if !p.new_link.is_empty() %}
     <dialog class="d3-dlg" id="new-link">
       <form method="post" action="{{ p.new_link }}">

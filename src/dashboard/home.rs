@@ -1458,6 +1458,21 @@ async fn page(
                 q.rest.get("new_link").map(String::as_str),
                 q.rest.get("link_error").map(String::as_str),
             );
+            if public.is_none() {
+                let share = format!(
+                    "{}{}",
+                    crate::sites::app_path(&ctx.site.domain, "share-card"),
+                    page.shell.keep
+                );
+                if let Some(p) = page
+                    .cards
+                    .iter_mut()
+                    .find(|c| c.key == "channels")
+                    .and_then(|c| c.panels.first_mut())
+                {
+                    p.share = share;
+                }
+            }
             let at = |d: Date| d.midnight().assume_offset(ctx.offset).unix_timestamp();
             let bots = joined(bots.await)?;
             let mut ai = cards::ai_card(
