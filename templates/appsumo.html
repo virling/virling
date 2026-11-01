@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+{% include "_head.html" %}
+<meta name="robots" content="noindex, nofollow">
+<title>Redeem your license · Virling</title>
+</head>
+<body class="auth">
+<header class="auth-top">
+  <a class="brand" href="/app">{% include "_logo.html" %}<b>virling</b></a>
+</header>
+<main class="auth-main">
+  <div class="auth-box">
+  {% if view == "done" %}
+    <div class="auth-copy">
+      <h1>Your lifetime plan is active</h1>
+      <p>AppSumo tier {{ tier }}: {{ plan }} features and {{ events }} events a month, paid once. There is no subscription and no card on file.</p>
+    </div>
+    <a class="btn lg block" href="/app">Open Virling</a>
+  {% else if view == "signin" %}
+    <div class="auth-copy">
+      <h1>One step left</h1>
+      <p>Your AppSumo tier {{ tier }} license is confirmed. Sign in, or create your account with the same email link, and the lifetime plan is added when you come back here.</p>
+      <p class="muted">Open the sign-in link in this browser.</p>
+    </div>
+    <a class="btn lg block" href="/login">Continue with email</a>
+  {% else %}
+    <div class="auth-copy">
+      <h1>Redeem your AppSumo license</h1>
+      <p>Activate your license from your AppSumo account. AppSumo sends you back here to finish, and your Virling account gets the lifetime plan.</p>
+    </div>
+    {% if !error.is_empty() %}
+    <div class="alert" role="alert">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--error)" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+      <span>{{ error }}</span>
+    </div>
+    {% endif %}
+    <a class="btn lg block secondary" href="{{ products }}">Open my AppSumo products</a>
+  {% endif %}
+  </div>
+</main>
+</body>
+</html>

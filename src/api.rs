@@ -769,6 +769,7 @@ pub(crate) mod tests {
             turnstile: None,
             billing: None,
             self_track_site: None,
+            appsumo: None,
         };
         let state = AppState::new(
             config,

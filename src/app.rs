@@ -45,6 +45,8 @@ pub struct Config {
     pub turnstile: Option<Turnstile>,
     /// Dodo billing for the hosted plans; None on self-hosted servers.
     pub billing: Option<crate::billing::Dodo>,
+    /// AppSumo lifetime licenses; None unless hosted with the AppSumo keys set.
+    pub appsumo: Option<crate::appsumo::AppSumo>,
     /// Site whose script the sign-in page loads, so visits that start on the app are tracked too.
     pub self_track_site: Option<String>,
 }
@@ -437,6 +439,11 @@ pub fn router(state: AppState) -> Router {
                 post(crate::webhooks::remove),
             );
         app = app.merge(crate::admin::routes());
+        if state.config.appsumo.is_some() {
+            app = app
+                .route(crate::appsumo::PATH, get(crate::appsumo::redeem_page))
+                .route("/api/webhooks/appsumo", post(crate::appsumo::webhook));
+        }
         if oauth::enabled(&state.config) {
             app = app
                 .route(

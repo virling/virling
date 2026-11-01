@@ -815,7 +815,7 @@ pub async fn paid(state: &AppState, site_id: &str) -> sqlx::Result<bool> {
         return Ok(true);
     }
     let paid: Option<bool> = sqlx::query_scalar(
-        "SELECT a.plan IN ('paid', 'founding', 'comped') FROM sites s JOIN accounts a ON a.id = s.account_id WHERE s.id = ?",
+        "SELECT a.plan IN ('paid', 'founding', 'comped', 'lifetime') FROM sites s JOIN accounts a ON a.id = s.account_id WHERE s.id = ?",
     )
     .bind(site_id)
     .fetch_optional(&state.db)
@@ -1760,6 +1760,7 @@ mod tests {
                 ai_budget_usd: Some(spent_once + 0.025),
                 billing: None,
                 self_track_site: None,
+                appsumo: None,
                 ..(*state.config).clone()
             }),
             ..state.clone()

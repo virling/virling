@@ -21,10 +21,15 @@
 </section>
 {% if let Some(b) = billing %}
 <section class="set-sec" id="plan">
-<div class="set-intro"><h2>Plan and billing</h2><p class="muted">Applies to every site on your account. Billed monthly through Dodo Payments.</p></div>
+<div class="set-intro"><h2>Plan and billing</h2><p class="muted">Applies to every site on your account. {% if b.state == "lifetime" %}Paid once on AppSumo, with no subscription.{% else %}Billed monthly through Dodo Payments.{% endif %}</p></div>
 <div class="card">
   {% if !billing_note.is_empty() %}<div class="notice ok-note" role="status">{{ billing_note }}</div>{% endif %}
-  {% if b.state == "none" %}
+  {% if b.state == "lifetime" %}
+  <div class="setting">
+    <div><b>{{ b.headline }}</b><span class="muted">{{ b.detail }}</span></div>
+    <div class="actions"><a class="btn secondary" href="https://appsumo.com/account/products/">{{ b.button }}</a></div>
+  </div>
+  {% else if b.state == "none" %}
   <form method="post" action="/app/{{ shell.domain }}/account/billing">
     <div class="setting">
       <div><b id="plan-label">{{ b.headline }}</b><span class="muted">Personal is $19 a month. Agency is $79 a month with client reports and {{ crate::team::INCLUDED }} users, then {{ crate::team::SEAT_PRICE }} per extra seat.</span></div>
@@ -96,6 +101,8 @@
   </form>
   {% else if team.next == "upgrade" %}
   <div class="setting"><div><b>Invite people</b><span class="muted">Teams are part of the Agency plan.</span></div><a class="btn secondary" href="#plan">Switch to Agency</a></div>
+  {% else if team.next == "capped" && lifetime %}
+  <div class="setting"><div><b>Invite people</b><span class="muted">Your lifetime plan includes {{ crate::team::INCLUDED }} users.</span></div></div>
   {% else if team.next == "capped" %}
   <div class="setting"><div><b>Invite people</b><span class="muted">Teams larger than {{ crate::team::INCLUDED }} use the hosted Agency plan.</span></div><a class="btn secondary" href="https://virling.com/agency">Hosted Agency</a></div>
   {% else %}

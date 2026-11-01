@@ -26,7 +26,7 @@ pub const ACCESS_PREFIX: &str = "vo_";
 const REFRESH_PREFIX: &str = "vr_";
 /// The one scope: read every site of the account, like an API key.
 const SCOPE: &str = "read";
-const NEXT_COOKIE: &str = "virling_next";
+pub const NEXT_COOKIE: &str = "virling_next";
 const DOCS: &str = "https://docs.virling.com/reference/mcp";
 const REGISTER_PER_SECOND: u32 = 3;
 const TOKEN_PER_SECOND: u32 = 20;
@@ -526,7 +526,7 @@ pub fn resume(headers: &HeaderMap, mut res: Response) -> Response {
         .collect();
     if let Some(location) = bytes
         .and_then(|b| String::from_utf8(b).ok())
-        .filter(|n| n.starts_with("/oauth/authorize?"))
+        .filter(|n| n.starts_with("/oauth/authorize?") || n == crate::appsumo::PATH)
         .and_then(|n| HeaderValue::from_str(&n).ok())
     {
         res.headers_mut().insert(header::LOCATION, location);
