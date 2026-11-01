@@ -37,6 +37,7 @@ mod markdown;
 mod mcp;
 mod oauth;
 mod onboarding;
+mod partners;
 mod providers;
 mod purge;
 mod query;

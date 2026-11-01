@@ -276,6 +276,14 @@ pub fn router(state: AppState) -> Router {
                 "/app/{domain}/launches/remove",
                 post(crate::launches::remove),
             )
+            .route(
+                "/app/{domain}/partners",
+                get(crate::partners::page).post(crate::partners::create),
+            )
+            .route(
+                "/app/{domain}/partners/remove",
+                post(crate::partners::remove),
+            )
             .route("/app/{domain}/links", get(links::page).post(links::create))
             .route("/app/{domain}/links/delete", post(links::delete))
             .route("/app/{domain}/funnels", post(dashboard::save_funnel))
@@ -387,6 +395,7 @@ pub fn router(state: AppState) -> Router {
                 post(crate::sync::revenuecat_webhook),
             )
             .route("/r/{token}", get(dashboard::report::shared))
+            .route("/partner/{token}", get(crate::partners::shared))
             .route("/share/{domain}", get(dashboard::public))
             .route("/share/{domain}/globe", get(crate::globe::public_page))
             .route("/share/{domain}/globe/data", get(crate::globe::public_data))
