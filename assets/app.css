@@ -244,6 +244,10 @@ img.favicon { background: none; object-fit: contain; }
 .range > button { width: auto; height: 32px; border-color: var(--field); font-weight: 500; }
 .content { padding: 20px 32px 32px; display: flex; flex-direction: column; gap: 16px; width: 100%; }
 .notice.row { flex-direction: row; align-items: center; justify-content: space-between; }
+.sample-bar { position: sticky; top: 0; z-index: 11; height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 32px; background: var(--paper); border-bottom: 1px solid var(--rule); font-size: 14px; color: var(--ink-2); }
+.sample-bar b { color: var(--ink); }
+.sample-bar .d3-btn { height: 32px; }
+.main:has(.sample-bar) .top { top: 48px; }
 .notice.ok-note { background: var(--up-soft); border-color: transparent; color: var(--up); }
 
 .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
@@ -1050,6 +1054,8 @@ a.ctl { text-decoration: none; }
   .step-box h1 { font-size: 30px; }
   .steps-top { padding: 14px 16px; }
   .notice.row { flex-direction: column; align-items: flex-start; }
+  .sample-bar { padding: 0 16px; }
+  .sample-bar .more { display: none; }
 }
 @media print {
   @page { size: A4; margin: 12mm; }
