@@ -140,6 +140,8 @@ struct AccountPage {
     /// The hosted subscription, for the owner when billing is set up.
     billing: Option<crate::billing::View>,
     billing_note: &'static str,
+    /// An AppSumo lifetime plan, whose team stays at the included users.
+    lifetime: bool,
 }
 
 pub struct KeyView {
@@ -810,6 +812,7 @@ async fn show_account(
         team,
         team_note,
         adding: q.add.unwrap_or_default(),
+        lifetime: billing.as_ref().is_some_and(|b| b.state == "lifetime"),
         billing,
         billing_note,
     })
@@ -1208,6 +1211,13 @@ pub async fn save_plan(
     }
     if !matches!(input.account_type.as_str(), "personal" | "agency") {
         return StatusCode::BAD_REQUEST.into_response();
+    }
+    if crate::appsumo::lifetime(&state.db, &account.id)
+        .await
+        .unwrap_or(true)
+    {
+        return Redirect::to(&format!("{}#plan", app_path(&ctx.site.domain, "account")))
+            .into_response();
     }
     if input.account_type == "personal" {
         let others: i64 = sqlx::query_scalar(

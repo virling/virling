@@ -46,7 +46,7 @@ pub struct Dodo {
 pub const FOUNDING_SPOTS: i64 = 50;
 
 /// Whether a founding spot is still open on `plan`, counting pre-order founders and founding subscriptions.
-async fn founding_open(db: &sqlx::SqlitePool, plan: &str) -> sqlx::Result<bool> {
+pub(crate) async fn founding_open(db: &sqlx::SqlitePool, plan: &str) -> sqlx::Result<bool> {
     let taken: i64 = sqlx::query_scalar(
         "SELECT count(*) FROM accounts WHERE founder = ?1
            OR id IN (SELECT account_id FROM billing WHERE founding = 1 AND product = ?1)",
@@ -432,7 +432,7 @@ pub fn live(b: &Billing) -> bool {
 
 /// The Billing section of the Account page.
 pub struct View {
-    /// "none", "trial", "paid" or "past_due".
+    /// "none", "trial", "paid", "past_due" or "lifetime".
     pub state: &'static str,
     pub headline: String,
     pub detail: String,
@@ -442,6 +442,23 @@ pub struct View {
 }
 
 pub async fn view(db: &sqlx::SqlitePool, account_id: &str, now: i64) -> sqlx::Result<View> {
+    if let Some(tier) = crate::appsumo::tier(db, account_id).await? {
+        let kind: String = sqlx::query_scalar("SELECT account_type FROM accounts WHERE id = ?")
+            .bind(account_id)
+            .fetch_one(db)
+            .await?;
+        return Ok(View {
+            state: "lifetime",
+            headline: format!("Lifetime (AppSumo), tier {tier}"),
+            detail: format!(
+                "{} features and {} events a month, paid once.",
+                crate::dashboard::plan_label(&kind),
+                crate::dashboard::group(crate::usage::limit(&kind).0)
+            ),
+            cancelling: false,
+            button: "Change tier on AppSumo",
+        });
+    }
     let b = load(db, account_id).await?;
     let (founder, prepaid): (Option<String>, Option<i64>) =
         sqlx::query_as("SELECT founder, founder_until FROM accounts WHERE id = ?")
@@ -634,7 +651,9 @@ pub async fn start(
     }
     let session = async {
         let old = load(&state.db, &account.id).await?;
-        if old.as_ref().is_some_and(live) {
+        if old.as_ref().is_some_and(live)
+            || crate::appsumo::lifetime(&state.db, &account.id).await?
+        {
             return Ok(None);
         }
         let (email, founder, prepaid, vid): (String, Option<String>, Option<i64>, Option<String>) =
@@ -1028,6 +1047,7 @@ mod tests {
                 founders_token: "founders_test".into(),
             }),
             self_track_site: None,
+            appsumo: None,
         };
         let store =
             Arc::new(crate::events::DuckStore::open(&dir.path().join("events.duckdb")).unwrap());

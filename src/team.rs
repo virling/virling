@@ -74,8 +74,8 @@ async fn record_seats(state: &AppState, org: &str) -> sqlx::Result<()> {
 }
 
 pub async fn load(db: &SqlitePool, org: &str, hosted: bool) -> sqlx::Result<Team> {
-    let (owner, kind): (String, String) =
-        sqlx::query_as("SELECT email, account_type FROM accounts WHERE id = ?")
+    let (owner, kind, plan): (String, String, String) =
+        sqlx::query_as("SELECT email, account_type, plan FROM accounts WHERE id = ?")
             .bind(org)
             .fetch_one(db)
             .await?;
@@ -129,7 +129,8 @@ pub async fn load(db: &SqlitePool, org: &str, hosted: bool) -> sqlx::Result<Team
     Ok(Team {
         people,
         seats,
-        next: next_seat(kind == "agency", hosted, n),
+        // Lifetime Agency includes its users with no paid seats past them.
+        next: next_seat(kind == "agency", hosted && plan != "lifetime", n),
     })
 }
 

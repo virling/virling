@@ -6,6 +6,7 @@ mod animals;
 mod answers;
 mod api;
 mod app;
+mod appsumo;
 mod assets;
 mod auth;
 mod bench;
@@ -257,6 +258,19 @@ struct ServeArgs {
     /// Bearer token for the founders lookup, the worker's FOUNDERS_TOKEN
     #[arg(long, env = "VIRLING_FOUNDERS_TOKEN", hide_env_values = true)]
     founders_token: Option<String>,
+    /// AppSumo partner API key, which signs its webhooks; needs --hosted and the OAuth keys below
+    #[arg(long, env = "VIRLING_APPSUMO_API_KEY", hide_env_values = true)]
+    appsumo_api_key: Option<String>,
+    #[arg(long, env = "VIRLING_APPSUMO_CLIENT_ID")]
+    appsumo_client_id: Option<String>,
+    #[arg(long, env = "VIRLING_APPSUMO_CLIENT_SECRET", hide_env_values = true)]
+    appsumo_client_secret: Option<String>,
+    /// AppSumo tier number sold as the Personal lifetime plan
+    #[arg(long, env = "VIRLING_APPSUMO_PERSONAL_TIER", default_value_t = 1)]
+    appsumo_personal_tier: i64,
+    /// AppSumo tier number sold as the Agency lifetime plan
+    #[arg(long, env = "VIRLING_APPSUMO_AGENCY_TIER", default_value_t = 2)]
+    appsumo_agency_tier: i64,
 }
 
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
@@ -340,6 +354,23 @@ async fn start() -> anyhow::Result<()> {
                 Some(_) => anyhow::bail!("--dodo-api-key needs --hosted"),
                 None => None,
             };
+            let appsumo = match (args.appsumo_api_key, args.hosted) {
+                (Some(api_key), true) => Some(appsumo::AppSumo {
+                    api_key,
+                    client_id: args
+                        .appsumo_client_id
+                        .context("--appsumo-api-key needs --appsumo-client-id")?,
+                    client_secret: args
+                        .appsumo_client_secret
+                        .context("--appsumo-api-key needs --appsumo-client-secret")?,
+                    personal_tier: args.appsumo_personal_tier,
+                    agency_tier: args.appsumo_agency_tier,
+                    oauth_url: "https://appsumo.com".into(),
+                    api_url: "https://api.licensing.appsumo.com".into(),
+                }),
+                (Some(_), false) => anyhow::bail!("--appsumo-api-key needs --hosted"),
+                (None, _) => None,
+            };
             let events = Cached::new(DuckStore::open(&cli.data_dir.join("events.duckdb"))?);
             let config = Config {
                 marketing: args.marketing,
@@ -377,6 +408,7 @@ async fn start() -> anyhow::Result<()> {
                     },
                 ),
                 billing,
+                appsumo,
                 self_track_site: args.self_track_site.filter(|s| !s.trim().is_empty()),
             };
             let mailer = mail::Mailer::new(args.smtp_url.as_deref(), &args.mail_from)?;
@@ -533,6 +565,7 @@ mod tests {
             turnstile: None,
             billing: None,
             self_track_site: None,
+            appsumo: None,
         };
         let state = AppState::new(
             config,

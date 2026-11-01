@@ -24,11 +24,12 @@ const PAGE: usize = 50;
 const SUPPORT_TTL_SECS: i64 = 30 * 60;
 const BETA_TTL: Duration = Duration::from_secs(60);
 const RETURN_COOKIE: &str = "virling_return";
-pub const PLANS: [(&str, &str); 4] = [
+pub const PLANS: [(&str, &str); 5] = [
     ("self_hosted", "None"),
     ("paid", "Paid"),
     ("founding", "Founding"),
     ("comped", "Free access"),
+    ("lifetime", "Lifetime"),
 ];
 
 #[derive(Default)]
@@ -1224,6 +1225,7 @@ mod tests {
             turnstile: None,
             billing: None,
             self_track_site: None,
+            appsumo: None,
         };
         let state = AppState::new(
             config,
