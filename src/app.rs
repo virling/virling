@@ -57,6 +57,8 @@ pub struct AppState {
     pub favicons: reqwest::Client,
     pub rates: Arc<Rates>,
     pub presence: Arc<crate::live::Presence>,
+    /// Hosted pageviews this month per account, for the usage cap.
+    pub usage: Arc<crate::usage::Meter>,
 }
 
 impl AppState {
@@ -86,6 +88,7 @@ impl AppState {
             limiter: Arc::default(),
             mailer: Arc::new(mailer),
             presence: Arc::default(),
+            usage: Arc::default(),
         }
     }
 }

@@ -95,6 +95,12 @@ pub fn date(ts: i64) -> String {
         .unwrap_or_default()
 }
 
+/// "December 1"
+pub fn day_of(d: time::Date) -> String {
+    d.format(format_description!("[month repr:long] [day padding:none]"))
+        .unwrap_or_default()
+}
+
 /// Whole days left until `ts`, counting a started day.
 pub fn days_left(ts: i64, now: i64) -> i64 {
     ((ts - now).max(0) + 86399) / 86400
@@ -897,7 +903,7 @@ pub async fn run(state: AppState) {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use std::net::SocketAddr;
     use std::sync::{Arc, Mutex};
 
@@ -956,15 +962,15 @@ mod tests {
         (url, calls)
     }
 
-    struct T {
+    pub(crate) struct T {
         _dir: tempfile::TempDir,
-        state: AppState,
-        account: String,
+        pub(crate) state: AppState,
+        pub(crate) account: String,
         cookie: String,
         calls: Calls,
     }
 
-    async fn setup() -> T {
+    pub(crate) async fn setup() -> T {
         let dir = tempfile::tempdir().unwrap();
         let db = crate::open_sqlite(dir.path()).await.unwrap();
         let account = sites::find_or_create_account(&db, "owner@agency.com")
@@ -1070,7 +1076,7 @@ mod tests {
             .unwrap()
     }
 
-    async fn page(t: &T, path: &str) -> String {
+    pub(crate) async fn page(t: &T, path: &str) -> String {
         let res = crate::app::router(t.state.clone())
             .layer(MockConnectInfo(SocketAddr::from(([203, 0, 113, 7], 5555))))
             .oneshot(
@@ -1087,7 +1093,7 @@ mod tests {
         String::from_utf8(bytes.to_vec()).unwrap()
     }
 
-    fn mails(t: &T) -> Vec<(String, String, String)> {
+    pub(crate) fn mails(t: &T) -> Vec<(String, String, String)> {
         match &*t.state.mailer {
             Mailer::Capture(sent) => sent.lock().unwrap().clone(),
             _ => unreachable!(),

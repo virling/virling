@@ -38,6 +38,7 @@ mod stats;
 mod sync;
 mod team;
 mod ua;
+mod usage;
 mod visitor_pages;
 mod visitors;
 mod waitlist;
@@ -297,6 +298,7 @@ async fn main() -> anyhow::Result<()> {
                 tokio::spawn(dashboard::schedule::run(state.clone()));
                 if state.config.billing.is_some() {
                     tokio::spawn(billing::run(state.clone()));
+                    tokio::spawn(usage::run(state.clone()));
                 }
             }
             let listener = tokio::net::TcpListener::bind(args.addr)

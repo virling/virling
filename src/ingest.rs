@@ -597,6 +597,14 @@ pub async fn collect(
                 .session_for(&site.id, &visitor_id, now, &arrival)
         };
 
+        if state.config.billing.is_some()
+            && !state
+                .usage
+                .allow(&state.db, &site.id, kind == "pageview" && bot.is_none())
+                .await
+        {
+            continue;
+        }
         let event = Event {
             site_id: site.id.clone(),
             ts: now,

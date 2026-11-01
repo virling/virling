@@ -184,6 +184,15 @@ async fn load_in(
     .await
     .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
     let now = OffsetDateTime::now_utc();
+    let cap = match &state.config.billing {
+        Some(_) => {
+            let (used, limit) = crate::usage::status(state, &account.id)
+                .await
+                .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
+            crate::usage::banner(used, limit, now)
+        }
+        None => String::new(),
+    };
     let trial = match &state.config.billing {
         Some(_) if account.owner => crate::billing::load(&state.db, &account.id)
             .await
@@ -281,6 +290,7 @@ async fn load_in(
         live,
         agency: account_type == "agency",
         banner: match (trial, attributed) {
+            _ if !cap.is_empty() => cap,
             (Some(ends), Some((payments, revenue))) => {
                 let left = crate::billing::days_left(ends, now.unix_timestamp());
                 let left = format!(
