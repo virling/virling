@@ -112,6 +112,10 @@ struct SettingsPage {
     /// The chat that gets payment alerts and the last send error, when set up.
     telegram: Option<(String, String)>,
     telegram_note: &'static str,
+    /// Host, signing secret, whether it is Slack, and the last send error, when a webhook is set.
+    webhook: Option<(String, String, bool, String)>,
+    /// The note after saving, and whether it reports an error.
+    webhook_note: (&'static str, bool),
     alerts: crate::alerts::Settings,
     alert_hours: Vec<i64>,
     alerts_saved: bool,
@@ -266,6 +270,15 @@ async fn show(
         (_, Some("telegram")) => "Telegram did not accept that bot token and chat ID.",
         _ => "",
     };
+    let webhook = crate::webhooks::view(&state, &ctx.site.id).await;
+    let webhook_note = match (q.saved.as_deref(), q.error.as_deref()) {
+        (Some("webhook"), _) => ("Saved. A test event was sent to the URL.", false),
+        (_, Some("webhook")) => (
+            "That URL did not accept a test event. Use a public https URL that answers 2xx.",
+            true,
+        ),
+        _ => ("", false),
+    };
     let Ok(alerts) = crate::alerts::load_settings(&state.db, &ctx.site.id).await else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };
@@ -277,6 +290,8 @@ async fn show(
         ai,
         telegram: telegram.map(|(chat, error)| (chat, error.unwrap_or_default())),
         telegram_note,
+        webhook,
+        webhook_note,
         alerts,
         alert_hours: (0..24).collect(),
         alerts_saved: q.saved.as_deref() == Some("alerts"),

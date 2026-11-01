@@ -63,6 +63,7 @@ mod visitor_pages;
 mod visitors;
 mod waitlist;
 mod waitlist_copy;
+mod webhooks;
 mod why;
 
 use std::net::SocketAddr;
@@ -391,6 +392,7 @@ async fn start() -> anyhow::Result<()> {
             if app_enabled {
                 tokio::spawn(sync::run(state.clone()));
                 tokio::spawn(telegram::run(state.clone()));
+                tokio::spawn(webhooks::run(state.clone()));
                 tokio::spawn(alerts::run(state.clone()));
                 tokio::spawn(answers::run(state.clone()));
                 favicon::spawn_sources(state.clone());
@@ -3708,6 +3710,102 @@ mod tests {
                 .1
                 .starts_with("Yesterday on example.com")
         );
+    }
+
+    #[tokio::test]
+    async fn webhooks_send_signed_payments_and_goals_once() {
+        type Got = Arc<std::sync::Mutex<Vec<(String, String, String)>>>;
+        let (_dir, mut state, store) = setup().await;
+        let site = site_id(&state).await;
+        let got: Got = Default::default();
+        let sink = got.clone();
+        let hook = axum::Router::new().route(
+            "/hook",
+            axum::routing::post(move |h: axum::http::HeaderMap, body: String| {
+                let sink = sink.clone();
+                async move {
+                    let head = |k: &str| h[k].to_str().unwrap().to_string();
+                    let row = (head("virling-event"), head("virling-signature"), body);
+                    sink.lock().unwrap().push(row);
+                    StatusCode::OK
+                }
+            }),
+        );
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        tokio::spawn(async move { axum::serve(listener, hook).await.unwrap() });
+        state.favicons = reqwest::Client::new();
+        let (uc, un) = state.vault.encrypt(&format!("http://{addr}/hook")).unwrap();
+        let (sc, sn) = state.vault.encrypt("whsec_test").unwrap();
+        let start = time::OffsetDateTime::now_utc() - time::Duration::minutes(5);
+        sqlx::query(
+            "INSERT INTO webhooks (site_id, url_ciphertext, url_nonce, secret_ciphertext, secret_nonce, host, sent_until, goals_until)
+             VALUES (?, ?, ?, ?, ?, '127.0.0.1', ?, ?)",
+        )
+        .bind(&site)
+        .bind(uc)
+        .bind(un)
+        .bind(sc)
+        .bind(sn)
+        .bind(start.unix_timestamp())
+        .bind((start.unix_timestamp_nanos() / 1000) as i64)
+        .execute(&state.db)
+        .await
+        .unwrap();
+        let vid = "0b7c2d1e-aaaa-bbbb-cccc-1234567890ab";
+        let batch = format!(
+            r#"[{{"n":"pageview","u":"https://example.com/","r":"https://chatgpt.com/","s":"example.com","v":"{vid}","w":1440}},
+            {{"n":"goal","u":"https://example.com/signup","s":"example.com","v":"{vid}","w":1440,"g":"signup"}}]"#
+        );
+        assert_eq!(post(&state, &batch, UA).await, StatusCode::ACCEPTED);
+        store
+            .upsert_payments(&[Payment {
+                site_id: site.clone(),
+                provider: "stripe".into(),
+                provider_payment_id: "pi_hook".into(),
+                ts: time::OffsetDateTime::now_utc() + time::Duration::seconds(1),
+                amount: 4900,
+                currency: "usd".into(),
+                amount_usd: Some(49.0),
+                refunded: 0,
+                status: "paid".into(),
+                visitor_id: Some(vid.into()),
+                customer_id: None,
+                is_renewal: false,
+            }])
+            .unwrap();
+        crate::sync::rebuild_attribution(&state, Some(&site)).await;
+        crate::webhooks::tick(&state).await.unwrap();
+        crate::webhooks::tick(&state).await.unwrap();
+        let got = got.lock().unwrap().clone();
+        let kinds: Vec<&str> = got.iter().map(|g| g.0.as_str()).collect();
+        assert_eq!(kinds, ["payment.attributed", "goal.completed"], "each once");
+        for (_, sig, body) in &got {
+            let t: i64 = sig[2..sig.find(',').unwrap()].parse().unwrap();
+            assert_eq!(*sig, crate::webhooks::signature("whsec_test", t, body));
+        }
+        let pay: serde_json::Value = serde_json::from_str(&got[0].2).unwrap();
+        assert_eq!(pay["site"], "example.com");
+        assert_eq!(pay["data"]["channel"], "AI");
+        assert_eq!(pay["data"]["amount"], 4900);
+        let goal: serde_json::Value = serde_json::from_str(&got[1].2).unwrap();
+        assert_eq!(goal["data"]["goal"], "signup");
+        assert_eq!(goal["data"]["visitor_id"], vid);
+
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let plain = "url=http%3A%2F%2Fexample.com%2Fhook".to_string();
+        let res = call(
+            &state,
+            form("/app/example.com/settings/webhook", plain, Some(&cookie)),
+        )
+        .await;
+        assert_eq!(
+            res.headers()["location"],
+            "/app/example.com/settings?error=webhook#webhooks"
+        );
+        let page =
+            body_text(call(&state, get("/app/example.com/settings", Some(&cookie))).await).await;
+        assert!(page.contains("127.0.0.1") && page.contains("whsec_test"));
     }
 
     #[tokio::test]

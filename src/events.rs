@@ -151,6 +151,13 @@ pub trait EventStore: Send + Sync {
     fn reading(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ReadRow>>;
     /// Bot visitors filtered in the last `days` days.
     fn bots_filtered(&self, site_id: &str, days: i64) -> anyhow::Result<u64>;
+    /// Goal completions after unix microsecond `after`, oldest first: microseconds, goal, page and visitor.
+    fn goals_since(
+        &self,
+        site_id: &str,
+        after: i64,
+        limit: u32,
+    ) -> anyhow::Result<Vec<(i64, String, String, String)>>;
     /// Current UTC offset of IANA zone `tz`.
     fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset>;
 
@@ -1625,6 +1632,30 @@ impl EventStore for DuckStore {
 
     fn reading(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ReadRow>> {
         crate::reading::reading(&*self.read()?, site_id, period)
+    }
+
+    fn goals_since(
+        &self,
+        site_id: &str,
+        after: i64,
+        limit: u32,
+    ) -> anyhow::Result<Vec<(i64, String, String, String)>> {
+        let conn = self.reader()?;
+        let mut stmt = conn.prepare(
+            "SELECT epoch_us(ts), name, path, visitor_id FROM events
+             WHERE site_id = ? AND kind = 'goal' AND ts > to_timestamp(CAST(? AS DOUBLE) / 1e6 - 1)
+               AND epoch_us(ts) > ?
+             ORDER BY ts LIMIT ?",
+        )?;
+        let rows = stmt.query_map(params![site_id, after, after, limit], |r| {
+            Ok((
+                r.get(0)?,
+                r.get::<_, Option<String>>(1)?.unwrap_or_default(),
+                r.get(2)?,
+                r.get(3)?,
+            ))
+        })?;
+        Ok(rows.collect::<Result<_, _>>()?)
     }
 
     fn bots_filtered(&self, site_id: &str, days: i64) -> anyhow::Result<u64> {
