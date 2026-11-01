@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why GA4 revenue doesn't match Stripe or Shopify</title>
+<meta name="description" content="Eight reasons GA4 and your payment provider disagree on revenue, how to check each one, and which number to trust.">
+<link rel="canonical" href="https://virling.com/blog/ga4-revenue-does-not-match-stripe">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/ga4-revenue-does-not-match-stripe">
+<meta property="og:title" content="Why GA4 revenue doesn't match Stripe or Shopify">
+<meta property="og:description" content="Eight reasons GA4 and your payment provider disagree on revenue, how to check each one, and which number to trust.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Why GA4 revenue doesn't match Stripe or Shopify","item":"https://virling.com/blog/ga4-revenue-does-not-match-stripe"}]},{"@type":"BlogPosting","headline":"Why GA4 revenue doesn't match Stripe or Shopify","description":"Eight reasons GA4 and your payment provider disagree on revenue, how to check each one, and which number to trust.","datePublished":"2026-11-01","dateModified":"2026-11-01","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/ga4-revenue-does-not-match-stripe"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why is GA4 revenue lower than Stripe?","acceptedAnswer":{"@type":"Answer","text":"Usually because purchase events never fire: buyers who close the tab after paying, blocked or declined tracking, and subscription renewals that happen without a visit. Missing currency parameters also drop revenue."}},{"@type":"Question","name":"Why is GA4 revenue higher than Stripe or Shopify?","acceptedAnswer":{"@type":"Answer","text":"Duplicate purchase events, often from a reloaded thank-you page, and refunds that GA4 never hears about. Send a unique transaction_id and a refund event."}},{"@type":"Question","name":"Does GA4 track Stripe subscription renewals?","acceptedAnswer":{"@type":"Answer","text":"Not on its own. A renewal is charged with no visit, so no browser event is sent. You have to send it from your server or use a tool that reads payments from Stripe."}},{"@type":"Question","name":"How do I stop checkout.stripe.com showing as a referrer in GA4?","acceptedAnswer":{"@type":"Answer","text":"Add checkout.stripe.com, and any other payment domain you use, to the list of unwanted referrals in your GA4 data stream's tag settings."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-01</span>
+      <h1>Why GA4 revenue doesn't match Stripe or Shopify</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-01.</p>
+<p class="p">TL;DR: GA4 counts purchase events that a browser sends. Stripe and Shopify count money that actually moved. Anything that stops the event from being sent, or changes the amount after it was sent, opens a gap. Trust your payment provider for revenue, and use analytics only to say where each payment came from.</p>
+<h2>The eight causes, and how to check each</h2>
+<table class="cmp"><thead><tr><th>Cause</th><th>How to check</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">The purchase event never fires</th><td>Count GA4 purchase events and successful payments for the same day. Hosted checkouts such as checkout.stripe.com return to your site only if the buyer waits for the redirect</td><td>Send the purchase from your server when the payment webhook arrives, not from the thank-you page</td></tr><tr><th scope="row">Ad blockers and declined consent</th><td>Compare purchases in GA4 with orders in the same hour; the gap stays even on days with no other issue</td><td>Server-side events reduce it. Some gap is normal</td></tr><tr><th scope="row">Subscription renewals</th><td>In Stripe, invoices with billing reason subscription_cycle. No visit happens, so the browser sends nothing</td><td>Send renewals from the server, or use a tool that reads payments</td></tr><tr><th scope="row">Refunds and disputes</th><td>Your provider subtracts refunds; GA4 keeps the purchase unless you send a refund event</td><td>Send a refund event with the same transaction_id</td></tr><tr><th scope="row">Currency</th><td>Purchase events without a currency parameter do not count toward revenue. GA4 also converts to your property currency at its own rate</td><td>Always send currency with value</td></tr><tr><th scope="row">Tax, shipping and discounts</th><td>Compare one order's value in GA4 with its total in Shopify or Stripe</td><td>Decide what value means and send the same thing every time</td></tr><tr><th scope="row">Time zones</th><td>Your GA4 property and your Stripe or Shopify account can use different time zones, so orders near midnight land on different days</td><td>Compare whole weeks or months, or set both to the same zone</td></tr><tr><th scope="row">Duplicate purchase events</th><td>GA4 higher than Stripe usually means the thank-you page fired twice, for example on reload</td><td>Send a unique transaction_id so GA4 can drop the duplicate</td></tr></tbody></table>
+<h2>When the total matches but the channel is wrong</h2>
+<p class="p">A second problem hides inside the first. When a buyer leaves for checkout.stripe.com or a PayPal page and comes back, GA4 can start a new session with the payment page as the referrer. The sale then belongs to Stripe or PayPal instead of the ad or post that brought the buyer. Add those domains to GA4's list of unwanted referrals in the data stream's tag settings.</p>
+<p class="p">Long buying cycles cause the same drift: a buyer who first came from a post and paid two weeks later from a bookmark shows as Direct under a last-click view. See <a href="/blog/first-touch-vs-last-touch-attribution-saas">first-touch or last-touch attribution</a>.</p>
+<h2>Which number to trust</h2>
+<p class="p">Use your payment provider for revenue, refunds and renewals, because it is the ledger. Use analytics for the question it can answer: which visit came before each payment. The reliable way to join the two is to pass a visitor ID into checkout and match each payment to that visitor's visits, as in <a href="/blog/track-stripe-revenue-by-traffic-source">tracking Stripe revenue by traffic source</a>.</p>
+<p class="p">Virling does this join for you. It reads payments from <a href="/integrations/stripe">Stripe</a>, <a href="/integrations/shopify">Shopify</a> and seven other providers with a read-only key, so its revenue matches your provider, and credits each payment to the visit before it. Renewals keep the channel of the first payment.</p>
+<h2>Frequently asked questions</h2>
+<h3>Why is GA4 revenue lower than Stripe?</h3><p class="p">Usually because purchase events never fire: buyers who close the tab after paying, blocked or declined tracking, and subscription renewals that happen without a visit. Missing currency parameters also drop revenue.</p>
+<h3>Why is GA4 revenue higher than Stripe or Shopify?</h3><p class="p">Duplicate purchase events, often from a reloaded thank-you page, and refunds that GA4 never hears about. Send a unique transaction_id and a refund event.</p>
+<h3>Does GA4 track Stripe subscription renewals?</h3><p class="p">Not on its own. A renewal is charged with no visit, so no browser event is sent. You have to send it from your server or use a tool that reads payments from Stripe.</p>
+<h3>How do I stop checkout.stripe.com showing as a referrer in GA4?</h3><p class="p">Add checkout.stripe.com, and any other payment domain you use, to the list of unwanted referrals in your GA4 data stream's tag settings.</p>
+<p class="p">Get revenue that matches your payment provider, split by channel: start a 14-day free trial at <a href="https://app.virling.com/login">app.virling.com</a>.</p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
