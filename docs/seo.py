@@ -43,7 +43,7 @@ for f in sorted(book.rglob("*.html")):
     page = page.replace("VIRLING_VERSION", version)
     title = html.unescape(re.search(r"<title>(.*?)</title>", page, re.S).group(1).strip())
     desc = html.unescape(re.search(r'<meta name="description" content="([^"]*)">', page).group(1))
-    graph = [{"@type": "TechArticle", "headline": title, "description": desc, "url": url, "isPartOf": {"@type": "WebSite", "name": "Virling docs", "url": site}, "publisher": {"@type": "Organization", "@id": "https://virling.com/#org", "name": "Virling", "url": "https://virling.com/"}}]
+    graph = [{"@type": "TechArticle", "headline": title, "description": desc, "url": url, "isPartOf": {"@type": "WebSite", "name": "Virling docs", "url": site}, "publisher": {"@type": "Organization", "@id": "https://virling.com/#org", "name": "Virling", "url": "https://virling.com/", "sameAs": ["https://github.com/virling", "https://github.com/virling/virling", "https://www.npmjs.com/package/virling", "https://docs.virling.com/"]}}]
     faq = re.findall(r"<h2[^>]*>(.*?)</h2>\s*<p>(.*?)</p>", page, re.S) if rel == "faq.html" else []
     if faq:
         text = lambda h: " ".join(html.unescape(re.sub(r"<[^>]+>", "", h)).split())
