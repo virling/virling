@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WooCommerce order attribution says Unknown: why and fixes</title>
+<meta name="description" content="Why WooCommerce order attribution marks orders as Unknown, how to tell which cause you have, and how to keep the source on future orders.">
+<link rel="canonical" href="https://virling.com/blog/woocommerce-order-attribution-unknown">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/woocommerce-order-attribution-unknown">
+<meta property="og:title" content="WooCommerce order attribution says Unknown: why and fixes">
+<meta property="og:description" content="Why WooCommerce order attribution marks orders as Unknown, how to tell which cause you have, and how to keep the source on future orders.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"WooCommerce order attribution says Unknown: why and fixes","item":"https://virling.com/blog/woocommerce-order-attribution-unknown"}]},{"@type":"BlogPosting","headline":"WooCommerce order attribution says Unknown: why and fixes","description":"Why WooCommerce order attribution marks orders as Unknown, how to tell which cause you have, and how to keep the source on future orders.","datePublished":"2026-11-01","dateModified":"2026-11-01","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/woocommerce-order-attribution-unknown"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What does Unknown mean in WooCommerce order attribution?","acceptedAnswer":{"@type":"Answer","text":"It means WooCommerce saved no attribution data with the order, so it cannot say which source brought the buyer. It is not a display error, and the data cannot be filled in later."}},{"@type":"Question","name":"Why are WooCommerce orders Unknown even with UTM links?","acceptedAnswer":{"@type":"Answer","text":"The UTM tags are read by a script into cookies. If the script is delayed or blocked, the cookies are refused, or the checkout runs outside the store's pages, the values never reach the order."}},{"@type":"Question","name":"Do subscription renewals show as Unknown?","acceptedAnswer":{"@type":"Answer","text":"Renewal orders are created without a store visit, so they carry no fresh attribution. A tool that links renewals to the first payment keeps their original channel."}},{"@type":"Question","name":"How do I turn on WooCommerce order attribution?","acceptedAnswer":{"@type":"Answer","text":"Go to WooCommerce, Settings, Advanced, Features and enable Order Attribution."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-01</span>
+      <h1>Why WooCommerce order attribution says Unknown</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-01.</p>
+<p class="p">TL;DR: Unknown means WooCommerce saved no attribution data with the order. Its order attribution reads the visitor's source from cookies set in the browser, so anything that stops those cookies or that script, or any order placed without a browser visit, ends up as Unknown. Data that was never saved cannot be recovered later, so the fixes only help future orders.</p>
+<h2>How WooCommerce order attribution works</h2>
+<p class="p">Order attribution is built into WooCommerce. You can turn it on or off under WooCommerce, Settings, Advanced, Features. A script in the store records where each visitor came from, such as a referrer or UTM tags, in short-lived cookies. At checkout WooCommerce copies those values onto the order and shows them as the order's origin.</p>
+<h2>The usual causes of Unknown</h2>
+<table class="cmp"><thead><tr><th>Cause</th><th>How to spot it</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">Orders with no store visit</th><td>Orders created in the admin, through the REST API, by import, or as subscription renewals</td><td>Expected. Filter them out before you compare channels</td></tr><tr><th scope="row">Blocked cookies or scripts</th><td>Unknown share is higher for buyers on privacy browsers or with ad blockers, and where your consent banner is declined</td><td>Some loss is normal. Make sure the attribution script is not blocked by your own consent setup once a visitor accepts</td></tr><tr><th scope="row">Optimisation plugins</th><td>Unknown started after you added caching, script delay or minify settings</td><td>Exclude the order attribution script from delay and combine settings, then test an order</td></tr><tr><th scope="row">Checkouts that skip the store's pages</th><td>Express buttons, payment links or a checkout on another domain</td><td>Test each checkout path with a tagged link and check the order's origin</td></tr><tr><th scope="row">Long gaps before buying</th><td>The buyer visited from an ad or a post, then came back much later</td><td>The cookies are short-lived. Use analytics that keeps the first source on a visitor ID</td></tr><tr><th scope="row">Bots and fake orders</th><td>Failed or spam orders with no device type</td><td>Block spam at checkout; these were never real visits</td></tr></tbody></table>
+<h2>How to test it</h2>
+<ol class="post-list"><li>Open your store in a private window from a link with <code>?utm_source=test&amp;utm_medium=test</code>.</li><li>Place a test order the way a customer would.</li><li>Open the order in the admin and check the origin. If it says Unknown, turn off script delay and caching rules one at a time and repeat.</li></ol>
+<h2>Keep the source on every order</h2>
+<p class="p">A sturdier approach is to store a visitor ID on the order and match it to that visitor's visits, so the source does not depend on a cookie lasting until checkout. Virling does this with a short snippet that saves the visitor ID in the order's meta data, for the classic and block checkout. It reads orders with a read-only REST key, counts refunds and WooCommerce Subscriptions renewals, and shows revenue per visitor for each channel; see <a href="/integrations/woocommerce">WooCommerce revenue attribution</a>.</p>
+<p class="p">The same problem shows up on other platforms under another name; see <a href="/blog/shopify-orders-show-as-direct">why Shopify orders show up as Direct</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>What does Unknown mean in WooCommerce order attribution?</h3><p class="p">It means WooCommerce saved no attribution data with the order, so it cannot say which source brought the buyer. It is not a display error, and the data cannot be filled in later.</p>
+<h3>Why are WooCommerce orders Unknown even with UTM links?</h3><p class="p">The UTM tags are read by a script into cookies. If the script is delayed or blocked, the cookies are refused, or the checkout runs outside the store's pages, the values never reach the order.</p>
+<h3>Do subscription renewals show as Unknown?</h3><p class="p">Renewal orders are created without a store visit, so they carry no fresh attribution. A tool that links renewals to the first payment keeps their original channel.</p>
+<h3>How do I turn on WooCommerce order attribution?</h3><p class="p">Go to WooCommerce, Settings, Advanced, Features and enable Order Attribution.</p>
+<p class="p">See which channel brings your WooCommerce buyers: start a 14-day free trial at <a href="https://app.virling.com/login">app.virling.com</a>.</p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
