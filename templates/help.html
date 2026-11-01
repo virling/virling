@@ -17,8 +17,19 @@
 <form class="card" method="post" action="/app/{{ shell.domain }}/help">
   {% if !error.is_empty() %}<div class="notice" role="alert">{{ error }}</div>{% endif %}
   <div class="setting">
-    <div><b>Topic</b><span class="muted">So the right person answers.</span></div>
-    <select class="input" name="topic" aria-label="Topic">{% for t in topics %}<option value="{{ t }}">{{ t }}</option>{% endfor %}</select>
+    <div><b id="topic-label">Topic</b><span class="muted">So the right person answers.</span></div>
+    <div class="select compact" data-select>
+      <input type="hidden" name="topic" value="{{ topics[0] }}">
+      <button type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="topic-label">
+        <span data-label>{{ topics[0] }}</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="menu" hidden>
+        <div role="listbox" aria-labelledby="topic-label">
+        {% for t in topics %}<button type="button" role="option" data-value="{{ t }}" aria-selected="{{ loop.first }}">{{ t }}</button>{% endfor %}
+        </div>
+      </div>
+    </div>
   </div>
   <div class="setting stacked">
     <div><b>Message</b><span class="muted">What happened, what you expected, and the page or payment if there is one.</span></div>
