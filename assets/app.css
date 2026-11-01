@@ -1594,3 +1594,9 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .ll-name a { font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ll-note { margin: 12px 0 0; font-size: 12px; }
 @media (max-width: 800px) { .ll-row { grid-template-columns: minmax(0, 1fr) 80px 80px; } .ll-row > :nth-child(2), .ll-row > :nth-child(3), .ll-row > :nth-child(5) { display: none; } }
+.sc-box { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.sc-box h2, .sc-box p { margin: 0; }
+.sc-form { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--ink-2); }
+.sc-form label { display: inline-flex; align-items: center; gap: 6px; }
+.sc-img { width: 100%; max-width: 720px; height: auto; border: 1px solid var(--rule); border-radius: 8px; }
+.sc-acts { display: flex; gap: 12px; align-items: center; }

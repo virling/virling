@@ -474,3 +474,24 @@ for (const b of document.querySelectorAll("[data-ai-test]")) {
     note.textContent = res.ok ? "Test sent. ChatGPT-User now shows on the AI card of your dashboard." : "The test did not go through.";
   });
 }
+
+for (const form of document.querySelectorAll("form[data-autosubmit]")) {
+  form.addEventListener("change", () => form.submit());
+}
+
+for (const b of document.querySelectorAll("[data-png]")) {
+  b.addEventListener("click", async () => {
+    const img = new Image();
+    img.src = URL.createObjectURL(await (await fetch(b.dataset.png)).blob());
+    await img.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = 2400;
+    canvas.height = 1260;
+    canvas.getContext("2d").drawImage(img, 0, 0, 2400, 1260);
+    URL.revokeObjectURL(img.src);
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = b.dataset.file;
+    a.click();
+  });
+}

@@ -371,6 +371,12 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
             "/.well-known/oauth-authorization-server".into(),
             Auth::None,
         ),
+        get("page.share_card", format!("{app}/share-card"), Auth::Session),
+        get(
+            "page.share_card.svg",
+            format!("{app}/share-card.svg?range=30d&set=1&amounts=1"),
+            Auth::Session,
+        ),
         get("page.share", format!("/r/{share}"), Auth::None),
         get("page.public", format!("/share/{domain}"), Auth::None),
         get(
