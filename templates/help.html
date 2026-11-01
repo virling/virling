@@ -1,0 +1,50 @@
+{% extends "app.html" %}
+{% block content %}
+<div class="settings">
+{% if sent %}<div class="notice ok-note" role="status">Thanks, your message is sent. We reply within one business day, by email.</div>{% endif %}
+<section class="set-sec">
+<div class="set-intro"><h2>Find an answer</h2><p class="muted">Most setup questions are answered in the docs.</p></div>
+<div class="card help-links">
+  <a class="setting" href="https://docs.virling.com/troubleshooting" target="_blank" rel="noopener"><div><b>Troubleshooting</b><span class="muted">Unattributed payments, checkout not linked, no visitors, event limits.</span></div><span class="help-go" aria-hidden="true">&rarr;</span></a>
+  <a class="setting" href="https://docs.virling.com/quickstart" target="_blank" rel="noopener"><div><b>Setup guide</b><span class="muted">Add the script, connect payments and link checkout.</span></div><span class="help-go" aria-hidden="true">&rarr;</span></a>
+  <a class="setting" href="https://docs.virling.com/faq" target="_blank" rel="noopener"><div><b>FAQ</b><span class="muted">Attribution, cookies, privacy and plans.</span></div><span class="help-go" aria-hidden="true">&rarr;</span></a>
+  <a class="setting" href="https://virling.com/changelog" target="_blank" rel="noopener"><div><b>Changelog</b><span class="muted">What changed and when.</span></div><span class="help-go" aria-hidden="true">&rarr;</span></a>
+</div>
+</section>
+{% if hosted %}
+<section class="set-sec" id="contact">
+<div class="set-intro"><h2>Contact support</h2><p class="muted">We reply within one business day from {{ support }}. Your account, plan and site are added for you.</p></div>
+<form class="card" method="post" action="/app/{{ shell.domain }}/help">
+  {% if !error.is_empty() %}<div class="notice" role="alert">{{ error }}</div>{% endif %}
+  <div class="setting">
+    <div><b id="topic-label">Topic</b><span class="muted">So the right person answers.</span></div>
+    <div class="select compact" data-select>
+      <input type="hidden" name="topic" value="{{ topics[0] }}">
+      <button type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="topic-label">
+        <span data-label>{{ topics[0] }}</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="menu" hidden>
+        <div role="listbox" aria-labelledby="topic-label">
+        {% for t in topics %}<button type="button" role="option" data-value="{{ t }}" aria-selected="{{ loop.first }}">{{ t }}</button>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="setting stacked">
+    <div><b>Message</b><span class="muted">What happened, what you expected, and the page or payment if there is one.</span></div>
+    <textarea class="input set-area help-msg" name="message" rows="6" maxlength="5000" required aria-label="Message"></textarea>
+  </div>
+  <div class="actions end"><button class="btn" type="submit">Send message</button></div>
+</form>
+</section>
+{% else %}
+<section class="set-sec">
+<div class="set-intro"><h2>Report a problem</h2><p class="muted">Self-hosted Virling is supported in the open.</p></div>
+<div class="card help-links">
+  <a class="setting" href="https://github.com/virling/virling/issues" target="_blank" rel="noopener"><div><b>GitHub issues</b><span class="muted">Search known problems or open a new issue at github.com/virling/virling/issues.</span></div><span class="help-go" aria-hidden="true">&rarr;</span></a>
+</div>
+</section>
+{% endif %}
+</div>
+{% endblock %}

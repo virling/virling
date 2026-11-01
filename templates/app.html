@@ -53,6 +53,7 @@
     </button>
     <div class="menu up" hidden>
       <a href="/app/{{ shell.domain }}/account"{% if shell.nav == "account" %} aria-current="page"{% endif %}>Account settings</a>
+      <a href="/app/{{ shell.domain }}/help"{% if shell.nav == "help" %} aria-current="page"{% endif %}>Help and support</a>
       <form method="post" action="/logout"><button type="submit">Sign out</button></form>
     </div>
   </div>

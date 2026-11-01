@@ -52,6 +52,7 @@ mod sites;
 mod spend;
 mod stack;
 mod stats;
+mod support;
 mod sync;
 mod team;
 mod telegram;
