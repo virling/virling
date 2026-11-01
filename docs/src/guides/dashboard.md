@@ -2,6 +2,14 @@
 
 The dashboard shows what each channel earns, not only how many visitors it sends. Open it at `/app/yourdomain.com` on your Virling server. It updates on its own while it is open, so you never need to reload to see a new visitor or payment.
 
+## Start with AI and retention
+
+Two views show what visitor counts miss: how AI assistants find and send you buyers, and which channels bring customers who stay. The numbers below come from the [live demo](https://virling.com/demo/), a sample invoicing tool, over its last 90 days.
+
+**AI visibility.** AI is a channel like any other, so visits from ChatGPT, Claude, Perplexity and Gemini count with their revenue; in the demo, AI sends 21% of visitors and 29% of revenue. On the AI card, **Crawls** shows which AI companies' bots read your pages; OpenAI's read 5,004 of them. **Answers** asks your buyer questions to the assistants every week and shows how often they name you; Claude named the demo site in 47 of 72 answers, ChatGPT in 34. See [AI crawlers](../track/ai-crawlers.md) and [AI answers](../track/ai-answers.md).
+
+**Retention by first-payment channel.** The Retention page groups customers by the channel of their first payment, so you see which channels bring customers who keep paying. In the demo, 48 of the 57 customers who first came from AI still pay, and 30-day churn is 5% for AI against 36% for Email. See [Retention by channel](../attribution/retention.md).
+
 ## The range
 
 The date picker at the top right sets the period for every page: Today, Yesterday, Last 7 days, Last 30 days, Last 90 days, This month, Last 12 months, or Since tracking started. Each number shows its change against the previous period of the same length. The range stays in the address, so a link keeps it. **Custom range** picks exact dates, and **Compare to other dates** compares the range against any other period you choose instead of the one just before it.
