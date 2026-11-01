@@ -82,6 +82,17 @@ fn valid_destination(raw: &str, domain: &str) -> Option<String> {
     ok.then(|| url.to_string())
 }
 
+/// A typed page: a path on the site or a full URL on it.
+pub fn destination(raw: &str, domain: &str) -> Option<String> {
+    let raw = raw.trim();
+    let raw = if raw.starts_with('/') {
+        format!("https://{domain}{raw}")
+    } else {
+        raw.to_string()
+    };
+    valid_destination(&raw, domain)
+}
+
 pub async fn create(
     State(state): State<AppState>,
     account: Account,
@@ -104,13 +115,7 @@ pub async fn create(
     if source.is_empty() {
         return fail("place").into_response();
     }
-    let raw = input.destination.trim();
-    let raw = if raw.starts_with('/') {
-        format!("https://{}{raw}", ctx.site.domain)
-    } else {
-        raw.to_string()
-    };
-    let Some(destination) = valid_destination(&raw, &ctx.site.domain) else {
+    let Some(destination) = destination(&input.destination, &ctx.site.domain) else {
         return fail("destination").into_response();
     };
     let channel = match crate::channel::classify(None, Some(&source), None) {

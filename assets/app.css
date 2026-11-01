@@ -1594,3 +1594,12 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .ll-name a { font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ll-note { margin: 12px 0 0; font-size: 12px; }
 @media (max-width: 800px) { .ll-row { grid-template-columns: minmax(0, 1fr) 80px 80px; } .ll-row > :nth-child(2), .ll-row > :nth-child(3), .ll-row > :nth-child(5) { display: none; } }
+.ll-row.pt-row { grid-template-columns: minmax(0, 2fr) 90px 130px 100px 100px 70px; }
+.pt-links { display: flex; gap: 12px; }
+.pt-links .d3-link { padding: 0; font-size: 12px; }
+.pt-shared { max-width: 720px; margin: 0 auto; padding: 48px 16px; display: flex; flex-direction: column; gap: 12px; }
+.pt-shared h1 { font-size: 22px; letter-spacing: -0.02em; }
+.pt-url { overflow-wrap: anywhere; }
+.pt-sum { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.pt-foot { font-size: 12px; }
+@media (max-width: 800px) { .ll-row.pt-row { grid-template-columns: minmax(0, 1fr) 90px; } .ll-row.pt-row > :nth-child(2), .ll-row.pt-row > :nth-child(3), .ll-row.pt-row > :nth-child(5) { display: none; } .ll-row.pt-row > form { grid-column: 1 / -1; } .pt-sum { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

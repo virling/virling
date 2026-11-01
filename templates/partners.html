@@ -1,0 +1,33 @@
+{% extends "app.html" %}
+{% block tools %}{% include "_range.html" %}{% endblock %}
+{% block content %}
+<section class="box ll-add">
+  <h2>Add a partner</h2>
+  <p class="dim">A link for a creator, affiliate or sponsor. Visits through it count toward that partner, and each partner gets a read-only page with their own numbers. No payouts.</p>
+  {% if !error.is_empty() %}<div class="notice" role="alert">{{ error }}</div>{% endif %}
+  <form method="post" action="/app/{{ shell.domain }}/partners" class="ll-form">
+    <label>Partner<input class="input" name="name" maxlength="80" placeholder="Jane's newsletter" required></label>
+    <label>Page<input class="input" name="destination" value="/" required></label>
+    <button class="btn" type="submit">Add partner</button>
+  </form>
+</section>
+<section class="box ll-list">
+  <h2>Partners</h2>
+  {% if rows.is_empty() %}
+  <p class="dim">No partners yet. Add the first one above.</p>
+  {% else %}
+  <div class="ll-row pt-row th"><span>Partner</span><span class="num">Visitors</span><span class="num">Paying customers</span><span class="num">Revenue</span><span class="num">Refund rate</span><span></span></div>
+  {% for r in rows %}
+  <div class="ll-row pt-row">
+    <span class="ll-name"><b>{{ r.name }}</b><span class="pt-links"><button type="button" class="d3-link" data-copy-text="{{ r.link }}">Copy link</button><button type="button" class="d3-link" data-copy-text="{{ r.share }}">Copy report link</button></span></span>
+    <span class="num" data-k="Visitors">{{ r.figures.visitors }}</span>
+    <span class="num" data-k="Paying customers">{{ r.figures.customers }}</span>
+    <span class="num" data-k="Revenue"><b>{{ r.figures.revenue }}</b></span>
+    <span class="num" data-k="Refund rate">{{ r.figures.refund_rate }}</span>
+    <form method="post" action="/app/{{ shell.domain }}/partners/remove" data-confirm="Remove this partner? Its link stops working."><input type="hidden" name="id" value="{{ r.id }}"><button class="b" type="submit">Remove</button></form>
+  </div>
+  {% endfor %}
+  <p class="dim ll-note">Most revenue first. Revenue is credited to the visit through the partner's link under your attribution model, net of refunds.</p>
+  {% endif %}
+</section>
+{% endblock %}
