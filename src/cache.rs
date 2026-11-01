@@ -123,6 +123,19 @@ impl<S: EventStore> EventStore for Cached<S> {
         result
     }
 
+    fn refresh_attribution(
+        &self,
+        site_id: &str,
+        model: &str,
+        window_days: i64,
+    ) -> anyhow::Result<bool> {
+        let result = self.inner.refresh_attribution(site_id, model, window_days);
+        if !matches!(result, Ok(false)) {
+            self.changed([site_id]);
+        }
+        result
+    }
+
     fn retention(
         &self,
         site_id: &str,
