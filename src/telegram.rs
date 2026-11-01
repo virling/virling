@@ -20,8 +20,8 @@ const BATCH: u32 = 20;
 /// Local hour from which yesterday's digest goes out.
 const DIGEST_HOUR: u8 = 9;
 /// Visitors today that count as a spike, and how many times the daily average of the week before.
-const SPIKE_MIN: u64 = 20;
-const SPIKE_TIMES: f64 = 3.0;
+pub(crate) const SPIKE_MIN: u64 = 20;
+pub(crate) const SPIKE_TIMES: f64 = 3.0;
 
 async fn send(state: &AppState, token: &str, chat: &str, text: &str) -> anyhow::Result<()> {
     let res = state

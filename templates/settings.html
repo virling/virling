@@ -171,6 +171,29 @@
   {% endif %}
 </div>
 </section>
+<section class="set-sec" id="webhooks">
+<div class="set-intro"><h2>Webhooks</h2><p class="muted">Post each attributed payment, each goal completion and traffic spikes on {{ shell.domain }} to a URL of yours, within a minute. Other URLs get signed JSON, to forward into a warehouse or your own app; a Slack incoming webhook URL gets short messages. <a href="https://docs.virling.com/reference/webhooks">Payloads and signatures</a></p></div>
+<div class="card">
+  {% if webhook_note.1 %}<div class="alert" role="alert">{{ webhook_note.0 }}</div>{% else if !webhook_note.0.is_empty() %}<div class="notice ok-note" role="status">{{ webhook_note.0 }}</div>{% endif %}
+  {% if let Some((host, secret, slack, error)) = webhook %}
+  <div class="conn">
+    <div class="grow"><b>{% if *slack %}Slack{% else %}<span class="mono">{{ host }}</span>{% endif %}</b> <span class="badge {% if error.is_empty() %}ok{% else %}bad{% endif %}">{% if error.is_empty() %}On{% else %}Error{% endif %}</span>{% if !error.is_empty() %}<span class="err small">{{ error }}</span>{% endif %}</div>
+    <form method="post" action="/app/{{ shell.domain }}/settings/webhook/remove" data-confirm="Turn off the webhook?">
+      <button class="btn ghost" type="submit">Turn off</button>
+    </form>
+  </div>
+  {% if !slack %}<div class="code" data-tabs>
+    <div class="code-head"><span class="code-title">Signing secret</span><button class="copy" type="button" data-copy>Copy</button></div>
+    <pre class="wrap">{{ secret }}</pre>
+  </div>{% endif %}
+  {% else %}
+  <form method="post" action="/app/{{ shell.domain }}/settings/webhook" class="stack">
+    <label class="field">URL<input class="input" name="url" type="url" placeholder="https://example.com/hooks/virling" autocomplete="off" spellcheck="false" required></label>
+    <div class="actions"><button class="btn" type="submit">Send a test and turn on</button></div>
+  </form>
+  {% endif %}
+</div>
+</section>
 <section class="set-sec" id="ai-answers">
 <div class="set-intro"><h2>AI answers</h2><p class="muted">Once a week, Virling asks ChatGPT, Claude, Perplexity and Gemini your buyer questions with web search on, and counts how often they name {{ shell.domain }}. Pages assistants open while answering are counted without any setup.</p></div>
 <div class="card">

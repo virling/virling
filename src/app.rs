@@ -409,6 +409,14 @@ pub fn router(state: AppState) -> Router {
             .route(
                 "/app/{domain}/settings/telegram/remove",
                 post(crate::telegram::remove),
+            )
+            .route(
+                "/app/{domain}/settings/webhook",
+                post(crate::webhooks::save),
+            )
+            .route(
+                "/app/{domain}/settings/webhook/remove",
+                post(crate::webhooks::remove),
             );
         app = app.merge(crate::admin::routes());
         if oauth::enabled(&state.config) {

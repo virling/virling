@@ -235,6 +235,15 @@ impl<S: EventStore> EventStore for Cached<S> {
         self.inner.bots_filtered(site_id, days)
     }
 
+    fn goals_since(
+        &self,
+        site_id: &str,
+        after: i64,
+        limit: u32,
+    ) -> anyhow::Result<Vec<(i64, String, String, String)>> {
+        self.inner.goals_since(site_id, after, limit)
+    }
+
     fn utc_offset(&self, tz: &str) -> anyhow::Result<UtcOffset> {
         self.inner.utc_offset(tz)
     }

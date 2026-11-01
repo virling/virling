@@ -98,6 +98,10 @@ Sample data is never counted anywhere that matters: the public dashboard, client
 
 In **Site settings > Telegram alerts**, paste a bot token from @BotFather and your chat ID. Virling sends a test message, then one message per new paid payment, with its amount and source, within a minute. The token is stored encrypted, and only the account owner can set it. You also get one message on a day when visitors reach at least three times the daily average of the week before (and at least 20), and a summary of yesterday after 9 in the morning in the site's timezone. Alerts stay off while a site holds sample data.
 
+## Webhooks
+
+In **Site settings > Webhooks**, paste a URL to get each attributed payment, goal completion and traffic spike as a signed JSON request, or as a Slack message when the URL is a Slack incoming webhook. See [Webhooks](../reference/webhooks.md).
+
 ## Share a site
 
 In **Site settings**:

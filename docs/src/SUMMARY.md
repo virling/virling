@@ -72,6 +72,7 @@
 - [Event API](reference/event-api.md)
 - [Read API](reference/api.md)
 - [MCP server](reference/mcp.md)
+- [Webhooks](reference/webhooks.md)
 - [Outbound connections](reference/outbound.md)
 
 # Help
