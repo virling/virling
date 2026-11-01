@@ -10,6 +10,10 @@
 </p>
 
 <p align="center">
+  <a href="https://www.opensourcealternatives.to"><img src="https://www.opensourcealternatives.to/badge-osa.svg" alt="As seen on Open Source Alternatives"></a>
+</p>
+
+<p align="center">
   <a href="https://virling.com/demo/"><img src=".github/dashboard.png" alt="Virling dashboard: revenue, revenue per visitor and the channels that bring paying customers" width="900"></a>
 </p>
 
