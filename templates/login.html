@@ -27,6 +27,7 @@
       <button class="btn secondary" type="submit"{% if turnstile.is_some() %} disabled data-wait{% endif %}>Send it again</button>
     </form>
     <a class="link-quiet" href="/login">Use a different email</a>
+    <script>if("BroadcastChannel"in window)new BroadcastChannel("virling-auth").onmessage=function(){location.href="/app"}</script>
   {% else if view == "invite" %}
     <div class="auth-copy">
       <h1>Join the team as {{ email }}</h1>
