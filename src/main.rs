@@ -259,8 +259,24 @@ struct ServeArgs {
     founders_token: Option<String>,
 }
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
+unsafe extern "C" {
+    fn mallopt(param: i32, value: i32) -> i32;
+}
+
+fn main() -> anyhow::Result<()> {
+    // M_ARENA_MAX = 2: glibc's per-thread arenas otherwise keep freed memory, about doubling RSS under load.
+    #[cfg(all(target_os = "linux", target_env = "gnu"))]
+    unsafe {
+        mallopt(-8, 2);
+    }
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()?
+        .block_on(start())
+}
+
+async fn start() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),

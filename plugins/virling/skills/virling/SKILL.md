@@ -18,6 +18,7 @@ The user connects Virling once, in Claude or Paperclip; see [setup.md](setup.md)
 | Which sites can I read? | `list_sites` |
 | How is the site doing? | `get_overview` |
 | Which channel, referrer, campaign, page or country makes money? | `get_breakdown` with `dimension` set to `channel`, `referrer`, `campaign`, `keyword`, `landing_page`, `page`, `country`, `device`, `browser`, `os` or `language` |
+| Which channel is worth more, and which only brings visitors? | `get_channel_verdicts` |
 | Which channel brings customers who stay? | `get_retention` |
 | Do AI assistants use and name the site? | `get_ai_answers` |
 | Recent payments and their source | `list_payments` with `filter` (`all`, `attributed`, `unattributed`, `refunded`), `limit` (max 200) and `offset` |
@@ -42,14 +43,15 @@ When asked for a weekly review, or run on a schedule:
 
 1. `get_overview` with `range` `7d` for revenue, payments and the change against the week before.
 2. `get_breakdown` with `dimension` `channel` and `range` `7d`, and again with `30d` for context.
-3. `get_retention` for which channels bring customers who keep paying.
-4. Report the channel that made the most money, the biggest drop, the share of revenue that is Unattributed, and one concrete next step, such as doing more of what paid or fixing checkout linking when Unattributed is high.
+3. `get_channel_verdicts` with `range` `7d` for one plain line per channel.
+4. `get_retention` for which channels bring customers who keep paying.
+5. Report the channel that made the most money, the biggest drop, the share of revenue that is Unattributed, and one concrete next step, such as doing more of what paid or fixing checkout linking when Unattributed is high.
 
 Report numbers with their range and site, and say when the data is thin (a handful of payments) instead of drawing strong conclusions.
 
 ## More
 
-The CLI and HTTP API are documented at https://docs.virling.com/reference/api.html.
+The CLI and HTTP API are documented at https://docs.virling.com/reference/api.
 
 ## Examples
 
