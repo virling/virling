@@ -241,6 +241,7 @@ pub trait EventStore: Send + Sync {
         window_days: i64,
     ) -> anyhow::Result<Option<Journey>>;
     /// Totals, current and previous daily series, the four breakdowns and setup facts.
+    #[cfg(test)]
     fn report(&self, site_id: &str, period: &Period) -> anyhow::Result<Report> {
         self.report_in(site_id, period, &Filter::default())
     }

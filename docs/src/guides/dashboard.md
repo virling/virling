@@ -14,6 +14,7 @@ The date picker at the top right sets the period for every page: Today, Yesterda
 - **Matched revenue:** under the five numbers, one line gives the share of revenue matched to a visit and why the rest was not, such as payments with no visitor ID or with no visit inside the lookback window. It disappears when every payment is matched. See [Link checkout to visits](../payments/checkout.md).
 - **Revenue chart:** bars for revenue per day, with a dot per day for visitors on the right axis. Hover a bar for the day's payments, and click it to filter the page to that day. Launches you log, and notes added through the [API](../reference/api.md), show as markers on their day.
 - **Filters:** every filter you click shows as a chip at the top. **See visitors** opens the Visitors page with the same filters, so you can see the people behind a number.
+- **Segments:** with filters on, click **Save as segment** and name it, such as "AI visitors in the US". Saved segments show as tabs at the top of every view; click one to put its filters back on. On the client report and weekly email, pick a segment from the menu next to the week to limit the report to it, and the report names the segment under the week.
 - **Insight line:** the biggest finding in the period, such as what an AI assistant visitor is worth compared with your average.
 
 ## The breakdown cards
