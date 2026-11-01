@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why Shopify orders show up as Direct, and how to fix it</title>
+<meta name="description" content="Untagged emails, in-app browsers, other domains and long buying cycles push Shopify orders into Direct. How to spot and fix each one.">
+<link rel="canonical" href="https://virling.com/blog/shopify-orders-show-as-direct">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/shopify-orders-show-as-direct">
+<meta property="og:title" content="Why Shopify orders show up as Direct, and how to fix it">
+<meta property="og:description" content="Untagged emails, in-app browsers, other domains and long buying cycles push Shopify orders into Direct. How to spot and fix each one.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"sameAs":["https://github.com/virling/virling"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Why Shopify orders show up as Direct, and how to fix it","item":"https://virling.com/blog/shopify-orders-show-as-direct"}]},{"@type":"BlogPosting","headline":"Why Shopify orders show up as Direct, and how to fix it","description":"Untagged emails, in-app browsers, other domains and long buying cycles push Shopify orders into Direct. How to spot and fix each one.","datePublished":"2026-11-01","dateModified":"2026-11-01","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/shopify-orders-show-as-direct"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What does Direct mean for a Shopify order?","acceptedAnswer":{"@type":"Answer","text":"It means the analytics found no referrer, UTM tag or click ID on the visit before the order. It often hides email, social apps, chat links and earlier visits rather than people typing your address."}},{"@type":"Question","name":"Why does Facebook or Instagram traffic show as Direct?","acceptedAnswer":{"@type":"Answer","text":"Links opened inside the Facebook or Instagram app often arrive without a referrer. Tag ad and bio links with UTM parameters so the source survives."}},{"@type":"Question","name":"How do I reduce Direct orders in Shopify?","acceptedAnswer":{"@type":"Answer","text":"Tag every campaign link, track your blog or landing pages together with the store, store a visitor ID on the cart, and read a last non-direct view instead of the last click."}},{"@type":"Question","name":"Can I see which channel each Shopify order came from?","acceptedAnswer":{"@type":"Answer","text":"Yes, if each order carries a visitor ID that can be matched to that visitor's visits. Virling stores the ID as a cart attribute, which Shopify copies onto the order."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-01</span>
+      <h1>Why Shopify orders show up as Direct, and how to fix it</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-01.</p>
+<p class="p">TL;DR: An order shows as Direct when nothing about the visit before it says where the buyer came from: no referrer, no UTM tag, no click ID. That is usually a tracking gap, not people typing your address. Most of it can be fixed with tagged links and a visitor ID stored on the order.</p>
+<h2>The usual causes</h2>
+<table class="cmp"><thead><tr><th>Cause</th><th>How to spot it</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">Untagged email and SMS links</th><td>Direct orders jump on the day a campaign goes out. Email and SMS apps rarely pass a referrer</td><td>Add UTM tags to every campaign link, or check that your email tool adds them</td></tr><tr><th scope="row">In-app browsers</th><td>Buyers from Instagram, TikTok or Facebook bios and stories. The app's browser often sends no referrer</td><td>Tag bio and story links. Use analytics that recognises in-app browsers</td></tr><tr><th scope="row">Links in chats, PDFs and apps</th><td>WhatsApp, Slack and Discord shares, QR codes and PDFs arrive with nothing attached</td><td>Tag the links you share, and use short links you can tell apart</td></tr><tr><th scope="row">Landing pages on another domain</th><td>Your blog, link-in-bio page or quiz lives elsewhere and links to the store without tags</td><td>Tag every link into the store, or track both domains as one site</td></tr><tr><th scope="row">Long buying cycles</th><td>The buyer found you through an ad or a post, then came back days later from a bookmark</td><td>Read a last non-direct or first-touch view, not only the last click</td></tr><tr><th scope="row">Orders with no web visit</th><td>Draft orders, POS, staff-created orders and subscription renewals. Check the order's sales channel in Shopify</td><td>Filter reports to Online Store orders</td></tr><tr><th scope="row">AI assistants</th><td>Customers say they found you in ChatGPT, but the order says Direct. Some assistants tag links, many do not, and copied links carry nothing</td><td>Track AI referrers where they exist and ask how buyers heard about you</td></tr><tr><th scope="row">Declined consent</th><td>Direct share is higher in regions where your banner asks for consent</td><td>Expected. Count these as unattributed rather than Direct</td></tr></tbody></table>
+<h2>How to see the real source of each order</h2>
+<ol class="post-list"><li>Tag every link you control with <code>utm_source</code>, <code>utm_medium</code> and <code>utm_campaign</code>. The rules are in <a href="/blog/utm-parameters-for-revenue-tracking">which UTM parameters to use</a>.</li><li>Give each visitor an ID when they land, and remember their first source.</li><li>Store that ID on the cart. Shopify copies cart attributes onto the order, so every order carries the visitor who placed it.</li><li>Match each order to that visitor's visits and credit the last real source before the purchase, not the final bookmark.</li></ol>
+<p class="p">Virling does steps 2 to 4 with one script and a short theme snippet; see <a href="/integrations/shopify">Shopify revenue attribution</a>. It reads orders with a token that can only read orders, counts refunds and Shopify Subscriptions renewals, and shows revenue per visitor for each channel, including AI assistants.</p>
+<h2>Frequently asked questions</h2>
+<h3>What does Direct mean for a Shopify order?</h3><p class="p">It means the analytics found no referrer, UTM tag or click ID on the visit before the order. It often hides email, social apps, chat links and earlier visits rather than people typing your address.</p>
+<h3>Why does Facebook or Instagram traffic show as Direct?</h3><p class="p">Links opened inside the Facebook or Instagram app often arrive without a referrer. Tag ad and bio links with UTM parameters so the source survives.</p>
+<h3>How do I reduce Direct orders in Shopify?</h3><p class="p">Tag every campaign link, track your blog or landing pages together with the store, store a visitor ID on the cart, and read a last non-direct view instead of the last click.</p>
+<h3>Can I see which channel each Shopify order came from?</h3><p class="p">Yes, if each order carries a visitor ID that can be matched to that visitor's visits. Virling stores the ID as a cart attribute, which Shopify copies onto the order.</p>
+<p class="p">See which channel brings your Shopify buyers: start a 14-day free trial at <a href="https://app.virling.com/login">app.virling.com</a>.</p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
