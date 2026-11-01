@@ -14,6 +14,7 @@
   - [Release binary](install/binary.md)
   - [Build from source](install/source.md)
 - [How Virling works](how-it-works.md)
+- [Troubleshooting](troubleshooting.md)
 
 # Track
 

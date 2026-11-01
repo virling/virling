@@ -342,6 +342,10 @@ pub fn router(state: AppState) -> Router {
             .route("/app/{domain}/settings/ai/run", post(settings::run_ai))
             .route("/app/{domain}/settings/share", post(settings::share))
             .route("/app/{domain}/settings/unshare", post(settings::revoke))
+            .route(
+                "/app/{domain}/help",
+                get(crate::support::page).post(crate::support::send),
+            )
             .route("/app/{domain}/account", get(settings::account_page))
             .route("/app/{domain}/account/plan", post(settings::save_plan))
             .route("/app/{domain}/account/team", post(crate::team::invite))
