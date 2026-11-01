@@ -181,6 +181,15 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
         .bind(&share)
         .execute(&db)
         .await?;
+    sqlx::query(
+        "INSERT INTO short_links (id, site_id, slug, name, destination, source, channel, created_at, share_token)
+         VALUES ('bench-partner', ?, 'bench-partner', 'Bench partner', 'https://example.com/', 'bench-partner', 'referral', 0, ?)
+         ON CONFLICT (id) DO UPDATE SET share_token = excluded.share_token",
+    )
+    .bind(&site_id)
+    .bind(&share)
+    .execute(&db)
+    .await?;
     sqlx::query("UPDATE sites SET public_dashboard = 1 WHERE id = ?")
         .bind(&site_id)
         .execute(&db)
@@ -371,6 +380,8 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
             "/.well-known/oauth-authorization-server".into(),
             Auth::None,
         ),
+        get("page.partners", format!("{app}/partners"), Auth::Session),
+        get("page.partner.share", format!("/partner/{share}"), Auth::None),
         get("page.share", format!("/r/{share}"), Auth::None),
         get("page.public", format!("/share/{domain}"), Auth::None),
         get(

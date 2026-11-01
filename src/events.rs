@@ -446,6 +446,12 @@ pub struct DuckStore {
     imported_sites: Mutex<HashMap<String, (time::Date, time::Date)>>,
 }
 
+impl Drop for DuckStore {
+    fn drop(&mut self) {
+        self.index.join_loads();
+    }
+}
+
 #[derive(Default)]
 struct Queue {
     events: Vec<Event>,
