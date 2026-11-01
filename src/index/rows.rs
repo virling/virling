@@ -412,7 +412,7 @@ impl SiteIndex {
         let (mut visits, mut pageviews) = (0, 0);
         let mut last_pv: Option<&Pageview> = None;
         let mut first_pv: Option<&Pageview> = None;
-        let (mut pricing, mut checkout) = (false, false);
+        let (mut pricing, mut checkout, mut bot) = (false, false, false);
         let mut goals: Vec<&str> = Vec::new();
         let mut exits: Vec<(i64, u32)> = Vec::new();
         for s in self.sessions_of(v) {
@@ -440,6 +440,7 @@ impl SiteIndex {
                     .strings
                     .name(pv.path)
                     .is_some_and(|p| p.starts_with("/pricing"));
+                bot |= self.bot_attrs(pv.attrs);
             }
             for m in self.marks_of(s).filter(|m| m.ts >= lo && m.ts < hi) {
                 any = true;
@@ -494,7 +495,25 @@ impl SiteIndex {
                 .map(|&i| self.payments[i as usize].net.unwrap_or(0.0))
                 .sum(),
             who: payer.unwrap_or_else(|| format!("v:{}", visitor.id)),
+            bot,
         }
+    }
+
+    fn bot_attrs(&self, attrs: u32) -> bool {
+        let a = &self.attrs[attrs as usize];
+        let name = |i: usize| self.strings.name(a[i]);
+        visitors::likely_bot(name(OS), name(BROWSER), name(DEVICE))
+    }
+
+    /// Whether `visitor_row` would mark `v` as a likely bot.
+    fn likely_bot(&self, v: u32, lo: i64, hi: i64) -> bool {
+        self.sessions_of(v)
+            .filter(|&s| {
+                let sess = &self.sessions[s as usize];
+                sess.first < hi && sess.last >= lo
+            })
+            .flat_map(|s| self.pageviews_of(s))
+            .any(|pv| pv.ts >= lo && pv.ts < hi && self.bot_attrs(pv.attrs))
     }
 
     /// The visits, pages or revenue `visitor_row` gives `v`, to sort `visitor_list` by.
@@ -568,6 +587,9 @@ impl SiteIndex {
             if let Some(h) = &hosts
                 && cols.is_none_or(|cols| cols[REFERRER] == NULL || !h.contains(&cols[REFERRER]))
             {
+                continue;
+            }
+            if filter.hide_bots && self.likely_bot(v, lo, hi) {
                 continue;
             }
             if let Some(paid) = filter.paid {
@@ -924,6 +946,10 @@ mod tests {
                     },
                     VisitorFilter {
                         hosts: Some(hosts.clone()),
+                        ..Default::default()
+                    },
+                    VisitorFilter {
+                        hide_bots: true,
                         ..Default::default()
                     },
                 ] {

@@ -36,7 +36,17 @@ pub struct VisitorFilter {
     pub search: Option<String>,
     /// "visits", "pages" or "revenue", most first; otherwise most recently seen first.
     pub sort: Option<String>,
+    /// Leaves out likely bots.
+    pub hide_bots: bool,
 }
+
+/// What ingest's impossible-screen rule leaves in stored events: Chrome on macOS with a Mobile or Tablet screen.
+pub(crate) fn likely_bot(os: Option<&str>, browser: Option<&str>, device: Option<&str>) -> bool {
+    os == Some("macOS") && browser == Some("Chrome") && matches!(device, Some("Mobile" | "Tablet"))
+}
+
+/// `likely_bot` as SQL over an events row.
+const LIKELY_BOT: &str = "os = 'macOS' AND browser = 'Chrome' AND device IN ('Mobile', 'Tablet')";
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct VisitorRow {
@@ -62,6 +72,8 @@ pub struct VisitorRow {
     pub revenue_usd: f64,
     /// Key of the generated name: the first payment's payer, as on payment rows, else the visitor.
     pub who: String,
+    /// A pageview in the range matched `likely_bot`.
+    pub bot: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -215,6 +227,9 @@ pub(crate) fn visitor_list(
         Some(false) => wheres.push("coalesce(pd.n, 0) = 0"),
         None => {}
     }
+    if filter.hide_bots {
+        wheres.push("NOT per.bot");
+    }
     if filter.search.is_some() {
         wheres.push(
             "(contains(lower(coalesce(per.landing_page, '')), $q) OR contains(lower(coalesce(per.exit_page, '')), $q)
@@ -241,7 +256,8 @@ pub(crate) fn visitor_list(
                 first(path ORDER BY ts, path) FILTER (WHERE kind = 'pageview') AS landing_page,
                 coalesce(bool_or(kind = 'pageview' AND starts_with(path, '/pricing')), false) AS pricing,
                 to_json(coalesce(list(name) FILTER (WHERE kind = 'exit'), []))::VARCHAR AS exits,
-                list_sort(list_distinct(list(name) FILTER (WHERE kind = 'goal'))) AS goals
+                list_sort(list_distinct(list(name) FILTER (WHERE kind = 'goal'))) AS goals,
+                coalesce(bool_or(kind = 'pageview' AND {LIKELY_BOT}), false) AS bot
             FROM ev GROUP BY visitor_id
         ),
         outs AS (
@@ -270,7 +286,7 @@ pub(crate) fn visitor_list(
                 to_json(coalesce(per.goals, []))::VARCHAR AS goals,
                 coalesce(pd.n, 0) AS n, coalesce(pd.revenue, 0) AS revenue,
                 coalesce(pd.payer, 'v:' || per.visitor_id) AS who,
-                per.landing_page, per.pricing, per.exits
+                per.landing_page, per.pricing, per.exits, per.bot
             FROM per
             LEFT JOIN firsts f USING (visitor_id)
             LEFT JOIN outs o USING (visitor_id)
@@ -334,6 +350,7 @@ pub(crate) fn visitor_list(
             payments: r.get::<_, i64>(9)? as u64,
             revenue_usd: r.get(10)?,
             who: r.get(11)?,
+            bot: r.get(15)?,
         })
     })?;
     Ok(VisitorPage {
