@@ -17,6 +17,7 @@ mod events;
 mod favicon;
 mod flags;
 mod fx;
+mod globe;
 mod icons;
 mod index;
 mod ingest;
@@ -1459,6 +1460,141 @@ mod tests {
         assert!(pill().await.contains("No visitors online"));
         let other = call(&state, get("/app/other.com/live", Some(&cookie))).await;
         assert_eq!(other.status(), StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
+    async fn globe_lists_live_visitors_payments_and_revenue_by_country() {
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        seed(&store, &site);
+        let now = time::OffsetDateTime::now_utc();
+        store
+            .insert_events(&[Event {
+                site_id: site.clone(),
+                ts: now,
+                visitor_id: "live1".into(),
+                session_id: "live-s".into(),
+                kind: "pageview".into(),
+                name: None,
+                path: "/pricing".into(),
+                referrer_host: Some("news.ycombinator.com".into()),
+                utm_source: None,
+                utm_medium: None,
+                utm_campaign: None,
+                utm_content: None,
+                utm_term: None,
+                channel: "Communities".into(),
+                country: Some("FR".into()),
+                device: "Mobile".into(),
+                browser: "Safari".into(),
+                os: "iOS".into(),
+                region: None,
+                city: None,
+                host: None,
+                language: None,
+            }])
+            .unwrap();
+        crate::sync::rebuild_attribution(&state, Some(&site)).await;
+        state.presence.seen(&site, "live1");
+        let data = async |uri: &str| -> serde_json::Value {
+            let res = call(&state, get(uri, Some(&cookie))).await;
+            assert_eq!(res.status(), StatusCode::OK);
+            serde_json::from_str(&body_text(res).await).unwrap()
+        };
+        let g = data("/app/example.com/globe/data").await;
+        assert_eq!(g["online"], 1);
+        let live = &g["visitors"][0];
+        assert_eq!(g["visitors"].as_array().unwrap().len(), 1);
+        assert_eq!(
+            (live["cc"].as_str(), live["page"].as_str()),
+            (Some("FR"), Some("/pricing"))
+        );
+        assert_eq!(live["place"], "France");
+        assert!(
+            g["faces"][live["face"].as_u64().unwrap() as usize]
+                .as_str()
+                .unwrap()
+                .starts_with("<svg")
+        );
+        let pay = &g["payments"][0];
+        assert_eq!(
+            (pay["amt"].as_str(), pay["cc"].as_str(), pay["vid"].as_str()),
+            (Some("$49.00"), Some("DE"), Some("v1"))
+        );
+        let steps = g["journeys"]["v1"].as_array().unwrap();
+        assert_eq!(steps[0][0], "from");
+        assert_eq!(steps.last().unwrap()[0], "pay");
+        let de = g["countries"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|c| c["cc"] == "DE")
+            .unwrap();
+        assert!(de["visitors"].as_u64().unwrap() > 0);
+        let page =
+            body_text(call(&state, get("/app/example.com/globe", Some(&cookie))).await).await;
+        assert!(page.contains(r#"id="globe-data""#) && page.contains(r#"aria-current="page">"#));
+        assert!(page.contains(r#"data-outline="/assets/globe/countries.json""#));
+        for uri in ["/app/other.com/globe", "/app/other.com/globe/data"] {
+            assert_eq!(
+                call(&state, get(uri, Some(&cookie))).await.status(),
+                StatusCode::NOT_FOUND
+            );
+        }
+        assert_eq!(
+            call(&state, get("/app/example.com/globe/data", None))
+                .await
+                .status(),
+            StatusCode::SEE_OTHER
+        );
+    }
+
+    #[tokio::test]
+    async fn globe_outline_is_a_cacheable_static_file_with_valid_shapes() {
+        let (_dir, state, _store) = setup().await;
+        let res = call(&state, get("/assets/globe/countries.json", None)).await;
+        assert_eq!(res.status(), StatusCode::OK);
+        assert_eq!(res.headers()["content-type"], "application/json");
+        assert!(
+            res.headers()["cache-control"]
+                .to_str()
+                .unwrap()
+                .contains("max-age=604800")
+        );
+        let o: serde_json::Value = serde_json::from_str(&body_text(res).await).unwrap();
+        let pts = o["pts"].as_object().unwrap();
+        for (cc, p) in pts {
+            let (lon, lat) = (p[0].as_f64().unwrap(), p[1].as_f64().unwrap());
+            assert!(lon.abs() <= 180.0 && lat.abs() <= 90.0, "{cc}");
+            assert!(crate::flags::lookup(cc).is_some(), "{cc}");
+        }
+        for shape in o["shapes"].as_array().unwrap() {
+            assert!(pts.contains_key(shape[0].as_str().unwrap()));
+            for ring in shape[1].as_array().unwrap() {
+                let flat: Vec<i64> = ring
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|n| n.as_i64().unwrap())
+                    .collect();
+                assert!(flat.len() >= 6 && flat.len().is_multiple_of(2));
+                let (mut x, mut y) = (0, 0);
+                for c in flat.chunks(2) {
+                    x += c[0];
+                    y += c[1];
+                    assert!(x.abs() <= 1800 && y.abs() <= 900);
+                }
+            }
+        }
+        assert!(pts.len() >= 190, "centroids for the known countries");
+        let lib = call(&state, get("/assets/vendor/three-r170.module.min.js", None)).await;
+        assert_eq!(lib.status(), StatusCode::OK);
+        assert!(lib.headers()["cache-control"].to_str().unwrap().contains("immutable"));
+        let src = body_text(lib).await;
+        assert!(src.contains("SPDX-License-Identifier: MIT"));
+        let page = call(&state, get("/assets/globe.js", None)).await;
+        assert!(body_text(page).await.contains("root.dataset.three"));
     }
 
     #[tokio::test]

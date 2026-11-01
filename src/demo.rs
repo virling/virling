@@ -1065,6 +1065,17 @@ async fn run(dir: &Path, out: &Path) -> anyhow::Result<()> {
     }
     std::fs::write(out.join("app.css"), include_str!("../assets/app.css"))?;
     std::fs::write(out.join("app.js"), include_str!("../assets/app.js"))?;
+    std::fs::write(out.join("globe.js"), include_str!("../assets/globe.js"))?;
+    std::fs::create_dir_all(out.join("vendor"))?;
+    std::fs::write(
+        out.join("vendor/three-r170.module.min.js"),
+        include_str!("../assets/vendor/three-r170.module.min.js"),
+    )?;
+    std::fs::create_dir_all(out.join("globe"))?;
+    std::fs::write(
+        out.join("globe/countries.json"),
+        include_str!("../assets/globe/countries.json"),
+    )?;
     let flag_dir = out.join("flags");
     std::fs::create_dir_all(&flag_dir)?;
     for (code, _) in COUNTRIES {
@@ -1181,6 +1192,7 @@ fn target(url: &str) -> Option<String> {
         "" => ("", &["range", "sources", "location", "pages"]),
         "/payments" => ("payments/", &["range", "filter"]),
         "/report" => ("report/", &[]),
+        "/globe" => ("globe/", &["range"]),
         "/retention" => ("retention/", &["range", "by"]),
         "/visitors" => ("visitors/", &["range", "exit", "paid", "channel", "goal"]),
         p if p.starts_with("/visitors/") => {
@@ -1311,6 +1323,9 @@ fn rewrite(html: &str, built: &HashSet<String>) -> String {
     out.replace("/assets/flags/", "/demo/flags/")
         .replace("/assets/app.css", "/demo/app.css")
         .replace("/assets/app.js", "/demo/app.js")
+        .replace("/assets/globe.js", "/demo/globe.js")
+        .replace("/assets/globe/", "/demo/globe/")
+        .replace("/assets/vendor/", "/demo/vendor/")
         .replacen(
             "<main class=\"content\">",
             &format!("<main class=\"content\">\n{BANNER}"),

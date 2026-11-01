@@ -308,6 +308,8 @@ pub async fn run(dir: &Path, args: BenchArgs) -> anyhow::Result<()> {
             ..get("page.payment.drawer", drawer, Auth::Session)
         },
         get("page.visitors", format!("{app}/visitors"), Auth::Session),
+        get("page.globe", format!("{app}/globe"), Auth::Session),
+        get("page.globe.data", format!("{app}/globe/data"), Auth::Session),
         get(
             "page.visitors.paid",
             format!("{app}/visitors?paid=yes"),
