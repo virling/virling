@@ -16,7 +16,7 @@ use crate::sites::app_path;
 /// Where hosted support mail goes; self-hosted servers show the issue tracker instead.
 pub const SUPPORT_EMAIL: &str = "help@virling.com";
 
-const TOPICS: &[&str] = &["Setup", "Payments", "Billing", "Bug", "Other"];
+const TOPICS: &[&str] = &["Setup", "Payments", "Billing", "Bug", "Suggestion", "Other"];
 
 #[derive(Template)]
 #[template(path = "help.html")]
@@ -241,7 +241,10 @@ mod tests {
         assert!(html.contains("Contact support"));
         let (status, location, _) = call(
             &state,
-            post(&cookie, "topic=Payments&message=Stripe+shows+Unattributed"),
+            post(
+                &cookie,
+                "topic=Suggestion&message=Stripe+shows+Unattributed",
+            ),
         )
         .await;
         assert_eq!(status, StatusCode::SEE_OTHER);
@@ -249,7 +252,7 @@ mod tests {
         let sent = mails(&state);
         assert_eq!(sent.len(), 2);
         assert_eq!(sent[0].0, SUPPORT_EMAIL);
-        assert!(sent[0].1.contains("[Payments] example.com"));
+        assert!(sent[0].1.contains("[Suggestion] example.com"));
         assert!(sent[0].2.contains("Stripe shows Unattributed"));
         assert!(sent[0].2.contains("me@example.com"));
         assert_eq!(sent[1].0, "me@example.com");
