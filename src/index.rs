@@ -1931,6 +1931,8 @@ pub struct Indexes {
     discard: Mutex<HashSet<String>>,
     /// Held by writers from commit until their events are applied, and by a load while its snapshot starts.
     gate: Mutex<()>,
+    /// Background loads still running, joined before the store closes.
+    loads: Mutex<Vec<std::thread::JoinHandle<()>>>,
 }
 
 impl Indexes {
@@ -1941,6 +1943,14 @@ impl Indexes {
             stale_payments: Mutex::default(),
             discard: Mutex::default(),
             gate: Mutex::default(),
+            loads: Mutex::default(),
+        }
+    }
+
+    /// Waits for background loads, so no query runs while the process exits.
+    pub fn join_loads(&self) {
+        for load in std::mem::take(&mut *self.loads.lock().unwrap()) {
+            let _ = load.join();
         }
     }
 
@@ -1969,12 +1979,15 @@ impl Indexes {
                 );
                 drop(slots);
                 let (this, site, conn) = (self.clone(), site_id.to_string(), conn()?);
-                std::thread::spawn(move || {
+                let load = std::thread::spawn(move || {
                     if let Err(err) = this.load(&site, &conn) {
                         tracing::error!(%err, site_id = site, "loading the session index failed");
                         this.slots.lock().unwrap().remove(&site);
                     }
                 });
+                let mut loads = self.loads.lock().unwrap();
+                loads.retain(|l| !l.is_finished());
+                loads.push(load);
                 Ok(None)
             }
         }
