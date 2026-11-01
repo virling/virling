@@ -165,6 +165,13 @@ pub trait EventStore: Send + Sync {
         period: &Period,
         f: &Filter,
     ) -> anyhow::Result<Vec<stats::DayPoint>>;
+    /// Visitors and revenue by local weekday and hour, and by four-hour block.
+    fn week_hours(
+        &self,
+        site_id: &str,
+        period: &Period,
+        f: &Filter,
+    ) -> anyhow::Result<Vec<stats::WeekHour>>;
     fn payment_summary(&self, site_id: &str, period: &Period) -> anyhow::Result<PaymentSummary>;
     /// Payments per provider, new against renewals and why unmatched ones did not match.
     fn payment_split(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ProviderSplit>>;
@@ -631,6 +638,15 @@ impl EventStore for DuckStore {
         f: &Filter,
     ) -> anyhow::Result<Vec<stats::DayPoint>> {
         stats::hourly(&self.conn.lock().unwrap(), site_id, period, f)
+    }
+
+    fn week_hours(
+        &self,
+        site_id: &str,
+        period: &Period,
+        f: &Filter,
+    ) -> anyhow::Result<Vec<stats::WeekHour>> {
+        stats::week_hours(&self.conn.lock().unwrap(), site_id, period, f)
     }
 
     fn payment_split(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ProviderSplit>> {

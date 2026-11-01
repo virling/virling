@@ -1664,6 +1664,105 @@ pub(crate) fn report(
     })
 }
 
+/// Visitors and payments in one local weekday and hour, or a four-hour block of it.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct WeekHour {
+    /// 0 is Monday.
+    pub day: u8,
+    /// First hour of the cell.
+    pub hour: u8,
+    /// 1 for an hour, 4 for a block of four hours.
+    pub span: u8,
+    pub visitors: u64,
+    pub payments: u64,
+    pub revenue_usd: f64,
+    /// Revenue from first payments, which customers time themselves, unlike renewals.
+    pub first_payments: u64,
+    pub first_usd: f64,
+}
+
+/// Visitors and revenue by local weekday and hour of the period, plus four-hour blocks; empty cells are left out.
+pub(crate) fn week_hours(
+    conn: &Connection,
+    site_id: &str,
+    period: &Period,
+    f: &Filter,
+) -> anyhow::Result<Vec<WeekHour>> {
+    let (scope, within, paid) = (f.cte(), f.within("session_id"), f.paid());
+    let mut stmt = conn.prepare(&format!(
+        "WITH {BOUNDS}{scope},
+        seen AS (
+            SELECT DISTINCT epoch_us(ts) // 900000000 AS q, visitor_id
+            FROM events, bounds WHERE site_id = $site AND kind = 'pageview' AND ts >= lo AND ts < hi{within}
+        ),
+        local AS (
+            SELECT q, isodow(timezone($tz, t)) - 1 AS d, hour(timezone($tz, t)) AS h
+            FROM (SELECT q, make_timestamptz(q * 900000000) AS t FROM (SELECT DISTINCT q FROM seen))
+        ),
+        v AS (SELECT d, h, visitor_id FROM seen JOIN local USING (q)),
+        r AS (
+            SELECT isodow(timezone($tz, p.ts)) - 1 AS d, hour(timezone($tz, p.ts)) AS h, {NET_USD} AS net,
+                p.is_renewal
+            FROM payments p, bounds
+            WHERE p.site_id = $site AND p.ts >= lo AND p.ts < hi AND p.status <> 'failed'{paid}
+        )
+        SELECT d, coalesce(h, b * 4), CASE WHEN h IS NULL THEN 4 ELSE 1 END, count(DISTINCT visitor_id), 0, 0.0, 0, 0.0
+        FROM (SELECT *, h // 4 AS b FROM v) GROUP BY GROUPING SETS ((d, h), (d, b))
+        UNION ALL
+        SELECT d, coalesce(h, b * 4), CASE WHEN h IS NULL THEN 4 ELSE 1 END, 0, count(*), coalesce(sum(net), 0),
+            count(*) FILTER (WHERE NOT is_renewal), coalesce(sum(net) FILTER (WHERE NOT is_renewal), 0)
+        FROM (SELECT *, h // 4 AS b FROM r) GROUP BY GROUPING SETS ((d, h), (d, b))"
+    ))?;
+    let rows = stmt.query_map(
+        named_params! {
+            "site": site_id,
+            "tz": period.tz,
+            "from": period.from.to_string(),
+            "to": period.to.to_string(),
+        },
+        |r| {
+            Ok((
+                r.get::<_, i64>(0)?,
+                r.get::<_, i64>(1)?,
+                r.get::<_, i64>(2)?,
+                r.get::<_, i64>(3)?,
+                r.get::<_, i64>(4)?,
+                r.get::<_, f64>(5)?,
+                r.get::<_, i64>(6)?,
+                r.get::<_, f64>(7)?,
+            ))
+        },
+    )?;
+    let mut out: Vec<WeekHour> = Vec::new();
+    for row in rows {
+        let (d, h, span, visitors, payments, revenue, firsts, first_usd) = row?;
+        let (day, hour, span) = (d as u8, h as u8, span as u8);
+        match out
+            .iter_mut()
+            .find(|c| c.day == day && c.hour == hour && c.span == span)
+        {
+            Some(c) => {
+                c.visitors += visitors as u64;
+                c.payments += payments as u64;
+                c.revenue_usd += revenue;
+                c.first_payments += firsts as u64;
+                c.first_usd += first_usd;
+            }
+            None => out.push(WeekHour {
+                day,
+                hour,
+                span,
+                visitors: visitors as u64,
+                payments: payments as u64,
+                revenue_usd: revenue,
+                first_payments: firsts as u64,
+                first_usd,
+            }),
+        }
+    }
+    Ok(out)
+}
+
 #[cfg(test)]
 mod tests {
     use time::macros::{date, datetime};
@@ -2413,6 +2512,35 @@ mod tests {
                 .1
                 .is_empty()
         );
+    }
+
+    #[test]
+    fn week_hours_group_by_local_weekday_and_hour() {
+        let (_dir, store) = store();
+        store
+            .insert_events(&[visit("v1", "a", T, "Direct"), visit("v2", "b", T, "Direct")])
+            .unwrap();
+        store
+            .upsert_payments(&[pay("p1", T + Duration::hours(1), Some("v1"), Some("c1"))])
+            .unwrap();
+        let cells = store
+            .week_hours("s", &period(), &Filter::default())
+            .unwrap();
+        let at = |t: OffsetDateTime, span: u8| {
+            let h = t.hour() / span * span;
+            cells
+                .iter()
+                .find(|c| {
+                    c.day == t.weekday().number_days_from_monday() && c.hour == h && c.span == span
+                })
+                .cloned()
+                .unwrap_or_else(|| panic!("{t} {span}"))
+        };
+        assert_eq!(at(T, 1).visitors, 2);
+        let paid = at(T + Duration::hours(1), 1);
+        assert_eq!((paid.payments, paid.revenue_usd), (1, 100.0));
+        assert_eq!(cells.iter().filter(|c| c.span == 1).count(), 2);
+        assert!(at(T, 4).visitors == 2 && cells.iter().any(|c| c.span == 4 && c.payments == 1));
     }
 
     #[test]

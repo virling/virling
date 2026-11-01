@@ -27,6 +27,7 @@ mod insight;
 pub mod report;
 pub mod schedule;
 mod views;
+mod when;
 
 pub use home::dashboard;
 

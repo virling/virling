@@ -553,7 +553,13 @@ fn seed(site: &str, now: OffsetDateTime) -> (Vec<Event>, Vec<Payment>, Vec<Subsc
         let count = (base * (0.85 + 0.3 * rng.f())) as usize;
         for _ in 0..count {
             let src = &SOURCES[rng.pick(&weights)];
+            // Visits lean to the afternoon, most of all midweek.
+            let pull = match day.weekday() {
+                time::Weekday::Tuesday | time::Weekday::Wednesday | time::Weekday::Thursday => 0.6,
+                _ => 0.25,
+            };
             let hour = 7.0 + rng.f() * 16.0;
+            let hour = hour + (15.0 - hour) * pull;
             let ts = day + Duration::seconds((hour * 3600.0) as i64);
             if ts > now {
                 continue;

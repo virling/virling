@@ -12,7 +12,7 @@ use time::{Date, Duration, OffsetDateTime};
 
 use super::{
     Ctx, Opt, Shell, blocking, cards, day, delta, encode, goals, group, insight, link, load, money,
-    plural, provider_name, resolve_range, source_of, usd, views,
+    plural, provider_name, resolve_range, source_of, usd, views, when,
 };
 use crate::alias::Names;
 use crate::app::AppState;
@@ -64,8 +64,8 @@ const FILTERS: [(&str, &str); 12] = [
 ];
 
 /// Params kept by every link besides the range, filters and card tabs.
-const KEEP: [&str; 9] = [
-    "compare", "view", "chart", "gtab", "vtab", "ret", "s1", "s2", "s3",
+const KEEP: [&str; 10] = [
+    "compare", "view", "chart", "gtab", "vtab", "ret", "s1", "s2", "s3", "when",
 ];
 
 const VIEWS: [(&str, &str); 5] = [
@@ -202,6 +202,7 @@ struct DashboardPage {
     chart_tabs: Vec<Opt>,
     cards: Vec<cards::TabCard>,
     ai: Option<cards::AiCard>,
+    when: Option<when::WhenCard>,
     goals: Option<goals::GoalsView>,
     visitors: Option<views::VisitorsView>,
     payments: Option<views::PaymentsView>,
@@ -747,7 +748,8 @@ async fn page(
                     .map(|r| r.revenue_usd)
                     .sum();
                 let avg = (visitors > 0 && attributed > 0.0).then(|| attributed / visitors as f64);
-                Data::Overview(Box::new(report), tabs, hours, avg, sources)
+                let week = store.week_hours(&id, &pq, &f)?;
+                Data::Overview(Box::new(report), tabs, hours, avg, sources, week)
             }
             "goals" => Data::Goals(goals::load(&*store, &id, &pq, &f, &rest)?),
             "visitors" => Data::Visitors(views::load_visitors(&*store, &id, &pq, &tz, now, &f)?),
@@ -856,6 +858,7 @@ async fn page(
         chart_tabs: Vec::new(),
         cards: Vec::new(),
         ai: None,
+        when: None,
         goals: None,
         visitors: None,
         payments: None,
@@ -863,7 +866,13 @@ async fn page(
         shell,
     };
     match data {
-        Data::Overview(report, tabs, hours, avg, sources) => {
+        Data::Overview(report, tabs, hours, avg, sources, week) => {
+            page.when = Some(when::card(
+                &week,
+                q.rest.get("when").map(String::as_str) == Some("visitors"),
+                &ctx.site.timezone,
+                |k| format!("{}#when", href(&[("when", k)])),
+            ));
             let setup = &report.setup;
             let since = setup.first_event.map(|t| t.to_offset(ctx.offset).date());
             let age = since.map_or(0, |d| (today - d).whole_days());
@@ -1266,6 +1275,7 @@ enum Data {
         Option<(Vec<DayPoint>, Vec<DayPoint>)>,
         Option<f64>,
         Vec<BreakdownRow>,
+        Vec<crate::stats::WeekHour>,
     ),
     Goals(goals::GoalsData),
     Visitors(views::VisitorsData),

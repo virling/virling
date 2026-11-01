@@ -31,6 +31,8 @@ mod visitor_pages;
 mod visitors;
 mod waitlist;
 mod waitlist_copy;
+#[cfg(test)]
+mod zz_timing;
 
 use std::net::SocketAddr;
 use std::path::PathBuf;
