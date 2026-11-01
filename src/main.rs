@@ -47,6 +47,7 @@ mod retention;
 mod retention_page;
 mod sample;
 mod settings;
+mod share_card;
 mod sites;
 mod spend;
 mod stack;

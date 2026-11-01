@@ -1,0 +1,21 @@
+{% extends "app.html" %}
+{% block tools %}{% include "_range.html" %}{% endblock %}
+{% block content %}
+<section class="box sc-box">
+  <h2>Share card</h2>
+  <p class="dim">An image of revenue by channel for the range above, to post on social. It shows only channels and the parts you pick here, never customers or emails.</p>
+  <form method="get" class="sc-form" data-autosubmit>
+    {% for (k, v) in hidden %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+    <input type="hidden" name="set" value="1">
+    <label><input type="checkbox" name="amounts" value="1"{% if amounts %} checked{% endif %}>Revenue amounts</label>
+    <label><input type="checkbox" name="site" value="1"{% if site %} checked{% endif %}>Site name</label>
+    <label><input type="checkbox" name="dark" value="1"{% if dark %} checked{% endif %}>Dark</label>
+    <noscript><button class="btn" type="submit">Update</button></noscript>
+  </form>
+  <img class="sc-img" src="{{ image }}" width="1200" height="630" alt="Revenue by channel card">
+  <div class="sc-acts">
+    <button type="button" class="btn" data-png="{{ image }}" data-file="{{ file }}">Download PNG</button>
+    <a class="d3-link" href="{{ image }}" download>Download SVG</a>
+  </div>
+</section>
+{% endblock %}

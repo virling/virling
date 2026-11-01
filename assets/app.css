@@ -1603,3 +1603,9 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .pt-sum { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .pt-foot { font-size: 12px; }
 @media (max-width: 800px) { .ll-row.pt-row { grid-template-columns: minmax(0, 1fr) 90px; } .ll-row.pt-row > :nth-child(2), .ll-row.pt-row > :nth-child(3), .ll-row.pt-row > :nth-child(5) { display: none; } .ll-row.pt-row > form { grid-column: 1 / -1; } .pt-sum { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.sc-box { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.sc-box h2, .sc-box p { margin: 0; }
+.sc-form { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--ink-2); }
+.sc-form label { display: inline-flex; align-items: center; gap: 6px; }
+.sc-img { width: 100%; max-width: 720px; height: auto; border: 1px solid var(--rule); border-radius: 8px; }
+.sc-acts { display: flex; gap: 12px; align-items: center; }
