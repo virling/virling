@@ -47,6 +47,10 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Virling vs Plausible](https://virling.com/vs/plausible)
 - [Virling vs PostHog](https://virling.com/vs/posthog)
 - [Virling vs Umami](https://virling.com/vs/umami)
+- [Virling vs Matomo](https://virling.com/vs/matomo)
+- [Virling vs Fathom](https://virling.com/vs/fathom)
+- [Virling vs Mixpanel](https://virling.com/vs/mixpanel)
+- [Virling vs Triple Whale](https://virling.com/vs/triple-whale)
 
 ## Docs
 
