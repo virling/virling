@@ -8,6 +8,9 @@
   var endpoint = s.getAttribute("data-api") || new URL("/api/event", s.src);
   // A cookie set after consent is read even in cookieless mode, but only cookie mode creates or renews one.
   var ref = d.referrer, last, vid = (d.cookie.match(/virling_vid=([^;]+)/) || [])[1] || null, nav = performance.getEntriesByType("navigation")[0]?.type;
+  // Headless browsers on servers have no GPU, so WebGL falls back to a software renderer.
+  var gl = d.createElement("canvas").getContext("webgl"), gi = gl?.getExtension("WEBGL_debug_renderer_info"),
+    soft = /SwiftShader|llvmpipe/.test(gl ? gl.getParameter(gi ? gi.UNMASKED_RENDERER_WEBGL : gl.RENDERER) : "");
 
   if (!has("data-cookieless")) {
     vid = vid || "v" + Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -19,7 +22,7 @@
   }
 
   var send = (name, goal, u, e, x) => {
-    var body = JSON.stringify([{ n: name, u: u || L.href, e, x, r: ref, s: site, v: vid, w: screen.width, d: devicePixelRatio, g: goal, l: n.language, z: Intl.DateTimeFormat().resolvedOptions().timeZone || void 0, k: nav, b: n.webdriver || !n.languages?.length || void 0 }]);
+    var body = JSON.stringify([{ n: name, u: u || L.href, e, x, r: ref, s: site, v: vid, w: screen.width, d: devicePixelRatio, g: goal, l: n.language, z: Intl.DateTimeFormat().resolvedOptions().timeZone || void 0, k: nav, b: n.webdriver || !n.languages?.length || soft || void 0 }]);
     ref = nav = null;
     n.sendBeacon?.(endpoint, body) || fetch(endpoint, { method: "POST", body, keepalive: true });
   };

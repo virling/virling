@@ -38,7 +38,7 @@ const channel = (bus) =>
   };
 const tick = () => new Promise((r) => setTimeout(r, 5));
 
-function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set(), agent = {}, zone = "Europe/Berlin", links = [], before = "", compat = false } = {}) {
+function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set(), agent = {}, zone = "Europe/Berlin", links = [], before = "", compat = false, gpu = "ANGLE (Apple, ANGLE Metal Renderer: Apple M2, Unspecified Version)" } = {}) {
   const loc = new URL(url);
   const clock = { t: 1_700_000_000_000 };
   const sent = [];
@@ -60,6 +60,14 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
     documentElement: { scrollHeight: 2000 },
     addEventListener: on("d:"),
     querySelectorAll: () => links,
+    // WebGL with the renderer string in `gpu`; null means WebGL is unavailable.
+    createElement: () => ({
+      getContext: () => gpu === null ? null : {
+        RENDERER: 7937,
+        getExtension: () => ({ UNMASKED_RENDERER_WEBGL: 37446 }),
+        getParameter: (p) => (p == 37446 ? gpu : "WebKit WebGL"),
+      },
+    }),
     get cookie() { return cookie.get(); },
     set cookie(v) { cookie.set(v); },
   };
@@ -116,6 +124,12 @@ test("automation and a browser without languages are flagged", () => {
   assert.equal(browser("https://example.com/").sent[0].b, undefined);
   assert.equal(browser("https://example.com/", { agent: { webdriver: true } }).sent[0].b, true);
   assert.equal(browser("https://example.com/", { agent: { languages: [] } }).sent[0].b, true);
+});
+
+test("a software WebGL renderer is flagged", () => {
+  assert.equal(browser("https://example.com/", { gpu: "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)" }).sent[0].b, true);
+  assert.equal(browser("https://example.com/", { gpu: "llvmpipe (LLVM 15.0.7, 256 bits)" }).sent[0].b, true);
+  assert.equal(browser("https://example.com/", { gpu: null }).sent[0].b, undefined);
 });
 
 test("goals from the queue and from virling()", () => {
