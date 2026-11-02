@@ -1,0 +1,65 @@
+name: Deploy server
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-server
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  DEPLOY_HOST: 100.98.80.35
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-24.04-arm
+    environment:
+      name: production
+      url: https://app.virling.com
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2.9.3
+      - run: cargo build --release --locked
+      - uses: tailscale/github-action@v4.4.0
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+          ping: ${{ env.DEPLOY_HOST }}
+      - name: Ship and restart, roll back if unhealthy
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          install -m 600 /dev/null ~/deploy_key
+          echo "$DEPLOY_SSH_KEY" > ~/deploy_key
+          ssh-keyscan -T 20 "$DEPLOY_HOST" > ~/known_hosts
+          SSH="ssh -i $HOME/deploy_key -o UserKnownHostsFile=$HOME/known_hosts ubuntu@$DEPLOY_HOST"
+          scp -i ~/deploy_key -o UserKnownHostsFile=~/known_hosts target/release/virling "ubuntu@$DEPLOY_HOST:/tmp/virling.new"
+          $SSH bash -s <<'EOF'
+          set -e
+          sudo cp /opt/virling/virling /opt/virling/virling.prev
+          sudo install -m 755 /tmp/virling.new /opt/virling/virling
+          sudo systemctl restart virling
+          for i in $(seq 1 30); do
+            [ "$(curl -s -o /dev/null -w %{http_code} http://127.0.0.1:8080/login)" = 200 ] && { /opt/virling/virling --version; exit 0; }
+            sleep 2
+          done
+          echo "Unhealthy after restart, rolling back"
+          sudo journalctl -u virling -n 30 --no-pager
+          sudo install -m 755 /opt/virling/virling.prev /opt/virling/virling
+          sudo systemctl restart virling
+          exit 1
+          EOF
