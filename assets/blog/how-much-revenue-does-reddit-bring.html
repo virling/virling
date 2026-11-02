@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to see how much revenue Reddit brings you</title>
+<meta name="description" content="Measure revenue from Reddit posts, not just upvotes and visits: tag links per subreddit, handle the missing referrer from the app, and read revenue per visitor.">
+<link rel="canonical" href="https://virling.com/blog/how-much-revenue-does-reddit-bring">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/how-much-revenue-does-reddit-bring">
+<meta property="og:title" content="How to see how much revenue Reddit brings you">
+<meta property="og:description" content="Measure revenue from Reddit posts, not just upvotes and visits: tag links per subreddit, handle the missing referrer from the app, and read revenue per visitor.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"How to see how much revenue Reddit brings you","item":"https://virling.com/blog/how-much-revenue-does-reddit-bring"}]},{"@type":"BlogPosting","headline":"How to see how much revenue Reddit brings you","description":"Measure revenue from Reddit posts, not just upvotes and visits: tag links per subreddit, handle the missing referrer from the app, and read revenue per visitor.","datePublished":"2026-11-02","dateModified":"2026-11-02","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/how-much-revenue-does-reddit-bring"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I measure revenue from Reddit posts?","acceptedAnswer":{"@type":"Answer","text":"Tag each Reddit link with utm_source=reddit and a campaign per post, pass the visitor ID into checkout, and use a tool that joins payments to visits. Then compare Reddit's revenue and revenue per visitor with your site average, per post."}},{"@type":"Question","name":"Why do Reddit visits show up as Direct?","acceptedAnswer":{"@type":"Answer","text":"Links opened inside the Reddit app often arrive with no referrer. With no referrer and no UTM tag, analytics tools count the visit as Direct. Adding utm_source=reddit to the link keeps those visits credited to Reddit."}},{"@type":"Question","name":"Can I see which subreddit sent a paying customer?","acceptedAnswer":{"@type":"Answer","text":"Not from the referrer alone, because Virling stores the referrer host, not the full URL. Put the subreddit and post in utm_campaign and the Campaign tab shows revenue per subreddit."}},{"@type":"Question","name":"Is Reddit traffic worth it for a SaaS?","acceptedAnswer":{"@type":"Answer","text":"It depends on the subreddit and the offer. Compare Reddit's revenue per visitor with your site average over a few weeks. A loud channel with low revenue per visitor deserves less time; one strong thread can still be worth repeating."}},{"@type":"Question","name":"How should I tag Reddit Ads?","acceptedAnswer":{"@type":"Answer","text":"Use utm_source=reddit and utm_medium=cpc. In Virling a paid medium wins over the referrer, so ad clicks land in the Paid channel and stay apart from organic Reddit posts."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-02</span>
+      <h1>How to see how much revenue Reddit brings you</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-02.</p>
+<p class="p"><b>Revenue from Reddit</b> is the money paid by customers whose credited visit came from reddit.com or from a link tagged with <code>utm_source=reddit</code>. To measure it you need each Reddit visit stored with a visitor ID, that ID carried into checkout, and payments joined back to the visit. Upvotes and visitor counts do not tell you this.</p>
+<p class="p">A Reddit post can send a lot of people in a day. Most of them read, close the tab and never come back. The question worth answering is not how many came but whether any of them paid, and how much each Reddit visitor was worth compared with your other channels.</p>
+<h2>How Reddit visits get counted</h2>
+<p class="p">There are two ways a visit gets marked as Reddit, and you want both working.</p>
+<ul class="post-list"><li><b>The referrer.</b> A click from reddit.com in a desktop or mobile browser usually arrives with reddit.com as the referrer. In Virling, reddit.com and its subdomains, such as old.reddit.com, are in the Communities channel and show as Reddit in the Source tab.</li><li><b>A UTM tag.</b> Links opened inside the Reddit app often arrive with no referrer. With no referrer and no tag, the visit lands in Direct. A <code>utm_source=reddit</code> on the link fixes that: with no referrer, Virling reads the source, and <code>reddit</code> is a known Communities source.</li></ul>
+<p class="p">Virling credits some in-app browsers to their app even without a referrer, such as Instagram, LinkedIn and Slack, but Reddit's app is not on that list. Tag your links. The full rule order is in <a href="https://docs.virling.com/attribution/channels">channels</a>.</p>
+<h2>Tag your Reddit links</h2>
+<p class="p">One link per post, so you can tell posts apart:</p>
+<div class="code block"><pre>https://yourdomain.com/?utm_source=reddit&amp;utm_medium=community&amp;utm_campaign=r-saas-launch-nov</pre></div>
+<ul class="post-list"><li><b>utm_source=reddit</b> for every Reddit link, so they group under one source.</li><li><b>utm_medium=community</b> for posts and comments. Anything except a paid or email medium keeps the visit in Communities.</li><li><b>utm_campaign</b> names the subreddit and the post. Virling never stores full referrer URLs, so the referrer alone cannot tell you which subreddit or thread a visit came from. The campaign can, and it shows in the Campaign tab.</li></ul>
+<p class="p">For Reddit Ads, use <code>utm_medium=cpc</code>. A paid medium wins over the referrer, so ad clicks land in Paid and do not inflate your organic Reddit numbers. More naming rules are in <a href="/blog/utm-parameters-for-revenue-tracking">which UTM parameters to use</a>, and the <a href="/tools/utm-builder">UTM builder</a> makes the link for you.</p>
+<p class="p">If long tagged URLs look spammy in a comment, use a tracked link instead. In Virling, open the Campaign tab on the Channels card, click <b>+ Tracked link</b>, pick Reddit and the page it should open. The short link adds the source, a community medium and its own campaign on the click, and the Campaign tab then lists it by name with its visitors and revenue. Some subreddits remove posts with short links, so read the rules first. See <a href="https://docs.virling.com/track/links">tracked links</a>.</p>
+<h2>Make sure payments can be credited</h2>
+<p class="p">Tags only get you visits. Revenue needs the visitor ID in checkout. If you use Stripe Payment Links, Polar checkout links or Dodo Payments links, the script adds the ID on click. For a checkout you create on your server, pass the <code>virling_vid</code> cookie, for example as <code>client_reference_id</code> on a Stripe Checkout Session. Every provider is covered in <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</p>
+<p class="p">Reddit buyers rarely pay on the first visit. With the default model, last non-direct, someone who clicked your post on Monday and came back on Friday by typing your URL is still credited to Reddit, as long as the Reddit visit is inside the lookback window, 90 days by default. If they subscribe, every renewal keeps counting toward Reddit.</p>
+<h2>Read the numbers</h2>
+<ol class="post-list"><li>Open the dashboard and pick a range that covers the post and a few weeks after it.</li><li>In the Channels card, open Communities, or switch to the Source tab, and find Reddit. The row shows visitors, revenue and revenue per visitor, with a chip that compares it with your site average.</li><li>Click the Reddit row to filter the whole page. The Pages card now shows which landing pages Reddit visitors arrived on.</li><li>Switch to the Campaign tab to split Reddit by subreddit and post, if you tagged them.</li><li>Open a payment from the Payments page to see the buyer's journey: every visit before the payment, with the credited one marked.</li><li>Check the Retention page after a month or two. It groups customers by the channel and referrer of their first payment, so you can see whether Reddit customers keep paying.</li></ol>
+<p class="p">A made-up example of what you might see: Reddit sent 1,800 visitors and $240, which is $0.13 per visitor, against a site average of $0.60. That is a loud channel that pays below average. If one campaign inside it, say a thread in a niche subreddit, made $200 of that from 150 visitors, that thread is worth $1.33 per visitor and the rest is noise. Your numbers will differ; the method is the same as in <a href="/blog/what-is-revenue-per-visitor">what is revenue per visitor</a>.</p>
+<h2>Log the post as a launch</h2>
+<p class="p">On the Launches page you can log a post with its name, link, channel and day. Virling then shows the visitors, new customers and revenue of that day and the day after. Those figures are all traffic on those two days, not only Reddit, so treat them as context and use the Source and Campaign numbers for the real credit.</p>
+<h2>What to check when the numbers look wrong</h2>
+<ul class="post-list"><li><b>Reddit looks small but Direct jumped the same day.</b> App visits without tags. Tag the next post.</li><li><b>Visits but no revenue at all.</b> Check the Matched revenue line under the Overview numbers. If a large share of revenue is unmatched, the visitor ID is not reaching checkout. See <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</li><li><b>Revenue shows up weeks later.</b> Normal for considered purchases. The Time to pay card shows the median days from first visit to first payment per channel. See <a href="/blog/how-long-does-a-visitor-take-to-become-a-customer">how long a visitor takes to become a customer</a>.</li><li><b>You want to know which channels introduce buyers</b> rather than which close them: switch the model to first touch in Site settings and compare. History is recomputed, and you can switch back.</li><li><b>Visitors who block the script</b> are not counted at all, so Reddit's real visitor number can be higher than what any analytics tool shows. Revenue still counts in your total, as Unattributed.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>How do I measure revenue from Reddit posts?</h3><p class="p">Tag each Reddit link with utm_source=reddit and a campaign per post, pass the visitor ID into checkout, and use a tool that joins payments to visits. Then compare Reddit's revenue and revenue per visitor with your site average, per post.</p>
+<h3>Why do Reddit visits show up as Direct?</h3><p class="p">Links opened inside the Reddit app often arrive with no referrer. With no referrer and no UTM tag, analytics tools count the visit as Direct. Adding utm_source=reddit to the link keeps those visits credited to Reddit.</p>
+<h3>Can I see which subreddit sent a paying customer?</h3><p class="p">Not from the referrer alone, because Virling stores the referrer host, not the full URL. Put the subreddit and post in utm_campaign and the Campaign tab shows revenue per subreddit.</p>
+<h3>Is Reddit traffic worth it for a SaaS?</h3><p class="p">It depends on the subreddit and the offer. Compare Reddit's revenue per visitor with your site average over a few weeks. A loud channel with low revenue per visitor deserves less time; one strong thread can still be worth repeating.</p>
+<h3>How should I tag Reddit Ads?</h3><p class="p">Use utm_source=reddit and utm_medium=cpc. In Virling a paid medium wins over the referrer, so ad clicks land in the Paid channel and stay apart from organic Reddit posts.</p>
+<p class="p">See what your last Reddit post earned: start a 14-day free trial at <a href="https://app.virling.com/login">app.virling.com</a>, or <a href="/self-host">self-host Virling free</a>. The <a href="/demo/">live demo</a> shows the Channels card with made-up data.</p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

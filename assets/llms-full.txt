@@ -88,6 +88,10 @@ Track visits with a first-party visitor ID, pass that ID into checkout, and join
 
 Yes. Virling is AGPLv3 and self-hosted. It reads Stripe with a restricted read-only key and credits each payment to the visit that led to it.
 
+### How do I see how much revenue Reddit brings?
+
+Visits from reddit.com, or with utm_source=reddit when there is no referrer, are in Virling's Communities channel and show as Reddit in the Source tab, with revenue and revenue per visitor. Links opened in the Reddit app often have no referrer, so tag them, and put the subreddit and post in utm_campaign. Guide: https://virling.com/blog/how-much-revenue-does-reddit-bring
+
 ### Can I self-host revenue analytics?
 
 Yes. Virling is one binary with embedded storage. Run it with Docker or a release binary on your own server.
