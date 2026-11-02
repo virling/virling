@@ -10,6 +10,7 @@ on:
       - "src/**"
       - "Cargo.toml"
       - "Cargo.lock"
+      - "migrations/**"
       - "scripts/install.sh"
       - ".github/workflows/deploy-site.yml"
   workflow_dispatch:
