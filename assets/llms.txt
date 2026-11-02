@@ -80,7 +80,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Find which marketing channel pays](https://virling.com/blog/find-which-channel-pays): five steps to measure revenue per visitor by channel
 - [Ask Claude which channel pays](https://virling.com/blog/ask-claude-which-channel-pays): connect payments and ask an MCP assistant
 - [How to see how much revenue Reddit brings you](https://virling.com/blog/how-much-revenue-does-reddit-bring): Tag links per subreddit, handle visits from the Reddit app that arrive with no referrer, and compare Reddit's revenue per visitor with your average.
-- [What is revenue per visitor, and how to work it out](https://virling.com/blog/what-is-revenue-per-visitor): Revenue per visitor is revenue divided by visitors. A worked example, what a good number looks like, and how to use it to pick channels.
+- [Revenue per visitor: formula, average and how to calculate](https://virling.com/blog/what-is-revenue-per-visitor): Revenue per visitor (RPV) is revenue divided by unique visitors. How to calculate it, what a good average is, why it matters and how to raise it.
 - [First-touch or last-touch attribution for a SaaS](https://virling.com/blog/first-touch-vs-last-touch-attribution-saas): First touch credits the visit that found you. Last touch credits the visit before the payment. Which to use for a small SaaS, with an example.
 - [How to track Stripe revenue by traffic source](https://virling.com/blog/track-stripe-revenue-by-traffic-source): Stripe knows who paid, not where they came from. Pass the visitor ID into checkout so each payment can be joined to the visit before it.
 - [Which UTM parameters to use to trace revenue](https://virling.com/blog/utm-parameters-for-revenue-tracking): Five UTM parameters, the naming rules that keep reports clean, and the mistakes that send revenue to Direct.
@@ -89,7 +89,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Trial-to-paid conversion by traffic source, step by step](https://virling.com/blog/trial-to-paid-conversion-by-traffic-source): Track the trial start as a goal, credit the first charge to the visits before the trial, and compare each channel's trial-to-paid rate.
 - [Which blog posts bring paying customers? How to find out](https://virling.com/blog/which-blog-posts-bring-paying-customers): Page views show which posts are read, not which pay. Credit payments to the landing page and compare posts by revenue per visitor.
 - [Cookieless analytics and revenue: what you lose and keep](https://virling.com/blog/cookieless-analytics-and-revenue): Without cookies you can count visits and keep sessions, but payments can no longer be linked to a visit. What changes and when to use it.
-- [Self-hosted analytics: what it takes to run it yourself](https://virling.com/blog/self-hosted-analytics-what-it-takes): What self-hosting analytics really costs in setup, servers and upkeep, and the questions to ask before you pick a tool.
+- [Self-hosted analytics: server size, cost and upkeep](https://virling.com/blog/self-hosted-analytics-what-it-takes): What self-hosted analytics needs: server size, setup time, backups and upgrades, with measured numbers and the questions to ask before you pick a tool.
 
 ## Source
 
