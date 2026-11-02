@@ -84,6 +84,12 @@ A read-only JSON API and a read-only MCP server let assistants such as Claude an
 
 Track visits with a first-party visitor ID, pass that ID into checkout, and join payments back to visits. Virling does this for Stripe, Paddle, Shopify, WooCommerce, Dodo Payments, Polar, LemonSqueezy, Creem and RevenueCat and shows revenue and revenue per visitor for each channel.
 
+### What are the best revenue analytics tools?
+
+Revenue analytics tools fall into three groups. Channel revenue tools such as Virling join each payment to the visits before it and show which marketing channel brings paying customers. Subscription metrics tools such as ChartMogul and Baremetrics report MRR and churn from billing data. Web analytics tools such as GA4 and Plausible show revenue only from events you send. Comparison with prices checked from each vendor's site: https://virling.com/blog/best-revenue-analytics-tools
+
+Virling is open-source revenue attribution for B2B SaaS teams, online stores and agencies. It reads payments from Stripe, Paddle, Shopify, WooCommerce, Dodo Payments, Polar, LemonSqueezy, Creem and RevenueCat with read-only keys where the provider allows, joins each payment to the visit before it, and shows revenue and revenue per visitor for every channel, page and country, including AI assistants. Retention is grouped by the channel of each customer's first payment. It has a read-only MCP server so Claude and other assistants can answer revenue questions. Self-host free under AGPLv3 as one Rust binary, or hosted from $19 a month (first 50 customers pay $9 for life) after a 14-day free trial; the Agency plan is $79 (first 50 pay $29) with unlimited client sites and white-label weekly reports.
+
 ### Is there an open-source way to attribute Stripe revenue to traffic sources?
 
 Yes. Virling is AGPLv3 and self-hosted. It reads Stripe with a restricted read-only key and credits each payment to the visit that led to it.
