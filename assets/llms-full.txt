@@ -92,6 +92,10 @@ Yes. Virling is AGPLv3 and self-hosted. It reads Stripe with a restricted read-o
 
 Yes. Virling is one binary with embedded storage. Run it with Docker or a release binary on your own server.
 
+### How do I measure trial-to-paid conversion by traffic source?
+
+Send a goal such as trial_started when the trial begins, so each trial has a channel. For card-up-front trials on Stripe, Polar and Dodo Payments, Virling records the trial start and credits the first charge to the visits before the trial. Divide paying customers by trials for each channel. Guide: https://virling.com/blog/trial-to-paid-conversion-by-traffic-source
+
 ### Does Virling need a cookie banner?
 
 That depends on your jurisdiction. In cookieless mode Virling sets no cookie, but payments can then not be linked to visits.

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trial-to-paid conversion by traffic source, step by step</title>
+<meta name="description" content="How to measure trial-to-paid conversion for each channel: track the trial start, credit the first charge to the right visit, and compare channels fairly.">
+<link rel="canonical" href="https://virling.com/blog/trial-to-paid-conversion-by-traffic-source">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/trial-to-paid-conversion-by-traffic-source">
+<meta property="og:title" content="Trial-to-paid conversion by traffic source, step by step">
+<meta property="og:description" content="How to measure trial-to-paid conversion for each channel: track the trial start, credit the first charge to the right visit, and compare channels fairly.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Trial-to-paid conversion by traffic source, step by step","item":"https://virling.com/blog/trial-to-paid-conversion-by-traffic-source"}]},{"@type":"BlogPosting","headline":"Trial-to-paid conversion by traffic source, step by step","description":"How to measure trial-to-paid conversion for each channel: track the trial start, credit the first charge to the right visit, and compare channels fairly.","datePublished":"2026-11-02","dateModified":"2026-11-02","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/trial-to-paid-conversion-by-traffic-source"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is trial-to-paid conversion by traffic source?","acceptedAnswer":{"@type":"Answer","text":"It is the share of free trials from each marketing channel that become paying customers. You need the channel of each trial and each customer's first payment credited to the visits before the trial, then divide payers by trials per channel."}},{"@type":"Question","name":"How do I track free trial conversions by channel?","acceptedAnswer":{"@type":"Answer","text":"Send a goal when the trial starts, so each trial is stored with its visit and channel. Then credit the first payment to the visits before the trial. Virling does the credit for Stripe, Polar and Dodo Payments trials, and shows trials and paying customers per channel."}},{"@type":"Question","name":"Why is the first payment after a free trial unattributed?","acceptedAnswer":{"@type":"Answer","text":"With a card-up-front trial the provider charges the card automatically when the trial ends, so that charge never passed through your site and carries no visitor ID. A tool has to link it back to the trial start, which did carry the ID."}},{"@type":"Question","name":"What is a good trial-to-paid conversion rate?","acceptedAnswer":{"@type":"Answer","text":"It depends on whether the trial asks for a card, your price and your market, so a benchmark from another company says little. Compare your own channels with each other and with your average, within one trial type."}},{"@type":"Question","name":"Should I judge channels by trial-to-paid rate alone?","acceptedAnswer":{"@type":"Answer","text":"No. Also check how long each channel takes to pay and how many of its customers still pay after a month or two. A channel with a high trial-to-paid rate and early cancellations can be worth less than a slower one whose customers stay."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-02</span>
+      <h1>Trial-to-paid conversion by traffic source, step by step</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-02.</p>
+<p class="p"><b>Trial-to-paid conversion by traffic source</b> is the share of free trials from each marketing channel that turn into a paying customer. You get it by recording which channel brought each trial, then crediting each customer's first payment to the visits before the trial began. A channel that sends many trials but few payers looks very different once you divide.</p>
+<p class="p">Signups are the number most SaaS dashboards stop at. They flatter channels that bring curious people. Trial-to-paid is where you see which channels bring people who were ready to buy.</p>
+<h2>The formula</h2>
+<p class="p"><code>trial-to-paid rate for a channel = customers from that channel who paid / trials from that channel</code></p>
+<p class="p">Use the same group of trials on both sides. If your trial lasts 14 days, the trials from the last 14 days have not had their chance to convert yet, so leave them out or expect a lower number for the most recent weeks.</p>
+<h2>Why it differs by channel</h2>
+<ul class="post-list"><li><b>Intent.</b> Someone who searched for a tool like yours, or asked an AI assistant for one, arrives closer to buying than someone who clicked a thread out of curiosity.</li><li><b>The promise before the click.</b> A post that oversold the product brings trials that leave on day two.</li><li><b>Who the channel reaches.</b> A community full of builders who will copy the idea brings different trials than a newsletter read by people with a budget.</li><li><b>Time.</b> Some channels convert in a day, others need the whole trial and a reminder email. Cutting a slow channel early can cost you its customers.</li><li><b>Card up front or not.</b> Trials that ask for a card convert at a higher rate but start less often, so compare channels within one trial type.</li></ul>
+<h2>The hard part: the first charge has no visit</h2>
+<p class="p">A paid plan bought through checkout carries the visitor ID, so the payment can be joined to the visit that led to it. A trial that asks for a card is different. Checkout charges nothing, and two weeks later the provider charges the card on its own. That first real charge was never near your website, so on its own it has no visit to be credited to.</p>
+<p class="p">Virling handles this for Stripe, Polar and Dodo Payments. It reads the trial start from the $0 checkout (Stripe's <code>checkout.session.completed</code> with a total of 0, Polar's $0 order and Dodo's $0 subscription payment), keeps it apart from payments so it never counts as revenue or a customer, and credits the customer's later charge from the visits before the trial started. Stripe trial starts are read from the time Stripe was connected, so earlier trials are not seen. See <a href="https://docs.virling.com/attribution/renewals">renewals and free trials</a>.</p>
+<p class="p">A trial with no card is simpler: when the user upgrades, they go through checkout, and checkout carries the visitor ID like any other payment, as long as you pass it. See <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</p>
+<h2>How to measure it in Virling</h2>
+<h3>1. Send a goal when the trial starts</h3>
+<p class="p">Fire one goal at the moment the trial exists, on the page after signup or after the trial checkout:</p>
+<div class="code block"><pre>virling("goal", "trial_started");</pre></div>
+<p class="p">If every signup is a trial, your signup goal is the trial start and you can use that. Goals are stored with the visitor, the session and the page. See <a href="https://docs.virling.com/track/goals">goals</a>.</p>
+<h3>2. Build a trial funnel</h3>
+<p class="p">Open the Goals tab at the top of the dashboard. The funnel always starts at Visit and ends at Paid, which comes from your payments with no setup. Choose <code>trial_started</code> as the step between them, and save it as a named funnel such as "Trial to paid" so it is one click away next time. Each step counts the visitors who did the step before it, shows the drop between steps, and shows the median time from the trial to the payment.</p>
+<p class="p">The channel tabs above the funnel filter it to one channel, and the headline changes to the share of visitors from that channel who became paying customers. Divide the Paid step by the trial step for that channel's trial-to-paid rate.</p>
+<p class="p">One caveat: the funnel's Paid step follows the visitor ID on the payment itself. That works for no-card trials, where the user pays through checkout. For card-up-front trials the automatic first charge has no visitor ID of its own, so the funnel undercounts payers. Use step 3 for those.</p>
+<h3>3. For card-up-front trials, use credited customers</h3>
+<p class="p">Two numbers, both by channel:</p>
+<ul class="post-list"><li><b>Trials:</b> in the Goals tab, switch to the Goals list and open <code>trial_started</code>. It splits the goal by channel, with the count and the share of that channel's visitors.</li><li><b>Payers:</b> open Customers who stay (the Retention page). Customers acquired counts customers whose first payment falls in the range, grouped by the channel credited for that payment, which includes the credit from the trial start.</li></ul>
+<p class="p">Divide the second by the first for each channel. The two sides are counted slightly differently: a goal is split by the channel of the session it happened in, while payments follow your attribution model, last non-direct by default. A visitor who found you on Reddit and came back by typing your URL to start the trial counts as Direct on the trial side and Reddit on the payment side. With a big gap between the two in one channel, switch the model to last touch in Site settings and compare; history is recomputed, and you can switch back.</p>
+<h3>4. Look past the first payment</h3>
+<p class="p">A channel with a high trial-to-paid rate can still lose if its customers cancel after a month. The same Retention page shows how many customers from each channel still pay, their 30-day churn and their lifetime value. The Time to pay card on the dashboard shows the median time from first visit to first payment per channel, which tells you whether a channel needs the full trial or converts on day one. See <a href="https://docs.virling.com/attribution/retention">retention by channel</a> and <a href="/blog/how-long-does-a-visitor-take-to-become-a-customer">how long a visitor takes to become a customer</a>.</p>
+<h2>A worked example</h2>
+<p class="p">Made-up numbers to show the method. Over 90 days, leaving out the last 14:</p>
+<ul class="post-list"><li>Organic search: 120 trials, 30 paid, 25%.</li><li>Communities: 200 trials, 16 paid, 8%.</li><li>AI: 25 trials, 9 paid, 36%.</li></ul>
+<p class="p">Communities sends the most trials and converts the fewest. AI sends the fewest and converts the best. Before you move effort, check the time to pay and the 30-day churn for each, and wait until a channel has a few dozen trials. With 25 trials, two extra payers move the rate by eight points.</p>
+<h2>What to check if the numbers look off</h2>
+<ul class="post-list"><li><b>Paid customers show as Unattributed.</b> The visitor ID did not reach checkout, or the trial started before Stripe was connected. The Matched revenue line under the Overview numbers gives the share matched and why the rest was not. See <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</li><li><b>No trial starts are credited on a provider other than Stripe, Polar or Dodo Payments.</b> Trial-start credit covers those three. On others, pass the visitor ID when the trial is created if the provider lets you store it on the subscription or customer, or send an identify event with the email after signup so Stripe payments can be matched by email.</li><li><b>The trial goal fires twice.</b> Fire it once, on the step that creates the trial, not on every visit to the welcome page. The funnel counts visitors, but the Goals list counts completions.</li><li><b>Big swings week to week.</b> Small numbers. Use a longer range.</li></ul>
+<p class="p">For the general setup of joining payments to visits, see <a href="/blog/find-which-channel-pays">how to find which marketing channel pays</a> and <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>What is trial-to-paid conversion by traffic source?</h3><p class="p">It is the share of free trials from each marketing channel that become paying customers. You need the channel of each trial and each customer's first payment credited to the visits before the trial, then divide payers by trials per channel.</p>
+<h3>How do I track free trial conversions by channel?</h3><p class="p">Send a goal when the trial starts, so each trial is stored with its visit and channel. Then credit the first payment to the visits before the trial. Virling does the credit for Stripe, Polar and Dodo Payments trials, and shows trials and paying customers per channel.</p>
+<h3>Why is the first payment after a free trial unattributed?</h3><p class="p">With a card-up-front trial the provider charges the card automatically when the trial ends, so that charge never passed through your site and carries no visitor ID. A tool has to link it back to the trial start, which did carry the ID.</p>
+<h3>What is a good trial-to-paid conversion rate?</h3><p class="p">It depends on whether the trial asks for a card, your price and your market, so a benchmark from another company says little. Compare your own channels with each other and with your average, within one trial type.</p>
+<h3>Should I judge channels by trial-to-paid rate alone?</h3><p class="p">No. Also check how long each channel takes to pay and how many of its customers still pay after a month or two. A channel with a high trial-to-paid rate and early cancellations can be worth less than a slower one whose customers stay.</p>
+<p class="p">Measure your own trials by channel: start a 14-day free trial at <a href="https://app.virling.com/login">app.virling.com</a>, or <a href="/self-host">self-host Virling free</a>. The <a href="/demo/">live demo</a> has a goals funnel with made-up data.</p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
