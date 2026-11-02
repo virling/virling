@@ -70,6 +70,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 
 ## Blog
 
+- [WooCommerce order attribution says Unknown: why and fixes](https://virling.com/blog/woocommerce-order-attribution-unknown): why WooCommerce marks orders as Unknown, how to tell which cause you have, and how to keep the source on future orders.
 - [Best revenue attribution tools for SaaS and stores, 2026](https://virling.com/blog/best-revenue-attribution-tools): seven tools that show which channel brings paying customers, compared on payment sync, self-hosting and price.
 - [Why GA4 revenue doesn't match Stripe or Shopify](https://virling.com/blog/ga4-revenue-does-not-match-stripe): eight reasons GA4 and your payment provider disagree on revenue, how to check each one, and which number to trust.
 - [Why Shopify orders show up as Direct, and how to fix it](https://virling.com/blog/shopify-orders-show-as-direct): untagged emails, in-app browsers, other domains and long buying cycles push Shopify orders into Direct.
