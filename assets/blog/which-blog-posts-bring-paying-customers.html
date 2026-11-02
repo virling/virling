@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which blog posts bring paying customers? How to find out</title>
+<meta name="description" content="Page views show which posts are read, not which pay. How to credit payments to the landing page, compare posts by revenue per visitor, and read the result.">
+<link rel="canonical" href="https://virling.com/blog/which-blog-posts-bring-paying-customers">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/which-blog-posts-bring-paying-customers">
+<meta property="og:title" content="Which blog posts bring paying customers? How to find out">
+<meta property="og:description" content="Page views show which posts are read, not which pay. How to credit payments to the landing page, compare posts by revenue per visitor, and read the result.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Which blog posts bring paying customers? How to find out","item":"https://virling.com/blog/which-blog-posts-bring-paying-customers"}]},{"@type":"BlogPosting","headline":"Which blog posts bring paying customers? How to find out","description":"Page views show which posts are read, not which pay. How to credit payments to the landing page, compare posts by revenue per visitor, and read the result.","datePublished":"2026-11-02","dateModified":"2026-11-02","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/which-blog-posts-bring-paying-customers"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Which blog posts bring paying customers?","acceptedAnswer":{"@type":"Answer","text":"The ones whose visitors later pay. To see them, credit each payment to the landing page of the visit that brought the customer, then compare pages by revenue per visitor, not by page views."}},{"@type":"Question","name":"How do I track revenue by landing page?","acceptedAnswer":{"@type":"Answer","text":"Connect your payment provider and pass the visitor ID into checkout. The payment is then joined to the visit before it, and the whole payment, after refunds, is credited to that visit's landing page, channel and campaign. Virling shows this on the Pages card, under Landing page."}},{"@type":"Question","name":"What is the difference between a landing page and the page before paying?","acceptedAnswer":{"@type":"Answer","text":"The landing page is the first page of the visit that is credited with the payment, the post that found the customer. The page before paying is the last page viewed before the payment, often pricing or checkout. Landing page shows what attracts buyers; before paying shows what closes them."}},{"@type":"Question","name":"Should I delete blog posts that bring no revenue?","acceptedAnswer":{"@type":"Answer","text":"Not on that evidence alone. A post can bring no payments because it is new, because it gets few visitors, or because it reaches readers who buy later through another page. Check visitors, revenue per visitor and time to pay before you change or remove anything."}},{"@type":"Question","name":"Is a post with a lot of traffic and no revenue a problem?","acceptedAnswer":{"@type":"Answer","text":"It is a question, not a verdict. Look at who the post attracts and what it offers next. A post that draws readers who are not your buyers can be rewritten for a different search, or linked to the product more clearly."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-02</span>
+      <h1>Which blog posts bring paying customers? How to find out</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-02.</p>
+<p class="p"><b>The blog posts that bring paying customers</b> are the ones whose readers later pay you, and you only see them when each payment is credited to the first page of the visit that brought the customer. Page views cannot show this. A post can be read by thousands and bring nobody who buys, while a quiet post brings the people who do.</p>
+<p class="p">This guide shows how to credit payments to landing pages, which numbers to compare, and how to read the result without over-trusting it.</p>
+<h2>Why page views mislead</h2>
+<ul class="post-list"><li><b>Reach is not intent.</b> A post that ranks for a broad question draws many readers who will never need your product.</li><li><b>The buyer may not read the post you expect.</b> The pages that get the most views are often the pages that matter least for revenue.</li><li><b>Payment happens elsewhere.</b> Most people read a post, leave, and pay days later after typing your address or following another link. Without a record that ties the payment to the first visit, that sale lands in Direct.</li></ul>
+<h2>What you need first</h2>
+<p class="p">Two links must exist before any page report means something. The payment must be connected, and the visitor ID must reach checkout, so a payment can be joined to the visit before it. See <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a> and <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</p>
+<p class="p">Then it is a matter of which visit gets the credit. Virling describes a session by its first pageview: its channel, referrer, campaign and landing page. When a payment is matched, the whole payment, after refunds, is credited to that session&rsquo;s channel, referrer, campaign and landing page. See <a href="https://docs.virling.com/attribution/model">the attribution model</a>.</p>
+<h2>How to read it in Virling</h2>
+<h3>1. Open the Pages card</h3>
+<p class="p">The Pages card on the dashboard has two tabs. <b>Landing page</b> lists the first page of the visit that was credited with the payment. <b>Before paying</b> lists the last page viewed before the payment. Each row shows visitors, revenue and revenue per visitor, with a chip that compares the row with your site average: green above it, red below.</p>
+<h3>2. Sort by revenue per visitor, not by visitors</h3>
+<p class="p">A row with many visitors and a red chip is loud but does not pay. A small row with a green chip is worth more of your time. See <a href="/blog/what-is-revenue-per-visitor">what revenue per visitor is</a>. Wait until a post has a few hundred visitors before you trust its chip: one sale on 40 visitors makes a post look better than it is.</p>
+<h3>3. Filter by channel</h3>
+<p class="p">Click a row, or a channel on the Channels card, and the whole page filters to it. Open a post and see which channel sends its visitors: a post whose revenue comes from organic search is a different asset from one that earned it from a single Reddit thread. Click <b>See visitors</b> to open the people behind the number.</p>
+<h3>4. Compare Landing page with Before paying</h3>
+<p class="p">Landing page tells you which posts attract buyers. Before paying tells you which pages close them, often pricing or a comparison page. If a post has a high landing-page chip and its readers go through the same page before paying, link that page more clearly from the post. The <b>Almost paid</b> card, which appears when it has something to show, lists visitors who reached pricing or checkout and did not pay, by their last page, with the revenue left on the table.</p>
+<h3>5. Check whether the post is read</h3>
+<p class="p">The <b>Reading</b> card shows, for each page, how long it stays visible and how far it is scrolled, for every visitor or only for buyers. Compare the two: if buyers scroll to the end of a post and everyone else leaves at the top, the end of the post is doing the work.</p>
+<h2>A worked example</h2>
+<p class="p">Made-up numbers to show the method. Over 90 days:</p>
+<ul class="post-list"><li>A comparison post: 900 visitors, 6 sales, high revenue per visitor.</li><li>A &ldquo;what is&rdquo; explainer: 14,000 visitors, 5 sales, low revenue per visitor.</li><li>A tutorial: 2,100 visitors, 1 sale. Too few sales to judge.</li></ul>
+<p class="p">The explainer wins on traffic and loses on pay. The comparison post deserves a sister post on the next rival. The tutorial needs more time, or a clearer step to the product, before it is judged. Do not delete the explainer: it may be where people first meet you. Check its time to pay on the <a href="/blog/how-long-does-a-visitor-take-to-become-a-customer">time to pay</a> card before deciding.</p>
+<h2>What to check if the numbers look off</h2>
+<ul class="post-list"><li><b>Most revenue has no landing page.</b> The payment was not matched to a visit. The Matched revenue line under the Overview numbers gives the share matched and why the rest was not. See <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</li><li><b>Posts you expected to win are missing.</b> By default the payment is credited to the latest visit that was not Direct, which can be a later visit than the one that found the customer. Switch the attribution model to first touch in Site settings to credit the earliest session, and compare. See <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch or last touch</a>.</li><li><b>A post with traffic shows no revenue.</b> Check its row against the date range, since a sale is credited on the day of the payment. Posts that readers return from days later need a longer range.</li></ul>
+<p class="p">For the general setup, see <a href="/blog/find-which-channel-pays">how to find which marketing channel pays</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>Which blog posts bring paying customers?</h3><p class="p">The ones whose visitors later pay. To see them, credit each payment to the landing page of the visit that brought the customer, then compare pages by revenue per visitor, not by page views.</p>
+<h3>How do I track revenue by landing page?</h3><p class="p">Connect your payment provider and pass the visitor ID into checkout. The payment is then joined to the visit before it, and the whole payment, after refunds, is credited to that visit's landing page, channel and campaign. Virling shows this on the Pages card, under Landing page.</p>
+<h3>What is the difference between a landing page and the page before paying?</h3><p class="p">The landing page is the first page of the visit that is credited with the payment, the post that found the customer. The page before paying is the last page viewed before the payment, often pricing or checkout. Landing page shows what attracts buyers; before paying shows what closes them.</p>
+<h3>Should I delete blog posts that bring no revenue?</h3><p class="p">Not on that evidence alone. A post can bring no payments because it is new, because it gets few visitors, or because it reaches readers who buy later through another page. Check visitors, revenue per visitor and time to pay before you change or remove anything.</p>
+<h3>Is a post with a lot of traffic and no revenue a problem?</h3><p class="p">It is a question, not a verdict. Look at who the post attracts and what it offers next. A post that draws readers who are not your buyers can be rewritten for a different search, or linked to the product more clearly.</p>
+<p class="p">See which of your posts pays: start a 14-day free trial at <a href="https://app.virling.com/login">app.virling.com</a>, or <a href="/self-host">self-host Virling free</a>. The <a href="/demo/">live demo</a> has a Pages card with made-up data.</p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
