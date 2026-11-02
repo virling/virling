@@ -360,12 +360,13 @@ async fn start() -> anyhow::Result<()> {
             let appsumo = match (args.appsumo_api_key, args.hosted) {
                 (Some(api_key), true) => Some(appsumo::AppSumo {
                     api_key,
-                    client_id: args
-                        .appsumo_client_id
-                        .context("--appsumo-api-key needs --appsumo-client-id")?,
-                    client_secret: args
-                        .appsumo_client_secret
-                        .context("--appsumo-api-key needs --appsumo-client-secret")?,
+                    client_id: args.appsumo_client_id.unwrap_or_else(|| {
+                        tracing::warn!(
+                            "AppSumo redemption is off until --appsumo-client-id is set"
+                        );
+                        String::new()
+                    }),
+                    client_secret: args.appsumo_client_secret.unwrap_or_default(),
                     personal_tier: args.appsumo_personal_tier,
                     agency_tier: args.appsumo_agency_tier,
                     oauth_url: "https://appsumo.com".into(),
