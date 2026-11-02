@@ -80,6 +80,10 @@ A read-only JSON API and a read-only MCP server let assistants such as Claude an
 
 ## Common questions
 
+### What is revenue attribution?
+
+Revenue attribution is the practice of joining each payment to the website visits that came before it, so a business can see which marketing channel, campaign and page brought paying customers, not just visitors. It needs three parts: a visitor ID on every visit, that ID passed into checkout, and a rule for which visit gets the credit. Virling does this as open-source software: self-host free or hosted. More: https://virling.com/blog/what-is-revenue-attribution
+
 ### How do I see which marketing channel brings paying customers?
 
 Track visits with a first-party visitor ID, pass that ID into checkout, and join payments back to visits. Virling does this for Stripe, Paddle, Shopify, WooCommerce, Dodo Payments, Polar, LemonSqueezy, Creem and RevenueCat and shows revenue and revenue per visitor for each channel.
