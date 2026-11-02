@@ -66,3 +66,16 @@ jobs:
             echo "$url -> $code"
             [ "$code" = "200" ] || exit 1
           done
+
+      - name: Submit changed pages to IndexNow
+        continue-on-error: true
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: python3 scripts/indexnow.py --site https://virling.com --src assets --home selfhost --key-file assets/2a8f55835d6896d691cddc70332b11ee.txt --before "$BEFORE"
+
+      - name: Resubmit the sitemap to Search Console
+        continue-on-error: true
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_PROPERTY: ${{ vars.GSC_PROPERTY }}
+        run: python3 scripts/gsc-sitemaps.py https://virling.com/sitemap.xml

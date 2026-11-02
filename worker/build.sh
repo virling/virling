@@ -15,7 +15,7 @@ cp ../assets/vs.html ../assets/about.html ../assets/privacy.html ../assets/terms
 curl -fsSL https://api.github.com/repos/virling/virling/releases | perl ../scripts/changelog.pl ../assets/changelog.html > public/changelog.html
 cp ../assets/site.css ../assets/site.js ../assets/app.css ../assets/app.js ../assets/email-logo.png public/assets/
 cp ../assets/auth.md public/auth.md
-cp ../assets/favicon.svg ../assets/favicon.ico ../assets/v.js ../assets/v-compat.js ../assets/robots.txt ../assets/sitemap.xml ../assets/llms.txt ../assets/llms-full.txt ../scripts/install.sh public/
+cp ../assets/favicon.svg ../assets/favicon.ico ../assets/v.js ../assets/v-compat.js ../assets/robots.txt ../assets/2a8f55835d6896d691cddc70332b11ee.txt ../assets/sitemap.xml ../assets/llms.txt ../assets/llms-full.txt ../scripts/install.sh public/
 cp -R ../assets/art public/assets/art
 # Date each sitemap URL by the last commit that touched its page.
 perl -pi -e 's#<loc>https://virling\.com(/[^<]*)</loc>#my $p = $1; my $f = $p eq "/" ? "selfhost" : substr($p, 1); my $d = `git log -1 --format=%cs -- ../assets/$f.html`; chomp $d; "<loc>https://virling.com$p</loc>" . ($d ? "<lastmod>$d</lastmod>" : "")#e' public/sitemap.xml
