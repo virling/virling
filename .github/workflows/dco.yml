@@ -25,3 +25,26 @@ jobs:
             fi
           done
           exit $missing
+
+  no-ai-attribution:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: No AI co-author trailers or PR footers
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          bad=0
+          for c in $(git rev-list --no-merges ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}); do
+            if git show -s --format=%B "$c" | grep -qiE '^(Co-authored-by: .*(claude|anthropic)|Claude-Session:)'; then
+              echo "::error::Commit $c has an AI co-author or session trailer. Reword it without the trailer."
+              bad=1
+            fi
+          done
+          if printf '%s' "$BODY" | grep -qiE 'Generated with \[?Claude Code'; then
+            echo "::error::The PR description has a Generated with Claude Code footer. Remove it."
+            bad=1
+          fi
+          exit $bad
