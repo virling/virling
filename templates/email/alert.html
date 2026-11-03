@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ subject }}</title>
+</head>
+<body style="margin:0;padding:24px 12px;background:#F6F6F3;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;color:#0E1116">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFFFF;border:1px solid #E4E4DF;border-radius:16px">
+<tr><td style="padding:28px 28px 24px">
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+<td valign="middle" style="padding-bottom:18px;border-bottom:1px solid #EFEFEB"><img src="{{ base }}/assets/email-logo.png" width="104" height="26" alt="Virling" style="display:block;border:0"></td>
+<td valign="middle" align="right" style="padding-bottom:18px;border-bottom:1px solid #EFEFEB"><div style="font-weight:600;font-size:14px">{{ domain }}</div><div style="font-size:12px;color:#6B717C">{{ when }}</div></td>
+</tr></table>
+
+<div style="font-size:13px;font-weight:600;color:#E8471C;margin:24px 0 6px">{{ kicker }}</div>
+<h1 style="margin:0;font-size:24px;line-height:1.25;letter-spacing:-0.02em;font-weight:700">{{ headline }}</h1>
+
+{% if !kpis.is_empty() %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px">
+<tr>{% for k in kpis %}<td width="33%" valign="top" style="padding:{% if loop.first %}0 4px 0 0{% else if loop.last %}0 0 0 4px{% else %}0 4px{% endif %}">
+<div style="border:1px solid #E4E4DF;border-radius:12px;padding:12px 14px">
+<div style="font-size:12px;color:#6B717C">{{ k.0 }}</div>
+<div style="font-size:22px;font-weight:700;letter-spacing:-0.02em;margin-top:2px">{{ k.1 }}</div>
+</div>
+</td>{% endfor %}</tr>
+</table>
+{% endif %}
+
+{% if !rows.is_empty() %}
+<div style="margin:24px 0 6px;font-size:13px;color:#6B717C">{{ rows_title }}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px">
+{% for r in rows %}<tr>
+<td style="padding:10px 8px 10px 0;border-top:1px solid #EFEFEB;font-weight:600">{{ r.0 }}</td>
+<td align="right" style="padding:10px 0;border-top:1px solid #EFEFEB;color:#4B515C;white-space:nowrap">{{ r.1 }}</td>
+<td align="right" style="padding:10px 0 10px 16px;border-top:1px solid #EFEFEB;font-weight:600;white-space:nowrap">{{ r.2 }}</td>
+</tr>{% endfor %}
+</table>
+{% endif %}
+
+<p style="margin:24px 0 0"><a href="{{ link }}" style="display:inline-block;padding:12px 20px;border-radius:10px;background:#0E1116;color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none">Open the dashboard</a></p>
+
+<hr style="border:0;border-top:1px solid #EFEFEB;margin:24px 0 12px">
+<p style="margin:0;font-size:12px;line-height:1.5;color:#6B717C">You get this because email alerts are on for {{ domain }}. <a href="{{ settings }}" style="color:#4B515C">Change them in site settings</a>.</p>
+</td></tr></table>
+</td></tr></table>
+</body>
+</html>
