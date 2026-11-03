@@ -1,4 +1,6 @@
-# AI crawlers
+# AI crawlers: track GPTBot, ClaudeBot and other LLM bots
+
+AI crawlers, also called LLM crawlers, are the bots AI companies send to read websites: to train models, to build AI search indexes, and to fetch a page live when someone asks an assistant. Virling counts which of your pages each one reads, next to the visitors and revenue its assistant sends you.
 
 The **AI** card on the dashboard has one row per AI company, with the pages its crawlers read next to the visitors and revenue its assistants sent. Hover a company's pages read to see each bot's hits, pages, most-read page and when it was last seen. Crawler hits are stored apart from visits, so they never count as visitors.
 
@@ -110,3 +112,20 @@ end
 ```
 
 Crawler hits have their own per-site rate limit, so a crawler flood never drops real visits.
+
+## Allow or block AI crawlers
+
+Each crawler reads `robots.txt` by its own token. Blocking training bots does not block the answer and search bots, so you can stay out of training data and still be cited in AI answers:
+
+```text
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+```
+
+Compare the pages read before and after the change on the AI card. Answer and search bots that keep reading your pages, and the revenue their assistants send, show whether blocking cost you anything.
