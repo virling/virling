@@ -1,5 +1,6 @@
 //! Email to the site owner for each new sale and a daily digest at a chosen local hour.
 
+use askama::Template;
 use axum::Form;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
@@ -9,8 +10,7 @@ use time::{Duration, OffsetDateTime};
 
 use crate::app::AppState;
 use crate::auth::Account;
-use crate::chart::esc;
-use crate::dashboard::{load, money, native};
+use crate::dashboard::{group, load, money, native};
 use crate::sites::app_path;
 use crate::stats::{Dimension, PaymentFilter, Period};
 
@@ -30,16 +30,39 @@ pub async fn run(state: AppState) {
 
 type Row = (String, String, String, String, bool, bool, i64, i64, i64);
 
-async fn email(state: &AppState, to: &str, subject: &str, lines: &[String], link: &str) {
-    let text = format!("{}\n\n{link}\n", lines.join("\n"));
-    let body: String = lines.iter().map(|l| format!("<p>{}</p>", esc(l))).collect();
-    let html = format!(
-        "{body}<p><a href=\"{}\">Open the dashboard</a></p>",
-        esc(link)
-    );
-    if let Err(err) = state.mailer.send(to, subject, text, html).await {
+/// One alert email: a headline, optional stat cards and rows, and a link to the dashboard.
+#[derive(Template)]
+#[template(path = "email/alert.html")]
+struct Alert<'a> {
+    subject: &'a str,
+    base: &'a str,
+    domain: &'a str,
+    when: String,
+    kicker: &'a str,
+    headline: String,
+    kpis: Vec<(&'static str, String)>,
+    rows_title: &'static str,
+    rows: Vec<(String, String, String)>,
+    link: &'a str,
+    settings: String,
+}
+
+async fn email(state: &AppState, to: &str, lines: &[String], alert: &Alert<'_>) {
+    let text = format!("{}\n\n{}\n", lines.join("\n"), alert.link);
+    let html = match alert.render() {
+        Ok(html) => html,
+        Err(err) => {
+            tracing::error!(%err, "rendering an alert email failed");
+            return;
+        }
+    };
+    if let Err(err) = state.mailer.send(to, alert.subject, text, html).await {
         tracing::error!(%err, "sending an alert email failed");
     }
+}
+
+fn day_name(d: time::Date) -> String {
+    format!("{}, {} {}", d.weekday(), d.day(), d.month())
 }
 
 /// Sends the sale emails and the digest due at `now`; returns how many emails went out.
@@ -53,10 +76,12 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
     .await?;
     let mut sent = 0;
     for (site, domain, tz, to, sales, digest, hour, sent_until, digest_day) in rows {
-        let link = format!("{}{}", state.config.base_url, app_path(&domain, ""));
+        let base = state.config.base_url.as_str();
+        let link = format!("{base}{}", app_path(&domain, ""));
+        let settings = format!("{base}{}#alerts", app_path(&domain, "settings"));
         let store = state.events.clone();
         let (id, zone) = (site.clone(), tz.clone());
-        let (today, local_hour, page, yesterday, channels) =
+        let (today, local_offset, page, yesterday, channels) =
             tokio::task::spawn_blocking(move || {
                 let local = now.to_offset(store.utc_offset(&zone)?);
                 let today = local.date();
@@ -68,7 +93,7 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
                 let before = day(today - Duration::days(1), today - Duration::days(1));
                 anyhow::Ok((
                     today,
-                    local.hour(),
+                    local.offset(),
                     if sales {
                         Some(store.payment_list(
                             &id,
@@ -99,14 +124,21 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
             for p in fresh {
                 let amount = native(p.amount, &p.currency);
                 let source = p.touch.as_ref().map_or("an unknown source", |t| &t.source);
-                email(
-                    state,
-                    &to,
-                    &format!("New sale on {domain}: {amount}"),
-                    &[format!("{amount} from {source}.")],
-                    &link,
-                )
-                .await;
+                let subject = format!("New sale on {domain}: {amount}");
+                let alert = Alert {
+                    subject: &subject,
+                    base,
+                    domain: &domain,
+                    when: day_name(p.ts.to_offset(local_offset).date()),
+                    kicker: "New sale",
+                    headline: format!("{amount} from {source}"),
+                    kpis: vec![],
+                    rows_title: "",
+                    rows: vec![],
+                    link: &link,
+                    settings: settings.clone(),
+                };
+                email(state, &to, &[format!("{amount} from {source}.")], &alert).await;
                 sqlx::query(
                     "UPDATE email_alerts SET sent_until = max(sent_until, ?) WHERE site_id = ?",
                 )
@@ -118,7 +150,7 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
             }
         }
         let julian = i64::from(today.to_julian_day());
-        if digest && i64::from(local_hour) >= hour && digest_day < julian {
+        if digest && i64::from(now.to_offset(local_offset).hour()) >= hour && digest_day < julian {
             if yesterday.visitors > 0 || yesterday.payments > 0 {
                 let mut lines = vec![format!(
                     "Yesterday on {domain}: {} visitors, {} sales, {} revenue.",
@@ -126,15 +158,61 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
                     yesterday.payments,
                     money(yesterday.revenue_usd)
                 )];
-                if let Some(top) = channels.iter().find(|c| !c.unattributed && c.visitors > 0) {
+                let top: Vec<_> = channels
+                    .iter()
+                    .filter(|c| !c.unattributed && c.visitors > 0)
+                    .take(3)
+                    .collect();
+                if let Some(c) = top.first() {
                     lines.push(format!(
                         "Top channel: {}, {} visitors and {} revenue.",
-                        top.label,
-                        top.visitors,
-                        money(top.revenue_usd)
+                        c.label,
+                        c.visitors,
+                        money(c.revenue_usd)
                     ));
                 }
-                email(state, &to, &format!("Yesterday on {domain}"), &lines, &link).await;
+                let headline = if yesterday.payments > 0 {
+                    format!(
+                        "{} from {} {}",
+                        money(yesterday.revenue_usd),
+                        group(yesterday.payments),
+                        if yesterday.payments == 1 {
+                            "sale"
+                        } else {
+                            "sales"
+                        }
+                    )
+                } else {
+                    format!("{} visitors, no sales", group(yesterday.visitors))
+                };
+                let subject = format!("Yesterday on {domain}");
+                let alert = Alert {
+                    subject: &subject,
+                    base,
+                    domain: &domain,
+                    when: day_name(today - Duration::days(1)),
+                    kicker: "Daily digest",
+                    headline,
+                    kpis: vec![
+                        ("Visitors", group(yesterday.visitors)),
+                        ("Sales", group(yesterday.payments)),
+                        ("Revenue", money(yesterday.revenue_usd)),
+                    ],
+                    rows_title: "Top channels",
+                    rows: top
+                        .iter()
+                        .map(|c| {
+                            (
+                                c.label.clone(),
+                                format!("{} visitors", group(c.visitors)),
+                                money(c.revenue_usd),
+                            )
+                        })
+                        .collect(),
+                    link: &link,
+                    settings: settings.clone(),
+                };
+                email(state, &to, &lines, &alert).await;
                 sent += 1;
             }
             sqlx::query("UPDATE email_alerts SET digest_day = ? WHERE site_id = ?")
@@ -232,4 +310,35 @@ pub async fn save(
         app_path(&ctx.site.domain, "settings")
     ))
     .into_response()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn digest_shows_stats_and_channels() {
+        let alert = Alert {
+            subject: "Yesterday on example.com",
+            base: "https://app.virling.com",
+            domain: "example.com",
+            when: day_name(time::macros::date!(2026 - 11 - 02)),
+            kicker: "Daily digest",
+            headline: "$120 from 3 sales".into(),
+            kpis: vec![
+                ("Visitors", "97".into()),
+                ("Sales", "3".into()),
+                ("Revenue", "$120".into()),
+            ],
+            rows_title: "Top channels",
+            rows: vec![("Organic search".into(), "90 visitors".into(), "$80".into())],
+            link: "https://app.virling.com/app/example.com",
+            settings: "https://app.virling.com/app/example.com/settings#alerts".into(),
+        };
+        let html = alert.render().unwrap();
+        assert!(html.contains("Monday, 2 November"));
+        assert!(html.contains("$120 from 3 sales"));
+        assert!(html.contains("Organic search"));
+        assert!(html.contains("/settings#alerts"));
+    }
 }
