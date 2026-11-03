@@ -1,5 +1,5 @@
 """Gives each built page a canonical URL and its own description, and writes sitemap.xml."""
-import html, json, pathlib, re, sys
+import html, json, pathlib, re, subprocess, sys
 
 book = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "book")
 site = "https://docs.virling.com/"
@@ -25,7 +25,6 @@ for f in sorted(book.rglob("*.html")):
         continue
     path = rel[: -len("index.html")] if rel.endswith("index.html") else rel[: -len(".html")]
     url = site + path
-    urls.append(url)
     page = f.read_text()
     head = f'<meta name="description" content="'
     if rel != "index.html":
@@ -53,6 +52,7 @@ for f in sorted(book.rglob("*.html")):
     page = page.replace("</head>", f'<link rel="canonical" href="{url}">\n{og}<meta name="twitter:card" content="summary">\n<script type="application/ld+json">{ld}</script>\n</head>', 1)
     f.write_text(page)
     src = book.parent / "src" / (rel[: -len(".html")] + ".md")
+    urls.append((url, subprocess.run(["git", "log", "-1", "--format=%cs", "--", src], capture_output=True, text=True).stdout.strip()))
     if src.exists():
         (book / (rel[: -len(".html")] + ".md")).write_text(src.read_text())
     llms.append(f"- [{title}]({url}): {desc}")
@@ -62,7 +62,7 @@ for f in sorted(book.rglob("*.html")):
 for f in book.glob("searchindex*.js*"):
     f.write_text(f.read_text().replace("VIRLING_VERSION", version))
 
-rows = "".join(f"  <url><loc>{u}</loc></url>\n" for u in urls)
+rows = "".join(f"  <url><loc>{u}</loc>" + (f"<lastmod>{d}</lastmod>" if d else "") + "</url>\n" for u, d in urls)
 (book / "sitemap.xml").write_text(
     '<?xml version="1.0" encoding="UTF-8"?>\n'
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + rows + "</urlset>\n"
