@@ -23,6 +23,8 @@ for (const select of document.querySelectorAll("[data-select]")) {
   const label = select.querySelector("[data-label]");
   const options = [...menu.querySelectorAll("[role=option]")];
   const visible = () => options.filter((o) => !o.hidden);
+  const chosen = options.find((o) => o.getAttribute("aria-selected") === "true");
+  if (chosen) label.textContent = chosen.textContent.trim();
   let active = -1;
   const highlight = (i) => {
     const list = visible();
