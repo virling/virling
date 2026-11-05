@@ -141,6 +141,33 @@ async fn mark(
     .map(|_| ())
 }
 
+type Keys = (Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>);
+
+/// Posts one event to the site's webhook or Slack URL, if it has one.
+pub async fn notify(
+    state: &AppState,
+    site: &str,
+    domain: &str,
+    kind: &str,
+    data: Value,
+    text: &str,
+) -> anyhow::Result<()> {
+    let row: Option<Keys> = sqlx::query_as(
+        "SELECT url_ciphertext, url_nonce, secret_ciphertext, secret_nonce FROM webhooks WHERE site_id = ?",
+    )
+    .bind(site)
+    .fetch_optional(&state.db)
+    .await?;
+    let Some((uc, un, sc, sn)) = row else {
+        return Ok(());
+    };
+    let (url, secret) = (
+        state.vault.decrypt(&uc, &un)?,
+        state.vault.decrypt(&sc, &sn)?,
+    );
+    deliver(state, &url, &secret, domain, kind, data, text).await
+}
+
 pub async fn tick(state: &AppState) -> anyhow::Result<()> {
     let rows: Vec<Row> = sqlx::query_as(
         "SELECT w.site_id, s.domain, s.timezone, w.url_ciphertext, w.url_nonce, w.secret_ciphertext,

@@ -3848,6 +3848,60 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn notify_posts_to_the_site_webhook_when_it_has_one() {
+        type Got = Arc<std::sync::Mutex<Vec<String>>>;
+        let (_dir, mut state, _store) = setup().await;
+        let site = site_id(&state).await;
+        let data = serde_json::json!({ "changes": [] });
+        let send = |state: AppState, data: serde_json::Value, site: String| async move {
+            crate::webhooks::notify(
+                &state,
+                &site,
+                "example.com",
+                "alert.unusual_change",
+                data,
+                "x",
+            )
+            .await
+            .unwrap()
+        };
+        send(state.clone(), data.clone(), site.clone()).await;
+        let got: Got = Default::default();
+        let sink = got.clone();
+        let hook = axum::Router::new().route(
+            "/hook",
+            axum::routing::post(move |h: axum::http::HeaderMap| {
+                let sink = sink.clone();
+                async move {
+                    let kind = h["virling-event"].to_str().unwrap().to_string();
+                    sink.lock().unwrap().push(kind);
+                    StatusCode::OK
+                }
+            }),
+        );
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        tokio::spawn(async move { axum::serve(listener, hook).await.unwrap() });
+        state.favicons = reqwest::Client::new();
+        let (uc, un) = state.vault.encrypt(&format!("http://{addr}/hook")).unwrap();
+        let (sc, sn) = state.vault.encrypt("whsec_test").unwrap();
+        sqlx::query(
+            "INSERT INTO webhooks (site_id, url_ciphertext, url_nonce, secret_ciphertext, secret_nonce, host, sent_until, goals_until)
+             VALUES (?, ?, ?, ?, ?, '127.0.0.1', 0, 0)",
+        )
+        .bind(&site)
+        .bind(uc)
+        .bind(un)
+        .bind(sc)
+        .bind(sn)
+        .execute(&state.db)
+        .await
+        .unwrap();
+        send(state.clone(), data, site).await;
+        assert_eq!(*got.lock().unwrap(), ["alert.unusual_change"]);
+    }
+
+    #[tokio::test]
     async fn webhooks_send_signed_payments_and_goals_once() {
         type Got = Arc<std::sync::Mutex<Vec<(String, String, String)>>>;
         let (_dir, mut state, store) = setup().await;

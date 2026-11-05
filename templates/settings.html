@@ -147,7 +147,7 @@
       <label class="switch"><input type="checkbox" role="switch" name="digest"{% if alerts.digest %} checked{% endif %}><span></span><span class="sr">Daily digest email</span></label>
     </div>
     <div class="setting">
-      <div><b>Unusual changes</b><span class="muted">When revenue or a channel moves sharply, a new source sends its first buyer, or tracking stops. Only on days something changed.</span></div>
+      <div><b>Unusual changes</b><span class="muted">When revenue or a channel moves sharply, a new source sends its first buyer, or tracking stops. Only on days something changed. Also posted to your webhook or Slack when one is set.</span></div>
       <label class="switch"><input type="checkbox" role="switch" name="changes"{% if alerts.changes %} checked{% endif %}><span></span><span class="sr">Email for unusual changes</span></label>
     </div>
     <label class="field">Send these at<select class="input" name="hour">{% for h in alert_hours %}<option value="{{ h }}"{% if *h == alerts.hour %} selected{% endif %}>{{ "{:02}"|format(h) }}:00</option>{% endfor %}</select></label>
