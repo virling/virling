@@ -1729,8 +1729,8 @@ mod tests {
         let cookie = sign_in(&state, "me%40example.com").await;
         let site =
             body_text(call(&state, get("/app/example.com/settings", Some(&cookie))).await).await;
-        assert_eq!(site.matches(r#"type="checkbox" role="switch""#).count(), 4);
-        assert_eq!(site.matches(r#"type="checkbox""#).count(), 4);
+        assert_eq!(site.matches(r#"type="checkbox" role="switch""#).count(), 5);
+        assert_eq!(site.matches(r#"type="checkbox""#).count(), 5);
         for label in ["model-label", "cookie-label"] {
             assert!(site.contains(&format!(
                 r#"<div class="seg" role="radiogroup" aria-labelledby="{label}">"#
@@ -3822,6 +3822,29 @@ mod tests {
                 .1
                 .starts_with("Yesterday on example.com")
         );
+    }
+
+    #[tokio::test]
+    async fn change_alerts_check_once_a_day_and_stay_quiet_without_a_change() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let path = "/app/example.com/settings/alerts";
+        call(
+            &state,
+            form(path, "changes=on&hour=0".into(), Some(&cookie)),
+        )
+        .await;
+        let page = call(&state, get("/app/example.com/settings", Some(&cookie))).await;
+        assert!(body_text(page).await.contains(r#"name="changes" checked"#));
+        let before = sent(&state).len();
+        let tomorrow = time::OffsetDateTime::now_utc() + time::Duration::days(1);
+        assert_eq!(crate::alerts::tick(&state, tomorrow).await.unwrap(), 0);
+        assert_eq!(sent(&state).len(), before);
+        let day: i64 = sqlx::query_scalar("SELECT changes_day FROM email_alerts")
+            .fetch_one(&state.db)
+            .await
+            .unwrap();
+        assert_eq!(day, i64::from(tomorrow.date().to_julian_day()));
     }
 
     #[tokio::test]
