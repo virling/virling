@@ -7,6 +7,7 @@ Virling can post three kinds of events to a URL of yours, within a minute of the
 | `payment.attributed` | A new paid payment is credited to a visit. Payments that stay unattributed for 10 minutes are skipped. |
 | `goal.completed` | A visitor completes a [goal](../track/goals.md). |
 | `alert.traffic_spike` | Visitors today reach at least 20 and three times the daily average of the week before, once a day at most. |
+| `alert.unusual_change` | With **Unusual changes** on in Site settings > Email alerts: revenue or a channel moved sharply yesterday, a referrer sent its first buyer, or tracking stopped. Once a day at most, at the alert hour. |
 
 Set it up in **Site settings > Webhooks**: paste a public `https://` URL and click **Send a test and turn on**. Virling sends a `ping` event first and only saves the URL when it answers with a 2xx status. Only the account owner can set it, and the URL and secret are stored encrypted. Webhooks stay off while a site holds sample data.
 
@@ -42,7 +43,7 @@ Every other URL gets a `POST` with a JSON body:
 }
 ```
 
-`amount` is in the currency's minor unit. A `goal.completed` event has `goal`, `path`, `visitor_id` and `completed_at` in `data`, and an `alert.traffic_spike` event has `visitors_today` and `usual_per_day`.
+`amount` is in the currency's minor unit. A `goal.completed` event has `goal`, `path`, `visitor_id` and `completed_at` in `data`, an `alert.traffic_spike` event has `visitors_today` and `usual_per_day`, and an `alert.unusual_change` event has `changes`, a list with `headline`, `name`, `usual` and `yesterday`.
 
 To keep a copy in a warehouse, point the webhook at a small endpoint or pipeline of yours that inserts each body as a row.
 

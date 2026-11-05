@@ -386,6 +386,22 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
             if let Some(first) = found.first() {
                 let subject = format!("{domain}: {}", first.headline);
                 let lines: Vec<String> = found.iter().map(|c| c.sentence()).collect();
+                let data = serde_json::json!({ "changes": found.iter().map(|c| serde_json::json!({
+                    "headline": c.headline, "name": c.row.0, "usual": c.row.1, "yesterday": c.row.2,
+                })).collect::<Vec<_>>() });
+                let text = format!("{subject}. {}", lines.join(" "));
+                if let Err(err) = crate::webhooks::notify(
+                    state,
+                    &site,
+                    &domain,
+                    "alert.unusual_change",
+                    data,
+                    &text,
+                )
+                .await
+                {
+                    tracing::error!(%err, "posting an unusual change failed");
+                }
                 let alert = Alert {
                     subject: &subject,
                     base,
