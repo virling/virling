@@ -49,6 +49,8 @@ pub struct Incoming {
     e: Option<u32>,
     /// Furthest scroll in percent, on a read.
     x: Option<u32>,
+    /// Web vitals of the page load on its first read: LCP ms, slowest interaction ms, layout shift x1000.
+    p: Option<Vec<Option<f64>>>,
     /// Email on an identify; only its salted hash is kept.
     m: Option<String>,
 }
@@ -655,6 +657,12 @@ pub async fn collect(
                     path,
                     secs: secs.min(3600) as u16,
                     scroll: scroll.min(100) as u8,
+                    vitals: match e.p.as_deref() {
+                        Some(&[Some(lcp), Some(inp), Some(cls)]) if lcp > 0.0 => {
+                            Some([lcp, inp, cls].map(|v| v.clamp(0.0, 600_000.0) as u32))
+                        }
+                        _ => None,
+                    },
                 });
             }
             continue;

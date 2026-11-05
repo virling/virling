@@ -170,6 +170,7 @@ struct DashboardPage {
     profit: Option<crate::spend::ProfitCard>,
     topay: Option<crate::topay::PayCard>,
     reading: Option<crate::reading::ReadCard>,
+    speed: Option<crate::speed::SpeedCard>,
     almost: Option<crate::almost::AlmostCard>,
     verdicts: Vec<crate::verdict::Verdict>,
     why: Option<String>,
@@ -204,6 +205,7 @@ struct PublicPage {
     ai: Option<cards::AiCard>,
     profit: Option<crate::spend::ProfitCard>,
     reading: Option<crate::reading::ReadCard>,
+    speed: Option<crate::speed::SpeedCard>,
     almost: Option<crate::almost::AlmostCard>,
     verdicts: Vec<crate::verdict::Verdict>,
     topay: Option<crate::topay::PayCard>,
@@ -837,7 +839,9 @@ async fn page(
             let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
             let goals = tokio::spawn(blocking(move || goal_card::load(&*store, &sid, &per)));
             let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
-            let read = tokio::spawn(blocking(move || store.reading(&sid, &per)));
+            let read = tokio::spawn(blocking(move || {
+                Ok((store.reading(&sid, &per)?, store.speed(&sid, &per)?))
+            }));
             let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
             let almost = tokio::spawn(blocking(move || store.almost_paid(&sid, &per)));
             let earlier = filters.is_empty().then(|| {
@@ -1072,6 +1076,7 @@ async fn page(
         profit: None,
         topay: None,
         reading: None,
+        speed: None,
         almost: None,
         verdicts: Vec::new(),
         why: None,
@@ -1583,7 +1588,8 @@ async fn page(
                     cur.visitors,
                     |v| href(&[("goals", v)]),
                 ));
-                let read = joined(read.await)?;
+                let (read, speed) = joined(read.await)?;
+                page.speed = crate::speed::card(&speed);
                 page.reading = crate::reading::card(
                     &read,
                     q.rest.get("rd").is_some_and(|v| v == "buyers"),
@@ -1704,6 +1710,7 @@ async fn page(
         profit: page.profit,
         topay: page.topay,
         reading: None,
+        speed: None,
         almost: None,
         verdicts: Vec::new(),
         why: page.why,

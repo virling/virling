@@ -21,16 +21,23 @@
     i < 0 && ck(31536000, dom = 0);
   }
 
-  var send = (name, goal, u, e, x) => {
-    var body = JSON.stringify([{ n: name, u: u || L.href, e, x, r: ref, s: site, v: vid, w: screen.width, d: devicePixelRatio, g: goal, l: n.language, z: Intl.DateTimeFormat().resolvedOptions().timeZone || void 0, k: nav, b: n.webdriver || !n.languages?.length || soft || void 0 }]);
+  var send = (name, goal, u, e, x, p) => {
+    var body = JSON.stringify([{ n: name, u: u || L.href, e, x, p, r: ref, s: site, v: vid, w: screen.width, d: devicePixelRatio, g: goal, l: n.language, z: Intl.DateTimeFormat().resolvedOptions().timeZone || void 0, k: nav, b: n.webdriver || !n.languages?.length || soft || void 0 }]);
     ref = nav = null;
     n.sendBeacon?.(endpoint, body) || fetch(endpoint, { method: "POST", body, keepalive: true });
   };
 
+  // Web vitals of the page load, sent with its first read: LCP, slowest interaction and layout shift x1000.
+  var vit = [0, 0, 0],
+    po = (t, f) => { try { new PerformanceObserver((l) => l.getEntries().map(f)).observe({ type: t, buffered: !0 }); } catch {} };
+  po("largest-contentful-paint", (e) => vit[0] = e.startTime);
+  po("event", (e) => e.interactionId && (vit[1] = Math.max(vit[1], e.duration)));
+  po("layout-shift", (e) => e.hadRecentInput || (vit[2] += e.value * 1e3));
+
   // Reading depth: seconds the page was visible and the furthest scroll, sent once when the page ends; nothing is stored.
   var href = L.href, shown = d.hidden ? 0 : Date.now(), act = 0, deep = 0, tick = () => { shown && (act += Date.now() - shown); shown = d.hidden ? 0 : Date.now(); },
     depth = () => deep = Math.max(deep, (w.scrollY + w.innerHeight) * 100 / d.documentElement.scrollHeight | 0),
-    report = () => { tick(); act > 1e3 && (depth(), send("read", 0, href, act / 1e3 | 0, deep)); act = deep = 0; };
+    report = () => { tick(); act > 1e3 && (depth(), send("read", 0, href, act / 1e3 | 0, deep, vit || void 0), vit = 0); act = deep = 0; };
   on(d, "visibilitychange", tick);
   on(w, "scroll", depth);
 

@@ -50,6 +50,7 @@ mod sample;
 mod settings;
 mod share_card;
 mod sites;
+mod speed;
 mod spend;
 mod stack;
 mod stats;
@@ -591,6 +592,43 @@ mod tests {
             .body(Body::from(body.to_string()))
             .unwrap();
         app.oneshot(req).await.unwrap().status()
+    }
+
+    #[tokio::test]
+    async fn reads_carry_web_vitals_of_the_page_load() {
+        let (_dir, state, store) = setup().await;
+        let read = |path: &str, p: &str| {
+            format!(
+                r#"{{"n":"read","u":"https://example.com{path}","s":"example.com","v":"vvitals01","e":12,"x":40,"p":{p}}}"#
+            )
+        };
+        for (path, p) in [
+            ("/pricing", "[3120.6,248,90.4]"),
+            ("/", "[0,0,0]"),
+            ("/docs", "[1800,null,0]"),
+            ("/blog", "\"fast\""),
+        ] {
+            post(&state, &read(path, p), UA).await;
+        }
+        let today = time::OffsetDateTime::now_utc().date();
+        let period = Period {
+            from: today,
+            to: today,
+            tz: "UTC".into(),
+        };
+        let site = site_id(&state).await;
+        let speed = store.speed(&site, &period).unwrap();
+        let rows: Vec<(&str, Option<f64>, Option<f64>)> = speed
+            .rows
+            .iter()
+            .map(|r| (r.path.as_str(), r.lcp, r.cls))
+            .collect();
+        assert_eq!(
+            rows,
+            [("/pricing", Some(3120.0), Some(90.0))],
+            "no LCP, a null or a malformed value stores no vitals"
+        );
+        assert_eq!(store.reading(&site, &period).unwrap().len(), 3);
     }
 
     #[tokio::test]
