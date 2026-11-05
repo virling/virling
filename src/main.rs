@@ -48,6 +48,7 @@ mod retention;
 mod retention_page;
 mod sample;
 mod settings;
+mod setup_emails;
 mod share_card;
 mod sites;
 mod speed;
@@ -430,6 +431,9 @@ async fn start() -> anyhow::Result<()> {
                 tokio::spawn(webhooks::run(state.clone()));
                 tokio::spawn(alerts::run(state.clone()));
                 tokio::spawn(speed::run(state.clone()));
+                if state.config.hosted {
+                    tokio::spawn(setup_emails::run(state.clone()));
+                }
                 tokio::spawn(answers::run(state.clone()));
                 favicon::spawn_sources(state.clone());
                 tokio::spawn(dashboard::schedule::run(state.clone()));
@@ -3893,6 +3897,43 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(day, i64::from(tomorrow.date().to_julian_day()));
+    }
+
+    #[tokio::test]
+    async fn setup_reminders_go_out_once_each_for_new_sites() {
+        let (_dir, state, _store) = setup().await;
+        let now = time::OffsetDateTime::now_utc();
+        let tick = || crate::setup_emails::tick(&state, now);
+        assert_eq!(tick().await.unwrap(), 0, "a new site gets a day");
+        let aged = |days: i64| {
+            sqlx::query("UPDATE sites SET created_at = ?")
+                .bind(
+                    (now - time::Duration::days(days))
+                        .unix_timestamp()
+                        .to_string(),
+                )
+                .execute(&state.db)
+        };
+        aged(30).await.unwrap();
+        assert_eq!(tick().await.unwrap(), 0, "an old site is left alone");
+        aged(2).await.unwrap();
+        let before = sent(&state).len();
+        assert_eq!(tick().await.unwrap(), 1);
+        assert_eq!(tick().await.unwrap(), 0, "never twice");
+        let batch = r#"[{"n":"pageview","u":"https://example.com/","s":"example.com","v":"vsetup01","w":1440}]"#;
+        assert_eq!(post(&state, batch, UA).await, StatusCode::ACCEPTED);
+        assert_eq!(
+            tick().await.unwrap(),
+            1,
+            "visits arrived, payments are next"
+        );
+        assert_eq!(tick().await.unwrap(), 0);
+        let mail = sent(&state);
+        assert_eq!(mail[before].1, "Add the script to see your first visit");
+        assert_eq!(
+            mail[before + 1].1,
+            "Connect payments to see which channels pay"
+        );
     }
 
     #[tokio::test]

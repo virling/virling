@@ -54,21 +54,25 @@ type Row = (
 /// One alert email: a headline, optional stat cards and rows, and a link to the dashboard.
 #[derive(Template)]
 #[template(path = "email/alert.html")]
-struct Alert<'a> {
-    subject: &'a str,
-    base: &'a str,
-    domain: &'a str,
-    when: String,
-    kicker: &'a str,
-    headline: String,
-    kpis: Vec<(&'static str, String)>,
-    rows_title: &'static str,
-    rows: Vec<(String, String, String)>,
-    link: &'a str,
-    settings: String,
+pub(crate) struct Alert<'a> {
+    pub subject: &'a str,
+    pub base: &'a str,
+    pub domain: &'a str,
+    pub when: String,
+    pub kicker: &'a str,
+    pub headline: String,
+    pub note: String,
+    pub kpis: Vec<(&'static str, String)>,
+    pub rows_title: &'static str,
+    pub rows: Vec<(String, String, String)>,
+    pub link: &'a str,
+    pub action: &'a str,
+    pub footer: String,
+    pub footer_link: &'a str,
+    pub settings: String,
 }
 
-async fn email(state: &AppState, to: &str, lines: &[String], alert: &Alert<'_>) {
+pub(crate) async fn email(state: &AppState, to: &str, lines: &[String], alert: &Alert<'_>) {
     let text = format!("{}\n\n{}\n", lines.join("\n"), alert.link);
     let html = match alert.render() {
         Ok(html) => html,
@@ -82,7 +86,13 @@ async fn email(state: &AppState, to: &str, lines: &[String], alert: &Alert<'_>) 
     }
 }
 
-fn day_name(d: time::Date) -> String {
+const ALERTS_LINK: &str = "Change them in site settings";
+
+fn alerts_footer(domain: &str) -> String {
+    format!("You get this because email alerts are on for {domain}.")
+}
+
+pub(crate) fn day_name(d: time::Date) -> String {
     format!("{}, {} {}", d.weekday(), d.day(), d.month())
 }
 
@@ -265,10 +275,14 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
                     when: day_name(p.ts.to_offset(local_offset).date()),
                     kicker: "New sale",
                     headline: format!("{amount} from {source}"),
+                    note: String::new(),
                     kpis: vec![],
                     rows_title: "",
                     rows: vec![],
                     link: &link,
+                    action: "Open the dashboard",
+                    footer: alerts_footer(&domain),
+                    footer_link: ALERTS_LINK,
                     settings: settings.clone(),
                 };
                 email(state, &to, &[format!("{amount} from {source}.")], &alert).await;
@@ -327,6 +341,7 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
                     when: day_name(today - Duration::days(1)),
                     kicker: "Daily digest",
                     headline,
+                    note: String::new(),
                     kpis: vec![
                         ("Visitors", group(yesterday.visitors)),
                         ("Sales", group(yesterday.payments)),
@@ -344,6 +359,9 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
                         })
                         .collect(),
                     link: &link,
+                    action: "Open the dashboard",
+                    footer: alerts_footer(&domain),
+                    footer_link: ALERTS_LINK,
                     settings: settings.clone(),
                 };
                 email(state, &to, &lines, &alert).await;
@@ -409,10 +427,14 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<usize
                     when: day_name(today - Duration::days(1)),
                     kicker: "Unusual change",
                     headline: first.headline.clone(),
+                    note: String::new(),
                     kpis: vec![],
                     rows_title: "Against the week before",
                     rows: found.into_iter().map(|c| c.row).collect(),
                     link: &link,
+                    action: "Open the dashboard",
+                    footer: alerts_footer(&domain),
+                    footer_link: ALERTS_LINK,
                     settings: settings.clone(),
                 };
                 email(state, &to, &lines, &alert).await;
@@ -540,6 +562,7 @@ mod tests {
             when: day_name(time::macros::date!(2026 - 11 - 02)),
             kicker: "Daily digest",
             headline: "$120 from 3 sales".into(),
+            note: String::new(),
             kpis: vec![
                 ("Visitors", "97".into()),
                 ("Sales", "3".into()),
@@ -548,6 +571,9 @@ mod tests {
             rows_title: "Top channels",
             rows: vec![("Organic search".into(), "90 visitors".into(), "$80".into())],
             link: "https://app.virling.com/app/example.com",
+            action: "Open the dashboard",
+            footer: alerts_footer("example.com"),
+            footer_link: ALERTS_LINK,
             settings: "https://app.virling.com/app/example.com/settings#alerts".into(),
         };
         let html = alert.render().unwrap();

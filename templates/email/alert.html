@@ -17,6 +17,7 @@
 
 <div style="font-size:13px;font-weight:600;color:#E8471C;margin:24px 0 6px">{{ kicker }}</div>
 <h1 style="margin:0;font-size:24px;line-height:1.25;letter-spacing:-0.02em;font-weight:700">{{ headline }}</h1>
+{% if !note.is_empty() %}<p style="margin:10px 0 0;font-size:15px;line-height:1.55;color:#4B515C">{{ note }}</p>{% endif %}
 
 {% if !kpis.is_empty() %}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px">
@@ -40,10 +41,10 @@
 </table>
 {% endif %}
 
-<p style="margin:24px 0 0"><a href="{{ link }}" style="display:inline-block;padding:12px 20px;border-radius:10px;background:#0E1116;color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none">Open the dashboard</a></p>
+<p style="margin:24px 0 0"><a href="{{ link }}" style="display:inline-block;padding:12px 20px;border-radius:10px;background:#0E1116;color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none">{{ action }}</a></p>
 
 <hr style="border:0;border-top:1px solid #EFEFEB;margin:24px 0 12px">
-<p style="margin:0;font-size:12px;line-height:1.5;color:#6B717C">You get this because email alerts are on for {{ domain }}. <a href="{{ settings }}" style="color:#4B515C">Change them in site settings</a>.</p>
+<p style="margin:0;font-size:12px;line-height:1.5;color:#6B717C">{{ footer }} <a href="{{ settings }}" style="color:#4B515C">{{ footer_link }}</a>.</p>
 </td></tr></table>
 </td></tr></table>
 </body>
