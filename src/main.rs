@@ -429,6 +429,7 @@ async fn start() -> anyhow::Result<()> {
                 tokio::spawn(telegram::run(state.clone()));
                 tokio::spawn(webhooks::run(state.clone()));
                 tokio::spawn(alerts::run(state.clone()));
+                tokio::spawn(speed::run(state.clone()));
                 tokio::spawn(answers::run(state.clone()));
                 favicon::spawn_sources(state.clone());
                 tokio::spawn(dashboard::schedule::run(state.clone()));
@@ -618,6 +619,11 @@ mod tests {
         };
         let site = site_id(&state).await;
         let speed = store.speed(&site, &period).unwrap();
+        crate::speed::refresh(&state.db, &state.events)
+            .await
+            .unwrap();
+        let card = crate::speed::stored(&state.db, &site).await.unwrap();
+        assert_eq!(card, speed, "the stored card holds the same loads");
         let rows: Vec<(&str, Option<f64>, Option<f64>)> = speed
             .rows
             .iter()

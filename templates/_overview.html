@@ -251,7 +251,7 @@
   {% endif %}
   {% if let Some(s) = speed %}
   <div class="d3-card d3-bc" id="speed">
-    <div class="d3-bc-head"><h2>Page speed</h2><span class="d3-sub">from real visits, slowest first</span></div>
+    <div class="d3-bc-head"><h2>Page speed</h2><span class="d3-sub">last 30 days, slowest first</span></div>
     <div class="d3-panel">
     <div class="d3-row d3-speedrow th"><span>Page</span><span class="num" title="Largest contentful paint, 75th percentile">Load</span><span class="num">Conv.</span><span class="num rv">Revenue</span></div>
     {% for r in s.rows %}

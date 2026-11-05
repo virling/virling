@@ -952,6 +952,8 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
     store.insert_events(&events)?;
     store.upsert_payments(&payments)?;
     store.insert_reads(&reads(&events, &payments))?;
+    let cards: Arc<dyn EventStore> = store.clone();
+    crate::speed::refresh(&db, &cards).await?;
     store.replace_subscriptions(&site, "stripe", &subscriptions)?;
     for (n, (slug, name, source, channel, path)) in LINKS.iter().enumerate() {
         let clicks: HashSet<&str> = events

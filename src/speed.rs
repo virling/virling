@@ -1,20 +1,29 @@
 //! Core Web Vitals from real visits, per page, next to how the visitors who loaded the page converted.
 
-use duckdb::{Connection, named_params};
-use serde::Serialize;
+use std::sync::Arc;
 
+use duckdb::{Connection, named_params};
+use serde::{Deserialize, Serialize};
+use sqlx::SqlitePool;
+use time::{Duration, OffsetDateTime};
+
+use crate::app::AppState;
+use crate::events::EventStore;
 use crate::stats::{BOUNDS, NET_USD, Period};
 
 /// Pages with the most loads considered, then listed slowest first.
 const TOP: usize = 20;
 const SHOWN: usize = 6;
+/// Days the card covers, and how often it is worked out again.
+const WINDOW_DAYS: i64 = 30;
+const REFRESH: std::time::Duration = std::time::Duration::from_secs(3600);
 /// Largest contentful paint, slowest interaction and layout shift (x1000) past which a load is poor.
 const LCP_POOR: f64 = 4000.0;
 const LCP_GOOD: f64 = 2500.0;
 const INP_POOR: f64 = 500.0;
 const CLS_POOR: f64 = 250.0;
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SpeedRow {
     pub path: String,
     pub loads: u64,
@@ -28,13 +37,62 @@ pub struct SpeedRow {
     pub revenue_usd: f64,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Serialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct Speed {
     pub rows: Vec<SpeedRow>,
     /// Visitors with a load slower than 2.5 s, and how many of them paid.
     pub slow: (u64, u64),
     /// Visitors whose loads were all faster, and how many of them paid.
     pub fast: (u64, u64),
+}
+
+/// Refreshes every site's stored card once an hour, forever.
+pub async fn run(state: AppState) {
+    loop {
+        if let Err(err) = refresh(&state.db, &state.events).await {
+            tracing::error!(%err, "refreshing page speed failed");
+        }
+        tokio::time::sleep(REFRESH).await;
+    }
+}
+
+/// Works out the last 30 days per site and stores it for the dashboard.
+pub async fn refresh(db: &SqlitePool, store: &Arc<dyn EventStore>) -> anyhow::Result<()> {
+    let sites: Vec<(String, String)> = sqlx::query_as("SELECT id, timezone FROM sites")
+        .fetch_all(db)
+        .await?;
+    for (site, tz) in sites {
+        let (store, id) = (store.clone(), site.clone());
+        let speed = tokio::task::spawn_blocking(move || {
+            let to = OffsetDateTime::now_utc()
+                .to_offset(store.utc_offset(&tz)?)
+                .date();
+            let from = to - Duration::days(WINDOW_DAYS - 1);
+            store.speed(&id, &Period { from, to, tz })
+        })
+        .await??;
+        sqlx::query(
+            "INSERT INTO speed_cards (site_id, data) VALUES (?, ?)
+             ON CONFLICT (site_id) DO UPDATE SET data = excluded.data",
+        )
+        .bind(&site)
+        .bind(serde_json::to_string(&speed)?)
+        .execute(db)
+        .await?;
+    }
+    Ok(())
+}
+
+/// The stored card of a site; empty until the first refresh.
+pub async fn stored(db: &SqlitePool, site_id: &str) -> anyhow::Result<Speed> {
+    let data: Option<String> = sqlx::query_scalar("SELECT data FROM speed_cards WHERE site_id = ?")
+        .bind(site_id)
+        .fetch_optional(db)
+        .await?;
+    Ok(match data {
+        Some(data) => serde_json::from_str(&data)?,
+        None => Speed::default(),
+    })
 }
 
 pub(crate) fn speed(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<Speed> {

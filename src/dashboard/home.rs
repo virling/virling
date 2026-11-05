@@ -840,8 +840,8 @@ async fn page(
             let goals = tokio::spawn(blocking(move || goal_card::load(&*store, &sid, &per)));
             let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
             let read = tokio::spawn(blocking(move || store.reading(&sid, &per)));
-            let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
-            let speed = tokio::spawn(blocking(move || store.speed(&sid, &per)));
+            let (db, sid) = (state.db.clone(), site.clone());
+            let speed = tokio::spawn(async move { crate::speed::stored(&db, &sid).await });
             let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
             let almost = tokio::spawn(blocking(move || store.almost_paid(&sid, &per)));
             let earlier = filters.is_empty().then(|| {
