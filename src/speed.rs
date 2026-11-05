@@ -38,7 +38,7 @@ pub struct Speed {
 }
 
 pub(crate) fn speed(conn: &Connection, site_id: &str, period: &Period) -> anyhow::Result<Speed> {
-    let base = format!(
+    let mut stmt = conn.prepare(&format!(
         "WITH {BOUNDS},
         v AS (
             SELECT path, vh, lcp, inp, cls FROM vitals, bounds
@@ -49,16 +49,7 @@ pub(crate) fn speed(conn: &Connection, site_id: &str, period: &Period) -> anyhow
             WHERE p.site_id = $site AND p.visitor_id IS NOT NULL AND p.status <> 'failed'
               AND p.ts >= lo AND p.ts < hi
             GROUP BY 1
-        )"
-    );
-    let params = named_params! {
-        "site": site_id,
-        "tz": period.tz,
-        "from": period.from.to_string(),
-        "to": period.to.to_string(),
-    };
-    let mut stmt = conn.prepare(&format!(
-        "{base},
+        ),
         top AS (
             SELECT path, count(*) AS loads,
                 quantile_cont(lcp, 0.75) FILTER (WHERE lcp > 0) AS lcp,
@@ -70,43 +61,53 @@ pub(crate) fn speed(conn: &Connection, site_id: &str, period: &Period) -> anyhow
         money AS (
             SELECT w.path, count(*) AS visitors, count(p.vh) AS buyers, coalesce(sum(p.rev), 0) AS rev
             FROM who w LEFT JOIN payers p USING (vh) GROUP BY w.path
+        ),
+        per AS (SELECT vh, max(lcp) > {LCP_GOOD} AS slow FROM v WHERE lcp > 0 GROUP BY vh),
+        ranked AS (
+            SELECT t.path, t.loads, t.lcp, t.inp, t.cls, m.visitors, m.buyers, m.rev,
+                row_number() OVER (ORDER BY t.lcp DESC NULLS LAST, t.loads DESC, t.path) AS n
+            FROM top t JOIN money m USING (path)
         )
-        SELECT t.path, t.loads, t.lcp, t.inp, t.cls, m.visitors, m.buyers, m.rev
-        FROM top t JOIN money m USING (path)
-        ORDER BY t.lcp DESC NULLS LAST, t.loads DESC, t.path LIMIT {SHOWN}"
+        SELECT path, loads, lcp, inp, cls, visitors, buyers, rev, NULL::BOOLEAN AS slow, n
+        FROM ranked WHERE n <= {SHOWN}
+        UNION ALL
+        SELECT NULL, 0, NULL, NULL, NULL, count(*), count(p.vh), 0.0, per.slow, 0
+        FROM per LEFT JOIN payers p USING (vh) GROUP BY per.slow
+        ORDER BY n"
     ))?;
-    let rows = stmt
-        .query_map(params, |r| {
-            Ok(SpeedRow {
-                path: r.get(0)?,
-                loads: r.get::<_, i64>(1)? as u64,
-                lcp: r.get(2)?,
-                inp: r.get(3)?,
-                cls: r.get(4)?,
-                visitors: r.get::<_, i64>(5)? as u64,
-                buyers: r.get::<_, i64>(6)? as u64,
-                revenue_usd: r.get(7)?,
-            })
-        })?
-        .collect::<Result<Vec<_>, _>>()?;
-    let mut split = conn.prepare(&format!(
-        "{base},
-        per AS (SELECT vh, max(lcp) > {LCP_GOOD} AS slow FROM v WHERE lcp > 0 GROUP BY vh)
-        SELECT slow, count(*), count(p.vh) FROM per LEFT JOIN payers p USING (vh) GROUP BY slow"
-    ))?;
-    let mut out = Speed {
-        rows,
-        ..Speed::default()
+    let params = named_params! {
+        "site": site_id,
+        "tz": period.tz,
+        "from": period.from.to_string(),
+        "to": period.to.to_string(),
     };
-    for row in split.query_map(params, |r| {
-        Ok((
-            r.get::<_, bool>(0)?,
-            r.get::<_, i64>(1)? as u64,
-            r.get::<_, i64>(2)? as u64,
-        ))
-    })? {
-        let (slow, visitors, buyers) = row?;
-        *if slow { &mut out.slow } else { &mut out.fast } = (visitors, buyers);
+    let mut out = Speed::default();
+    let rows = stmt.query_map(params, |r| {
+        let (visitors, buyers) = (r.get::<_, i64>(5)? as u64, r.get::<_, i64>(6)? as u64);
+        Ok(match r.get::<_, Option<bool>>(8)? {
+            Some(slow) => (Some((slow, visitors, buyers)), None),
+            None => (
+                None,
+                Some(SpeedRow {
+                    path: r.get(0)?,
+                    loads: r.get::<_, i64>(1)? as u64,
+                    lcp: r.get(2)?,
+                    inp: r.get(3)?,
+                    cls: r.get(4)?,
+                    visitors,
+                    buyers,
+                    revenue_usd: r.get(7)?,
+                }),
+            ),
+        })
+    })?;
+    for row in rows {
+        match row? {
+            (Some((true, v, b)), _) => out.slow = (v, b),
+            (Some((false, v, b)), _) => out.fast = (v, b),
+            (_, Some(row)) => out.rows.push(row),
+            _ => {}
+        }
     }
     Ok(out)
 }
