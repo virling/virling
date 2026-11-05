@@ -206,7 +206,7 @@
   {% endif %}
   {% for c in cards %}{% if loop.index > 2 %}{% call tabcard(c) %}{% endcall %}{% endif %}{% endfor %}
 </div>
-{% if profit.is_some() || reading.is_some() || almost.is_some() || topay.is_some() || !verdicts.is_empty() %}<div class="d3-cards d3-more">
+{% if profit.is_some() || reading.is_some() || speed.is_some() || almost.is_some() || topay.is_some() || !verdicts.is_empty() %}<div class="d3-cards d3-more">
   {% if !verdicts.is_empty() %}
   <div class="d3-card d3-bc" id="verdicts">
     <div class="d3-bc-head"><h2>Channel verdicts</h2><span class="d3-sub">against the period before</span></div>
@@ -247,6 +247,18 @@
     <div class="d3-foot"><span>Visitors who paid, against everyone else</span></div>
     </div>
     {% endif %}
+  </div>
+  {% endif %}
+  {% if let Some(s) = speed %}
+  <div class="d3-card d3-bc" id="speed">
+    <div class="d3-bc-head"><h2>Page speed</h2><span class="d3-sub">from real visits, slowest first</span></div>
+    <div class="d3-panel">
+    <div class="d3-row d3-speedrow th"><span>Page</span><span class="num" title="Largest contentful paint, 75th percentile">Load</span><span class="num">Conv.</span><span class="num rv">Revenue</span></div>
+    {% for r in s.rows %}
+    <div class="d3-row d3-speedrow" title="{{ r.path }}: input delay {{ r.inp.0 }}, layout shift {{ r.cls.0 }}"><div class="nmw"><span class="nm"><span class="tx"><b>{{ r.path }}</b></span></span></div><span class="num{% if r.lcp.1 %} poor{% endif %}">{{ r.lcp.0 }}</span><span class="num">{{ r.conversion }}</span><span class="num rv">{{ r.revenue }}</span></div>
+    {% endfor %}
+    <div class="d3-foot"><span>{% if s.line.is_empty() %}Conversion and revenue of the visitors who loaded each page{% else %}{{ s.line }}{% endif %}</span></div>
+    </div>
   </div>
   {% endif %}
   {% if let Some(a) = almost %}

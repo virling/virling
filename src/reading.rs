@@ -159,6 +159,7 @@ mod tests {
             path: path.into(),
             secs,
             scroll,
+            vitals: None,
         }
     }
 

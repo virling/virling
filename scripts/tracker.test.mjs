@@ -38,7 +38,7 @@ const channel = (bus) =>
   };
 const tick = () => new Promise((r) => setTimeout(r, 5));
 
-function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set(), agent = {}, zone = "Europe/Berlin", links = [], before = "", compat = false, gpu = "ANGLE (Apple, ANGLE Metal Renderer: Apple M2, Unspecified Version)" } = {}) {
+function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "navigate", bus = new Set(), agent = {}, zone = "Europe/Berlin", links = [], before = "", compat = false, gpu = "ANGLE (Apple, ANGLE Metal Renderer: Apple M2, Unspecified Version)", entries = {} } = {}) {
   const loc = new URL(url);
   const clock = { t: 1_700_000_000_000 };
   const sent = [];
@@ -88,7 +88,12 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
     ...agent,
   };
   const performance = { getEntriesByType: (t) => (t == "navigation" ? [{ type: nav }] : []) };
-  const ctx = { window, document, navigator, location, history, performance, BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, devicePixelRatio: 2, Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: zone }) }) }, URL, JSON, Date: { now: () => clock.t }, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]), imported: (u) => imports.push(u) };
+  // Hands each observer the buffered entries of its type, like a browser does.
+  class PerformanceObserver {
+    constructor(f) { this.f = f; }
+    observe({ type }) { this.f({ getEntries: () => entries[type] || [] }); }
+  }
+  const ctx = { window, document, navigator, location, history, performance, ...(Object.keys(entries).length && { PerformanceObserver }), BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, devicePixelRatio: 2, Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: zone }) }) }, URL, JSON, Date: { now: () => clock.t }, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]), imported: (u) => imports.push(u) };
   vm.createContext(ctx);
   // import() needs a module loader, so the script's dynamic import is recorded instead.
   vm.runInContext(before + SRC.replace(/\bimport\(/g, "imported("), ctx);
@@ -326,6 +331,28 @@ test("reading time and scroll depth are sent once, when the page ends", () => {
   const read = b.sent.find((e) => e.n == "read");
   assert.deepEqual([read.u, read.e, read.x], ["https://example.com/blog/post", 20, 70]);
   assert.deepEqual(b.sent.map((e) => e.n), ["pageview", "read", "leave"]);
+});
+
+test("web vitals go with the first read only, and not without an observer", () => {
+  const entries = {
+    "largest-contentful-paint": [{ startTime: 900 }, { startTime: 2400.5 }],
+    event: [{ duration: 96, interactionId: 1 }, { duration: 312, interactionId: 2 }, { duration: 480 }, { duration: 40, interactionId: 3 }],
+    "layout-shift": [{ value: 0.05 }, { value: 0.2, hadRecentInput: true }, { value: 0.03 }],
+  };
+  const b = browser("https://example.com/", { entries });
+  b.clock.t += 5_000;
+  b.history.pushState({}, "", "/pricing");
+  b.clock.t += 5_000;
+  b.fire("w:", "pagehide", { persisted: false });
+  const reads = b.sent.filter((e) => e.n == "read");
+  assert.deepEqual(reads.map((r) => r.u), ["https://example.com/", "https://example.com/pricing"]);
+  assert.deepEqual([reads[0].p[0], reads[0].p[1], Math.round(reads[0].p[2])], [2400.5, 312, 80]);
+  assert.equal(reads[1].p, undefined);
+  assert.ok(b.sent.filter((e) => e.n != "read").every((e) => e.p === undefined));
+  const plain = browser("https://example.com/");
+  plain.clock.t += 5_000;
+  plain.fire("w:", "pagehide", { persisted: false });
+  assert.deepEqual(plain.sent.find((e) => e.n == "read").p, [0, 0, 0]);
 });
 
 test("time in a hidden tab is not reading time", () => {
