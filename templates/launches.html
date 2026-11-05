@@ -14,7 +14,13 @@
         <div class="menu" hidden><div role="listbox" aria-labelledby="ll-channel"><button type="button" role="option" data-value="" aria-selected="true">Not set</button>{% for c in channels %}<button type="button" role="option" data-value="{{ c }}" aria-selected="false">{{ c }}</button>{% endfor %}</div></div>
       </div>
     </div>
-    <label>Day<input class="input" name="day" type="date" value="{{ today }}" required></label>
+    <div class="ll-pick"><span id="ll-day">Day</span>
+      <div class="select ll-day" data-day>
+        <input type="hidden" name="day" value="{{ today }}">
+        <button type="button" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="ll-day"><span data-label>{{ today }}</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></button>
+        <div class="menu" hidden><div class="cal"></div></div>
+      </div>
+    </div>
     <button class="btn" type="submit">Add launch</button>
   </form>
 </section>

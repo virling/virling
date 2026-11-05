@@ -3258,8 +3258,12 @@ mod tests {
             StatusCode::ACCEPTED
         );
         let funnel = goals("").await;
-        assert!(funnel.contains(r#"<option value="page:/pricing*">Viewed pricing</option>"#));
-        assert!(funnel.contains(r#"<option value="page:/pricing">Viewed /pricing</option>"#));
+        assert!(funnel.contains(
+            r#"data-value="page:/pricing*" aria-selected="false">Viewed pricing</button>"#
+        ));
+        assert!(funnel.contains(
+            r#"data-value="page:/pricing" aria-selected="false">Viewed /pricing</button>"#
+        ));
     }
 
     #[tokio::test]

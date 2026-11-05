@@ -391,6 +391,72 @@ document.addEventListener("click", (e) => {
   all.textContent = open ? "Collapse all" : "Expand all";
 });
 
+for (const box of document.querySelectorAll("[data-day]")) {
+  const trigger = box.querySelector("button");
+  const menu = box.querySelector(".menu");
+  const cal = menu.querySelector(".cal");
+  const hidden = box.querySelector("input[type=hidden]");
+  const label = box.querySelector("[data-label]");
+  const iso = (d) => d.toISOString().slice(0, 10);
+  const parse = (s) => new Date(s + "T00:00:00Z");
+  const fmt = (s) => parse(s).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  const today = hidden.value;
+  let view = parse(today);
+  view.setUTCDate(1);
+  label.textContent = fmt(today);
+  const draw = (focus) => {
+    const y = view.getUTCFullYear(), m = view.getUTCMonth();
+    const first = (new Date(Date.UTC(y, m, 1)).getUTCDay() + 6) % 7;
+    const days = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    const title = view.toLocaleDateString(undefined, { month: "long", year: "numeric", timeZone: "UTC" });
+    let cells = "<span></span>".repeat(first);
+    for (let d = 1; d <= days; d++) {
+      const s = iso(new Date(Date.UTC(y, m, d)));
+      const cls = [s === hidden.value ? "on" : "", s === today ? "today" : ""].join(" ").trim();
+      cells += `<button type="button" data-d="${s}"${cls ? ` class="${cls}"` : ""}>${d}</button>`;
+    }
+    cal.innerHTML = `<div class="cal-head"><button type="button" data-step="-1" aria-label="Previous month">&#8249;</button><b>${title}</b><button type="button" data-step="1" aria-label="Next month">&#8250;</button></div><div class="cal-dow"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div><div class="cal-grid">${cells}</div>`;
+    if (focus) cal.querySelector(`[data-d="${focus}"]`)?.focus();
+  };
+  const open = (state) => {
+    menu.hidden = !state;
+    trigger.setAttribute("aria-expanded", String(state));
+    if (!state) return;
+    view = parse(hidden.value);
+    view.setUTCDate(1);
+    draw(hidden.value);
+  };
+  trigger.addEventListener("click", () => open(menu.hidden));
+  cal.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    e.stopPropagation();
+    if (b.dataset.step) {
+      view.setUTCMonth(view.getUTCMonth() + Number(b.dataset.step));
+      draw();
+      return;
+    }
+    hidden.value = b.dataset.d;
+    label.textContent = fmt(b.dataset.d);
+    open(false);
+    trigger.focus();
+  });
+  menu.addEventListener("keydown", (e) => {
+    const steps = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
+    const at = document.activeElement.dataset.d;
+    if (e.key === "Escape") { open(false); trigger.focus(); }
+    else if (at && steps[e.key]) {
+      e.preventDefault();
+      const next = parse(at);
+      next.setUTCDate(next.getUTCDate() + steps[e.key]);
+      view = new Date(next);
+      view.setUTCDate(1);
+      draw(iso(next));
+    }
+  });
+  document.addEventListener("click", (e) => { if (!box.contains(e.target)) open(false); });
+}
+
 for (const form of document.querySelectorAll("[data-cal]")) {
   const [from, to] = form.querySelectorAll("input[type=date]");
   const max = from.max;
