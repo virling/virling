@@ -50,7 +50,7 @@ These appear below the main grid when they have something to show.
 
 - **Channel verdicts:** one plain line per channel against the period before, such as what earned most, what to do more of, and what earned nothing. The same lines are in the weekly email and the client report.
 - **Reading:** for each page, how long it stays visible and how far it is scrolled, for every visitor or only for buyers.
-- **Page speed:** Core Web Vitals from real visits for your most loaded pages, slowest first: load time (largest contentful paint) at the 75th percentile, next to the conversion rate and revenue of the visitors who loaded the page. Load times past 4 s show in red. Hover a row for its slowest interaction and layout shift.
+- **Page speed:** Core Web Vitals from real visits for your most loaded pages, slowest first: load time (largest contentful paint) at the 75th percentile, next to the conversion rate and revenue of the visitors who loaded the page. Load times past 4 s show in red. Hover a row for its slowest interaction and layout shift. With 30 or more visitors on each side, a line compares how visitors who waited over 2.5 s for a page converted against those with faster loads. Browsers without the Largest Contentful Paint API, such as older Safari, are left out.
 - **Almost paid:** visitors who reached pricing or checkout and did not pay, by channel or by their last page, with the revenue left on the table.
 - **Profit by channel** and **Time to pay**, described below.
 
