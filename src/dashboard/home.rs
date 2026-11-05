@@ -839,9 +839,9 @@ async fn page(
             let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
             let goals = tokio::spawn(blocking(move || goal_card::load(&*store, &sid, &per)));
             let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
-            let read = tokio::spawn(blocking(move || {
-                Ok((store.reading(&sid, &per)?, store.speed(&sid, &per)?))
-            }));
+            let read = tokio::spawn(blocking(move || store.reading(&sid, &per)));
+            let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
+            let speed = tokio::spawn(blocking(move || store.speed(&sid, &per)));
             let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
             let almost = tokio::spawn(blocking(move || store.almost_paid(&sid, &per)));
             let earlier = filters.is_empty().then(|| {
@@ -856,7 +856,7 @@ async fn page(
                     store.breakdown(&sid, &before, Dimension::Channel)
                 }))
             });
-            (spend, pays, goals, read, almost, earlier)
+            (spend, pays, goals, read, speed, almost, earlier)
         });
         (links, bots, own)
     });
@@ -1561,7 +1561,7 @@ async fn page(
                     state.config.hosted,
                 ));
             }
-            if let Some((spend, pays, goals, read, almost, earlier)) = own {
+            if let Some((spend, pays, goals, read, speed, almost, earlier)) = own {
                 let spend = joined(spend.await)?;
                 page.profit = crate::spend::profit_card(
                     &report.channels,
@@ -1588,8 +1588,8 @@ async fn page(
                     cur.visitors,
                     |v| href(&[("goals", v)]),
                 ));
-                let (read, speed) = joined(read.await)?;
-                page.speed = crate::speed::card(&speed);
+                let read = joined(read.await)?;
+                page.speed = crate::speed::card(&joined(speed.await)?);
                 page.reading = crate::reading::card(
                     &read,
                     q.rest.get("rd").is_some_and(|v| v == "buyers"),
