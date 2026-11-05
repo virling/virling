@@ -19,6 +19,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Free tools](https://virling.com/tools): browser tools with no signup
 - [UTM builder](https://virling.com/tools/utm-builder): add utm_source, utm_medium and utm_campaign to any link
 - [Revenue per visitor and ROI calculator](https://virling.com/tools/revenue-per-visitor): revenue per visitor, return on ad spend and break-even per channel
+- [Payment fee calculator](https://virling.com/tools/payment-fee-calculator): compare Stripe, Paddle, Lemon Squeezy, Polar, Dodo Payments and Creem fees on your own price
 - [AI crawler checker](https://virling.com/tools/ai-crawler-checker): see which AI crawlers a robots.txt allows or blocks
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
