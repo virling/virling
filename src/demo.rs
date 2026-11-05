@@ -952,6 +952,8 @@ async fn seeded(dir: &Path, email: &str) -> anyhow::Result<(AppState, String)> {
     store.insert_events(&events)?;
     store.upsert_payments(&payments)?;
     store.insert_reads(&reads(&events, &payments))?;
+    let cards: Arc<dyn EventStore> = store.clone();
+    crate::speed::refresh(&db, &cards).await?;
     store.replace_subscriptions(&site, "stripe", &subscriptions)?;
     for (n, (slug, name, source, channel, path)) in LINKS.iter().enumerate() {
         let clicks: HashSet<&str> = events
@@ -1051,6 +1053,7 @@ fn reads(events: &[Event], payments: &[Payment]) -> Vec<Read> {
         .map(|(i, e)| {
             let n = (i * 7919 + e.path.len() * 31) % 100;
             let bonus = paid.contains(e.visitor_id.as_str()) as usize;
+            let page = e.path.bytes().map(usize::from).sum::<usize>();
             Read {
                 site_id: e.site_id.clone(),
                 ts: e.ts,
@@ -1058,6 +1061,17 @@ fn reads(events: &[Event], payments: &[Payment]) -> Vec<Read> {
                 path: e.path.clone(),
                 secs: (10 + n * 2 + bonus * 50) as u16,
                 scroll: (20 + n * 6 / 10 + bonus * 20).min(100) as u8,
+                // Each page its own speed, with slow loads more common for visitors who did not pay.
+                vitals: Some([
+                    (1100 + page % 9 * 300 + n * 12 + (1 - bonus) * usize::from(n % 4 == 0) * 1800)
+                        as u32,
+                    if n % 3 == 0 {
+                        110 + n * 3 + page % 4 * 60
+                    } else {
+                        0
+                    } as u32,
+                    (n % 5 * 20 + usize::from(page % 5 == 0) * 220) as u32,
+                ]),
             }
         })
         .collect()

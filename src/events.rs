@@ -29,6 +29,8 @@ pub struct Read {
     pub path: String,
     pub secs: u16,
     pub scroll: u8,
+    /// Web vitals of the page load, sent with its first read: LCP ms, slowest interaction ms, layout shift x1000.
+    pub vitals: Option<[u32; 3]>,
 }
 
 #[derive(Debug, Clone)]
@@ -149,6 +151,8 @@ pub trait EventStore: Send + Sync {
     fn insert_reads(&self, reads: &[Read]) -> anyhow::Result<()>;
     /// Reading per page in the range, most read first, with those who paid shown apart.
     fn reading(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ReadRow>>;
+    /// Web vitals per page with the conversion and revenue of the visitors who loaded it.
+    fn speed(&self, site_id: &str, period: &Period) -> anyhow::Result<crate::speed::Speed>;
     /// Bot visitors filtered in the last `days` days.
     fn bots_filtered(&self, site_id: &str, days: i64) -> anyhow::Result<u64>;
     /// Goal completions after unix microsecond `after`, oldest first: microseconds, goal, page and visitor.
@@ -849,6 +853,15 @@ impl DuckStore {
                 path VARCHAR NOT NULL,
                 secs USMALLINT NOT NULL,
                 scroll UTINYINT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS vitals (
+                site_id VARCHAR NOT NULL,
+                ts TIMESTAMPTZ NOT NULL,
+                vh UBIGINT NOT NULL,
+                path VARCHAR NOT NULL,
+                lcp UINTEGER NOT NULL,
+                inp UINTEGER NOT NULL,
+                cls UINTEGER NOT NULL
             );
             CREATE TABLE IF NOT EXISTS payments (
                 site_id VARCHAR NOT NULL,
@@ -1616,6 +1629,8 @@ impl EventStore for DuckStore {
         let tx = conn.unchecked_transaction()?;
         let mut stmt =
             tx.prepare("INSERT INTO reads VALUES (?, ?, hash(CAST(? AS VARCHAR)), ?, ?, ?)")?;
+        let mut vit =
+            tx.prepare("INSERT INTO vitals VALUES (?, ?, hash(CAST(? AS VARCHAR)), ?, ?, ?, ?)")?;
         for r in reads {
             stmt.execute(params![
                 r.site_id,
@@ -1625,8 +1640,19 @@ impl EventStore for DuckStore {
                 r.secs,
                 r.scroll
             ])?;
+            if let Some([lcp, inp, cls]) = r.vitals {
+                vit.execute(params![
+                    r.site_id,
+                    ts_value(r.ts),
+                    r.visitor_id,
+                    r.path,
+                    lcp,
+                    inp,
+                    cls
+                ])?;
+            }
         }
-        drop(stmt);
+        drop((stmt, vit));
         tx.commit()?;
         Ok(())
     }
@@ -1657,6 +1683,10 @@ impl EventStore for DuckStore {
             ))
         })?;
         Ok(rows.collect::<Result<_, _>>()?)
+    }
+
+    fn speed(&self, site_id: &str, period: &Period) -> anyhow::Result<crate::speed::Speed> {
+        crate::speed::speed(&*self.read()?, site_id, period)
     }
 
     fn bots_filtered(&self, site_id: &str, days: i64) -> anyhow::Result<u64> {

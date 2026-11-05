@@ -882,6 +882,7 @@ a.hov { color: inherit; text-decoration: none; }
     .d3-row.d3-almostrow { grid-template-columns: minmax(0, 240px) repeat(3, minmax(64px, 1fr)); }
     .d3-row.d3-almostpg { grid-template-columns: minmax(0, 240px) minmax(64px, 1fr); }
     .d3-row.d3-payrow { grid-template-columns: minmax(0, 240px) repeat(5, minmax(64px, 1fr)); }
+    .d3-row.d3-speedrow { grid-template-columns: minmax(0, 240px) repeat(3, minmax(64px, 1fr)); }
   }
 }
 @media (max-width: 720px) {
@@ -1587,6 +1588,8 @@ body.r2-page { min-height: 100vh; background: var(--ground); line-height: normal
 .d3-almostrow { grid-template-columns: minmax(0, 1fr) 70px 60px 100px; }
 .d3-almostpg { grid-template-columns: minmax(0, 1fr) 80px; }
 .d3-payrow { grid-template-columns: minmax(0, 1fr) 76px 84px 56px 56px 60px; }
+.d3-speedrow { grid-template-columns: minmax(0, 1fr) 52px 52px 60px; }
+.d3-speedrow .num.poor { color: var(--error-text); }
 .ll-add, .ll-list { padding: 16px; margin-bottom: 16px; }
 .ll-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; align-items: end; margin-top: 12px; }
 .ll-form label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--ink-2); }

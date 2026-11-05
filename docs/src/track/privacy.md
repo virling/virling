@@ -2,7 +2,7 @@
 
 ## What is stored
 
-For each event Virling stores: the time, the path without its query string, the referrer host, UTM tags, the channel, the country, the device type, the browser name, the operating system, the browser language, the site host, a visitor ID and a session ID. The region and city are stored too when the proxy or CDN in front of Virling sends them, as Cloudflare and Vercel do. For goals, the goal name. For outbound link clicks, the destination host and path without its query string. When the page is closed or left, a leave event with no extra data, used for time on page and the exit page.
+For each event Virling stores: the time, the path without its query string, the referrer host, UTM tags, the channel, the country, the device type, the browser name, the operating system, the browser language, the site host, a visitor ID and a session ID. The region and city are stored too when the proxy or CDN in front of Virling sends them, as Cloudflare and Vercel do. For goals, the goal name. For outbound link clicks, the destination host and path without its query string. When the page is closed or left, a leave event with no extra data, used for time on page and the exit page. When a page is left after more than a second, how long it was visible and how far it was scrolled, and with the first one, four timings of the page load: largest contentful paint, the slowest interaction, layout shift and time to first byte.
 
 Events do not include IP addresses, full user agents, full referrer URLs, or anything a visitor types.
 

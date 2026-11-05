@@ -170,6 +170,7 @@ struct DashboardPage {
     profit: Option<crate::spend::ProfitCard>,
     topay: Option<crate::topay::PayCard>,
     reading: Option<crate::reading::ReadCard>,
+    speed: Option<crate::speed::SpeedCard>,
     almost: Option<crate::almost::AlmostCard>,
     verdicts: Vec<crate::verdict::Verdict>,
     why: Option<String>,
@@ -204,6 +205,7 @@ struct PublicPage {
     ai: Option<cards::AiCard>,
     profit: Option<crate::spend::ProfitCard>,
     reading: Option<crate::reading::ReadCard>,
+    speed: Option<crate::speed::SpeedCard>,
     almost: Option<crate::almost::AlmostCard>,
     verdicts: Vec<crate::verdict::Verdict>,
     topay: Option<crate::topay::PayCard>,
@@ -838,6 +840,8 @@ async fn page(
             let goals = tokio::spawn(blocking(move || goal_card::load(&*store, &sid, &per)));
             let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
             let read = tokio::spawn(blocking(move || store.reading(&sid, &per)));
+            let (db, sid) = (state.db.clone(), site.clone());
+            let speed = tokio::spawn(async move { crate::speed::stored(&db, &sid).await });
             let (store, sid, per) = (state.events.clone(), site.clone(), p.clone());
             let almost = tokio::spawn(blocking(move || store.almost_paid(&sid, &per)));
             let earlier = filters.is_empty().then(|| {
@@ -852,7 +856,7 @@ async fn page(
                     store.breakdown(&sid, &before, Dimension::Channel)
                 }))
             });
-            (spend, pays, goals, read, almost, earlier)
+            (spend, pays, goals, read, speed, almost, earlier)
         });
         (links, bots, own)
     });
@@ -1072,6 +1076,7 @@ async fn page(
         profit: None,
         topay: None,
         reading: None,
+        speed: None,
         almost: None,
         verdicts: Vec::new(),
         why: None,
@@ -1556,7 +1561,7 @@ async fn page(
                     state.config.hosted,
                 ));
             }
-            if let Some((spend, pays, goals, read, almost, earlier)) = own {
+            if let Some((spend, pays, goals, read, speed, almost, earlier)) = own {
                 let spend = joined(spend.await)?;
                 page.profit = crate::spend::profit_card(
                     &report.channels,
@@ -1584,6 +1589,7 @@ async fn page(
                     |v| href(&[("goals", v)]),
                 ));
                 let read = joined(read.await)?;
+                page.speed = crate::speed::card(&joined(speed.await)?);
                 page.reading = crate::reading::card(
                     &read,
                     q.rest.get("rd").is_some_and(|v| v == "buyers"),
@@ -1704,6 +1710,7 @@ async fn page(
         profit: page.profit,
         topay: page.topay,
         reading: None,
+        speed: None,
         almost: None,
         verdicts: Vec::new(),
         why: page.why,

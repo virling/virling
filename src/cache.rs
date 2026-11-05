@@ -227,6 +227,12 @@ impl<S: EventStore> EventStore for Cached<S> {
         })
     }
 
+    fn speed(&self, site_id: &str, period: &Period) -> anyhow::Result<crate::speed::Speed> {
+        self.get(site_id, format!("speed {period:?}"), || {
+            self.inner.speed(site_id, period)
+        })
+    }
+
     fn insert_bots(&self, bots: &[(Event, &str)]) -> anyhow::Result<()> {
         self.inner.insert_bots(bots)
     }
