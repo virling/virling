@@ -7,8 +7,20 @@
   <form method="post" action="/app/{{ shell.domain }}/launches" class="ll-form">
     <label>Name<input class="input" name="name" maxlength="80" placeholder="Show HN post" required></label>
     <label>Link<input class="input" name="url" type="url" placeholder="https://news.ycombinator.com/item?id=..."></label>
-    <label>Channel<select class="input" name="channel"><option value="">Not set</option>{% for c in channels %}<option value="{{ c }}">{{ c }}</option>{% endfor %}</select></label>
-    <label>Day<input class="input" name="day" type="date" value="{{ today }}" required></label>
+    <div class="ll-pick"><span id="ll-channel">Channel</span>
+      <div class="select" data-select>
+        <input type="hidden" name="channel" value="">
+        <button type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="ll-channel"><span data-label>Not set</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="menu" hidden><div role="listbox" aria-labelledby="ll-channel"><button type="button" role="option" data-value="" aria-selected="true">Not set</button>{% for c in channels %}<button type="button" role="option" data-value="{{ c }}" aria-selected="false">{{ c }}</button>{% endfor %}</div></div>
+      </div>
+    </div>
+    <div class="ll-pick"><span id="ll-day">Day</span>
+      <div class="select ll-day" data-day>
+        <input type="hidden" name="day" value="{{ today }}">
+        <button type="button" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="ll-day"><span data-label>{{ today }}</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></button>
+        <div class="menu" hidden><div class="cal"></div></div>
+      </div>
+    </div>
     <button class="btn" type="submit">Add launch</button>
   </form>
 </section>
