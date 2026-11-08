@@ -655,6 +655,32 @@ mod tests {
         assert_eq!(rows.len(), 1);
         assert_eq!(rows[0].0, "vsignup01");
         assert!(rows[0].1.len() == 64 && !rows[0].1.contains("ann"));
+        let other = r#"{"n":"identify","u":"https://example.com/","s":"example.com","v":"vother01","m":"ann@example.com"}"#;
+        assert_eq!(post(&state, other, mac).await, StatusCode::ACCEPTED);
+        let owner: String = sqlx::query_scalar("SELECT visitor_id FROM visitor_emails")
+            .fetch_one(&state.db)
+            .await
+            .unwrap();
+        assert_eq!(
+            owner, "vsignup01",
+            "a later identify cannot take the email over"
+        );
+    }
+
+    #[tokio::test]
+    async fn oversized_site_names_are_dropped_and_not_cached() {
+        let (_dir, state, _store) = setup().await;
+        let long = "a".repeat(100_000);
+        let body = format!(
+            r#"{{"n":"pageview","u":"https://example.com/","s":"{long}","v":"vlong01","w":1440}}"#
+        );
+        post(&state, &body, UA).await;
+        assert!(state.sites.by_domain(&state.db, &long).await.is_none());
+        assert_eq!(
+            state.sites.len(),
+            0,
+            "no cache entry for a name that cannot be a domain"
+        );
     }
 
     #[tokio::test]
