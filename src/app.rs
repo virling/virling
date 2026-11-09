@@ -80,6 +80,8 @@ pub struct AppState {
     pub http: reqwest::Client,
     /// Fetches site favicons from public hosts only.
     pub favicons: reqwest::Client,
+    /// Reaches the store URLs users enter, on public hosts only.
+    pub stores: reqwest::Client,
     pub rates: Arc<Rates>,
     pub presence: Arc<crate::live::Presence>,
     pub pins: Arc<crate::live::Pins>,
@@ -104,6 +106,7 @@ impl AppState {
             rates: Arc::new(Rates::new(http.clone())),
             http,
             favicons: crate::favicon::client(),
+            stores: crate::favicon::public_client(std::time::Duration::from_secs(30)),
             config: Arc::new(config),
             db,
             events,
