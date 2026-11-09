@@ -50,6 +50,9 @@ pub(crate) fn preset(key: &str, today: Date, first: Option<Date>) -> Option<(Dat
     })
 }
 
+/// Longest custom range, as the read API allows.
+const MAX_DAYS: i64 = 3660;
+
 fn ymd(s: Option<&str>) -> Option<Date> {
     Date::parse(s?, format_description!("[year]-[month]-[day]")).ok()
 }
@@ -104,7 +107,9 @@ impl Picked {
     ) -> Self {
         let default = "7d";
         let custom = match (ymd(from), ymd(to)) {
-            (Some(f), Some(t)) if f <= t && f <= today => Some((f, t.min(today))),
+            (Some(f), Some(t)) if f <= t && f <= today && (t - f).whole_days() < MAX_DAYS => {
+                Some((f, t.min(today)))
+            }
             _ => None,
         };
         let key = range
@@ -121,7 +126,7 @@ impl Picked {
         let vs = compare
             .and_then(|c| c.split_once(".."))
             .and_then(|(a, b)| Some((ymd(Some(a))?, ymd(Some(b))?)))
-            .filter(|(a, b)| a <= b && *b <= today);
+            .filter(|(a, b)| a <= b && *b <= today && (*b - *a).whole_days() < MAX_DAYS);
         Picked {
             key,
             default,
@@ -285,6 +290,24 @@ mod tests {
             Some((date!(2026 - 10 - 15), date!(2026 - 10 - 15)))
         );
         assert_eq!(preset("all", t, None), None);
+    }
+
+    #[test]
+    fn custom_ranges_stay_within_ten_years() {
+        let t = date!(2026 - 10 - 16);
+        let far = Picked::read(t, None, None, Some("0001-01-01"), Some("2026-10-16"), None);
+        assert_ne!(far.from, date!(0001 - 01 - 01));
+        let ok = Picked::read(t, None, None, Some("2020-01-01"), Some("2026-10-16"), None);
+        assert_eq!(ok.from, date!(2020 - 01 - 01));
+        let vs = Picked::read(
+            t,
+            None,
+            Some("7d"),
+            None,
+            None,
+            Some("0001-01-01..2026-10-01"),
+        );
+        assert!(vs.vs.is_none_or(|(a, _)| a != date!(0001 - 01 - 01)));
     }
 
     #[test]

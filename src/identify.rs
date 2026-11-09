@@ -48,7 +48,7 @@ pub async fn save(
     let h = hash(&salt(db, site_id).await?, &email);
     sqlx::query(
         "INSERT INTO visitor_emails (site_id, email_hash, visitor_id, seen_at) VALUES (?, ?, ?, ?)
-         ON CONFLICT (site_id, email_hash) DO UPDATE SET visitor_id = excluded.visitor_id, seen_at = excluded.seen_at",
+         ON CONFLICT (site_id, email_hash) DO UPDATE SET seen_at = excluded.seen_at",
     )
     .bind(site_id)
     .bind(h)

@@ -37,7 +37,16 @@ pub struct SiteCache {
 }
 
 impl SiteCache {
+    #[cfg(test)]
+    pub fn len(&self) -> usize {
+        self.entries.read().unwrap().len()
+    }
+
     pub async fn by_domain(&self, db: &SqlitePool, domain: &str) -> Option<Arc<Site>> {
+        // Longer than any DNS name, so never a site, and kept out of the cache.
+        if domain.len() > 253 {
+            return None;
+        }
         if let Some((site, at)) = self.entries.read().unwrap().get(domain)
             && (site.is_some() || at.elapsed() < MISS_TTL)
         {
