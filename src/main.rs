@@ -4097,6 +4097,25 @@ mod tests {
         assert_eq!(goal["data"]["visitor_id"], vid);
 
         let cookie = sign_in(&state, "me%40example.com").await;
+        for private in [
+            "https%3A%2F%2F10.0.0.5%2Fhook",
+            "https%3A%2F%2F%5B%3A%3A1%5D%2F",
+        ] {
+            let res = call(
+                &state,
+                form(
+                    "/app/example.com/settings/webhook",
+                    format!("url={private}"),
+                    Some(&cookie),
+                ),
+            )
+            .await;
+            assert_eq!(
+                res.headers()["location"],
+                "/app/example.com/settings?error=webhook#webhooks",
+                "a private IP is refused"
+            );
+        }
         let plain = "url=http%3A%2F%2Fexample.com%2Fhook".to_string();
         let res = call(
             &state,

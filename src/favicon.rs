@@ -78,7 +78,7 @@ impl Resolve for PublicOnly {
     }
 }
 
-fn literal_ip_is_public(url: &Url) -> bool {
+pub(crate) fn literal_ip_is_public(url: &Url) -> bool {
     match url.host() {
         Some(url::Host::Ipv4(ip)) => is_public(IpAddr::V4(ip)),
         Some(url::Host::Ipv6(ip)) => is_public(IpAddr::V6(ip)),
@@ -88,9 +88,14 @@ fn literal_ip_is_public(url: &Url) -> bool {
 }
 
 pub fn client() -> Client {
+    public_client(Duration::from_secs(5))
+}
+
+/// An https client that only reaches public addresses, redirects included.
+pub fn public_client(timeout: Duration) -> Client {
     Client::builder()
         .user_agent(concat!("virling/", env!("CARGO_PKG_VERSION")))
-        .timeout(Duration::from_secs(5))
+        .timeout(timeout)
         .https_only(true)
         .no_proxy()
         .dns_resolver(Arc::new(PublicOnly))

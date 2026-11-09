@@ -339,7 +339,9 @@ pub async fn save(
     let url = input.url.trim();
     let host = url::Url::parse(url)
         .ok()
-        .filter(|u| u.scheme() == "https" && url.len() <= 500)
+        .filter(|u| {
+            u.scheme() == "https" && url.len() <= 500 && crate::favicon::literal_ip_is_public(u)
+        })
         .and_then(|u| u.host_str().map(String::from));
     let Some(host) = host else {
         return Redirect::to(&format!("{settings}?error=webhook#webhooks")).into_response();

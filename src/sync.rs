@@ -31,6 +31,15 @@ struct Integration {
     store_url: Option<String>,
 }
 
+/// Store URLs come from the user, so those providers only reach public hosts.
+fn client(state: &AppState, provider: Provider) -> &reqwest::Client {
+    if provider.needs_store() {
+        &state.stores
+    } else {
+        &state.http
+    }
+}
+
 pub async fn add_integration(
     state: &AppState,
     site_id: &str,
@@ -38,7 +47,9 @@ pub async fn add_integration(
     key: &str,
     store: Option<&str>,
 ) -> anyhow::Result<()> {
-    provider.check_key(&state.http, key, store).await?;
+    provider
+        .check_key(client(state, provider), key, store)
+        .await?;
     let (ciphertext, nonce) = state.vault.encrypt(key)?;
     // LemonSqueezy, Creem and RevenueCat send checkout data in webhooks, which need a public https address.
     let url = format!(
@@ -352,7 +363,7 @@ async fn sync_subscriptions(state: &AppState, integration: &Integration) -> anyh
     let products = crate::providers::product_list(integration.products.as_deref().unwrap_or(""));
     let subscriptions = provider
         .subscriptions(
-            &state.http,
+            client(state, provider),
             &key,
             &products,
             integration.store_url.as_deref(),
@@ -391,7 +402,7 @@ async fn sync_one(state: &AppState, integration: &Integration) -> anyhow::Result
     for _ in 0..MAX_PAGES_PER_RUN {
         let page = provider
             .fetch(
-                &state.http,
+                client(state, provider),
                 &key,
                 cursor.as_deref(),
                 &products,
