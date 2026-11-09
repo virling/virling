@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to track LemonSqueezy revenue by traffic source</title>
+<meta name="description" content="LemonSqueezy knows who paid, not where they came from. Pass the visitor ID as checkout custom data so each order can be joined to the visit before it.">
+<link rel="canonical" href="https://virling.com/blog/track-lemonsqueezy-revenue-by-traffic-source">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/track-lemonsqueezy-revenue-by-traffic-source">
+<meta property="og:title" content="How to track LemonSqueezy revenue by traffic source">
+<meta property="og:description" content="LemonSqueezy knows who paid, not where they came from. Pass the visitor ID as checkout custom data so each order can be joined to the visit before it.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"How to track LemonSqueezy revenue by traffic source","item":"https://virling.com/blog/track-lemonsqueezy-revenue-by-traffic-source"}]},{"@type":"BlogPosting","headline":"How to track LemonSqueezy revenue by traffic source","description":"LemonSqueezy knows who paid, not where they came from. Pass the visitor ID as checkout custom data so each order can be joined to the visit before it.","datePublished":"2026-11-09","dateModified":"2026-11-09","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/track-lemonsqueezy-revenue-by-traffic-source"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can LemonSqueezy show which traffic source a sale came from?","acceptedAnswer":{"@type":"Answer","text":"Not on its own. LemonSqueezy records the order, not the visit. You need to pass a visitor ID into checkout as custom data and join it to your analytics."}},{"@type":"Question","name":"Why does LemonSqueezy need a webhook for this?","acceptedAnswer":{"@type":"Answer","text":"LemonSqueezy only returns checkout custom data in webhooks, not in its API responses for orders. A webhook for new orders and subscription payments is how the visitor ID reaches your analytics."}},{"@type":"Question","name":"Which channel do LemonSqueezy renewals get?","acceptedAnswer":{"@type":"Answer","text":"Renewal invoices keep the channel of the subscription's first payment instead of landing in Direct."}},{"@type":"Question","name":"Can I limit the LemonSqueezy API key to read-only?","acceptedAnswer":{"@type":"Answer","text":"No. LemonSqueezy API keys cannot be made read-only and they cover every store on your account, so store the key encrypted and delete it in LemonSqueezy to revoke access."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-09</span>
+      <h1>How to track LemonSqueezy revenue by traffic source</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-09.</p>
+<p class="p">To track LemonSqueezy revenue by traffic source, give each visitor an ID, pass it to LemonSqueezy as checkout custom data, and join each order back to the visits that came before it. LemonSqueezy knows who paid and how much. It does not know which page or channel they came from.</p>
+<h2>Step 1: set a visitor ID</h2>
+<p class="p">Your analytics script sets one first-party ID per visitor and remembers the first source: referrer, UTM tags or direct. Put the script on the pages that link to checkout, not only on the checkout itself.</p>
+<h2>Step 2: send the ID to LemonSqueezy at checkout</h2>
+<p class="p">LemonSqueezy checkouts accept custom data. Pick the option that matches how you sell:</p>
+<ul class="post-list"><li><b>Checkout links:</b> add the ID to the link as <code>checkout[custom][name]=value</code></li><li><b>Checkouts you create on your server:</b> when you call <code>POST /v1/checkouts</code>, set <code>data.attributes.checkout_data.custom</code> to an object holding the ID from the visitor's cookie</li></ul>
+<p class="p">If your link is built before the analytics script has loaded, the value will be empty, so wait for the script first.</p>
+<h2>Step 3: catch the custom data in a webhook</h2>
+<p class="p">This is the step that surprises people. LemonSqueezy only returns checkout custom data in webhooks. Reading orders from the API is not enough, because the ID will not be there. Register a webhook for <code>order_created</code> and <code>subscription_payment_success</code>, check each request's <code>X-Signature</code> against your signing secret, and attach the ID to the order or invoice it came with. The webhook address must be a public <code>https://</code> URL that LemonSqueezy can reach.</p>
+<h2>Step 4: join orders to visits</h2>
+<p class="p">Match each order's ID to that visitor's earlier visits and credit one of them with a rule you keep fixed (see <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch or last touch</a>). Orders with no ID have no visit to join, so they show as Unattributed.</p>
+<h2>Step 5: handle refunds and renewals</h2>
+<p class="p">Refunds do not change an order's creation time, so a scan that only looks at new orders will miss them. Rescan recent orders for refunds on a schedule, or a channel will look better than it is. Renewal invoices should keep the channel of the subscription's first payment.</p>
+<h2>Step 6: report revenue per channel</h2>
+<p class="p">Group the joined orders by channel and divide by visitors to get <a href="/blog/what-is-revenue-per-visitor">revenue per visitor</a>. That is the table that tells you where to spend time.</p>
+<p class="p">Checkout on another domain or a second site? See <a href="/blog/cross-domain-checkout-attribution">cross-domain checkout attribution</a>.</p>
+<h2>What goes wrong</h2>
+<ul class="post-list"><li>Passing the ID but never registering the webhook: orders import with no visitor and fall into Unattributed</li><li>A webhook address that LemonSqueezy cannot reach, such as a private or http URL</li><li>Building the checkout link before the script has loaded, so the ID is empty</li><li>Ignoring refunds, which overstates a channel</li></ul>
+<h2>Doing it with Virling</h2>
+<p class="p">Virling imports LemonSqueezy orders and subscription invoices from the last 90 days on the first run, then new ones every minute, and rescans the last 60 days for refunds every 6 hours. When you connect, it registers the webhook on each of your stores for you, checks the signature and attaches the visitor ID. Checkout links on <code>STORE.lemonsqueezy.com</code> need no code, because the script adds <code>checkout[custom][virling_vid]</code> to them. The webhook needs <code>VIRLING_BASE_URL</code> to be a public <code>https://</code> address.</p>
+<p class="p">One thing to know first: LemonSqueezy API keys cannot be made read-only and cover every store on your account. Virling stores the key encrypted, and you can delete it in LemonSqueezy at any time. The setup is in <a href="https://docs.virling.com/payments/lemonsqueezy">the docs</a> and on the <a href="/integrations/lemonsqueezy">LemonSqueezy integration page</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>Can LemonSqueezy show which traffic source a sale came from?</h3><p class="p">Not on its own. LemonSqueezy records the order, not the visit. You need to pass a visitor ID into checkout as custom data and join it to your analytics.</p>
+<h3>Why does LemonSqueezy need a webhook for this?</h3><p class="p">LemonSqueezy only returns checkout custom data in webhooks, not in its API responses for orders. A webhook for new orders and subscription payments is how the visitor ID reaches your analytics.</p>
+<h3>Which channel do LemonSqueezy renewals get?</h3><p class="p">Renewal invoices keep the channel of the subscription's first payment instead of landing in Direct.</p>
+<h3>Can I limit the LemonSqueezy API key to read-only?</h3><p class="p">No. LemonSqueezy API keys cannot be made read-only and they cover every store on your account, so store the key encrypted and delete it in LemonSqueezy to revoke access.</p>
+<p class="p">Start a 14-day free trial at <a href="https://app.virling.com/login">app.virling.com</a>.</p>
+</div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
