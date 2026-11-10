@@ -55,9 +55,3 @@
 
 /*.md
   Content-Type: text/markdown; charset=utf-8
-
-/demo/
-  X-Robots-Tag: noindex
-
-/demo/*
-  X-Robots-Tag: noindex

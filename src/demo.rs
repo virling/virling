@@ -1342,12 +1342,12 @@ fn target(url: &str) -> Option<String> {
     })
 }
 
-/// The demo's own page may be found in search; its generated pages (every filter, payment and visitor) may not.
+/// The demo's own page may be found in search; its generated pages (every filter, payment and visitor) may not, nor their links followed.
 fn seo_tags(html: &str, path: &str, file: &str) -> String {
     let tag = if path == "/demo/" && file == "index.html" {
         r#"<link rel="canonical" href="https://virling.com/demo/">"#
     } else {
-        r#"<meta name="robots" content="noindex,follow">"#
+        r#"<meta name="robots" content="noindex,nofollow">"#
     };
     html.replacen("</head>", &format!("{tag}\n</head>"), 1)
 }
