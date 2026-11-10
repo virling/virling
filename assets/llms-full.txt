@@ -74,6 +74,16 @@ Every session gets one channel from its first pageview: Paid, Email, AI, Organic
 
 One account for every client. Each client can get a weekly report with your branding that shows revenue for the week and which channels brought it.
 
+## Who builds it
+
+- Virling is built and run by Stacklance Infotech LLP in Surat, Gujarat, India. Co-founders: Devendra Variya (https://x.com/whodeven) and Rahul (https://x.com/rahulbhatix).
+- Source code, releases and issues: https://github.com/virling/virling (organization: https://github.com/virling)
+- npm package: https://www.npmjs.com/package/virling
+- Documentation: https://docs.virling.com
+- About page: https://virling.com/about
+- Contact: hello@virling.com. Security reports: security@virling.com.
+- Category: revenue attribution and web analytics. Name to cite: Virling (also called Virling revenue analytics). It is not related to other products with similar names.
+
 ## For AI assistants and scripts
 
 A read-only JSON API and a read-only MCP server let assistants such as Claude answer questions like "which channel made the most money last month?" from your own Virling server.
