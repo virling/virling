@@ -345,7 +345,14 @@ pub async fn confirm(State(state): State<AppState>, Query(input): Query<TokenInp
 }
 
 /// Joins the team and signs in.
-pub async fn accept(State(state): State<AppState>, Form(input): Form<TokenInput>) -> Response {
+pub async fn accept(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    Form(input): Form<TokenInput>,
+) -> Response {
+    if auth::cross_site(&headers, &state.config.base_url) {
+        return StatusCode::FORBIDDEN.into_response();
+    }
     let fail = |error: &'static str| {
         auth::page(LoginPage {
             view: "enter",

@@ -342,11 +342,25 @@ pub async fn confirm(State(state): State<AppState>, Query(input): Query<TokenInp
     }
 }
 
+/// Whether a browser sent this request from another site, as a login form posted by a third party would be.
+pub(crate) fn cross_site(headers: &HeaderMap, base_url: &str) -> bool {
+    let get = |name| headers.get(name).and_then(|v| v.to_str().ok());
+    match get("origin") {
+        Some(origin) => {
+            !url::Url::parse(base_url).is_ok_and(|u| u.origin().ascii_serialization() == origin)
+        }
+        None => get("sec-fetch-site") == Some("cross-site"),
+    }
+}
+
 pub async fn verify(
     State(state): State<AppState>,
     headers: HeaderMap,
     Form(input): Form<TokenInput>,
 ) -> Response {
+    if cross_site(&headers, &state.config.base_url) {
+        return axum::http::StatusCode::FORBIDDEN.into_response();
+    }
     let row: Option<(String, Option<String>)> = sqlx::query_as(
         "UPDATE login_tokens SET used_at = ? WHERE token_hash = ? AND used_at IS NULL AND expires_at > ? RETURNING email, vid",
     )

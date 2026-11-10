@@ -1185,6 +1185,28 @@ mod tests {
         b.body(Body::from(body)).unwrap()
     }
 
+    #[tokio::test]
+    async fn sign_in_forms_posted_from_another_site_are_refused() {
+        let (_dir, state, _store) = setup().await;
+        for (name, value) in [
+            ("origin", "https://evil.example"),
+            ("sec-fetch-site", "cross-site"),
+        ] {
+            for path in ["/auth/verify", "/invite"] {
+                let req = Request::post(path)
+                    .header("content-type", "application/x-www-form-urlencoded")
+                    .header(name, value)
+                    .body(Body::from("token=abc"))
+                    .unwrap();
+                assert_eq!(
+                    call(&state, req).await.status(),
+                    StatusCode::FORBIDDEN,
+                    "{path} {name}"
+                );
+            }
+        }
+    }
+
     fn get(uri: &str, cookie: Option<&str>) -> Request<Body> {
         let mut b = Request::get(uri);
         if let Some(c) = cookie {
