@@ -99,3 +99,9 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 ## Source
 
 - [GitHub repository](https://github.com/virling/virling): code, releases and changelog, AGPLv3
+- [GitHub organization](https://github.com/virling): all Virling repositories
+- [npm package](https://www.npmjs.com/package/virling): the Virling tracking package
+- [Documentation](https://docs.virling.com/): setup, payment providers and attribution
+- [About Virling](https://virling.com/about): built and run by Stacklance Infotech LLP in Surat, Gujarat, India
+- [Devendra Variya on X](https://x.com/whodeven): co-founder
+- [Rahul on X](https://x.com/rahulbhatix): co-founder
