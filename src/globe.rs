@@ -385,9 +385,20 @@ struct PublicGlobePage {
     data: String,
 }
 
-/// What a public globe may show: no journeys, and no amounts when the owner hides revenue.
+/// What a public globe may show: no journeys, opaque IDs, and no amounts when the owner hides revenue.
 fn publicize(g: &mut Globe, hide_revenue: bool) {
+    use std::hash::BuildHasher;
+    static KEY: std::sync::LazyLock<std::hash::RandomState> =
+        std::sync::LazyLock::new(std::hash::RandomState::new);
     g.journeys.clear();
+    let mask = |id: &str| format!("{:016x}", KEY.hash_one(id));
+    for v in &mut g.visitors {
+        v.id = mask(&v.id);
+    }
+    for p in &mut g.payments {
+        p.id = mask(&p.id);
+        p.vid = p.vid.as_deref().map(mask);
+    }
     if hide_revenue {
         for p in &mut g.payments {
             p.amt = "A payment".into();
@@ -542,5 +553,61 @@ pub async fn data(
     match build(&state, &ctx.site, p, &picked.label).await {
         Ok(g) => timing(Json(g).into_response(), t0),
         Err(code) => code.into_response(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn public_globes_hide_visitor_and_payment_ids() {
+        let visitor = GVisitor {
+            id: "vis_123".into(),
+            name: String::new(),
+            face: 0,
+            cc: String::new(),
+            place: String::new(),
+            src: String::new(),
+            ch: String::new(),
+            page: String::new(),
+            dev: String::new(),
+            paid: 1,
+            spent: String::new(),
+            at: None,
+        };
+        let pay = GPay {
+            id: "pi_secret".into(),
+            name: String::new(),
+            face: 0,
+            cc: String::new(),
+            place: String::new(),
+            amt: String::new(),
+            usd: 0.0,
+            src: String::new(),
+            ch: String::new(),
+            ago: String::new(),
+            ts: 0,
+            vid: Some("vis_123".into()),
+            at: None,
+        };
+        let mut g = Globe {
+            now: 0,
+            online: 0,
+            label: String::new(),
+            faces: vec![],
+            visitors: vec![visitor],
+            last: None,
+            payments: vec![pay],
+            countries: vec![],
+            journeys: HashMap::new(),
+        };
+        publicize(&mut g, false);
+        let json = serde_json::to_string(&g).unwrap();
+        assert!(!json.contains("vis_123") && !json.contains("pi_secret"));
+        assert_eq!(
+            g.payments[0].vid.as_deref(),
+            Some(g.visitors[0].id.as_str())
+        );
     }
 }
