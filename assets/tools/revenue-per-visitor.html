@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Revenue per visitor and channel ROI calculator | Virling</title>
+<title>Revenue per visitor calculator: RPV, ROAS and break-even | Virling</title>
 <meta name="description" content="Free calculator for revenue per visitor, return on ad spend and the break-even revenue per visitor of a marketing channel. Runs in your browser.">
 <link rel="canonical" href="https://virling.com/tools/revenue-per-visitor">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Virling">
 <meta property="og:url" content="https://virling.com/tools/revenue-per-visitor">
-<meta property="og:title" content="Revenue per visitor and channel ROI calculator | Virling">
+<meta property="og:title" content="Revenue per visitor calculator: RPV, ROAS and break-even | Virling">
 <meta property="og:description" content="Free calculator for revenue per visitor, return on ad spend and the break-even revenue per visitor of a marketing channel. Runs in your browser.">
 <meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Revenue per visitor calculator","item":"https://virling.com/tools/revenue-per-visitor"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Revenue per visitor calculator","url":"https://virling.com/tools/revenue-per-visitor","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Revenue per visitor calculator","item":"https://virling.com/tools/revenue-per-visitor"}]}]}</script>
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
@@ -36,7 +36,7 @@
 </div>
 
 <main>
-  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / roi calculator</span><h1>Revenue per visitor and ROI.</h1><p class="lead">Enter a channel's visitors, the revenue they brought and what it cost, to see whether it pays.</p></div></div></section>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / roi calculator</span><h1>Revenue per visitor calculator</h1><p class="lead">Enter a channel's visitors, the revenue they brought and what it cost, to get revenue per visitor, return on spend and the break-even point.</p></div></div></section>
   <section class="band"><div class="wrap"><div class="tool">
 <form class="tool-form" id="roi" autocomplete="off">
   <label>Visitors from the channel<input name="visitors" type="number" min="0" step="1" value="1200"></label>
@@ -46,9 +46,25 @@
 </form>
 <div class="tool-stats" id="roi-out"></div>
   </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The revenue per visitor formula</h2>
+<p class="p">Revenue per visitor (RPV) is the revenue a group of visitors brought, divided by how many visitors there were:</p>
+<p class="p"><code>revenue per visitor = revenue / unique visitors</code></p>
+<p class="p">With the defaults above, $1,800 from 1,200 visitors is $1.50 per visitor. Use the same date range for both numbers, count each person once, and use money you actually collected, after refunds. Sessions or page views in the bottom half make the number look smaller than it is.</p>
+<p class="p">If you know your conversion rate and average order value, they give the same result: <code>revenue per visitor = conversion rate × average order value</code>. A 2% conversion rate and a $50 average order is 0.02 &times; $50 = $1.00 per visitor.</p>
+<h2>What the other results mean</h2>
+<ul class="post-list">
+<li><b>Return on spend</b> is revenue divided by cost. $1,800 from $600 of spend is 3.0x. For an ad channel this is return on ad spend (ROAS).</li>
+<li><b>Profit</b> is revenue minus cost, before product costs and payment fees.</li>
+<li><b>Break-even revenue per visitor</b> is cost divided by visitors: $600 over 1,200 visitors is $0.50. A channel whose revenue per visitor is below this costs more than it brings.</li>
+<li><b>Against your site average</b> divides the channel's revenue per visitor by your whole site's. 2.0x means each visitor from the channel is worth twice a typical visitor.</li>
+</ul>
+<h2>How to use it to compare channels</h2>
+<p class="p">Run the calculator once per channel with the same date range, then rank channels by revenue per visitor rather than by traffic. A channel with few visitors and a high figure often deserves more time than a loud one. Wait for a few hundred visitors before trusting a result, since one payment moves a small channel a lot. For benchmarks, the worked example by channel and ways to raise the number, read <a href="/blog/what-is-revenue-per-visitor">what revenue per visitor is and how to calculate it</a>. To get the revenue per channel in the first place, see <a href="/blog/find-which-channel-pays">how to find which marketing channel pays</a>.</p>
+  </div></div></section>
   <section class="band" id="faq"><div class="wrap"><div class="faq">
     <span class="kicker">questions</span>
-    <h2>Questions.</h2>
+    <h2>Revenue per visitor calculator FAQ</h2>
     <div class="faq-list">
       <div><h3>How is revenue per visitor calculated?</h3><p class="p">Revenue from the channel's visitors divided by the number of visitors. It is the fairest way to compare a channel that sends many cheap visits with one that sends a few that buy.</p></div>
       <div><h3>What is a good return on spend?</h3><p class="p">Above 1x the channel earns back what it costs. Most teams want 3x or more, because revenue also has to pay for the product and fees.</p></div>
