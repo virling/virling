@@ -192,7 +192,7 @@
       <button class="btn ghost" type="submit">Turn off</button>
     </form>
   </div>
-  {% if !slack %}<div class="code" data-tabs>
+  {% if !slack && !secret.is_empty() %}<div class="code" data-tabs>
     <div class="code-head"><span class="code-title">Signing secret</span><button class="copy" type="button" data-copy>Copy</button></div>
     <pre class="wrap">{{ secret }}</pre>
   </div>{% endif %}
