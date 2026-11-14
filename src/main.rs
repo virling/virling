@@ -1186,6 +1186,21 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn pages_cannot_be_framed_except_share_pages() {
+        let (_dir, state, _store) = setup().await;
+        let res = call(&state, get("/login", None)).await;
+        assert!(
+            res.headers()["content-security-policy"]
+                .to_str()
+                .unwrap()
+                .contains("frame-ancestors 'none'")
+        );
+        assert_eq!(res.headers()["x-content-type-options"], "nosniff");
+        let res = call(&state, get("/share/example.com/globe", None)).await;
+        assert!(!res.headers().contains_key("content-security-policy"));
+    }
+
+    #[tokio::test]
     async fn sign_in_forms_posted_from_another_site_are_refused() {
         let (_dir, state, _store) = setup().await;
         for (name, value) in [

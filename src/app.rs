@@ -510,6 +510,10 @@ pub fn router(state: AppState) -> Router {
         ))
         .layer(axum::middleware::from_fn_with_state(
             state.clone(),
+            security_headers,
+        ))
+        .layer(axum::middleware::from_fn_with_state(
+            state.clone(),
             mcp_host_only,
         ))
         .with_state(state)
@@ -560,6 +564,38 @@ async fn keep_out_of_search(
         res.headers_mut()
             .entry("x-robots-tag")
             .or_insert(axum::http::HeaderValue::from_static("noindex"));
+    }
+    res
+}
+
+/// Stops other sites from framing pages (the public share pages stay embeddable) and pins HTTPS.
+async fn security_headers(
+    State(state): State<AppState>,
+    req: axum::extract::Request,
+    next: axum::middleware::Next,
+) -> Response {
+    let share = req.uri().path().starts_with("/share/");
+    let mut res = next.run(req).await;
+    let headers = res.headers_mut();
+    if !share {
+        headers
+            .entry(axum::http::header::CONTENT_SECURITY_POLICY)
+            .or_insert(axum::http::HeaderValue::from_static(
+                "frame-ancestors 'none'; object-src 'none'; base-uri 'self'",
+            ));
+    }
+    headers
+        .entry(axum::http::header::X_CONTENT_TYPE_OPTIONS)
+        .or_insert(axum::http::HeaderValue::from_static("nosniff"));
+    headers
+        .entry(axum::http::header::REFERRER_POLICY)
+        .or_insert(axum::http::HeaderValue::from_static(
+            "strict-origin-when-cross-origin",
+        ));
+    if state.config.base_url.starts_with("https://") {
+        headers
+            .entry(axum::http::header::STRICT_TRANSPORT_SECURITY)
+            .or_insert(axum::http::HeaderValue::from_static("max-age=31536000"));
     }
     res
 }
