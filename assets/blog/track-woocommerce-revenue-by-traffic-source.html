@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to track WooCommerce revenue by traffic source</title>
+<meta name="description" content="WooCommerce knows who ordered, not which channel sent them. Save a visitor ID on each order so it can be joined to the visits before it.">
+<link rel="canonical" href="https://virling.com/blog/track-woocommerce-revenue-by-traffic-source">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/track-woocommerce-revenue-by-traffic-source">
+<meta property="og:title" content="How to track WooCommerce revenue by traffic source">
+<meta property="og:description" content="WooCommerce knows who ordered, not which channel sent them. Save a visitor ID on each order so it can be joined to the visits before it.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"How to track WooCommerce revenue by traffic source","item":"https://virling.com/blog/track-woocommerce-revenue-by-traffic-source"}]},{"@type":"BlogPosting","headline":"How to track WooCommerce revenue by traffic source","description":"WooCommerce knows who ordered, not which channel sent them. Save a visitor ID on each order so it can be joined to the visits before it.","datePublished":"2026-11-16","dateModified":"2026-11-16","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/track-woocommerce-revenue-by-traffic-source"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can WooCommerce show which traffic source an order came from?","acceptedAnswer":{"@type":"Answer","text":"Partly. WooCommerce order attribution shows an origin for some orders, and the rest show as Unknown. For a view you control, save a visitor ID on each order and join it to that visitor's earlier visits in your analytics."}},{"@type":"Question","name":"Where does the visitor ID go in WooCommerce?","acceptedAnswer":{"@type":"Answer","text":"In the order's meta data, under virling_vid. A short snippet in your theme's functions.php, or in a snippets plugin, copies it from the virling_vid cookie when the order is created, in the classic and the block checkout."}},{"@type":"Question","name":"Which channel do WooCommerce subscription renewals get?","acceptedAnswer":{"@type":"Answer","text":"With WooCommerce Subscriptions, a renewal order is marked as a renewal and keeps the channel of the customer's first payment."}},{"@type":"Question","name":"What kind of REST API key does Virling need?","acceptedAnswer":{"@type":"Answer","text":"A WooCommerce REST API key with Read permissions. Virling only reads orders, refunds and subscriptions, so it never needs write access."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-16</span>
+      <h1>How to track WooCommerce revenue by traffic source</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-16.</p>
+<p class="p">To track WooCommerce revenue by traffic source, give each visitor an ID, save it on the order when checkout creates it, and join each order back to the visits that came before it. WooCommerce knows who ordered and how much. Its built-in order attribution can show an origin, but it relies on short-lived cookies and a script that has to run on every page, and many orders end up as <a href="/blog/woocommerce-order-attribution-unknown">Unknown</a>.</p>
+<h2>Step 1: set a visitor ID</h2>
+<p class="p">Your analytics script sets one first-party ID per visitor and remembers the first source: referrer, UTM tags or direct. Put the script in your theme so it runs on every page of the store, including the product, cart and checkout pages, and on any blog or landing page that links to the store. Because the ID lives in a cookie on your own domain, WordPress receives it with every request from the browser, so the server can read it at checkout without any extra JavaScript.</p>
+<h2>Step 2: save the ID on the order</h2>
+<p class="p">WooCommerce orders carry meta data, so the ID can travel with the order. Hook into order creation and copy the ID from the cookie into the order's meta. WooCommerce has two checkouts, the classic shortcode checkout and the newer block checkout, and each fires its own hook when it builds the order, so use both:</p>
+<div class="code block"><pre>add_action('woocommerce_checkout_create_order', 'virling_vid_on_order');
+add_action('woocommerce_store_api_checkout_update_order_from_request', 'virling_vid_on_order');
+function virling_vid_on_order($order) {
+  $vid = $_COOKIE['virling_vid'] ?? '';
+  if (preg_match('/^[A-Za-z0-9-]{8,64}$/', $vid)) $order-&gt;update_meta_data('virling_vid', $vid);
+}</pre></div>
+<p class="p">Put it in your theme's <code>functions.php</code> or in a snippets plugin. A snippets plugin is often the safer home, because a theme update can replace <code>functions.php</code>. The pattern check means only a well-formed ID is saved, and an order placed without the cookie simply gets no ID.</p>
+<h2>Step 3: read orders from the REST API</h2>
+<p class="p">In WordPress, open WooCommerce, Settings, Advanced, REST API, and add a key with Read permissions. A read-only key is all an analytics tool needs: it reads orders, refunds and subscriptions, and never changes them. The store has to answer over https, with pretty permalinks on, so that <code>/wp-json/wc/v3/</code> works.</p>
+<p class="p">Decide which order statuses count as paid. Processing and completed orders have been paid. Failed and cancelled orders have not. Pending and on-hold orders are not paid yet, so wait for them to move on instead of counting or dropping them straight away.</p>
+<h2>Step 4: join orders to visits</h2>
+<p class="p">Match each order's <code>virling_vid</code> to that visitor's earlier visits and credit one of them with a rule you keep fixed (see <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch or last touch</a>). Orders with no ID have no visit to join, so they show as Unattributed. They still count toward revenue, so your totals stay right even when the channel is missing.</p>
+<p class="p">WooCommerce allows guest checkout. Guest orders have no customer ID, so each one counts as its own customer. That is worth knowing before you read a customers column next to a revenue column.</p>
+<h2>Step 5: handle refunds and renewals</h2>
+<p class="p">Two things change the numbers after the first order. Refunds lower an order's revenue, and they can arrive weeks after the sale, so read recent orders again from time to time to catch them. Otherwise a channel that looks good on day one keeps looking good after its buyers asked for their money back.</p>
+<p class="p">If you sell subscriptions with WooCommerce Subscriptions, each renewal is a new order created without a store visit, so it carries no visitor ID of its own. Mark renewal orders as renewals and give them the channel of the customer's first payment, or they will pile up as Unattributed and the channel that won the customer will look smaller than it is.</p>
+<h2>Step 6: report revenue per channel</h2>
+<p class="p">Group the joined orders by channel and divide by visitors to get <a href="/blog/what-is-revenue-per-visitor">revenue per visitor</a>. That is the table that tells you where to spend time and ad budget: a channel with fewer visitors can still bring more revenue per visitor than a busy one.</p>
+<p class="p">Checkout on another domain, a subdomain or a second site? See <a href="/blog/cross-domain-checkout-attribution">cross-domain checkout attribution</a>.</p>
+<h2>What goes wrong</h2>
+<ul class="post-list"><li>Hooking only the classic checkout, so orders from the block checkout arrive with no visitor ID</li><li>Losing the snippet in a theme update because it lived in a theme you do not control</li><li>Orders created in the admin, through the REST API or by import, which have no web visit and so no visitor ID</li><li>Counting pending and on-hold orders as revenue before they are paid</li><li>Ignoring refunds, which overstates a channel</li></ul>
+<h2>Doing it with Virling</h2>
+<p class="p">Virling reads WooCommerce orders, their refunds and, with WooCommerce Subscriptions, subscriptions from your store's REST API with a read-only key. In Virling, paste the consumer key and the consumer secret joined by a colon, as <code>ck_...:cs_...</code>, and enter your store's address, such as <code>https://shop.example.com</code>.</p>
+<p class="p">It imports orders from the last 90 days on the first run, then new ones every minute. Processing and completed orders count as paid, failed and cancelled ones as failed, and pending and on-hold orders wait until they are paid. Each order's refunds lower its revenue, and orders from the last 60 days are read again every 6 hours so later refunds show up. With WooCommerce Subscriptions, renewal orders are marked as renewals and keep the channel of the first payment, and subscription status is read once an hour so Retention can tell who still pays. Without it, Retention uses payment recency.</p>
+<p class="p">Virling reads the ID from <code>virling_vid</code> in the order's meta data, which is what the snippet above saves. Add it once, make a test order from a page that runs the script, and after the next sync the order shows a channel instead of Unattributed in the payments list. The setup is in <a href="https://docs.virling.com/payments/woocommerce">the docs</a> and on the <a href="/integrations/woocommerce">WooCommerce integration page</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>Can WooCommerce show which traffic source an order came from?</h3><p class="p">Partly. WooCommerce order attribution shows an origin for some orders, and the rest show as Unknown. For a view you control, save a visitor ID on each order and join it to that visitor's earlier visits in your analytics.</p>
+<h3>Where does the visitor ID go in WooCommerce?</h3><p class="p">In the order's meta data, under virling_vid. A short snippet in your theme's functions.php, or in a snippets plugin, copies it from the virling_vid cookie when the order is created, in the classic and the block checkout.</p>
+<h3>Which channel do WooCommerce subscription renewals get?</h3><p class="p">With WooCommerce Subscriptions, a renewal order is marked as a renewal and keeps the channel of the customer's first payment.</p>
+<h3>What kind of REST API key does Virling need?</h3><p class="p">A WooCommerce REST API key with Read permissions. Virling only reads orders, refunds and subscriptions, so it never needs write access.</p>
+<p class="p">See which channel brings your WooCommerce buyers: start a 14-day free trial at <a href="https://app.virling.com/login">app.virling.com</a>.</p>
+</div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
