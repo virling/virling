@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revenue attribution for SaaS: trials, renewals and MRR by channel</title>
+<meta name="description" content="See which channel brings SaaS customers who convert from trial and keep paying. Renewals, retention and MRR by first source, for Stripe, Paddle, Polar and more.">
+<link rel="canonical" href="https://virling.com/integrations/saas">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/saas">
+<meta property="og:title" content="Revenue attribution for SaaS: trials, renewals and MRR by channel">
+<meta property="og:description" content="See which channel brings SaaS customers who convert from trial and keep paying. Renewals, retention and MRR by first source, for Stripe, Paddle, Polar and more.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"SaaS","item":"https://virling.com/integrations/saas"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does a free trial count as revenue?","acceptedAnswer":{"@type":"Answer","text":"No. Virling keeps a trial start apart from payments and never counts it as revenue, a payment or a customer. It uses it only for credit: a later payment of that customer with no visitor ID of its own is credited from the visits before the trial started."}},{"@type":"Question","name":"Which channel gets credit for a renewal?","acceptedAnswer":{"@type":"Answer","text":"The channel of the customer's first payment. A renewal copies the first payment's channel, referrer, campaign, landing page, country and device, even years later."}},{"@type":"Question","name":"How is MRR calculated?","acceptedAnswer":{"@type":"Answer","text":"From each live subscription's price, currency and billing interval, read once an hour with the same read-only key. MRR is the sum per month, converted to USD, over subscriptions that are live, past any trial and not ended. It is the list price before discounts and tax."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / saas</span>
+      <h1>Which channel brings SaaS customers who stay.</h1>
+      <p class="lead">Virling joins each subscription payment to the visit that came before it, then follows the customer through trial, renewals and churn. Trial conversions, renewals, retention and MRR are all credited to the channel that first brought each customer. Open source, one Rust binary, or hosted.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">A SaaS payment rarely follows the visit that earned it. People sign up for a trial, pay weeks later and renew for years. Virling credits each paying customer to the visit that brought them, and keeps that credit for every renewal after.</p>
+<h2>Trial to paid, by channel</h2>
+<p class="p">A free trial starts with nothing charged, so there is no payment to carry the visitor ID from checkout. Virling records the trial start apart from payments and never counts it as revenue, a payment or a customer. When the trial converts, a payment with no visitor ID of its own is credited from the visits before the trial started.</p>
+<ul class="post-list"><li><b>Stripe</b>: trial starts come from <code>checkout.session.completed</code> events with a total of 0, from the time Stripe was connected.</li><li><b>Polar</b>: $0 orders with billing reason <code>subscription_create</code>.</li><li><b>Dodo Payments</b>: $0 subscription payments.</li></ul>
+<p class="p">Each site has one attribution model. Last non-direct is the default. First touch credits the earliest session in the lookback window and fits longer buying cycles. The window can be 30, 60, 90 or 365 days. Changing either rebuilds attribution for the whole site, history included.</p>
+<h2>Renewals keep the first source</h2>
+<p class="p">A renewal takes the attribution of the customer&#x27;s first payment. If someone subscribed after a visit from Reddit, every renewal is credited to that Reddit visit, even though the renewal itself has no visit. Upgrades and other plan changes count as renewals too, so they keep the first payment&#x27;s channel.</p>
+<h2>Retention and LTV by first source</h2>
+<p class="p">The Retention page groups each customer by the channel, referrer and campaign of their first payment, and shows which of them keep paying. A channel that sends many signups who leave after a month can look best on a revenue-this-month view and still be worth less than a smaller channel whose customers stay for a year.</p>
+<ul class="post-list"><li><b>Customers acquired</b> and how many are <b>still paying</b> today.</li><li><b>First-payment revenue</b>, <b>refunded</b> amount and <b>net LTV</b>, every payment so far net of refunds.</li><li><b>Avg LTV</b>, <b>refund rate</b> and <b>30-day churn</b>.</li><li>Each source&#x27;s share of customers next to its share of customers still paying.</li></ul>
+<p class="p">A customer is still paying while the provider reports a live subscription for them, such as <code>active</code>, <code>trialing</code> or <code>past_due</code> on Stripe. A subscription cancelled at the end of its period stays live until the period ends. Without subscription access, Virling falls back to payment recency.</p>
+<h2>MRR</h2>
+<p class="p">Once an hour Virling reads each subscription&#x27;s price, currency and billing interval with the same read-only key. MRR is the sum of those prices per month, converted to USD, over subscriptions that are live, past any trial and not ended. It is the list price before discounts and tax. MRR shows on Latest payments, and the retention view adds what the customers from a date range pay per month now.</p>
+<h2>SaaS billing providers</h2>
+<p class="p">Each provider marks renewals its own way. Virling reads them all into the same model:</p>
+<ul class="post-list"><li><a href="/integrations/stripe">Stripe</a>: the invoice&#x27;s billing reason is <code>subscription_cycle</code>.</li><li><a href="/integrations/paddle">Paddle</a>: the origin is <code>subscription_recurring</code>, <code>subscription_update</code> or <code>subscription_charge</code>.</li><li><a href="/integrations/polar">Polar</a>: the order&#x27;s billing reason is <code>subscription_cycle</code>.</li><li><a href="/integrations/lemonsqueezy">LemonSqueezy</a>: a subscription invoice with billing reason <code>renewal</code>.</li><li><a href="/integrations/dodo-payments">Dodo Payments</a>: the subscription already had a paid payment before it.</li><li><a href="/integrations/creem">Creem</a>: the customer already had a payment before it.</li></ul>
+<p class="p">Polar and Creem need the optional <code>subscriptions:read</code> scope, and Paddle the optional <code>subscription.read</code> permission, for live subscription status. Without it, their customers use payment recency and the page says so.</p>
+<h2>What to know</h2>
+<ul class="post-list"><li>The first payment must be in Virling. Payments older than the 90-day backfill are not imported, so renewals of subscriptions that started before that are Unattributed.</li><li>Customers are matched per provider. A customer who moved from one provider to another counts as two customers.</li><li>Until a site has 60 days of payments, the Retention page leads with refund rate and 30-day churn instead of LTV.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>Does a free trial count as revenue?</h3><p class="p">No. Virling keeps a trial start apart from payments and never counts it as revenue, a payment or a customer. It uses it only for credit: a later payment of that customer with no visitor ID of its own is credited from the visits before the trial started.</p>
+<h3>Which channel gets credit for a renewal?</h3><p class="p">The channel of the customer&#x27;s first payment. A renewal copies the first payment&#x27;s channel, referrer, campaign, landing page, country and device, even years later.</p>
+<h3>How is MRR calculated?</h3><p class="p">From each live subscription&#x27;s price, currency and billing interval, read once an hour with the same read-only key. MRR is the sum per month, converted to USD, over subscriptions that are live, past any trial and not ended. It is the list price before discounts and tax.</p>
+      <p class="p">Full reference: <a href="https://docs.virling.com/attribution/renewals">Renewals</a> and <a href="https://docs.virling.com/attribution/retention">Retention by channel</a> in the docs. Plans and the free trial: <a href="/pricing">pricing</a>.</p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post"><h2>Related reading</h2><ul class="post-list"><li><a href="/blog/trial-to-paid-conversion-by-traffic-source">Trial-to-paid conversion by traffic source, step by step</a></li><li><a href="/blog/first-touch-vs-last-touch-attribution-saas">First-touch or last-touch attribution for a SaaS</a></li><li><a href="/blog/how-long-does-a-visitor-take-to-become-a-customer">How long does a visitor take to become a customer?</a></li></ul><p class="p">Integrations: <a href="/integrations/stripe">Stripe</a>, <a href="/integrations/paddle">Paddle</a>, <a href="/integrations/polar">Polar</a>, <a href="/integrations/lemonsqueezy">LemonSqueezy</a>, <a href="/integrations/dodo-payments">Dodo Payments</a> and <a href="/integrations/creem">Creem</a>.</p></div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
