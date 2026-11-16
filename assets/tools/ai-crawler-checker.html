@@ -36,7 +36,7 @@
 </div>
 
 <main>
-  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / ai crawler checker</span><h1>AI crawler robots.txt checker.</h1><p class="lead">Paste your robots.txt to see which AI crawlers may read your pages, and which rule decides it.</p></div></div></section>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / ai crawler checker</span><h1>AI crawler robots.txt checker.</h1><p class="lead">This AI crawler checker reads your robots.txt and shows whether GPTBot, ClaudeBot, PerplexityBot and other AI crawlers may read a page, and which rule decides it. Paste the file, set the page path, and each bot gets an Allowed or Blocked verdict. The check runs in your browser.</p></div></div></section>
   <section class="band"><div class="wrap"><div class="tool">
 <form class="tool-form" id="robots" autocomplete="off">
   <label class="wide">Your robots.txt <span class="dim">open yoursite.com/robots.txt and paste it here</span><textarea name="txt" rows="10" spellcheck="false" placeholder="User-agent: *&#10;Allow: /&#10;&#10;User-agent: GPTBot&#10;Disallow: /"></textarea></label>
@@ -44,9 +44,13 @@
 </form>
 <div class="tool-table" id="robots-out"></div>
   </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Guides on AI crawlers and AI search traffic</h2>
+<ul class="post-list"><li><a href="/blog/is-ai-search-traffic-worth-anything">Is AI search traffic worth anything?</a>: how to measure the visitors and revenue AI answers send.</li><li><a href="https://docs.virling.com/track/ai-crawlers">AI crawlers</a>: count which pages GPTBot, ClaudeBot and other bots read on your site.</li><li><a href="https://docs.virling.com/track/ai-answers">AI answers</a>: see how often ChatGPT, Claude and Perplexity use and name your site.</li></ul>
+  </div></div></section>
   <section class="band" id="faq"><div class="wrap"><div class="faq">
     <span class="kicker">questions</span>
-    <h2>Questions.</h2>
+    <h2>AI crawler checker FAQ</h2>
     <div class="faq-list">
       <div><h3>Should I block AI crawlers?</h3><p class="p">It depends on what you want. Blocking training crawlers such as GPTBot or CCBot keeps your pages out of future models. Blocking search and user agents such as OAI-SearchBot, Claude-User or Perplexity-User also keeps you out of AI answers that could send you visitors.</p></div>
       <div><h3>How does this checker decide?</h3><p class="p">It follows the robots.txt rules crawlers use: a crawler obeys the group that names it, else the <code>*</code> group, and the longest matching Allow or Disallow path wins. An empty Disallow allows everything.</p></div>
@@ -56,7 +60,7 @@
   </div></div></section>
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Should I block AI crawlers?", "acceptedAnswer": {"@type": "Answer", "text": "It depends on what you want. Blocking training crawlers such as GPTBot or CCBot keeps your pages out of future models. Blocking search and user agents such as OAI-SearchBot, Claude-User or Perplexity-User also keeps you out of AI answers that could send you visitors."}}, {"@type": "Question", "name": "How does this checker decide?", "acceptedAnswer": {"@type": "Answer", "text": "It follows the robots.txt rules crawlers use: a crawler obeys the group that names it, else the * group, and the longest matching Allow or Disallow path wins. An empty Disallow allows everything."}}, {"@type": "Question", "name": "Does robots.txt stop every bot?", "acceptedAnswer": {"@type": "Answer", "text": "No. It is a request, not a lock. The crawlers listed here say they follow it, but others may not."}}, {"@type": "Question", "name": "Is my robots.txt sent anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "No. The check runs in your browser and nothing you paste leaves the page."}}]}</script>
   <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
-<h2>See which channels actually pay</h2>
+<h2>See what AI answers send you in revenue</h2>
 <p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so revenue per visitor and return come from your real numbers. 14 days free.</p>
 <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
   </div></div></section>
