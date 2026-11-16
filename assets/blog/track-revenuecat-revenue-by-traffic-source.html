@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to track RevenueCat revenue by traffic source</title>
+<meta name="description" content="RevenueCat knows which app user paid, not which ad or post sent them. Carry the web visitor ID to the customer so each purchase joins the visit before it.">
+<link rel="canonical" href="https://virling.com/blog/track-revenuecat-revenue-by-traffic-source">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/track-revenuecat-revenue-by-traffic-source">
+<meta property="og:title" content="How to track RevenueCat revenue by traffic source">
+<meta property="og:description" content="RevenueCat knows which app user paid, not which ad or post sent them. Carry the web visitor ID to the customer so each purchase joins the visit before it.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"How to track RevenueCat revenue by traffic source","item":"https://virling.com/blog/track-revenuecat-revenue-by-traffic-source"}]},{"@type":"BlogPosting","headline":"How to track RevenueCat revenue by traffic source","description":"RevenueCat knows which app user paid, not which ad or post sent them. Carry the web visitor ID to the customer so each purchase joins the visit before it.","datePublished":"2026-11-16","dateModified":"2026-11-16","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/track-revenuecat-revenue-by-traffic-source"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can RevenueCat show which ad or post led to a subscription?","acceptedAnswer":{"@type":"Answer","text":"Not on its own. RevenueCat records the customer and the purchase, not the web visit. You need to store a visitor ID on the customer as an attribute and join it to your analytics."}},{"@type":"Question","name":"Which RevenueCat purchases can be attributed?","acceptedAnswer":{"@type":"Answer","text":"Purchases that carry a visitor ID: those from a web paywall on a page that runs the script, and those from app users whose virling_vid attribute was set from a web visit."}},{"@type":"Question","name":"What happens to installs with no web visit?","acceptedAnswer":{"@type":"Answer","text":"Purchases from people who found the app in the store, or never came through your site, have no visit to credit. They still count toward revenue, as Unattributed."}},{"@type":"Question","name":"Which channel do RevenueCat renewals get?","acceptedAnswer":{"@type":"Answer","text":"A renewal keeps the channel of the first payment. When a free trial converts, the first paid renewal is credited to the visit that started the trial."}},{"@type":"Question","name":"Which RevenueCat key does Virling need?","acceptedAnswer":{"@type":"Answer","text":"A V2 secret key with read access to Project configuration and Customer information, and read and write access to Integrations so Virling can add its webhook."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-16</span>
+      <h1>How to track RevenueCat revenue by traffic source</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-16.</p>
+<p class="p">To track RevenueCat revenue by traffic source, give each web visitor an ID, store that ID on the RevenueCat customer before they buy, and join each purchase back to the visits that came before it. RevenueCat knows which app user paid, for which product, in which store. It does not know which ad, post or search sent them to you.</p>
+<p class="p">That gap matters most when you run a web funnel: people read a post or click an ad, land on your site, sign up or buy there, and only later open the app. This post walks through that path in plain words, and is honest about the purchases no tool can tie to a visit.</p>
+<h2>The web-to-app path</h2>
+<p class="p">A subscriber who came through your site takes one of two roads:</p>
+<ul class="post-list"><li><b>They buy on the web.</b> A web paywall on your site sells the subscription, and they open the app afterwards with the same account.</li><li><b>They sign up on the web, then buy in the app.</b> They create an account on your site, install the app, log in, and subscribe through the App Store or Google Play.</li></ul>
+<p class="p">On both roads there is a moment when you know two things at once: the visitor ID in their browser and the app user ID RevenueCat uses for them. That moment is where the link is made. Everything below is about catching it.</p>
+<h2>Step 1: set a visitor ID</h2>
+<p class="p">Your analytics script sets one first-party ID per visitor and remembers the first source: referrer, UTM tags or direct. Put the script on every page a buyer passes through, including the paywall and the signup page, not only the landing page.</p>
+<h2>Step 2: store the ID on the RevenueCat customer</h2>
+<p class="p">RevenueCat customers carry attributes, so the ID can live on the customer and travel with every purchase they make. Set an attribute named <code>virling_vid</code> before the purchase, in one of two ways:</p>
+<ul class="post-list"><li><b>From your app</b> with the RevenueCat SDK's <code>setAttributes</code>, once you have the visitor ID for that person</li><li><b>From your server</b> when the person signs up on your site, using the cookie from that request and their app user ID</li></ul>
+<p class="p">The server call looks like this:</p>
+<div class="code block"><pre>await fetch(`https://api.revenuecat.com/v2/projects/${projectId}/customers/${appUserId}/attributes`, {
+  method: &quot;POST&quot;,
+  headers: { authorization: `Bearer ${process.env.REVENUECAT_SECRET_KEY}`, &quot;content-type&quot;: &quot;application/json&quot; },
+  body: JSON.stringify({ attributes: [{ name: &quot;virling_vid&quot;, value: req.cookies.virling_vid }] }),
+});</pre></div>
+<p class="p">That call needs a key with write access to Customer information. Keep it on your server, and keep it separate from the read key you give your analytics tool.</p>
+<p class="p">Timing is the part people get wrong. The ID has to be on the customer before the purchase happens, because the purchase event carries the attributes the customer had at that moment. Set it at signup, not after checkout.</p>
+<h2>Step 3: receive purchases as they happen</h2>
+<p class="p">RevenueCat sends purchases, renewals and cancellations to a webhook. Each event carries the customer's attributes, so the visitor ID arrives with the purchase. Check a shared secret on every delivery so nobody else can post fake purchases to it.</p>
+<h2>Step 4: join purchases to visits</h2>
+<p class="p">Match each purchase's ID to that visitor's earlier visits and credit one of them with a rule you keep fixed (see <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch or last touch</a>). Purchases with no ID have no visit to join, so they show as Unattributed.</p>
+<h2>Step 5: handle trials, renewals and refunds</h2>
+<p class="p">App subscriptions often start with a free trial, and the money only shows up at the first renewal. Keep the trial start, and credit that first paid renewal to the visit that started the trial, or a channel that brings trials will look like it brings nothing (see <a href="/blog/trial-to-paid-conversion-by-traffic-source">trial-to-paid conversion by traffic source</a>). Later renewals keep the channel of the first payment. Mark refunds against the payment they belong to, or a channel will look better than it is.</p>
+<h2>Step 6: report revenue per channel</h2>
+<p class="p">Group the joined purchases by channel and divide by visitors to get <a href="/blog/what-is-revenue-per-visitor">revenue per visitor</a>. That is the table that tells you which ad or post pays for itself.</p>
+<h2>What cannot be attributed</h2>
+<p class="p">Only purchases that carry a visitor ID can be credited to a visit. That leaves some revenue that no web analytics can explain:</p>
+<ul class="post-list"><li>Installs with no web visit: people who found the app by searching the store, from a store listing, or from a friend, and never touched your site</li><li>People who visited your site but then made a new account in the app, so their app user ID was never linked to the visit</li><li>Purchases made before the attribute was set</li></ul>
+<p class="p">These purchases still count toward your total revenue, as Unattributed. That is the honest answer: the visit did not happen, or was never linked, so there is nothing to credit. If most of your subscribers start in the store, the Unattributed share will be large, and that tells you how much of your growth the web funnel explains.</p>
+<h2>What goes wrong</h2>
+<ul class="post-list"><li>Setting the attribute after the purchase, so the purchase arrives with no visitor</li><li>Running the script on the landing page but not on the signup page or paywall, so the ID is never read where the account is made</li><li>Giving the server key more access than it needs</li><li>Counting the trial start as the sale, or ignoring refunds, which overstates a channel</li></ul>
+<h2>Doing it with Virling</h2>
+<p class="p">Virling connects with a RevenueCat V2 secret key. Give it read access to <b>Project configuration</b> and <b>Customer information</b>, and read and write access to <b>Integrations</b>, so it can add its webhook. Leave everything else without access. The key covers one project, so connect each project to its own site.</p>
+<p class="p">When you connect, Virling adds one webhook to the project for initial purchases, renewals, non-renewing purchases and cancellations, and checks a random secret in its <code>Authorization</code> header on every delivery. The webhook needs Virling to be reachable over https. Purchases and renewals arrive as they happen, in the currency the customer paid. A cancellation by customer support, or with a negative price, marks the payment refunded.</p>
+<p class="p">It also imports one-time purchases from the last 90 days, once, when you connect. Subscription payments from before you connected are not imported. Subscription status is not read, so Retention uses payment recency for RevenueCat customers.</p>
+<p class="p">Virling reads the visitor ID from the customer attribute <code>virling_vid</code>. On a page that runs the script, <code>window.virling.vid()</code> returns the visitor ID, and the <code>virling_vid</code> cookie holds it for your server. The setup is in <a href="https://docs.virling.com/payments/revenuecat">the docs</a> and on the <a href="/integrations/revenuecat">RevenueCat integration page</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>Can RevenueCat show which ad or post led to a subscription?</h3><p class="p">Not on its own. RevenueCat records the customer and the purchase, not the web visit. You need to store a visitor ID on the customer as an attribute and join it to your analytics.</p>
+<h3>Which RevenueCat purchases can be attributed?</h3><p class="p">Purchases that carry a visitor ID: those from a web paywall on a page that runs the script, and those from app users whose virling_vid attribute was set from a web visit.</p>
+<h3>What happens to installs with no web visit?</h3><p class="p">Purchases from people who found the app in the store, or never came through your site, have no visit to credit. They still count toward revenue, as Unattributed.</p>
+<h3>Which channel do RevenueCat renewals get?</h3><p class="p">A renewal keeps the channel of the first payment. When a free trial converts, the first paid renewal is credited to the visit that started the trial.</p>
+<h3>Which RevenueCat key does Virling need?</h3><p class="p">A V2 secret key with read access to Project configuration and Customer information, and read and write access to Integrations so Virling can add its webhook.</p>
+<p class="p">Start a 14-day free trial at <a href="https://app.virling.com/login">app.virling.com</a>.</p>
+</div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
