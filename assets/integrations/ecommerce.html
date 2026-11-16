@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revenue attribution for ecommerce: orders and revenue by channel</title>
+<meta name="description" content="See which channel brings orders and revenue for your Shopify or WooCommerce store, why orders show as Direct, and which first source brings repeat buyers.">
+<link rel="canonical" href="https://virling.com/integrations/ecommerce">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/ecommerce">
+<meta property="og:title" content="Revenue attribution for ecommerce: orders and revenue by channel">
+<meta property="og:description" content="See which channel brings orders and revenue for your Shopify or WooCommerce store, why orders show as Direct, and which first source brings repeat buyers.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"Ecommerce","item":"https://virling.com/integrations/ecommerce"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I see which channel brings orders to my store?","acceptedAnswer":{"@type":"Answer","text":"Add the Virling script to the store, connect Shopify or WooCommerce with a read-only key, and add a short snippet that saves the visitor ID on each order. Virling ties each order to the visit before it and shows revenue and revenue per visitor for every channel, source, campaign and landing page."}},{"@type":"Question","name":"Why do so many ecommerce orders show as Direct?","acceptedAnswer":{"@type":"Answer","text":"A visit is Direct when it has no referrer, no UTM tag and no source Virling can read. Untagged email and SMS links, QR codes and some in-app browsers all arrive that way. Tag the links you control, and keep the default last non-direct model so a buyer who comes back by bookmark is credited to the source that found them."}},{"@type":"Question","name":"Can I see which channel brings repeat buyers?","acceptedAnswer":{"@type":"Answer","text":"Yes. The Retention page groups each customer by the channel, referrer and campaign of their first order, and shows how many still pay, their net lifetime value, refund rate and 30-day churn. Every later order of that customer counts toward the first channel there."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / ecommerce</span>
+      <h1>Which channel brings your store orders.</h1>
+      <p class="lead">Virling joins each Shopify or WooCommerce order to the visit that came before it, so you see orders and revenue by channel, campaign and landing page, how much of it is really Direct, and which first source brings buyers who come back. Open source, one Rust binary, or hosted.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">An order and the visit that led to it are usually recorded in different tools. Virling joins them: a visitor ID set when someone lands, stored on the order at checkout, and matched to that visitor&#x27;s sessions when the order comes in.</p>
+<h2>Connect your store</h2>
+<ul class="post-list"><li><a href="/integrations/shopify">Shopify</a>: a custom app token with only the <code>read_orders</code> scope, and a short snippet in <code>theme.liquid</code> that stores the visitor ID on the cart. Shopify copies cart attributes onto the order.</li><li><a href="/integrations/woocommerce">WooCommerce</a>: a REST API key with <b>Read</b> permission, and a short snippet in <code>functions.php</code> that saves the visitor ID on each new order, for the classic and the block checkout.</li></ul>
+<p class="p">Neither key can change products, customers or orders. Shopify orders from the last 60 days and WooCommerce orders from the last 90 days are imported on the first run, then new orders every minute. Refunds lower an order&#x27;s revenue once Virling reads them.</p>
+<h2>Orders and revenue per channel</h2>
+<p class="p">Every visit gets one channel from its first pageview: Paid, Email, AI, Organic search, Communities, Social, Referral or Direct. The dashboard lists visitors, revenue and revenue per visitor for each channel, source, campaign and landing page, with a chip that compares each row with your site average.</p>
+<ul class="post-list"><li><b>Revenue per visitor</b> is the number to watch. A channel with many visitors and a low chip sends traffic that does not buy.</li><li><b>Orders.</b> Click a channel to filter the whole dashboard by it. The funnel&#x27;s Paid step then shows how many of its visitors placed an order.</li><li><b>Refunded</b> on the Channels card shows the share of a row&#x27;s orders refunded in whole or part, so a channel full of returns stands out.</li><li><b>Before paying</b> on the Pages card shows the last page a buyer saw before the order.</li><li><b>Recent customers</b> lists the last 10 buyers with their first source, visits before paying and time to convert.</li></ul>
+<p class="p">Each site has one attribution model. Last non-direct is the default: a buyer who found you through a post and came back a week later by typing your address is credited to the post. First touch and last touch are the other choices, and the lookback window can be 30, 60, 90 or 365 days.</p>
+<h2>Direct and unknown origin</h2>
+<p class="p">A visit is Direct when it arrives with no referrer, no UTM tag and no source Virling can read. In a store that is rarely someone typing your address. Untagged email and SMS links, QR codes, links in PDFs and links from your own blog on another domain all land as Direct. The common causes and fixes are in <a href="/blog/shopify-orders-show-as-direct">why Shopify orders show up as Direct</a>.</p>
+<ul class="post-list"><li><b>In-app browsers.</b> A link opened inside Instagram, Facebook, TikTok, LinkedIn, WhatsApp or another known app is credited to that app when its browser names itself, instead of Direct.</li><li><b>Direct, split.</b> The Channels card splits Direct by how visitors arrived: typed or bookmarked, a shared link, or a return from checkout.</li><li><b>Unattributed is not Direct.</b> An order that reached Virling with no visitor ID, or with no visit inside the lookback window, still counts toward revenue but is listed as Unattributed. Orders created without a web visit, such as staff or point-of-sale orders, usually land here.</li><li><b>Matched revenue.</b> A line under the dashboard numbers gives the share of revenue matched to a visit and why the rest was not, so you know how far to trust each channel.</li></ul>
+<h2>Repeat buyers by first source</h2>
+<p class="p">On the dashboard, every order is credited to the visit before it, so a repeat order that followed an email counts for Email. The Retention page asks a different question: which channel brought customers who came back. It groups each customer by the channel, referrer and campaign of their first order, and keeps every later order under that first source.</p>
+<ul class="post-list"><li><b>Customers acquired</b> and how many are <b>still paying</b> today.</li><li><b>First-payment revenue</b>, <b>refunded</b> amount and <b>net LTV</b>, every order so far net of refunds.</li><li><b>Avg LTV</b>, <b>refund rate</b> and <b>30-day churn</b>.</li><li>Each source&#x27;s share of customers next to its share of customers still paying.</li></ul>
+<p class="p">A store customer is one Shopify or WooCommerce customer ID. Without a subscription, a customer is still paying while they have an order, not fully refunded, within their usual gap between orders plus 7 days. The gap is the time between their last two orders, from 7 to 366 days, or 30 days after a single order. For WooCommerce Subscriptions customers, the live subscription status decides instead. Renewal orders from Shopify Subscriptions and WooCommerce Subscriptions keep the channel of the first order on every view.</p>
+<h2>What to know</h2>
+<ul class="post-list"><li>Orders placed before the snippet was on your store carry no visitor ID, so they are Unattributed.</li><li>Guest orders have no customer ID, so a guest who orders again can count as a new customer.</li><li>Until a site has 60 days of orders, the Retention page leads with refund rate and 30-day churn instead of LTV.</li><li>Shopify needs the <code>myshopify.com</code> address, not a custom domain. WooCommerce needs https and pretty permalinks.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>How do I see which channel brings orders to my store?</h3><p class="p">Add the Virling script to the store, connect Shopify or WooCommerce with a read-only key, and add a short snippet that saves the visitor ID on each order. Virling ties each order to the visit before it and shows revenue and revenue per visitor for every channel, source, campaign and landing page.</p>
+<h3>Why do so many ecommerce orders show as Direct?</h3><p class="p">A visit is Direct when it has no referrer, no UTM tag and no source Virling can read. Untagged email and SMS links, QR codes and some in-app browsers all arrive that way. Tag the links you control, and keep the default last non-direct model so a buyer who comes back by bookmark is credited to the source that found them.</p>
+<h3>Can I see which channel brings repeat buyers?</h3><p class="p">Yes. The Retention page groups each customer by the channel, referrer and campaign of their first order, and shows how many still pay, their net lifetime value, refund rate and 30-day churn. Every later order of that customer counts toward the first channel there.</p>
+      <p class="p">Full reference: <a href="https://docs.virling.com/payments/shopify">Shopify</a>, <a href="https://docs.virling.com/payments/woocommerce">WooCommerce</a>, <a href="https://docs.virling.com/attribution/channels">Channels</a>, <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a> and <a href="https://docs.virling.com/attribution/retention">Retention by channel</a> in the docs. Plans and the free trial: <a href="/pricing">pricing</a>.</p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post"><h2>Related reading</h2><ul class="post-list"><li><a href="/blog/shopify-orders-show-as-direct">Why Shopify orders show up as Direct, and how to fix it</a></li><li><a href="/blog/best-revenue-attribution-tools#ecommerce">Ecommerce attribution tools for Shopify and WooCommerce, compared</a></li><li><a href="/blog/what-is-revenue-per-visitor">Revenue per visitor: formula, average and how to calculate</a></li><li><a href="/blog/utm-parameters-for-revenue-tracking">Which UTM parameters to use to trace revenue</a></li></ul><p class="p">Integrations: <a href="/integrations/shopify">Shopify</a> and <a href="/integrations/woocommerce">WooCommerce</a>.</p></div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
