@@ -13,7 +13,7 @@
 <meta property="og:description" content="Stripe knows who paid, not where they came from. Pass the visitor ID into checkout so each payment can be joined to the visit before it.">
 <meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"How to track Stripe revenue by traffic source","item":"https://virling.com/blog/track-stripe-revenue-by-traffic-source"}]},{"@type":"BlogPosting","headline":"How to track Stripe revenue by traffic source","description":"Stripe knows who paid, not where they came from. Pass the visitor ID into checkout so each payment can be joined to the visit before it.","datePublished":"2026-10-26","dateModified":"2026-10-26","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/track-stripe-revenue-by-traffic-source"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can Stripe show which traffic source a payment came from?","acceptedAnswer":{"@type":"Answer","text":"Not on its own. Stripe records the payment, not the visit. You need to pass a visitor ID into checkout and join it to your analytics."}},{"@type":"Question","name":"Should I use client_reference_id or metadata?","acceptedAnswer":{"@type":"Answer","text":"Either works. client_reference_id is a single dedicated field, and metadata is useful when you also store other values."}},{"@type":"Question","name":"Does this work with Payment Links?","acceptedAnswer":{"@type":"Answer","text":"Yes. Add client_reference_id as a query parameter on the link and the value is stored on the resulting Checkout Session."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"How to track Stripe revenue by traffic source","item":"https://virling.com/blog/track-stripe-revenue-by-traffic-source"}]},{"@type":"BlogPosting","headline":"How to track Stripe revenue by traffic source","description":"Stripe knows who paid, not where they came from. Pass the visitor ID into checkout so each payment can be joined to the visit before it.","datePublished":"2026-10-26","dateModified":"2026-11-16","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/track-stripe-revenue-by-traffic-source"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can Stripe show which traffic source a payment came from?","acceptedAnswer":{"@type":"Answer","text":"Not on its own. Stripe records the payment, not the visit. You need to pass a visitor ID into checkout and join it to your analytics."}},{"@type":"Question","name":"Should I use client_reference_id or metadata?","acceptedAnswer":{"@type":"Answer","text":"Either works. client_reference_id is a single dedicated field, and metadata is useful when you also store other values."}},{"@type":"Question","name":"Does this work with Payment Links?","acceptedAnswer":{"@type":"Answer","text":"Yes. The Virling script adds client_reference_id to buy.stripe.com links on the page, and the value is stored on the resulting Checkout Session. A link opened from an email or a QR code carries no visitor ID."}},{"@type":"Question","name":"What if my checkout code runs before the script loads?","acceptedAnswer":{"@type":"Answer","text":"window.virling.vid is not there yet, so wait for it for up to two seconds, or read the virling_vid cookie on your server instead. In cookieless mode there is no visitor ID to pass."}},{"@type":"Question","name":"What happens to Stripe payments without a visitor ID?","acceptedAnswer":{"@type":"Answer","text":"They still count toward revenue, as Unattributed. If you sent an identify event with the visitor's email, a payment whose payer email matches is credited to that visitor instead."}},{"@type":"Question","name":"Can I send events to Virling from my server?","acceptedAnswer":{"@type":"Answer","text":"Yes. POST them to /api/event with the visitor ID from the virling_vid cookie and the visitor's User-Agent. Payments themselves are read from Stripe, so they need no event."}},{"@type":"Question","name":"Does Virling need write access to Stripe?","acceptedAnswer":{"@type":"Answer","text":"No. It uses a restricted key with Read access only, and refuses secret keys, so it cannot change anything in your Stripe account."}}]}]}</script>
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
@@ -48,14 +48,57 @@
 <h2>Step 1: set a visitor ID</h2>
 <p class="p">Your analytics script sets one first-party ID per visitor and remembers the first source: referrer, UTM tags or direct.</p>
 <h2>Step 2: send the ID to Stripe at checkout</h2>
-<p class="p">Pick the option that matches how you sell:</p>
-<ul class="post-list"><li><b>Checkout Session:</b> put the visitor ID in <code>client_reference_id</code> or in <code>metadata</code> when you create the session</li><li><b>Payment Link:</b> add <code>?client_reference_id=&lt;visitor id&gt;</code> to the link before you send the visitor to it</li></ul>
+<p class="p">The visitor ID lives in the <code>virling_vid</code> cookie, a first-party cookie on your domain, so your server receives it with every request. Pick the option that matches how you sell.</p>
+<p class="p"><b>Checkout Session.</b> Set <code>client_reference_id</code> when your server creates the session:</p>
+<div class="code block"><pre data-snippet>const session = await stripe.checkout.sessions.create({
+  client_reference_id: req.cookies.virling_vid,
+  line_items: [{ price: "price_...", quantity: 1 }],
+  mode: "subscription",
+  success_url: "https://yourdomain.com/thanks",
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p"><b>Your own PaymentIntent (Elements).</b> Put the ID in <code>metadata</code>:</p>
+<div class="code block"><pre data-snippet>const intent = await stripe.paymentIntents.create({
+  amount: 4900,
+  currency: "usd",
+  metadata: { virling_vid: req.cookies.virling_vid },
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p"><b>Payment Links.</b> Links to <code>buy.stripe.com</code> need no code. The Virling script adds <code>client_reference_id</code> to them when the page loads and again on click, and never replaces a value that is already on the link.</p>
+<p class="p"><b>In the browser.</b> <code>window.virling?.vid?.()</code> returns the same ID. The script loads with <code>defer</code>, so if your checkout code can run before it, wait for it:</p>
+<div class="code block"><pre data-snippet>async function visitorId() {
+  for (let i = 0; i &lt; 20 &amp;&amp; !window.virling?.vid; i++) {
+    await new Promise((r) =&gt; setTimeout(r, 100));
+  }
+  return window.virling?.vid?.() || null;
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
 <p class="p">Now every payment carries the visitor who made it.</p>
 <h2>Step 3: read payments and join them to visits</h2>
 <p class="p">Read payments from Stripe with a read-only key, then match each one's ID to that visitor's earlier visits. Credit one of them with a rule you keep fixed (see <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch or last touch</a>).</p>
 <h2>Step 4: report revenue per channel</h2>
 <p class="p">Group the joined payments by channel and divide by visitors to get <a href="/blog/what-is-revenue-per-visitor">revenue per visitor</a>. That is the table that tells you where to spend time.</p>
 <p class="p">Checkout on another domain, a subdomain or a second site? See <a href="/blog/cross-domain-checkout-attribution">cross-domain checkout attribution</a>.</p>
+<h2>Server-side tracking</h2>
+<p class="p">Payments need no server-side tracking: Virling reads them from Stripe. For things only your server sees, such as a signup or a checkout started from your backend, send an event to <code>POST /api/event</code> with the visitor ID from the cookie as <code>v</code>, so it joins the same visitor:</p>
+<div class="code block"><pre data-snippet>await fetch("https://app.virling.com/api/event", {
+  method: "POST",
+  headers: { "user-agent": req.headers["user-agent"] },
+  body: JSON.stringify({
+    n: "goal",
+    g: "signup",
+    u: "https://yourdomain.com/signup",
+    s: "yourdomain.com",
+    v: req.cookies.virling_vid,
+  }),
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Forward the visitor's <code>User-Agent</code>: requests with an empty or bot user agent are dropped. The page URL in <code>u</code> must be on the site's domain or a subdomain. The endpoint answers <code>202</code> once the body parses, even when an event is dropped, and accepts an array of up to 50 events. Self-hosted, use your own server's address.</p>
+<p class="p">When checkout cannot carry the ID, for example a Payment Link opened from an email, send an <code>identify</code> event with the visitor's email after signup. Virling keeps only a salted SHA-256 hash of it, and a later Stripe payment with no visitor ID whose payer email matches is credited to that visitor:</p>
+<div class="code block"><pre data-snippet>body: JSON.stringify({
+  n: "identify",
+  u: "https://yourdomain.com/signup",
+  s: "yourdomain.com",
+  v: req.cookies.virling_vid,
+  m: user.email,
+}),</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The full field list is in the <a href="https://docs.virling.com/reference/event-api">Event API reference</a>.</p>
 <h2>What goes wrong</h2>
 <ul class="post-list"><li>Forgetting step 2: payments arrive with no visitor and fall into Direct</li><li>Using a different ID in the script and in checkout, so nothing matches</li><li>Running the script on the marketing site but not on the page that creates the checkout, so the ID never reaches Stripe</li></ul>
 <h2>Doing it with Virling</h2>
@@ -63,7 +106,11 @@
 <h2>Frequently asked questions</h2>
 <h3>Can Stripe show which traffic source a payment came from?</h3><p class="p">Not on its own. Stripe records the payment, not the visit. You need to pass a visitor ID into checkout and join it to your analytics.</p>
 <h3>Should I use client_reference_id or metadata?</h3><p class="p">Either works. client_reference_id is a single dedicated field, and metadata is useful when you also store other values.</p>
-<h3>Does this work with Payment Links?</h3><p class="p">Yes. Add client_reference_id as a query parameter on the link and the value is stored on the resulting Checkout Session.</p>
+<h3>Does this work with Payment Links?</h3><p class="p">Yes. The Virling script adds client_reference_id to buy.stripe.com links on the page, and the value is stored on the resulting Checkout Session. A link opened from an email or a QR code carries no visitor ID.</p>
+<h3>What if my checkout code runs before the script loads?</h3><p class="p">window.virling.vid is not there yet, so wait for it for up to two seconds, or read the virling_vid cookie on your server instead. In cookieless mode there is no visitor ID to pass.</p>
+<h3>What happens to Stripe payments without a visitor ID?</h3><p class="p">They still count toward revenue, as Unattributed. If you sent an identify event with the visitor's email, a payment whose payer email matches is credited to that visitor instead.</p>
+<h3>Can I send events to Virling from my server?</h3><p class="p">Yes. POST them to /api/event with the visitor ID from the virling_vid cookie and the visitor's User-Agent. Payments themselves are read from Stripe, so they need no event.</p>
+<h3>Does Virling need write access to Stripe?</h3><p class="p">No. It uses a restricted key with Read access only, and refuses secret keys, so it cannot change anything in your Stripe account.</p>
 <p class="p">Start a 14-day free trial at <a href="https://app.virling.com/login">app.virling.com</a>.</p>
   </div></div></section>
 </main>
