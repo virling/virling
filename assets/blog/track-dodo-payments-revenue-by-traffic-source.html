@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to track Dodo Payments revenue by traffic source</title>
+<meta name="description" content="Dodo Payments knows who paid, not where they came from. Put the visitor ID in the payment&#x27;s metadata so each payment can be joined to the visit before it.">
+<link rel="canonical" href="https://virling.com/blog/track-dodo-payments-revenue-by-traffic-source">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/track-dodo-payments-revenue-by-traffic-source">
+<meta property="og:title" content="How to track Dodo Payments revenue by traffic source">
+<meta property="og:description" content="Dodo Payments knows who paid, not where they came from. Put the visitor ID in the payment&#x27;s metadata so each payment can be joined to the visit before it.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"How to track Dodo Payments revenue by traffic source","item":"https://virling.com/blog/track-dodo-payments-revenue-by-traffic-source"}]},{"@type":"BlogPosting","headline":"How to track Dodo Payments revenue by traffic source","description":"Dodo Payments knows who paid, not where they came from. Put the visitor ID in the payment's metadata so each payment can be joined to the visit before it.","datePublished":"2026-11-16","dateModified":"2026-11-16","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/track-dodo-payments-revenue-by-traffic-source"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can Dodo Payments show which traffic source a sale came from?","acceptedAnswer":{"@type":"Answer","text":"Not on its own. Dodo Payments records the payment, not the visit. You need to put a visitor ID into the payment's metadata and join it to your analytics."}},{"@type":"Question","name":"Do Dodo payment links need code to carry the visitor ID?","acceptedAnswer":{"@type":"Answer","text":"No. A static payment link on checkout.dodopayments.com can take the visitor ID as a metadata_virling_vid query parameter, which Dodo stores as the payment's metadata.virling_vid. The Virling script adds it for you."}},{"@type":"Question","name":"How are Dodo subscription renewals counted?","acceptedAnswer":{"@type":"Answer","text":"Every paid payment of a subscription after the first paid one is marked as a renewal, so renewals are not counted as new customers. The first charge after a free trial counts as the first payment."}},{"@type":"Question","name":"Do test mode keys work?","acceptedAnswer":{"@type":"Answer","text":"Yes. Virling tries the key against live.dodopayments.com first and test.dodopayments.com second, and remembers which one accepted it."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-16</span>
+      <h1>How to track Dodo Payments revenue by traffic source</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-16.</p>
+<p class="p">To track Dodo Payments revenue by traffic source, give each visitor an ID, put it in the payment's metadata at checkout, and join each payment back to the visits that came before it. Dodo Payments knows who paid, for which product and how much. It does not know which post, search or ad sent that customer to your site.</p>
+<p class="p">This guide walks through the whole join by hand, then shows how Virling does it for you. Either way, the hard part is the same: the visitor ID has to reach Dodo before the customer pays.</p>
+<h2>Step 1: set a visitor ID</h2>
+<p class="p">Your analytics script sets one first-party ID per visitor and remembers the first source: referrer, UTM tags or direct. Put the script on every page that links to checkout, not only on your landing page. A payment that starts on a page without the script cannot be traced.</p>
+<p class="p">The ID should live in a first-party cookie on your own domain, so your server receives it with every request from the browser and can pass it on when it creates a checkout.</p>
+<h2>Step 2: send the ID to Dodo at checkout</h2>
+<p class="p">Dodo payments carry metadata, so the ID can travel with the payment. Pick the option that matches how you sell:</p>
+<ul class="post-list"><li><b>Static payment links on <code>checkout.dodopayments.com/buy/...</code>:</b> add the ID to the link as <code>metadata_virling_vid</code>, and Dodo stores it as the payment's <code>metadata.virling_vid</code></li><li><b>Checkout sessions you create on your server:</b> set <code>metadata</code> to an object holding the ID from the visitor's cookie</li></ul>
+<p class="p">A checkout session created with the Dodo Payments Node SDK looks like this:</p>
+<div class="code block"><pre>const session = await client.checkoutSessions.create({
+  product_cart: [{ product_id: &quot;pdt_...&quot;, quantity: 1 }],
+  return_url: &quot;https://yourdomain.com/thanks&quot;,
+  metadata: { virling_vid: req.cookies.virling_vid },
+});
+// Send the customer to session.checkout_url</pre></div>
+<p class="p">If you build a payment link URL in your own code instead of using a plain link, add the parameter yourself, and only when there is a value:</p>
+<div class="code block"><pre>const url = new URL(&quot;https://checkout.dodopayments.com/buy/pdt_...&quot;);
+const vid = window.virling?.vid?.();
+if (vid) url.searchParams.set(&quot;metadata_virling_vid&quot;, vid);
+location.href = url.href;</pre></div>
+<p class="p">If that code can run before the analytics script has loaded, the value will be empty, so wait for the script first.</p>
+<h2>Step 3: read the ID back from the payment</h2>
+<p class="p">Create an API key in the Dodo Payments dashboard and list payments from the Dodo API. Live and test mode use different hosts, <code>live.dodopayments.com</code> and <code>test.dodopayments.com</code>, so make sure you read from the one your key belongs to. The visitor ID sits in the payment's <code>metadata.virling_vid</code>.</p>
+<p class="p">Payments can succeed some time after they are created, so a single pass over yesterday's list will miss some. Re-read a recent window on every run instead of only asking for what is new. Keep an eye on Dodo's rate limit of 240 requests per minute while you backfill.</p>
+<h2>Step 4: join payments to visits</h2>
+<p class="p">Match each payment's ID to that visitor's earlier visits and credit one of them with a rule you keep fixed (see <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch or last touch</a>). Payments with no ID have no visit to join, so they show as Unattributed. They still count toward revenue; you just cannot say where they came from.</p>
+<h2>Step 5: handle refunds, disputes and renewals</h2>
+<p class="p">A refund does not change when a payment was made. Read refunds on their own and apply each one to the payment it belongs to, or a channel will look better than it is. Treat a lost or accepted dispute the same way, since the money went back to the customer.</p>
+<p class="p">Subscriptions need one more rule. A subscription produces a payment every billing period, and only the first paid one is a new customer. Mark every later paid payment as a renewal, so a channel is not credited with a new sale each month. Counting from the first paid payment, not the first payment, means the first charge after a free trial is still the first payment.</p>
+<h2>Step 6: filter to your products</h2>
+<p class="p">One Dodo account can sell more than one product, and not all of them belong to the site you are measuring. Keep a list of the product IDs that belong to this site and drop the rest. A subscription payment belongs to its subscription's product.</p>
+<h2>Step 7: report revenue per channel</h2>
+<p class="p">Group the joined payments by channel and divide by visitors to get <a href="/blog/what-is-revenue-per-visitor">revenue per visitor</a>. That is the table that tells you where to spend time.</p>
+<p class="p">Checkout on another domain or a second site? See <a href="/blog/cross-domain-checkout-attribution">cross-domain checkout attribution</a>.</p>
+<h2>What goes wrong</h2>
+<ul class="post-list"><li>Creating the checkout session without metadata, so payments import with no visitor and fall into Unattributed</li><li>Building the payment link before the script has loaded, so the ID is empty</li><li>Pointing a test key at the live host, or the other way round, so nothing comes back</li><li>Reading only new payments, so ones that succeed late are missed</li><li>Ignoring refunds and disputes, which overstates a channel</li><li>Counting every subscription payment as a new sale</li></ul>
+<h2>Doing it with Virling</h2>
+<p class="p">Virling reads Dodo Payments payments, refunds and subscriptions with an API key. Create the key in the Dodo Payments dashboard and paste it into Virling. Live mode and test mode keys both work: Virling tries the key against <code>live.dodopayments.com</code> first and <code>test.dodopayments.com</code> second, and remembers which one accepted it.</p>
+<p class="p">It imports payments from the last 90 days on the first run, then new ones every minute. Listing walks one day at a time and re-reads the last 30 minutes on each round, so payments that succeed late are not missed. Refunds update the payment they belong to, and lost or accepted disputes count as refunded. For a subscription payment, Virling looks up the subscription's paid payments and marks every one after the first paid one as a renewal. To stay inside Dodo's rate limit it makes at most a couple of extra lookups per round, so a large backfill can take a few minutes to finish.</p>
+<p class="p">If one Dodo account sells more than this site's products, list the site's product IDs in site settings, under Payment connections, in <b>Only these product IDs</b>. Virling then imports only payments, refunds and subscriptions for those products.</p>
+<p class="p">Static payment links on <code>checkout.dodopayments.com/buy/...</code> need no code. Keep the link as a normal <code>&lt;a href&gt;</code> on a page that runs the script, and the script adds <code>metadata_virling_vid</code> with the visitor ID unless it is already there. For checkout sessions you create yourself, set <code>virling_vid</code> in <code>metadata</code> from the <code>virling_vid</code> cookie, as in step 2. To check it works, make a test payment from a page that runs the script, wait for the next sync, and open the payments list: the payment should show a channel instead of Unattributed. The setup is in <a href="https://docs.virling.com/payments/dodo">the docs</a> and on the <a href="/integrations/dodo-payments">Dodo Payments integration page</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>Can Dodo Payments show which traffic source a sale came from?</h3><p class="p">Not on its own. Dodo Payments records the payment, not the visit. You need to put a visitor ID into the payment's metadata and join it to your analytics.</p>
+<h3>Do Dodo payment links need code to carry the visitor ID?</h3><p class="p">No. A static payment link on checkout.dodopayments.com can take the visitor ID as a metadata_virling_vid query parameter, which Dodo stores as the payment's metadata.virling_vid. The Virling script adds it for you.</p>
+<h3>How are Dodo subscription renewals counted?</h3><p class="p">Every paid payment of a subscription after the first paid one is marked as a renewal, so renewals are not counted as new customers. The first charge after a free trial counts as the first payment.</p>
+<h3>Do test mode keys work?</h3><p class="p">Yes. Virling tries the key against live.dodopayments.com first and test.dodopayments.com second, and remembers which one accepted it.</p>
+<p class="p">Start a 14-day free trial at <a href="https://app.virling.com/login">app.virling.com</a>.</p>
+</div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
