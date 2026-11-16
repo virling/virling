@@ -22,6 +22,8 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Stripe fee calculator](https://virling.com/tools/payment-fee-calculator): what Stripe charges per sale, compared with Paddle, Lemon Squeezy, Polar, Dodo Payments and Creem on your own price
 - [AI crawler checker](https://virling.com/tools/ai-crawler-checker): see which AI crawlers a robots.txt allows or blocks
 - [CAC payback calculator](https://virling.com/tools/cac-payback-calculator): months to earn back acquisition cost from monthly revenue per customer and gross margin
+- [Checkout snippet generator](https://virling.com/tools/checkout-snippet-generator): pick a payment provider and copy the code that passes the visitor ID into checkout
+- [LTV to CAC ratio calculator](https://virling.com/tools/ltv-cac-calculator): lifetime value, acquisition cost, LTV to CAC ratio and payback months per channel
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -105,6 +107,10 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [How to track Dodo Payments revenue by traffic source](https://virling.com/blog/track-dodo-payments-revenue-by-traffic-source): Dodo Payments knows who paid, not where they came from. Put the visitor ID in the payment's metadata so each payment can be joined to the visit before it.
 - [How to track RevenueCat revenue by traffic source](https://virling.com/blog/track-revenuecat-revenue-by-traffic-source): RevenueCat knows which app user paid, not which ad or post sent them. Carry the web visitor ID to the customer so each purchase joins the visit before it.
 - [How to track WooCommerce revenue by traffic source](https://virling.com/blog/track-woocommerce-revenue-by-traffic-source): WooCommerce knows who ordered, not which channel sent them. Save a visitor ID on each order so it can be joined to the visits before it.
+- [LinkedIn revenue tracking for B2B SaaS](https://virling.com/blog/linkedin-revenue-tracking): Is LinkedIn worth it for your SaaS? Tag posts and profile links, handle the in-app browser, and see the revenue and revenue per visitor LinkedIn brings.
+- [Product Hunt launch revenue: how to measure it](https://virling.com/blog/product-hunt-launch-revenue): Did your Product Hunt launch pay off? Tag the launch link, then follow payments from Product Hunt over the weeks after, including trials that convert late.
+- [X (Twitter) revenue tracking for founders who build in public](https://virling.com/blog/x-twitter-revenue-tracking): How to track revenue from X: t.co referrers, UTM-tagged bio and post links, and visits joined to payments, so you see whether posting brings paying customers.
+- [YouTube revenue tracking: which videos bring paying customers](https://virling.com/blog/youtube-revenue-tracking): How to track revenue from YouTube: tag description and pinned-comment links per video, stop app clicks landing as Direct, and see revenue per video.
 
 ## Source
 
