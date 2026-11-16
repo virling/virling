@@ -21,8 +21,8 @@ Google-Extended and Applebot-Extended are mostly `robots.txt` tokens. Google and
 Each AI crawler names itself in its `User-Agent` header. ClaudeBot and GPTBot send:
 
 ```text
-Mozilla/5.0 (compatible; ClaudeBot/1.0; +claudebot@anthropic.com)
-Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; GPTBot/1.2; +https://openai.com/gptbot)
+Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; ClaudeBot/1.0; +claudebot@anthropic.com)
+Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; GPTBot/1.2; +https://openai.com/gptbot
 ```
 
 Version numbers and the text around them change, so match the bot's token, case-insensitive, not the full string:
