@@ -21,6 +21,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Revenue per visitor and ROI calculator](https://virling.com/tools/revenue-per-visitor): revenue per visitor, return on ad spend and break-even per channel
 - [Stripe fee calculator](https://virling.com/tools/payment-fee-calculator): what Stripe charges per sale, compared with Paddle, Lemon Squeezy, Polar, Dodo Payments and Creem on your own price
 - [AI crawler checker](https://virling.com/tools/ai-crawler-checker): see which AI crawlers a robots.txt allows or blocks
+- [CAC payback calculator](https://virling.com/tools/cac-payback-calculator): months to earn back acquisition cost from monthly revenue per customer and gross margin
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -38,6 +39,8 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [LemonSqueezy](https://virling.com/integrations/lemonsqueezy): API key and a signed webhook
 - [Creem](https://virling.com/integrations/creem): scoped API key and a signed webhook
 - [RevenueCat](https://virling.com/integrations/revenuecat): web purchases and renewals by webhook, credited when they carry a visitor ID
+- [Revenue attribution for SaaS](https://virling.com/integrations/saas): trials, renewals, retention and MRR by first source
+- [Revenue attribution for ecommerce](https://virling.com/integrations/ecommerce): orders and revenue by channel for Shopify and WooCommerce stores, and which first source brings repeat buyers
 
 ## Compare
 
@@ -96,6 +99,12 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Which blog posts bring paying customers? How to find out](https://virling.com/blog/which-blog-posts-bring-paying-customers): Page views show which posts are read, not which pay. Credit payments to the landing page and compare posts by revenue per visitor.
 - [Cookieless analytics and revenue: what you lose and keep](https://virling.com/blog/cookieless-analytics-and-revenue): Without cookies you can count visits and keep sessions, but payments can no longer be linked to a visit. What changes and when to use it.
 - [Self-hosted analytics: server size, cost and upkeep](https://virling.com/blog/self-hosted-analytics-what-it-takes): What self-hosted analytics needs: server size, setup time, backups and upgrades, with measured numbers and the questions to ask before you pick a tool.
+- [Newsletter revenue tracking: see which issue brings sales](https://virling.com/blog/newsletter-revenue-tracking): Tag each newsletter issue with UTM parameters and see the payments every issue brought, instead of losing them to Direct.
+- [Organic search revenue tracking: which Google visits pay](https://virling.com/blog/organic-search-revenue-tracking): Search reports show clicks, not payments. How to credit each sale to the Google or Bing visit and landing page behind it, and why the keyword is missing.
+- [How to track Creem revenue by traffic source](https://virling.com/blog/track-creem-revenue-by-traffic-source): Creem knows who paid, not where they came from. Put the visitor ID in checkout metadata and catch it in a webhook so each payment joins the visit before it.
+- [How to track Dodo Payments revenue by traffic source](https://virling.com/blog/track-dodo-payments-revenue-by-traffic-source): Dodo Payments knows who paid, not where they came from. Put the visitor ID in the payment's metadata so each payment can be joined to the visit before it.
+- [How to track RevenueCat revenue by traffic source](https://virling.com/blog/track-revenuecat-revenue-by-traffic-source): RevenueCat knows which app user paid, not which ad or post sent them. Carry the web visitor ID to the customer so each purchase joins the visit before it.
+- [How to track WooCommerce revenue by traffic source](https://virling.com/blog/track-woocommerce-revenue-by-traffic-source): WooCommerce knows who ordered, not which channel sent them. Save a visitor ID on each order so it can be joined to the visits before it.
 
 ## Source
 
