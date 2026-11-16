@@ -2585,6 +2585,25 @@ mod tests {
             StatusCode::OK,
             "members see the team's sites"
         );
+        let (url, url_nonce) = state.vault.encrypt("https://hooks.example/v").unwrap();
+        let (secret, secret_nonce) = state.vault.encrypt("whsec_member").unwrap();
+        sqlx::query("INSERT INTO webhooks (site_id, url_ciphertext, url_nonce, secret_ciphertext, secret_nonce, host, sent_until, goals_until) SELECT id, ?, ?, ?, ?, 'hooks.example', 0, 0 FROM sites WHERE domain = 'example.com'")
+            .bind(url)
+            .bind(url_nonce)
+            .bind(secret)
+            .bind(secret_nonce)
+            .execute(&state.db)
+            .await
+            .unwrap();
+        let settings = |cookie: String| {
+            let state = state.clone();
+            async move {
+                body_text(call(&state, get("/app/example.com/settings", Some(&cookie))).await).await
+            }
+        };
+        assert!(settings(owner.clone()).await.contains("whsec_member"));
+        let shown = settings(member.clone()).await;
+        assert!(shown.contains("hooks.example") && !shown.contains("whsec_member"));
         let mine = page(member.clone()).await;
         assert!(
             mine.contains("a@team.io")

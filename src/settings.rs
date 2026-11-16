@@ -272,7 +272,13 @@ async fn show(
         (_, Some("telegram")) => "Telegram did not accept that bot token and chat ID.",
         _ => "",
     };
-    let webhook = crate::webhooks::view(&state, &ctx.site.id).await;
+    let webhook =
+        crate::webhooks::view(&state, &ctx.site.id)
+            .await
+            .map(|(host, secret, slack, error)| {
+                let secret = if account.owner { secret } else { String::new() };
+                (host, secret, slack, error)
+            });
     let webhook_note = match (q.saved.as_deref(), q.error.as_deref()) {
         (Some("webhook"), _) => ("Saved. A test event was sent to the URL.", false),
         (_, Some("webhook")) => (
