@@ -16,6 +16,28 @@ Each bot has a type:
 
 Google-Extended and Applebot-Extended are mostly `robots.txt` tokens. Google and Apple crawl with their normal bots, so these two rarely show up.
 
+## How to detect ClaudeBot and GPTBot
+
+Each AI crawler names itself in its `User-Agent` header. ClaudeBot and GPTBot send:
+
+```text
+Mozilla/5.0 (compatible; ClaudeBot/1.0; +claudebot@anthropic.com)
+Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; GPTBot/1.2; +https://openai.com/gptbot)
+```
+
+Version numbers and the text around them change, so match the bot's token, case-insensitive, not the full string:
+
+| Company | Tokens in the user agent |
+| --- | --- |
+| Anthropic | `ClaudeBot`, `Claude-SearchBot`, `Claude-User`, `anthropic-ai` |
+| OpenAI | `GPTBot`, `OAI-SearchBot`, `ChatGPT-User` |
+| Perplexity | `PerplexityBot`, `Perplexity-User` |
+| Google | `Google-Extended`, `GoogleOther` |
+| Meta | `meta-externalagent`, `meta-externalfetcher` |
+| Others | `Applebot-Extended`, `Amazonbot`, `CCBot`, `Bytespider`, `DuckAssistBot` |
+
+The regex in the snippets below matches all of them. A user agent can be faked, so treat a match as a claim. To see which of these bots your `robots.txt` allows, paste it into the [AI crawler checker](https://virling.com/tools/ai-crawler-checker).
+
 ## What the script sees
 
 The tracking script runs in browsers, and most crawlers never run JavaScript. Out of the box, Virling only counts the crawlers that fetch `/v.js` with a `Referer` or run the script. That is a small share of them.
