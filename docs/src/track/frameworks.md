@@ -62,6 +62,36 @@ Use `is:inline` so Astro leaves the tag as it is instead of bundling it. The scr
   data-site="yourdomain.com"></script>
 ```
 
+## Nuxt
+
+Add the tag to the app head in the Nuxt config. Nuxt renders it into the HTML of every page, so the script can read its own attributes. Route changes are tracked through `history.pushState`, so client-side navigation is counted.
+
+```ts,file:nuxt.config.ts
+export default defineNuxtConfig({
+  app: {
+    head: {
+      script: [
+        { src: "https://stats.example.com/v.js", defer: true,
+          "data-site": "yourdomain.com" },
+      ],
+    },
+  },
+});
+```
+
+Then [check that it works](script.md#check-that-it-works): open the published site and watch for the first pageview.
+
+## SvelteKit
+
+Paste the tag into `src/app.html`, before `%sveltekit.head%`. That file is the shell of every page, and client-side navigation is counted on its own.
+
+```html,file:src/app.html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+Then [check that it works](script.md#check-that-it-works): open the published site and watch for the first pageview.
+
 ## WordPress
 
 The Virling plugin adds the tag for you and survives theme updates. Download the `integrations/wordpress/virling` folder from the [repository](https://github.com/virling/virling/tree/main/integrations/wordpress/virling), upload it to `wp-content/plugins/`, activate it, then enter your Virling server and site domain in Settings, Virling. It skips logged-in administrators by default.
@@ -72,6 +102,18 @@ Without the plugin, open Appearance, Theme File Editor, open `header.php` and pa
 <script defer src="https://stats.example.com/v.js"
   data-site="yourdomain.com"></script>
 ```
+
+## Ghost
+
+1. In Ghost Admin, open **Settings**, then **Code injection**.
+2. Paste the tag into **Site header** and save. It is added to every page of the site.
+
+```html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+Then [check that it works](script.md#check-that-it-works): open the published site and watch for the first pageview.
 
 ## Framer
 
@@ -96,6 +138,33 @@ Framer moves between pages without a full reload; the script counts each page ch
 <script defer src="https://stats.example.com/v.js"
   data-site="yourdomain.com"></script>
 ```
+
+## Squarespace
+
+1. In Squarespace, open **Settings**, **Developer tools**, then **Code injection**. On older menus it is under **Settings**, **Advanced**.
+2. Paste the tag into **Header** and save. Code injection needs a plan that includes it.
+
+```html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+Then [check that it works](script.md#check-that-it-works): open the published site and watch for the first pageview.
+
+## Wix
+
+1. In the Wix dashboard, open **Settings**, then **Custom code** under **Advanced**. Custom code needs a premium plan and a connected domain.
+2. Click **Add Custom Code**, paste the tag, choose **All pages** and **Load code once**, and place it in **Head**.
+3. Apply, then publish the site.
+
+```html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+Wix moves between pages without a full reload; the script counts each page change on its own.
+
+Then [check that it works](script.md#check-that-it-works): open the published site and watch for the first pageview.
 
 ## Google Tag Manager
 
