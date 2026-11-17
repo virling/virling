@@ -10,6 +10,7 @@
 - [Read your dashboard](guides/dashboard.md)
 - [Use Virling with Paperclip](guides/paperclip.md)
 - [Run Virling for client sites](guides/agencies.md)
+- [Set up an online store](guides/ecommerce.md)
 - [Install](install/index.md)
   - [Docker](install/docker.md)
   - [Release binary](install/binary.md)
