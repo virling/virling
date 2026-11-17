@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client marketing report template: monthly revenue by channel | Virling</title>
+<meta name="description" content="Free client marketing report template for agencies: revenue and paying customers by channel, change versus last month, top campaigns and next steps. Edit it, print it or copy it as CSV.">
+<link rel="canonical" href="https://virling.com/tools/agency-client-report-template">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/agency-client-report-template">
+<meta property="og:title" content="Client marketing report template: monthly revenue by channel | Virling">
+<meta property="og:description" content="Free client marketing report template for agencies: revenue and paying customers by channel, change versus last month, top campaigns and next steps. Edit it, print it or copy it as CSV.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Client marketing report template","url":"https://virling.com/tools/agency-client-report-template","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Client marketing report template","item":"https://virling.com/tools/agency-client-report-template"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+<style>
+.rep-meta { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 0; font-size: 15px; color: var(--ink-2); }
+.rep h2 { margin: 0; }
+.rep h3 { margin: 8px 0 0; font-size: 17px; }
+.rep .cmp input { width: 100%; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 8px; background: #fff; font: inherit; color: var(--ink); }
+.rep .cmp .n, .rep .cmp .n input { text-align: right; }
+.rep .cmp tfoot th, .rep .cmp tfoot td { font-weight: 600; color: var(--ink); border-top: 1px solid var(--rule); }
+.rep ol { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+.rep ol input { width: 100%; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 8px; background: #fff; font: inherit; color: var(--ink); }
+@media print {
+  @page { margin: 12mm; }
+  body { background: #fff; }
+  .wrap:has(> .top), .foot, .hero, main > .band:not(.rep-band), .tool-form, .tool-out, .tool-cta, .rep-note { display: none !important; }
+  .band { padding: 0 !important; border: 0 !important; background: #fff !important; }
+  .rep { gap: 8px; max-width: none; }
+  .rep .cmp { font-size: 11px; border-radius: 0; }
+  .rep .cmp th, .rep .cmp td { padding: 4px 6px; }
+  .rep input { border: 0 !important; padding: 0 !important; background: none !important; }
+  .rep h2 { font-size: 20px; }
+  .rep h3 { font-size: 13px; }
+  .rep ol { gap: 2px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / client marketing report template</span><h1>Client marketing report template</h1><p class="lead">A one-page monthly report an agency can send a client: revenue and paying customers by channel, the change versus last month, the top campaigns and three next steps in plain language. Type over the example, then print it or copy it as text or CSV. No signup, and everything stays in your browser.</p></div></div></section>
+  <section class="band rep-band"><div class="wrap"><div class="tool rep">
+<form class="tool-form" id="rep-form" autocomplete="off">
+  <label>Client<input name="client" value="Example Client"></label>
+  <label>Prepared by<input name="agency" value="Your Agency"></label>
+  <label>Month<input name="month" value="November 2026"></label>
+  <label>Currency <span class="dim">symbol or code</span><input name="cur" value="$"></label>
+</form>
+<p class="rep-note dim">The names and numbers below are an example. Replace them with your client's figures; rows with no channel or campaign name are left out of the copy.</p>
+<h2 id="rep-title">Marketing report: Example Client, November 2026</h2>
+<p class="rep-meta"><span id="rep-by">Prepared by Your Agency</span><span id="rep-sum">$12,000 from 60 paying customers, +14% versus last month</span></p>
+<h3>Revenue by channel</h3>
+<table class="cmp" id="rep-ch"><thead><tr><th>Channel</th><th class="n">Revenue</th><th class="n">Last month</th><th class="n">Change</th><th class="n">Paying customers</th></tr></thead><tbody><tr><th scope="row"><input data-k="name" value="Organic search" aria-label="Channel"></th><td class="n"><input data-k="rev" value="4000" aria-label="Revenue" inputmode="decimal"></td><td class="n"><input data-k="prev" value="3000" aria-label="Last month" inputmode="decimal"></td><td class="n" data-chg>+33%</td><td class="n"><input data-k="cust" value="20" aria-label="Paying customers" inputmode="decimal"></td></tr><tr><th scope="row"><input data-k="name" value="Paid" aria-label="Channel"></th><td class="n"><input data-k="rev" value="3000" aria-label="Revenue" inputmode="decimal"></td><td class="n"><input data-k="prev" value="3000" aria-label="Last month" inputmode="decimal"></td><td class="n" data-chg>0%</td><td class="n"><input data-k="cust" value="15" aria-label="Paying customers" inputmode="decimal"></td></tr><tr><th scope="row"><input data-k="name" value="Email" aria-label="Channel"></th><td class="n"><input data-k="rev" value="2000" aria-label="Revenue" inputmode="decimal"></td><td class="n"><input data-k="prev" value="2500" aria-label="Last month" inputmode="decimal"></td><td class="n" data-chg>-20%</td><td class="n"><input data-k="cust" value="10" aria-label="Paying customers" inputmode="decimal"></td></tr><tr><th scope="row"><input data-k="name" value="Social" aria-label="Channel"></th><td class="n"><input data-k="rev" value="1000" aria-label="Revenue" inputmode="decimal"></td><td class="n"><input data-k="prev" value="500" aria-label="Last month" inputmode="decimal"></td><td class="n" data-chg>+100%</td><td class="n"><input data-k="cust" value="5" aria-label="Paying customers" inputmode="decimal"></td></tr><tr><th scope="row"><input data-k="name" value="Referral" aria-label="Channel"></th><td class="n"><input data-k="rev" value="500" aria-label="Revenue" inputmode="decimal"></td><td class="n"><input data-k="prev" value="0" aria-label="Last month" inputmode="decimal"></td><td class="n" data-chg>new</td><td class="n"><input data-k="cust" value="2" aria-label="Paying customers" inputmode="decimal"></td></tr><tr><th scope="row"><input data-k="name" value="Direct" aria-label="Channel"></th><td class="n"><input data-k="rev" value="1500" aria-label="Revenue" inputmode="decimal"></td><td class="n"><input data-k="prev" value="1500" aria-label="Last month" inputmode="decimal"></td><td class="n" data-chg>0%</td><td class="n"><input data-k="cust" value="8" aria-label="Paying customers" inputmode="decimal"></td></tr></tbody><tfoot><tr><th scope="row">Total</th><td class="n" id="t-rev">12,000</td><td class="n" id="t-prev">10,500</td><td class="n" id="t-chg">+14%</td><td class="n" id="t-cust">60</td></tr></tfoot></table>
+<h3>Top campaigns</h3>
+<table class="cmp" id="rep-cp"><thead><tr><th>Campaign</th><th>Channel</th><th class="n">Revenue</th><th class="n">Paying customers</th></tr></thead><tbody><tr><th scope="row"><input data-k="name" value="spring-launch-2026-11" aria-label="Campaign"></th><td><input data-k="ch" value="Email" aria-label="Channel"></td><td class="n"><input data-k="rev" value="1500" aria-label="Revenue" inputmode="decimal"></td><td class="n"><input data-k="cust" value="8" aria-label="Paying customers" inputmode="decimal"></td></tr><tr><th scope="row"><input data-k="name" value="search-brand" aria-label="Campaign"></th><td><input data-k="ch" value="Paid" aria-label="Channel"></td><td class="n"><input data-k="rev" value="1000" aria-label="Revenue" inputmode="decimal"></td><td class="n"><input data-k="cust" value="5" aria-label="Paying customers" inputmode="decimal"></td></tr><tr><th scope="row"><input data-k="name" value="partner-guide" aria-label="Campaign"></th><td><input data-k="ch" value="Referral" aria-label="Channel"></td><td class="n"><input data-k="rev" value="500" aria-label="Revenue" inputmode="decimal"></td><td class="n"><input data-k="cust" value="2" aria-label="Paying customers" inputmode="decimal"></td></tr></tbody></table>
+<h3>Next steps</h3>
+<ol id="rep-next"><li><input data-k="step" value="Example: move part of the Paid budget to the campaigns that grew in Organic search." aria-label="Next step 1"></li><li><input data-k="step" value="Example: send the spring launch email again to customers who did not open it." aria-label="Next step 2"></li><li><input data-k="step" value="Example: ask the new referral partner for a second article." aria-label="Next step 3"></li></ol>
+<div class="tool-out"><span class="dim">Print saves one page, or a PDF from your browser's print screen.</span><output id="rep-status"></output><button class="btn sm" type="button" id="rep-print">Print</button><button class="btn sm" type="button" id="rep-text">Copy as text</button><button class="btn sm" type="button" id="rep-copy">Copy as CSV</button><a class="lk" id="rep-csv" download="client-marketing-report.csv" href="#">Download CSV</a></div>
+<div class="txt post tool-cta">
+<p class="p">Filling this in by hand means pulling numbers from several dashboards each month. Virling fills the report from real payments: it links every visit to the payment it led to, then sends each client a report of revenue by channel under your brand. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/agency">Virling for agencies</a></p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>What goes in each section</h2>
+<ul class="post-list">
+<li><b>Revenue by channel.</b> Money paid this month by customers whose visit came from each channel, next to last month. Count paying customers too, so one large order does not hide a channel that brought few buyers.</li>
+<li><b>Change versus last month.</b> The template works it out for you. A channel with no revenue last month shows as new rather than an endless percentage.</li>
+<li><b>Top campaigns.</b> The three campaigns that brought the most revenue, named the way they appear in your UTM tags, with the channel they belong to.</li>
+<li><b>Next steps.</b> Three short actions for next month, each tied to a row above, such as moving budget to the channel that grew or fixing the campaign that fell.</li>
+</ul>
+<h2>Where the numbers come from</h2>
+<p class="p">Revenue belongs to the payment provider, not the ad platform. Take the month's payments from the client's provider, then credit each one to the channel of the visit before it. Ad platforms report their own conversions, and the totals of several platforms usually add up to more than the client was paid. If you cannot link payments to visits, say so in the report rather than mixing the two.</p>
+<p class="p">Channel names in the example follow <a href="https://docs.virling.com/attribution/channels">the channels Virling uses</a>: Organic search, Paid, Email, Social, Referral and Direct. Keep the same names every month so the change column compares like with like.</p>
+<h2>Sending it</h2>
+<p class="p">Print the page to one sheet or save it as a PDF from the print screen, or copy it as text into an email. Copy as CSV puts the channel, campaign and next step rows in one sheet you can paste into a spreadsheet. To run this for every client without the monthly copy and paste, see <a href="https://docs.virling.com/guides/agencies">running Virling for client sites</a>.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Related tools and guides</h2>
+<ul class="post-list"><li><a href="/agency">Virling for agencies</a>: white-label reports of revenue by channel for every client.</li><li><a href="https://docs.virling.com/guides/agencies">Run Virling for client sites</a>: one account, a site per client and a branded report.</li><li><a href="/tools/utm-naming-template">UTM naming convention template</a>: tag client links so campaigns land in the right channel.</li><li><a href="/tools/roas-calculator">ROAS calculator</a>: check the return on a client's ad spend.</li><li><a href="/blog/find-which-channel-pays">Find which channel pays</a>: trace revenue back to the channel that brought it.</li></ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Client marketing report FAQ</h2>
+    <div class="faq-list">
+      <div><h3>What should a monthly client marketing report include?</h3><p class="p">Revenue and paying customers by channel, the change from last month, the campaigns that brought the most revenue and a few next steps. One page is enough for most clients; detail can live in an appendix.</p></div>
+      <div><h3>Should I report revenue or conversions?</h3><p class="p">Revenue from real payments where you can, because that is what the client sees in the bank. Conversions reported by ad platforms are estimates and often overlap across platforms.</p></div>
+      <div><h3>How do I show the change versus last month?</h3><p class="p">Put last month's revenue next to this month's and show the difference as a percentage. When a channel had nothing last month, call it new instead of showing a percentage.</p></div>
+      <div><h3>Is this template free?</h3><p class="p">Yes. It runs in your browser with no signup. Nothing you type is sent anywhere; print it, copy it as text or download it as CSV.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What should a monthly client marketing report include?", "acceptedAnswer": {"@type": "Answer", "text": "Revenue and paying customers by channel, the change from last month, the campaigns that brought the most revenue and a few next steps. One page is enough for most clients; detail can live in an appendix."}}, {"@type": "Question", "name": "Should I report revenue or conversions?", "acceptedAnswer": {"@type": "Answer", "text": "Revenue from real payments where you can, because that is what the client sees in the bank. Conversions reported by ad platforms are estimates and often overlap across platforms."}}, {"@type": "Question", "name": "How do I show the change versus last month?", "acceptedAnswer": {"@type": "Answer", "text": "Put last month's revenue next to this month's and show the difference as a percentage. When a channel had nothing last month, call it new instead of showing a percentage."}}, {"@type": "Question", "name": "Is this template free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It runs in your browser with no signup. Nothing you type is sent anywhere; print it, copy it as text or download it as CSV."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>Send this report without the spreadsheet</h2>
+<p class="p">This template takes numbers you gather. Virling measures them: it links every visit to the payment it led to, so each client sees the customers and revenue every channel brought from real payments, in a report under your brand. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("rep-form"), ch = document.querySelector("#rep-ch tbody"), cp = document.querySelector("#rep-cp tbody"), nx = document.getElementById("rep-next"), msg = document.getElementById("rep-status"), dl = document.getElementById("rep-csv");
+const num = (s) => { const n = parseFloat(String(s).replace(/[^0-9.-]/g, "")); return isFinite(n) ? n : 0; };
+const fmt = (n) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
+const chg = (r, p) => (p === 0 ? (r === 0 ? "0%" : "new") : (r > p ? "+" : "") + Math.round(((r - p) / p) * 100) + "%");
+const field = (q) => { q = String(q); return /[",\n]/.test(q) ? '"' + q.replace(/"/g, '""') + '"' : q; };
+const rowsOf = (tb) => [...tb.querySelectorAll("tr")].map((tr) => Object.fromEntries([...tr.querySelectorAll("input")].map((i) => [i.dataset.k, i.value.trim()]))).filter((r) => r.name);
+let text = "", csv = "";
+const render = () => {
+  const cur = f.cur.value.trim(), money = (n) => (cur.length > 1 ? fmt(n) + " " + cur : cur + fmt(n));
+  const client = f.client.value.trim(), month = f.month.value.trim(), agency = f.agency.value.trim();
+  const title = "Marketing report: " + [client, month].filter(Boolean).join(", ");
+  document.getElementById("rep-title").textContent = title;
+  document.getElementById("rep-by").textContent = agency ? "Prepared by " + agency : "";
+  ch.querySelectorAll("tr").forEach((tr) => { const g = (k) => num(tr.querySelector(`[data-k=${k}]`).value); tr.querySelector("[data-chg]").textContent = chg(g("rev"), g("prev")); });
+  const chs = rowsOf(ch).map((r) => ({ ...r, r: num(r.rev), p: num(r.prev), c: num(r.cust) })), cps = rowsOf(cp), steps = [...nx.querySelectorAll("input")].map((i) => i.value.trim()).filter(Boolean);
+  const t = chs.reduce((a, r) => ({ r: a.r + r.r, p: a.p + r.p, c: a.c + r.c }), { r: 0, p: 0, c: 0 });
+  document.getElementById("t-rev").textContent = fmt(t.r);
+  document.getElementById("t-prev").textContent = fmt(t.p);
+  document.getElementById("t-chg").textContent = chg(t.r, t.p);
+  document.getElementById("t-cust").textContent = fmt(t.c);
+  document.getElementById("rep-sum").textContent = money(t.r) + " from " + fmt(t.c) + " paying customers, " + chg(t.r, t.p) + " versus last month";
+  text = [title, agency ? "Prepared by " + agency : "", "", "Revenue by channel", ...chs.map((r) => `${r.name}: ${money(r.r)} from ${fmt(r.c)} paying customers (${chg(r.r, r.p)} versus last month)`), `Total: ${money(t.r)} from ${fmt(t.c)} paying customers (${chg(t.r, t.p)} versus last month)`, "", "Top campaigns", ...cps.map((r, i) => `${i + 1}. ${r.name}${r.ch ? " (" + r.ch + ")" : ""}: ${money(num(r.rev))} from ${fmt(num(r.cust))} paying customers`), "", "Next steps", ...steps.map((s, i) => `${i + 1}. ${s}`)].join("\n").replace(/^\n/, "") + "\n";
+  const rows = [["section", "name", "channel", "revenue", "last_month_revenue", "change", "paying_customers"], ...chs.map((r) => ["channel", r.name, r.name, r.r, r.p, chg(r.r, r.p), r.c]), ["total", "Total", "", t.r, t.p, chg(t.r, t.p), t.c], ...cps.map((r) => ["campaign", r.name, r.ch, num(r.rev), "", "", num(r.cust)]), ...steps.map((s) => ["next_step", s, "", "", "", "", ""])];
+  csv = rows.map((r) => r.map(field).join(",")).join("\n") + "\n";
+  dl.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+};
+const copyBtn = (id, get, label) => { const b = document.getElementById(id); b.addEventListener("click", async () => { try { await navigator.clipboard.writeText(get()); b.textContent = "Copied"; } catch { msg.textContent = "Copy is blocked here; use Download CSV."; } setTimeout(() => (b.textContent = label), 1500); }); };
+copyBtn("rep-text", () => text, "Copy as text");
+copyBtn("rep-copy", () => csv, "Copy as CSV");
+document.getElementById("rep-print").addEventListener("click", () => window.print());
+document.querySelector(".rep").addEventListener("input", render);
+render();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
