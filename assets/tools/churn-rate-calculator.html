@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Churn rate calculator: customer and revenue churn | Virling</title>
+<meta name="description" content="Free churn rate calculator. Enter customers at the start of the month and customers lost to get customer churn, revenue churn from MRR, and the implied average customer lifetime. Runs in your browser.">
+<link rel="canonical" href="https://virling.com/tools/churn-rate-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/churn-rate-calculator">
+<meta property="og:title" content="Churn rate calculator: customer and revenue churn | Virling">
+<meta property="og:description" content="Free churn rate calculator. Enter customers at the start of the month and customers lost to get customer churn, revenue churn from MRR, and the implied average customer lifetime. Runs in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Churn rate calculator","url":"https://virling.com/tools/churn-rate-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Churn rate calculator","item":"https://virling.com/tools/churn-rate-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / churn rate calculator</span><h1>Churn rate calculator</h1><p class="lead">Enter how many customers you had at the start of the month and how many cancelled, to see your customer churn rate and how long the average customer stays. Add MRR to get revenue churn too. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="churn" autocomplete="off">
+  <label>Customers at start of month<input name="start" type="number" min="0" step="1" value="400"></label>
+  <label>Customers lost during the month<input name="lost" type="number" min="0" step="1" value="12"></label>
+  <label>MRR at start of month ($, optional)<input name="mrr" type="number" min="0" step="0.01" value="20000"></label>
+  <label>MRR lost to cancellations and downgrades ($, optional)<input name="mrrlost" type="number" min="0" step="0.01" value="500"></label>
+</form>
+<div class="tool-stats" id="churn-out"></div>
+<div class="txt post tool-cta">
+<p class="p">This is one blended number. Virling fills in churn per channel from your real payments: it links every visit to the payment it led to, and shows which channels bring customers who keep paying. See <a href="https://docs.virling.com/attribution/retention">retention by channel</a> in the docs. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/ltv-cac-calculator">LTV to CAC calculator</a>, <a href="/tools/cac-payback-calculator">CAC payback calculator</a>, <a href="/blog/trial-to-paid-conversion-by-traffic-source">trial to paid conversion by traffic source</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The churn rate formula</h2>
+<p class="p">Customer churn rate is the share of the customers you had at the start of a period who cancelled during it:</p>
+<p class="p"><code>customer churn = customers lost / customers at start</code></p>
+<p class="p">Revenue churn uses monthly recurring revenue instead of headcount, and counts downgrades as well as cancellations:</p>
+<p class="p"><code>revenue churn = MRR lost / MRR at start</code></p>
+<p class="p">If churn stays roughly steady, the average customer lifetime follows from it:</p>
+<p class="p"><code>average lifetime = 1 / customer churn</code></p>
+<p class="p">Leave out customers who signed up during the month from both numbers. Counting them makes the base larger and the churn rate look lower than it is.</p>
+<h2>A worked example</h2>
+<p class="p">With the defaults above, you start the month with 400 customers and 12 cancel. 12 / 400 = 3% customer churn, so 97% of customers stayed. At 3% a month the average customer stays about 1 / 0.03 = 33.3 months.</p>
+<p class="p">Those 400 customers paid $20,000 MRR at the start of the month, and cancellations and downgrades removed $500 of it. $500 / $20,000 = 2.5% revenue churn. Revenue churn is lower than customer churn here, which means the customers who left paid less than average.</p>
+<h2>Churn differs by channel</h2>
+<p class="p">A single churn rate hides where it comes from. Customers from a launch day or a discount listing often leave after the first month, while customers from search or a referral stay for years, and the blended rate sits somewhere in between. Run the calculator per channel with the customers each channel brought, or let Virling do it from your payments: its <a href="https://docs.virling.com/attribution/retention">Retention page</a> groups customers by the channel of their first payment and shows how many are still paying. For which channel gets that credit, see <a href="/blog/first-touch-vs-last-touch-attribution-saas">first-touch vs last-touch attribution for SaaS</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Churn rate calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How is churn rate calculated?</h3><p class="p">Customers lost during a period divided by customers at the start of that period. Customers who signed up during the period are left out of both numbers, so new growth does not hide cancellations.</p></div>
+      <div><h3>What is the difference between customer churn and revenue churn?</h3><p class="p">Customer churn counts people who left. Revenue churn counts the monthly recurring revenue they took with them, plus any downgrades. If larger customers stay and smaller ones leave, revenue churn is lower than customer churn.</p></div>
+      <div><h3>How does churn relate to customer lifetime?</h3><p class="p">When churn is steady, the average customer stays about one divided by the churn rate. A 3% monthly churn means roughly 33 months. It is a simple estimate, since churn is usually higher in the first months.</p></div>
+      <div><h3>Should I use monthly or annual churn?</h3><p class="p">Use the period that matches your billing. Monthly churn suits monthly plans. For annual churn, enter the customers at the start of a year and those lost during it, and read the lifetime as years instead of months.</p></div>
+      <div><h3>Why does churn differ by channel?</h3><p class="p">Customers from different channels arrive with different intent. A launch or a discount site can bring many signups who leave after a month, while search or referrals bring customers who stay. Comparing churn per channel shows which ones are worth the spend.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How is churn rate calculated?", "acceptedAnswer": {"@type": "Answer", "text": "Customers lost during a period divided by customers at the start of that period. Customers who signed up during the period are left out of both numbers, so new growth does not hide cancellations."}}, {"@type": "Question", "name": "What is the difference between customer churn and revenue churn?", "acceptedAnswer": {"@type": "Answer", "text": "Customer churn counts people who left. Revenue churn counts the monthly recurring revenue they took with them, plus any downgrades. If larger customers stay and smaller ones leave, revenue churn is lower than customer churn."}}, {"@type": "Question", "name": "How does churn relate to customer lifetime?", "acceptedAnswer": {"@type": "Answer", "text": "When churn is steady, the average customer stays about one divided by the churn rate. A 3% monthly churn means roughly 33 months. It is a simple estimate, since churn is usually higher in the first months."}}, {"@type": "Question", "name": "Should I use monthly or annual churn?", "acceptedAnswer": {"@type": "Answer", "text": "Use the period that matches your billing. Monthly churn suits monthly plans. For annual churn, enter the customers at the start of a year and those lost during it, and read the lifetime as years instead of months."}}, {"@type": "Question", "name": "Why does churn differ by channel?", "acceptedAnswer": {"@type": "Answer", "text": "Customers from different channels arrive with different intent. A launch or a discount site can bring many signups who leave after a month, while search or referrals bring customers who stay. Comparing churn per channel shows which ones are worth the spend."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring customers who stay</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers, revenue and retention each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("churn"), out = document.getElementById("churn-out");
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 2 }) + "%";
+const months = (n) => (n < 100 ? n.toFixed(1) : Math.round(n).toLocaleString("en-US")) + " months";
+const calc = () => {
+  const s = +f.start.value, l = +f.lost.value, m = +f.mrr.value, ml = +f.mrrlost.value;
+  const c = s > 0 && l <= s ? l / s : NaN, r = m > 0 && ml <= m && f.mrrlost.value !== "" ? ml / m : NaN;
+  const rows = [];
+  rows.push(["Customer churn rate", c >= 0 ? pct(c) : "No data"]);
+  rows.push(["Customer retention rate", c >= 0 ? pct(1 - c) : "No data"]);
+  rows.push(["Revenue churn rate", r >= 0 ? pct(r) : "No data"]);
+  rows.push(["Implied average lifetime", c > 0 ? months(1 / c) : c === 0 ? "No churn" : "No data"]);
+  out.innerHTML = rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+f.addEventListener("input", calc);
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
