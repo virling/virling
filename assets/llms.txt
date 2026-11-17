@@ -24,6 +24,15 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [CAC payback calculator](https://virling.com/tools/cac-payback-calculator): months to earn back acquisition cost from monthly revenue per customer and gross margin
 - [Checkout snippet generator](https://virling.com/tools/checkout-snippet-generator): pick a payment provider and copy the code that passes the visitor ID into checkout
 - [LTV to CAC ratio calculator](https://virling.com/tools/ltv-cac-calculator): lifetime value, acquisition cost, LTV to CAC ratio and payback months per channel
+- [Average order value calculator](https://virling.com/tools/aov-calculator): average order value overall and per channel for ecommerce stores
+- [Attribution model calculator](https://virling.com/tools/attribution-model-calculator): how five attribution models split one payment across a journey of 2 to 6 channels
+- [Customer acquisition cost calculator](https://virling.com/tools/cac-calculator): blended and per-channel customer acquisition cost, including shared costs
+- [Churn rate calculator](https://virling.com/tools/churn-rate-calculator): customer churn, revenue churn and implied average customer lifetime
+- [Conversion rate calculator by channel](https://virling.com/tools/conversion-rate-calculator): conversion rate, revenue per visitor and average order value per channel
+- [MRR calculator](https://virling.com/tools/mrr-calculator): MRR, ARR and net new MRR from plans and new, expansion, contraction and churned MRR
+- [ROAS calculator](https://virling.com/tools/roas-calculator): return on ad spend, break-even ROAS and profit or loss from spend, revenue and gross margin
+- [UTM checker](https://virling.com/tools/utm-checker): find missing source or medium, capitals, spaces, duplicate parameters and other mistakes in tagged links
+- [UTM naming convention template](https://virling.com/tools/utm-naming-template): source, medium and campaign naming for email, social, paid ads, partners and podcasts, copy as CSV
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -111,6 +120,16 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Product Hunt launch revenue: how to measure it](https://virling.com/blog/product-hunt-launch-revenue): Did your Product Hunt launch pay off? Tag the launch link, then follow payments from Product Hunt over the weeks after, including trials that convert late.
 - [X (Twitter) revenue tracking for founders who build in public](https://virling.com/blog/x-twitter-revenue-tracking): How to track revenue from X: t.co referrers, UTM-tagged bio and post links, and visits joined to payments, so you see whether posting brings paying customers.
 - [YouTube revenue tracking: which videos bring paying customers](https://virling.com/blog/youtube-revenue-tracking): How to track revenue from YouTube: tag description and pinned-comment links per video, stop app clicks landing as Direct, and see revenue per video.
+- [Affiliate revenue tracking: which partners bring paying customers](https://virling.com/blog/affiliate-revenue-tracking): One source value per partner, compare partners by paid revenue instead of clicks, and keep your payout software.
+- [Cold email revenue tracking: which sequences bring paying customers](https://virling.com/blog/cold-email-revenue-tracking): Tag links per sequence and step, keep email clicks out of Direct, and judge each sequence by paying customers.
+- [Community revenue tracking: which Discord, Slack and forum posts bring customers](https://virling.com/blog/community-revenue-tracking): Why chat links land as Direct, how to tag them per community, and paid customers per Discord server, Slack group or forum.
+- [Hacker News launch revenue: which HN visits turn into paying customers](https://virling.com/blog/hacker-news-revenue-tracking): The news.ycombinator.com referrer, Show HN and front-page spikes, visitors who come back as Direct, and first-touch credit.
+- [How to track influencer sales: which creators bring paying customers](https://virling.com/blog/influencer-revenue-tracking): One tagged link per creator, why discount codes alone miss buyers, and how to compare creators by revenue, not clicks.
+- [Instagram revenue tracking: which posts and stories bring paying customers](https://virling.com/blog/instagram-revenue-tracking): Tag bio and story links, understand l.instagram.com and in-app browser visits, and see revenue per link from Instagram and Facebook.
+- [Pinterest revenue tracking: which pins bring paying customers](https://virling.com/blog/pinterest-revenue-tracking): Tag pin and profile links, stop app clicks landing as Direct in Shopify or WooCommerce, and see revenue per pin.
+- [Podcast revenue tracking: which shows bring paying customers](https://virling.com/blog/podcast-revenue-tracking): Vanity URLs, tracked links per show, promo codes, and listeners who search your name later, for sponsorships and guest spots.
+- [Track QR code sales: which printed codes bring paying customers](https://virling.com/blog/qr-code-revenue-tracking): Put UTM tags in the QR code URL, make one code per placement, use short redirect links, and stop scans landing as Direct.
+- [Webinar revenue tracking: which webinars bring paying customers](https://virling.com/blog/webinar-revenue-tracking): Tag registration, follow-up and replay links apart, allow for the weeks before a buyer pays, and see which webinar paid.
 
 ## Source
 
