@@ -125,7 +125,7 @@ const check = (line, site) => {
   }
   if (src && (src === site || src === "www." + site || src === site.split(".")[0])) issues.push(`utm_source names your own site: links between your own pages need no tags`);
   else if (src === "internal" || med === "internal") issues.push("Tagged as internal: links between your own pages need no tags");
-  return { where: u.host + u.pathname + (frag ? "#" + frag.split(/[?&]/)[0].replace(/^utm_.*/i, "") : ""), tags: tags.concat(hashTags), issues };
+  return { where: u.host + u.pathname + (frag && !/^utm_/i.test(frag) ? "#" + frag.split(/[?&]/)[0] : ""), tags: tags.concat(hashTags), issues };
 };
 const run = () => {
   const site = f.site.value.trim().toLowerCase().replace(/^[a-z]+:\/\//, "").replace(/^www\./, "").replace(/[/:].*$/, "");
