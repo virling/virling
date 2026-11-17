@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMS marketing revenue tracking for online stores</title>
+<meta name="description" content="Why SMS clicks land as Direct, how link shorteners can drop UTM tags, and how to credit Shopify and WooCommerce orders to each text campaign and flow.">
+<link rel="canonical" href="https://virling.com/blog/sms-marketing-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/sms-marketing-revenue-tracking">
+<meta property="og:title" content="SMS marketing revenue tracking for online stores">
+<meta property="og:description" content="Why SMS clicks land as Direct, how link shorteners can drop UTM tags, and how to credit Shopify and WooCommerce orders to each text campaign and flow.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"SMS marketing revenue tracking for online stores","item":"https://virling.com/blog/sms-marketing-revenue-tracking"}]},{"@type":"BlogPosting","headline":"SMS marketing revenue tracking for online stores","description":"Why SMS clicks land as Direct, how link shorteners can drop UTM tags, and how to credit Shopify and WooCommerce orders to each text campaign and flow.","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/sms-marketing-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why do SMS clicks show up as Direct?","acceptedAnswer":{"@type":"Answer","text":"Messaging apps do not send a referrer when someone taps a link in a text, so the visit carries no sign of where it came from. Unless the link has UTM tags, the visit and the order after it are counted as Direct."}},{"@type":"Question","name":"Do link shorteners remove UTM parameters?","acceptedAnswer":{"@type":"Answer","text":"They can. Tags added to a short link after it was made may not be passed on, and a redirect that keeps only the path drops them. Add the tags to the full URL before it is shortened, then tap the link on your own phone and check the address bar."}},{"@type":"Question","name":"What UTM parameters should I use for SMS?","acceptedAnswer":{"@type":"Answer","text":"Use utm_source=sms and utm_medium=sms on every link, and a utm_campaign per campaign or flow, such as sms-winter-sale-2026-12 or sms-flow-abandoned-cart. Keep every value lowercase."}},{"@type":"Question","name":"Which channel does SMS traffic show in Virling?","acceptedAnswer":{"@type":"Answer","text":"Referral, with sms as its source. Virling has no separate SMS channel, so click Referral, then the sms source, and the Campaign tab shows revenue for each campaign and flow."}},{"@type":"Question","name":"Does Virling send text messages?","acceptedAnswer":{"@type":"Answer","text":"No. Virling reads tagged visits and your Shopify or WooCommerce orders. Keep sending with the SMS tool you use today."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-17</span>
+      <h1>SMS marketing revenue tracking for online stores</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-17.</p>
+<p class="p"><b>To track SMS marketing revenue for an online store</b>, tag every link in your text campaigns and automated flows with <code>utm_source=sms</code>, <code>utm_medium=sms</code> and a <code>utm_campaign</code> per campaign or flow, check that the tags survive your link shortener, then credit each Shopify or WooCommerce order to the tagged visit before it. Without tags, a tap on a link in a text usually arrives with no referrer and is counted as Direct, so your SMS revenue hides in the one channel that tells you nothing.</p>
+<h2>Why SMS clicks land as Direct</h2>
+<p class="p">When someone taps a link in a text message, the phone opens the page in a browser, and the messaging app does not send a referrer. The visit carries no sign that it came from a text, so your store, your analytics and Virling all have nothing to go on but the URL. If the URL has no UTM tags, the visit is Direct, next to typed addresses and bookmarks.</p>
+<ul class="post-list"><li><b>No referrer.</b> Text messages are not web pages, so there is no site to report as the source. Only the tags in the link can say where the click came from.</li><li><b>Untagged flows.</b> Campaigns often get tags because someone builds each send by hand. Automated flows, such as abandoned cart or welcome texts, are set up once and are easy to leave untagged for months.</li><li><b>Tags lost on the way.</b> A shortener or a redirect between the text and your store can drop the tags, so a link that was tagged when you wrote it arrives without them.</li></ul>
+<p class="p">The same causes push email and in-app browser visits into Direct; see <a href="/blog/shopify-orders-show-as-direct">why Shopify orders show up as Direct</a>.</p>
+<h2>How link shorteners can drop UTM tags</h2>
+<p class="p">Texts are short, so most SMS tools shorten links, often without asking. A short link is a redirect: the shopper taps it, the shortener looks up the long URL and sends them there. The tags arrive only if they are part of that long URL.</p>
+<ul class="post-list"><li><b>Tags added after shortening.</b> If you append tags to a short link, such as <code>sho.rt/abc?utm_source=sms</code>, the shortener may ignore them and redirect to the long URL without them. Add the tags to the full URL first, then shorten it.</li><li><b>Redirects that keep only the path.</b> A redirect from an old product URL, from <code>http</code> to <code>https</code>, or from your bare domain to <code>www</code> can be set up to send the path and drop the query string. The tags go with it.</li><li><b>Hand-edited links.</b> A second <code>?</code> instead of <code>&amp;</code>, or a space in a value, breaks the tags. Check links with the free <a href="/tools/utm-checker">UTM checker</a> before you send.</li></ul>
+<p class="p">The only sure test is a real one: send the text to your own phone, tap the link and look for <code>utm_source=sms</code> in the address bar of the page that opens. Do it once for each flow, not only for campaigns.</p>
+<p class="p">If you want a short link you control, a Virling <a href="https://docs.virling.com/track/links">tracked link</a> is a short URL on your Virling server that adds <code>utm_source</code>, <code>utm_medium</code> and <code>utm_campaign</code> on the redirect and keeps any tags already on the destination. Its id becomes the campaign, and Links shows the clicks, visitors and revenue each one brought.</p>
+<h2>How Virling credits SMS orders</h2>
+<p class="p">Virling has no separate SMS channel. Every session gets one channel from its first pageview, and <code>utm_medium</code> decides only Paid and Email. A text has no referrer, so the next rule reads <code>utm_source</code>: <code>sms</code> is not a known search, social, AI or community source, so the visit counts as <b>Referral</b>, with <code>sms</code> as its source. What matters is that it is no longer Direct, and that all your texts share one source row. Do not tag texts as <code>email</code> to move them into the Email channel; you would lose the split between the two. See <a href="https://docs.virling.com/attribution/channels">how channels are decided</a>.</p>
+<p class="p">Orders come straight from your store. Virling imports new <a href="/integrations/shopify">Shopify</a> or <a href="/integrations/woocommerce">WooCommerce</a> orders every minute with a read-only key, lowers revenue when you refund, and joins each order to the visits before it through the visitor ID a short snippet stores on the order.</p>
+<p class="p">Under the default model, the whole order is credited to the latest visit in the last 90 days that was not Direct. A shopper who taps your abandoned cart text and comes back the next day by typing your address is credited to that text. A shopper who taps the text and later returns from a search result is credited to Organic search. A text that was delivered but never tapped is never credited. You can switch to first touch or last touch in site settings; see <a href="https://docs.virling.com/attribution/model">the attribution model</a>.</p>
+<h2>Set up SMS revenue tracking step by step</h2>
+<h3>1. Pick UTM values for campaigns and flows</h3>
+<p class="p">Keep <code>utm_source=sms</code> and <code>utm_medium=sms</code> on every link, and name each campaign or flow in <code>utm_campaign</code>. Start every SMS campaign with <code>sms-</code>, so texts and emails about the same sale stay on separate rows in the Campaign tab.</p>
+<ul class="post-list"><li><b>Campaign:</b> <code>https://yourstore.com/collections/sale?utm_source=sms&amp;utm_medium=sms&amp;utm_campaign=sms-winter-sale-2026-12</code></li><li><b>Abandoned cart flow:</b> <code>utm_source=sms&amp;utm_medium=sms&amp;utm_campaign=sms-flow-abandoned-cart</code></li><li><b>Welcome flow:</b> <code>utm_source=sms&amp;utm_medium=sms&amp;utm_campaign=sms-flow-welcome</code></li><li><b>Win-back flow:</b> <code>utm_source=sms&amp;utm_medium=sms&amp;utm_campaign=sms-flow-win-back</code></li></ul>
+<p class="p">A flow keeps the same campaign value all year. <code>utm_content</code> is stored with the visit but is not a report row, so if you want each text of a flow as its own row, add the step to the campaign, such as <code>sms-flow-abandoned-cart-2</code>. Build the links with the free <a href="/tools/utm-builder">UTM builder</a>, write your values down once with the <a href="/tools/utm-naming-template">UTM naming template</a>, and lowercase every one.</p>
+<h3>2. Tag links before they are shortened</h3>
+<p class="p">If your SMS tool can add UTM tags to every link in a campaign or flow, set them there, so they are part of the URL before it is shortened. Otherwise paste the full tagged URL into the message and let the tool shorten that. Send a test text to yourself and check the address bar, as above.</p>
+<h3>3. Add the Virling script</h3>
+<p class="p">Paste the tag before <code>&lt;/head&gt;</code> on every page: in <code>theme.liquid</code> on Shopify, or with the Virling WordPress plugin on WooCommerce. It reads the tags on the landing page and sets the visitor ID. See <a href="https://docs.virling.com/track/script">add the script</a>.</p>
+<p class="p"><code>&lt;script defer src="https://app.virling.com/v.js" data-site="yourstore.com"&gt;&lt;/script&gt;</code></p>
+<h3>4. Connect Shopify or WooCommerce</h3>
+<p class="p">Connect Shopify with a custom app token that can only read orders, or WooCommerce with a REST API key with Read permission. Then add the snippet that stores the visitor ID on each order: a cart attribute on Shopify, order meta data on WooCommerce. The whole setup is on the <a href="/integrations/ecommerce">revenue attribution for online stores</a> page, with the code in <a href="https://docs.virling.com/guides/ecommerce">set up Virling for an online store</a>.</p>
+<h3>5. Read SMS revenue by campaign and flow</h3>
+<p class="p">On the dashboard, click <b>Referral</b> in the Channels card, switch to the Source tab and click <code>sms</code>. The Campaign tab then shows each campaign and flow with visitors, revenue and revenue per visitor. Click <b>Save as segment</b> and name it SMS to get back to this view in one click. Compare by revenue per visitor, not by visitors: a flow that sends few shoppers who buy can be worth more than a blast that sends many who do not. Open an order on the <b>Payments</b> page to see the visits before it and which one got the credit.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>What to check if the numbers look off</h2>
+<ul class="post-list"><li><b>SMS orders show as Direct.</b> A link was left untagged, or a shortener or redirect dropped the tags. Tap a link from each flow on your own phone.</li><li><b>SMS revenue is lower than in your SMS tool.</b> Many SMS tools credit an order to a text that was sent or clicked within a window you set, however the buyer reached the store. Virling credits each order once, to a visit, so the two answer different questions.</li><li><b>Orders show as Unattributed.</b> The order has no visitor ID. Check that the Shopify or WooCommerce snippet is in place.</li><li><b>One flow is split across rows.</b> Values differ in case or spelling, such as <code>SMS-flow-welcome</code> and <code>sms-flow-welcome</code>. Pick one and keep it.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>Why do SMS clicks show up as Direct?</h3><p class="p">Messaging apps do not send a referrer when someone taps a link in a text, so the visit carries no sign of where it came from. Unless the link has UTM tags, the visit and the order after it are counted as Direct.</p>
+<h3>Do link shorteners remove UTM parameters?</h3><p class="p">They can. Tags added to a short link after it was made may not be passed on, and a redirect that keeps only the path drops them. Add the tags to the full URL before it is shortened, then tap the link on your own phone and check the address bar.</p>
+<h3>What UTM parameters should I use for SMS?</h3><p class="p">Use utm_source=sms and utm_medium=sms on every link, and a utm_campaign per campaign or flow, such as sms-winter-sale-2026-12 or sms-flow-abandoned-cart. Keep every value lowercase.</p>
+<h3>Which channel does SMS traffic show in Virling?</h3><p class="p">Referral, with sms as its source. Virling has no separate SMS channel, so click Referral, then the sms source, and the Campaign tab shows revenue for each campaign and flow.</p>
+<h3>Does Virling send text messages?</h3><p class="p">No. Virling reads tagged visits and your Shopify or WooCommerce orders. Keep sending with the SMS tool you use today.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which texts bring real orders</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
