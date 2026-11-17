@@ -117,7 +117,7 @@ const near = (m) => {
   const n = m.replace(/[\s_.-]+/g, "");
   const hit = PAID.concat(EMAIL).find((k) => k.replace(/[_-]/g, "") === n || (m.length >= 4 && lev(m, k) <= (m.length >= 5 ? 2 : 1)));
   if (hit) return [hit, PAID.includes(hit) ? "Paid" : "Email"];
-  if (/^(cpm|cpv|cpa|cpl|display|banner|ads?|sponsored|paid.*|.*ads)$/.test(n)) return ["cpc or paid", "Paid"];
+  if (/^(cpm|cpv|cpa|cpl|display|banner|ads?|sponsored|paid.*|(google|meta|facebook|social|search|linkedin|tiktok)ads)$/.test(n)) return ["cpc or paid", "Paid"];
   if (/mail|newslet/.test(n)) return ["email", "Email"];
   return null;
 };
@@ -127,7 +127,7 @@ const run = () => {
   let u;
   try { u = new URL(/^[a-z]+:\/\//i.test(raw) ? raw : "https://" + raw); } catch { sum.innerHTML = ""; out.innerHTML = ""; warn.innerHTML = `<div class="tr"><span><b class="no">Not a URL</b></span><span>Paste the full landing URL, starting with https://</span><span></span></div>`; return; }
   const q = {}, names = [];
-  for (const [k, v] of u.searchParams) { names.push(k); if (!(k in q)) q[k] = v.trim(); }
+  for (const [k, v] of u.searchParams) { names.push(k); q[k] = v.trim(); }
   const get = (k) => q[k] || null;
   for (const k of names) if (k !== k.toLowerCase() && /^(utm_[a-z_]+|ref)$/i.test(k)) issues.push(`${k} has capitals and is not read: write it as ${k.toLowerCase()}`);
   const hash = u.hash.slice(1);
