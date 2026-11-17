@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MRR calculator: monthly and annual recurring revenue | Virling</title>
+<meta name="description" content="Free MRR calculator for SaaS. Enter subscribers, price and billing interval per plan, plus new, expansion, contraction and churned MRR, to get MRR, ARR and net new MRR. Runs in your browser.">
+<link rel="canonical" href="https://virling.com/tools/mrr-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/mrr-calculator">
+<meta property="og:title" content="MRR calculator: monthly and annual recurring revenue | Virling">
+<meta property="og:description" content="Free MRR calculator for SaaS. Enter subscribers, price and billing interval per plan, plus new, expansion, contraction and churned MRR, to get MRR, ARR and net new MRR. Runs in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"MRR calculator","url":"https://virling.com/tools/mrr-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"MRR calculator","item":"https://virling.com/tools/mrr-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / mrr calculator</span><h1>MRR calculator</h1><p class="lead">Enter the subscribers, price and billing interval of each plan to get your monthly recurring revenue (MRR) and annual recurring revenue (ARR), then add this month's movements for net new MRR. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="mrr" autocomplete="off">
+  <table class="cmp" style="grid-column:1/-1"><thead><tr><th>Plan</th><th>Subscribers</th><th>Price ($)</th><th>Billing</th><th>MRR</th><th style="width:110px"></th></tr></thead><tbody id="mrr-rows"></tbody></table>
+  <p style="grid-column:1/-1;margin:0"><button class="btn sm light" type="button" id="mrr-add">Add plan</button></p>
+  <div class="tool-stats" id="mrr-sum" style="grid-column:1/-1"></div>
+  <label>New MRR ($)<span class="dim">From customers who started paying this month</span><input name="new" type="number" min="0" step="0.01" value="600"></label>
+  <label>Expansion MRR ($)<span class="dim">From upgrades and added seats</span><input name="exp" type="number" min="0" step="0.01" value="200"></label>
+  <label>Contraction MRR ($)<span class="dim">Lost to downgrades</span><input name="con" type="number" min="0" step="0.01" value="100"></label>
+  <label>Churned MRR ($)<span class="dim">Lost to cancellations</span><input name="churn" type="number" min="0" step="0.01" value="300"></label>
+</form>
+<p class="fine-note">Yearly plans count as one twelfth of their price per month: a $480 yearly plan adds $40 of MRR. The movements are optional; leave them at 0 if you only need MRR and ARR.</p>
+<div class="txt post tool-cta">
+<p class="p">A spreadsheet gives you one MRR number. Virling links every visit to the payment it led to, so it fills in the paying subscribers and revenue for each channel from your real payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/churn-rate-calculator">churn rate calculator</a>, <a href="/tools/ltv-cac-calculator">LTV to CAC ratio calculator</a>, <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The MRR formula</h2>
+<p class="p">Monthly recurring revenue is the subscription revenue you can expect every month. For each plan, multiply the paying subscribers by the monthly price, then add the plans together:</p>
+<p class="p"><code>MRR = sum of (subscribers &times; monthly price)</code><br><code>monthly price of a yearly plan = yearly price / 12</code><br><code>ARR = MRR &times; 12</code></p>
+<p class="p">Net new MRR is how much MRR grew during the month, after what you lost:</p>
+<p class="p"><code>net new MRR = new + expansion &minus; contraction &minus; churned</code></p>
+<p class="p">Count only recurring subscription charges. Leave out one-time fees, setup charges, taxes and refunds, use the price customers actually pay after discounts, and do not count free trials until they convert.</p>
+<h2>A worked example</h2>
+<p class="p">These are round illustrative numbers, the same as the defaults above, not data from a real business. A product has 100 subscribers on a $20 monthly plan ($2,000 of MRR), 40 on a $50 monthly plan ($2,000) and 25 on a $480 yearly plan. Each yearly subscriber adds $480 / 12 = $40 a month, so that plan adds $1,000. MRR is $5,000 and ARR is $60,000.</p>
+<p class="p">During the month the product gained $600 of MRR from new customers and $200 from upgrades, and lost $100 to downgrades and $300 to cancellations. Net new MRR is $600 + $200 &minus; $100 &minus; $300 = $400, so MRR was $4,600 at the start of the month.</p>
+<h2>Know where new MRR comes from</h2>
+<p class="p">Total MRR says how big the business is, not which marketing brought it there. To grow new MRR you need to know which channels bring the subscribers behind it, which means joining each payment to the visit that started it. See <a href="/blog/find-which-channel-pays">how to find which marketing channel pays</a> and <a href="/blog/ga4-revenue-does-not-match-stripe">why GA4 revenue does not match Stripe</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>MRR calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate MRR?</h3><p class="p">Multiply the paying subscribers on each plan by the plan's monthly price and add the plans together. Yearly and quarterly plans are converted to a monthly amount first, by dividing the price by 12 or by 3.</p></div>
+      <div><h3>How do yearly plans count in MRR?</h3><p class="p">As one twelfth of the yearly price every month, even though the customer pays once a year. A $480 yearly subscription adds $40 of MRR for each of the 12 months it covers, not $480 in the month it was paid.</p></div>
+      <div><h3>What is the difference between MRR and ARR?</h3><p class="p">They measure the same recurring revenue over different periods. ARR is MRR times 12. Businesses that sell mostly monthly plans usually report MRR; those that sell mostly yearly contracts often report ARR.</p></div>
+      <div><h3>What is net new MRR?</h3><p class="p">The change in MRR over a month: new MRR plus expansion MRR, minus contraction MRR and churned MRR. If it is negative, the business lost more recurring revenue than it added.</p></div>
+      <div><h3>Should discounts, taxes and one-time fees count in MRR?</h3><p class="p">Use the price after discounts, since that is what customers pay. Leave out taxes, one-time fees and setup charges, because they are not recurring revenue you keep each month.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate MRR?", "acceptedAnswer": {"@type": "Answer", "text": "Multiply the paying subscribers on each plan by the plan's monthly price and add the plans together. Yearly and quarterly plans are converted to a monthly amount first, by dividing the price by 12 or by 3."}}, {"@type": "Question", "name": "How do yearly plans count in MRR?", "acceptedAnswer": {"@type": "Answer", "text": "As one twelfth of the yearly price every month, even though the customer pays once a year. A $480 yearly subscription adds $40 of MRR for each of the 12 months it covers, not $480 in the month it was paid."}}, {"@type": "Question", "name": "What is the difference between MRR and ARR?", "acceptedAnswer": {"@type": "Answer", "text": "They measure the same recurring revenue over different periods. ARR is MRR times 12. Businesses that sell mostly monthly plans usually report MRR; those that sell mostly yearly contracts often report ARR."}}, {"@type": "Question", "name": "What is net new MRR?", "acceptedAnswer": {"@type": "Answer", "text": "The change in MRR over a month: new MRR plus expansion MRR, minus contraction MRR and churned MRR. If it is negative, the business lost more recurring revenue than it added."}}, {"@type": "Question", "name": "Should discounts, taxes and one-time fees count in MRR?", "acceptedAnswer": {"@type": "Answer", "text": "Use the price after discounts, since that is what customers pay. Leave out taxes, one-time fees and setup charges, because they are not recurring revenue you keep each month."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring recurring revenue</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the subscribers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("mrr"), body = document.getElementById("mrr-rows"), sum = document.getElementById("mrr-sum");
+const usd = (n) => { const a = Math.abs(n), d = a < 100 ? 2 : 0; return (n < 0 ? "-$" : "$") + a.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); };
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const add = (name, n, p, yearly) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td><input name="name" type="text" aria-label="Plan" value="${esc(name)}"></td><td><input name="n" type="number" min="0" step="1" aria-label="Subscribers" value="${n}"></td><td><input name="p" type="number" min="0" step="0.01" aria-label="Price" value="${p}"></td><td><button class="btn sm light" type="button" data-iv aria-label="Billing interval, click to switch" data-yearly="${yearly ? 1 : 0}">${yearly ? "Yearly" : "Monthly"}</button></td><td data-mrr></td><td><button class="btn sm light" type="button" data-rm>Remove</button></td>`;
+  body.appendChild(tr);
+};
+const calc = () => {
+  const trs = [...body.rows];
+  let mrr = 0;
+  trs.forEach((tr) => {
+    tr.querySelector("[data-rm]").disabled = trs.length < 2;
+    const q = (n) => +tr.querySelector(`[name=${n}]`).value;
+    const m = (q("n") * q("p")) / (tr.querySelector("[data-iv]").dataset.yearly === "1" ? 12 : 1);
+    tr.querySelector("[data-mrr]").textContent = usd(m);
+    mrr += m;
+  });
+  const v = (n) => +f.elements[n].value;
+  const net = v("new") + v("exp") - v("con") - v("churn");
+  sum.innerHTML = [["MRR", usd(mrr)], ["ARR", usd(mrr * 12)], ["Net new MRR", usd(net)], ["MRR at start of month", usd(mrr - net)]].map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+body.addEventListener("click", (e) => {
+  const iv = e.target.closest("[data-iv]");
+  if (iv) { const y = iv.dataset.yearly !== "1"; iv.dataset.yearly = y ? "1" : "0"; iv.textContent = y ? "Yearly" : "Monthly"; calc(); return; }
+  const b = e.target.closest("[data-rm]");
+  if (b && body.rows.length > 1) { b.closest("tr").remove(); calc(); }
+});
+document.getElementById("mrr-add").addEventListener("click", () => { add("", 0, 0, false); calc(); body.lastElementChild.querySelector("input").focus(); });
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+add("Starter", 100, 20, false);
+add("Pro", 40, 50, false);
+add("Pro yearly", 25, 480, true);
+calc();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
