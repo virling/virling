@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dark social traffic: what it is and what revenue it brings</title>
+<meta name="description" content="Dark social traffic is links shared in chats, DMs and email that arrive with no referrer. Where it comes from, how to spot it, and how to see its revenue.">
+<link rel="canonical" href="https://virling.com/blog/dark-social-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/dark-social-revenue-tracking">
+<meta property="og:title" content="Dark social traffic: what it is and what revenue it brings">
+<meta property="og:description" content="Dark social traffic is links shared in chats, DMs and email that arrive with no referrer. Where it comes from, how to spot it, and how to see its revenue.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Dark social traffic: what it is and what revenue it brings","item":"https://virling.com/blog/dark-social-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Dark social traffic: what it is and what revenue it brings","description":"Dark social traffic is links shared in chats, DMs and email that arrive with no referrer. Where it comes from, how to spot it, and how to see its revenue.","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/dark-social-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is dark social traffic?","acceptedAnswer":{"@type":"Answer","text":"Visits from links shared in private places, such as chat apps, direct messages and email, that arrive with no referrer. Analytics tools cannot see where they came from, so they usually file them as Direct."}},{"@type":"Question","name":"Why does dark social show up as Direct?","acceptedAnswer":{"@type":"Answer","text":"Chat and mail apps often pass no referrer when a link is opened. With no referrer and no UTM tag, a visit has nothing to say where it came from, so it falls into Direct."}},{"@type":"Question","name":"Can any tool fully measure dark social?","acceptedAnswer":{"@type":"Answer","text":"No. A visit with no referrer, no tag and no app name in its user agent carries no record of where the link was shared. You can shrink dark social by tagging links and recognising in-app browsers, but not remove it."}},{"@type":"Question","name":"How do I tell dark social apart from people typing my URL?","acceptedAnswer":{"@type":"Answer","text":"Look at landing pages. People who type your address or use a bookmark mostly land on the homepage, while a deep blog post or docs page in Direct was almost certainly reached through a shared link."}},{"@type":"Question","name":"Does dark social traffic bring revenue?","acceptedAnswer":{"@type":"Answer","text":"It can. Read revenue per channel and per landing page, not visits, and credit payments with a last non-direct model so a buyer who first came from a tagged link is credited to it."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-17</span>
+      <h1>Dark social traffic: what it is and what revenue it brings</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-17.</p>
+<p class="p">TL;DR: Dark social traffic is visits from links shared in chat apps, direct messages and email that arrive with no referrer, so analytics files them as Direct. It is real word of mouth, not people typing your address. You cannot measure all of it, but you can spot it by landing page, tag the links you share, recognise some in-app browsers, and credit each payment to the last visit that had a real source.</p>
+<h2>Where dark social traffic comes from</h2>
+<p class="p">A browser sends a referrer when someone clicks a link on a web page. Many private places do not: a link opened from a chat app, a direct message, an email client or a PDF often arrives with nothing that says where it was clicked. With no referrer and no UTM tag, the visit has no source, and it lands in Direct with typed addresses and bookmarks.</p>
+<table class="cmp"><thead><tr><th>Where the link was shared</th><th>What usually arrives</th><th>What Virling does</th></tr></thead><tbody><tr><th scope="row">WhatsApp, Telegram, Slack, Discord, Messenger</th><td>No referrer. Some open the link in their own browser, which names the app in the user agent</td><td>Credits the visit to the app as Social when the user agent names it, otherwise Direct</td></tr><tr><th scope="row">Email and newsletters</th><td>Often no referrer from mail apps</td><td>Email when the link has <code>utm_medium=email</code> or <code>newsletter</code>, otherwise Direct</td></tr><tr><th scope="row">Text messages, documents and PDFs</th><td>No referrer</td><td>Direct unless the link is tagged</td></tr><tr><th scope="row">Links copied from a social app and pasted elsewhere</th><td>No referrer, sometimes a share or click ID in the URL</td><td>Direct, marked as a shared link when the URL carries one of those IDs</td></tr></tbody></table>
+<p class="p">Private communities are one of the biggest sources. If your buyers talk in Discord or Slack groups, read <a href="/blog/community-revenue-tracking">community revenue tracking</a> for how to tag the links you post there. For everything else that lands in Direct, see <a href="/blog/why-is-direct-my-biggest-traffic-source">why Direct is your biggest traffic source</a>.</p>
+<h2>How to tell dark social from true direct visits</h2>
+<p class="p">The landing page is the best clue. Someone who types your address or opens a bookmark nearly always lands on the homepage, a login page or another short URL. Nobody types the address of a long blog post or a deep docs page, so Direct visits that land there almost certainly came from a link someone shared.</p>
+<ol class="post-list"><li>Click Direct on the Channels card to filter the page to it, then open the Landing page tab under Pages.</li><li>Treat the homepage, login and pricing as mostly typed or bookmarked.</li><li>Treat posts, docs, changelog entries and other deep pages as mostly shared links.</li><li>Watch for spikes: a deep page that suddenly gets Direct visits on one day was probably dropped in a group chat.</li></ol>
+<p class="p">To check how one particular URL will be classified, paste it into the <a href="/tools/traffic-source-checker">traffic source checker</a>.</p>
+<h2>What Virling can and cannot recover</h2>
+<p class="p">Virling gives each session one channel from its first pageview. A <code>utm_medium</code> of email or newsletter makes it Email, a referrer or a <code>utm_source</code> decides the channel next, and only a visit with none of these is Direct. Before falling back to Direct, it checks the user agent: when it names Instagram, Facebook or Messenger, TikTok, LinkedIn, Telegram, WhatsApp, Slack or Discord, the visit is credited to that app as Social. The rules are in <a href="https://docs.virling.com/attribution/channels">the channel docs</a>.</p>
+<p class="p">What is left in Direct is split on the Channels card by how visitors arrived: typed or bookmarked, a shared link, or a return from checkout. A visit counts as a shared link when its URL carries a share or click ID that some apps add.</p>
+<p class="p">What it cannot do: some apps open links in a plain system browser that does not name them, and many chat and mail apps strip everything. Those visits stay Direct, and nothing in them says which chat or person shared the link. The landing page breakdown above is how you read them.</p>
+<h2>How to see what revenue dark social brings</h2>
+<ol class="post-list"><li>Tag every link you share on purpose: <code>utm_source=whatsapp</code>, <code>utm_source=slack</code> or <code>utm_medium=email</code>, with a <code>utm_campaign</code> for the post or message. The rules are in <a href="/blog/utm-parameters-for-revenue-tracking">which UTM parameters to use</a>.</li><li>Give people a tagged link to share, such as a share button or a copy link on your posts, so the links they pass on keep the tag.</li><li>Connect your payment provider so each payment is joined to the visits before it.</li><li>Use a last non-direct model. It credits a payment to the latest visit in the lookback window that was not Direct, so a buyer who first clicked a tagged link in a chat and later typed your address is credited to that link. If every visit was Direct, the payment stays Direct.</li><li>Read revenue by landing page for Direct. Revenue on deep pages under Direct is a fair estimate of what untagged shared links earn.</li></ol>
+<p class="p">Virling uses last non-direct by default with a 90-day lookback, and you can switch to first touch or last touch in site settings. See <a href="https://docs.virling.com/attribution/model">the model docs</a>.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Frequently asked questions</h2>
+<h3>What is dark social traffic?</h3><p class="p">Visits from links shared in private places, such as chat apps, direct messages and email, that arrive with no referrer. Analytics tools cannot see where they came from, so they usually file them as Direct.</p>
+<h3>Why does dark social show up as Direct?</h3><p class="p">Chat and mail apps often pass no referrer when a link is opened. With no referrer and no UTM tag, a visit has nothing to say where it came from, so it falls into Direct.</p>
+<h3>Can any tool fully measure dark social?</h3><p class="p">No. A visit with no referrer, no tag and no app name in its user agent carries no record of where the link was shared. You can shrink dark social by tagging links and recognising in-app browsers, but not remove it.</p>
+<h3>How do I tell dark social apart from people typing my URL?</h3><p class="p">Look at landing pages. People who type your address or use a bookmark mostly land on the homepage, while a deep blog post or docs page in Direct was almost certainly reached through a shared link.</p>
+<h3>Does dark social traffic bring revenue?</h3><p class="p">It can. Read revenue per channel and per landing page, not visits, and credit payments with a last non-direct model so a buyer who first came from a tagged link is credited to it.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See what your shared links earn</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
