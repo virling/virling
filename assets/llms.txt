@@ -34,6 +34,10 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [UTM checker](https://virling.com/tools/utm-checker): find missing source or medium, capitals, spaces, duplicate parameters and other mistakes in tagged links
 - [UTM naming convention template](https://virling.com/tools/utm-naming-template): source, medium and campaign naming for email, social, paid ads, partners and podcasts, copy as CSV
 - [Client marketing report template](https://virling.com/tools/agency-client-report-template): monthly report for agency clients with revenue and paying customers by channel, change versus last month, top campaigns and next steps, copy as CSV
+- [Marketing budget allocation calculator](https://virling.com/tools/marketing-budget-calculator): ROAS, share of spend versus share of revenue and a suggested split of next month's budget from spend and revenue per channel
+- [Net revenue retention calculator](https://virling.com/tools/nrr-calculator): net and gross revenue retention from starting MRR, expansion, contraction and churned MRR
+- [Shopify fee calculator](https://virling.com/tools/shopify-fee-calculator): what Shopify takes per order and per month on each plan, with Shopify Payments or a third-party gateway
+- [Traffic source checker](https://virling.com/tools/traffic-source-checker): paste a landing URL and referrer to see which channel Virling credits, the rule that matched and the tagging mistakes behind it
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -131,6 +135,10 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Podcast revenue tracking: which shows bring paying customers](https://virling.com/blog/podcast-revenue-tracking): Vanity URLs, tracked links per show, promo codes, and listeners who search your name later, for sponsorships and guest spots.
 - [Track QR code sales: which printed codes bring paying customers](https://virling.com/blog/qr-code-revenue-tracking): Put UTM tags in the QR code URL, make one code per placement, use short redirect links, and stop scans landing as Direct.
 - [Webinar revenue tracking: which webinars bring paying customers](https://virling.com/blog/webinar-revenue-tracking): Tag registration, follow-up and replay links apart, allow for the weeks before a buyer pays, and see which webinar paid.
+- [Email marketing revenue tracking for online stores](https://virling.com/blog/email-marketing-revenue-tracking-ecommerce): Why your email tool and your store disagree on email revenue, and how to credit Shopify and WooCommerce orders to the campaigns and flows that sent the click.
+- [Facebook revenue tracking: which page posts and group shares bring paying customers](https://virling.com/blog/facebook-revenue-tracking): Facebook revenue tracking for pages and groups: how l.facebook.com and in-app visits are counted, which UTM tags to use, and how to see revenue per post.
+- [Do free tools bring paying customers? How to measure it](https://virling.com/blog/free-tool-marketing-revenue): Free tools and calculators bring traffic, but do they bring buyers? How to credit payments to the tool page that brought the visitor and track signups from it.
+- [Do software directories bring paying customers? How to measure it](https://virling.com/blog/software-directory-revenue-tracking): Are SaaS directories worth it? How directory clicks are credited, how to tag listing links per directory, and how to compare paying customers by directory over 90 days.
 
 ## Source
 
