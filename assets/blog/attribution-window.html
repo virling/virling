@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attribution window: how long a visit gets credit</title>
+<meta name="description" content="An attribution window is how many days before a payment a visit can earn credit. How its length changes which channel gets credit, and how to pick one.">
+<link rel="canonical" href="https://virling.com/blog/attribution-window">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/attribution-window">
+<meta property="og:title" content="Attribution window: how long a visit gets credit">
+<meta property="og:description" content="An attribution window is how many days before a payment a visit can earn credit. How its length changes which channel gets credit, and how to pick one.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Attribution window: how long a visit gets credit","item":"https://virling.com/blog/attribution-window"}]},{"@type":"BlogPosting","headline":"Attribution window: how long a visit gets credit","description":"An attribution window is how many days before a payment a visit can earn credit. How its length changes which channel gets credit, and how to pick one.","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/attribution-window"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is an attribution window?","acceptedAnswer":{"@type":"Answer","text":"The number of days before a payment in which a visit can earn credit for it. Visits older than the window are ignored."}},{"@type":"Question","name":"Is an attribution window the same as a lookback window?","acceptedAnswer":{"@type":"Answer","text":"Yes. Both names mean how far back from a payment the attribution model looks for visits to credit."}},{"@type":"Question","name":"What attribution window should a SaaS with a free trial use?","acceptedAnswer":{"@type":"Answer","text":"One longer than most customers take from their first visit to their first charge, trial included. With a 14-day trial, 60 or 90 days is a safer start than 30."}},{"@type":"Question","name":"What attribution window should an online store use?","acceptedAnswer":{"@type":"Answer","text":"Stores where people buy within days can use 30 days. Expensive or seasonal products that people think about for weeks need 60 or 90."}},{"@type":"Question","name":"What happens to a payment with no visit inside the window?","acceptedAnswer":{"@type":"Answer","text":"In Virling it is Unattributed. It still counts toward revenue, but no channel gets the credit."}},{"@type":"Question","name":"Does changing the window change past reports?","acceptedAnswer":{"@type":"Answer","text":"In Virling, yes. Saving a new window rebuilds attribution for every payment of the site, history included, so you can compare windows and switch back."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-17</span>
+      <h1>Attribution window: how long a visit gets credit</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-17.</p>
+<p class="p">An attribution window, also called a lookback window, is the number of days before a payment in which a visit can earn credit for it. Visits inside the window are candidates for the credit; visits older than the window are ignored. A short window credits only recent visits, so it favours the channels that close. A long window reaches back to the visits that first introduced the customer. Pick a window longer than most of your customers take to pay. Virling uses 90 days by default and offers 30, 60, 90 or 365.</p>
+<h2>How the window and the model work together</h2>
+<p class="p">The window decides which visits are considered. The attribution model then picks one of them. Under last non-direct, the latest visit in the window that was not Direct gets the credit. Under first touch, the earliest visit in the window gets it. So first touch never reaches past the window: with a 30-day window, the first touch is the first visit in the last 30 days, not the first visit ever. For the two models side by side, see <a href="/blog/first-touch-vs-last-touch-attribution-saas">first-touch or last-touch attribution for a SaaS</a>.</p>
+<h2>An attribution window example</h2>
+<p class="p">This journey is made up to show the effect. A visitor:</p>
+<ul class="post-list"><li>Day 1: finds you through a podcast link</li><li>Day 40: comes back from a newsletter</li><li>Day 62: types your URL and starts a 14-day trial</li><li>Day 76: pays for the first time</li></ul>
+<p class="p">The window counts back from the payment on day 76.</p>
+<ul class="post-list"><li>30 days reaches back to day 46. Only the Direct visit on day 62 is inside, so last non-direct and first touch both credit Direct</li><li>60 days reaches back to day 16. The newsletter visit is inside, so last non-direct and first touch credit the newsletter</li><li>90 days reaches back before day 1. Last non-direct still credits the newsletter, and first touch now credits the podcast</li></ul>
+<p class="p">Same customer, same payment, three different answers. A window shorter than the buying cycle hands the credit to the last few visits and hides the channels that started the journey. To try other journeys and models, use the free <a href="/tools/attribution-model-calculator">attribution model calculator</a>.</p>
+<h2>What a short or long window does</h2>
+<ul class="post-list"><li>Short window: credits recent visits only. Good when people buy soon after they find you. Payments whose visits all fall outside it have no source</li><li>Long window: keeps early visits in play, so first touch and slow channels such as podcasts, search content and newsletters keep their credit. Under last non-direct it mostly matters when the recent visits were all Direct</li></ul>
+<h2>Picking a window for a SaaS with a trial</h2>
+<p class="p">The clock runs from the visit to the payment, and a trial sits in between. A visitor who reads for two weeks and then takes a 14-day trial pays about a month after the first visit. Add the trial length to the time people spend before they sign up, then pick the next window up. For most SaaS products with a trial, the 90-day default is a sensible start. Use 365 days for annual plans sold to teams who take months to decide.</p>
+<h2>Picking a window for a store</h2>
+<p class="p">Many store orders happen within days of the first visit, and 30 days covers them. Expensive items, gifts bought ahead of a season, and products people compare for weeks need 60 or 90 days. If you are unsure, keep 90 and check whether a shorter window changes the answer.</p>
+<h2>Base it on your own time to pay</h2>
+<p class="p">The best guide is how long your own customers take. Measure the median days from first visit to first payment, per channel, as in <a href="/blog/how-long-does-a-visitor-take-to-become-a-customer">how long a visitor takes to become a customer</a>. Choose a window comfortably longer than that median, so the slow channels are not cut off.</p>
+<h2>How to set the window in Virling</h2>
+<ul class="post-list"><li>Open site settings at /app/yourdomain.com/settings</li><li>Choose the lookback window: 30, 60, 90 or 365 days. The default is 90</li><li>Choose the model: last non-direct (the default), first touch or last touch</li><li>Save. Virling rebuilds attribution for every payment of the site, history included, and the dashboard shows the result on the next page load</li></ul>
+<p class="p">Payments with no visit inside the window show as Unattributed and still count toward revenue. If many payments land there, try a longer window. With Stripe, Polar and Dodo Payments, Virling also records a free trial start and credits later charges from the visits before the trial started. Details are in <a href="https://docs.virling.com/attribution/model">the model and lookback window docs</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>What is an attribution window?</h3><p class="p">The number of days before a payment in which a visit can earn credit for it. Visits older than the window are ignored.</p>
+<h3>Is an attribution window the same as a lookback window?</h3><p class="p">Yes. Both names mean how far back from a payment the attribution model looks for visits to credit.</p>
+<h3>What attribution window should a SaaS with a free trial use?</h3><p class="p">One longer than most customers take from their first visit to their first charge, trial included. With a 14-day trial, 60 or 90 days is a safer start than 30.</p>
+<h3>What attribution window should an online store use?</h3><p class="p">Stores where people buy within days can use 30 days. Expensive or seasonal products that people think about for weeks need 60 or 90.</p>
+<h3>What happens to a payment with no visit inside the window?</h3><p class="p">In Virling it is Unattributed. It still counts toward revenue, but no channel gets the credit.</p>
+<h3>Does changing the window change past reports?</h3><p class="p">In Virling, yes. Saving a new window rebuilds attribution for every payment of the site, history included, so you can compare windows and switch back.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channel gets credit under each window</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
