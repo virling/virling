@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Email marketing revenue tracking for online stores</title>
+<meta name="description" content="Why your email tool and your store disagree on email revenue, and how to credit Shopify and WooCommerce orders to the campaigns and flows that sent the click.">
+<link rel="canonical" href="https://virling.com/blog/email-marketing-revenue-tracking-ecommerce">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/email-marketing-revenue-tracking-ecommerce">
+<meta property="og:title" content="Email marketing revenue tracking for online stores">
+<meta property="og:description" content="Why your email tool and your store disagree on email revenue, and how to credit Shopify and WooCommerce orders to the campaigns and flows that sent the click.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Email marketing revenue tracking for online stores","item":"https://virling.com/blog/email-marketing-revenue-tracking-ecommerce"}]},{"@type":"Article","headline":"Email marketing revenue tracking for online stores","description":"Why your email tool and your store disagree on email revenue, and how to credit Shopify and WooCommerce orders to the campaigns and flows that sent the click.","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/email-marketing-revenue-tracking-ecommerce"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why is the revenue in my email tool higher than my store's?","acceptedAnswer":{"@type":"Answer","text":"Email tools usually credit an order to an email when the buyer opened or clicked it within a set window, however they reached the store. Opens are counted even when a privacy feature loads the email on its own, and the same order can also be claimed by an ad platform. Your store counts each order once."}},{"@type":"Question","name":"How do I track revenue from email campaigns on Shopify?","acceptedAnswer":{"@type":"Answer","text":"Tag every link with utm_medium=email and a utm_campaign per campaign or flow, connect Shopify with a read-only token, and store the visitor ID on the cart so Shopify copies it onto the order. Each order is then credited to the visit before it, and the Campaign tab shows revenue per campaign and flow."}},{"@type":"Question","name":"Does an opened email with no click count as email revenue in Virling?","acceptedAnswer":{"@type":"Answer","text":"No. Virling credits orders to visits, so an email counts only when someone clicks a tagged link and lands on your store. If the buyer later arrives from another channel, the default model credits the latest visit that was not Direct."}},{"@type":"Question","name":"How should I tag automated flows?","acceptedAnswer":{"@type":"Answer","text":"Give each flow its own utm_campaign, such as flow-abandoned-cart, flow-welcome or flow-win-back, and use utm_content for the email in the flow. utm_content is stored with the visit but is not a report row, so put the step in the campaign if you want each email as its own row."}},{"@type":"Question","name":"Does Virling send my emails?","acceptedAnswer":{"@type":"Answer","text":"No. Virling reads tagged visits and your Shopify or WooCommerce orders. Keep sending with the tool you use today."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-17</span>
+      <h1>Email marketing revenue tracking for online stores</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-17.</p>
+<p class="p"><b>To track email marketing revenue for an online store</b>, tag every link in your campaigns and automated flows with <code>utm_medium=email</code> and a <code>utm_campaign</code> per campaign or flow, then credit each Shopify or WooCommerce order to the tagged visit before it. That gives you revenue from real orders, counted once, next to every other channel. The &ldquo;attributed revenue&rdquo; in your email tool answers a different question, and this post explains why the two rarely match.</p>
+<p class="p">Writing a creator newsletter rather than running a store? See <a href="/blog/newsletter-revenue-tracking">newsletter revenue tracking</a> instead.</p>
+<h2>Why email tool revenue and order revenue differ</h2>
+<p class="p">Your email tool and your store both report revenue, but they credit it by different rules.</p>
+<ul class="post-list"><li><b>Open-based crediting.</b> Most email tools credit an order to an email when the buyer opened it, or clicked it, within an attribution window you set, however the buyer reached the store. A subscriber who opened your sale email and later bought from a search ad counts as email revenue.</li><li><b>Opens are not always people.</b> Some mail apps load every email, images included, on their own to protect privacy. Each of those loads counts as an open, so open-based revenue grows without anyone reading.</li><li><b>One order, many claims.</b> Your email tool, your ad platforms and your affiliate network each credit by their own rules, so the same order can be counted in several reports. Added up, they can exceed what the store took.</li><li><b>Click-based crediting.</b> An order is credited to email only when the buyer clicked a link and landed on the store. Each order goes to one channel, so channel totals add up to your store revenue.</li></ul>
+<p class="p">Neither is wrong; they measure different things. Open-based numbers show how many buyers had seen an email. Click-based numbers show which visits led to orders, and they compare fairly against search, social and ads because every channel is counted the same way.</p>
+<h2>How Virling credits email orders</h2>
+<p class="p">Virling is click-based. Every session gets one channel from its first pageview, and <code>utm_medium</code> is checked first: <code>email</code>, <code>newsletter</code> or <code>e-mail</code> is the <b>Email</b> channel, whatever the referrer says. Many mail apps send no referrer at all, so an untagged email click usually lands in Direct. See <a href="https://docs.virling.com/attribution/channels">how channels are decided</a>.</p>
+<p class="p">Orders come straight from your store. Connect <a href="/integrations/shopify">Shopify</a> with a custom app token that can only read orders, or <a href="/integrations/woocommerce">WooCommerce</a> with a read-only REST API key, and Virling imports new orders every minute and lowers revenue when you refund. A short snippet stores the visitor ID on each order, so the order is joined to the visits before it. See <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</p>
+<p class="p">Under the default model, the whole order is credited to the latest visit in the last 90 days that was not Direct, with its channel, source and campaign. A shopper who clicks your abandoned cart email and comes back the next day by typing your address is credited to that email. A shopper who clicks the email and later returns from a search result is credited to Organic search. An email that was only opened is never credited. You can switch to first touch or last touch in site settings; see <a href="https://docs.virling.com/attribution/model">the attribution model</a>.</p>
+<h2>A UTM template for campaigns and flows</h2>
+<p class="p">Keep <code>utm_medium=email</code> on every link, use the source to split one-off campaigns from automated flows, and name each campaign or flow in <code>utm_campaign</code>. Use <code>utm_content</code> to tell the emails in a flow, or two links in one email, apart.</p>
+<h3>Campaigns</h3>
+<p class="p">One-off sends to your list, such as a sale or a product drop. One campaign value per send, with the month:</p>
+<p class="p"><code>https://yourstore.com/collections/sale?utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=winter-sale-2026-12&amp;utm_content=hero-button</code></p>
+<h3>Flows</h3>
+<p class="p">Automated emails that run all year. One campaign value per flow that never changes, and the email in the flow as content:</p>
+<ul class="post-list"><li><b>Abandoned cart:</b> <code>utm_source=flow&amp;utm_medium=email&amp;utm_campaign=flow-abandoned-cart&amp;utm_content=email-1</code></li><li><b>Welcome:</b> <code>utm_source=flow&amp;utm_medium=email&amp;utm_campaign=flow-welcome&amp;utm_content=email-2</code></li><li><b>Win-back:</b> <code>utm_source=flow&amp;utm_medium=email&amp;utm_campaign=flow-win-back&amp;utm_content=email-1</code></li></ul>
+<p class="p">With these values, the Source tab splits Email revenue into campaigns and flows, and the Campaign tab shows one row per send and one per flow. <code>utm_content</code> is stored with the visit but is not a report row, so if you want each email of a flow as its own row, add the step to the campaign instead, such as <code>flow-abandoned-cart-1</code>. Write your values down once with the free <a href="/tools/utm-naming-template">UTM naming template</a>, and lowercase every one.</p>
+<p class="p">Most email tools let you add UTM tags to every link in a template automatically. Set it once per flow, then check a sent email: click a link and look for the tags in the address bar.</p>
+<h2>Read email revenue by campaign and flow</h2>
+<h3>1. Open the Email channel</h3>
+<p class="p">On the dashboard, the Channels card lists each channel with visitors, revenue and revenue per visitor. Click <b>Email</b> to filter the whole page to visits from your emails.</p>
+<h3>2. Compare campaigns and flows</h3>
+<p class="p">The Source tab shows <code>newsletter</code> against <code>flow</code>, and the Campaign tab shows each send and each flow. Compare them by revenue per visitor, not by visitors: a flow that sends few shoppers who buy can be worth more than a campaign that sends many who do not.</p>
+<h3>3. Check single orders</h3>
+<p class="p">The <b>Payments</b> page lists every order with the channel it was credited to. Open one to see the visits before it and which one got the credit, which is the quickest way to answer &ldquo;did that email really sell this?&rdquo;</p>
+<h2>What to check if the numbers look off</h2>
+<ul class="post-list"><li><b>Email revenue is lower than in your email tool.</b> Expected: opens and orders that came through another channel are not credited to email here. Compare the two as different measures, not as an error.</li><li><b>Email orders show as Direct.</b> A link was left untagged, or a redirect dropped the tags. Check the links in each flow, not only in campaigns.</li><li><b>Orders show as Unattributed.</b> The order has no visitor ID. Check that the Shopify or WooCommerce snippet is in place; see <a href="https://docs.virling.com/guides/ecommerce">set up Virling for an online store</a>.</li><li><b>One flow is split across rows.</b> Values differ in case or spelling, such as <code>Flow-Welcome</code> and <code>flow-welcome</code>. Pick one and keep it.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>Why is the revenue in my email tool higher than my store&rsquo;s?</h3><p class="p">Email tools usually credit an order to an email when the buyer opened or clicked it within a set window, however they reached the store. Opens are counted even when a privacy feature loads the email on its own, and the same order can also be claimed by an ad platform. Your store counts each order once.</p>
+<h3>How do I track revenue from email campaigns on Shopify?</h3><p class="p">Tag every link with utm_medium=email and a utm_campaign per campaign or flow, connect Shopify with a read-only token, and store the visitor ID on the cart so Shopify copies it onto the order. Each order is then credited to the visit before it, and the Campaign tab shows revenue per campaign and flow.</p>
+<h3>Does an opened email with no click count as email revenue in Virling?</h3><p class="p">No. Virling credits orders to visits, so an email counts only when someone clicks a tagged link and lands on your store. If the buyer later arrives from another channel, the default model credits the latest visit that was not Direct.</p>
+<h3>How should I tag automated flows?</h3><p class="p">Give each flow its own utm_campaign, such as flow-abandoned-cart, flow-welcome or flow-win-back, and use utm_content for the email in the flow. utm_content is stored with the visit but is not a report row, so put the step in the campaign if you want each email as its own row.</p>
+<h3>Does Virling send my emails?</h3><p class="p">No. Virling reads tagged visits and your Shopify or WooCommerce orders. Keep sending with the tool you use today.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which emails bring real orders</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
