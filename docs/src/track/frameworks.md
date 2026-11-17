@@ -166,6 +166,70 @@ Wix moves between pages without a full reload; the script counts each page chang
 
 Then [check that it works](script.md#check-that-it-works): open the published site and watch for the first pageview.
 
+## Bubble
+
+1. In the Bubble editor, open the **Settings** tab, then **SEO / metatags**.
+2. Paste the tag into **Script/meta tags in header**. Bubble adds it to the `<head>` of every page of the app; its [SEO settings page](https://manual.bubble.io/core-resources/application-settings/seo-metatags) lists no plan limit for this field.
+3. Deploy the app to live.
+
+```html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+Then [check that it works](script.md#check-that-it-works): open the live app and watch for the first pageview.
+
+## Carrd
+
+1. In the Carrd builder, click **Add Element**, then **Embed**.
+2. Set **Type** to **Code** and paste the tag into **Code**.
+3. Set **Style** to **Hidden** and choose **Head**, so the tag goes in the site's `<head>`.
+4. Publish the site. Embeds output nothing in the builder, and they need Pro Standard or higher; see [Embedding custom code](https://carrd.com/docs/building/embedding-custom-code).
+
+```html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+Then [check that it works](script.md#check-that-it-works): open the published site and watch for the first pageview.
+
+## Hugo
+
+Find the template in your theme that holds `</head>`, usually `baseof.html` or a head partial under `themes/<theme>/layouts/`. Copy it to the same path in your project's own `layouts/` folder and paste the tag before `</head>`. Hugo [uses the project's file over the theme's](https://gohugo.io/templates/lookup-order/), so theme updates do not remove it.
+
+```html,file:layouts/baseof.html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+Rebuild and deploy, then [check that it works](script.md#check-that-it-works): open the published site and watch for the first pageview.
+
+## Jekyll
+
+Paste the tag before `</head>` in `_includes/head.html`. With a gem-based theme such as Minima the file is not in your site yet: copy it from the theme into your own `_includes` folder first, and Jekyll [uses your copy over the theme's](https://jekyllrb.com/docs/themes/#overriding-theme-defaults).
+
+```html,file:_includes/head.html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+Rebuild and deploy, then [check that it works](script.md#check-that-it-works): open the published site and watch for the first pageview.
+
+## Docusaurus
+
+Add the tag to `scripts` in the site config. Docusaurus [puts each entry in the `<head>`](https://docusaurus.io/docs/api/docusaurus-config#scripts) of every page with the attributes you give it, so the script can read `data-site`. Route changes are tracked through `history.pushState`, so client-side navigation is counted.
+
+```js,file:docusaurus.config.js
+export default {
+  scripts: [
+    { src: "https://stats.example.com/v.js", defer: true,
+      "data-site": "yourdomain.com" },
+  ],
+};
+```
+
+Rebuild and deploy, then [check that it works](script.md#check-that-it-works): open the published site and watch for the first pageview.
+
 ## Google Tag Manager
 
 Import the ready-made container, or add one tag by hand.
