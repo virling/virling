@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WooCommerce UTM tracking: where UTMs show on orders</title>
+<meta name="description" content="Where WooCommerce stores UTM parameters on an order, why they go missing, and how to see revenue per UTM campaign for your store.">
+<link rel="canonical" href="https://virling.com/blog/woocommerce-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/woocommerce-utm-tracking">
+<meta property="og:title" content="WooCommerce UTM tracking: where UTMs show on orders">
+<meta property="og:description" content="Where WooCommerce stores UTM parameters on an order, why they go missing, and how to see revenue per UTM campaign for your store.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"WooCommerce UTM tracking: where UTMs show on orders","item":"https://virling.com/blog/woocommerce-utm-tracking"}]},{"@type":"BlogPosting","headline":"WooCommerce UTM tracking: where UTMs show on orders","description":"Where WooCommerce stores UTM parameters on an order, why they go missing, and how to see revenue per UTM campaign for your store.","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/woocommerce-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does WooCommerce track UTM parameters?","acceptedAnswer":{"@type":"Answer","text":"Yes, with order attribution turned on under WooCommerce, Settings, Advanced, Features. A script reads the UTM tags of the visit into session cookies, and at checkout WooCommerce copies the source, medium and campaign onto the order."}},{"@type":"Question","name":"Where do I see UTM parameters on a WooCommerce order?","acceptedAnswer":{"@type":"Answer","text":"Open the order in the admin and look at the Order attribution box. It shows the origin, source type, UTM campaign, source and medium, device type and session page views. The orders list also has an Origin column."}},{"@type":"Question","name":"Why do WooCommerce orders have no UTM data?","acceptedAnswer":{"@type":"Answer","text":"The attribution cookies were never set or did not reach checkout: a caching or script delay plugin held the script back, the visitor declined cookies, the session ended before buying, or the order was created without a store visit, such as in the admin or as a subscription renewal."}},{"@type":"Question","name":"How do I see revenue per UTM campaign in WooCommerce?","acceptedAnswer":{"@type":"Answer","text":"The WooCommerce Analytics extension has an Orders by Campaign report, which WooCommerce describes as early access and single currency only. For revenue after refunds per campaign, save a visitor ID on each order and join it to that visitor's tagged visits in your analytics."}},{"@type":"Question","name":"Can I add UTM data to orders placed before I turned attribution on?","acceptedAnswer":{"@type":"Answer","text":"No. WooCommerce only saves attribution on orders placed while the feature is on, and data that was never saved cannot be filled in later."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-17</span>
+      <h1>WooCommerce UTM tracking: where UTMs show on orders</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-17.</p>
+<p class="p">WooCommerce tracks UTM parameters with its built-in order attribution. Open an order in the admin and the <b>Order attribution</b> box shows the origin, source type, UTM campaign, source and medium of the visit that placed it, and the orders list has an <b>Origin</b> column. For revenue by UTM campaign, the WooCommerce Analytics extension has an <b>Orders by Campaign</b> report. Many orders carry no UTM data at all, because the values live in short session cookies. For revenue per campaign after refunds, save a visitor ID on each order and join it to that visitor's tagged visits.</p>
+<h2>Where WooCommerce stores UTM values on an order</h2>
+<p class="p">Order attribution is part of WooCommerce. Turn it on or off under <b>WooCommerce</b>, <b>Settings</b>, <b>Advanced</b>, <b>Features</b>. While a visitor browses, a script records the referring site, the UTM <code>source</code>, <code>medium</code>, <code>campaign</code>, <code>content</code> and <code>term</code>, the device type and the session's page views in cookies whose names start with <code>sbjs_</code>. When the visitor places an order, WooCommerce reads those cookies and saves the values on the order, in meta data whose keys start with <code>_wc_order_attribution</code>.</p>
+<p class="p">In the admin you see them in two places:</p>
+<ul class="post-list"><li>The <b>Order attribution</b> box on the order page: origin, source type, UTM campaign, source and medium, device type and session page views</li><li>The <b>Origin</b> column in the orders list, such as a UTM source, Organic, Referral, Direct, Web Admin or Unknown</li></ul>
+<p class="p">The same page has a <b>Customer history</b> box with the customer's completed orders, refunded orders and total spend. Source: <a href="https://woocommerce.com/document/order-attribution-tracking/">WooCommerce order attribution tracking</a>.</p>
+<h2>How to see revenue by UTM campaign in WooCommerce</h2>
+<p class="p">The WooCommerce Analytics extension adds order attribution reports: Orders by Channel, Orders by Source, Orders by Campaign, Orders by Device, and Orders by Channel and Source. WooCommerce describes it as early access and built for single-currency stores, and the reports only cover orders placed while order attribution was on. Source: <a href="https://woocommerce.com/document/woocommerce-analytics/order-attribution-report/">order attribution report</a>.</p>
+<h2>Why UTM values go missing</h2>
+<p class="p">An order only carries UTM values if the script ran, the cookies were set and they lasted until checkout. These are the usual breaks:</p>
+<ul class="post-list"><li><b>Caching and optimisation plugins.</b> Script delay, combine and minify settings can hold back or break the attribution script, so no cookies are set. Exclude it from those settings and test an order.</li><li><b>Cookie consent.</b> WooCommerce order attribution works with the WP Consent API, so a consent banner that the visitor declines can stop the cookies, and their order has no source.</li><li><b>Short sessions.</b> A session lasts 30 minutes by default and the cookies end with it. A buyer who clicks a campaign link today and comes back by typing your address next week is not credited to the campaign.</li><li><b>Cross-domain pages.</b> Cookies belong to one domain. Landing pages on one domain and a store on another, or a checkout hosted elsewhere, do not share them.</li><li><b>Email links.</b> Email apps often send no referrer, so an untagged link from a newsletter or an order email arrives as Direct. And because a UTM visit always overrides an earlier source, a tagged order email clicked just before buying takes the credit from the campaign that won the buyer.</li><li><b>Coupon links.</b> A buyer who leaves to look for a discount code and comes back from a coupon site after their session ended is credited to that site as a referral.</li><li><b>Orders with no store visit.</b> Orders created in the admin, through the REST API or by import, and subscription renewals, carry no fresh attribution.</li></ul>
+<p class="p">Attribution that was never saved cannot be added later. The causes of empty origins and how to test each one are in <a href="/blog/woocommerce-order-attribution-unknown">why WooCommerce order attribution says Unknown</a>.</p>
+<h2>How Virling ties each order to the visit before it</h2>
+<p class="p">Virling does not rely on a session cookie lasting until checkout. Its script gives each visitor a first-party ID in the <code>virling_vid</code> cookie, kept for a year, and stores the UTM tags of every landing. A short snippet saves that ID on the order, and Virling reads the order from your store's REST API and joins it to that visitor's earlier visits. By default it credits the latest visit in the last 90 days that was not Direct, so a typed return a week later keeps the campaign. Refunds lower the campaign's revenue, and WooCommerce Subscriptions renewals keep the channel of the first payment. The steps below set it up.</p>
+<h2>Step 1: tag your links</h2>
+<p class="p">Add <code>utm_source</code>, <code>utm_medium</code> and <code>utm_campaign</code> to every link you control: newsletters, SMS, ads, creator posts and bio links. Pick one spelling for each source and keep it, because <code>utm_source=newsletter</code> and <code>utm_source=Newsletter</code> split one source in two. The <a href="/tools/utm-builder">UTM builder</a> makes the links, and the rules are in <a href="/blog/utm-parameters-for-revenue-tracking">which UTM parameters to use</a>.</p>
+<h2>Step 2: check the links</h2>
+<p class="p">Paste your campaign links into the <a href="/tools/utm-checker">UTM checker</a> before they go out. It flags a missing source or medium, capitals, spaces, duplicate parameters, tags after the <code>#</code> and tagged internal links, which all split or lose campaign data.</p>
+<h2>Step 3: add the script</h2>
+<p class="p">Add the Virling script to every page of the store, including the cart and checkout. On WordPress, the Virling plugin adds the tag for you and survives theme updates; see <a href="https://docs.virling.com/track/frameworks">the framework guides</a>. Leave cookieless mode off for a store, because without the cookie there is no visitor ID for the order to carry. If you need consent first, set the visitor cookie to <b>Until consent</b> and call <code>virling("consent")</code> from your consent tool when the visitor accepts.</p>
+<h2>Step 4: save the visitor ID on the order</h2>
+<p class="p">Add this to your theme's <code>functions.php</code>, or to a snippets plugin, which survives theme updates. It copies the visitor ID from the <code>virling_vid</code> cookie into the order's meta data, for the classic and the block checkout:</p>
+<div class="code block"><pre>add_action('woocommerce_checkout_create_order', 'virling_vid_on_order');
+add_action('woocommerce_store_api_checkout_update_order_from_request', 'virling_vid_on_order');
+function virling_vid_on_order($order) {
+  $vid = $_COOKIE['virling_vid'] ?? '';
+  if (preg_match('/^[A-Za-z0-9-]{8,64}$/', $vid)) $order-&gt;update_meta_data('virling_vid', $vid);
+}</pre></div>
+<h2>Step 5: connect WooCommerce with a read-only key</h2>
+<p class="p">In WordPress, open <b>WooCommerce</b>, <b>Settings</b>, <b>Advanced</b>, <b>REST API</b>, and add a key with <b>Read</b> permissions. In Virling, paste the consumer key and the consumer secret joined by a colon, as <code>ck_...:cs_...</code>, and enter your store's https address. Virling imports orders from the last 90 days on the first run, then new ones every minute, and reads orders from the last 60 days again every 6 hours so later refunds show up. Details are on the <a href="/integrations/woocommerce">WooCommerce integration page</a> and in <a href="https://docs.virling.com/payments/woocommerce">the WooCommerce docs</a>.</p>
+<h2>Step 6: read revenue per campaign</h2>
+<p class="p">Open your store from a link with <code>?utm_source=test&amp;utm_medium=test</code> in a private window, place a test order, and after the next sync it shows the <code>test</code> source in the payments list instead of Unattributed. On the dashboard, the Channels card shows visitors, revenue and revenue per visitor for each channel, and its Campaign tab breaks that down by <code>utm_campaign</code>. Open any order to see the visits before it. Virling credits orders by visit, not by discount code, so give each campaign a tagged link as well as a code.</p>
+<p class="p">Virling is open source. Self-host it free, or start the hosted version with a 14-day free trial.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Frequently asked questions</h2>
+<h3>Does WooCommerce track UTM parameters?</h3><p class="p">Yes, with order attribution turned on under WooCommerce, Settings, Advanced, Features. A script reads the UTM tags of the visit into session cookies, and at checkout WooCommerce copies the source, medium and campaign onto the order.</p>
+<h3>Where do I see UTM parameters on a WooCommerce order?</h3><p class="p">Open the order in the admin and look at the Order attribution box. It shows the origin, source type, UTM campaign, source and medium, device type and session page views. The orders list also has an Origin column.</p>
+<h3>Why do WooCommerce orders have no UTM data?</h3><p class="p">The attribution cookies were never set or did not reach checkout: a caching or script delay plugin held the script back, the visitor declined cookies, the session ended before buying, or the order was created without a store visit, such as in the admin or as a subscription renewal.</p>
+<h3>How do I see revenue per UTM campaign in WooCommerce?</h3><p class="p">The WooCommerce Analytics extension has an Orders by Campaign report, which WooCommerce describes as early access and single currency only. For revenue after refunds per campaign, save a visitor ID on each order and join it to that visitor's tagged visits in your analytics.</p>
+<h3>Can I add UTM data to orders placed before I turned attribution on?</h3><p class="p">No. WooCommerce only saves attribution on orders placed while the feature is on, and data that was never saved cannot be filled in later.</p>
+</div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See revenue per UTM campaign for your WooCommerce store</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
