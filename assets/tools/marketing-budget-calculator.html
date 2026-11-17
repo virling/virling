@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marketing budget calculator: allocate spend by channel | Virling</title>
+<meta name="description" content="Free marketing budget allocation calculator. Enter spend and revenue per channel to see ROAS, share of spend vs share of revenue, and a suggested split of next month's budget. Runs in your browser.">
+<link rel="canonical" href="https://virling.com/tools/marketing-budget-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/marketing-budget-calculator">
+<meta property="og:title" content="Marketing budget calculator: allocate spend by channel | Virling">
+<meta property="og:description" content="Free marketing budget allocation calculator. Enter spend and revenue per channel to see ROAS, share of spend vs share of revenue, and a suggested split of next month's budget. Runs in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Marketing budget allocation calculator","url":"https://virling.com/tools/marketing-budget-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Marketing budget allocation calculator","item":"https://virling.com/tools/marketing-budget-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / marketing budget calculator</span><h1>Marketing budget allocation calculator</h1><p class="lead">Enter what each marketing channel cost last month and the revenue it brought. See the ROAS of each channel, how its share of spend compares with its share of revenue, and a suggested split of next month's budget that moves money toward the channels that return more. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="mb" autocomplete="off">
+  <table class="cmp" style="grid-column:1/-1"><thead><tr><th>Channel</th><th>Spend ($)</th><th>Revenue ($)</th><th>ROAS</th><th style="width:110px"></th></tr></thead><tbody id="mb-rows"></tbody><tfoot id="mb-total"></tfoot></table>
+  <p><button class="btn sm light" type="button" id="mb-add">Add channel</button> <span class="dim" id="mb-left"></span></p>
+  <label>Total budget for next month ($)<input name="budget" type="number" min="0" step="0.01" value="10000"><span class="dim">Use the same period, such as one month, for every number</span></label>
+</form>
+<div class="tool-stats" id="mb-sum"></div>
+<div style="overflow-x:auto"><table class="cmp" id="mb-out" style="min-width:620px"></table></div>
+<p class="fine-note">The suggestion is a simple proportional model: next month's budget is split in proportion to the revenue each paid channel brought, which is the same as weighting each channel's spend by its ROAS. It assumes a channel keeps its ROAS at a new spend level, which real channels rarely do, and it is only as good as the revenue you credit to each channel. Channels with no spend, such as organic search, are left out of the split. Read <a href="/blog/what-is-revenue-attribution">what revenue attribution is</a> before moving money on these numbers.</p>
+<div class="txt post tool-cta">
+<p class="p">A budget split is only as good as the revenue you credit to each channel. Virling links every visit to the payment it led to, so it fills in the revenue for each channel from your real payments instead of a platform's estimate. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/roas-calculator">ROAS calculator</a>, <a href="/tools/cac-calculator">CAC calculator by channel</a>, <a href="/blog/find-which-channel-pays">how to find which marketing channel pays</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The formulas</h2>
+<p class="p">For each channel, return on ad spend is the revenue it brought divided by what you spent on it:</p>
+<p class="p"><code>ROAS = channel revenue / channel spend</code></p>
+<p class="p">Share of spend and share of revenue compare each channel with the total across all channels:</p>
+<p class="p"><code>share of spend = channel spend / total spend</code><br><code>share of revenue = channel revenue / total revenue</code></p>
+<p class="p">A channel whose share of revenue is higher than its share of spend returns more than your average channel; one whose share of revenue is lower returns less. The suggested budget gives each paid channel the same share of next month's budget as its share of revenue among paid channels:</p>
+<p class="p"><code>suggested spend = total budget &times; channel revenue / revenue of all paid channels</code></p>
+<p class="p">Because channel revenue is channel spend &times; ROAS, this moves budget toward channels with a higher ROAS and away from those with a lower one, in proportion to how far apart they are. A channel that brought no revenue gets no budget.</p>
+<h2>A worked example</h2>
+<p class="p">With the defaults above, four channels cost $10,000 last month and brought $25,000 of revenue, a blended ROAS of 2.5x.</p>
+<ul class="post-list">
+<li><b>Paid search</b>: $4,000 of spend, $12,000 of revenue, ROAS 3x. 40% of spend, 48% of revenue. Suggested: $4,800, up $800.</li>
+<li><b>Paid social</b>: $3,000 of spend, $6,000 of revenue, ROAS 2x. 30% of spend, 24% of revenue. Suggested: $2,400, down $600.</li>
+<li><b>Display</b>: $2,000 of spend, $2,000 of revenue, ROAS 1x. 20% of spend, 8% of revenue. Suggested: $800, down $1,200.</li>
+<li><b>Newsletter sponsorships</b>: $1,000 of spend, $5,000 of revenue, ROAS 5x. 10% of spend, 20% of revenue. Suggested: $2,000, up $1,000.</li>
+</ul>
+<p class="p">The total stays at the $10,000 you entered. If you enter a bigger or smaller budget, every suggested amount scales with it.</p>
+<h2>Where the simple model breaks</h2>
+<p class="p">Most channels get less efficient as you spend more on them: the cheapest clicks and the most interested buyers come first. Doubling a sponsorship that returned 5x will rarely return 5x again. Treat the suggestion as the direction to move, shift part of the budget, and measure again the next month.</p>
+<p class="p">The bigger limit is the revenue column. Ad platforms report the conversions they can see within their own attribution windows, and a sale that touched two platforms can be counted by both, so the revenue per channel can add up to more than you collected. A split built on those numbers moves money toward whichever platform claims the most. To get revenue per channel you can trust, each payment has to be tied to the visit that brought it: see <a href="/blog/what-is-revenue-attribution">what revenue attribution is</a>, and <a href="/blog/first-touch-vs-last-touch-attribution-saas">first-touch vs last-touch attribution for SaaS</a> for which channel gets the credit.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Marketing budget calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How should I allocate my marketing budget across channels?</h3><p class="p">Start from what each channel returned: divide the revenue it brought by what it cost. Move budget from channels with a low return toward those with a high one, a step at a time, and keep some budget for testing new channels that have no history yet.</p></div>
+      <div><h3>How does this calculator suggest a budget?</h3><p class="p">It splits the total budget you enter in proportion to the revenue each paid channel brought. That is the same as weighting each channel's current spend by its ROAS, so channels that return more get a bigger share.</p></div>
+      <div><h3>Why should I not move the whole budget at once?</h3><p class="p">Channels usually get less efficient as spend grows, so a channel will not keep its ROAS when its budget doubles. Shifting part of the budget and measuring again shows how each channel responds.</p></div>
+      <div><h3>What revenue should I enter for each channel?</h3><p class="p">The revenue from customers who came through that channel in the same period as the spend. Use numbers matched from your payments rather than each ad platform's own report, since several platforms can claim the same sale.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How should I allocate my marketing budget across channels?", "acceptedAnswer": {"@type": "Answer", "text": "Start from what each channel returned: divide the revenue it brought by what it cost. Move budget from channels with a low return toward those with a high one, a step at a time, and keep some budget for testing new channels that have no history yet."}}, {"@type": "Question", "name": "How does this calculator suggest a budget?", "acceptedAnswer": {"@type": "Answer", "text": "It splits the total budget you enter in proportion to the revenue each paid channel brought. That is the same as weighting each channel's current spend by its ROAS, so channels that return more get a bigger share."}}, {"@type": "Question", "name": "Why should I not move the whole budget at once?", "acceptedAnswer": {"@type": "Answer", "text": "Channels usually get less efficient as spend grows, so a channel will not keep its ROAS when its budget doubles. Shifting part of the budget and measuring again shows how each channel responds."}}, {"@type": "Question", "name": "What revenue should I enter for each channel?", "acceptedAnswer": {"@type": "Answer", "text": "The revenue from customers who came through that channel in the same period as the spend. Use numbers matched from your payments rather than each ad platform's own report, since several platforms can claim the same sale."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels actually pay back</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("mb"), body = document.getElementById("mb-rows"), tot = document.getElementById("mb-total"), sum = document.getElementById("mb-sum"), out = document.getElementById("mb-out"), addBtn = document.getElementById("mb-add"), MAX = 8;
+const usd = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const sgn = (n) => (Math.round(n) > 0 ? "+" : "") + usd(Math.round(n) === 0 ? 0 : n);
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 1 }) + "%";
+const x = (n) => n.toFixed(2) + "x";
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const add = (name, s, r) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td><input name="name" type="text" aria-label="Channel" value="${esc(name)}"></td><td><input name="s" type="number" min="0" step="0.01" aria-label="Spend" value="${s}"></td><td><input name="r" type="number" min="0" step="0.01" aria-label="Revenue" value="${r}"></td><td data-o></td><td><button class="btn sm light" type="button" data-rm>Remove</button></td>`;
+  body.appendChild(tr);
+};
+const calc = () => {
+  const trs = [...body.rows], budget = Math.max(0, +f.budget.value || 0);
+  trs.forEach((tr) => (tr.querySelector("[data-rm]").disabled = trs.length < 2));
+  addBtn.disabled = trs.length >= MAX;
+  document.getElementById("mb-left").textContent = trs.length >= MAX ? "Up to " + MAX + " channels" : "";
+  const rows = trs.map((tr, i) => {
+    const q = (n) => tr.querySelector(`[name=${n}]`);
+    return { tr, name: q("name").value.trim() || "Channel " + (i + 1), s: Math.max(0, +q("s").value || 0), r: Math.max(0, +q("r").value || 0) };
+  });
+  const t = rows.reduce((a, c) => ({ s: a.s + c.s, r: a.r + c.r }), { s: 0, r: 0 });
+  const paid = rows.filter((c) => c.s > 0), paidRev = paid.reduce((a, c) => a + c.r, 0);
+  let best = null;
+  paid.forEach((c) => { if (!best || c.r / c.s > best.r / best.s) best = c; });
+  rows.forEach((c) => {
+    c.tr.querySelector("[data-o]").textContent = c.s > 0 ? x(c.r / c.s) : "No spend";
+    c.tr.style.background = c === best && c.r > 0 ? "var(--revenue-soft)" : "";
+  });
+  tot.innerHTML = `<tr><th scope="row">Total</th><td><b>${usd(t.s)}</b></td><td><b>${usd(t.r)}</b></td><td><b>${t.s > 0 ? x(t.r / t.s) : "No spend"}</b></td><td></td></tr>`;
+  sum.innerHTML = [["Blended ROAS", t.s > 0 ? x(t.r / t.s) : "No data"], ["Highest ROAS channel", best && best.r > 0 ? esc(best.name) : "No data"], ["Budget to split", usd(budget)]].map(([k, v]) => `<div><span class="dim">${k}</span><b>${v}</b></div>`).join("");
+  const head = "<thead><tr><th>Channel</th><th>Share of spend</th><th>Share of revenue</th><th>Current spend</th><th>Suggested spend</th><th>Change</th></tr></thead><tbody>";
+  out.innerHTML = head + rows.map((c) => {
+    const sug = c.s > 0 && paidRev > 0 ? (budget * c.r) / paidRev : null;
+    return `<tr><th>${esc(c.name)}</th><td>${t.s > 0 ? pct(c.s / t.s) : "No data"}</td><td>${t.r > 0 ? pct(c.r / t.r) : "No data"}</td><td>${usd(c.s)}</td><td>${sug === null ? (c.s > 0 ? "No revenue yet" : "Not split") : `<b>${usd(sug)}</b>`}</td><td>${sug === null ? "" : sgn(sug - c.s)}</td></tr>`;
+  }).join("") + `<tr><th>Total</th><td>${t.s > 0 ? "100%" : ""}</td><td>${t.r > 0 ? "100%" : ""}</td><td><b>${usd(t.s)}</b></td><td><b>${paidRev > 0 ? usd(budget) : "No data"}</b></td><td>${paidRev > 0 ? sgn(budget - t.s) : ""}</td></tr></tbody>`;
+};
+body.addEventListener("click", (e) => { const b = e.target.closest("[data-rm]"); if (b && body.rows.length > 1) { b.closest("tr").remove(); calc(); } });
+addBtn.addEventListener("click", () => { if (body.rows.length >= MAX) return; add("", 0, 0); calc(); body.lastElementChild.querySelector("input").focus(); });
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+add("Paid search", 4000, 12000);
+add("Paid social", 3000, 6000);
+add("Display", 2000, 2000);
+add("Newsletter sponsorships", 1000, 5000);
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
