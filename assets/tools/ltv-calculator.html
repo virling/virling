@@ -137,10 +137,11 @@ const show = (open) => {
   if (open) { mark(items.find((i) => i.getAttribute("aria-selected") === "true")); menu.focus(); }
 };
 const pick = (el) => {
+  const was = r.dataset.value;
   items.forEach((i) => i.setAttribute("aria-selected", String(i === el)));
   r.dataset.value = el.dataset.value;
   document.getElementById("mode-value").textContent = el.textContent;
-  if (+f.elements.margin.value === (el.dataset.value === "e" ? 80 : 40)) f.elements.margin.value = el.dataset.value === "e" ? 40 : 80;
+  if (was !== el.dataset.value && +f.elements.margin.value === (el.dataset.value === "e" ? 80 : 40)) f.elements.margin.value = el.dataset.value === "e" ? 40 : 80;
   show(false);
   r.focus();
   calc();
