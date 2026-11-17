@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shopify UTM tracking: where UTMs show on orders and reports</title>
+<meta name="description" content="Where Shopify shows UTM parameters on an order and in its reports, what it keeps and drops, and how to see revenue per UTM campaign.">
+<link rel="canonical" href="https://virling.com/blog/shopify-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/shopify-utm-tracking">
+<meta property="og:title" content="Shopify UTM tracking: where UTMs show on orders and reports">
+<meta property="og:description" content="Where Shopify shows UTM parameters on an order and in its reports, what it keeps and drops, and how to see revenue per UTM campaign.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Shopify UTM tracking: where UTMs show on orders and reports","item":"https://virling.com/blog/shopify-utm-tracking"}]},{"@type":"BlogPosting","headline":"Shopify UTM tracking: where UTMs show on orders and reports","description":"Where Shopify shows UTM parameters on an order and in its reports, what it keeps and drops, and how to see revenue per UTM campaign.","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/shopify-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does Shopify track UTM parameters?","acceptedAnswer":{"@type":"Answer","text":"Yes. Shopify reads UTM parameters from the URL a visitor lands on. Each session in an order's conversion details can show its UTM parameters, and traffic with a utm_campaign parameter is attributed to marketing in Shopify's marketing reports."}},{"@type":"Question","name":"Where do I see UTM parameters on a Shopify order?","acceptedAnswer":{"@type":"Answer","text":"Open the order and find the Conversion summary section. Click View conversion details, then View full sessions. Each session can show its referral, app details and UTM parameters. Shopify says the summary can take up to 48 hours to show."}},{"@type":"Question","name":"Why is the conversion summary empty on some orders?","acceptedAnswer":{"@type":"Answer","text":"Shopify leaves it empty for draft orders, for orders that did not come from the Online Store or Hydrogen and have no source or landing page, and when an app or private browser blocked cookies so no source was captured."}},{"@type":"Question","name":"How do I see revenue per UTM campaign in Shopify?","acceptedAnswer":{"@type":"Answer","text":"Use the Performance by marketing campaign report, or the top performing marketing campaigns on the Attribution page. For revenue after refunds tied to each campaign, store a visitor ID on the cart and join each order to that visitor's tagged visits in your analytics."}},{"@type":"Question","name":"How long does Shopify remember a UTM source?","acceptedAnswer":{"@type":"Answer","text":"Shopify sessions are cookie based and end after 30 minutes of inactivity. If a visitor does not buy within 30 days of a session, the first interaction referrer is reset, and the path to purchase uses touchpoints from up to 30 days before an order."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-17</span>
+      <h1>Shopify UTM tracking: where UTMs show on orders and reports</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-17.</p>
+<p class="p">Shopify tracks UTM parameters from the URL a visitor lands on. On an order, open the <b>Conversion summary</b>, then <b>View conversion details</b> and <b>View full sessions</b>: each session can show its UTM parameters. In reports, traffic with a <code>utm_campaign</code> parameter counts as marketing, and the <b>Performance by marketing campaign</b> report shows sales per campaign. Some orders carry nothing: draft orders, orders from outside the Online Store, and visits where cookies were blocked. For revenue per campaign after refunds, store a visitor ID on each order.</p>
+<h2>Where Shopify shows UTM parameters on an order</h2>
+<p class="p">On the order page, Shopify has a section called <b>Conversion summary</b> on the order page. It shows the customer's number of orders, their visits to your store in the last 30 days and where their first visit came from. <b>View conversion details</b> adds the days between the first and the most recent visit, and <b>View full sessions</b> lists each visit with its referral, app details and UTM parameters. Shopify notes that the summary can take up to 48 hours to appear. Source: <a href="https://help.shopify.com/en/manual/fulfillment/managing-orders/analytics/conversion-summary">Shopify Help Center, conversion summary</a>.</p>
+<h2>Where UTMs show in Shopify reports</h2>
+<p class="p">Shopify says that traffic arriving with <code>utm_campaign</code> in the URL is attributed to marketing. The marketing reports then show it:</p>
+<ul class="post-list"><li><b>Sales attributed to marketing</b>, which has a UTM campaign name field</li><li><b>Performance by marketing campaign</b>, for sales per campaign</li><li><b>Performance by marketing channel</b>, for the same numbers per channel</li><li>The <b>Attribution</b> page, with a list of top performing marketing campaigns</li></ul>
+<p class="p">The attribution models on offer are last non-direct click, last click, first click, any click and linear. Sources: <a href="https://help.shopify.com/en/manual/promoting-marketing/analyze-marketing/marketing-performance">marketing performance</a> and <a href="https://help.shopify.com/en/manual/reports-and-analytics/shopify-reports/report-types/default-reports/marketing-reports">marketing reports</a> in the Shopify Help Center.</p>
+<h2>What Shopify keeps and what it drops</h2>
+<ul class="post-list"><li>Draft orders have an empty conversion summary</li><li>Orders that did not come from the Online Store or Hydrogen, with no source or landing page, have an empty summary</li><li>When an app or private browser blocks cookies and no source was captured, the summary is empty; headless stores and blocked cookies can give a limited summary with a source and landing page but no visit timeline</li><li>A session ends after 30 minutes of inactivity, and if a visitor does not buy within 30 days of a session, the first interaction referrer is reset</li><li>The path to purchase uses touchpoints from up to 30 days before an order, or from the customer's previous order if that was more recent</li><li>Marketing reports leave out test and deleted orders but include canceled, pending and unpaid ones, and chargebacks are not in the sales reports</li></ul>
+<p class="p">Orders with no captured source are why so many land in Direct; the causes and fixes are in <a href="/blog/shopify-orders-show-as-direct">why Shopify orders show up as Direct</a>.</p>
+<h2>How to see revenue per UTM campaign</h2>
+<p class="p">Inside Shopify, open <b>Performance by marketing campaign</b>. It groups sales by campaign under Shopify's attribution model. To see revenue per campaign after refunds, joined to the exact visit that brought each buyer, every order needs to carry the visitor who placed it, so you can match it to that visitor's tagged visits. The full method is in <a href="/blog/track-shopify-revenue-by-traffic-source">how to track Shopify revenue by traffic source</a>. The steps below set it up.</p>
+<h2>Step 1: name your UTMs</h2>
+<p class="p">Pick one spelling for each source and medium and keep it: <code>utm_source=newsletter</code> and <code>utm_source=Newsletter</code> split one source in two. Tag every link you control with <code>utm_source</code>, <code>utm_medium</code> and <code>utm_campaign</code>, and use <code>utm_content</code> to tell apart two links in the same campaign. The <a href="/tools/utm-builder">UTM builder</a> makes the links, and the rules are in <a href="/blog/utm-parameters-for-revenue-tracking">which UTM parameters to use</a>.</p>
+<h2>Step 2: check the links</h2>
+<p class="p">Paste your campaign links into the <a href="/tools/utm-checker">UTM checker</a> before they go out. It flags a missing source or medium, capitals, spaces, duplicate parameters, tags after the <code>#</code> and tagged internal links, which all split or lose campaign data.</p>
+<h2>Step 3: store the visitor ID on the cart</h2>
+<p class="p">Add the Virling script to your theme so it runs on every store page; it stores the UTM tags of each landing. Then add this snippet to <code>theme.liquid</code>, after the Virling script. It writes the visitor ID to the cart as <code>virling_vid</code>, and Shopify copies cart attributes onto the order as note attributes:</p>
+<div class="code block"><pre data-snippet>&lt;script&gt;
+addEventListener("load", function () {
+  var vid = window.virling &amp;&amp; virling.vid &amp;&amp; virling.vid();
+  if (vid) fetch("/cart/update.js", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ attributes: { virling_vid: vid } })
+  });
+});
+&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>Step 4: connect the store with a read-only token</h2>
+<p class="p">In your Shopify admin, open <b>Settings</b>, <b>Apps and sales channels</b>, <b>Develop apps</b>, and create an app (<a href="https://help.shopify.com/en/manual/apps/app-types/custom-apps">Shopify's guide to custom apps</a>). Under <b>Admin API integration</b>, give it only the <code>read_orders</code> scope and install it. Paste the Admin API access token, which starts with <code>shpat_</code>, and your <code>your-store.myshopify.com</code> address into Virling. Virling imports the last 60 days of orders on the first run, then new orders and refunds every minute. Details are on the <a href="/integrations/shopify">Shopify integration page</a> and in <a href="https://docs.virling.com/payments/shopify">the docs</a>.</p>
+<h2>Step 5: read revenue per campaign</h2>
+<p class="p">On the dashboard, the Channels card shows visitors, revenue and revenue per visitor for each channel, and its Campaign tab breaks that down by <code>utm_campaign</code>. Refunds lower a campaign's revenue, and Shopify Subscriptions renewals keep the campaign of the customer's first payment. To see what a campaign's revenue leaves after Shopify's fees, use the <a href="/tools/shopify-fee-calculator">Shopify fee calculator</a>.</p>
+<p class="p">Virling is open source. Self-host it free, or start the hosted version with a 14-day free trial.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Frequently asked questions</h2>
+<h3>Does Shopify track UTM parameters?</h3><p class="p">Yes. Shopify reads UTM parameters from the URL a visitor lands on. Each session in an order's conversion details can show its UTM parameters, and traffic with a utm_campaign parameter is attributed to marketing in Shopify's marketing reports.</p>
+<h3>Where do I see UTM parameters on a Shopify order?</h3><p class="p">Open the order and find the Conversion summary section. Click View conversion details, then View full sessions. Each session can show its referral, app details and UTM parameters. Shopify says the summary can take up to 48 hours to show.</p>
+<h3>Why is the conversion summary empty on some orders?</h3><p class="p">Shopify leaves it empty for draft orders, for orders that did not come from the Online Store or Hydrogen and have no source or landing page, and when an app or private browser blocked cookies so no source was captured.</p>
+<h3>How do I see revenue per UTM campaign in Shopify?</h3><p class="p">Use the Performance by marketing campaign report, or the top performing marketing campaigns on the Attribution page. For revenue after refunds tied to each campaign, store a visitor ID on the cart and join each order to that visitor's tagged visits in your analytics.</p>
+<h3>How long does Shopify remember a UTM source?</h3><p class="p">Shopify sessions are cookie based and end after 30 minutes of inactivity. If a visitor does not buy within 30 days of a session, the first interaction referrer is reset, and the path to purchase uses touchpoints from up to 30 days before an order.</p>
+</div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See revenue per UTM campaign for your Shopify store</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
