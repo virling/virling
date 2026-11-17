@@ -6,7 +6,7 @@ use time::{OffsetDateTime, UtcOffset};
 use tokio::sync::broadcast;
 
 use crate::almost::AlmostPaid;
-use crate::events::{Event, EventStore, LatestPageview, Payment, Read};
+use crate::events::{Event, EventStore, JsError, LatestPageview, Payment, Read};
 use crate::providers::Subscription;
 use crate::reading::ReadRow;
 use crate::retention::{Mrr, Retention};
@@ -219,6 +219,10 @@ impl<S: EventStore> EventStore for Cached<S> {
         let result = self.inner.insert_reads(reads);
         self.changed(reads.iter().map(|r| r.site_id.as_str()));
         result
+    }
+
+    fn insert_errors(&self, errors: &[JsError]) -> anyhow::Result<()> {
+        self.inner.insert_errors(errors)
     }
 
     fn reading(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ReadRow>> {

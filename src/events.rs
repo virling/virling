@@ -33,6 +33,21 @@ pub struct Read {
     pub vitals: Option<[u32; 3]>,
 }
 
+/// An uncaught browser error, kept for ERROR_DAYS.
+#[derive(Debug, Clone)]
+pub struct JsError {
+    pub site_id: String,
+    pub ts: OffsetDateTime,
+    pub visitor_id: String,
+    pub path: String,
+    pub message: String,
+    pub source: String,
+    pub line: u32,
+}
+
+/// Days browser errors are kept.
+pub const ERROR_DAYS: i64 = 30;
+
 #[derive(Debug, Clone)]
 pub struct Event {
     pub site_id: String,
@@ -149,6 +164,8 @@ pub trait EventStore: Send + Sync {
     fn insert_bots(&self, bots: &[(Event, &str)]) -> anyhow::Result<()>;
     /// Stores reading time and scroll depth, kept apart from events and the session index.
     fn insert_reads(&self, reads: &[Read]) -> anyhow::Result<()>;
+    /// Stores browser errors and drops those older than ERROR_DAYS.
+    fn insert_errors(&self, errors: &[JsError]) -> anyhow::Result<()>;
     /// Reading per page in the range, most read first, with those who paid shown apart.
     fn reading(&self, site_id: &str, period: &Period) -> anyhow::Result<Vec<ReadRow>>;
     /// Web vitals per page with the conversion and revenue of the visitors who loaded it.
@@ -862,6 +879,15 @@ impl DuckStore {
                 lcp UINTEGER NOT NULL,
                 inp UINTEGER NOT NULL,
                 cls UINTEGER NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS js_errors (
+                site_id VARCHAR NOT NULL,
+                ts TIMESTAMPTZ NOT NULL,
+                visitor_id VARCHAR NOT NULL,
+                path VARCHAR NOT NULL,
+                message VARCHAR NOT NULL,
+                source VARCHAR NOT NULL,
+                line UINTEGER NOT NULL
             );
             CREATE TABLE IF NOT EXISTS payments (
                 site_id VARCHAR NOT NULL,
@@ -1653,6 +1679,33 @@ impl EventStore for DuckStore {
             }
         }
         drop((stmt, vit));
+        tx.commit()?;
+        Ok(())
+    }
+
+    fn insert_errors(&self, errors: &[JsError]) -> anyhow::Result<()> {
+        if errors.is_empty() {
+            return Ok(());
+        }
+        let conn = self.conn.lock().unwrap();
+        let tx = conn.unchecked_transaction()?;
+        let mut stmt = tx.prepare("INSERT INTO js_errors VALUES (?, ?, ?, ?, ?, ?, ?)")?;
+        for e in errors {
+            stmt.execute(params![
+                e.site_id,
+                ts_value(e.ts),
+                e.visitor_id,
+                e.path,
+                e.message,
+                e.source,
+                e.line
+            ])?;
+        }
+        drop(stmt);
+        tx.execute(
+            "DELETE FROM js_errors WHERE ts < now() - to_days(CAST(? AS INTEGER))",
+            params![ERROR_DAYS],
+        )?;
         tx.commit()?;
         Ok(())
     }

@@ -320,6 +320,27 @@ test("pushState and replaceState route changes log pageviews, once per URL", () 
   );
 });
 
+test("errors are sent once each, at most 5 per page view, without query strings", () => {
+  const b = browser("https://example.com/app?id=7");
+  const err = (message, line) => b.fire("w:", "error", { message, filename: "https://example.com/app.js?v=3#x", lineno: line });
+  err("x is not defined", 12);
+  err("x is not defined", 12);
+  b.fire("w:", "unhandledrejection", { reason: new Error("load failed") });
+  b.fire("w:", "error", {});
+  const sent = b.sent.filter((e) => e.n == "error");
+  assert.deepEqual(sent.map((e) => [e.g, e.f, e.x, e.u]), [
+    ["x is not defined", "https://example.com/app.js", 12, "https://example.com/app?id=7"],
+    ["load failed", "", 0, "https://example.com/app?id=7"],
+  ]);
+  assert.equal(sent[0].v, b.sent[0].v);
+  for (let i = 0; i < 10; i++) err("boom " + i, i);
+  assert.equal(b.sent.filter((e) => e.n == "error").length, 5);
+  b.history.pushState({}, "", "/next");
+  err("boom 0", 0);
+  assert.equal(b.sent.at(-1).g, "boom 0");
+  assert.equal(new URL(b.sent.at(-1).u).pathname, "/next");
+});
+
 test("reading time and scroll depth are sent once, when the page ends", () => {
   const b = browser("https://example.com/blog/post");
   b.clock.t += 20_000;
