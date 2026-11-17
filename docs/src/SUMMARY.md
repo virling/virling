@@ -9,6 +9,7 @@
 - [Find which channel pays](guides/channel-revenue.md)
 - [Read your dashboard](guides/dashboard.md)
 - [Use Virling with Paperclip](guides/paperclip.md)
+- [Run Virling for client sites](guides/agencies.md)
 - [Install](install/index.md)
   - [Docker](install/docker.md)
   - [Release binary](install/binary.md)
