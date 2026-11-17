@@ -38,6 +38,11 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Net revenue retention calculator](https://virling.com/tools/nrr-calculator): net and gross revenue retention from starting MRR, expansion, contraction and churned MRR
 - [Shopify fee calculator](https://virling.com/tools/shopify-fee-calculator): what Shopify takes per order and per month on each plan, with Shopify Payments or a third-party gateway
 - [Traffic source checker](https://virling.com/tools/traffic-source-checker): paste a landing URL and referrer to see which channel Virling credits, the rule that matched and the tagging mistakes behind it
+- [Repeat purchase rate calculator](https://virling.com/tools/repeat-purchase-rate-calculator): repeat purchase rate, purchase frequency and average days between orders, overall and per first channel, for ecommerce stores
+- [ARPU calculator](https://virling.com/tools/arpu-calculator): average revenue per user and per account, monthly and annual, from MRR or ARR, paying accounts and users
+- [Break-even CPA calculator](https://virling.com/tools/break-even-cpa-calculator): the most you can pay per customer and a target CPA from order value or monthly price, gross margin and orders or months per customer
+- [Questions to ask an AI assistant about revenue by channel](https://virling.com/tools/ai-revenue-questions): 26 questions to ask Claude, ChatGPT or another AI assistant about revenue by channel once Virling's MCP server is connected
+- [Marketing channel scorecard template](https://virling.com/tools/channel-scorecard-template): visitors, signups, paying customers, revenue, revenue per visitor, spend and CAC per channel with a keep, test or cut rule, copy as CSV
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -139,6 +144,13 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Facebook revenue tracking: which page posts and group shares bring paying customers](https://virling.com/blog/facebook-revenue-tracking): Facebook revenue tracking for pages and groups: how l.facebook.com and in-app visits are counted, which UTM tags to use, and how to see revenue per post.
 - [Do free tools bring paying customers? How to measure it](https://virling.com/blog/free-tool-marketing-revenue): Free tools and calculators bring traffic, but do they bring buyers? How to credit payments to the tool page that brought the visitor and track signups from it.
 - [Do software directories bring paying customers? How to measure it](https://virling.com/blog/software-directory-revenue-tracking): Are SaaS directories worth it? How directory clicks are credited, how to tag listing links per directory, and how to compare paying customers by directory over 90 days.
+- [GitHub revenue tracking: which README and repo visits turn into paying customers](https://virling.com/blog/github-revenue-tracking): How to do GitHub revenue tracking for developer tools: the github.com referrer, UTM tags for README, website field and release links, and comparing GitHub customers with other channels.
+- [SMS marketing revenue tracking for online stores](https://virling.com/blog/sms-marketing-revenue-tracking): Why SMS clicks land as Direct, how link shorteners can drop UTM tags, and how to credit Shopify and WooCommerce orders to each text campaign and flow.
+- [Dark social traffic: what it is and what revenue it brings](https://virling.com/blog/dark-social-revenue-tracking): Dark social traffic is links shared in chats, DMs and email that arrive with no referrer. Where it comes from, how to spot it, and how to see its revenue.
+- [Attribution window: how long a visit gets credit](https://virling.com/blog/attribution-window): An attribution window is how many days before a payment a visit can earn credit. How its length changes which channel gets credit, and how to pick one.
+- [Stripe Checkout UTM parameters: how to pass them](https://virling.com/blog/stripe-checkout-utm-parameters): How to carry UTM tags or a visitor ID into Stripe Checkout Sessions and Payment Links, where they show up, and why UTM in metadata is not attribution.
+- [Shopify UTM tracking: where UTMs show on orders and reports](https://virling.com/blog/shopify-utm-tracking): Where Shopify shows UTM parameters on an order and in its reports, what it keeps and drops, and how to see revenue per UTM campaign.
+- [Guest post revenue tracking: which articles bring paying customers](https://virling.com/blog/guest-post-revenue-tracking): How to track revenue from guest posts, roundups and press mentions: how referrals are credited, how to ask for tagged links, and how to compare articles by paying customers over 90 days.
 
 ## Source
 
