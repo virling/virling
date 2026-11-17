@@ -33,6 +33,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [ROAS calculator](https://virling.com/tools/roas-calculator): return on ad spend, break-even ROAS and profit or loss from spend, revenue and gross margin
 - [UTM checker](https://virling.com/tools/utm-checker): find missing source or medium, capitals, spaces, duplicate parameters and other mistakes in tagged links
 - [UTM naming convention template](https://virling.com/tools/utm-naming-template): source, medium and campaign naming for email, social, paid ads, partners and podcasts, copy as CSV
+- [Client marketing report template](https://virling.com/tools/agency-client-report-template): monthly report for agency clients with revenue and paying customers by channel, change versus last month, top campaigns and next steps, copy as CSV
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
