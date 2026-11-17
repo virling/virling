@@ -105,8 +105,12 @@
 <h3>Can I send events to Virling from my server?</h3><p class="p">Yes. POST them to /api/event with the visitor ID from the virling_vid cookie and the visitor's User-Agent. Transactions themselves are read from Paddle, so they need no event.</p>
 <h3>What if Paddle checkout opens before the script loads?</h3><p class="p">window.virling.vid is not there yet and customData gets an empty value. Wait for it for up to two seconds, or create the transaction on your server with the ID from the cookie.</p>
 <h3>Do refunds change a channel's revenue?</h3><p class="p">Yes. Approved refund and chargeback adjustments lower the transaction's revenue, and transactions from the last 60 days are read again every 6 hours, so later refunds show up.</p>
-<p class="p">Start a 14-day free trial at <a href="https://app.virling.com/login">app.virling.com</a>.</p>
 </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See your Paddle revenue by traffic source</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
 </main>
 
 <footer class="foot"><div class="wrap">
