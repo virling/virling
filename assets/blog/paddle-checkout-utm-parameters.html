@@ -51,7 +51,7 @@
 <h2>Step 1: keep a visitor ID until checkout</h2>
 <p class="p">Store one ID per visitor when they land, and record the UTM tags and referrer of every visit against it. With the Virling script, the ID is in the first-party <code>virling_vid</code> cookie, and <code>window.virling?.vid?.()</code> returns it in the browser. Put the script on the page that opens checkout as well as on your marketing pages.</p>
 <h2>Step 2: pass it as customData with Paddle.js</h2>
-<p class="p">For overlay or inline checkout, set <code>customData</code> when you open checkout. Paddle requires a JSON object with at least one key (<a href="https://developer.paddle.com/paddlejs/methods/paddle-checkout-open">Paddle.Checkout.open reference</a>):</p>
+<p class="p">For overlay or inline checkout, set <code>customData</code> when you open checkout. Paddle requires a JSON object with at least one key (<a href="https://developer.paddle.com/paddle-js/methods/paddle-checkout-open">Paddle.Checkout.open reference</a>):</p>
 <div class="code block"><pre data-snippet>Paddle.Checkout.open({
   items: [{ priceId: "pri_...", quantity: 1 }],
   customData: { virling_vid: window.virling?.vid?.() },
