@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LemonSqueezy analytics: see which channel brought each order</title>
-<meta name="description" content="Join every LemonSqueezy order to the visit before it through a signed webhook. Revenue per channel, renewals and refunds.">
+<title>LemonSqueezy revenue attribution: see which channel brought each order</title>
+<meta name="description" content="LemonSqueezy analytics with revenue attribution. Join every LemonSqueezy order to the visit before it through a signed webhook. Revenue per channel, renewals and refunds.">
 <link rel="canonical" href="https://virling.com/integrations/lemonsqueezy">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Virling">
 <meta property="og:url" content="https://virling.com/integrations/lemonsqueezy">
-<meta property="og:title" content="LemonSqueezy analytics: see which channel brought each order">
-<meta property="og:description" content="Join every LemonSqueezy order to the visit before it through a signed webhook. Revenue per channel, renewals and refunds.">
+<meta property="og:title" content="LemonSqueezy revenue attribution: see which channel brought each order">
+<meta property="og:description" content="LemonSqueezy analytics with revenue attribution. Join every LemonSqueezy order to the visit before it through a signed webhook. Revenue per channel, renewals and refunds.">
 <meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"LemonSqueezy","item":"https://virling.com/integrations/lemonsqueezy"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can Virling link LemonSqueezy orders to visits?","acceptedAnswer":{"@type":"Answer","text":"Yes, through a webhook. Virling registers a webhook for order_created and subscription_payment_success on each store, which needs VIRLING_BASE_URL to be a public https address. Without one, LemonSqueezy payments show as Unattributed."}},{"@type":"Question","name":"Does the LemonSqueezy API key have to be read-only?","acceptedAnswer":{"@type":"Answer","text":"LemonSqueezy API keys cannot be made read-only and cover every store on your account. Virling stores the key encrypted, and you can delete it in LemonSqueezy at any time to revoke access."}},{"@type":"Question","name":"How far back does Virling import LemonSqueezy orders?","acceptedAnswer":{"@type":"Answer","text":"Orders and subscription invoices from the last 90 days on the first run, then new ones every minute."}}]}]}</script>
@@ -39,8 +39,8 @@
   <section class="hero"><div class="wrap">
     <div class="txt sub-hero">
       <span class="kicker">integrations / lemonsqueezy</span>
-      <h1>LemonSqueezy revenue, joined to the visits behind it.</h1>
-      <p class="lead">Virling ties each LemonSqueezy payment to the visit that came before it, so you see which channel, referrer and page bring paying customers, not just visitors. Open source, one Rust binary, or hosted.</p>
+      <h1>LemonSqueezy revenue attribution: each order joined to the visit behind it.</h1>
+      <p class="lead">Virling ties each LemonSqueezy payment to the visit that came before it, so your analytics show which channel, referrer and page bring paying customers, not just visitors. Open source, one Rust binary, or hosted.</p>
       <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p>
     </div>
   </div></section>
@@ -62,11 +62,13 @@ const vid = window.virling?.vid?.();
 if (vid) url.searchParams.set(&quot;checkoutcustomvirling_vid&quot;, vid);
 location.href = url.href;</pre></div>
 <p class="p">Or on your server, when you create a checkout with <code>POST /v1/checkouts</code>, set <code>data.attributes.checkout_data.custom</code> to <code>{ "virling_vid": "&lt;the visitor's virling_vid cookie&gt;" }</code>.</p>
+<h2>Who uses this</h2>
+<p class="p">SaaS founders who bill subscriptions through LemonSqueezy and want trials, renewals and MRR by channel (see <a href="/integrations/saas">Virling for SaaS</a>), sellers of digital products such as licenses, templates and courses who want to know which post or referrer sold them, and agencies that report revenue by channel to clients who sell through LemonSqueezy (see <a href="/agency">Virling for agencies</a>).</p>
 <h2>Frequently asked questions</h2>
 <h3>Can Virling link LemonSqueezy orders to visits?</h3><p class="p">Yes, through a webhook. Virling registers a webhook for order_created and subscription_payment_success on each store, which needs VIRLING_BASE_URL to be a public https address. Without one, LemonSqueezy payments show as Unattributed.</p>
 <h3>Does the LemonSqueezy API key have to be read-only?</h3><p class="p">LemonSqueezy API keys cannot be made read-only and cover every store on your account. Virling stores the key encrypted, and you can delete it in LemonSqueezy at any time to revoke access.</p>
 <h3>How far back does Virling import LemonSqueezy orders?</h3><p class="p">Orders and subscription invoices from the last 90 days on the first run, then new ones every minute.</p>
-      <p class="p">Full reference: <a href="https://docs.virling.com/payments/lemonsqueezy">LemonSqueezy in the docs</a>.</p>
+      <p class="p">Full reference: <a href="https://docs.virling.com/payments/lemonsqueezy">LemonSqueezy in the docs</a>. Step by step: <a href="/blog/track-lemonsqueezy-revenue-by-traffic-source">How to track LemonSqueezy revenue by traffic source</a>.</p>
     </div>
   </div></section>
   <section class="band"><div class="wrap"><div class="txt post"><h2>Related reading</h2><ul class="post-list"><li><a href="/blog/find-which-channel-pays">How to find which marketing channel pays for your SaaS</a></li><li><a href="/blog/what-is-revenue-per-visitor">Revenue per visitor: formula, average and how to calculate</a></li><li><a href="/blog/utm-parameters-for-revenue-tracking">Which UTM parameters to use to trace revenue</a></li></ul><p class="p">Other integrations: <a href="/integrations/stripe">Stripe</a>, <a href="/integrations/paddle">Paddle</a>, <a href="/integrations/shopify">Shopify</a>, <a href="/integrations/woocommerce">WooCommerce</a>, <a href="/integrations/dodo-payments">Dodo Payments</a>, <a href="/integrations/polar">Polar</a>, <a href="/integrations/creem">Creem</a> and <a href="/integrations/revenuecat">RevenueCat</a>.</p></div></div></section>
