@@ -18,6 +18,7 @@
   <url><loc>https://virling.com/integrations/revenuecat</loc></url>
   <url><loc>https://virling.com/integrations/saas</loc></url>
   <url><loc>https://virling.com/integrations/ecommerce</loc></url>
+  <url><loc>https://virling.com/integrations/digital-products</loc></url>
   <url><loc>https://virling.com/blog</loc></url>
   <url><loc>https://virling.com/blog/woocommerce-order-attribution-unknown</loc></url>
   <url><loc>https://virling.com/blog/what-is-revenue-attribution</loc></url>
@@ -75,6 +76,24 @@
   <url><loc>https://virling.com/blog/stripe-checkout-utm-parameters</loc></url>
   <url><loc>https://virling.com/blog/shopify-utm-tracking</loc></url>
   <url><loc>https://virling.com/blog/guest-post-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/paddle-checkout-utm-parameters</loc></url>
+  <url><loc>https://virling.com/blog/lemonsqueezy-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/perplexity-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/sponsorship-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/referral-program-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/gemini-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/bluesky-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/dev-to-medium-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/copilot-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/whatsapp-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/discount-code-attribution</loc></url>
+  <url><loc>https://virling.com/blog/polar-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/claude-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/indie-hackers-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/threads-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/dodo-payments-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/revenuecat-web-paywall-attribution</loc></url>
+  <url><loc>https://virling.com/blog/prove-marketing-roi-to-clients</loc></url>
   <url><loc>https://virling.com/vs</loc></url>
   <url><loc>https://virling.com/vs/datafast</loc></url>
   <url><loc>https://virling.com/vs/databull</loc></url>
@@ -117,5 +136,19 @@
   <url><loc>https://virling.com/tools/break-even-cpa-calculator</loc></url>
   <url><loc>https://virling.com/tools/ai-revenue-questions</loc></url>
   <url><loc>https://virling.com/tools/channel-scorecard-template</loc></url>
+  <url><loc>https://virling.com/tools/ltv-calculator</loc></url>
+  <url><loc>https://virling.com/tools/marketing-roi-calculator</loc></url>
+  <url><loc>https://virling.com/tools/email-subscriber-value-calculator</loc></url>
+  <url><loc>https://virling.com/tools/quick-ratio-calculator</loc></url>
+  <url><loc>https://virling.com/tools/influencer-roi-calculator</loc></url>
+  <url><loc>https://virling.com/tools/affiliate-commission-calculator</loc></url>
+  <url><loc>https://virling.com/tools/lead-value-calculator</loc></url>
+  <url><loc>https://virling.com/tools/launch-tracking-checklist</loc></url>
+  <url><loc>https://virling.com/tools/customer-retention-rate-calculator</loc></url>
+  <url><loc>https://virling.com/tools/trial-to-paid-calculator</loc></url>
+  <url><loc>https://virling.com/tools/how-did-you-hear-about-us-template</loc></url>
+  <url><loc>https://virling.com/tools/mer-calculator</loc></url>
+  <url><loc>https://virling.com/tools/contribution-margin-calculator</loc></url>
+  <url><loc>https://virling.com/tools/ab-test-calculator</loc></url>
   <url><loc>https://virling.com/what-we-dont-do</loc></url>
 </urlset>
