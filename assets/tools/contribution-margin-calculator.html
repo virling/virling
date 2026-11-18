@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contribution margin calculator: margin per order | Virling</title>
+<meta name="description" content="Free contribution margin per order calculator for ecommerce stores. Enter order value, product cost, shipping, payment fees and acquisition cost to see what an order is really worth. Runs in your browser.">
+<link rel="canonical" href="https://virling.com/tools/contribution-margin-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/contribution-margin-calculator">
+<meta property="og:title" content="Contribution margin calculator: margin per order | Virling">
+<meta property="og:description" content="Free contribution margin per order calculator for ecommerce stores. Enter order value, product cost, shipping, payment fees and acquisition cost to see what an order is really worth. Runs in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Contribution margin calculator","url":"https://virling.com/tools/contribution-margin-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Contribution margin calculator","item":"https://virling.com/tools/contribution-margin-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / contribution margin calculator</span><h1>Contribution margin per order calculator</h1><p class="lead">See what one order is really worth after product cost, shipping, payment fees and the cost of winning it. Enter an order's value and its costs to get the contribution margin per order in dollars and as a share of the order. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="cm" autocomplete="off">
+  <label>Order value ($)<input name="value" type="number" min="0" step="0.01" value="80"></label>
+  <label>Product cost ($)<input name="product" type="number" min="0" step="0.01" value="30"></label>
+  <label>Shipping and packaging ($)<input name="ship" type="number" min="0" step="0.01" value="8"></label>
+  <label>Payment fee (%)<input name="feepct" type="number" min="0" max="100" step="0.01" value="2.9"></label>
+  <label>Payment fee per order ($)<input name="feefix" type="number" min="0" step="0.01" value="0.30"></label>
+  <label>Acquisition cost per order ($)<input name="cpa" type="number" min="0" step="0.01" value="15"></label>
+</form>
+<div class="tool-stats" id="cm-out"></div>
+<p class="fine-note">Order value is what the buyer paid without sales tax. Acquisition cost is your ad or marketing spend divided by the orders it brought; set it to 0 for an order from a free channel.</p>
+<div class="txt post tool-cta">
+<p class="p">The cost and value of an order change with the channel it came from. Virling links every visit to the payment it led to, so you see the revenue and orders each channel brings from your real payments, and its Profit by channel card takes your spend and payment fees off each one. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/payment-fee-calculator">payment fee calculator</a>, <a href="/tools/break-even-cpa-calculator">break-even CPA calculator</a>, <a href="/tools/aov-calculator">average order value calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The contribution margin formula</h2>
+<p class="p">Contribution margin per order is what is left of one order after the costs that come with it. It is the amount that order adds toward rent, salaries, software and profit:</p>
+<p class="p"><code>payment fee = order value &times; fee percent + fixed fee</code></p>
+<p class="p"><code>contribution margin = order value - product cost - shipping - payment fee - acquisition cost</code></p>
+<p class="p"><code>contribution margin % = contribution margin / order value</code></p>
+<p class="p">The calculator also shows the margin before acquisition cost. That is the most you could pay to win this order and still break even on it; see the <a href="/tools/break-even-cpa-calculator">break-even CPA calculator</a> if customers come back for more orders.</p>
+<h2>A worked example</h2>
+<p class="p">These are round illustrative numbers, the same ones the calculator starts with, not data from a real store. An order is worth $80. The products in it cost $30, shipping and packaging cost $8, and the card payment costs 2.9% + $0.30, which is $2.62. Before marketing, the order leaves $80 - $30 - $8 - $2.62 = $39.38. It came from an ad, at an acquisition cost of $15 per order, so the contribution margin is $24.38, or 30.5% of the order.</p>
+<p class="p">Now take a $40 order from another channel with the same product margin ($15 of product), the same $8 shipping and the same $15 acquisition cost. The fee is $1.46, and the order leaves $0.54, or 1.4% of its value. Shipping, the fixed part of the fee and the acquisition cost do not shrink with the order, so a channel with smaller orders keeps far less per order.</p>
+<h2>Margin per order differs by channel</h2>
+<p class="p">Each channel brings its own average order value and its own cost per order, so one store-wide margin hides channels that lose money on every sale. To compare them you need the revenue and orders of each channel; see the <a href="/tools/aov-calculator">average order value calculator</a> and <a href="/blog/find-which-channel-pays">how to find which marketing channel pays</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Contribution margin calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate contribution margin per order?</h3><p class="p">Take the order value and subtract every cost that comes with that one order: product cost, shipping and packaging, the payment fee and what you paid to acquire the order. An $80 order with $30 of product, $8 of shipping, a $2.62 payment fee and $15 of acquisition cost leaves $24.38, or 30.5% of the order.</p></div>
+      <div><h3>What is the difference between contribution margin and gross margin?</h3><p class="p">Gross margin usually takes off only the cost of the product. Contribution margin also takes off the other costs that grow with each order, such as shipping, payment fees and the marketing cost of winning the order, so it is lower and closer to what the order adds to your profit.</p></div>
+      <div><h3>Which costs belong in contribution margin?</h3><p class="p">Costs that come with each extra order: product cost, packaging, shipping, payment fees, marketplace or app fees charged per order, and the acquisition cost of that order. Rent, salaries and software subscriptions stay the same whether you sell one more order or not, so they are left out and paid from the total contribution.</p></div>
+      <div><h3>Should the order value include shipping and tax?</h3><p class="p">Leave out sales tax, because it is not your money. If the buyer pays for shipping, include it in the order value and keep your real shipping cost as a cost, so the two cancel out as they do in your bank account.</p></div>
+      <div><h3>Why is contribution margin different for each channel?</h3><p class="p">Channels bring different order values and cost different amounts per order. Shipping and the fixed part of the payment fee stay the same on a small order, so a channel with a lower average order value keeps a smaller share, and a paid channel carries an acquisition cost that organic search or email may not.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate contribution margin per order?", "acceptedAnswer": {"@type": "Answer", "text": "Take the order value and subtract every cost that comes with that one order: product cost, shipping and packaging, the payment fee and what you paid to acquire the order. An $80 order with $30 of product, $8 of shipping, a $2.62 payment fee and $15 of acquisition cost leaves $24.38, or 30.5% of the order."}}, {"@type": "Question", "name": "What is the difference between contribution margin and gross margin?", "acceptedAnswer": {"@type": "Answer", "text": "Gross margin usually takes off only the cost of the product. Contribution margin also takes off the other costs that grow with each order, such as shipping, payment fees and the marketing cost of winning the order, so it is lower and closer to what the order adds to your profit."}}, {"@type": "Question", "name": "Which costs belong in contribution margin?", "acceptedAnswer": {"@type": "Answer", "text": "Costs that come with each extra order: product cost, packaging, shipping, payment fees, marketplace or app fees charged per order, and the acquisition cost of that order. Rent, salaries and software subscriptions stay the same whether you sell one more order or not, so they are left out and paid from the total contribution."}}, {"@type": "Question", "name": "Should the order value include shipping and tax?", "acceptedAnswer": {"@type": "Answer", "text": "Leave out sales tax, because it is not your money. If the buyer pays for shipping, include it in the order value and keep your real shipping cost as a cost, so the two cancel out as they do in your bank account."}}, {"@type": "Question", "name": "Why is contribution margin different for each channel?", "acceptedAnswer": {"@type": "Answer", "text": "Channels bring different order values and cost different amounts per order. Shipping and the fixed part of the payment fee stay the same on a small order, so a channel with a lower average order value keeps a smaller share, and a paid channel carries an acquisition cost that organic search or email may not."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See what each channel's orders are worth</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the orders and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("cm"), out = document.getElementById("cm-out");
+const usd = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const calc = () => {
+  const n = (k) => Math.max(+f.elements[k].value || 0, 0);
+  const v = n("value"), fee = v * Math.min(n("feepct"), 100) / 100 + n("feefix");
+  const before = v - n("product") - n("ship") - fee, cm = before - n("cpa");
+  const pct = (x) => (v > 0 ? +(Math.round(x * 100) / 100 / v * 100).toFixed(1) + "%" : "No data");
+  const rows = [["Contribution margin per order", v > 0 ? usd(cm) : "No data"], ["Contribution margin", pct(cm)], ["Payment fee", v > 0 ? usd(fee) : "No data"], ["Margin before acquisition cost", v > 0 ? usd(before) + " (" + pct(before) + ")" : "No data"]];
+  out.innerHTML = rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
