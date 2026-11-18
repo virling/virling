@@ -151,6 +151,11 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Stripe Checkout UTM parameters: how to pass them](https://virling.com/blog/stripe-checkout-utm-parameters): How to carry UTM tags or a visitor ID into Stripe Checkout Sessions and Payment Links, where they show up, and why UTM in metadata is not attribution.
 - [Shopify UTM tracking: where UTMs show on orders and reports](https://virling.com/blog/shopify-utm-tracking): Where Shopify shows UTM parameters on an order and in its reports, what it keeps and drops, and how to see revenue per UTM campaign.
 - [Guest post revenue tracking: which articles bring paying customers](https://virling.com/blog/guest-post-revenue-tracking): How to track revenue from guest posts, roundups and press mentions: how referrals are credited, how to ask for tagged links, and how to compare articles by paying customers over 90 days.
+- [ChatGPT revenue tracking: which ChatGPT visits pay](https://virling.com/blog/chatgpt-revenue-tracking): How to track ChatGPT traffic and revenue: the chatgpt.com referrer, the utm_source=chatgpt.com tag, visits with no referrer, and how the payment is credited.
+- [Build in public with a revenue dashboard: share revenue by channel](https://virling.com/blog/public-revenue-dashboard): How to share revenue publicly with Virling: a read-only dashboard of revenue by channel at /share/yourdomain.com, with a switch to hide the dollar amounts.
+- [Quora revenue tracking: which answers bring paying customers](https://virling.com/blog/quora-revenue-tracking): Quora revenue tracking for SaaS and online stores: tag links in answers, Spaces and your profile, and see which answers bring paying customers, not just views.
+- [Stripe Payment Link UTM tracking: see which source sold](https://virling.com/blog/stripe-payment-links-utm-tracking): Stripe Payment Links drop your UTM tags and the referrer. See what a Payment Link keeps, and how to track the source of every Payment Link sale with no code.
+- [WooCommerce UTM tracking: where UTMs show on orders](https://virling.com/blog/woocommerce-utm-tracking): Where WooCommerce stores UTM parameters on an order, why they go missing, and how to see revenue per UTM campaign for your store.
 
 ## Source
 
