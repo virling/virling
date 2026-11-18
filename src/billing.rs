@@ -640,6 +640,7 @@ pub async fn start(
     State(state): State<AppState>,
     account: Account,
     Path(domain): Path<String>,
+    headers: HeaderMap,
     Form(input): Form<StartInput>,
 ) -> Response {
     let page = match owner_page(&state, &account, &domain).await {
@@ -661,6 +662,21 @@ pub async fn start(
                 .bind(&account.id)
                 .fetch_one(&state.db)
                 .await?;
+        let vid = match vid {
+            Some(vid) => Some(vid),
+            None => {
+                let vid = crate::auth::cookie(&headers, "virling_vid")
+                    .filter(|v| crate::ingest::valid_visitor_id(v));
+                if let Some(vid) = &vid {
+                    sqlx::query("UPDATE accounts SET vid = ? WHERE id = ? AND vid IS NULL")
+                        .bind(vid)
+                        .bind(&account.id)
+                        .execute(&state.db)
+                        .await?;
+                }
+                vid
+            }
+        };
         let dodo = state
             .config
             .billing
@@ -1280,6 +1296,30 @@ mod tests {
         let (_, _, body) = t.calls.lock().unwrap()[0].clone();
         assert_eq!(body["metadata"]["virling_vid"], "vmarketing12");
         assert_eq!(body["metadata"]["account_id"], json!(t.account));
+    }
+
+    #[tokio::test]
+    async fn checkout_falls_back_to_the_visitor_cookie() {
+        let t = setup().await;
+        crate::app::router(t.state.clone())
+            .layer(MockConnectInfo(SocketAddr::from(([203, 0, 113, 7], 5555))))
+            .oneshot(
+                Request::post("/app/agency.com/account/billing")
+                    .header("cookie", format!("{}; virling_vid=vcookie12345", t.cookie))
+                    .header("content-type", "application/x-www-form-urlencoded")
+                    .body(Body::from("plan=agency"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (_, _, body) = t.calls.lock().unwrap()[0].clone();
+        assert_eq!(body["metadata"]["virling_vid"], "vcookie12345");
+        let saved: Option<String> = sqlx::query_scalar("SELECT vid FROM accounts WHERE id = ?")
+            .bind(&t.account)
+            .fetch_one(&t.state.db)
+            .await
+            .unwrap();
+        assert_eq!(saved.as_deref(), Some("vcookie12345"));
     }
 
     #[tokio::test]
