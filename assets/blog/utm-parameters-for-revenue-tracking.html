@@ -49,14 +49,15 @@
 <ul class="post-list"><li><code>utm_source</code>: where the link lives, such as newsletter, x or reddit</li><li><code>utm_medium</code>: the kind of channel, such as email, social or cpc</li><li><code>utm_campaign</code>: the push it belongs to, such as launch-oct</li><li><code>utm_content</code>: which variant, useful when you test two links</li><li><code>utm_term</code>: the paid keyword, only for search ads</li></ul>
 <h2>A tagged link</h2>
 <p class="p"><code>https://example.com/pricing?utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=launch-oct</code></p>
+<p class="p">The <a href="/tools/utm-builder">UTM builder</a> makes links like this one, and the <a href="/tools/utm-checker">UTM checker</a> finds capitals, spaces and missing tags in links you already have.</p>
 <h2>Naming rules that keep reports clean</h2>
-<ul class="post-list"><li>Lowercase everything. <code>X</code> and <code>x</code> become two rows in most tools</li><li>Use hyphens, not spaces</li><li>Write the names down in one list and reuse them</li><li>One value per meaning: pick <code>email</code> or <code>newsletter</code> for the medium, not both</li></ul>
+<ul class="post-list"><li>Lowercase everything. <code>X</code> and <code>x</code> become two rows in most tools</li><li>Use hyphens, not spaces</li><li>Write the names down in one list, such as the <a href="/tools/utm-naming-template">UTM naming template</a>, and reuse them</li><li>One value per meaning: pick <code>email</code> or <code>newsletter</code> for the medium, not both</li></ul>
 <h2>What not to tag</h2>
 <ul class="post-list"><li>Links between your own pages. They overwrite the real source with an internal one</li><li>Organic search results. Search engines already pass a referrer</li><li>Links in places that strip them, such as some private messages</li></ul>
 <h2>Why revenue goes to Direct</h2>
 <p class="p">When a visit has no UTM tags and no referrer, it is counted as direct. Most untagged email clicks, app links and shared messages end up there. Tag what you can and the Direct row shrinks.</p>
 <h2>From tags to revenue</h2>
-<p class="p">Tags only name the source. To see money, join payments to the visits that carried them, as in <a href="/blog/track-stripe-revenue-by-traffic-source">tracking Stripe revenue by traffic source</a>. Virling groups visits into channels from UTM tags and referrers; see <a href="https://docs.virling.com/attribution/channels">how channels are decided</a>.</p>
+<p class="p">Tags only name the source. To see money, join payments to the visits that carried them, as in <a href="/blog/track-stripe-revenue-by-traffic-source">tracking Stripe revenue by traffic source</a>. For platform specifics, see <a href="/blog/stripe-checkout-utm-parameters">how to pass UTM parameters into Stripe Checkout</a> and <a href="/blog/shopify-utm-tracking">where Shopify shows UTMs on orders</a>. Virling groups visits into channels from UTM tags and referrers; see <a href="https://docs.virling.com/attribution/channels">how channels are decided</a>.</p>
 <h2>Frequently asked questions</h2>
 <h3>Which UTM parameters are required?</h3><p class="p">None are required technically, but utm_source, utm_medium and utm_campaign together give enough detail to trace revenue to a campaign.</p>
 <h3>Should I add UTM tags to links on my own site?</h3><p class="p">No. Tagging internal links replaces the visitor&#x27;s real source with an internal one and breaks attribution.</p>
