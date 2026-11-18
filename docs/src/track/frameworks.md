@@ -92,6 +92,71 @@ Paste the tag into `src/app.html`, before `%sveltekit.head%`. That file is the s
 
 Then [check that it works](script.md#check-that-it-works): open the published site and watch for the first pageview.
 
+## React (Vite)
+
+Paste the tag into `index.html` at the project root, before `</head>`. Vite uses that file as the shell of the app and leaves an external script without `type="module"` as it is. Route changes from React Router are tracked through `history.pushState`, so client-side navigation is counted; see [Single-page apps](spa.md).
+
+```html,file:index.html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+To pass the visitor ID to a checkout you open from the browser, read it with `window.virling?.vid?.()`; see [Link checkout to visits](../payments/checkout.md#read-the-visitor-id).
+
+## Remix
+
+Add the tag to the `<head>` in the root route, next to `<Meta />` and `<Links />`. Remix renders it into the HTML of every page, and client-side navigation is counted on its own; see [Single-page apps](spa.md).
+
+```jsx,file:app/root.tsx
+<head>
+  <Meta />
+  <Links />
+  <script defer src="https://stats.example.com/v.js"
+    data-site="yourdomain.com"></script>
+</head>
+```
+
+To pass the visitor ID to checkout, read the `virling_vid` cookie from the request's `Cookie` header in the action that creates the checkout; see [Link checkout to visits](../payments/checkout.md).
+
+## Gatsby
+
+Add the tag to the head of every page with `setHeadComponents` in `gatsby-ssr.js`. Gatsby renders it into the HTML with its attributes, so the script can read `data-site`. Route changes are tracked through `history.pushState`, so client-side navigation is counted; see [Single-page apps](spa.md).
+
+```jsx,file:gatsby-ssr.js
+import React from "react";
+
+export const onRenderBody = ({ setHeadComponents }) => {
+  setHeadComponents([
+    <script key="virling" defer src="https://stats.example.com/v.js"
+      data-site="yourdomain.com"></script>,
+  ]);
+};
+```
+
+To pass the visitor ID to a checkout you open from the browser, read it with `window.virling?.vid?.()`; see [Link checkout to visits](../payments/checkout.md#read-the-visitor-id).
+
+## Laravel
+
+Paste the tag before `</head>` in the Blade layout every page extends, usually `resources/views/layouts/app.blade.php`.
+
+```html,file:resources/views/layouts/app.blade.php
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+To pass the visitor ID to checkout, read it in the controller with `$request->cookie('virling_vid')`. Laravel encrypts cookies by default and returns nothing for one it did not set, so leave this one out: in Laravel 11 and later add `$middleware->encryptCookies(except: ['virling_vid']);` in `bootstrap/app.php`, and in older versions add `'virling_vid'` to `$except` in `app/Http/Middleware/EncryptCookies.php`. See [Link checkout to visits](../payments/checkout.md).
+
+## Ruby on Rails
+
+Paste the tag before `</head>` in `app/views/layouts/application.html.erb`. With Turbo, page visits use `history.pushState`, so each one is counted; see [Single-page apps](spa.md).
+
+```html,file:app/views/layouts/application.html.erb
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+To pass the visitor ID to checkout, read `cookies[:virling_vid]` in the controller that creates the checkout, for example as `client_reference_id` on a Stripe Checkout Session. See [Link checkout to visits](../payments/checkout.md).
+
 ## WordPress
 
 The Virling plugin adds the tag for you and survives theme updates. Download the `integrations/wordpress/virling` folder from the [repository](https://github.com/virling/virling/tree/main/integrations/wordpress/virling), upload it to `wp-content/plugins/`, activate it, then enter your Virling server and site domain in Settings, Virling. It skips logged-in administrators by default.
