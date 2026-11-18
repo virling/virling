@@ -91,7 +91,7 @@ const calc = () => {
   const n = (k) => Math.max(+f.elements[k].value || 0, 0);
   const v = n("value"), fee = v * Math.min(n("feepct"), 100) / 100 + n("feefix");
   const before = v - n("product") - n("ship") - fee, cm = before - n("cpa");
-  const pct = (x) => (v > 0 ? +(x / v * 100).toFixed(1) + "%" : "No data");
+  const pct = (x) => (v > 0 ? +(Math.round(x * 100) / 100 / v * 100).toFixed(1) + "%" : "No data");
   const rows = [["Contribution margin per order", v > 0 ? usd(cm) : "No data"], ["Contribution margin", pct(cm)], ["Payment fee", v > 0 ? usd(fee) : "No data"], ["Margin before acquisition cost", v > 0 ? usd(before) + " (" + pct(before) + ")" : "No data"]];
   out.innerHTML = rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
 };
