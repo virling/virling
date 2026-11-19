@@ -71,7 +71,7 @@
 // Send the customer to (await res.json()).checkout_url</pre></div>
 <p class="p">Use <code>https://test-api.creem.io</code> with a test mode key.</p>
 <h2>Who uses this</h2>
-<p class="p">SaaS founders who bill subscriptions through Creem and want trials, renewals and MRR by channel (see <a href="/integrations/saas">Virling for SaaS</a>), sellers of digital products such as licenses, templates and courses who want to know which post or referrer sold them, and agencies that report revenue by channel to clients who sell through Creem (see <a href="/agency">Virling for agencies</a>).</p>
+<p class="p">SaaS founders who bill subscriptions through Creem and want trials, renewals and MRR by channel (see <a href="/integrations/saas">Virling for SaaS</a>), sellers of digital products such as licenses, templates and courses who want to know which post or referrer sold them (see <a href="/integrations/digital-products">Virling for digital products</a>), and agencies that report revenue by channel to clients who sell through Creem (see <a href="/agency">Virling for agencies</a>).</p>
 <h2>Frequently asked questions</h2>
 <h3>How do I see which channel a Creem payment came from?</h3><p class="p">Connect Creem to Virling with a scoped API key and set virling_vid in the checkout metadata. Virling adds a checkout.completed webhook and ties each payment to the visit before it.</p>
 <h3>Which scopes does the Creem key need?</h3><p class="p">transactions:read, plus subscriptions:read for Retention and webhooks:write so Virling can add its webhook. No other scopes are needed.</p>
