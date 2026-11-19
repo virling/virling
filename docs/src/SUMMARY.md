@@ -13,6 +13,7 @@
 - [Set up an online store](guides/ecommerce.md)
 - [Set up a SaaS product](guides/saas.md)
 - [Set up a mobile app](guides/mobile-apps.md)
+- [Set up a no-code site](guides/no-code.md)
 - [Test your setup](guides/test-your-setup.md)
 - [Install](install/index.md)
   - [Docker](install/docker.md)
