@@ -177,8 +177,25 @@
     </div>
   </div></div></section>
 
-  <section class="band" id="faq"><div class="wrap"><div class="faq">
-    <span class="kicker">09<span>/</span>questions</span>
+  <section class="band" id="proof"><div class="wrap"><div class="note">
+    <span class="kicker">09<span>/</span>what you can check</span>
+    <h2>Open code, measured on a small server.</h2>
+    <ul class="facts">
+      <li><i></i><span>Open source under AGPLv3, source on <a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a></span></li>
+      <li><i></i><span>Run it on your own server for free, or let us host it. <a href="/self-host">How self-hosting works</a></span></li>
+    </ul>
+    <p class="p">In a load test on 2026-10-31, Virling ran in a container limited to one vCPU and 1 GB of RAM:</p>
+    <ul class="facts">
+      <li><i></i><span>100,000 pageviews ingested at 2,829 a second, with none failed and a p99 of 34 ms</span></li>
+      <li><i></i><span>157 MB of memory after the ingest</span></li>
+      <li><i></i><span>Dashboard queries at 0.6 to 7.6 ms median on the demo data</span></li>
+    </ul>
+    <p class="p">Read the <a href="/blog/self-hosted-analytics-what-it-takes">full write-up</a>, or rerun the test yourself with <a href="https://github.com/virling/virling/blob/main/scripts/load-1cpu.sh">scripts/load-1cpu.sh</a>.</p>
+    <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+  </div></div></section>
+
+  <section class="band alt" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">10<span>/</span>questions</span>
     <h2>Questions people ask.</h2>
     <div class="faq-list">
       <div><h3>How do I see which marketing channel brings paying customers?</h3><p class="p">Give every visitor an ID, pass that ID into checkout, and join each payment back to the visits before it. Virling does all three. Add one script tag, connect your payment provider with a read-only key, and the dashboard shows revenue and revenue per visitor for every channel, page and country.</p></div>
