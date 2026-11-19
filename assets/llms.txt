@@ -58,6 +58,9 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Contribution margin per order calculator](https://virling.com/tools/contribution-margin-calculator): contribution margin per order for ecommerce stores, after product cost, shipping, payment fees and acquisition cost
 - [A/B test calculator with revenue per visitor](https://virling.com/tools/ab-test-calculator): conversion rate, lift, two-sided z-test significance and revenue per visitor for two variants
 - [Cart abandonment rate calculator: carts, orders and lost revenue](https://virling.com/tools/cart-abandonment-rate-calculator): Free cart abandonment rate calculator for ecommerce stores. Enter carts created and orders completed to see your abandonment rate and the revenue left in carts. Runs in your browser.
+- [Annual plan discount calculator: monthly vs annual pricing](https://virling.com/tools/annual-discount-calculator): annual price, effective monthly price and break-even customer lifetime from your monthly price, discount and churn
+- [Revenue growth rate calculator: MoM, CMGR and annual growth](https://virling.com/tools/revenue-growth-rate-calculator): total growth, compound monthly growth rate (CMGR) and annualized growth from starting and ending revenue
+- [SaaS magic number calculator: sales efficiency from revenue growth](https://virling.com/tools/saas-magic-number-calculator): how much new annual revenue each dollar of last quarter's sales and marketing spend bought
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
