@@ -64,6 +64,8 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Burn multiple calculator: cash burned per dollar of new ARR](https://virling.com/tools/burn-multiple-calculator): how much cash you burn to add each dollar of net new annual recurring revenue in the same period
 - [Rule of 40 calculator: SaaS growth plus profit margin](https://virling.com/tools/rule-of-40-calculator): Rule of 40 score from revenue growth rate plus EBITDA or free cash flow margin, and how far it is from 40
 - [Investor update template: monthly update with revenue by channel](https://virling.com/tools/investor-update-template): monthly investor update with highlights, key metrics, revenue by acquisition channel, what worked, what did not and asks, copied as Markdown or plain text
+- [SEO ROI calculator: revenue, ROI and break-even](https://virling.com/tools/seo-roi-calculator): revenue from organic search, ROI and months to break even from organic visits, visit to customer rate, revenue per customer and SEO cost
+- [Discount break-even calculator](https://virling.com/tools/discount-break-even-calculator): how many more units a discounted sale must sell to keep the same gross profit, from price, unit cost or gross margin and discount
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -84,6 +86,9 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Revenue attribution for SaaS](https://virling.com/integrations/saas): trials, renewals, retention and MRR by first source
 - [Revenue attribution for ecommerce](https://virling.com/integrations/ecommerce): orders and revenue by channel for Shopify and WooCommerce stores, and which first source brings repeat buyers
 - [Revenue attribution for digital products](https://virling.com/integrations/digital-products): sales of templates, courses, ebooks and small software by channel, for LemonSqueezy, Polar, Creem and Dodo Payments
+- [Revenue attribution for mobile apps](https://virling.com/integrations/mobile-apps): paying subscribers by channel for apps that sell through RevenueCat and web paywalls, and what stays Unattributed
+- [Revenue attribution for browser extensions](https://virling.com/integrations/browser-extensions): which launch post, search or creator brings the users who pay for a Chrome or Firefox extension
+- [Revenue attribution for developer tools](https://virling.com/integrations/developer-tools): whether GitHub, Hacker News, dev.to, docs or AI assistants bring paying customers to a developer tool, API or open source project with a paid tier
 
 ## Compare
 
@@ -208,6 +213,13 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Next.js Stripe Checkout UTM tracking: pass the visit to the session](https://virling.com/blog/nextjs-stripe-utm-tracking): How to tie a Stripe Checkout payment in a Next.js App Router app to the visit and UTM tags that brought it, with a route handler and a server action.
 - [Carrd revenue tracking: see which channel brings each sale](https://virling.com/blog/carrd-revenue-tracking): Carrd revenue tracking for one-page sites: add the script with an embed element, keep plain Stripe Payment Links or LemonSqueezy checkout links, connect the provider, and see which channel brought each sale.
 - [Track Stripe revenue by traffic source in an AI-built app](https://virling.com/blog/vibe-coded-app-revenue-tracking): Built your app with Lovable, Bolt, Replit or Cursor and added Stripe? One prompt adds the Virling script and passes the visitor ID to Checkout, so each payment shows its channel.
+- [Black Friday revenue tracking: which channel drove each sale](https://virling.com/blog/black-friday-revenue-tracking): Black Friday revenue tracking for stores and SaaS: tag every sale link, keep one UTM naming scheme, and read revenue by channel the week after Cyber Monday.
+- [Bubble revenue tracking: see which channel brings each payment](https://virling.com/blog/bubble-revenue-tracking): Bubble revenue tracking for SaaS apps on Stripe: add the script in SEO / metatags, pass the visitor ID to Stripe Payment Links or Checkout, connect Stripe, and see which channel brought each payment.
+- [Squarespace revenue tracking: see which channel brings each sale](https://virling.com/blog/squarespace-revenue-tracking): Squarespace revenue tracking for sites that sell through Stripe Payment Links, LemonSqueezy or Polar checkout links: add the script with Code injection, keep plain links, connect the provider, and see which channel brought each sale.
+- [Wix revenue tracking: see which channel brings each sale](https://virling.com/blog/wix-revenue-tracking): Wix revenue tracking for sites that sell through checkout links: add the script with Custom code, keep plain Stripe Payment Links, LemonSqueezy or Polar checkout links, connect the provider, and see which channel brought each sale.
+- [Substack revenue tracking: which posts bring paying customers](https://virling.com/blog/substack-revenue-tracking): See which Substack posts and notes bring paying customers: how Substack clicks arrive, how to tag each post's links, and where the payments show in Virling.
+- [Google AI Overviews revenue tracking: which AI Overview clicks pay](https://virling.com/blog/google-ai-overviews-revenue-tracking): Clicks from Google AI Overviews and AI Mode arrive from google.com and count as Organic search. What you can separate, what you cannot, and how to see the revenue.
+- [Discord revenue tracking: which servers and posts bring paying customers](https://virling.com/blog/discord-revenue-tracking): Discord revenue tracking: why Discord clicks land as Direct, a UTM naming scheme per server and channel, and which servers and announcements bring paying customers.
 
 ## Source
 

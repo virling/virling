@@ -19,6 +19,9 @@
   <url><loc>https://virling.com/integrations/saas</loc></url>
   <url><loc>https://virling.com/integrations/ecommerce</loc></url>
   <url><loc>https://virling.com/integrations/digital-products</loc></url>
+  <url><loc>https://virling.com/integrations/mobile-apps</loc></url>
+  <url><loc>https://virling.com/integrations/browser-extensions</loc></url>
+  <url><loc>https://virling.com/integrations/developer-tools</loc></url>
   <url><loc>https://virling.com/blog</loc></url>
   <url><loc>https://virling.com/blog/woocommerce-order-attribution-unknown</loc></url>
   <url><loc>https://virling.com/blog/what-is-revenue-attribution</loc></url>
@@ -111,6 +114,13 @@
   <url><loc>https://virling.com/blog/nextjs-stripe-utm-tracking</loc></url>
   <url><loc>https://virling.com/blog/carrd-revenue-tracking</loc></url>
   <url><loc>https://virling.com/blog/vibe-coded-app-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/black-friday-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/bubble-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/squarespace-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/wix-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/substack-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/google-ai-overviews-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/discord-revenue-tracking</loc></url>
   <url><loc>https://virling.com/vs</loc></url>
   <url><loc>https://virling.com/vs/datafast</loc></url>
   <url><loc>https://virling.com/vs/databull</loc></url>
@@ -174,5 +184,7 @@
   <url><loc>https://virling.com/tools/burn-multiple-calculator</loc></url>
   <url><loc>https://virling.com/tools/rule-of-40-calculator</loc></url>
   <url><loc>https://virling.com/tools/investor-update-template</loc></url>
+  <url><loc>https://virling.com/tools/seo-roi-calculator</loc></url>
+  <url><loc>https://virling.com/tools/discount-break-even-calculator</loc></url>
   <url><loc>https://virling.com/what-we-dont-do</loc></url>
 </urlset>
