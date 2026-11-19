@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Substack revenue tracking: which posts bring paying customers</title>
+<meta name="description" content="See which Substack posts and notes bring paying customers: how Substack clicks arrive, how to tag each post's links, and where the payments show in Virling.">
+<link rel="canonical" href="https://virling.com/blog/substack-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/substack-revenue-tracking">
+<meta property="og:title" content="Substack revenue tracking: which posts bring paying customers">
+<meta property="og:description" content="See which Substack posts and notes bring paying customers: how Substack clicks arrive, how to tag each post's links, and where the payments show in Virling.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Substack revenue tracking: which posts bring paying customers","item":"https://virling.com/blog/substack-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Substack revenue tracking: which posts bring paying customers","description":"See which Substack posts and notes bring paying customers: how Substack clicks arrive, how to tag each post's links, and where the payments show in Virling.","datePublished":"2026-11-19","dateModified":"2026-11-19","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/substack-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I see which Substack post brought a paying customer?","acceptedAnswer":{"@type":"Answer","text":"Tag the links to your site in each post with utm_source=substack.com, utm_medium=email and a utm_campaign named after the post. Connect your payment provider and pass the visitor ID into checkout. Each payment is then credited to the tagged visit, and the Campaign tab shows revenue per post."}},{"@type":"Question","name":"Why do clicks from my Substack emails show as Direct?","acceptedAnswer":{"@type":"Answer","text":"Most email apps send no referrer when a reader clicks a link. Without UTM tags the visit has nothing that says it came from Substack, so it is counted as Direct, and so is the payment that follows."}},{"@type":"Question","name":"Which channel does Substack traffic land in?","acceptedAnswer":{"@type":"Answer","text":"A click from a Substack web page carries the substack.com host, or your publication's subdomain, as the referrer, and lands in Social. A publication on a custom domain is not on the known list, so its clicks land in Referral under that domain. A utm_medium of email or newsletter puts the visit in Email, whatever the referrer says."}},{"@type":"Question","name":"Should I use utm_source=substack or substack.com?","acceptedAnswer":{"@type":"Answer","text":"Use substack.com. When a click arrives with no referrer, a source that names a known host stands in for the referrer, so the visit joins the same Substack row as clicks that kept their referrer. The short name substack still puts the visit in Social, but not in that row."}},{"@type":"Question","name":"Do Substack's own stats show which post brought a sale on my site?","acceptedAnswer":{"@type":"Answer","text":"No. Substack's Posts page shows how many readers clicked each link, but it cannot see what happened on your site after the click. Joining the click to the payment that followed is what Virling does."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-19</span>
+      <h1>Substack revenue tracking: which posts bring paying customers</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-19.</p>
+<p class="p"><b>Substack revenue tracking</b> means joining each payment on your own site to the Substack post or note that sent the buyer. To see which post brought a paying customer, tag every link to your site in that post with <code>utm_source=substack.com</code>, <code>utm_medium=email</code> and a <code>utm_campaign</code> named after the post, then pass the visitor ID into checkout. Virling credits each payment to the tagged visit, so the Campaign tab shows revenue per post. Substack&rsquo;s own stats count clicks on each link; they stop at the click and cannot see the payment that came after.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>How Substack traffic reaches your site</h2>
+<p class="p">The same post reaches readers in two ways, and they arrive differently:</p>
+<ul class="post-list"><li><b>From the web.</b> A reader who clicks a link on your publication&rsquo;s page or in a note on substack.com usually arrives with that host as the referrer. Virling has substack.com and its subdomains on its list of social hosts, so these clicks land in the Social channel. substack.com shows as Substack in the Source tab, and a subdomain such as <code>yourname.substack.com</code> is its own row under that host. A publication on a custom domain, which Substack supports, is not on the list, so its clicks land in Referral under that domain.</li><li><b>From the email.</b> Most subscribers read the post in an email app, and most email apps send no referrer when a link is clicked. With no referrer and no tag, the visit has nothing that says it came from Substack, so it is counted as Direct, and so is the payment that follows. Links opened inside a mobile app can arrive the same way.</li><li><b>Only the host.</b> Even when the referrer is present, it is a host, not a post. Every post on your publication shares one row. Tags on the links are how you tell posts apart.</li></ul>
+<p class="p">For more on visits that arrive with no referrer, see <a href="/blog/dark-social-revenue-tracking">dark social revenue tracking</a>.</p>
+<h2>Tag the links in each post</h2>
+<p class="p">Use one source and one medium in every post, and change only the campaign:</p>
+<p class="p"><code>https://example.com/pricing?utm_source=substack.com&amp;utm_medium=email&amp;utm_campaign=pricing-teardown</code></p>
+<ul class="post-list"><li><code>utm_source=substack.com</code>: the same value in every post. A source that names a known host stands in for a missing referrer, so email clicks join the same Substack row as web clicks. The short name <code>substack</code> still puts the visit in Social, but not in that row.</li><li><code>utm_medium=email</code>: puts the visit in the Email channel, whatever the referrer says. A link in a post is the same link in the email and on the web, so readers from both count as Email.</li><li><code>utm_campaign=pricing-teardown</code>: one value per post, lowercase, with hyphens. Use the post&rsquo;s slug so you can find it later.</li><li><code>utm_content</code>: optional, to tell two links in the same post apart, such as <code>intro</code> and <code>footer</code>.</li></ul>
+<p class="p">For notes, leave out <code>utm_medium</code> and use a campaign such as <code>note-launch-day</code>. A click from substack.com then lands in Social, and its campaign is still recorded. Tag every link to your site, not only the main one, including the one in your about page and your welcome email. The free <a href="/tools/utm-builder">UTM builder</a> makes the tagged URLs for you.</p>
+<p class="p">After you publish, open a link from the email in your own inbox and check the address bar on your site. The tags that arrive there are the ones Virling reads.</p>
+<h2>How Virling sorts a Substack visit</h2>
+<p class="p">Every session gets one channel from its first pageview, and <code>utm_medium</code> is checked first. A medium of <code>email</code>, <code>newsletter</code> or <code>e-mail</code> is the <b>Email</b> channel. Without one, a referrer from substack.com or a subdomain is <b>Social</b>, any other referrer is Referral, and a visit with no referrer is sorted by its <code>utm_source</code>. The campaign is stored with the visit either way. See <a href="https://docs.virling.com/attribution/channels">how channels are decided</a>.</p>
+<p class="p">When a payment comes in, it is joined to the visits before it. Under the default model the whole payment, after refunds, is credited to the latest visit in the last 90 days that was not Direct, and to that visit&rsquo;s channel, source, campaign and landing page. A reader who clicks your post on Monday and comes back on Thursday by typing your address is still credited to the post. See <a href="https://docs.virling.com/attribution/model">the attribution model</a>.</p>
+<h2>See payments per post</h2>
+<h3>1. Open the channel</h3>
+<p class="p">On the dashboard, the Channels card lists each channel with visitors, revenue and revenue per visitor. Click <b>Email</b> for tagged posts, or <b>Social</b> for notes and untagged web clicks, and the whole page filters to those visits.</p>
+<h3>2. Switch to the Campaign tab</h3>
+<p class="p">The Campaign tab on the same card has one row per <code>utm_campaign</code>, so each post and note shows its own visitors and revenue. Compare posts by revenue per visitor, not by visitors: a niche post read by a few buyers can be worth more than a popular one read by many who never pay.</p>
+<h3>3. Open the payments</h3>
+<p class="p">Click a post to filter the dashboard to it and see its revenue over time. The <b>Payments</b> page lists every payment with its source; open one to see the journey: the sessions before the payment and which one got the credit.</p>
+<h2>Or use a tracked link per post</h2>
+<p class="p">Instead of writing UTM tags by hand, open <b>Links</b> in the app and make a short link for the post. Set the destination, the source <code>substack.com</code>, and the channel Email for a post or Social for a note. A click redirects to your page with <code>utm_source</code>, <code>utm_medium</code> and <code>utm_campaign</code> added, and Links shows the clicks, visitors and revenue each link brought. The link&rsquo;s id becomes the campaign, so give each link a name you will recognise, such as &ldquo;Pricing teardown post&rdquo;. See <a href="https://docs.virling.com/track/links">tracked links</a>.</p>
+<h2>What to check if the numbers look off</h2>
+<ul class="post-list"><li><b>Substack revenue still shows as Direct.</b> A link was left untagged, or the tags were lost in a redirect before your page. Click a link from a sent post and check the address bar.</li><li><b>Posts are split across rows.</b> Values differ in case or spelling, such as <code>Pricing-Teardown</code> and <code>pricing-teardown</code>. Pick one format and keep it.</li><li><b>Revenue shows no channel at all.</b> The payment was not matched to a visit. Pass the visitor ID into checkout; see <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</li><li><b>A recent post looks weak.</b> Readers often pay days or weeks later. Give it time, and check the date range, since a sale is credited on the day of the payment.</li></ul>
+<p class="p">To put a value on the list itself, try the <a href="/tools/email-subscriber-value-calculator">email subscriber value calculator</a>. For newsletters sent from other tools, see <a href="/blog/newsletter-revenue-tracking">newsletter revenue tracking</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I see which Substack post brought a paying customer?</h3><p class="p">Tag the links to your site in each post with utm_source=substack.com, utm_medium=email and a utm_campaign named after the post. Connect your payment provider and pass the visitor ID into checkout. Each payment is then credited to the tagged visit, and the Campaign tab shows revenue per post.</p>
+<h3>Why do clicks from my Substack emails show as Direct?</h3><p class="p">Most email apps send no referrer when a reader clicks a link. Without UTM tags the visit has nothing that says it came from Substack, so it is counted as Direct, and so is the payment that follows.</p>
+<h3>Which channel does Substack traffic land in?</h3><p class="p">A click from a Substack web page carries the substack.com host, or your publication's subdomain, as the referrer, and lands in Social. A publication on a custom domain is not on the known list, so its clicks land in Referral under that domain. A utm_medium of email or newsletter puts the visit in Email, whatever the referrer says.</p>
+<h3>Should I use utm_source=substack or substack.com?</h3><p class="p">Use substack.com. When a click arrives with no referrer, a source that names a known host stands in for the referrer, so the visit joins the same Substack row as clicks that kept their referrer. The short name substack still puts the visit in Social, but not in that row.</p>
+<h3>Do Substack's own stats show which post brought a sale on my site?</h3><p class="p">No. Substack's Posts page shows how many readers clicked each link, but it cannot see what happened on your site after the click. Joining the click to the payment that followed is what Virling does.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which Substack post pays</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
