@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cart abandonment rate calculator: carts, orders and lost revenue | Virling</title>
+<meta name="description" content="Free cart abandonment rate calculator for ecommerce stores. Enter carts created and orders completed to see your abandonment rate and the revenue left in carts. Runs in your browser.">
+<link rel="canonical" href="https://virling.com/tools/cart-abandonment-rate-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/cart-abandonment-rate-calculator">
+<meta property="og:title" content="Cart abandonment rate calculator: carts, orders and lost revenue | Virling">
+<meta property="og:description" content="Free cart abandonment rate calculator for ecommerce stores. Enter carts created and orders completed to see your abandonment rate and the revenue left in carts. Runs in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Cart abandonment rate calculator","url":"https://virling.com/tools/cart-abandonment-rate-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Cart abandonment rate calculator","item":"https://virling.com/tools/cart-abandonment-rate-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / cart abandonment rate calculator</span><h1>Cart abandonment rate calculator</h1><p class="lead">Enter how many carts shoppers created and how many orders they completed to get your cart abandonment rate. Add your average order value to see the revenue left in abandoned carts. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="cart" autocomplete="off">
+  <label>Carts created<input name="carts" type="number" min="0" step="1" value="1000"></label>
+  <label>Orders completed<input name="orders" type="number" min="0" step="1" value="300"></label>
+  <label>Average order value ($) <span class="dim">optional</span><input name="aov" type="number" min="0" step="0.01" value="60"></label>
+  <div class="tool-stats" id="cart-sum" style="grid-column:1/-1"></div>
+</form>
+<p class="fine-note">Use the same date range for carts and orders. Leave average order value empty to skip the revenue figure.</p>
+<div class="txt post tool-cta">
+<p class="p">An abandonment rate tells you how many carts were left, not which traffic brought the shoppers who left them. Virling links every visit to the order it led to, including Shopify and WooCommerce orders, so you see orders and revenue for each channel from your real payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/conversion-rate-calculator">conversion rate calculator</a>, <a href="/tools/aov-calculator">average order value calculator</a>, <a href="/integrations/ecommerce">ecommerce revenue tracking</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The cart abandonment rate formula</h2>
+<p class="p">Cart abandonment rate is the share of carts that never became an order:</p>
+<p class="p"><code>cart abandonment rate = (carts created - orders completed) / carts created &times; 100</code></p>
+<p class="p">The revenue left in abandoned carts is an estimate from your average order value:</p>
+<p class="p"><code>revenue left in carts = (carts created - orders completed) &times; average order value</code></p>
+<p class="p">Count carts and orders over the same period. A cart counts when a shopper adds at least one item; some stores count started checkouts instead, which gives a lower rate because it leaves out shoppers who never reached checkout. Pick one and keep it, so this month compares with the last.</p>
+<h2>A worked example</h2>
+<p class="p">These are round illustrative numbers, the same ones the calculator starts with, not data from a real store. In a month, shoppers create 1,000 carts and complete 300 orders. 700 carts were abandoned, so the abandonment rate is 700 / 1,000 = 70%, and 30% of carts became orders.</p>
+<p class="p">With an average order value of $60, the abandoned carts held about 700 &times; $60 = $42,000. That is an upper bound, not money you can win back: abandoned carts are often smaller or larger than completed orders, some shoppers come back and order later, and many were only comparing prices or checking shipping costs.</p>
+<h2>Abandonment by channel</h2>
+<p class="p">One store-wide rate hides big differences between traffic sources. Shoppers from an email to past customers often know what they want and finish checkout, while a first visit from a social ad may add an item to see the total and leave. A store-wide rate can rise just because a campaign sent more of the second kind, with nothing wrong in the checkout. To read it per source, run this calculator once for each channel with that channel's carts and orders.</p>
+<p class="p">Virling counts orders and revenue per channel: every visit gets one channel from its first pageview, and each Shopify or WooCommerce order is joined to the visit that brought the buyer. The <b>Almost paid</b> card on the dashboard lists visitors who reached pricing or checkout and did not pay, by channel or by the last page they saw. To count carts, send a goal from your store when an item is added, such as <code>virling("goal", "add_to_cart")</code>, then click a channel on the dashboard to filter the Goals card to it. See <a href="/integrations/ecommerce">ecommerce revenue tracking</a> and the <a href="https://docs.virling.com/track/goals">goals docs</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Cart abandonment rate calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate cart abandonment rate?</h3><p class="p">Subtract completed orders from carts created, divide by carts created and multiply by 100. 1,000 carts and 300 orders is an abandonment rate of 70%.</p></div>
+      <div><h3>What is the difference between cart abandonment and checkout abandonment?</h3><p class="p">Cart abandonment starts counting when an item is added to the cart. Checkout abandonment only counts shoppers who started checkout, so it leaves out everyone who left from the cart page and is usually lower. Say which one you report.</p></div>
+      <div><h3>Is the revenue left in carts money I can recover?</h3><p class="p">Not all of it. It is the number of abandoned carts times your average order value, an upper bound. Some shoppers come back and order later, and many carts were never meant to become orders.</p></div>
+      <div><h3>Why is cart abandonment different for each traffic source?</h3><p class="p">Each source brings shoppers at a different moment. Returning customers from an email are often ready to buy, while first-time visitors from an ad may be browsing or checking shipping costs. A shift in your traffic mix can move the store-wide rate on its own.</p></div>
+      <div><h3>Where do I get carts and orders per channel?</h3><p class="p">From a tool that links each cart and order to the visit that brought the shopper. Virling joins each Shopify or WooCommerce order to its visit, and a goal sent when an item is added to the cart can be split by channel the same way.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate cart abandonment rate?", "acceptedAnswer": {"@type": "Answer", "text": "Subtract completed orders from carts created, divide by carts created and multiply by 100. 1,000 carts and 300 orders is an abandonment rate of 70%."}}, {"@type": "Question", "name": "What is the difference between cart abandonment and checkout abandonment?", "acceptedAnswer": {"@type": "Answer", "text": "Cart abandonment starts counting when an item is added to the cart. Checkout abandonment only counts shoppers who started checkout, so it leaves out everyone who left from the cart page and is usually lower. Say which one you report."}}, {"@type": "Question", "name": "Is the revenue left in carts money I can recover?", "acceptedAnswer": {"@type": "Answer", "text": "Not all of it. It is the number of abandoned carts times your average order value, an upper bound. Some shoppers come back and order later, and many carts were never meant to become orders."}}, {"@type": "Question", "name": "Why is cart abandonment different for each traffic source?", "acceptedAnswer": {"@type": "Answer", "text": "Each source brings shoppers at a different moment. Returning customers from an email are often ready to buy, while first-time visitors from an ad may be browsing or checking shipping costs. A shift in your traffic mix can move the store-wide rate on its own."}}, {"@type": "Question", "name": "Where do I get carts and orders per channel?", "acceptedAnswer": {"@type": "Answer", "text": "From a tool that links each cart and order to the visit that brought the shopper. Virling joins each Shopify or WooCommerce order to its visit, and a goal sent when an item is added to the cart can be split by channel the same way."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring buyers who finish</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the orders and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("cart"), sum = document.getElementById("cart-sum");
+const usd = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const pct = (n) => n.toLocaleString("en-US", { maximumFractionDigits: 1 }) + "%";
+const calc = () => {
+  const c = +f.elements.carts.value, o = +f.elements.orders.value, v = f.elements.aov.value === "" ? NaN : +f.elements.aov.value;
+  const ok = c > 0 && o >= 0 && o <= c, left = c - o;
+  sum.innerHTML = [
+    ["Cart abandonment rate", ok ? pct((left / c) * 100) : "No data"],
+    ["Abandoned carts", ok ? left.toLocaleString("en-US") : "No data"],
+    ["Carts that became orders", ok ? pct((o / c) * 100) : "No data"],
+    ["Revenue left in carts", ok && v >= 0 ? usd(left * v) : "No data"],
+  ].map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("") + (o > c ? '<p class="fine-note" style="grid-column:1/-1">Orders are higher than carts. Check that both cover the same period and the same definition of a cart.</p>' : "");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
