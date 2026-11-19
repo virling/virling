@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Google Ads revenue tracking: which campaigns bring paying customers</title>
+<meta name="description" content="How to track sales from Google Ads: tag final URLs with utm_medium=cpc, why untagged ad clicks look like organic search, and comparing campaigns by revenue.">
+<link rel="canonical" href="https://virling.com/blog/google-ads-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/google-ads-revenue-tracking">
+<meta property="og:title" content="Google Ads revenue tracking: which campaigns bring paying customers">
+<meta property="og:description" content="How to track sales from Google Ads: tag final URLs with utm_medium=cpc, why untagged ad clicks look like organic search, and comparing campaigns by revenue.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Google Ads revenue tracking: which campaigns bring paying customers","item":"https://virling.com/blog/google-ads-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Google Ads revenue tracking: which campaigns bring paying customers","description":"How to track sales from Google Ads: tag final URLs with utm_medium=cpc, why untagged ad clicks look like organic search, and comparing campaigns by revenue.","datePublished":"2026-11-19","dateModified":"2026-11-19","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/google-ads-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I track sales from Google Ads?","acceptedAnswer":{"@type":"Answer","text":"Tag each ad's final URL with utm_source=google, utm_medium=cpc and a campaign name, pass the visitor ID into checkout, and use a tool that joins payments to visits. Then read revenue and revenue per visitor for the Paid channel and each campaign."}},{"@type":"Question","name":"Does Virling count Google Ads clicks as Paid or Organic search?","acceptedAnswer":{"@type":"Answer","text":"Paid, if the link has utm_medium=cpc or another paid medium. The medium wins over the google.com referrer. Without a medium, the click is counted as Organic search."}},{"@type":"Question","name":"Does Virling read gclid?","acceptedAnswer":{"@type":"Answer","text":"No. The channel rules read the medium, referrer, utm_source and ref. Use UTM tags on the final URL so ad clicks are classified as Paid."}},{"@type":"Question","name":"Can Virling show my ad spend and return?","acceptedAnswer":{"@type":"Answer","text":"You can type your monthly spend per channel in Site settings, such as Paid 300, and the Profit by channel card shows spend, revenue, profit and return per dollar. Virling does not connect to Google Ads, so the amounts are the ones you enter."}},{"@type":"Question","name":"How do I compare two campaigns?","acceptedAnswer":{"@type":"Answer","text":"Click Paid in the Channels card, open the Campaign tab and compare revenue per visitor and paying customers, not clicks. Give each campaign its own utm_campaign value so the rows stay separate."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-19</span>
+      <h1>Google Ads revenue tracking: which campaigns bring paying customers</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-19.</p>
+<p class="p"><b>To see which Google Ads campaigns bring paying customers</b>, tag every ad's final URL with <code>utm_medium=cpc</code> plus a source and a campaign, carry the visitor ID into checkout, and use a tool that joins each payment to the visit that came before it. Then you can read revenue, and revenue per visitor, per campaign instead of clicks and form fills. Virling puts any visit with <code>utm_medium=cpc</code> in the Paid channel, even when it arrives from google.com.</p>
+<p class="p">Ad dashboards report clicks, conversions and a return figure the platform computed itself. The question a founder cares about is simpler: of the people who paid last month, which campaign had brought them, and what did each visitor from that campaign earn?</p>
+<h2>How an ad click is classified</h2>
+<p class="p">Virling decides a visit's channel from its first pageview, and the rules run in a fixed order. For ads, the first rule decides everything:</p>
+<ul class="post-list"><li><b>utm_medium first.</b> <code>cpc</code>, <code>ppc</code>, <code>paid</code>, <code>paidsearch</code>, <code>paid_social</code> and <code>paidsocial</code> all mean Paid. The medium wins over the referrer, so a click that comes from google.com with <code>utm_medium=cpc</code> is Paid, not Organic search.</li><li><b>No tag, no Paid.</b> An ad click with no <code>utm_medium</code> arrives with a google.com referrer and is counted as Organic search. Your paid and free search traffic then blend into one row.</li><li><b>Click IDs are not part of the rules.</b> The channel rules read the medium, the referrer, <code>utm_source</code> and <code>ref</code>. They do not read parameters such as <code>gclid</code>, so Google's automatic tagging alone does not put a visit in Paid. The UTM tags do.</li></ul>
+<p class="p">The full rule order is in <a href="https://docs.virling.com/attribution/channels">channels</a>.</p>
+<h2>Tag your ads</h2>
+<p class="p">Put the tags on the final URL of each ad, or in a tracking template at the account or campaign level so new ads inherit them:</p>
+<div class="code block"><pre>https://yourdomain.com/pricing?utm_source=google&amp;utm_medium=cpc&amp;utm_campaign=brand-search&amp;utm_term=revenue+analytics</pre></div>
+<ul class="post-list"><li><b>utm_source=google</b> for every Google ad. It matches the source your organic search visits show, so read the Paid channel to tell them apart.</li><li><b>utm_medium=cpc</b> for search and shopping ads. It is the value that makes the visit Paid.</li><li><b>utm_campaign</b> names the campaign. Keep one name per campaign and never reuse it, because the Campaign tab groups by this value.</li><li><b>utm_term</b> holds the keyword, and <b>utm_content</b> can hold the ad variant. Both are stored with the pageview, so you can compare them after the payments come in.</li></ul>
+<p class="p">Spelling matters: <code>CPC</code> and <code>cpc</code> are the same, but <code>cost-per-click</code> is not on the list. The <a href="/tools/utm-builder">UTM builder</a> avoids typos, the <a href="/tools/utm-checker">UTM checker</a> tells you what Virling will do with a given link, and <a href="/blog/utm-parameters-for-revenue-tracking">which UTM parameters to use</a> has the naming rules. If a landing page redirects, test that the tags survive: <a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after a redirect</a> shows how.</p>
+<h2>Make sure payments can be credited</h2>
+<p class="p">Tags only get you visits. Revenue needs the visitor ID in checkout. Stripe Payment Links, Polar and Dodo Payments links get it added on click, Shopify and WooCommerce stores use a short theme snippet, and a checkout you create on your server passes the <code>virling_vid</code> cookie, for example as <code>client_reference_id</code> on a Stripe Checkout Session. See <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>. Run one test visit and one test payment first: <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>.</p>
+<p class="p">Few people buy on the first ad click. With the default last non-direct model, a visitor who clicked an ad, left, and came back later by typing your URL is still credited to the ad, as long as the ad visit is inside the lookback window, 90 days by default. Subscription renewals keep counting toward the same campaign.</p>
+<h2>Compare campaigns by revenue</h2>
+<ol class="post-list"><li>Open the dashboard and pick a range of several weeks, so slow buyers have time to pay.</li><li>In the Channels card, click Paid. The whole page now shows only visitors from your tagged ads.</li><li>Switch to the Campaign tab and compare each campaign's visitors, revenue and revenue per visitor. A campaign with fewer clicks can still bring more money.</li><li>Open the Keyword tab or a payment's journey to see which terms and visits sit behind the credited sale.</li><li>Check the Retention page after a month or two. It groups customers by the channel of their first payment, so you can see whether Paid customers keep paying.</li></ol>
+<p class="p">For profit, open Site settings and type your monthly ad spend on a line such as <code>Paid 300</code>. The Profit by channel card then shows spend, revenue, profit and return per dollar for Paid next to your other channels. Nothing connects to Google Ads, so the numbers are only as good as the amount you type. The <a href="/tools/roas-calculator">ROAS calculator</a> does the same arithmetic for a single campaign.</p>
+<h2>What to check when the numbers look wrong</h2>
+<ul class="post-list"><li><b>Paid is empty but you run ads.</b> The final URLs probably have no <code>utm_medium</code>. Those clicks are in Organic search, because they carry a google.com referrer.</li><li><b>Paid shows visits from a channel you do not run.</b> Some link carries <code>utm_medium=paid</code> or <code>cpc</code> from an old campaign, a newsletter or a partner. Open the Campaign tab to find it.</li><li><b>Clicks in Google Ads are far above Paid visitors.</b> Visitors who block the script are not counted, and a redirect may have dropped the tags. Test each ad URL by hand.</li><li><b>Visits but no revenue.</b> Check the Matched revenue line under the Overview numbers. If a large share is unmatched, the visitor ID is not reaching checkout. See <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</li><li><b>A campaign looks good on clicks and bad on revenue.</b> That is the comparison working. Compare revenue per visitor before you raise the budget.</li></ul>
+<p class="p">If you also run ads on social platforms, use the same pattern with <code>utm_medium=paid_social</code> and a source such as <code>facebook</code>; <a href="/blog/facebook-revenue-tracking">Facebook revenue tracking</a> covers that side.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I track sales from Google Ads?</h3><p class="p">Tag each ad's final URL with <code>utm_source=google</code>, <code>utm_medium=cpc</code> and a campaign name, pass the visitor ID into checkout, and use a tool that joins payments to visits. Then read revenue and revenue per visitor for the Paid channel and each campaign.</p>
+<h3>Does Virling count Google Ads clicks as Paid or Organic search?</h3><p class="p">Paid, if the link has <code>utm_medium=cpc</code> or another paid medium. The medium wins over the google.com referrer. Without a medium, the click is counted as Organic search.</p>
+<h3>Does Virling read gclid?</h3><p class="p">No. The channel rules read the medium, referrer, <code>utm_source</code> and <code>ref</code>. Use UTM tags on the final URL so ad clicks are classified as Paid.</p>
+<h3>Can Virling show my ad spend and return?</h3><p class="p">You can type your monthly spend per channel in Site settings, such as <code>Paid 300</code>, and the Profit by channel card shows spend, revenue, profit and return per dollar. Virling does not connect to Google Ads, so the amounts are the ones you enter.</p>
+<h3>How do I compare two campaigns?</h3><p class="p">Click Paid in the Channels card, open the Campaign tab and compare revenue per visitor and paying customers, not clicks. Give each campaign its own <code>utm_campaign</code> value so the rows stay separate.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See what your Google Ads earn</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
