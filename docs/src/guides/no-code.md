@@ -48,10 +48,10 @@ The link must be a normal `<a href>` link on a page that runs the script. A para
 
 Open `/app/yourdomain.com/setup/payments`, pick your provider, paste the key and click **Connect and backfill**. Each page lists the key to create:
 
-- [Stripe](../payments/stripe.md): a restricted key, `rk_live_`. Secret keys are refused.
+- [Stripe](../payments/stripe.md): a restricted key, `rk_live_`, or `rk_test_` for a test purchase. Secret keys are refused.
 - [Polar](../payments/polar.md): an organization access token, `polar_oat_`.
 - [Dodo Payments](../payments/dodo.md): an API key.
-- [LemonSqueezy](../payments/lemonsqueezy.md): an API key. Virling also adds a webhook, which is how LemonSqueezy returns the visitor ID.
+- [LemonSqueezy](../payments/lemonsqueezy.md): an API key. Virling also adds a webhook, which is how LemonSqueezy returns the visitor ID. Self-hosted, it needs Virling on a public `https://` address.
 
 Virling imports the last 90 days, then checks for new payments every minute. It never creates, changes or refunds anything. See [Which key to create](../payments/index.md#which-key-to-create).
 
