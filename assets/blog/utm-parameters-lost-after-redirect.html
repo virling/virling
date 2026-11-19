@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UTM parameters lost after redirect: causes and fixes</title>
+<meta name="description" content="UTM tags usually vanish in a server redirect that drops the query string. How to test each redirect with curl, and fixes for Nginx, Caddy, SPAs and checkout.">
+<link rel="canonical" href="https://virling.com/blog/utm-parameters-lost-after-redirect">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/utm-parameters-lost-after-redirect">
+<meta property="og:title" content="UTM parameters lost after redirect: causes and fixes">
+<meta property="og:description" content="UTM tags usually vanish in a server redirect that drops the query string. How to test each redirect with curl, and fixes for Nginx, Caddy, SPAs and checkout.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"UTM parameters lost after redirect: causes and fixes","item":"https://virling.com/blog/utm-parameters-lost-after-redirect"}]},{"@type":"BlogPosting","headline":"UTM parameters lost after redirect: causes and fixes","description":"UTM tags usually vanish in a server redirect that drops the query string. How to test each redirect with curl, and fixes for Nginx, Caddy, SPAs and checkout.","datePublished":"2026-11-19","dateModified":"2026-11-19","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/utm-parameters-lost-after-redirect"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why are my UTM parameters lost after a redirect?","acceptedAnswer":{"@type":"Answer","text":"Usually because a server redirect builds the new address from the path alone and drops the query string. Http to https, www to bare domain and trailing slash rules are the usual suspects. Run curl -sIL on a tagged link and check that every Location header still has the utm_ tags."}},{"@type":"Question","name":"Why are my UTM parameters not passing to my analytics?","acceptedAnswer":{"@type":"Answer","text":"Either a redirect dropped them before the page loaded, or the page removed them before the analytics script read them. Single-page app routers and consent or login redirects can do the second. Open the tagged link in a private window and watch the address bar."}},{"@type":"Question","name":"Do 301 redirects keep the query string?","acceptedAnswer":{"@type":"Answer","text":"A 301 keeps whatever the server puts in the Location header. In Nginx, $request_uri keeps the query string and $uri does not. In Caddy, {uri} keeps it and {path} does not."}},{"@type":"Question","name":"Do link shorteners strip UTM parameters?","acceptedAnswer":{"@type":"Answer","text":"Most keep the tags that are part of the destination you shortened, but some drop tags you add to the short link itself. Put the tags on the destination before you shorten it, and check the short link with curl -I."}},{"@type":"Question","name":"Do UTM parameters survive a checkout on another domain?","acceptedAnswer":{"@type":"Answer","text":"They do not need to. Your analytics reads the tags on the landing page. To keep the source of a sale, pass the visitor ID into checkout so the payment joins to the tagged visit."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-19</span>
+      <h1>UTM parameters lost after redirect: causes and fixes</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-19.</p>
+<p class="p">When UTM parameters are lost after a redirect, the usual cause is a server rule that builds the new address from the path alone and throws away the query string. The http to https, www to bare domain and trailing slash redirects are the first places to look. To test it, run <code>curl -sIL "http://example.com/pricing?utm_source=test"</code> and read every <code>Location</code> header: if <code>utm_source=test</code> is missing from one of them, that hop is the culprit. The visit then arrives untagged and lands in Direct or under the wrong referrer.</p>
+<h2>Check the whole path first</h2>
+<p class="p">Your analytics only sees the tags that are in the address bar when its script runs. Anything between the click and that moment can remove them: a shortener, one or more server redirects, a consent or login page, or your own front-end router. Start by pasting the link into the <a href="/tools/utm-checker">UTM checker</a> to rule out mistakes in the link itself, such as tags after the <code>#</code> or a duplicate parameter. Then follow the hops below in order.</p>
+<pre>curl -sIL "http://example.com/pricing?utm_source=test&amp;utm_medium=email" | grep -i '^location'</pre>
+<p class="p">Each line is one hop. Every one of them should still carry the full query string.</p>
+<h2>Cause 1: server redirects that drop the query string</h2>
+<p class="p">Redirects from http to https, from www to the bare domain (or the reverse) and from <code>/pricing/</code> to <code>/pricing</code> are often written by hand, and it is easy to use a variable that holds only the path.</p>
+<p class="p"><b>Check:</b> request each variant of your address with a tag and look at the <code>Location</code> header.</p>
+<pre>curl -sI "http://example.com/?utm_source=test" | grep -i '^location'
+curl -sI "https://www.example.com/?utm_source=test" | grep -i '^location'
+curl -sI "https://example.com/pricing/?utm_source=test" | grep -i '^location'</pre>
+<p class="p"><b>Fix in Nginx:</b> <code>$request_uri</code> holds the path and the query string, <code>$uri</code> holds only the path. A <code>rewrite</code> keeps the query string unless the replacement ends in <code>?</code>.</p>
+<pre># Drops the tags
+return 301 https://example.com$uri;
+
+# Keeps the tags
+server {
+    listen 80;
+    server_name example.com www.example.com;
+    return 301 https://example.com$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name www.example.com;
+    return 301 https://example.com$request_uri;
+}
+
+# Trailing slash: rewrite adds the original query string back
+rewrite ^/(.+)/$ /$1 permanent;</pre>
+<p class="p"><b>Fix in Caddy:</b> the automatic http to https redirect keeps the query string. In your own <code>redir</code>, <code>{uri}</code> holds the path and the query string, <code>{path}</code> holds only the path.</p>
+<pre># Drops the tags
+redir https://example.com{path} permanent
+
+# Keeps the tags
+www.example.com {
+    redir https://example.com{uri} permanent
+}</pre>
+<p class="p">The same rule applies to redirects set up in a hosting dashboard or a CMS plugin: look for an option to forward the query string, and test the result with curl.</p>
+<h2>Cause 2: link shorteners</h2>
+<p class="p">A shortener is one more redirect. Some keep the tags that were part of the destination you shortened but ignore tags added to the short link afterwards, and some redirect through a page of their own first.</p>
+<p class="p"><b>Check:</b> <code>curl -sIL https://short.link/abc | grep -i '^location'</code> and confirm the last hop has your tags.</p>
+<p class="p"><b>Fix:</b> build the tagged destination first with the <a href="/tools/utm-builder">UTM builder</a>, then shorten that full URL. Do not add tags to the short link itself.</p>
+<h2>Cause 3: consent and login walls</h2>
+<p class="p">A page that sends visitors to <code>/login?next=/pricing</code> or reloads after a cookie banner often keeps the path and forgets the rest. If your analytics only loads after consent, the tagged landing page may be gone by the time the script runs.</p>
+<p class="p"><b>Check:</b> open the tagged link in a private window, go through the banner or the login, and watch the address bar at each step.</p>
+<p class="p"><b>Fix:</b> pass the full path and query string into the return address, URL-encoded, for example <code>/login?next=%2Fpricing%3Futm_source%3Dtest</code>, and send the visitor back to it after sign-in. If the banner reloads the page, reload the current <code>location.href</code>, not the bare path.</p>
+<h2>Cause 4: single-page app routers</h2>
+<p class="p">In a single-page app nothing reaches the server after the first load, but the router can still rewrite the address. A redirect from <code>/</code> to <code>/home</code>, a locale prefix, or code that tidies the URL with <code>history.replaceState</code> will drop the tags if it only passes the path. If that runs before your analytics script reads the address, the tags are lost.</p>
+<p class="p"><b>Check:</b> open the tagged link and, before clicking anything, run <code>location.search</code> in the browser console. It should still show the tags.</p>
+<p class="p"><b>Fix:</b> carry <code>location.search</code> into every router redirect, and do not strip tags from the URL in code. Load the analytics script in the root layout so it reads the landing address. The Virling script reads UTM tags from the landing URL and follows route changes through the History API; see <a href="https://docs.virling.com/track/spa">single-page app tracking</a>.</p>
+<h2>Cause 5: checkout on another domain</h2>
+<p class="p">Tags do not follow a buyer from your site to checkout.stripe.com, a hosted Paddle checkout or a store on another domain, and they do not need to. Your analytics script reads the tags on the landing page. What gets lost at checkout is the link between the payment and that visit, so the sale shows up as Direct or unattributed.</p>
+<p class="p"><b>Check:</b> open your site from a tagged link, pay in your provider's test mode, and see which source the sale gets.</p>
+<p class="p"><b>Fix:</b> pass the visitor ID into checkout instead of trying to forward UTM tags. The steps for each provider are in <a href="/blog/cross-domain-checkout-attribution">cross-domain checkout attribution</a>.</p>
+<h2>Do not tag your own internal links</h2>
+<p class="p">A last trap looks like the opposite problem. Adding UTM tags to links between your own pages overwrites the source the visitor arrived with. In Virling, a page that loads with different UTM tags starts a new session. Tag links that point to your site from somewhere else, and leave internal links plain.</p>
+<h2>Setup checklist</h2>
+<ol class="post-list"><li>Build each campaign link with the <a href="/tools/utm-builder">UTM builder</a> and check it with the <a href="/tools/utm-checker">UTM checker</a></li><li>Run <code>curl -sIL</code> on the link and on the http and www variants, and confirm every hop keeps the query string</li><li>Open the link in a private window and confirm <code>location.search</code> still has the tags after any banner, login or router redirect</li><li>Pass the visitor ID into checkout and make a test purchase</li><li>Confirm the test visit and the test sale show the source you tagged, not Direct</li></ol>
+<p class="p">Virling reads <code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code>, <code>utm_content</code> and <code>utm_term</code> from the landing URL, and falls back to <code>ref</code> when <code>utm_source</code> is missing. It joins each payment to the visit before it, so once the tags arrive you see revenue by source and campaign, not only visits.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+<h2>Frequently asked questions</h2>
+<h3>Why are my UTM parameters lost after a redirect?</h3><p class="p">Usually because a server redirect builds the new address from the path alone and drops the query string. Http to https, www to bare domain and trailing slash rules are the usual suspects. Run curl -sIL on a tagged link and check that every Location header still has the utm_ tags.</p>
+<h3>Why are my UTM parameters not passing to my analytics?</h3><p class="p">Either a redirect dropped them before the page loaded, or the page removed them before the analytics script read them. Single-page app routers and consent or login redirects can do the second. Open the tagged link in a private window and watch the address bar.</p>
+<h3>Do 301 redirects keep the query string?</h3><p class="p">A 301 keeps whatever the server puts in the Location header. In Nginx, $request_uri keeps the query string and $uri does not. In Caddy, {uri} keeps it and {path} does not.</p>
+<h3>Do link shorteners strip UTM parameters?</h3><p class="p">Most keep the tags that are part of the destination you shortened, but some drop tags you add to the short link itself. Put the tags on the destination before you shorten it, and check the short link with curl -I.</p>
+<h3>Do UTM parameters survive a checkout on another domain?</h3><p class="p">They do not need to. Your analytics reads the tags on the landing page. To keep the source of a sale, pass the visitor ID into checkout so the payment joins to the tagged visit.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the revenue behind every tagged link</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
