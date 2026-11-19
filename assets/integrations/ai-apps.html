@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revenue attribution for AI apps: credits and subscriptions by channel</title>
+<meta name="description" content="See whether X, Product Hunt, Reddit, YouTube or AI assistants bring the users who pay for your AI app. Credits, top-ups and subscriptions from Stripe, Polar, Creem and Dodo.">
+<link rel="canonical" href="https://virling.com/integrations/ai-apps">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/ai-apps">
+<meta property="og:title" content="Revenue attribution for AI apps: credits and subscriptions by channel">
+<meta property="og:description" content="See whether X, Product Hunt, Reddit, YouTube or AI assistants bring the users who pay for your AI app. Credits, top-ups and subscriptions from Stripe, Polar, Creem and Dodo.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"AI apps","item":"https://virling.com/integrations/ai-apps"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Do free credits count as revenue?","acceptedAnswer":{"@type":"Answer","text":"No. Virling counts only payments from your payment provider. Free credits involve no payment, so a user who only spends them counts as a visitor, not a customer, and their channel gets no revenue from them."}},{"@type":"Question","name":"Which channel gets credit for a credit top-up?","acceptedAnswer":{"@type":"Answer","text":"A renewal or plan change keeps the channel of the customer's first payment, and on Creem so does any later payment. On Stripe, Polar and Dodo Payments a one-off top-up is credited to the visit before it, and the Retention page counts it toward the channel of the customer's first payment."}},{"@type":"Question","name":"Can I ask an AI assistant which channel pays?","acceptedAnswer":{"@type":"Answer","text":"Yes. Virling serves a read-only MCP endpoint. Connect it to Claude, ChatGPT or Claude Code, sign in, and ask which channel, referrer or campaign brought the most revenue."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / ai apps</span>
+      <h1>Revenue attribution for AI apps: which channel brings users who pay.</h1>
+      <p class="lead">Virling joins each credit purchase and subscription payment to the visit that came before it, so you see whether X, Product Hunt, Reddit, YouTube or AI assistants bring the users who pay, not only the ones who sign up. Works with Stripe, Polar, Creem and Dodo Payments. Open source, one Rust binary, or hosted.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">Most AI apps and AI wrappers give new users free credits or a trial, then charge for a plan or a credit pack once those run out. A launch post can send hundreds of signups who spend the free credits and leave, while a quieter channel sends fewer users who keep topping up. Signups by channel ranks the launch first. Revenue by channel shows which one paid for your model costs.</p>
+<h2>Free credits, trials and top-ups</h2>
+<p class="p">Virling counts payments from your payment provider, not signups or usage. A user who only spends free credits is a visitor, not a customer, and adds nothing to a channel&#x27;s revenue.</p>
+<ul class="post-list"><li><b>Free trials</b>: a trial start has nothing charged, so Virling keeps it apart from payments and never counts it as revenue, a payment or a customer. When the trial converts, a payment with no visitor ID of its own is credited from the visits before the trial started. Trial starts are read from Stripe, Polar and Dodo Payments.</li><li><b>One-off top-ups</b>: a credit pack bought through checkout is a payment like any other. Pass the visitor ID into checkout and it is credited to the visit that led to it, under the site&#x27;s attribution model.</li><li><b>Subscriptions</b>: the first payment is credited to its visit, and every renewal after it keeps that channel.</li></ul>
+<p class="p">Each site has one attribution model. Last non-direct is the default, so a user who found you on Reddit and came back days later by typing your address is credited to Reddit, not Direct. The lookback window can be 30, 60, 90 or 365 days.</p>
+<h2>Top-ups and renewals credited to the first channel</h2>
+<p class="p">A renewal takes the attribution of the customer&#x27;s first payment. If someone subscribed after a visit from X, every renewal is credited to that X visit, even though the renewal itself has no visit. Upgrades and other plan changes count as renewals too, so they keep the first payment&#x27;s channel.</p>
+<ul class="post-list"><li><a href="/integrations/stripe">Stripe</a>: a renewal is an invoice with billing reason <code>subscription_cycle</code>.</li><li><a href="/integrations/polar">Polar</a>: an order with billing reason <code>subscription_cycle</code>.</li><li><a href="/integrations/dodo-payments">Dodo Payments</a>: a payment on a subscription that already had a paid payment before it.</li><li><a href="/integrations/creem">Creem</a>: any payment from a customer who already had a payment before it, so on Creem a later credit top-up keeps the first channel too.</li></ul>
+<p class="p">On Stripe, Polar and Dodo Payments, a one-off top-up outside a subscription is credited to its own visit. The Retention page still groups each customer by the channel, referrer and campaign of their first payment, and counts every later payment, top-ups included, in that channel&#x27;s net LTV. So you see both which visit led to each purchase and which channel brought the users who keep buying credits.</p>
+<p class="p">The first payment must be in Virling. Payments older than the 90-day backfill are not imported, so renewals of subscriptions that started before that are Unattributed. Customers are matched per provider.</p>
+<h2>X, Product Hunt, Reddit, YouTube and AI assistants</h2>
+<p class="p">Every session gets one channel from its first pageview, and the referrer is kept too, so each source shows on its own row:</p>
+<ul class="post-list"><li><b>Social</b>: X (<code>x.com</code>, <code>t.co</code>), YouTube, LinkedIn, TikTok and others.</li><li><b>Communities</b>: Product Hunt, Reddit, Hacker News, Indie Hackers and others.</li><li><b>AI</b>: visits from ChatGPT, Perplexity, Claude, Gemini, Copilot and DeepSeek.</li></ul>
+<p class="p">Links in your own posts can carry <code>utm_source</code> and <code>utm_campaign</code>, so a launch, a thread or a video gets its own revenue line.</p>
+<h2>Ask an assistant which channel pays</h2>
+<p class="p">Virling serves a read-only MCP server, so an AI assistant can read your reports and answer questions such as &quot;which channel made the most money last month?&quot;. Claude, ChatGPT and Claude Code sign in with OAuth, and other clients can use an API key. Hosted Virling is in the Claude directory.</p>
+<ul class="post-list"><li><code>get_breakdown</code>: visitors and credited revenue per channel, referrer, campaign, landing page, country or device.</li><li><code>get_channel_verdicts</code>: one plain line per channel against the period before: what earned most, what to double, what earned nothing.</li><li><code>get_retention</code>: customers, still paying, net LTV and 30-day churn per first-payment channel.</li><li><code>list_payments</code>: payments with the visit each one was credited to.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>Do free credits count as revenue?</h3><p class="p">No. Virling counts only payments from your payment provider. Free credits involve no payment, so a user who only spends them counts as a visitor, not a customer, and their channel gets no revenue from them.</p>
+<h3>Which channel gets credit for a credit top-up?</h3><p class="p">A renewal or plan change keeps the channel of the customer&#x27;s first payment, and on Creem so does any later payment. On Stripe, Polar and Dodo Payments a one-off top-up is credited to the visit before it, and the Retention page counts it toward the channel of the customer&#x27;s first payment.</p>
+<h3>Can I ask an AI assistant which channel pays?</h3><p class="p">Yes. Virling serves a read-only MCP endpoint. Connect it to Claude, ChatGPT or Claude Code, sign in, and ask which channel, referrer or campaign brought the most revenue.</p>
+      <p class="p">Full reference: <a href="https://docs.virling.com/attribution/renewals">Renewals</a>, <a href="https://docs.virling.com/reference/mcp">MCP server</a> and <a href="https://docs.virling.com/payments/checkout">Link checkout to visits</a> in the docs. Plans and the free trial: <a href="/pricing">pricing</a>.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post"><h2>Related reading</h2><ul class="post-list"><li><a href="/blog/vibe-coded-app-revenue-tracking">Track Stripe revenue by traffic source in an AI-built app</a></li><li><a href="/blog/product-hunt-launch-revenue">Product Hunt launch revenue: how to measure it</a></li><li><a href="/blog/x-twitter-revenue-tracking">X (Twitter) revenue tracking for founders who build in public</a></li></ul><p class="p">Integrations: <a href="/integrations/stripe">Stripe</a>, <a href="/integrations/polar">Polar</a>, <a href="/integrations/creem">Creem</a> and <a href="/integrations/dodo-payments">Dodo Payments</a>.</p></div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
