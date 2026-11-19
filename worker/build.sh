@@ -11,8 +11,8 @@ cp ../assets/integrations.html ../assets/blog.html public/
 cp -R ../assets/integrations ../assets/blog ../assets/vs ../assets/tools public/
 cp ../assets/404.html ../assets/500.html public/
 cp ../assets/vs.html ../assets/about.html ../assets/privacy.html ../assets/terms.html ../assets/refunds.html ../assets/what-we-dont-do.html ../assets/tools.html public/
-# The changelog is rendered from the GitHub releases at build time.
-curl -fsSL https://api.github.com/repos/virling/virling/releases | perl ../scripts/changelog.pl ../assets/changelog.html > public/changelog.html
+# The changelog is rendered from the GitHub releases at build time; CI sends GITHUB_TOKEN to avoid the rate limit.
+curl -fsSL --retry 3 ${GITHUB_TOKEN:+-H "Authorization: Bearer $GITHUB_TOKEN"} https://api.github.com/repos/virling/virling/releases | perl ../scripts/changelog.pl ../assets/changelog.html > public/changelog.html
 cp ../assets/site.css ../assets/site.js ../assets/app.css ../assets/app.js ../assets/email-logo.png public/assets/
 cp ../assets/auth.md public/auth.md
 cp ../assets/favicon.svg ../assets/favicon.ico ../assets/v.js ../assets/v-compat.js ../assets/robots.txt ../assets/2a8f55835d6896d691cddc70332b11ee.txt ../assets/sitemap.xml ../assets/llms.txt ../assets/llms-full.txt ../scripts/install.sh public/
