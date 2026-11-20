@@ -53,6 +53,8 @@ jobs:
 
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
