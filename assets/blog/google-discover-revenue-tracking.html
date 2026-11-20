@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Google Discover revenue tracking: do Discover visits pay</title>
+<meta name="description" content="How to see whether Google Discover visits turn into payments: how Discover clicks are counted, how to tell them from search, and which pages earn.">
+<link rel="canonical" href="https://virling.com/blog/google-discover-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/google-discover-revenue-tracking">
+<meta property="og:title" content="Google Discover revenue tracking: do Discover visits pay">
+<meta property="og:description" content="How to see whether Google Discover visits turn into payments: how Discover clicks are counted, how to tell them from search, and which pages earn.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Google Discover revenue tracking: do Discover visits pay","item":"https://virling.com/blog/google-discover-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Google Discover revenue tracking: do Discover visits pay","description":"How to see whether Google Discover visits turn into payments: how Discover clicks are counted, how to tell them from search, and which pages earn.","datePublished":"2026-11-20","dateModified":"2026-11-20","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/google-discover-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does Virling show Google Discover as its own channel?","acceptedAnswer":{"@type":"Answer","text":"No. A Discover click usually arrives with a Google referrer, the same as a search click, so it counts as Organic search and joins the google.com row. Nothing in the visit says it came from the Discover feed. To spot Discover visits, look for pages that got a sudden burst of Google visitors and match the dates with the Discover report in Search Console."}},{"@type":"Question","name":"Why do some Discover visits show as Direct?","acceptedAnswer":{"@type":"Answer","text":"When a story is opened in the Google app and the app sends no referrer, the visit carries nothing that names Google. With no referrer and no UTM tag it counts as Direct. Virling labels some of those Direct visits Google app, but that label covers anything opened in the Google app, not only Discover."}},{"@type":"Question","name":"Can I add UTM tags to Google Discover traffic?","acceptedAnswer":{"@type":"Answer","text":"No. Google builds the Discover card and its link from your page, so you cannot tag it. Tags only help on links you place yourself."}},{"@type":"Question","name":"How do I know if Discover traffic is worth it?","acceptedAnswer":{"@type":"Answer","text":"Compare the revenue per visitor of the pages Discover sent people to with your site average, over a range long enough for buyers to come back and pay. A page with many visitors and no payments brought attention, not customers."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-20</span>
+      <h1>Google Discover revenue tracking: do Discover visits pay</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-20.</p>
+<p class="p"><b>To see whether Google Discover visits turn into payments</b>, record the referrer on each visit, carry the visitor ID into checkout, and join each payment to the visit before it. Then compare the pages Discover sent people to by revenue per visitor. One thing to know first: Virling does not separate Discover from Google search. A Discover click usually arrives with a Google referrer, so it counts as <b>Organic search</b> on the google.com row, the same as a search click. You tell the two apart by landing page and by date.</p>
+<p class="p">Discover is the feed of articles Google shows in its app and on some mobile Google pages, without the reader typing a search. It can send a lot of visitors to one post in a few days. Whether those visitors ever pay is a separate question, and the Discover report in Search Console, which counts clicks and impressions, cannot answer it.</p>
+<h2>How Discover visits show up</h2>
+<p class="p">Virling gives every session one channel, decided by its first pageview. The referrer is a host only, so it says the visitor came from Google, not which Google surface they clicked on.</p>
+<ul class="post-list"><li><b>A Google referrer.</b> Any host that starts with <code>google.</code> or contains <code>.google.</code>, such as www.google.com or www.google.de, is a known search host. The visit counts as Organic search, and every Google country domain shares one google.com row in breakdowns. A Discover click with a Google referrer lands here, next to search clicks, and nothing marks it as Discover.</li><li><b>No referrer, opened in the Google app.</b> When the app sends no referrer and the link has no UTM tag, nothing in the visit names Google. It counts as Direct. Virling labels some Direct visits by the app they were opened in, and one label is Google app, but that covers anything opened in the Google app, not only Discover. <a href="/blog/why-is-direct-my-biggest-traffic-source">Why Direct is your biggest traffic source</a> explains the other labels.</li><li><b>Gemini is not Google.</b> Visits from gemini.google.com count as AI, because AI hosts are checked before search hosts, so they never mix into the google.com row.</li></ul>
+<p class="p">The full rule order is in <a href="https://docs.virling.com/attribution/channels">channels</a>.</p>
+<h2>Tell Discover apart from search with landing pages</h2>
+<p class="p">Search and Discover send people to different pages in different patterns. Search visits arrive steadily on pages that rank for what people type. Discover visits arrive in a burst on one article, often a recent one, and mostly on phones.</p>
+<ol class="post-list"><li>On the Channels card, click <b>Organic search</b>, then click the google.com row in the Source tab to filter the dashboard to Google.</li><li>Look at the visitors chart for spikes. A day or two of many more Google visitors than usual, with no change in your rankings, is the usual sign of Discover.</li><li>Pick a range around one spike and open the <b>Landing page</b> tab of the Pages card. The page that jumped is the one Discover showed.</li><li>Check the Discover report in Search Console for the same dates and page. If it shows clicks there, you have found your Discover visits.</li><li>Keep the steady pages as your search baseline, and treat the burst pages as Discover when you read their revenue.</li></ol>
+<p class="p">This is an estimate, not a label. On a day a page is in Discover, some of its Google visitors still came from search.</p>
+<h2>Why Discover traffic spikes and fades</h2>
+<p class="p">Discover does not wait for a query. Google picks articles for each reader's interests and puts them in the feed, often while they are fresh, and then stops showing them. Google describes Discover traffic as less predictable than search for this reason. A post can get many visitors for a few days and then almost none, and the same post may never be picked again.</p>
+<p class="p">That shape changes how you read the numbers. A spike makes visitor totals look good for one week and makes any month that includes it hard to compare with the next. Judge Discover by what the burst left behind: payments, and buyers who came back later.</p>
+<h2>Set it up in Virling</h2>
+<h3>1. Add the script</h3>
+<p class="p">Put the tag in the <code>&lt;head&gt;</code> of every page. It records the referrer on the first pageview, which is all Google attribution needs. The setup screen in the app shows the exact tag for your site. See <a href="https://docs.virling.com/track/script">add the script</a>.</p>
+<div class="code block"><pre>&lt;script defer src="https://app.virling.com/v.js" data-site="yourdomain.com"&gt;&lt;/script&gt;</pre></div>
+<p class="p">You cannot tag Discover links. Google builds the card and its link from your page, so there is no URL of yours to add <code>utm_source</code> to.</p>
+<h3>2. Connect your payment provider</h3>
+<p class="p">Referrers only get you visits. Revenue needs the visitor ID in checkout. If you use Stripe Payment Links, Polar checkout links or Dodo Payments links, the script adds the ID on click. For a checkout you create on your server, pass the <code>virling_vid</code> cookie, for example as <code>client_reference_id</code> on a Stripe Checkout Session. Each provider has its own page under <a href="/integrations">integrations</a>: <a href="/integrations/stripe">Stripe</a>, <a href="/integrations/paddle">Paddle</a>, <a href="/integrations/lemonsqueezy">Lemon Squeezy</a>, <a href="/integrations/polar">Polar</a>, <a href="/integrations/dodo-payments">Dodo Payments</a>, <a href="/integrations/creem">Creem</a>, <a href="/integrations/revenuecat">RevenueCat</a>, <a href="/integrations/shopify">Shopify</a> and <a href="/integrations/woocommerce">WooCommerce</a>. The setup for all of them is in <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</p>
+<p class="p">Discover readers often read one article, leave and come back days later by typing your address. With the default model, last non-direct, that later Direct visit does not take the credit: the payment goes to the Google visit, as long as it is inside the lookback window, 90 days by default. See <a href="https://docs.virling.com/attribution/model">the attribution model</a>.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+<h2>Which landing pages to compare by revenue per visitor</h2>
+<p class="p">Visitors say which article Discover liked. Revenue per visitor says which article brought people who pay. Divide the revenue credited to a page by its visitors, then compare it with your site average and with your steady search pages.</p>
+<ul class="post-list"><li><b>The Discover burst pages.</b> Each page that spiked, over a range that starts at the spike and runs long enough for late buyers to pay.</li><li><b>Your steady search pages.</b> The pages Google sends visitors to week after week. They are your baseline for what a Google visitor is worth.</li><li><b>The same article before and after.</b> If a post already got search visitors before Discover picked it, compare its revenue per visitor in a normal range with the burst range.</li></ul>
+<p class="p">The <a href="/tools/revenue-per-visitor">revenue per visitor calculator</a> does the sum for any page or channel. A Discover page with many visitors and no payments brought attention, not customers. That can still be worth it if readers sign up or come back, but you will only know by looking at revenue. <a href="/blog/which-blog-posts-bring-paying-customers">Which blog posts bring paying customers</a> walks through ranking posts this way, and <a href="/blog/organic-search-revenue-tracking">organic search revenue tracking</a> covers reading the search channel as a whole.</p>
+<h2>What to check when the numbers look wrong</h2>
+<ul class="post-list"><li><b>A Discover spike but no revenue.</b> Check the Matched revenue line under the Overview numbers. If a large share of revenue is unmatched, the visitor ID is not reaching checkout. See <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</li><li><b>Direct jumped on the same days as Google.</b> Some Discover readers opened the story in the Google app with no referrer. Direct is split by how visitors arrived, so check whether the Google app row grew on the same days.</li><li><b>Google revenue looks too low.</b> A reader who found you in Discover and came back through a newsletter is credited to Email under the default model. Switch to first touch in Site settings to see which visits start journeys; <a href="/blog/first-touch-vs-last-touch-attribution-saas">first-touch or last-touch attribution</a> explains the difference.</li><li><b>Visitors who block the script</b> are not counted at all, so the real visitor number can be higher than any analytics tool shows. Revenue still counts in your total, as Unattributed.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>Does Virling show Google Discover as its own channel?</h3><p class="p">No. A Discover click usually arrives with a Google referrer, the same as a search click, so it counts as Organic search and joins the google.com row. Nothing in the visit says it came from the Discover feed. To spot Discover visits, look for pages that got a sudden burst of Google visitors and match the dates with the Discover report in Search Console.</p>
+<h3>Why do some Discover visits show as Direct?</h3><p class="p">When a story is opened in the Google app and the app sends no referrer, the visit carries nothing that names Google. With no referrer and no UTM tag it counts as Direct. Virling labels some of those Direct visits Google app, but that label covers anything opened in the Google app, not only Discover.</p>
+<h3>Can I add UTM tags to Google Discover traffic?</h3><p class="p">No. Google builds the Discover card and its link from your page, so you cannot tag it. Tags only help on links you place yourself.</p>
+<h3>How do I know if Discover traffic is worth it?</h3><p class="p">Compare the revenue per visitor of the pages Discover sent people to with your site average, over a range long enough for buyers to come back and pay. A page with many visitors and no payments brought attention, not customers.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which Discover visitors pay</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
