@@ -26,6 +26,7 @@
   <url><loc>https://virling.com/integrations/ai-apps</loc></url>
   <url><loc>https://virling.com/integrations/memberships</loc></url>
   <url><loc>https://virling.com/integrations/plugins-and-themes</loc></url>
+  <url><loc>https://virling.com/integrations/coaching-and-consulting</loc></url>
   <url><loc>https://virling.com/blog</loc></url>
   <url><loc>https://virling.com/blog/woocommerce-order-attribution-unknown</loc></url>
   <url><loc>https://virling.com/blog/what-is-revenue-attribution</loc></url>
@@ -134,6 +135,12 @@
   <url><loc>https://virling.com/blog/cac-by-channel</loc></url>
   <url><loc>https://virling.com/blog/ltv-by-acquisition-channel</loc></url>
   <url><loc>https://virling.com/blog/content-marketing-roi</loc></url>
+  <url><loc>https://virling.com/blog/rails-stripe-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/django-stripe-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/subscription-renewal-attribution</loc></url>
+  <url><loc>https://virling.com/blog/marketing-year-in-review</loc></url>
+  <url><loc>https://virling.com/blog/lead-magnet-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/privacy-search-revenue-tracking</loc></url>
   <url><loc>https://virling.com/vs</loc></url>
   <url><loc>https://virling.com/vs/datafast</loc></url>
   <url><loc>https://virling.com/vs/databull</loc></url>
@@ -206,5 +213,7 @@
   <url><loc>https://virling.com/tools/cpm-calculator</loc></url>
   <url><loc>https://virling.com/tools/grr-calculator</loc></url>
   <url><loc>https://virling.com/tools/price-increase-calculator</loc></url>
+  <url><loc>https://virling.com/tools/social-utm-link-generator</loc></url>
+  <url><loc>https://virling.com/tools/cohort-retention-template</loc></url>
   <url><loc>https://virling.com/what-we-dont-do</loc></url>
 </urlset>
