@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Price increase calculator: how many customers can you lose? | Virling</title>
+<meta name="description" content="Free price increase calculator. Enter your current price, new price, paying customers and expected churn to see revenue before and after, break-even churn and new monthly revenue. Runs in your browser.">
+<link rel="canonical" href="https://virling.com/tools/price-increase-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/price-increase-calculator">
+<meta property="og:title" content="Price increase calculator: how many customers can you lose? | Virling">
+<meta property="og:description" content="Free price increase calculator. Enter your current price, new price, paying customers and expected churn to see revenue before and after, break-even churn and new monthly revenue. Runs in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Price increase calculator","url":"https://virling.com/tools/price-increase-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Price increase calculator","item":"https://virling.com/tools/price-increase-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / price increase calculator</span><h1>Price increase calculator</h1><p class="lead">Enter your current price, the new price, your paying customers and how many you expect to leave, to see your revenue before and after, the break-even churn, and how many customers you can lose and still earn the same. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="raise" autocomplete="off">
+  <label>Current price per customer per month ($)<input name="old" type="number" min="0" step="0.01" value="50"></label>
+  <label>New price per customer per month ($)<input name="new" type="number" min="0" step="0.01" value="60"></label>
+  <label>Current paying customers<input name="subs" type="number" min="0" step="1" value="400"></label>
+  <label>Customers you expect to leave (%)<input name="lose" type="number" min="0" max="100" step="0.1" value="10"></label>
+</form>
+<div class="tool-stats" id="raise-out"></div>
+<div class="txt post tool-cta">
+<p class="p">In plain words: revenue before is the current price times your customers. Revenue after is the new price times the customers who stay. Break-even churn is the price increase divided by the new price: lose fewer customers than that and you earn more.</p>
+<p class="p">This covers the customers you have. Virling shows what happens to new ones: it links every visit to the payment it led to, so you see how each channel converts to paying customers before and after the change. See <a href="https://docs.virling.com/attribution/">how attribution works</a> in the docs. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/churn-rate-calculator">churn rate calculator</a>, <a href="/tools/annual-discount-calculator">annual discount calculator</a>, <a href="/tools/mrr-calculator">MRR calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The price increase formula</h2>
+<p class="p">Monthly revenue before the change is your current price times your paying customers:</p>
+<p class="p"><code>revenue before = current price &times; customers</code></p>
+<p class="p">After the change, only the customers who stay pay, and they pay the new price:</p>
+<p class="p"><code>revenue after = new price &times; customers &times; (1 - share who leave)</code></p>
+<p class="p">Break-even churn is the share who can leave while revenue stays the same. Set the two lines equal and solve:</p>
+<p class="p"><code>break-even churn = 1 - current price / new price = (new price - current price) / new price</code></p>
+<p class="p">If the new price is lower than the current one, there is no churn to absorb. Instead you need more customers to keep the same revenue: <code>customers needed = customers &times; current price / new price</code>.</p>
+<h2>A worked example</h2>
+<p class="p">With the defaults above, 400 customers pay $50 a month, so revenue before is 400 &times; $50 = $20,000 a month. The price goes to $60, a 20% increase.</p>
+<p class="p">Break-even churn is ($60 - $50) / $60 = 16.67%, so you could lose up to 66 of your 400 customers and still earn the same. If 10% leave, 360 stay and pay $60, so the new monthly revenue is 360 &times; $60 = $21,600, which is $1,600 more than before. If 20% left instead, 320 would stay and revenue would fall to $19,200.</p>
+<p class="p">Note that break-even churn (16.67%) is below the price increase (20%), because the customers who stay pay the higher price.</p>
+<h2>What this number misses</h2>
+<p class="p">The calculator only looks at the customers you already have. A price change also moves how many new visitors become paying customers, and that rarely moves the same way across channels. Buyers from search or a referral often arrived wanting the product and may convert about as well at the new price, while buyers from a deal site or a discount-driven campaign may be the first to drop off. A blended conversion rate can stay flat while one channel quietly stops paying for itself.</p>
+<p class="p">So after a price change, watch new paying customers and revenue by channel, not just churn. You can do that by hand with the <a href="/tools/churn-rate-calculator">churn rate calculator</a> and your signups per source, or let Virling do it from your payments: it <a href="https://docs.virling.com/attribution/">credits each payment</a> to the channel, referrer, campaign and landing page of the visit that brought it, so you can compare each channel before and after the change.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Price increase calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do I calculate how many customers I can lose after a price increase?</h3><p class="p">Divide the price increase by the new price. Going from $50 to $60 is a $10 increase on a $60 price, so you can lose 10 / 60 = 16.67% of paying customers and still earn the same revenue. Lose fewer and revenue goes up; lose more and it goes down.</p></div>
+      <div><h3>What is break-even churn?</h3><p class="p">It is the share of current customers who can leave after a price change while revenue stays exactly where it was. The formula is 1 - old price / new price, which is the same as the price increase divided by the new price.</p></div>
+      <div><h3>Why is break-even churn smaller than the price increase percentage?</h3><p class="p">Because the customers who stay pay the new, higher price. A 20% increase from $50 to $60 breaks even at 16.67% churn, not 20%, since each remaining customer now brings $60 instead of $50.</p></div>
+      <div><h3>Should existing customers keep the old price?</h3><p class="p">That is a business choice. If you keep current customers on the old price, this calculator does not apply to them, and the change only affects new customers. Then the number to watch is how many visitors still convert at the new price.</p></div>
+      <div><h3>Does this work for annual plans or one-time prices?</h3><p class="p">Yes, as long as the old and new prices cover the same period. Enter annual prices to get annual revenue. For one-time purchases, use buyers per month instead of paying customers.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I calculate how many customers I can lose after a price increase?", "acceptedAnswer": {"@type": "Answer", "text": "Divide the price increase by the new price. Going from $50 to $60 is a $10 increase on a $60 price, so you can lose 10 / 60 = 16.67% of paying customers and still earn the same revenue. Lose fewer and revenue goes up; lose more and it goes down."}}, {"@type": "Question", "name": "What is break-even churn?", "acceptedAnswer": {"@type": "Answer", "text": "It is the share of current customers who can leave after a price change while revenue stays exactly where it was. The formula is 1 - old price / new price, which is the same as the price increase divided by the new price."}}, {"@type": "Question", "name": "Why is break-even churn smaller than the price increase percentage?", "acceptedAnswer": {"@type": "Answer", "text": "Because the customers who stay pay the new, higher price. A 20% increase from $50 to $60 breaks even at 16.67% churn, not 20%, since each remaining customer now brings $60 instead of $50."}}, {"@type": "Question", "name": "Should existing customers keep the old price?", "acceptedAnswer": {"@type": "Answer", "text": "That is a business choice. If you keep current customers on the old price, this calculator does not apply to them, and the change only affects new customers. Then the number to watch is how many visitors still convert at the new price."}}, {"@type": "Question", "name": "Does this work for annual plans or one-time prices?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, as long as the old and new prices cover the same period. Enter annual prices to get annual revenue. For one-time purchases, use buyers per month instead of paying customers."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See how each channel converts after a price change</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("raise"), out = document.getElementById("raise-out");
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 2 }) + "%";
+const usd = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const num = (n) => n.toLocaleString("en-US", { maximumFractionDigits: 1 });
+const calc = () => {
+  const p0 = +f.old.value, p1 = +f.new.value, n = +f.subs.value, l = +f.lose.value / 100;
+  const ok = p0 > 0 && p1 > 0 && n > 0, lok = ok && f.lose.value !== "" && l >= 0 && l <= 1;
+  const before = p0 * n, after = p1 * n * (1 - l), be = 1 - p0 / p1;
+  const rows = [];
+  rows.push(["Monthly revenue before", ok ? usd(before) : "No data"]);
+  rows.push(["New monthly revenue", lok ? usd(after) : "No data"]);
+  rows.push(["Change in monthly revenue", lok ? usd(after - before) + " (" + (after >= before ? "+" : "") + pct(after / before - 1) + ")" : "No data"]);
+  rows.push(["Break-even churn", !ok ? "No data" : be >= 0 ? pct(be) : "None, price is lower"]);
+  rows.push([be >= 0 ? "Customers you can lose" : "Customers needed to break even", !ok ? "No data" : be >= 0 ? num(n * be) : num(n * p0 / p1)]);
+  out.innerHTML = rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
