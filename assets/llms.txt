@@ -66,6 +66,11 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Investor update template: monthly update with revenue by channel](https://virling.com/tools/investor-update-template): monthly investor update with highlights, key metrics, revenue by acquisition channel, what worked, what did not and asks, copied as Markdown or plain text
 - [SEO ROI calculator: revenue, ROI and break-even](https://virling.com/tools/seo-roi-calculator): revenue from organic search, ROI and months to break even from organic visits, visit to customer rate, revenue per customer and SEO cost
 - [Discount break-even calculator](https://virling.com/tools/discount-break-even-calculator): how many more units a discounted sale must sell to keep the same gross profit, from price, unit cost or gross margin and discount
+- [Refund rate calculator: by count and by revenue](https://virling.com/tools/refund-rate-calculator): refund rate by count and by revenue, net revenue after refunds, and the refunds a target rate allows, from orders and refunds for a period
+- [Funnel conversion calculator: visit to paid at every step](https://virling.com/tools/funnel-conversion-calculator): conversion rate at each funnel step, visit to paid rate, revenue per visitor and the biggest drop, from visitors, signups or add to carts, trials or checkouts and paid customers
+- [Merchant of record fee calculator: Paddle, Polar, Creem fees](https://virling.com/tools/merchant-of-record-fee-calculator): fees and net payout on Paddle, Lemon Squeezy, Polar, Creem and Dodo Payments from monthly revenue, average order value and share of international buyers
+- [ARR calculator: annual recurring revenue from MRR](https://virling.com/tools/arr-calculator): ARR now, net new ARR and ARR in 12 months at the current net rate, from MRR or monthly plans plus new and churned MRR
+- [CPM calculator: CPM, CPC and CTR for sponsorships](https://virling.com/tools/cpm-calculator): CPM, CPC and CTR for a newsletter, podcast, creator or ad placement from its cost, impressions or sends and clicks, plus revenue per thousand and return when revenue is added
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -89,6 +94,8 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Revenue attribution for mobile apps](https://virling.com/integrations/mobile-apps): paying subscribers by channel for apps that sell through RevenueCat and web paywalls, and what stays Unattributed
 - [Revenue attribution for browser extensions](https://virling.com/integrations/browser-extensions): which launch post, search or creator brings the users who pay for a Chrome or Firefox extension
 - [Revenue attribution for developer tools](https://virling.com/integrations/developer-tools): whether GitHub, Hacker News, dev.to, docs or AI assistants bring paying customers to a developer tool, API or open source project with a paid tier
+- [Revenue attribution for online courses](https://virling.com/integrations/online-courses): which YouTube video, newsletter, webinar or affiliate brings each course or cohort sale, for Stripe, LemonSqueezy, Polar, Creem and Shopify
+- [Revenue attribution for AI apps](https://virling.com/integrations/ai-apps): whether X, Product Hunt, Reddit, YouTube or AI assistants bring the users who pay for an AI app, with credits, top-ups and subscriptions from Stripe, Polar, Creem and Dodo Payments
 
 ## Compare
 
@@ -220,6 +227,8 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Substack revenue tracking: which posts bring paying customers](https://virling.com/blog/substack-revenue-tracking): See which Substack posts and notes bring paying customers: how Substack clicks arrive, how to tag each post's links, and where the payments show in Virling.
 - [Google AI Overviews revenue tracking: which AI Overview clicks pay](https://virling.com/blog/google-ai-overviews-revenue-tracking): Clicks from Google AI Overviews and AI Mode arrive from google.com and count as Organic search. What you can separate, what you cannot, and how to see the revenue.
 - [Discord revenue tracking: which servers and posts bring paying customers](https://virling.com/blog/discord-revenue-tracking): Discord revenue tracking: why Discord clicks land as Direct, a UTM naming scheme per server and channel, and which servers and announcements bring paying customers.
+- [WordPress revenue tracking: which channel brought each sale](https://virling.com/blog/wordpress-revenue-tracking): See which channel brought each WordPress sale. Add the Virling script with the plugin or your theme header, then link WooCommerce orders or Stripe payment links to the visit.
+- [Laravel Stripe UTM tracking: Checkout and Cashier](https://virling.com/blog/laravel-stripe-utm-tracking): How to tie a Stripe Checkout payment in a Laravel app to the visit and UTM tags that brought it, with stripe-php or Laravel Cashier.
 
 ## Source
 
