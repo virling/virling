@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stripe invoice attribution for sales-led B2B SaaS</title>
+<meta name="description" content="How a Stripe invoice paid days after a demo call can still be credited to the channel that brought the buyer, and what stays unattributed.">
+<link rel="canonical" href="https://virling.com/blog/stripe-invoice-attribution">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/stripe-invoice-attribution">
+<meta property="og:title" content="Stripe invoice attribution for sales-led B2B SaaS">
+<meta property="og:description" content="How a Stripe invoice paid days after a demo call can still be credited to the channel that brought the buyer, and what stays unattributed.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Stripe invoice attribution for sales-led B2B SaaS","item":"https://virling.com/blog/stripe-invoice-attribution"}]},{"@type":"BlogPosting","headline":"Stripe invoice attribution for sales-led B2B SaaS","description":"How a Stripe invoice paid days after a demo call can still be credited to the channel that brought the buyer, and what stays unattributed.","datePublished":"2026-11-20","dateModified":"2026-11-20","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/stripe-invoice-attribution"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can a Stripe invoice be attributed to a marketing channel?","acceptedAnswer":{"@type":"Answer","text":"Yes, if Virling can tie it to a visitor. A payment that carries a visitor ID is matched directly. An invoice with no visitor ID is credited to a visitor when its payer email matches an email that visitor shared earlier in an identify event."}},{"@type":"Question","name":"Does the invoice need to be paid on the same day as the visit?","acceptedAnswer":{"@type":"Answer","text":"No. Virling considers every session of that visitor that started inside the lookback window before the payment. The window is 90 days by default and can be set to 30, 60, 90 or 365 days."}},{"@type":"Question","name":"Are renewals of an invoiced subscription credited too?","acceptedAnswer":{"@type":"Answer","text":"Yes. A Stripe charge whose invoice has billing reason subscription_cycle is a renewal and takes the attribution of the customer's first payment, matched by Stripe customer ID. If that first payment was Unattributed, the renewal usually is too."}},{"@type":"Question","name":"Why is an invoice still Unattributed after I sent an identify event?","acceptedAnswer":{"@type":"Answer","text":"The payer email on the charge must match the identified email exactly after trimming and lowercasing, the identify must happen before the payment is synced, and the visitor needs a session inside the lookback window. An invoice paid by a different person, such as an accounts team, does not match."}},{"@type":"Question","name":"Does Virling store the buyer's email?","acceptedAnswer":{"@type":"Answer","text":"No. It keeps only a SHA-256 hash of the trimmed, lowercased email, salted per site, and matching never crosses sites."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-20</span>
+      <h1>Stripe invoice attribution for sales-led B2B SaaS</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-20.</p>
+<p class="p">A Stripe invoice paid days after a demo call can still be credited to the channel that first brought the buyer, as long as the payment can be tied back to a visitor. Virling ties it in one of two ways: a visitor ID carried on the payment, or the payer's email matching an email that visitor shared earlier, for example when they booked the demo. Once the payment has a visitor, Virling looks at that visitor's sessions inside the lookback window before the payment and credits one of them. With the First touch model, that is the earliest one: the channel that brought them in.</p>
+<h2>Why invoices lose their source</h2>
+<p class="p">In a sales-led deal the buyer reads a post, books a call, talks to you, and pays an invoice a week later from a link in their inbox. Stripe records who paid and how much. Nothing on that invoice says the buyer first came from a search, a newsletter or a post on Hacker News. The browser that visited your site and the payment that arrived later are two separate records, and something has to join them.</p>
+<h2>How Virling matches a Stripe payment</h2>
+<p class="p">Virling reads Stripe charges with a read-only restricted key. For each charge it looks for a visitor ID in this order:</p>
+<ul class="post-list"><li><code>metadata.virling_vid</code> on the charge</li><li><code>metadata.virling_vid</code> on its PaymentIntent</li><li><code>metadata.virling_vid</code> or <code>client_reference_id</code> on the Checkout Session that created it</li></ul>
+<p class="p">An invoice you send from Stripe does not pass through a Checkout Session on your site, so it usually arrives with none of these. That is where email matching comes in: when a Stripe payment has no visitor ID, Virling compares its payer email (billing details or receipt email) with the emails your visitors shared in <code>identify</code> events. If one matches, the payment is credited to that visitor and shows <b>Matched by email</b> on the Payments page.</p>
+<p class="p">Virling finds the invoice a charge paid through Stripe's Invoice Payments. If the invoice's billing reason is <code>subscription_cycle</code>, the charge is a renewal and takes the attribution of the customer's first payment, matched by Stripe customer ID, even years later. Upgrades and plan changes (<code>subscription_update</code>) keep the first payment's channel too. So getting the first invoice attributed carries the whole subscription with it.</p>
+<h2>Which visit gets the credit</h2>
+<p class="p">Each site has one attribution model and one lookback window, set in site settings. Only sessions that started inside the window before the payment count. The window is 90 days by default, and can be 30, 60, 90 or 365 days. Pick one longer than your usual sales cycle; <a href="/blog/how-long-does-a-visitor-take-to-become-a-customer">how long a visitor takes to become a customer</a> shows how to measure it.</p>
+<ul class="post-list"><li><b>Last non-direct</b>, the default: the latest session in the window that was not Direct</li><li><b>First touch</b>: the earliest session in the window, the channel that introduced the buyer</li><li><b>Last touch</b>: the latest session in the window, Direct included</li></ul>
+<p class="p">First touch fits longer buying cycles, where the buyer often comes back by typing your URL before the call. See <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch vs last touch attribution for SaaS</a> for the trade-offs. Changing the model rebuilds attribution for every past payment of the site.</p>
+<h2>Making sales-led deals attributable</h2>
+<p class="p">The goal is to capture the visitor ID or the buyer's email while they are still on your site, before the deal moves to calls and email.</p>
+<p class="p"><b>At signup or demo booking, send the email.</b> When someone signs up or fills in a demo form on your own page, send an <code>identify</code> event with their email. Virling keeps only a salted SHA-256 hash of the trimmed, lowercased email. A later Stripe payment with no visitor ID whose payer email matches is credited to that visitor:</p>
+<div class="code block"><pre data-snippet>await fetch("https://app.virling.com/api/event", {
+  method: "POST",
+  headers: { "user-agent": req.headers["user-agent"] },
+  body: JSON.stringify({
+    n: "identify",
+    u: "https://yourdomain.com/book-a-demo",
+    s: "yourdomain.com",
+    v: req.cookies.virling_vid,
+    m: form.email,
+  }),
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">This works from the browser too, with <code>window.virling?.vid?.()</code> as <code>v</code>. The full recipe is in <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a> in the docs.</p>
+<p class="p"><b>When the buyer pays through your own checkout, send the visitor ID.</b> If the deal closes with a Checkout Session or a PaymentIntent your server creates, pass the <code>virling_vid</code> cookie as <code>client_reference_id</code> or <code>metadata.virling_vid</code>. The code for each provider is in <a href="https://docs.virling.com/payments/checkout">Link checkout to visits</a>. If signup or the app lives on another domain, carry the ID across first: see <a href="/blog/cross-domain-checkout-attribution">cross-domain checkout attribution</a>.</p>
+<h2>What stays unattributed, and why</h2>
+<p class="p">Unattributed payments still count toward revenue; they are just not credited to a visit. For invoiced deals the usual reasons are:</p>
+<ul class="post-list"><li><b>A different payer.</b> Email matching is exact. If the person who booked the demo is not the person whose email is on the payment, such as an accounts team, nothing matches.</li><li><b>No identify before the payment.</b> Email matching applies to payments synced after the identify event, so send it at signup or booking, not after the invoice is paid.</li><li><b>No session in the window.</b> The visitor is known but all their sessions started before the lookback window.</li><li><b>The visit was never tracked.</b> The script was blocked by an ad blocker, the visitor had Global Privacy Control with <code>data-respect-gpc</code>, the visit was filtered as a bot, or the site runs in cookieless mode, where there is no visitor ID.</li><li><b>Deals that never touched the site.</b> A buyer met at an event or through a referral who books by email has no visit to credit.</li><li><b>Old subscriptions.</b> Payments older than the 90-day backfill are not imported, so renewals of subscriptions that started before then have no first payment to copy from.</li></ul>
+<p class="p">Keep Unattributed as its own line rather than spreading it across channels. A growing share is a sign that a form or checkout stopped sending the ID or email.</p>
+<h2>Doing it with Virling</h2>
+<p class="p">Connect Stripe with a restricted key that can only read, add the script to your site, and send an identify event from your signup or demo form. Virling imports charges, finds their invoices, marks renewals and credits each payment to a channel. The setup for software companies is on the <a href="/integrations/saas">SaaS integration page</a>, and the key steps are on the <a href="/integrations/stripe">Stripe integration page</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>Can a Stripe invoice be attributed to a marketing channel?</h3><p class="p">Yes, if Virling can tie it to a visitor. A payment that carries a visitor ID is matched directly. An invoice with no visitor ID is credited to a visitor when its payer email matches an email that visitor shared earlier in an identify event.</p>
+<h3>Does the invoice need to be paid on the same day as the visit?</h3><p class="p">No. Virling considers every session of that visitor that started inside the lookback window before the payment. The window is 90 days by default and can be set to 30, 60, 90 or 365 days.</p>
+<h3>Are renewals of an invoiced subscription credited too?</h3><p class="p">Yes. A Stripe charge whose invoice has billing reason subscription_cycle is a renewal and takes the attribution of the customer's first payment, matched by Stripe customer ID. If that first payment was Unattributed, the renewal usually is too.</p>
+<h3>Why is an invoice still Unattributed after I sent an identify event?</h3><p class="p">The payer email on the charge must match the identified email exactly after trimming and lowercasing, the identify must happen before the payment is synced, and the visitor needs a session inside the lookback window. An invoice paid by a different person, such as an accounts team, does not match.</p>
+<h3>Does Virling store the buyer's email?</h3><p class="p">No. It keeps only a SHA-256 hash of the trimmed, lowercased email, salted per site, and matching never crosses sites.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring your invoiced deals</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
