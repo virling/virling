@@ -16,6 +16,7 @@
 - [Set up a no-code site](guides/no-code.md)
 - [Track a launch](guides/launch.md)
 - [Test your setup](guides/test-your-setup.md)
+- [Ask your AI assistant which channel pays](guides/ai-assistants.md)
 - [Install](install/index.md)
   - [Docker](install/docker.md)
   - [Release binary](install/binary.md)
