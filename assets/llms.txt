@@ -71,6 +71,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Merchant of record fee calculator: Paddle, Polar, Creem fees](https://virling.com/tools/merchant-of-record-fee-calculator): fees and net payout on Paddle, Lemon Squeezy, Polar, Creem and Dodo Payments from monthly revenue, average order value and share of international buyers
 - [ARR calculator: annual recurring revenue from MRR](https://virling.com/tools/arr-calculator): ARR now, net new ARR and ARR in 12 months at the current net rate, from MRR or monthly plans plus new and churned MRR
 - [CPM calculator: CPM, CPC and CTR for sponsorships](https://virling.com/tools/cpm-calculator): CPM, CPC and CTR for a newsletter, podcast, creator or ad placement from its cost, impressions or sends and clicks, plus revenue per thousand and return when revenue is added
+- [Gross revenue retention calculator: GRR formula](https://virling.com/tools/grr-calculator): gross revenue retention as a percentage from starting MRR, churned MRR and contraction MRR, with the GRR formula
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -96,6 +97,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Revenue attribution for developer tools](https://virling.com/integrations/developer-tools): whether GitHub, Hacker News, dev.to, docs or AI assistants bring paying customers to a developer tool, API or open source project with a paid tier
 - [Revenue attribution for online courses](https://virling.com/integrations/online-courses): which YouTube video, newsletter, webinar or affiliate brings each course or cohort sale, for Stripe, LemonSqueezy, Polar, Creem and Shopify
 - [Revenue attribution for AI apps](https://virling.com/integrations/ai-apps): whether X, Product Hunt, Reddit, YouTube or AI assistants bring the users who pay for an AI app, with credits, top-ups and subscriptions from Stripe, Polar, Creem and Dodo Payments
+- [Revenue attribution for membership sites and paid communities](https://virling.com/integrations/memberships): which channel brought each paying member of a membership site or paid community, with renewals credited to the first channel, for Stripe, Polar, LemonSqueezy and Paddle
 
 ## Compare
 
@@ -229,6 +231,13 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Discord revenue tracking: which servers and posts bring paying customers](https://virling.com/blog/discord-revenue-tracking): Discord revenue tracking: why Discord clicks land as Direct, a UTM naming scheme per server and channel, and which servers and announcements bring paying customers.
 - [WordPress revenue tracking: which channel brought each sale](https://virling.com/blog/wordpress-revenue-tracking): See which channel brought each WordPress sale. Add the Virling script with the plugin or your theme header, then link WooCommerce orders or Stripe payment links to the visit.
 - [Laravel Stripe UTM tracking: Checkout and Cashier](https://virling.com/blog/laravel-stripe-utm-tracking): How to tie a Stripe Checkout payment in a Laravel app to the visit and UTM tags that brought it, with stripe-php or Laravel Cashier.
+- [Snapchat revenue tracking: which snaps and stories bring paying customers](https://virling.com/blog/snapchat-revenue-tracking): Snapchat revenue tracking for stores and app makers: tag Story, Spotlight and profile links, keep in-app clicks out of Direct, and see revenue per snap.
+- [Twitch revenue tracking: which streams bring paying customers](https://virling.com/blog/twitch-revenue-tracking): How to track revenue from Twitch: tag panel links, chat commands, sponsor segments and VOD descriptions, and see which streams and creators bring paying customers.
+- [Bing revenue tracking: which Bing search visitors pay](https://virling.com/blog/bing-revenue-tracking): How to track revenue from Bing organic search: see Bing visits by referrer, keep Copilot apart, and compare Bing with Google by revenue, not clicks.
+- [Event revenue tracking: which conferences bring paying customers](https://virling.com/blog/event-revenue-tracking): Event revenue tracking for B2B founders: tag slides, booth QR codes and follow-up emails per event, and see which conferences bring paying customers.
+- [CAC by channel: how to calculate customer acquisition cost by channel](https://virling.com/blog/cac-by-channel): How to calculate customer acquisition cost by channel: divide your spend by the paying customers each channel brought, not clicks or signups, and how to count them.
+- [LTV by acquisition channel: which channels bring customers worth the most](https://virling.com/blog/ltv-by-acquisition-channel): How to see LTV by acquisition channel for a subscription product: credit renewals to the channel that won the customer and compare revenue per customer over months.
+- [Content marketing ROI: which content brings paying customers](https://virling.com/blog/content-marketing-roi): How to measure content marketing ROI: the formula, why pageviews and leads miss it, and how to see revenue from customers who landed on a post, guide or video.
 
 ## Source
 
