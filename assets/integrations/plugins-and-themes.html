@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plugin sales attribution: which channel brought each license sale</title>
+<meta name="description" content="See whether your docs, a marketplace listing, the blog, a newsletter or social brought each WordPress plugin, theme or license sale and renewal, with Paddle, LemonSqueezy, Polar, Creem or Stripe.">
+<link rel="canonical" href="https://virling.com/integrations/plugins-and-themes">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/plugins-and-themes">
+<meta property="og:title" content="Plugin sales attribution: which channel brought each license sale">
+<meta property="og:description" content="See whether your docs, a marketplace listing, the blog, a newsletter or social brought each WordPress plugin, theme or license sale and renewal, with Paddle, LemonSqueezy, Polar, Creem or Stripe.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"Plugins and themes","item":"https://virling.com/integrations/plugins-and-themes"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why does a click from my wordpress.org listing show as Referral?","acceptedAnswer":{"@type":"Answer","text":"wordpress.org is not on the community, search, social or AI host lists, so a click from a plugin or theme listing lands in Referral and shows under its own domain in the Source tab. Add utm_source and utm_campaign to the link, or use a tracked link, to tell the listing apart from your support forum or readme."}},{"@type":"Question","name":"How do I track links from inside the plugin, its readme or the dashboard of a free install?","acceptedAnswer":{"@type":"Answer","text":"A link opened from a WordPress admin screen, a readme or a downloaded file often arrives with no referrer, so it counts as Direct. Tag those links with utm_source and one utm_campaign per placement, or create a tracked link in Virling, and the visit keeps its source."}},{"@type":"Question","name":"Are license renewals credited to the channel that sold the first license?","acceptedAnswer":{"@type":"Answer","text":"Yes, when the renewal is billed as a subscription by Paddle, LemonSqueezy, Polar, Creem or Stripe. Virling detects the renewal and copies the channel, referrer and campaign of the customer's first payment. A new one-time purchase by the same buyer is a new sale and is credited from its own visitor ID."}},{"@type":"Question","name":"Which payment providers work for plugin and theme sales?","acceptedAnswer":{"@type":"Answer","text":"Paddle, LemonSqueezy, Polar, Creem and Stripe, each with a read-only key. Pass the visitor ID into checkout. Plain Stripe Payment Links, Polar checkout links and LemonSqueezy checkout links on a page that runs the script get it added by the script itself."}},{"@type":"Question","name":"Does it work if my marketing site runs on WordPress?","acceptedAnswer":{"@type":"Answer","text":"Yes. Add the script with the Virling WordPress plugin or in your theme's header. The plugin skips logged-in administrators by default, so test from a private window."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / plugins and themes</span>
+      <h1>Plugin sales attribution for plugin and theme sellers.</h1>
+      <p class="lead">Buyers of a WordPress plugin, theme, template or code license usually find it in your docs, a marketplace listing, a blog post, a newsletter or a social post, then buy on your own site. Virling joins each license sale and renewal to the visit that came before it, so the dashboard shows which of those channels brought the money, not just the downloads. Add the script to your marketing site, tag the links in your free-version listings and readme files, and connect Paddle, LemonSqueezy, Polar, Creem or Stripe.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">A plugin buyer rarely pays on the first visit. They install the free version, read the docs, open a support thread and come back when a client project needs the pro features. Virling credits each payment to a visit before it, by default the latest visit that was not Direct inside a 90-day lookback window, and you can switch the site to first touch to credit the visit that introduced the buyer.</p>
+<h2>Where plugin buyers come from</h2>
+<p class="p">Every session gets one channel from its first pageview. The places plugin and theme buyers come from land in different ones:</p>
+<ul class="post-list"><li><b>Marketplace and free-version listings</b>: wordpress.org and other directories are not on a known host list, so clicks land in <b>Referral</b> under their own domain.</li><li><b>Your blog and docs</b>: visits that start there keep the channel that brought them to the post, such as <b>Organic search</b> or <b>AI</b>. Pages on your own domain and its subdomains never change the channel.</li><li><b>Newsletters</b>: a link tagged <code>utm_medium=newsletter</code> or <code>email</code> lands in <b>Email</b>.</li><li><b>Social posts</b>: clicks from known social hosts land in <b>Social</b>.</li><li><b>Readme files, the WordPress admin screen and downloaded files</b>: often no referrer and no tag, so they are <b>Direct</b> unless you tag the link.</li></ul>
+<h2>Set it up in three steps</h2>
+<h3>1. Add the script to your marketing site</h3>
+<p class="p">Put the Virling tag on the site where buyers land and check out. On WordPress, use the Virling plugin or paste the tag in your theme&#x27;s header; the walkthrough is in <a href="/blog/wordpress-revenue-tracking">WordPress revenue tracking</a>. With <code>data-site</code> set to your domain, docs on <code>docs.example.com</code> count for the same site and share the visitor ID cookie. See <a href="https://docs.virling.com/track/script">Add the script</a>.</p>
+<h3>2. Tag the links in listings and readme files</h3>
+<p class="p">Links in a free-version listing, a readme, an upgrade notice or a settings screen carry no useful referrer. Give each one <code>utm_source</code> and its own <code>utm_campaign</code>, or create a <a href="https://docs.virling.com/track/links">tracked link</a> in Virling: a short URL that adds the tags for you and shows the clicks, visitors and revenue it brought. The Campaign tab then splits the listing from the readme and the upgrade notice.</p>
+<h3>3. Connect your payment provider</h3>
+<p class="p">Pass the visitor ID into checkout and connect the provider with a read-only key. Payments from the last 90 days are imported on the first run, then new ones every minute, and refunds lower a payment&#x27;s revenue.</p>
+<ul class="post-list"><li><a href="/integrations/paddle">Paddle</a>: <code>virling_vid</code> in the transaction&#x27;s custom data, passed as <code>customData</code> with Paddle.js. <a href="https://docs.virling.com/payments/paddle">Docs</a>.</li><li><a href="/integrations/lemonsqueezy">LemonSqueezy</a>: the visitor ID as checkout custom data; the script adds it to plain checkout links. <a href="https://docs.virling.com/payments/lemonsqueezy">Docs</a>.</li><li><a href="/integrations/polar">Polar</a>: checkout links need no code; checkout sessions take it in metadata. <a href="https://docs.virling.com/payments/polar">Docs</a>.</li><li><a href="/integrations/creem">Creem</a>: the visitor ID in checkout metadata. <a href="https://docs.virling.com/payments/creem">Docs</a>.</li><li><a href="/integrations/stripe">Stripe</a>: Payment Links get it from the script; Checkout Sessions take it as <code>client_reference_id</code> or metadata. <a href="https://docs.virling.com/payments/stripe">Docs</a>.</li></ul>
+<h2>License renewals</h2>
+<p class="p">A yearly license billed as a subscription renews without a visit. Virling marks the renewal and gives it the channel, referrer and campaign of the customer&#x27;s first payment, so a listing that sold a license keeps the credit for every renewal. See <a href="https://docs.virling.com/attribution/renewals">Renewals</a>. Merchant of record fees differ by provider; compare them with the <a href="/tools/merchant-of-record-fee-calculator">merchant of record fee calculator</a>.</p>
+<h2>Open source, self-host or hosted</h2>
+<p class="p">Virling is open source under AGPLv3; the code is on <a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a>. <a href="/self-host">Self-host</a> it as one Rust binary on your own server, or use the hosted version.</p>
+<h2>Frequently asked questions</h2>
+<h3>Why does a click from my wordpress.org listing show as Referral?</h3><p class="p">wordpress.org is not on the community, search, social or AI host lists, so a click from a plugin or theme listing lands in Referral and shows under its own domain in the Source tab. Add <code>utm_source</code> and <code>utm_campaign</code> to the link, or use a <a href="https://docs.virling.com/track/links">tracked link</a>, to tell the listing apart from your support forum or readme.</p>
+<h3>How do I track links from inside the plugin, its readme or the dashboard of a free install?</h3><p class="p">A link opened from a WordPress admin screen, a readme or a downloaded file often arrives with no referrer, so it counts as Direct. Tag those links with <code>utm_source</code> and one <code>utm_campaign</code> per placement, or create a tracked link in Virling, and the visit keeps its source.</p>
+<h3>Are license renewals credited to the channel that sold the first license?</h3><p class="p">Yes, when the renewal is billed as a subscription by Paddle, LemonSqueezy, Polar, Creem or Stripe. Virling detects the renewal and copies the channel, referrer and campaign of the customer&#x27;s first payment. A new one-time purchase by the same buyer is a new sale and is credited from its own visitor ID.</p>
+<h3>Which payment providers work for plugin and theme sales?</h3><p class="p">Paddle, LemonSqueezy, Polar, Creem and Stripe, each with a read-only key. Pass the visitor ID into checkout. Plain Stripe Payment Links, Polar checkout links and LemonSqueezy checkout links on a page that runs the script get it added by the script itself.</p>
+<h3>Does it work if my marketing site runs on WordPress?</h3><p class="p">Yes. Add the script with the Virling WordPress plugin or in your theme&#x27;s header. The plugin skips logged-in administrators by default, so test from a private window.</p>
+      <p class="p">Full reference: <a href="https://docs.virling.com/attribution/channels">Channels</a>, <a href="https://docs.virling.com/track/links">Tracked links</a> and <a href="https://docs.virling.com/attribution/renewals">Renewals</a> in the docs. Plans and the free trial: <a href="/pricing">pricing</a>.</p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post"><h2>See which channel sold each license</h2><p class="p">Self-host it free, or use the hosted version with a 14-day free trial.</p><p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p><h2>Related reading</h2><ul class="post-list"><li><a href="/blog/wordpress-revenue-tracking">WordPress revenue tracking: which channel brought each sale</a></li><li><a href="/tools/merchant-of-record-fee-calculator">Merchant of record fee calculator: Paddle, Polar, Creem fees</a></li></ul><p class="p">Integrations: <a href="/integrations/digital-products">Digital products</a>, <a href="/integrations/paddle">Paddle</a>, <a href="/integrations/lemonsqueezy">LemonSqueezy</a>, <a href="/integrations/polar">Polar</a>, <a href="/integrations/creem">Creem</a> and <a href="/integrations/stripe">Stripe</a>. Run it yourself: <a href="/self-host">self-host</a>.</p></div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
