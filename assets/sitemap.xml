@@ -24,6 +24,7 @@
   <url><loc>https://virling.com/integrations/developer-tools</loc></url>
   <url><loc>https://virling.com/integrations/online-courses</loc></url>
   <url><loc>https://virling.com/integrations/ai-apps</loc></url>
+  <url><loc>https://virling.com/integrations/memberships</loc></url>
   <url><loc>https://virling.com/blog</loc></url>
   <url><loc>https://virling.com/blog/woocommerce-order-attribution-unknown</loc></url>
   <url><loc>https://virling.com/blog/what-is-revenue-attribution</loc></url>
@@ -125,6 +126,13 @@
   <url><loc>https://virling.com/blog/discord-revenue-tracking</loc></url>
   <url><loc>https://virling.com/blog/wordpress-revenue-tracking</loc></url>
   <url><loc>https://virling.com/blog/laravel-stripe-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/snapchat-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/twitch-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/bing-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/event-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/cac-by-channel</loc></url>
+  <url><loc>https://virling.com/blog/ltv-by-acquisition-channel</loc></url>
+  <url><loc>https://virling.com/blog/content-marketing-roi</loc></url>
   <url><loc>https://virling.com/vs</loc></url>
   <url><loc>https://virling.com/vs/datafast</loc></url>
   <url><loc>https://virling.com/vs/databull</loc></url>
@@ -195,5 +203,6 @@
   <url><loc>https://virling.com/tools/merchant-of-record-fee-calculator</loc></url>
   <url><loc>https://virling.com/tools/arr-calculator</loc></url>
   <url><loc>https://virling.com/tools/cpm-calculator</loc></url>
+  <url><loc>https://virling.com/tools/grr-calculator</loc></url>
   <url><loc>https://virling.com/what-we-dont-do</loc></url>
 </urlset>
