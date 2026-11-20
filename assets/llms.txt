@@ -73,6 +73,8 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [CPM calculator: CPM, CPC and CTR for sponsorships](https://virling.com/tools/cpm-calculator): CPM, CPC and CTR for a newsletter, podcast, creator or ad placement from its cost, impressions or sends and clicks, plus revenue per thousand and return when revenue is added
 - [Gross revenue retention calculator: GRR formula](https://virling.com/tools/grr-calculator): gross revenue retention as a percentage from starting MRR, churned MRR and contraction MRR, with the GRR formula
 - [Price increase calculator: how many customers can you lose?](https://virling.com/tools/price-increase-calculator): revenue before and after a price increase, break-even churn and new monthly revenue, from current price, new price, paying customers and expected churn
+- [UTM links for social media: one tagged link per platform](https://virling.com/tools/social-utm-link-generator): a tagged link for X, LinkedIn, Instagram, TikTok, YouTube, Reddit, Threads, Bluesky, Discord and your newsletter from a page URL and a campaign name
+- [Cohort retention template by acquisition channel](https://virling.com/tools/cohort-retention-template): retention percentages by acquisition channel from monthly cohorts and how many customers still pay each month, copied as CSV
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -100,6 +102,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Revenue attribution for AI apps](https://virling.com/integrations/ai-apps): whether X, Product Hunt, Reddit, YouTube or AI assistants bring the users who pay for an AI app, with credits, top-ups and subscriptions from Stripe, Polar, Creem and Dodo Payments
 - [Revenue attribution for membership sites and paid communities](https://virling.com/integrations/memberships): which channel brought each paying member of a membership site or paid community, with renewals credited to the first channel, for Stripe, Polar, LemonSqueezy and Paddle
 - [Revenue attribution for plugin and theme sellers](https://virling.com/integrations/plugins-and-themes): whether docs, a marketplace listing, the blog, a newsletter or social brought each WordPress plugin, theme or license sale and renewal, for Paddle, LemonSqueezy, Polar, Creem and Stripe
+- [Revenue attribution for coaches and consultants](https://virling.com/integrations/coaching-and-consulting): which podcast guest spot, LinkedIn post, newsletter or referral brought each paying coaching or consulting client, for Stripe Payment Links and Checkout
 
 ## Compare
 
@@ -240,6 +243,12 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [CAC by channel: how to calculate customer acquisition cost by channel](https://virling.com/blog/cac-by-channel): How to calculate customer acquisition cost by channel: divide your spend by the paying customers each channel brought, not clicks or signups, and how to count them.
 - [LTV by acquisition channel: which channels bring customers worth the most](https://virling.com/blog/ltv-by-acquisition-channel): How to see LTV by acquisition channel for a subscription product: credit renewals to the channel that won the customer and compare revenue per customer over months.
 - [Content marketing ROI: which content brings paying customers](https://virling.com/blog/content-marketing-roi): How to measure content marketing ROI: the formula, why pageviews and leads miss it, and how to see revenue from customers who landed on a post, guide or video.
+- [Rails Stripe UTM tracking: Checkout and the Pay gem](https://virling.com/blog/rails-stripe-utm-tracking): How to tie a Stripe Checkout payment in a Ruby on Rails app to the visit and UTM tags that brought it, with stripe-ruby or the Pay gem.
+- [Django Stripe UTM tracking: Checkout in Python](https://virling.com/blog/django-stripe-utm-tracking): How to tie a Stripe Checkout payment in a Django app to the visit and UTM tags that brought it, with the stripe Python library.
+- [Subscription renewal attribution: which channel gets the MRR](https://virling.com/blog/subscription-renewal-attribution): How to attribute subscription renewals to a marketing channel: a renewal has no visit, so credit it to the channel of the customer's first payment.
+- [Marketing year in review: which channels brought paying customers](https://virling.com/blog/marketing-year-in-review): A marketing year in review by revenue per channel: which channels brought paying customers and renewals, which only brought visits, and what to keep or cut.
+- [Lead magnet ROI: do free downloads bring paying customers](https://virling.com/blog/lead-magnet-revenue-tracking): How to measure lead magnet ROI: track each opt-in as a goal, tag the links that promote it, and see which lead magnet visitors go on to pay.
+- [DuckDuckGo, Brave and privacy search revenue tracking](https://virling.com/blog/privacy-search-revenue-tracking): How to see which DuckDuckGo, Brave Search, Ecosia and Kagi visitors pay: what referrer these engines send, why some show as Direct, and cookies.
 
 ## Source
 
