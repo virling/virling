@@ -46,7 +46,7 @@
 <p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-09.</p>
 <p class="p">To track LemonSqueezy revenue by traffic source, give each visitor an ID, pass it to LemonSqueezy as checkout custom data, and join each order back to the visits that came before it. LemonSqueezy knows who paid and how much. It does not know which page or channel they came from.</p>
 <h2>Step 1: set a visitor ID</h2>
-<p class="p">Your analytics script sets one first-party ID per visitor and remembers the first source: referrer, UTM tags or direct. Put the script on the pages that link to checkout, not only on the checkout itself.</p>
+<p class="p">Your analytics script sets one first-party ID per visitor and remembers the first source: referrer, UTM tags or direct. Put the script on the pages that link to checkout, not only on the checkout itself. The UTM tags stay with the visit, not the LemonSqueezy checkout; <a href="/blog/lemonsqueezy-utm-tracking">LemonSqueezy UTM tracking</a> shows how the ID ties each order back to them.</p>
 <h2>Step 2: send the ID to LemonSqueezy at checkout</h2>
 <p class="p">LemonSqueezy checkouts accept custom data. Pick the option that matches how you sell:</p>
 <ul class="post-list"><li><b>Checkout links:</b> add the ID to the link as <code>checkout[custom][name]=value</code></li><li><b>Checkouts you create on your server:</b> when you call <code>POST /v1/checkouts</code>, set <code>data.attributes.checkout_data.custom</code> to an object holding the ID from the visitor's cookie</li></ul>

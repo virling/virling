@@ -46,7 +46,7 @@
 <p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-16.</p>
 <p class="p">To track Polar revenue by traffic source, give each visitor an ID, put it in the checkout's metadata, and join each order back to the visits that came before it. Polar knows who paid and how much. It does not know which page or channel they came from.</p>
 <h2>Step 1: set a visitor ID</h2>
-<p class="p">Your analytics script sets one first-party ID per visitor and remembers the first source: referrer, UTM tags or direct. Put the script on the pages that link to checkout, not only on the checkout itself.</p>
+<p class="p">Your analytics script sets one first-party ID per visitor and remembers the first source: referrer, UTM tags or direct. Put the script on the pages that link to checkout, not only on the checkout itself. The UTM tags stay with the visit, not the Polar checkout; <a href="/blog/polar-utm-tracking">Polar UTM tracking</a> shows how the ID ties each order back to them.</p>
 <h2>Step 2: send the ID to Polar at checkout</h2>
 <p class="p">Polar orders carry metadata, so the ID can travel with the order. Pick the option that matches how you sell:</p>
 <ul class="post-list"><li><b>Checkouts you create on your server:</b> when you call <code>polar.checkouts.create</code>, set <code>metadata</code> to an object holding the ID from the visitor's cookie</li><li><b>Checkout links on buy.polar.sh:</b> add the ID to the link as <code>reference_id</code>, which Polar stores in the order's metadata</li></ul>
