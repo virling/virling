@@ -72,6 +72,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [ARR calculator: annual recurring revenue from MRR](https://virling.com/tools/arr-calculator): ARR now, net new ARR and ARR in 12 months at the current net rate, from MRR or monthly plans plus new and churned MRR
 - [CPM calculator: CPM, CPC and CTR for sponsorships](https://virling.com/tools/cpm-calculator): CPM, CPC and CTR for a newsletter, podcast, creator or ad placement from its cost, impressions or sends and clicks, plus revenue per thousand and return when revenue is added
 - [Gross revenue retention calculator: GRR formula](https://virling.com/tools/grr-calculator): gross revenue retention as a percentage from starting MRR, churned MRR and contraction MRR, with the GRR formula
+- [Price increase calculator: how many customers can you lose?](https://virling.com/tools/price-increase-calculator): revenue before and after a price increase, break-even churn and new monthly revenue, from current price, new price, paying customers and expected churn
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -98,6 +99,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Revenue attribution for online courses](https://virling.com/integrations/online-courses): which YouTube video, newsletter, webinar or affiliate brings each course or cohort sale, for Stripe, LemonSqueezy, Polar, Creem and Shopify
 - [Revenue attribution for AI apps](https://virling.com/integrations/ai-apps): whether X, Product Hunt, Reddit, YouTube or AI assistants bring the users who pay for an AI app, with credits, top-ups and subscriptions from Stripe, Polar, Creem and Dodo Payments
 - [Revenue attribution for membership sites and paid communities](https://virling.com/integrations/memberships): which channel brought each paying member of a membership site or paid community, with renewals credited to the first channel, for Stripe, Polar, LemonSqueezy and Paddle
+- [Revenue attribution for plugin and theme sellers](https://virling.com/integrations/plugins-and-themes): whether docs, a marketplace listing, the blog, a newsletter or social brought each WordPress plugin, theme or license sale and renewal, for Paddle, LemonSqueezy, Polar, Creem and Stripe
 
 ## Compare
 
