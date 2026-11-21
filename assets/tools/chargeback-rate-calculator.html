@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chargeback rate calculator: rate, cost and thresholds | Virling</title>
+<meta name="description" content="Free chargeback rate calculator. Enter transactions and chargebacks for a month to get your chargeback rate, what disputes cost, and how far you are from Visa and Mastercard monitoring thresholds. Runs in your browser.">
+<link rel="canonical" href="https://virling.com/tools/chargeback-rate-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/chargeback-rate-calculator">
+<meta property="og:title" content="Chargeback rate calculator: rate, cost and thresholds | Virling">
+<meta property="og:description" content="Free chargeback rate calculator. Enter transactions and chargebacks for a month to get your chargeback rate, what disputes cost, and how far you are from Visa and Mastercard monitoring thresholds. Runs in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Chargeback rate calculator","url":"https://virling.com/tools/chargeback-rate-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Chargeback rate calculator","item":"https://virling.com/tools/chargeback-rate-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / chargeback rate calculator</span><h1>Chargeback rate calculator</h1><p class="lead">Enter your transactions and chargebacks for a month to see your chargeback rate, what the disputes cost you, and how far you are from the card network monitoring thresholds. Works for stores and SaaS. Everything runs in your browser and nothing is uploaded.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="cb" autocomplete="off">
+  <label>Transactions in the month<input name="tx" type="number" min="0" step="1" value="2000"></label>
+  <label>Chargebacks in the month<input name="cb" type="number" min="0" step="1" value="8"></label>
+  <label>Average order value ($, optional)<input name="aov" type="number" min="0" step="0.01" value="60"></label>
+  <label>Dispute fee per chargeback ($, optional)<input name="fee" type="number" min="0" step="0.01" value="15"></label>
+</form>
+<div class="tool-stats" id="cb-out"></div>
+<p class="fine-note">Thresholds from Stripe's guide to <a href="https://docs.stripe.com/disputes/monitoring-programs">card network monitoring programs</a>, checked on 2026-11-21. Visa's VAMP ratio also counts early fraud warnings, and Mastercard divides this month's chargebacks by last month's transactions, so treat these distances as a guide. Both networks also require a minimum count: 5 for VAMP non-compliant, 100 for Mastercard ECM, 300 for HECM, and 1,500 for VAMP excessive outside CEMEA (2.2% and 150 in CEMEA). Programs change, so check with your processor.</p>
+<div class="txt post tool-cta">
+<p class="p">This is one blended number. Virling splits revenue by channel from your real payments: it links every visit to the payment it led to and credits each payment, after refunds, to the channel that brought it. See <a href="https://docs.virling.com/attribution/">how attribution works</a> in the docs. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/refund-rate-calculator">refund rate calculator</a>, <a href="/tools/payment-fee-calculator">Stripe fee calculator</a>, <a href="/tools/aov-calculator">AOV calculator</a>, <a href="/blog/track-stripe-revenue-by-traffic-source">track Stripe revenue by traffic source</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The chargeback rate formula</h2>
+<p class="p">Chargeback rate is the share of a month's transactions that buyers disputed with their card issuer:</p>
+<p class="p"><code>chargeback rate = chargebacks / transactions</code></p>
+<p class="p">The monthly cost counts the order amount you lose on each chargeback plus the fee your processor charges for each dispute:</p>
+<p class="p"><code>monthly cost = chargebacks &times; (average order value + dispute fee)</code></p>
+<p class="p">That is the cost if you lose every dispute. Winning one returns the order amount; whether the fee comes back depends on your processor. Goods already shipped and the time spent answering disputes are not in the number.</p>
+<p class="p">The distance to a threshold is the threshold minus your rate, and the room left is how many more chargebacks the same number of transactions can take before reaching it:</p>
+<p class="p"><code>chargebacks to threshold = transactions &times; threshold - chargebacks</code></p>
+<h2>A worked example</h2>
+<p class="p">With the defaults above, the month has 2,000 transactions and 8 chargebacks. 8 / 2,000 = 0.4% chargeback rate. At a $60 average order and a $15 dispute fee, each chargeback costs $75, so the month costs 8 &times; $75 = $600.</p>
+<p class="p">The rate is 0.1 points under Visa's 0.5% non-compliant VAMP ratio: 2,000 &times; 0.005 = 10 chargebacks would reach it, so 2 more would. It is 1.1 points under the 1.5% Mastercard ECM rate, which 30 chargebacks would reach, and 2.6 points under the 3% HECM rate, which 60 would reach. Mastercard also needs at least 100 chargebacks in the month, so at this volume the rate alone does not enter its program.</p>
+<h2>Find the traffic sources that bring high-dispute buyers</h2>
+<p class="p">A blended chargeback rate hides where disputes come from. Buyers from some sources are more likely to dispute: a deal site, a coupon shared far beyond its audience, or an ad that promises more than the product does can bring orders that come back as chargebacks, while buyers from search or a referral who knew what they wanted rarely do. Friendly fraud, where a buyer does not recognise the charge, also clusters around sources that bring impulse buyers.</p>
+<p class="p">To find them, join each disputed payment to the visit that brought the buyer, then compare chargebacks and refunds per source. Run this calculator per source with the transactions and chargebacks each one brought, and the <a href="/tools/refund-rate-calculator">refund rate calculator</a> for refunds. The <a href="/tools/payment-fee-calculator">Stripe fee calculator</a> shows what each payment costs before any dispute. For how to join payments to traffic sources, see <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>. Virling does this join from your payments: it <a href="https://docs.virling.com/attribution/">credits each payment</a> to the channel, referrer, campaign and landing page of the visit that brought it, so a source that brings buyers who refund shows less revenue.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Chargeback rate calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How is chargeback rate calculated?</h3><p class="p">Divide the chargebacks in a month by the transactions in that month. The card networks each use their own version: Mastercard divides this month's chargebacks by last month's transactions, and Visa's VAMP ratio counts early fraud warnings as well as disputes.</p></div>
+      <div><h3>What chargeback rate is too high?</h3><p class="p">According to Stripe's guide to card network monitoring programs, Mastercard places a business in its Excessive Chargeback Merchant level at 1.5% and 100 chargebacks in a month, and the High level at 3% and 300. Visa's VAMP is non-compliant at 0.5% and 5 disputes and fraud warnings, and excessive at 1.5% and 1,500 in most regions. Your processor may act before you reach them.</p></div>
+      <div><h3>Is a chargeback the same as a refund?</h3><p class="p">No. You choose to give a refund. A chargeback is a buyer asking their card issuer to reverse the payment, which pulls the money back, usually adds a dispute fee, and counts toward the network thresholds. A refund given before a dispute is opened avoids the chargeback.</p></div>
+      <div><h3>What does a chargeback cost?</h3><p class="p">If you lose the dispute, the order amount plus the dispute fee, and any goods already shipped. The calculator counts the order amount and the fee. Winning a dispute returns the order amount; whether the fee comes back depends on your processor.</p></div>
+      <div><h3>Why do some traffic sources bring more chargebacks?</h3><p class="p">Buyers arrive with different intent. Deal sites, widely shared coupons and ads that overpromise can bring buyers who dispute, while search and referrals bring buyers who knew what they wanted. Joining each payment to the visit that brought it shows which sources those are.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How is chargeback rate calculated?", "acceptedAnswer": {"@type": "Answer", "text": "Divide the chargebacks in a month by the transactions in that month. The card networks each use their own version: Mastercard divides this month's chargebacks by last month's transactions, and Visa's VAMP ratio counts early fraud warnings as well as disputes."}}, {"@type": "Question", "name": "What chargeback rate is too high?", "acceptedAnswer": {"@type": "Answer", "text": "According to Stripe's guide to card network monitoring programs, Mastercard places a business in its Excessive Chargeback Merchant level at 1.5% and 100 chargebacks in a month, and the High level at 3% and 300. Visa's VAMP is non-compliant at 0.5% and 5 disputes and fraud warnings, and excessive at 1.5% and 1,500 in most regions. Your processor may act before you reach them."}}, {"@type": "Question", "name": "Is a chargeback the same as a refund?", "acceptedAnswer": {"@type": "Answer", "text": "No. You choose to give a refund. A chargeback is a buyer asking their card issuer to reverse the payment, which pulls the money back, usually adds a dispute fee, and counts toward the network thresholds. A refund given before a dispute is opened avoids the chargeback."}}, {"@type": "Question", "name": "What does a chargeback cost?", "acceptedAnswer": {"@type": "Answer", "text": "If you lose the dispute, the order amount plus the dispute fee, and any goods already shipped. The calculator counts the order amount and the fee. Winning a dispute returns the order amount; whether the fee comes back depends on your processor."}}, {"@type": "Question", "name": "Why do some traffic sources bring more chargebacks?", "acceptedAnswer": {"@type": "Answer", "text": "Buyers arrive with different intent. Deal sites, widely shared coupons and ads that overpromise can bring buyers who dispute, while search and referrals bring buyers who knew what they wanted. Joining each payment to the visit that brought it shows which sources those are."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring buyers who keep what they buy</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue after refunds that each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("cb"), out = document.getElementById("cb-out");
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 2 }) + "%";
+const usd = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const num = (n) => n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+const calc = () => {
+  const t = +f.tx.value, n = +f.cb.value, a = +f.aov.value || 0, d = +f.fee.value || 0;
+  const r = t > 0 && n >= 0 && n <= t ? n / t : NaN, ok = r >= 0;
+  const gap = (x) => {
+    if (!ok) return "No data";
+    const p = Math.abs(x - r) * 100, p2 = p.toLocaleString("en-US", { maximumFractionDigits: 2 });
+    if (r >= x) return p2 + " points over";
+    const left = Math.ceil(t * x - 1e-9) - n;
+    return p2 + " points under (" + num(left) + " more " + (left === 1 ? "chargeback" : "chargebacks") + ")";
+  };
+  const tier = !ok ? "No data" : r >= 0.03 && n >= 300 ? "HECM" : r >= 0.015 && n >= 100 ? "ECM" : "Not in the program";
+  const rows = [];
+  rows.push(["Chargeback rate", ok ? pct(r) : "No data"]);
+  rows.push(["Monthly chargeback cost", ok && (a > 0 || d > 0) ? usd(n * (a + d)) : "Add order value or fee"]);
+  rows.push(["To 0.5% (Visa VAMP non-compliant)", gap(0.005)]);
+  rows.push(["To 1.5% (Mastercard ECM, Visa VAMP excessive)", gap(0.015)]);
+  rows.push(["To 3% (Mastercard HECM)", gap(0.03)]);
+  rows.push(["Mastercard level, rate and count", tier]);
+  out.innerHTML = rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
