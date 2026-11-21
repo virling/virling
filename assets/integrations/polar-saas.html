@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polar SaaS attribution: subscriptions by traffic source</title>
+<meta name="description" content="For SaaS and developer tools selling through Polar: tie each order, payment after a trial and renewal to the channel that brought the customer.">
+<link rel="canonical" href="https://virling.com/integrations/polar-saas">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/polar-saas">
+<meta property="og:title" content="Polar SaaS attribution: subscriptions by traffic source">
+<meta property="og:description" content="For SaaS and developer tools selling through Polar: tie each order, payment after a trial and renewal to the channel that brought the customer.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"Polar","item":"https://virling.com/integrations/polar"},{"@type":"ListItem","position":4,"name":"Polar for SaaS","item":"https://virling.com/integrations/polar-saas"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Which channel brings my Polar subscribers?","acceptedAnswer":{"@type":"Answer","text":"Connect Polar to Virling with a read-only organization access token and pass the visitor ID in the checkout metadata; Polar checkout links get it from the script automatically. Each customer's first payment is credited to the visits before it, and every renewal keeps that channel, so the Channels card and the Retention page show which channels bring subscribers who pay."}},{"@type":"Question","name":"How are Polar renewals attributed?","acceptedAnswer":{"@type":"Answer","text":"An order with billing reason subscription_cycle is a renewal. It takes the channel, referrer, campaign and landing page of the customer's first payment, matched by Polar customer ID. Plan changes (subscription_update) keep that channel too."}},{"@type":"Question","name":"What about free trials on Polar?","acceptedAnswer":{"@type":"Answer","text":"A $0 order with billing reason subscription_create starts a trial. Virling never counts it as revenue, a payment or a customer. The customer's later payment, which has no visitor ID of its own, is credited to the visits before the trial started."}},{"@type":"Question","name":"Which scopes does the Polar token need?","acceptedAnswer":{"@type":"Answer","text":"orders:read and refunds:read, plus subscriptions:read so Retention can tell who still pays. No other scopes are needed, and Virling never creates, changes or refunds anything."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / polar for saas</span>
+      <h1>See which channel brings your Polar subscribers.</h1>
+      <p class="lead">For SaaS products and developer tools that sell subscriptions, licenses or sponsorships through Polar. Virling ties each order, the first payment after a trial and every renewal to the channel that brought the customer, so you compare channels by the customers who pay, not by signups. Open source under AGPL, hosted or <a href="/self-host">self-hosted</a>.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">Polar knows who pays and how much, but not the visit that brought them. Your ads, posts and search results bring the visit, and the renewal in month six never touches your site at all. Virling joins the two with a read-only organization access token.</p>
+<h2>What you get</h2>
+<ul class="post-list"><li><b>Each order credited to a channel.</b> The customer&#x27;s first payment is joined to the visits before it. By default it goes to the latest visit in the last 90 days that was not Direct; B2B buyers who take weeks to decide can be read with first touch or a 365-day window.</li><li><b>Trials that convert, credited to the visit before the trial.</b> A $0 order with billing reason <code>subscription_create</code> starts a trial. Virling never counts it as revenue, a payment or a customer, and credits the customer&#x27;s later payment to the visits before the trial started.</li><li><b>Renewals that keep the first channel.</b> An order with billing reason <code>subscription_cycle</code> is a renewal. It copies the channel, referrer, campaign, landing page, country and device of the customer&#x27;s first payment, matched by Polar customer ID, even years later. Plan changes (<code>subscription_update</code>) keep that channel too.</li><li><b>Refunds taken off.</b> New refunds update the order they belong to, and a pending refund is read again once it settles. Unpaid orders are checked again every 10 minutes for up to 30 days and imported once paid.</li><li><b>Retention by channel.</b> The Retention page groups customers by the channel of their first payment, with how many still pay, net LTV and 30-day churn. With <code>subscriptions:read</code>, subscription status is read once an hour and <code>active</code>, <code>trialing</code> and <code>past_due</code> count as still paying; without it, retention falls back to payment recency.</li><li><b>Revenue per visitor and time to pay.</b> The Channels card shows visitors, revenue and revenue per visitor per channel, and Time to pay shows the median time from first visit to first payment, so you do not cut a channel before its customers have had time to pay.</li></ul>
+<h2>Set it up</h2>
+<ol class="post-list"><li><b>Add the site.</b> Click <b>+ Add a site</b> and enter your domain, such as <code>yourproduct.com</code>, and its timezone.</li><li><b>Install the script.</b> Paste the tag before <code>&lt;/head&gt;</code> on your marketing site and your app. The <code>virling_vid</code> cookie is set on your registrable domain, so <code>yourproduct.com</code> and <code>app.yourproduct.com</code> share one visitor ID. Leave cookieless mode off.</li><li><b>Connect Polar.</b> In your Polar organization&#x27;s settings, create an Organization Access Token with <code>orders:read</code> and <code>refunds:read</code>, plus <code>subscriptions:read</code> for retention. Paste it under payments; it starts with <code>polar_oat_</code>, and production and sandbox tokens both work. The last 90 days are imported, then new orders every minute.</li><li><b>Pass the visitor ID at checkout.</b> Checkout links on <code>buy.polar.sh</code> need no code: keep the link as a normal <code>&lt;a href&gt;</code> on a page that runs the script, and the script adds <code>reference_id=&lt;visitor ID&gt;</code>, which Polar stores in the order&#x27;s metadata. For a checkout session you create on your server, set <code>virling_vid</code> in <code>metadata</code>. Virling reads it from the order&#x27;s metadata, then the order&#x27;s custom field data, then the customer&#x27;s metadata.</li></ol>
+<div class="code block"><pre>const checkout = await polar.checkouts.create({
+  products: [&quot;PRODUCT_ID&quot;],
+  success_url: &quot;https://yourproduct.com/thanks&quot;,
+  metadata: { virling_vid: req.cookies.virling_vid },
+});
+// Send the customer to checkout.url</pre></div>
+<p class="p">The full walkthrough is in <a href="/blog/track-polar-revenue-by-traffic-source">how to track Polar revenue by traffic source</a>, and <a href="/blog/polar-utm-tracking">Polar UTM tracking</a> covers tagging links so each order shows its campaign. Every setting is on the <a href="/integrations/polar">Polar integration page</a>, and <a href="/integrations/developer-tools">Virling for developer tools</a> covers the wider setup for products sold to developers.</p>
+<h2>What to know</h2>
+<ul class="post-list"><li>Orders older than the 90-day backfill are not imported, so renewals of subscriptions that started before that are Unattributed. Channel numbers fill in as new customers arrive.</li><li>Renewals carry no metadata of their own; they keep the channel of the subscription&#x27;s first payment.</li><li>Payments without a customer ID cannot be linked to a first payment, and payments without a visitor ID still count toward revenue as Unattributed.</li></ul>
+<h2>Open source</h2>
+<p class="p">Virling is open source under AGPLv3, and the code is on <a href="https://github.com/virling/virling">GitHub</a>. Use the hosted service, or <a href="/self-host">self-host it</a> as one binary with every feature. In a load test on 2026-10-31, in a container limited to one vCPU and 1 GB of RAM, it ingested 100,000 pageviews at 2,829 a second with none failed and a p99 of 34 ms, and used 157 MB of memory after the ingest.</p>
+<h2>Frequently asked questions</h2>
+<h3>Which channel brings my Polar subscribers?</h3><p class="p">Connect Polar to Virling with a read-only organization access token and pass the visitor ID in the checkout metadata; Polar checkout links get it from the script automatically. Each customer's first payment is credited to the visits before it, and every renewal keeps that channel, so the Channels card and the Retention page show which channels bring subscribers who pay.</p>
+<h3>How are Polar renewals attributed?</h3><p class="p">An order with billing reason subscription_cycle is a renewal. It takes the channel, referrer, campaign and landing page of the customer's first payment, matched by Polar customer ID. Plan changes (subscription_update) keep that channel too.</p>
+<h3>What about free trials on Polar?</h3><p class="p">A $0 order with billing reason subscription_create starts a trial. Virling never counts it as revenue, a payment or a customer. The customer's later payment, which has no visitor ID of its own, is credited to the visits before the trial started.</p>
+<h3>Which scopes does the Polar token need?</h3><p class="p">orders:read and refunds:read, plus subscriptions:read so Retention can tell who still pays. No other scopes are needed, and Virling never creates, changes or refunds anything.</p>
+      <p class="p">Full guides: <a href="https://docs.virling.com/guides/saas">Set up Virling for a SaaS product</a>, <a href="https://docs.virling.com/payments/polar">Polar in the docs</a> and <a href="https://docs.virling.com/attribution/renewals">Renewals</a>.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post"><h2>Related reading</h2><ul class="post-list"><li><a href="/integrations/polar">Polar revenue attribution</a></li><li><a href="/integrations/saas">Virling for SaaS</a></li><li><a href="/integrations/developer-tools">Revenue attribution for developer tools</a></li><li><a href="/blog/track-polar-revenue-by-traffic-source">How to track Polar revenue by traffic source</a></li><li><a href="/blog/polar-utm-tracking">Polar UTM tracking: which channel brought each order</a></li></ul></div></div></section>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
