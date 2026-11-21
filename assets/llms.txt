@@ -86,6 +86,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Chargeback rate calculator: rate, cost and thresholds](https://virling.com/tools/chargeback-rate-calculator): chargeback rate, monthly dispute cost and the distance to the Visa VAMP and Mastercard ECM and HECM thresholds, from transactions, chargebacks, average order value and dispute fee
 - [Failed payment recovery calculator: involuntary churn](https://virling.com/tools/failed-payment-recovery-calculator): MRR at risk, MRR lost per month and year to failed renewals, and the MRR saved by a better recovery rate, from MRR, the share of renewals that fail and the share recovered today and after improvements
 - [Store revenue goal calculator: orders and visitors needed](https://virling.com/tools/store-revenue-goal-calculator): orders, new buyers and visitors a month needed, from a monthly revenue goal, average order value, conversion rate and repeat purchase share
+- [Bulk UTM builder](https://virling.com/tools/bulk-utm-builder): add UTM tags to many links at once from a URL list or a CSV, then copy them all or download a CSV
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
