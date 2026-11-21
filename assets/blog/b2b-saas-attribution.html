@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B2B SaaS attribution for small teams</title>
+<meta name="description" content="Why B2B SaaS attribution is hard with long trials, invoices and sales calls, and what a small team can track today: first and last touch, revenue by channel and time to pay.">
+<link rel="canonical" href="https://virling.com/blog/b2b-saas-attribution">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/b2b-saas-attribution">
+<meta property="og:title" content="B2B SaaS attribution for small teams">
+<meta property="og:description" content="Why B2B SaaS attribution is hard with long trials, invoices and sales calls, and what a small team can track today: first and last touch, revenue by channel and time to pay.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"B2B SaaS attribution for small teams","item":"https://virling.com/blog/b2b-saas-attribution"}]},{"@type":"BlogPosting","headline":"B2B SaaS attribution for small teams","description":"Why B2B SaaS attribution is hard with long trials, invoices and sales calls, and what a small team can track today: first and last touch, revenue by channel and time to pay.","datePublished":"2026-11-21","dateModified":"2026-11-21","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/b2b-saas-attribution"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is B2B SaaS attribution?","acceptedAnswer":{"@type":"Answer","text":"Crediting each paying customer, and the revenue they bring, to the marketing channel behind the visits before they paid. For a B2B SaaS that means joining a payment that may come weeks later, often through a trial or an invoice, back to the visitor who first read your site."}},{"@type":"Question","name":"Why is B2B attribution harder than ecommerce attribution?","acceptedAnswer":{"@type":"Answer","text":"Buyers visit several times over weeks, start a free trial that charges nothing, talk to you on calls and often pay an invoice from their inbox. The visit and the payment are separate records, so something has to carry the visitor ID or the buyer's email from your site to the payment."}},{"@type":"Question","name":"Should a B2B SaaS use first-touch or last-touch attribution?","acceptedAnswer":{"@type":"Answer","text":"Start with last non-direct, the default, then switch to first touch to see which channels introduce buyers. B2B buyers often take weeks to decide, so first touch or a 365-day lookback window can show channels a short last-touch view misses. Changing the model rebuilds attribution for past payments too."}},{"@type":"Question","name":"Can an invoice paid after a sales call be attributed?","acceptedAnswer":{"@type":"Answer","text":"Yes, if it can be tied to a visitor. A Stripe payment with no visitor ID is credited to a visitor whose email, sent earlier in an identify event, matches the payer email exactly. A deal that never touched your site has no visit to credit."}},{"@type":"Question","name":"Do renewals count toward the channel that brought the customer?","acceptedAnswer":{"@type":"Answer","text":"Yes. Every renewal takes the channel of the customer's first payment, matched by the provider's customer ID, so a channel keeps the credit for the subscribers it brought."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-21</span>
+      <h1>B2B SaaS attribution for small teams</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-21.</p>
+<p class="p"><b>B2B SaaS attribution</b> means crediting each paying customer, and the revenue they bring, to the marketing channel behind the visits before they paid. For a small team it does not need a data warehouse or a marketing ops hire. It needs three things joined together: each visit stored with a visitor ID, that ID or the buyer's email carried to the payment, and payments read from your billing provider.</p>
+<p class="p">Signups and demo requests are easy to count. The question a founder actually has is harder: which channels bring customers who pay, and keep paying?</p>
+<h2>Why B2B attribution is hard</h2>
+<p class="p">A B2B purchase rarely happens in one visit. The path from first click to first payment breaks in a few predictable places.</p>
+<ul class="post-list"><li><b>Several visits over weeks.</b> A buyer reads a post, comes back from a search a week later, then types your URL on the day they sign up. Each visit can have a different source, and someone has to decide which one gets the credit.</li><li><b>Long free trials.</b> A trial charges nothing, so there is no payment to carry the visitor ID. The first real payment may arrive days or weeks after signup, with no browser session attached.</li><li><b>Invoices.</b> A deal that closes with an invoice is paid from a link in the buyer's inbox. Nothing on that invoice says where the buyer came from.</li><li><b>Sales calls.</b> When a deal moves to calls and email, it leaves your site. Whatever happens on the call is invisible to any analytics tool.</li></ul>
+<p class="p">The visit and the payment are two separate records. Attribution is the work of joining them.</p>
+<h2>What a small team can track today</h2>
+<p class="p">You do not need every touch of every stakeholder to make good decisions. These are enough to tell which channels are worth your time:</p>
+<ul class="post-list"><li><b>First and last touch for each paying customer.</b> Which channel introduced them, and which one brought them back to pay. Virling uses one model per site, set in Site settings: last non-direct by default, first touch, or last touch. Switching rebuilds attribution for every past payment, so you can compare channels under each model. <a href="/blog/first-touch-vs-last-touch-attribution-saas">First-touch or last-touch attribution for a SaaS</a> explains when each one fits.</li><li><b>Revenue by channel.</b> Visitors, revenue and revenue per visitor for each channel, with renewals counted toward the channel of the customer's first payment.</li><li><b>Time to pay.</b> The median time from first visit to first payment per channel, so you do not cut a channel before its customers have had time to pay. See <a href="/blog/how-long-does-a-visitor-take-to-become-a-customer">how long a visitor takes to become a customer</a>.</li><li><b>Retention by channel.</b> Customers grouped by the channel of their first payment, with how many still pay, so you can see which channel brings customers who stay.</li></ul>
+<p class="p">Models such as linear or position-based are not available in Virling yet. For a small team, comparing first touch with last non-direct usually answers the same question with less to explain.</p>
+<h2>Setting it up with Virling</h2>
+<h3>1. Add the script</h3>
+<p class="p">Add one tag before <code>&lt;/head&gt;</code> on every page of your marketing site and your app:</p>
+<div class="code block"><pre>&lt;script defer src="https://app.virling.com/v.js"
+  data-site="yourproduct.com"&gt;&lt;/script&gt;</pre></div>
+<p class="p">The <code>virling_vid</code> cookie is set on your registrable domain, so a site on <code>yourproduct.com</code> and an app on <code>app.yourproduct.com</code> share the same visitor ID. Leave cookieless mode off: without the cookie there is no visitor ID for checkout to carry.</p>
+<h3>2. Connect Stripe or Paddle</h3>
+<p class="p">Connect your billing provider with a key that can only read. For Stripe that is a restricted key with Read on Charges, Checkout Sessions, Customers, Events, Invoices, Subscriptions and PaymentIntents; secret keys are refused. For Paddle it is an API key with <code>transaction.read</code> and <code>adjustment.read</code>, plus <code>subscription.read</code> for retention. Virling imports the last 90 days, then checks for new payments every minute. It never creates, changes or refunds anything.</p>
+<h3>3. Pass the visitor ID at checkout</h3>
+<p class="p">This is the step that links a payment to the visits before it. Stripe Payment Links on <code>buy.stripe.com</code> need nothing: the script adds the visitor ID when the link is clicked on your site. For a Stripe Checkout Session your server creates, set <code>client_reference_id</code> to the <code>virling_vid</code> cookie, or put it in <code>metadata.virling_vid</code>:</p>
+<div class="code block"><pre>await stripe.checkout.sessions.create({
+  client_reference_id: req.cookies.virling_vid,
+  // ...
+});</pre></div>
+<p class="p">With Paddle.js, pass it as <code>customData: { virling_vid: window.virling?.vid?.() }</code> when you open checkout. The code for every provider is in <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>. Payments without a visitor ID still count toward revenue, as Unattributed.</p>
+<h3>4. Trials and invoices</h3>
+<p class="p">Stripe and Paddle report a trial start, and Virling keeps it apart from payments: it is never counted as revenue. A later payment of that customer with no visitor ID of its own is credited to the visits before the trial started. Stripe only sees trials that started after it was connected.</p>
+<p class="p">For invoiced deals, send the buyer's email in an <code>identify</code> event when they sign up or book a demo on your site. A Stripe payment with no visitor ID whose payer email matches exactly is credited to that visitor and shows Matched by email on the Payments page. Virling keeps only a salted hash of the email, and matching works for Stripe for now. The details, including what still stays unattributed, are in <a href="/blog/stripe-invoice-attribution">Stripe invoice attribution for sales-led B2B SaaS</a>.</p>
+<p class="p">Every renewal, upgrade and plan change takes the channel of the customer's first payment, matched by the provider's customer ID. Getting the first payment attributed carries the whole subscription with it. Renewals of subscriptions whose first payment is older than the 90-day backfill are Unattributed. The full setup for software companies is on the <a href="/integrations/stripe-saas">Stripe SaaS integration page</a> and in the <a href="https://docs.virling.com/guides/saas">SaaS guide</a>.</p>
+<h2>Reading the numbers</h2>
+<ol class="post-list"><li>Pick a range long enough for slow buyers to pay. The Time to pay card tells you how long that is per channel.</li><li>On the Channels card, compare revenue per visitor across channels, not visitors or signups. Use the Source and Campaign tabs to see the posts, sites and UTM campaigns behind a channel.</li><li>Open a payment on the Payments page to see the buyer's journey: every visit before the payment, with the credited one marked.</li><li>Switch the model to first touch, or the lookback window to 365 days, and see which channels move. Channels that rise under first touch are the ones introducing buyers.</li><li>After a month or two, check the Retention page to see whether customers from each channel keep paying.</li></ol>
+<p class="p">If you capture leads before they pay, the <a href="/tools/lead-value-calculator">lead value calculator</a> turns your lead to paid rate and first-year revenue per customer into what a lead is worth, and the most you can pay for one.</p>
+<h2>What stays out of reach</h2>
+<ul class="post-list"><li><b>Deals that never touched your site.</b> A buyer met at an event who books by email has no visit to credit.</li><li><b>A different payer.</b> Email matching is exact, so an invoice paid by an accounts team does not match the person who booked the demo.</li><li><b>Visits outside the lookback window.</b> Only sessions that started inside the window before the payment count: 30, 60, 90 or 365 days, 90 by default.</li><li><b>Blocked visits.</b> Visitors who block the script are not counted, though their revenue still counts in your total, as Unattributed.</li></ul>
+<p class="p">Keep Unattributed as its own line. A growing share usually means a form or checkout stopped sending the visitor ID or email.</p>
+<h2>Frequently asked questions</h2>
+<h3>What is B2B SaaS attribution?</h3><p class="p">Crediting each paying customer, and the revenue they bring, to the marketing channel behind the visits before they paid. For a B2B SaaS that means joining a payment that may come weeks later, often through a trial or an invoice, back to the visitor who first read your site.</p>
+<h3>Why is B2B attribution harder than ecommerce attribution?</h3><p class="p">Buyers visit several times over weeks, start a free trial that charges nothing, talk to you on calls and often pay an invoice from their inbox. The visit and the payment are separate records, so something has to carry the visitor ID or the buyer's email from your site to the payment.</p>
+<h3>Should a B2B SaaS use first-touch or last-touch attribution?</h3><p class="p">Start with last non-direct, the default, then switch to first touch to see which channels introduce buyers. B2B buyers often take weeks to decide, so first touch or a 365-day lookback window can show channels a short last-touch view misses. Changing the model rebuilds attribution for past payments too.</p>
+<h3>Can an invoice paid after a sales call be attributed?</h3><p class="p">Yes, if it can be tied to a visitor. A Stripe payment with no visitor ID is credited to a visitor whose email, sent earlier in an identify event, matches the payer email exactly. A deal that never touched your site has no visit to credit.</p>
+<h3>Do renewals count toward the channel that brought the customer?</h3><p class="p">Yes. Every renewal takes the channel of the customer's first payment, matched by the provider's customer ID, so a channel keeps the credit for the subscribers it brought.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring paying B2B customers</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
