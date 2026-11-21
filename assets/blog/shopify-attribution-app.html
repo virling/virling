@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shopify attribution app: a buyer's checklist</title>
+<meta name="description" content="What to check before you pick a Shopify attribution app: order-level source, first and last touch, discount codes, cross-device, privacy, data ownership and price.">
+<link rel="canonical" href="https://virling.com/blog/shopify-attribution-app">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/shopify-attribution-app">
+<meta property="og:title" content="Shopify attribution app: a buyer's checklist">
+<meta property="og:description" content="What to check before you pick a Shopify attribution app: order-level source, first and last touch, discount codes, cross-device, privacy, data ownership and price.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Shopify attribution app: a buyer's checklist","item":"https://virling.com/blog/shopify-attribution-app"}]},{"@type":"BlogPosting","headline":"Shopify attribution app: a buyer's checklist","description":"What to check before you pick a Shopify attribution app: order-level source, first and last touch, discount codes, cross-device, privacy, data ownership and price.","datePublished":"2026-11-21","dateModified":"2026-11-21","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/shopify-attribution-app"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What does a Shopify attribution app do?","acceptedAnswer":{"@type":"Answer","text":"It records where each visitor came from, such as a search, an ad, an email or a social post, and links that visit to the order the visitor later placed, so you see revenue per channel and campaign."}},{"@type":"Question","name":"What should I look for in a Shopify attribution app?","acceptedAnswer":{"@type":"Answer","text":"Check that it shows the source of every single order, lets you choose first or last touch, is clear about discount codes, handles other devices and checkout redirects, respects privacy and cookie rules, lets you own the data, and has a price that fits your store."}},{"@type":"Question","name":"Does Virling read Shopify discount codes?","acceptedAnswer":{"@type":"Answer","text":"No. Virling credits an order by the visit before it, not by a discount code, so code redemptions stay in Shopify's reports. Give each creator or campaign a tagged link as well as a code and compare the two."}},{"@type":"Question","name":"Does Virling import ad spend?","acceptedAnswer":{"@type":"Answer","text":"No. Virling shows revenue per channel and campaign, but it does not import ad spend, so cost per order and return on ad spend come from your ad platform's numbers."}},{"@type":"Question","name":"Can I self-host a Shopify attribution app?","acceptedAnswer":{"@type":"Answer","text":"Virling is open source under AGPL and free to self-host with every feature, so orders and visits stay on your own server. There is also a hosted version with a 14-day free trial."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-21</span>
+      <h1>Shopify attribution app: a buyer's checklist</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-21.</p>
+<p class="p">A Shopify attribution app links each order to the visit that brought the buyer, so you see revenue per channel and campaign. Before you pick one, check seven things: that it shows the source of every single order, lets you choose first or last touch, is clear about discount codes, handles other devices and checkout redirects, respects privacy and cookie rules, lets you own the data, and has a price that fits your store. Below is what to ask for each, how Virling answers it, and where Virling falls short.</p>
+<h2>1. Order-level source</h2>
+<p class="p"><b>What to check:</b> a report of sales per channel is not enough. You want to open any order and see the visits before it, so you can trust the totals and find orders with no source.</p>
+<p class="p"><b>Virling:</b> the Payments page lists every order with the channel it was credited to; open one to see the visits before it, and filter by unattributed to find orders with no visitor. A short snippet in <code>theme.liquid</code> stores the visitor ID on the cart as <code>virling_vid</code>, and Shopify copies it onto the order as a note attribute. Virling reads orders with a read-only token (only the <code>read_orders</code> scope), imports the last 60 days on the first run, then new orders and refunds every minute. Refunds lower a channel's revenue, and Shopify Subscriptions renewals keep the channel of the first payment. Headless and Hydrogen stores work too, with the cart attribute set from your own cart code. Setup is on the <a href="/integrations/shopify">Shopify integration page</a>.</p>
+<h2>2. First and last touch</h2>
+<p class="p"><b>What to check:</b> which visit gets the credit when a buyer came more than once, whether you can change it, and how far back it looks.</p>
+<p class="p"><b>Virling:</b> each site has one model: last non-direct (the default), first touch or last touch, with a lookback window of 30, 60, 90 or 365 days. Changing either rebuilds attribution for every order, history included. Linear and position-based models are not available yet.</p>
+<h2>3. Discount codes</h2>
+<p class="p"><b>What to check:</b> whether the app credits sales by the code used or by the visit, and what happens when a code leaks to a coupon site and credits sales its owner did not drive.</p>
+<p class="p"><b>Virling:</b> an order is credited by the visit before it, not by a discount code. Virling does not read codes, so code redemptions stay in Shopify's reports. Give each creator or campaign a tagged link as well as a code, and compare the two; <a href="/blog/discount-code-attribution">discount code attribution</a> covers how.</p>
+<h2>4. Cross-device and redirects</h2>
+<p class="p"><b>What to check:</b> what happens when someone browses on a phone and buys on a laptop, and whether the source survives a redirect to checkout or between your domains.</p>
+<p class="p"><b>Virling:</b> the visitor ID lives in a first-party cookie in one browser, so two devices are two visitors. For an order with no visitor ID, Virling compares the order's email with emails your site sent as <code>identify</code> events, kept only as salted hashes, and an exact match credits that visitor and shows <b>Matched by email</b>. Shopify's checkout domain is no problem, because the visitor ID travels on the cart, not in the browser. Subdomains share the cookie, but two separate domains do not, so keep landing pages and the store on one domain or its subdomains. Carts made outside your storefront, such as cart permalinks, Buy Button embeds or other sales channels, carry no visitor ID and can only match by email. Untagged links and missing visitor IDs are the usual reasons orders land in Direct; see <a href="/blog/shopify-orders-show-as-direct">why Shopify orders show up as Direct</a>.</p>
+<h2>5. Privacy and cookies</h2>
+<p class="p"><b>What to check:</b> what the app stores about each visitor, which cookies it sets, and how it works with a consent banner.</p>
+<p class="p"><b>Virling:</b> events do not include IP addresses, full user agents, full referrer URLs or anything a visitor types. The one cookie, <code>virling_vid</code>, is first-party and holds a random ID. With <code>data-respect-gpc</code> the script sends nothing when Global Privacy Control is on. A cookieless mode sets no cookie at all, but then orders cannot be linked to visits, so leave it off for a store; the <b>Until consent</b> setting counts visits without the cookie and sets it only once the visitor accepts.</p>
+<h2>6. Data ownership</h2>
+<p class="p"><b>What to check:</b> where your order and visit data lives, what access the app needs to your store, and what happens if you stop paying.</p>
+<p class="p"><b>Virling:</b> it is open source under AGPL. Self-host it and every visit and order stays on your own server, in files you back up yourself. The Shopify token can only read orders, and Virling never creates, changes or refunds anything.</p>
+<h2>7. Price</h2>
+<p class="p"><b>What to check:</b> the monthly price at your traffic, whether features are held back on cheaper plans, and whether there is a trial.</p>
+<p class="p"><b>Virling:</b> self-hosting is free, with every feature. Hosted plans start at $19 a month for unlimited sites and 100,000 events a month, after a 14-day free trial; see <a href="/pricing">pricing</a>. To see what an order leaves after Shopify's own fees, use the <a href="/tools/shopify-fee-calculator">Shopify fee calculator</a>.</p>
+<h2>What Virling does not do</h2>
+<ul class="post-list"><li>It does not import ad spend, so cost per order and return on ad spend come from your ad platform's numbers</li><li>It does not read discount codes</li><li>It does not read the UTM tags or landing page Shopify stores on an order; an order needs <code>virling_vid</code> or an email match</li><li>It does not read Shopify subscription status, so retention uses payment recency</li><li>Linear and position-based models are not available yet</li><li>The first import goes back 60 days, the most Shopify gives without the extra <code>read_all_orders</code> permission</li></ul>
+<p class="p">The steps for a whole store, including WooCommerce, are on the <a href="/integrations/ecommerce">ecommerce page</a>. Self-host Virling free, or start the hosted version with a 14-day free trial.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Frequently asked questions</h2>
+<h3>What does a Shopify attribution app do?</h3><p class="p">It records where each visitor came from, such as a search, an ad, an email or a social post, and links that visit to the order the visitor later placed, so you see revenue per channel and campaign.</p>
+<h3>What should I look for in a Shopify attribution app?</h3><p class="p">Check that it shows the source of every single order, lets you choose first or last touch, is clear about discount codes, handles other devices and checkout redirects, respects privacy and cookie rules, lets you own the data, and has a price that fits your store.</p>
+<h3>Does Virling read Shopify discount codes?</h3><p class="p">No. Virling credits an order by the visit before it, not by a discount code, so code redemptions stay in Shopify's reports. Give each creator or campaign a tagged link as well as a code and compare the two.</p>
+<h3>Does Virling import ad spend?</h3><p class="p">No. Virling shows revenue per channel and campaign, but it does not import ad spend, so cost per order and return on ad spend come from your ad platform's numbers.</p>
+<h3>Can I self-host a Shopify attribution app?</h3><p class="p">Virling is open source under AGPL and free to self-host with every feature, so orders and visits stay on your own server. There is also a hosted version with a 14-day free trial.</p>
+</div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the source of every Shopify order</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
