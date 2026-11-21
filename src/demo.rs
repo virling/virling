@@ -1200,7 +1200,15 @@ async fn fetch_favicons(db: &sqlx::SqlitePool) -> anyhow::Result<()> {
             continue;
         }
         let host = favicon::source_host(name).context("source host")?;
-        favicon::save_source(db, &client, &host, format!("https://{host}/").parse()?).await;
+        for attempt in 0..3 {
+            if attempt > 0 {
+                tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+            }
+            favicon::save_source(db, &client, &host, format!("https://{host}/").parse()?).await;
+            if favicon::source_icon(&host).is_some() {
+                break;
+            }
+        }
         anyhow::ensure!(
             favicon::source_icon(&host).is_some(),
             "no favicon for {host}"
