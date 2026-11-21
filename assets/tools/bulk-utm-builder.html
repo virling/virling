@@ -113,7 +113,7 @@ const clean = (v) => { v = (v || "").trim().replace(/\s+/g, "-"); return f.lower
 let links = [];
 const run = () => {
   const text = f.links.value.replace(/^\ufeff/, ""), first = (text.split(/\r?\n/).find((l) => l.trim()) || "").toLowerCase();
-  const head = first.includes(",") ? parseCsv(first)[0].map((h) => h.trim().replace(/^utm_/, "")) : null;
+  const head = first.includes(",") || first.trim() === "url" ? parseCsv(first)[0].map((h) => h.trim().replace(/^utm_/, "")) : null;
   let items;
   if (head && head.includes("url")) {
     items = parseCsv(text).slice(1).map((r) => { const o = {}; head.forEach((h, i) => (o[h] = r[i] || "")); return o; });
