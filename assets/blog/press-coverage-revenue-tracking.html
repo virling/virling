@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Press coverage revenue tracking: do mentions bring customers</title>
+<meta name="description" content="How to see whether press coverage, roundups and mentions bring paying customers: ask for tagged links, read referrers when you cannot, know what shows as Direct, and compare revenue per mention.">
+<link rel="canonical" href="https://virling.com/blog/press-coverage-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/press-coverage-revenue-tracking">
+<meta property="og:title" content="Press coverage revenue tracking: do mentions bring customers">
+<meta property="og:description" content="How to see whether press coverage, roundups and mentions bring paying customers: ask for tagged links, read referrers when you cannot, know what shows as Direct, and compare revenue per mention.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Press coverage revenue tracking: do mentions bring customers","item":"https://virling.com/blog/press-coverage-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Press coverage revenue tracking: do mentions bring customers","description":"How to see whether press coverage, roundups and mentions bring paying customers: ask for tagged links, read referrers when you cannot, know what shows as Direct, and compare revenue per mention.","datePublished":"2026-11-21","dateModified":"2026-11-21","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/press-coverage-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does press coverage bring customers?","acceptedAnswer":{"@type":"Answer","text":"Only your own data can say. Give each mention a tagged link where you can, read the referrer host where you cannot, pass the visitor ID into checkout, and look at paying customers and revenue per visitor for each mention over a few months. Readers who never clicked a link are not counted per mention."}},{"@type":"Question","name":"How do I track revenue from a press mention?","acceptedAnswer":{"@type":"Answer","text":"Hand the journalist a link with utm_source set to the outlet, utm_medium=referral and a utm_campaign for the story, or a tracked link from Virling, which adds those tags on the click. Each mention is then its own row in the Campaign tab with visitors and revenue."}},{"@type":"Question","name":"What if the article links to me without UTM tags?","acceptedAnswer":{"@type":"Answer","text":"A click from a web page usually carries the outlet's host as the referrer, so the visit shows under that host in Referral, or in Communities or Social for known hosts such as reddit.com or linkedin.com. All untagged stories on one outlet share that host's row."}},{"@type":"Question","name":"Why does press traffic show up as Direct?","acceptedAnswer":{"@type":"Answer","text":"A visit with no referrer, no UTM source and no ref is Direct. That covers readers who type your URL after reading print or hearing your name, links on sites that hide the referrer, and links opened from PDFs or apps that do not send one."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-21</span>
+      <h1>Press coverage revenue tracking: do mentions bring customers</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-21.</p>
+<p class="p"><b>To see whether press coverage brings customers</b>, join each payment to the visit that came before it, then look at which visits came from the article. Where you control the link, hand the writer a tagged link with the outlet as <code>utm_source</code> and the story as <code>utm_campaign</code>, so each mention gets its own row. Where you do not, the click usually carries the outlet's host as the referrer, so it still shows under that host. Readers who type your URL after reading print or hearing your name show as Direct. Compare paying customers and revenue per visitor for each mention over a few months, not page views or reach.</p>
+<p class="p">A feature in a trade magazine, a line in a roundup, a mention on a podcast or a news story about your launch can each bring a wave of readers. Most of them leave. The question for each mention is whether any of the people it sent became paying customers, and how that compares with your other mentions and your site average.</p>
+<h2>How a visit from a mention is credited</h2>
+<p class="p">Virling gives every session one channel, decided by its first pageview. The rules run in order and the first match wins:</p>
+<ol class="post-list"><li><b>utm_medium.</b> <code>email</code> or <code>newsletter</code> is Email, and <code>cpc</code> or <code>paid</code> is Paid, before anything else is checked.</li><li><b>The referrer host.</b> A click from a web page usually arrives with the outlet's host as the referrer. Most news sites, magazines and blogs land in Referral under their own host. Known hosts land in their own channel: <code>news.ycombinator.com</code>, <code>reddit.com</code> and <code>producthunt.com</code> are Communities, and <code>linkedin.com</code>, <code>x.com</code> and <code>youtube.com</code> are Social.</li><li><b>utm_source, or ref.</b> With no referrer, Virling reads <code>utm_source</code>, and <code>ref</code> when that is missing. An outlet's name is not a known source, so it lands in Referral.</li><li><b>Everything else is Direct.</b> No referrer, no source and no in-app browser it can name.</li></ol>
+<p class="p">The referrer is a host only, never the article's path. Two stories on the same outlet share one row unless their links are tagged. The full rule order and host lists are in <a href="https://docs.virling.com/attribution/channels">channels</a>, and the <a href="/blog/guest-post-revenue-tracking">guest post revenue tracking</a> guide covers the same rules for articles you write yourself.</p>
+<h2>Step by step</h2>
+<h3>1. Ask for tagged links</h3>
+<p class="p">Journalists and roundup editors copy whatever link you hand them. Make that link the tagged one:</p>
+<ul class="post-list"><li>Put it in the pitch email, the press kit, the company boilerplate and any form that asks for a product URL.</li><li>Use one <code>utm_source</code> per outlet and keep it for every story there, <code>utm_medium=referral</code> on all of them, and one <code>utm_campaign</code> per story.</li><li>Do not use <code>email</code> or <code>newsletter</code> as the medium, even when the story also goes out in the outlet's newsletter, or every click from the web page counts as Email.</li></ul>
+<div class="code block"><pre>https://yourdomain.com/?utm_source=examplenews&amp;utm_medium=referral&amp;utm_campaign=examplenews-launch-story
+https://yourdomain.com/?utm_source=exampletrade&amp;utm_medium=referral&amp;utm_campaign=exampletrade-tools-roundup</pre></div>
+<p class="p">The <a href="/tools/utm-builder">UTM builder</a> makes each link. If an editor wants a clean URL or the site strips query strings, use a tracked link instead: in Virling, open <b>Links</b>, set the source to the outlet's name, the channel to Referral and the page it should open. The short link redirects with <code>utm_source</code>, <code>utm_medium</code> and <code>utm_campaign</code> added, its id becomes the campaign, and clicks from bots are not counted. Make one link per story. See <a href="https://docs.virling.com/track/links">tracked links</a>.</p>
+<h3>2. Read referrers when you cannot tag</h3>
+<p class="p">Much coverage happens without you: a writer adds you to a list, or a news story links your homepage. You cannot tag those links, but a click from a web page still carries the outlet's host. On the Channels card, open Referral or use the Source tab, and each host is a row with visitors and revenue. Check Communities and Social too, since a story shared on Hacker News, Reddit or LinkedIn lands there under that host, not under the outlet.</p>
+<p class="p">An untagged story is credited to the outlet as a whole. If the outlet covered you twice, both stories share one row.</p>
+<h3>3. Know what shows up as Direct</h3>
+<p class="p">A visit with no referrer, no <code>utm_source</code> and no <code>ref</code> is Direct. For press, that is:</p>
+<ul class="post-list"><li><b>Readers who type your URL</b> after reading a print article, hearing you on a podcast or radio, or seeing your name in a screenshot. Nothing in the visit points at the mention.</li><li><b>Links on sites that hide the referrer</b>, with <code>rel="noreferrer"</code> or a strict referrer policy, when the link carries no tags.</li><li><b>Links opened from a PDF, an email client or an app</b> that sends no referrer. Instagram, Facebook, TikTok, LinkedIn, Telegram, WhatsApp, Slack and Discord in-app browsers are credited to that app instead, but only when the app names itself in the user agent.</li></ul>
+<p class="p">A rise in Direct on the day a story runs is a hint, not proof. <a href="/blog/why-is-direct-my-biggest-traffic-source">Why Direct is your biggest traffic source</a> covers how to read it, and <a href="/blog/dark-social-revenue-tracking">dark social revenue tracking</a> covers links shared in private messages. For spoken mentions, a short vanity URL that redirects to a tagged page turns typed visits into tagged ones; <a href="/blog/podcast-revenue-tracking">podcast revenue tracking</a> explains how.</p>
+<h3>4. Pick the model that fits press</h3>
+<p class="p">A reader often hears of you in a story, leaves, and comes back days later before paying. Which visit gets the payment depends on the site's model:</p>
+<ul class="post-list"><li><b>Last non-direct</b>, the default, credits the latest session in the lookback window that was not Direct. A reader who clicked the story and later typed your URL is credited to the story. One who came back through a search is credited to Organic search.</li><li><b>First touch</b> credits the earliest session in the window. It shows which mentions introduce people who later pay.</li><li><b>Last touch</b> credits the latest session, Direct included.</li></ul>
+<p class="p">The lookback window is 30, 60, 90 or 365 days, 90 by default. Change either in site settings; attribution for every payment is rebuilt right away, history included. See <a href="https://docs.virling.com/attribution/model">model and lookback window</a>.</p>
+<h3>5. Set up Virling</h3>
+<ol class="post-list"><li><b>Add the script</b> to the <code>&lt;head&gt;</code> of every page, including the pages your links open. See <a href="https://docs.virling.com/track/script">add the script</a>.</li><li><b>Connect a payment provider</b> and pass the visitor ID into checkout. Without that step you get visits but no revenue. See <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</li><li><b>Check one link.</b> Click a tagged link yourself and check that the visit shows with the right source and campaign.</li></ol>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Compare revenue per mention</h2>
+<ol class="post-list"><li>Pick a date range that starts the day the story ran and runs for a few months, so late buyers are included.</li><li>On the Channels card, open the Campaign tab. Each tagged story is a row with visitors, revenue and revenue per visitor.</li><li>Open the Source tab for untagged mentions, by host, under Referral, Communities and Social.</li><li>Note visitors, revenue and revenue per visitor for each mention next to your site's revenue per visitor for the same range.</li><li>Open a payment from the Payments page to see every visit before it, with the credited one marked.</li></ol>
+<p class="p">A mention with paying customers and revenue per visitor near or above your average tells you which outlets and angles to pitch again. One with many visitors and no customers reached the wrong readers. If you paid for a placement, the <a href="/tools/revenue-per-visitor">revenue per visitor calculator</a> shows its return.</p>
+<h2>Frequently asked questions</h2>
+<h3>Does press coverage bring customers?</h3><p class="p">Only your own data can say. Give each mention a tagged link where you can, read the referrer host where you cannot, pass the visitor ID into checkout, and look at paying customers and revenue per visitor for each mention over a few months. Readers who never clicked a link are not counted per mention.</p>
+<h3>How do I track revenue from a press mention?</h3><p class="p">Hand the journalist a link with utm_source set to the outlet, utm_medium=referral and a utm_campaign for the story, or a tracked link from Virling, which adds those tags on the click. Each mention is then its own row in the Campaign tab with visitors and revenue.</p>
+<h3>What if the article links to me without UTM tags?</h3><p class="p">A click from a web page usually carries the outlet's host as the referrer, so the visit shows under that host in Referral, or in Communities or Social for known hosts such as reddit.com or linkedin.com. All untagged stories on one outlet share that host's row.</p>
+<h3>Why does press traffic show up as Direct?</h3><p class="p">A visit with no referrer, no UTM source and no ref is Direct. That covers readers who type your URL after reading print or hearing your name, links on sites that hide the referrer, and links opened from PDFs or apps that do not send one.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which mentions bring paying customers</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
