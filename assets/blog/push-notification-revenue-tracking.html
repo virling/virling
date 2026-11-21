@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Push notification revenue tracking for online stores</title>
+<meta name="description" content="Why push notification clicks land as Direct, what cannot be tracked when a push opens your app, and how to credit store orders to each push campaign.">
+<link rel="canonical" href="https://virling.com/blog/push-notification-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/push-notification-revenue-tracking">
+<meta property="og:title" content="Push notification revenue tracking for online stores">
+<meta property="og:description" content="Why push notification clicks land as Direct, what cannot be tracked when a push opens your app, and how to credit store orders to each push campaign.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Push notification revenue tracking for online stores","item":"https://virling.com/blog/push-notification-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Push notification revenue tracking for online stores","description":"Why push notification clicks land as Direct, what cannot be tracked when a push opens your app, and how to credit store orders to each push campaign.","datePublished":"2026-11-21","dateModified":"2026-11-21","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/push-notification-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why do push notification clicks show up as Direct?","acceptedAnswer":{"@type":"Answer","text":"A tap on a push notification opens your page without a web page before it, so there is usually no referrer. Unless the link has UTM tags, the visit and the order after it are counted as Direct."}},{"@type":"Question","name":"What UTM parameters should I use for push notifications?","acceptedAnswer":{"@type":"Answer","text":"Use utm_source=push and utm_medium=push on every notification link, and a utm_campaign per campaign or automation, such as push-winter-sale-2026-12 or push-flow-abandoned-cart. Keep every value lowercase."}},{"@type":"Question","name":"Can Virling track a push that opens my app instead of my website?","acceptedAnswer":{"@type":"Answer","text":"No. Virling counts visits to web pages that run its script. A push that opens your native app makes no web visit, so it is never credited, and an order placed in the app without your web pages has no visitor ID and shows as Unattributed. It still counts toward revenue."}},{"@type":"Question","name":"Which channel does push traffic show in Virling?","acceptedAnswer":{"@type":"Answer","text":"Referral, with push as its source. Virling has no separate push channel, so click Referral, then the push source, and the Campaign tab shows revenue for each push campaign."}},{"@type":"Question","name":"Does Virling send push notifications?","acceptedAnswer":{"@type":"Answer","text":"No. Virling reads tagged visits and your Shopify or WooCommerce orders. Keep sending with the push tool you use today."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-21</span>
+      <h1>Push notification revenue tracking for online stores</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-21.</p>
+<p class="p"><b>To see which push notification campaigns bring orders</b>, tag the link in every web or mobile push with <code>utm_source=push</code>, <code>utm_medium=push</code> and a <code>utm_campaign</code> per campaign or automation, then credit each Shopify or WooCommerce order to the tagged visit before it. Without tags, a tap on a notification usually opens your store with no referrer and is counted as Direct, so push revenue hides in the one channel that tells you nothing. One limit up front: a push that opens your native app, with no visit to your website, cannot be tracked this way.</p>
+<h2>Why push clicks land as Direct</h2>
+<p class="p">A push notification is not a web page. When someone taps one, the browser or phone opens your page directly, so there is usually no referring site to report. Your store, your analytics and Virling have nothing to go on but the URL. If the URL has no UTM tags, the visit is Direct, next to typed addresses and bookmarks.</p>
+<ul class="post-list"><li><b>No referrer.</b> Only the tags in the link can say the click came from a push.</li><li><b>Untagged automations.</b> One-off campaigns often get tags because someone writes each send by hand. Automated pushes, such as abandoned cart, back in stock or price drop, are set up once and are easy to leave untagged.</li><li><b>Tags lost on the way.</b> A redirect between the notification and your store can drop the query string, and the tags go with it. Tap each notification on your own device and look for <code>utm_source=push</code> in the address bar.</li></ul>
+<p class="p">Email and SMS have the same problem and the same fix; see <a href="/blog/email-marketing-revenue-tracking-ecommerce">email marketing revenue tracking for online stores</a> and <a href="/blog/sms-marketing-revenue-tracking">SMS marketing revenue tracking</a>.</p>
+<h2>What cannot be tracked</h2>
+<p class="p">Virling counts visits to web pages that run its script, and credits an order through the visitor ID that page stores on it. That covers web push, and mobile push that opens a page of your store in a browser. It does not cover everything a push tool reports:</p>
+<ul class="post-list"><li><b>A push that opens your native app.</b> If the tap opens your app and no web page loads, there is no visit, so the push is never credited. If the order is then placed in the app without your web pages, it has no visitor ID and shows as <b>Unattributed</b>. It still counts toward revenue, but no campaign gets it.</li><li><b>Deliveries and opens without a visit.</b> A notification that was delivered, or dismissed, but never tapped through to your site is never credited.</li><li><b>Untagged links.</b> A visit from an untagged push is Direct, and under the default model a Direct visit gets the credit only when every visit in the lookback window was Direct.</li></ul>
+<p class="p">If most of your push revenue comes from orders inside your app, your push tool's own reports are the place to read it. Virling answers a narrower question: which pushes sent shoppers to your website before they ordered.</p>
+<h2>How Virling credits push orders</h2>
+<p class="p">Virling has no separate push channel. Every session gets one channel from its first pageview, and <code>utm_medium</code> decides only Paid and Email. A push has no referrer, so the next rule reads <code>utm_source</code>: <code>push</code> is not a known search, social, AI or community source, so the visit counts as <b>Referral</b>, with <code>push</code> as its source. What matters is that it is no longer Direct, and that all your pushes share one source row. Do not tag pushes as <code>email</code> to move them into the Email channel; you would lose the split between the two. See <a href="https://docs.virling.com/attribution/channels">how channels are decided</a>.</p>
+<p class="p">Orders come straight from your store. Virling checks for new <a href="/integrations/shopify">Shopify</a> or <a href="/integrations/woocommerce">WooCommerce</a> orders every minute with a read-only key, counts refunds, and joins each order to the visits before it through the visitor ID a short snippet stores on the order.</p>
+<p class="p">Under the default model, last non-direct, the whole order is credited to the latest visit in the last 90 days that was not Direct. A shopper who taps your price drop push and comes back the next day by typing your address is credited to that push. A shopper who taps the push and later returns from a search result is credited to Organic search. You can switch to first touch or last touch, and set the lookback window to 30, 60, 90 or 365 days, in site settings; saving rebuilds attribution for every order, history included. See <a href="https://docs.virling.com/attribution/model">the attribution model</a>.</p>
+<h2>Set up push revenue tracking step by step</h2>
+<h3>1. Pick UTM values for campaigns and automations</h3>
+<p class="p">Keep <code>utm_source=push</code> and <code>utm_medium=push</code> on every link, and name each campaign or automation in <code>utm_campaign</code>. Start every push campaign with <code>push-</code>, so pushes, texts and emails about the same sale stay on separate rows in the Campaign tab.</p>
+<ul class="post-list"><li><b>Campaign:</b> <code>https://yourstore.com/collections/sale?utm_source=push&amp;utm_medium=push&amp;utm_campaign=push-winter-sale-2026-12</code></li><li><b>Abandoned cart:</b> <code>utm_source=push&amp;utm_medium=push&amp;utm_campaign=push-flow-abandoned-cart</code></li><li><b>Back in stock:</b> <code>utm_source=push&amp;utm_medium=push&amp;utm_campaign=push-flow-back-in-stock</code></li><li><b>Price drop:</b> <code>utm_source=push&amp;utm_medium=push&amp;utm_campaign=push-flow-price-drop</code></li></ul>
+<p class="p">If you send both web and mobile push and want them apart, put it in the campaign, such as <code>push-web-winter-sale-2026-12</code>, and keep the source as <code>push</code>. Build the links with the free <a href="/tools/utm-builder">UTM builder</a> and lowercase every value.</p>
+<h3>2. Tag every notification link</h3>
+<p class="p">If your push tool can add UTM tags to every notification, set them there. Otherwise paste the full tagged URL as the notification's link. If you want a short link you control, a Virling <a href="https://docs.virling.com/track/links">tracked link</a> redirects to your page with <code>utm_source</code>, <code>utm_medium</code> and <code>utm_campaign</code> added and keeps any tags already on the destination. Set its source to <code>push</code> and its channel to Referral; its id becomes the campaign, and Links shows the clicks, visitors and revenue each one brought.</p>
+<h3>3. Add the Virling script</h3>
+<p class="p">Paste the tag before <code>&lt;/head&gt;</code> on every page: in <code>theme.liquid</code> on Shopify, or with the Virling WordPress plugin on WooCommerce. It reads the tags on the landing page and sets the visitor ID. See <a href="https://docs.virling.com/track/script">add the script</a>.</p>
+<p class="p"><code>&lt;script defer src="https://app.virling.com/v.js" data-site="yourstore.com"&gt;&lt;/script&gt;</code></p>
+<h3>4. Connect Shopify or WooCommerce</h3>
+<p class="p">Connect Shopify with a custom app token that can only read orders, or WooCommerce with a REST API key with Read permission. Then add the snippet that stores the visitor ID on each order: a cart attribute on Shopify, order meta data on WooCommerce. The whole setup is on the <a href="/integrations/ecommerce">revenue attribution for online stores</a> page, with the code in <a href="https://docs.virling.com/guides/ecommerce">set up Virling for an online store</a>.</p>
+<h3>5. Read push revenue by campaign</h3>
+<p class="p">On the dashboard, click <b>Referral</b> in the Channels card, switch to the Source tab and click <code>push</code>. The Campaign tab then shows each campaign and automation with visitors, revenue and revenue per visitor. Click <b>Save as segment</b> and name it Push to get back to this view in one click. Compare by revenue per visitor, not by visitors: an automation that sends few shoppers who buy can be worth more than a blast that sends many who do not. Open an order on the <b>Payments</b> page to see the visits before it and which one got the credit.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>What to check if the numbers look off</h2>
+<ul class="post-list"><li><b>Push orders show as Direct.</b> A link was left untagged, or a redirect dropped the tags. Tap a notification from each automation on your own device.</li><li><b>Push revenue is lower than in your push tool.</b> Push tools can credit an order to a notification that was sent, opened or clicked within a window, and can count orders placed in your app. Virling credits each order once, to a web visit, so the two answer different questions.</li><li><b>Orders show as Unattributed.</b> The order has no visitor ID. Check that the Shopify or WooCommerce snippet is in place, or the order was placed in your app.</li><li><b>One campaign is split across rows.</b> Values differ in case or spelling, such as <code>Push-flow-price-drop</code> and <code>push-flow-price-drop</code>. Pick one and keep it.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>Why do push notification clicks show up as Direct?</h3><p class="p">A tap on a push notification opens your page without a web page before it, so there is usually no referrer. Unless the link has UTM tags, the visit and the order after it are counted as Direct.</p>
+<h3>What UTM parameters should I use for push notifications?</h3><p class="p">Use utm_source=push and utm_medium=push on every notification link, and a utm_campaign per campaign or automation, such as push-winter-sale-2026-12 or push-flow-abandoned-cart. Keep every value lowercase.</p>
+<h3>Can Virling track a push that opens my app instead of my website?</h3><p class="p">No. Virling counts visits to web pages that run its script. A push that opens your native app makes no web visit, so it is never credited, and an order placed in the app without your web pages has no visitor ID and shows as Unattributed. It still counts toward revenue.</p>
+<h3>Which channel does push traffic show in Virling?</h3><p class="p">Referral, with push as its source. Virling has no separate push channel, so click Referral, then the push source, and the Campaign tab shows revenue for each push campaign.</p>
+<h3>Does Virling send push notifications?</h3><p class="p">No. Virling reads tagged visits and your Shopify or WooCommerce orders. Keep sending with the push tool you use today.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which pushes bring real orders</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
