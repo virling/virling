@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stripe attribution for agencies: client revenue by channel</title>
+<meta name="description" content="For agencies reporting on client Stripe revenue: tie each client payment to the channel and campaign that brought the customer, one site per client.">
+<link rel="canonical" href="https://virling.com/integrations/stripe-agencies">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/stripe-agencies">
+<meta property="og:title" content="Stripe attribution for agencies: client revenue by channel">
+<meta property="og:description" content="For agencies reporting on client Stripe revenue: tie each client payment to the channel and campaign that brought the customer, one site per client.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"Stripe for agencies","item":"https://virling.com/integrations/stripe-agencies"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do agencies show clients which channel brought their Stripe revenue?","acceptedAnswer":{"@type":"Answer","text":"Add one Virling site per client, install the script on the client's site, connect their Stripe account with a read-only restricted key, and pass the visitor ID into their checkout. Each payment is tied to the channel and campaign of the visit before it, and the client sees it through a report link without a login."}},{"@type":"Question","name":"Does each client need its own Stripe connection?","acceptedAnswer":{"@type":"Answer","text":"Yes. Each client domain is its own site with its own script tag and its own Stripe key, so every client's revenue stays on their site. Sites with the same client name are grouped under All clients."}},{"@type":"Question","name":"Can Virling change anything in a client's Stripe account?","acceptedAnswer":{"@type":"Answer","text":"No. Virling only accepts a restricted key with read access and refuses secret keys. It never creates, changes or refunds anything. When the engagement ends, Disconnect deletes the stored key."}},{"@type":"Question","name":"What if the client uses Stripe Payment Links?","acceptedAnswer":{"@type":"Answer","text":"Payment Links on buy.stripe.com need no code. When a visitor clicks one on a page that runs the script, the script adds the visitor ID as client_reference_id, and Stripe copies it onto the Checkout Session."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / stripe for agencies</span>
+      <h1>Show each client which channel brought their Stripe revenue.</h1>
+      <p class="lead">For agencies and freelancers who run marketing for clients that take payments through Stripe. Virling ties every client payment to the channel and campaign that brought the customer, on a separate site per client, and gives each client a branded report they open without a login. Open source under AGPL, hosted or <a href="/self-host">self-hosted</a>.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/agency">Virling for agencies</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">Clients ask one question: which channel paid. Stripe records the payment, and your ads, emails and posts bring the visit, but the two rarely meet. Virling joins them for each client, so the answer comes from their own Stripe payments.</p>
+<h2>What your agency gets</h2>
+<ul class="post-list"><li><b>One site per client.</b> Each client domain has its own script and its own Stripe connection, so every client&#x27;s revenue stays on their site. Sites with the same client name are grouped in the site switcher and on <b>All clients</b>, with visitors and revenue over the last 30 days and a total per client.</li><li><b>Payments by channel and campaign.</b> The Channels card lists visitors, revenue and revenue per visitor for each channel, with the sources and UTM campaigns behind it. Payments lists every Stripe payment with the channel it was credited to, and Retention shows which channels bring customers who keep paying.</li><li><b>Refunds and renewals kept current.</b> Refunds, lost disputes and late settlements update payments already imported, and subscription renewals are marked as renewals.</li><li><b>Sharing without logins.</b> A client link opens a site&#x27;s report with your agency name, logo and colours, and can be revoked at once. A weekly email sends the same report to up to 10 client addresses.</li><li><b>API and MCP.</b> One API key lists every client site and reads each one, and the same key connects an AI assistant through the <a href="https://docs.virling.com/reference/mcp">MCP server</a> to ask which channel paid.</li><li><b>Team members</b> for your own staff, who see and manage every site on the account.</li></ul>
+<h2>Set up a client</h2>
+<ol class="post-list"><li><b>Add the site.</b> Click <b>+ Add a site</b>, enter the client&#x27;s domain and timezone, and set their name under <b>Client</b> in site settings.</li><li><b>Install the script.</b> Paste the site&#x27;s tag from its setup screen before <code>&lt;/head&gt;</code> on every page of the client&#x27;s site. Each client gets its own tag, because <code>data-site</code> must match the domain you added.</li><li><b>Connect Stripe.</b> Ask the client for a Stripe restricted key with <b>Read</b> on Charges, Checkout Sessions, Customers, Events, Invoices, Subscriptions and PaymentIntents. Paste it into the site&#x27;s payment setup and click <b>Connect and backfill</b>. Secret keys are refused. The last 90 days are imported, then new payments every minute.</li><li><b>Pass the visitor ID at checkout.</b> Set <code>client_reference_id</code> on the Checkout Session, or <code>metadata.virling_vid</code> on a PaymentIntent, from the <code>virling_vid</code> cookie. Payment Links on <code>buy.stripe.com</code> need no code. See <a href="/integrations/stripe">the Stripe integration</a> and <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>.</li><li><b>Share the report.</b> Under <b>Client report</b> in site settings, add your branding, then create a client link and send it. Turn on the weekly email to send the report on a schedule.</li></ol>
+<p class="p">Payments without a visitor ID still count toward revenue, as Unattributed. Make a test payment from a page that runs the script and check that it shows a channel in Payments.</p>
+<h2>Monthly client reports</h2>
+<p class="p">For a monthly review, pick the month as the dashboard range, read revenue and revenue per visitor from the Channels card, and open payments to show the journey behind a sale. Enter the client&#x27;s monthly spend per channel in site settings and Profit by channel shows spend, revenue, profit and return per dollar.</p>
+<p class="p">The <a href="/tools/agency-client-report-template">client marketing report template</a> lays those numbers out in the order clients read them, and <a href="/blog/prove-marketing-roi-to-clients">how to prove marketing ROI to clients</a> walks through the monthly method. <b>Download PDF</b> on the report saves the page to attach to your own deck.</p>
+<h2>Open source</h2>
+<p class="p">Virling is open source under AGPLv3, and the code is on <a href="https://github.com/virling/virling">GitHub</a>. Use the hosted service, or <a href="/self-host">self-host it</a> on your own server with every feature if a client needs their data kept in house. In a load test on 2026-10-31, limited to one vCPU and 1 GB of RAM, Virling ingested 100,000 pageviews at 2,829 a second with none failed and a p99 of 34 ms. <a href="/self-host">How it was measured</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do agencies show clients which channel brought their Stripe revenue?</h3><p class="p">Add one Virling site per client, install the script on the client's site, connect their Stripe account with a read-only restricted key, and pass the visitor ID into their checkout. Each payment is tied to the channel and campaign of the visit before it, and the client sees it through a report link without a login.</p>
+<h3>Does each client need its own Stripe connection?</h3><p class="p">Yes. Each client domain is its own site with its own script tag and its own Stripe key, so every client's revenue stays on their site. Sites with the same client name are grouped under All clients.</p>
+<h3>Can Virling change anything in a client's Stripe account?</h3><p class="p">No. Virling only accepts a restricted key with read access and refuses secret keys. It never creates, changes or refunds anything. When the engagement ends, Disconnect deletes the stored key.</p>
+<h3>What if the client uses Stripe Payment Links?</h3><p class="p">Payment Links on <code>buy.stripe.com</code> need no code. When a visitor clicks one on a page that runs the script, the script adds the visitor ID as <code>client_reference_id</code>, and Stripe copies it onto the Checkout Session.</p>
+      <p class="p">Full guide: <a href="https://docs.virling.com/guides/agencies">Run Virling for client sites</a> and <a href="https://docs.virling.com/payments/stripe">Stripe in the docs</a>.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post"><h2>Related reading</h2><ul class="post-list"><li><a href="/agency">Virling for agencies</a></li><li><a href="/integrations/stripe">Stripe revenue attribution</a></li><li><a href="/integrations/shopify-agencies">Shopify for agencies</a></li><li><a href="/blog/track-stripe-revenue-by-traffic-source">How to track Stripe revenue by traffic source</a></li><li><a href="/blog/prove-marketing-roi-to-clients">How to prove marketing ROI to clients</a></li><li><a href="/tools/agency-client-report-template">Client marketing report template</a></li></ul></div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
