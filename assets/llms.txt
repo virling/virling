@@ -112,6 +112,11 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Stripe SaaS attribution](https://virling.com/integrations/stripe-saas): each subscription, payment after a trial and renewal on Stripe Billing tied to the channel that brought the customer, with a read-only restricted key
 - [Paddle SaaS attribution](https://virling.com/integrations/paddle-saas): each transaction, payment after a trial and renewal for SaaS selling through Paddle as merchant of record, tied to the channel that brought the customer
 - [Shopify agency client reporting](https://virling.com/integrations/shopify-agencies): for agencies running several client Shopify stores: each order tied to the channel and campaign that brought the buyer, per client site, with a shareable report
+- [Dodo Payments SaaS attribution](https://virling.com/integrations/dodo-payments-saas): each payment, trial conversion and renewal for SaaS selling subscriptions through Dodo Payments as merchant of record, tied to the channel that brought the customer
+- [LemonSqueezy SaaS attribution](https://virling.com/integrations/lemonsqueezy-saas): each order, renewal and license sale for SaaS selling through LemonSqueezy as merchant of record, tied to the channel that brought the customer
+- [Polar SaaS attribution](https://virling.com/integrations/polar-saas): each order, payment after a trial and renewal for SaaS and developer tools selling through Polar, tied to the channel that brought the customer
+- [Creem SaaS attribution](https://virling.com/integrations/creem-saas): each payment, first payment after a trial and renewal for SaaS selling through Creem as merchant of record, tied to the channel that brought the customer
+- [Stripe agency client reporting](https://virling.com/integrations/stripe-agencies): for agencies reporting on client Stripe revenue: each client payment tied to the channel and campaign that brought the customer, one site per client
 
 ## Compare
 
@@ -268,6 +273,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Do comparison pages bring paying customers? How to find out](https://virling.com/blog/comparison-page-revenue-tracking): "X vs Y" and alternatives pages draw buyers who are close to a decision. How to see which ones bring paying customers: as landing page, before paying, and by search source.
 - [Mastodon analytics: which posts and instances bring customers](https://virling.com/blog/mastodon-revenue-tracking): How to see which Mastodon posts and instances bring paying customers: instance referrers, visits with no referrer, UTM-tagged links, and visits joined to payments.
 - [Programmatic SEO revenue tracking by page template](https://virling.com/blog/programmatic-seo-revenue-tracking): Does programmatic SEO bring customers? How to group generated pages by URL pattern and read revenue per template and per landing page, not just traffic.
+- [Meta AI traffic: do Meta AI visits turn into paying customers?](https://virling.com/blog/meta-ai-revenue-tracking): How to see whether visitors from Meta AI in WhatsApp, Instagram, Messenger and meta.ai pay: how the visits arrive, where Virling counts them, and how payments are credited.
 
 ## Source
 
