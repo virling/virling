@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SaaS valuation calculator: ARR multiple valuation range | Virling</title>
+<meta name="description" content="Free SaaS valuation calculator. Enter MRR or ARR, growth, churn and the low and high revenue multiples you want to test to get an implied valuation range. Runs in your browser.">
+<link rel="canonical" href="https://virling.com/tools/saas-valuation-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/saas-valuation-calculator">
+<meta property="og:title" content="SaaS valuation calculator: ARR multiple valuation range | Virling">
+<meta property="og:description" content="Free SaaS valuation calculator. Enter MRR or ARR, growth, churn and the low and high revenue multiples you want to test to get an implied valuation range. Runs in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"SaaS valuation calculator","url":"https://virling.com/tools/saas-valuation-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"SaaS valuation calculator","item":"https://virling.com/tools/saas-valuation-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / saas valuation calculator</span><h1>SaaS valuation calculator</h1><p class="lead">Enter your MRR or ARR, your yearly growth rate and monthly churn, and a low and high revenue multiple you want to test. You get an implied valuation range on today's ARR and on ARR in 12 months. The multiples are yours to enter: this page has no built-in market multiples. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="val" autocomplete="off">
+  <div class="tool-pick" data-select><span id="m-label">Revenue input</span>
+    <button type="button" id="m" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="m-label m-value" data-value="mrr"><span id="m-value">Monthly (MRR)</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="m-menu" role="listbox" aria-labelledby="m-label" tabindex="-1" hidden><li role="option" data-value="mrr" aria-selected="true">Monthly (MRR)</li><li role="option" data-value="arr" aria-selected="false">Yearly (ARR)</li></ul>
+  </div>
+  <label><span id="rev-name">Current MRR ($)</span><span class="dim">Recurring subscription revenue only</span><input name="rev" type="number" min="0" step="0.01" value="50000"></label>
+  <label>Growth rate per year (%)<span class="dim">ARR growth over the last 12 months, net of churn</span><input name="growth" type="number" step="0.1" value="40"></label>
+  <label>Revenue churn per month (%)<span class="dim">Share of MRR lost to cancellations and downgrades</span><input name="churn" type="number" min="0" max="100" step="0.1" value="2"></label>
+  <label>Low multiple (&times; ARR)<span class="dim">The lowest ARR multiple you want to test</span><input name="lo" type="number" min="0" step="0.1" value="3"></label>
+  <label>High multiple (&times; ARR)<span class="dim">The highest ARR multiple you want to test</span><input name="hi" type="number" min="0" step="0.1" value="6"></label>
+</form>
+<div class="tool-stats" id="val-out"></div>
+<p class="fine-note" id="val-how"></p>
+<div class="txt post tool-cta">
+<p class="p">A multiple prices how durable revenue is, and a buyer will ask where it comes from. Virling shows that from your real payments: it links every visit to the payment it led to and credits trials, renewals and MRR to the channel that first brought each customer. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/arr-calculator">ARR calculator</a>, <a href="/tools/nrr-calculator">NRR calculator</a>, <a href="/blog/mrr-by-acquisition-channel">MRR by acquisition channel</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The valuation formula</h2>
+<p class="p">A revenue multiple valuation is ARR times a multiple. With a low and a high multiple you get a range:</p>
+<p class="p"><code>valuation = ARR &times; multiple</code></p>
+<p class="p">If you enter MRR, ARR is MRR times 12. ARR in 12 months applies your yearly growth rate once, and the forward range uses the same two multiples on that figure:</p>
+<p class="p"><code>ARR in 12 months = ARR &times; (1 + growth rate)</code></p>
+<p class="p">Monthly churn compounds over a year. The share of today's revenue lost in 12 months, before any new sales or expansion, is:</p>
+<p class="p"><code>yearly churn = 1 - (1 - monthly churn)<sup>12</sup></code></p>
+<p class="p">The calculator does not pick a multiple for you. Multiples depend on the buyer, the market at the time, growth, retention, margins and deal terms, and no single table fits every business. Enter the multiples you have from offers, advisors or comparable deals you trust, and use the range to see what they imply.</p>
+<h2>A worked example</h2>
+<p class="p">With the defaults above, MRR is $50,000, so ARR is $50,000 &times; 12 = $600,000. At 3&times; and 6&times; the implied valuation is $1,800,000 to $3,600,000.</p>
+<p class="p">ARR grew 40% over the last year. If the next year matches, ARR in 12 months is $600,000 &times; 1.4 = $840,000, and the same multiples give $2,520,000 to $5,040,000.</p>
+<p class="p">Churn of 2% a month means 1 - 0.98<sup>12</sup>, about 21.5% of today's revenue, is gone within a year unless it is replaced. That is the part of the business a buyer will look at hardest.</p>
+<h2>Where revenue comes from matters</h2>
+<p class="p">Two companies with the same ARR and the same multiple on paper can be worth very different amounts to a buyer. A buyer looks at how durable the revenue is: how much existing customers keep, expand or cancel, and whether the channels that bring new customers will keep working after the sale. Revenue that comes from one channel, or from customers who leave within a few months, gets discounted. Revenue spread across channels that bring customers who stay supports the high end of a range.</p>
+<p class="p">To show that, you need revenue per acquisition channel, with each subscription payment joined to the visit that brought the customer. See <a href="/blog/mrr-by-acquisition-channel">MRR by acquisition channel</a> for how to get it, and the <a href="/tools/nrr-calculator">NRR calculator</a> to measure how much revenue your existing customers keep.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>SaaS valuation calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you value a SaaS company with an ARR multiple?</h3><p class="p">Multiply annual recurring revenue by a revenue multiple. Using a low and a high multiple gives a range rather than one number, which is closer to how offers and negotiations work.</p></div>
+      <div><h3>What multiple should I use?</h3><p class="p">Use multiples from real offers, advisors or comparable deals you trust. The calculator has no built-in multiples because they change with the market, the buyer and the business, and a generic table can mislead.</p></div>
+      <div><h3>Why do growth and churn matter for valuation?</h3><p class="p">They change what a buyer expects ARR to be next year and how much of today's revenue will still be there. Faster growth and lower churn usually support a higher multiple; high churn means revenue has to be replaced just to stand still.</p></div>
+      <div><h3>Should I enter MRR or ARR?</h3><p class="p">Either. Pick the one you track in the Revenue input menu. MRR is multiplied by 12 to get ARR, and switching converts the number you entered.</p></div>
+      <div><h3>Is this a formal valuation?</h3><p class="p">No. It is arithmetic on the numbers you enter. A real sale price also depends on profit, deal structure, due diligence and the buyer.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you value a SaaS company with an ARR multiple?", "acceptedAnswer": {"@type": "Answer", "text": "Multiply annual recurring revenue by a revenue multiple. Using a low and a high multiple gives a range rather than one number, which is closer to how offers and negotiations work."}}, {"@type": "Question", "name": "What multiple should I use?", "acceptedAnswer": {"@type": "Answer", "text": "Use multiples from real offers, advisors or comparable deals you trust. The calculator has no built-in multiples because they change with the market, the buyer and the business, and a generic table can mislead."}}, {"@type": "Question", "name": "Why do growth and churn matter for valuation?", "acceptedAnswer": {"@type": "Answer", "text": "They change what a buyer expects ARR to be next year and how much of today's revenue will still be there. Faster growth and lower churn usually support a higher multiple; high churn means revenue has to be replaced just to stand still."}}, {"@type": "Question", "name": "Should I enter MRR or ARR?", "acceptedAnswer": {"@type": "Answer", "text": "Either. Pick the one you track in the Revenue input menu. MRR is multiplied by 12 to get ARR, and switching converts the number you entered."}}, {"@type": "Question", "name": "Is this a formal valuation?", "acceptedAnswer": {"@type": "Answer", "text": "No. It is arithmetic on the numbers you enter. A real sale price also depends on profit, deal structure, due diligence and the buyer."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring recurring revenue</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the subscribers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("val"), out = document.getElementById("val-out"), how = document.getElementById("val-how");
+const m = document.getElementById("m"), menu = document.getElementById("m-menu"), items = [...menu.children];
+const usd = (n) => { const a = Math.abs(n), d = a < 100 ? 2 : 0; return (n < 0 ? "-$" : "$") + a.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); };
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 1 }) + "%";
+const x = (n) => n.toLocaleString("en-US", { maximumFractionDigits: 2 }) + "×";
+const calc = () => {
+  const e = f.elements, rev = +e.rev.value, arr = m.dataset.value === "arr" ? rev : rev * 12;
+  const g = +e.growth.value / 100, c = +e.churn.value / 100, a = +e.lo.value, b = +e.hi.value;
+  const lo = Math.min(a, b), hi = Math.max(a, b), fwd = arr * (1 + g), ok = arr > 0 && lo >= 0 && g >= -1, cok = c >= 0 && c <= 1;
+  out.innerHTML = [["ARR now", usd(arr)], ["Low valuation", ok ? usd(arr * lo) : "No data"], ["High valuation", ok ? usd(arr * hi) : "No data"], ["ARR in 12 months", ok ? usd(fwd) : "No data"], ["Range on ARR in 12 months", ok ? `${usd(fwd * lo)} to ${usd(fwd * hi)}` : "No data"], ["Revenue lost to churn in a year", cok ? pct(1 - Math.pow(1 - c, 12)) : "No data"]].map(([k, v]) => `<div><span class="dim">${k}</span><b>${v}</b></div>`).join("");
+  how.textContent = ok
+    ? `ARR of ${usd(arr)} times ${x(lo)} to ${x(hi)} gives ${usd(arr * lo)} to ${usd(arr * hi)}. Growing ${pct(g)} for a year takes ARR to ${usd(fwd)}, valued with the same multiples.${cok ? ` At ${pct(c)} churn a month, ${pct(1 - Math.pow(1 - c, 12))} of today's revenue is lost within a year unless replaced.` : ""}`
+    : "Enter revenue above 0, multiples of 0 or more, and growth above -100% to see the valuation range.";
+};
+const mark = (el) => { items.forEach((i) => i.classList.toggle("on", i === el)); menu.setAttribute("aria-activedescendant", el.id = "m-" + el.dataset.value); };
+const show = (open) => {
+  menu.hidden = !open;
+  m.setAttribute("aria-expanded", String(open));
+  if (open) { mark(items.find((i) => i.getAttribute("aria-selected") === "true")); menu.focus(); }
+};
+const pick = (el) => {
+  const was = m.dataset.value, v = el.dataset.value, r = f.elements.rev;
+  items.forEach((i) => i.setAttribute("aria-selected", String(i === el)));
+  m.dataset.value = v;
+  document.getElementById("m-value").textContent = el.textContent;
+  document.getElementById("rev-name").textContent = v === "arr" ? "Current ARR ($)" : "Current MRR ($)";
+  if (was !== v && r.value !== "") r.value = +(v === "arr" ? +r.value * 12 : +r.value / 12).toFixed(2);
+  show(false);
+  m.focus();
+  calc();
+};
+m.addEventListener("click", () => show(menu.hidden));
+m.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); show(true); } });
+items.forEach((i) => { i.addEventListener("click", () => pick(i)); i.addEventListener("mousemove", () => mark(i)); });
+menu.addEventListener("keydown", (e) => {
+  const at = items.findIndex((i) => i.classList.contains("on"));
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); mark(items[(at + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]); }
+  else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(items[at]); }
+  else if (e.key === "Escape" || e.key === "Tab") { show(false); m.focus(); }
+});
+document.addEventListener("click", (e) => { if (!menu.hidden && !e.target.closest(".tool-pick")) show(false); });
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
