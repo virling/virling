@@ -30,6 +30,11 @@
   <url><loc>https://virling.com/integrations/stripe-saas</loc></url>
   <url><loc>https://virling.com/integrations/paddle-saas</loc></url>
   <url><loc>https://virling.com/integrations/shopify-agencies</loc></url>
+  <url><loc>https://virling.com/integrations/dodo-payments-saas</loc></url>
+  <url><loc>https://virling.com/integrations/lemonsqueezy-saas</loc></url>
+  <url><loc>https://virling.com/integrations/polar-saas</loc></url>
+  <url><loc>https://virling.com/integrations/creem-saas</loc></url>
+  <url><loc>https://virling.com/integrations/stripe-agencies</loc></url>
   <url><loc>https://virling.com/blog</loc></url>
   <url><loc>https://virling.com/blog/woocommerce-order-attribution-unknown</loc></url>
   <url><loc>https://virling.com/blog/what-is-revenue-attribution</loc></url>
@@ -154,6 +159,7 @@
   <url><loc>https://virling.com/blog/comparison-page-revenue-tracking</loc></url>
   <url><loc>https://virling.com/blog/mastodon-revenue-tracking</loc></url>
   <url><loc>https://virling.com/blog/programmatic-seo-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/meta-ai-revenue-tracking</loc></url>
   <url><loc>https://virling.com/vs</loc></url>
   <url><loc>https://virling.com/vs/datafast</loc></url>
   <url><loc>https://virling.com/vs/databull</loc></url>
