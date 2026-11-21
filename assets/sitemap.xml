@@ -27,6 +27,9 @@
   <url><loc>https://virling.com/integrations/memberships</loc></url>
   <url><loc>https://virling.com/integrations/plugins-and-themes</loc></url>
   <url><loc>https://virling.com/integrations/coaching-and-consulting</loc></url>
+  <url><loc>https://virling.com/integrations/stripe-saas</loc></url>
+  <url><loc>https://virling.com/integrations/paddle-saas</loc></url>
+  <url><loc>https://virling.com/integrations/shopify-agencies</loc></url>
   <url><loc>https://virling.com/blog</loc></url>
   <url><loc>https://virling.com/blog/woocommerce-order-attribution-unknown</loc></url>
   <url><loc>https://virling.com/blog/what-is-revenue-attribution</loc></url>
@@ -141,6 +144,10 @@
   <url><loc>https://virling.com/blog/marketing-year-in-review</loc></url>
   <url><loc>https://virling.com/blog/lead-magnet-revenue-tracking</loc></url>
   <url><loc>https://virling.com/blog/privacy-search-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/google-discover-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/google-shopping-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/revenue-by-country</loc></url>
+  <url><loc>https://virling.com/blog/stripe-invoice-attribution</loc></url>
   <url><loc>https://virling.com/vs</loc></url>
   <url><loc>https://virling.com/vs/datafast</loc></url>
   <url><loc>https://virling.com/vs/databull</loc></url>
@@ -217,5 +224,7 @@
   <url><loc>https://virling.com/tools/cohort-retention-template</loc></url>
   <url><loc>https://virling.com/tools/newsletter-sponsorship-calculator</loc></url>
   <url><loc>https://virling.com/tools/referral-program-calculator</loc></url>
+  <url><loc>https://virling.com/tools/free-shipping-threshold-calculator</loc></url>
+  <url><loc>https://virling.com/tools/traffic-value-calculator</loc></url>
   <url><loc>https://virling.com/what-we-dont-do</loc></url>
 </urlset>

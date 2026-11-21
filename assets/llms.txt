@@ -77,6 +77,8 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Cohort retention template by acquisition channel](https://virling.com/tools/cohort-retention-template): retention percentages by acquisition channel from monthly cohorts and how many customers still pay each month, copied as CSV
 - [Newsletter sponsorship ROI calculator: ROI and break-even](https://virling.com/tools/newsletter-sponsorship-calculator): expected clicks, customers, revenue, cost per customer, ROI and the break-even conversion rate from price, list size, open rate, click rate, conversion rate and customer value
 - [Referral program ROI calculator: reward cost and break-even](https://virling.com/tools/referral-program-calculator): referred customers, reward cost, cost per referred customer, ROI and the highest reward that breaks even from customers, share who refer, referrals per referrer, conversion rate, rewards and customer value
+- [Free shipping threshold calculator](https://virling.com/tools/free-shipping-threshold-calculator): the extra order value needed and the share of orders that must move up to break even, from AOV, gross margin, shipping cost and a free shipping threshold, for Shopify and WooCommerce stores
+- [Website traffic value calculator: what your visitors are worth](https://virling.com/tools/traffic-value-calculator): revenue per visitor and what your traffic is worth each month, per channel, from visitors, conversion rate and average order value or ARPU
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -105,6 +107,9 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Revenue attribution for membership sites and paid communities](https://virling.com/integrations/memberships): which channel brought each paying member of a membership site or paid community, with renewals credited to the first channel, for Stripe, Polar, LemonSqueezy and Paddle
 - [Revenue attribution for plugin and theme sellers](https://virling.com/integrations/plugins-and-themes): whether docs, a marketplace listing, the blog, a newsletter or social brought each WordPress plugin, theme or license sale and renewal, for Paddle, LemonSqueezy, Polar, Creem and Stripe
 - [Revenue attribution for coaches and consultants](https://virling.com/integrations/coaching-and-consulting): which podcast guest spot, LinkedIn post, newsletter or referral brought each paying coaching or consulting client, for Stripe Payment Links and Checkout
+- [Stripe SaaS attribution](https://virling.com/integrations/stripe-saas): each subscription, payment after a trial and renewal on Stripe Billing tied to the channel that brought the customer, with a read-only restricted key
+- [Paddle SaaS attribution](https://virling.com/integrations/paddle-saas): each transaction, payment after a trial and renewal for SaaS selling through Paddle as merchant of record, tied to the channel that brought the customer
+- [Shopify agency client reporting](https://virling.com/integrations/shopify-agencies): for agencies running several client Shopify stores: each order tied to the channel and campaign that brought the buyer, per client site, with a shareable report
 
 ## Compare
 
@@ -251,6 +256,10 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Marketing year in review: which channels brought paying customers](https://virling.com/blog/marketing-year-in-review): A marketing year in review by revenue per channel: which channels brought paying customers and renewals, which only brought visits, and what to keep or cut.
 - [Lead magnet ROI: do free downloads bring paying customers](https://virling.com/blog/lead-magnet-revenue-tracking): How to measure lead magnet ROI: track each opt-in as a goal, tag the links that promote it, and see which lead magnet visitors go on to pay.
 - [DuckDuckGo, Brave and privacy search revenue tracking](https://virling.com/blog/privacy-search-revenue-tracking): How to see which DuckDuckGo, Brave Search, Ecosia and Kagi visitors pay: what referrer these engines send, why some show as Direct, and cookies.
+- [Google Discover revenue tracking: do Discover visits pay](https://virling.com/blog/google-discover-revenue-tracking): How to see whether Google Discover visits turn into payments: how Discover clicks are counted, how to tell them from search, and which pages earn.
+- [Google Shopping revenue tracking: which free listing clicks pay](https://virling.com/blog/google-shopping-revenue-tracking): Google Shopping free listings tracking for Shopify and WooCommerce stores: how Shopping clicks are classified, how to tag product links and see revenue per product page.
+- [Revenue by country: which countries your customers pay from](https://virling.com/blog/revenue-by-country): How to see revenue by country next to visitors by country, why the two differ, how currencies are converted and how to act on it.
+- [Stripe invoice attribution for sales-led B2B SaaS](https://virling.com/blog/stripe-invoice-attribution): How a Stripe invoice paid days after a demo call can still be credited to the channel that brought the buyer, and what stays unattributed.
 
 ## Source
 
