@@ -131,6 +131,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Stripe ecommerce analytics](https://virling.com/integrations/stripe-ecommerce): for online stores on Stripe Checkout or Payment Links: each order tied to the channel and campaign that brought the buyer, with a read-only restricted key
 - [Polar for developer tools](https://virling.com/integrations/polar-developer-tools): for open source maintainers and developer tool makers selling licenses, sponsorships or subscriptions through Polar: each payment tied to the channel and campaign that brought the buyer
 - [LemonSqueezy for digital products](https://virling.com/integrations/lemonsqueezy-digital-products): for creators selling ebooks, templates and courses through LemonSqueezy: each payment tied to the channel and campaign that brought the buyer
+- [Paddle for desktop apps](https://virling.com/integrations/paddle-desktop-apps): for desktop and Mac apps selling licenses or subscriptions through Paddle: each payment tied to the channel and campaign behind the visit to the download page, and what stays Unattributed when the purchase happens inside the app
 
 ## Compare
 
