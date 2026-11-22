@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FastAPI Stripe UTM tracking: Checkout in Python</title>
+<meta name="description" content="How to see which traffic source each Stripe payment came from in a FastAPI app: pass the Virling visitor ID and UTM tags to Stripe Checkout.">
+<link rel="canonical" href="https://virling.com/blog/fastapi-stripe-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/fastapi-stripe-utm-tracking">
+<meta property="og:title" content="FastAPI Stripe UTM tracking: Checkout in Python">
+<meta property="og:description" content="How to see which traffic source each Stripe payment came from in a FastAPI app: pass the Virling visitor ID and UTM tags to Stripe Checkout.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"FastAPI Stripe UTM tracking: Checkout in Python","item":"https://virling.com/blog/fastapi-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"FastAPI Stripe UTM tracking: Checkout in Python","description":"How to see which traffic source each Stripe payment came from in a FastAPI app: pass the Virling visitor ID and UTM tags to Stripe Checkout.","datePublished":"2026-11-22","dateModified":"2026-11-22","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/fastapi-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Stripe Checkout in FastAPI?","acceptedAnswer":{"@type":"Answer","text":"Declare a virling_vid: Annotated[str | None, Cookie()] = None parameter on the route that creates the Checkout Session and pass it as client_reference_id. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them."}},{"@type":"Question","name":"How do I read the virling_vid cookie in FastAPI?","acceptedAnswer":{"@type":"Answer","text":"Add a parameter named virling_vid with Cookie() to your path operation, or read request.cookies.get(\"virling_vid\") from the Request. It is a first-party cookie on your domain, so the browser sends it with every request to your app."}},{"@type":"Question","name":"Should I use client_reference_id or metadata.virling_vid?","acceptedAnswer":{"@type":"Answer","text":"Use client_reference_id unless it already holds your own user or order ID. In that case put the visitor ID in the session's metadata.virling_vid. Virling reads either."}},{"@type":"Question","name":"Should the checkout route be async def or def?","acceptedAnswer":{"@type":"Answer","text":"Use def when you call stripe.checkout.Session.create(), since it is a blocking call. FastAPI runs def routes in a thread pool, so the call does not block the event loop."}},{"@type":"Question","name":"What happens if the cookie is missing?","acceptedAnswer":{"@type":"Answer","text":"The session is created without a visitor ID, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed."}},{"@type":"Question","name":"Do Stripe Payment Links in a FastAPI app need code?","acceptedAnswer":{"@type":"Answer","text":"No. Use a normal link to buy.stripe.com on a page that runs the script. The script adds client_reference_id to the link when the page loads and again on click, unless the link already has one."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-22</span>
+      <h1>FastAPI Stripe UTM tracking: Checkout in Python</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-22.</p>
+<p class="p">To see which traffic source each Stripe payment came from in a FastAPI app, load the Virling script in your base Jinja template, then read the <code>virling_vid</code> cookie in the route that creates the Stripe Checkout Session and pass it as <code>client_reference_id</code>, or as <code>metadata.virling_vid</code> if that field is taken. Stripe keeps that one ID, and Virling joins the payment to every visit behind it, with the UTM tags of each, so every payment shows the channel that brought the buyer.</p>
+<p class="p">This post covers FastAPI with the stripe Python library. The same steps for other stacks are in <a href="/blog/flask-stripe-utm-tracking">Flask Stripe UTM tracking</a> and <a href="/blog/django-stripe-utm-tracking">Django Stripe UTM tracking</a>. For Payment Links, metadata limits and where the values show up in Stripe, see the general guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>.</p>
+<h2>Why Stripe Checkout loses your UTM tags</h2>
+<p class="p">UTM tags live on the landing URL. Stripe Checkout runs on Stripe's domain and only stores what your server passes when it creates the session, so the tags of the visit are gone unless you carry them over. The same thing happens on any redirect that drops the query string, as covered in <a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a>. Passing one visitor ID instead of the tags keeps earlier visits and untagged ones, such as search and referrals, too.</p>
+<h2>Step 1: add the script to the base template</h2>
+<p class="p">If FastAPI renders your pages with <code>Jinja2Templates</code>, paste the tag before <code>&lt;/head&gt;</code> in the template every page extends, usually <code>templates/base.html</code>. If your pages come from a separate frontend, add it there instead. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<div class="code block"><pre data-snippet>&lt;!-- templates/base.html --&gt;
+&lt;script defer src="https://app.virling.com/v.js"
+  data-site="yourdomain.com"&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain and records the UTM tags of each visit against it.</p>
+<h2>Step 2: create the Checkout Session in a route</h2>
+<p class="p">Your server receives the cookie with every request from the browser. FastAPI reads it for you when you declare a parameter with the same name and <code>Cookie()</code>. Pass it as <code>client_reference_id</code> where you create the session with the stripe Python library:</p>
+<div class="code block"><pre data-snippet># main.py
+import os
+from typing import Annotated
+
+import stripe
+from fastapi import Cookie, FastAPI
+from fastapi.responses import RedirectResponse
+
+app = FastAPI()
+stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
+
+
+@app.post("/checkout")
+def checkout(virling_vid: Annotated[str | None, Cookie()] = None):
+    params = {
+        "line_items": [{"price": "price_...", "quantity": 1}],
+        "mode": "subscription",
+        "success_url": "https://yourdomain.com/thanks",
+    }
+    if virling_vid:
+        params["client_reference_id"] = virling_vid
+
+    checkout_session = stripe.checkout.Session.create(**params)
+    return RedirectResponse(checkout_session.url, status_code=303)</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The route is a plain <code>def</code> because <code>stripe.checkout.Session.create()</code> blocks. FastAPI runs <code>def</code> routes in a thread pool, so the event loop stays free. The <code>303</code> makes the browser follow the redirect with a GET. Post to it from a form, and the browser sends the cookie along:</p>
+<div class="code block"><pre data-snippet>&lt;form action="/checkout" method="post"&gt;
+  &lt;button type="submit"&gt;Subscribe&lt;/button&gt;
+&lt;/form&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The cookie is set on your registrable domain, so an API on a subdomain such as <code>api.yourdomain.com</code> receives it too. If your frontend calls that API with <code>fetch</code>, use <code>credentials: "include"</code> and set <code>allow_credentials=True</code> in <code>CORSMiddleware</code>. For other payment providers, the <a href="/tools/checkout-snippet-generator">checkout snippet generator</a> gives the matching code.</p>
+<h2>When client_reference_id is taken</h2>
+<p class="p">If you already use <code>client_reference_id</code> for your own user or order ID, put the visitor ID in the session's metadata instead. Virling reads either:</p>
+<div class="code block"><pre data-snippet>    if virling_vid:
+        params["metadata"] = {"virling_vid": virling_vid}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">If you create your own PaymentIntent for Elements instead of a Checkout Session, set the same <code>metadata</code> on <code>stripe.PaymentIntent.create()</code>. The full lookup order is in the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a> and in <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>. The <a href="/integrations/stripe">Stripe integration page</a> shows what Virling imports, and <a href="/integrations/stripe-saas">Stripe for SaaS</a> shows the subscription view.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Optional: keep the UTM tags in Stripe too</h2>
+<p class="p">Virling does not need the tags on the payment, since the visitor ID points to every visit. If you also want them readable in the Stripe Dashboard, save them from the landing URL in Starlette's <code>SessionMiddleware</code> (it needs the <code>itsdangerous</code> package) and copy them into metadata. Stripe does not copy session metadata to the Subscription, so set <code>subscription_data.metadata</code> as well, or <code>payment_intent_data.metadata</code> for <code>mode="payment"</code>:</p>
+<div class="code block"><pre data-snippet>from fastapi import Request
+from starlette.middleware.sessions import SessionMiddleware
+
+UTM_KEYS = ("utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term")
+
+
+@app.middleware("http")
+async def keep_utm(request: Request, call_next):
+    tags = {k: request.query_params[k] for k in UTM_KEYS if request.query_params.get(k)}
+    if tags:
+        request.session["utm"] = tags
+    return await call_next(request)
+
+# added last, so it runs first and request.session exists in keep_utm
+app.add_middleware(SessionMiddleware, secret_key=os.environ["SESSION_SECRET"])
+
+# add request: Request to checkout(), then before stripe.checkout.Session.create(**params):
+    utm = request.session.get("utm", {})
+    if utm:
+        params["metadata"] = {**params.get("metadata", {}), **utm}
+        params["subscription_data"] = {"metadata": utm}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">These tags record one visit, the last tagged one. Keep passing the visitor ID: it is what ties the payment to the whole path.</p>
+<h2>Subscriptions and renewals</h2>
+<p class="p">Only the first payment needs the visitor ID. A renewal takes the attribution of the customer's first payment, so each monthly or yearly charge of the subscription is credited to the same visit, with no code on your side. Plan changes count as renewals too.</p>
+<h2>Check that it works</h2>
+<p class="p">Make a test payment from a page that runs the script, wait for the next sync, and open the payments list at <code>/app/yourdomain.com/payments</code>. The payment should show a channel instead of Unattributed. Open it to see its journey. If it still shows Unattributed, check that the page you bought from loads the script and that the checkout request goes to the same domain or one of its subdomains, so the cookie is sent.</p>
+<p class="p">Payments without a visitor ID still count toward revenue, as Unattributed. How the join works from visit to payment is in <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>, and the <a href="/integrations/saas">SaaS page</a> shows what you get per channel.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I pass UTM parameters to Stripe Checkout in FastAPI?</h3><p class="p">Declare a virling_vid: Annotated[str | None, Cookie()] = None parameter on the route that creates the Checkout Session and pass it as client_reference_id. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them.</p>
+<h3>How do I read the virling_vid cookie in FastAPI?</h3><p class="p">Add a parameter named virling_vid with Cookie() to your path operation, or read request.cookies.get("virling_vid") from the Request. It is a first-party cookie on your domain, so the browser sends it with every request to your app.</p>
+<h3>Should I use client_reference_id or metadata.virling_vid?</h3><p class="p">Use client_reference_id unless it already holds your own user or order ID. In that case put the visitor ID in the session's metadata.virling_vid. Virling reads either.</p>
+<h3>Should the checkout route be async def or def?</h3><p class="p">Use def when you call stripe.checkout.Session.create(), since it is a blocking call. FastAPI runs def routes in a thread pool, so the call does not block the event loop.</p>
+<h3>What happens if the cookie is missing?</h3><p class="p">The session is created without a visitor ID, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed.</p>
+<h3>Do Stripe Payment Links in a FastAPI app need code?</h3><p class="p">No. Use a normal link to buy.stripe.com on a page that runs the script. The script adds client_reference_id to the link when the page loads and again on click, unless the link already has one.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring Stripe revenue</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
