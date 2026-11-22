@@ -94,6 +94,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Sales cycle length calculator](https://virling.com/tools/sales-cycle-calculator): average, median and longest sales cycle in days from the first touch and close date of each deal, and which lookback window covers every deal
 - [MRR waterfall calculator](https://virling.com/tools/mrr-waterfall-calculator): ending MRR, net new MRR and net MRR growth rate from starting, new, expansion, reactivated, contraction and churned MRR, with a waterfall chart (MRR bridge) for board and investor updates
 - [Net revenue calculator](https://virling.com/tools/net-revenue-calculator): net revenue and the share of gross kept from gross sales, discounts, refunds, chargebacks and payment or platform fees (percent plus fixed per order), with each deduction as a line
+- [Revenue attribution setup generator](https://virling.com/tools/attribution-setup-generator): step-by-step checklist to track revenue by traffic source for a site builder or framework and a payment provider, with docs links for each step
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
