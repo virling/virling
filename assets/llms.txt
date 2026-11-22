@@ -135,6 +135,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [LemonSqueezy for digital products](https://virling.com/integrations/lemonsqueezy-digital-products): for creators selling ebooks, templates and courses through LemonSqueezy: each payment tied to the channel and campaign that brought the buyer
 - [Paddle for desktop apps](https://virling.com/integrations/paddle-desktop-apps): for desktop and Mac apps selling licenses or subscriptions through Paddle: each payment tied to the channel and campaign behind the visit to the download page, and what stays Unattributed when the purchase happens inside the app
 - [Creem for AI apps](https://virling.com/integrations/creem-ai-apps): for founders of AI apps and wrappers selling through Creem: each paying user tied to the post, search or AI answer that brought them, with credit top-ups keeping the first channel
+- [Dodo Payments for digital products](https://virling.com/integrations/dodo-payments-digital-products): for creators selling ebooks, templates and courses through Dodo Payments: each payment tied to the channel and campaign that brought the buyer
 
 ## Compare
 
