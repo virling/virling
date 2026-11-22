@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SaaS revenue forecast calculator: project MRR and ARR | Virling</title>
+<meta name="description" content="Free SaaS revenue forecast calculator. Enter current MRR, new MRR per month, growth in new MRR, churn and expansion to get a month-by-month MRR forecast with ending MRR and ARR for up to 36 months. Runs in your browser.">
+<link rel="canonical" href="https://virling.com/tools/saas-revenue-forecast-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/saas-revenue-forecast-calculator">
+<meta property="og:title" content="SaaS revenue forecast calculator: project MRR and ARR | Virling">
+<meta property="og:description" content="Free SaaS revenue forecast calculator. Enter current MRR, new MRR per month, growth in new MRR, churn and expansion to get a month-by-month MRR forecast with ending MRR and ARR for up to 36 months. Runs in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"SaaS revenue forecast calculator","url":"https://virling.com/tools/saas-revenue-forecast-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"SaaS revenue forecast calculator","item":"https://virling.com/tools/saas-revenue-forecast-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / saas revenue forecast calculator</span><h1>SaaS revenue forecast calculator</h1><p class="lead">Enter your current monthly recurring revenue (MRR), the new MRR you add each month, how fast that grows, your churn and expansion rates to forecast MRR month by month, with ending MRR and ARR. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="fc" autocomplete="off">
+  <label>Current MRR ($)<input name="mrr" type="number" min="0" step="1" value="10000"></label>
+  <label>New MRR per month ($) <span class="dim">from new customers, in month 1</span><input name="new" type="number" min="0" step="1" value="2000"></label>
+  <label>Monthly growth in new MRR (%)<input name="growth" type="number" step="0.1" value="5"></label>
+  <label>Monthly churn rate (%) <span class="dim">share of MRR lost each month</span><input name="churn" type="number" min="0" max="100" step="0.1" value="3"></label>
+  <label>Monthly expansion rate (%) <span class="dim">upgrades as a share of MRR</span><input name="exp" type="number" min="0" step="0.1" value="1"></label>
+  <label>Months to forecast <span class="dim">up to 36</span><input name="months" type="number" min="1" max="36" step="1" value="12"></label>
+</form>
+<div class="tool-stats" id="fc-out"></div>
+<p class="fine-note" id="fc-how"></p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:600px"><thead><tr><th style="width:12%">Month</th><th>Starting MRR</th><th>New</th><th>Expansion</th><th>Churned</th><th>Ending MRR</th></tr></thead><tbody id="fc-rows"></tbody></table></div>
+<div class="txt post tool-cta">
+<p class="p">This forecast uses one total for new MRR. Virling links every visit to the payment it led to, so it shows the new MRR each channel brings from your real payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/mrr-calculator">MRR calculator</a>, <a href="/tools/mrr-waterfall-calculator">MRR waterfall calculator</a>, <a href="/tools/nrr-calculator">NRR calculator</a>, <a href="/tools/mrr-goal-calculator">MRR goal calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The formulas in plain words</h2>
+<p class="p">The forecast walks forward one month at a time. Each month starts with the MRR the previous month ended with. Expansion and churn are shares of that starting MRR:</p>
+<p class="p"><code>expansion MRR = starting MRR &times; expansion rate</code></p>
+<p class="p"><code>churned MRR = starting MRR &times; churn rate</code></p>
+<p class="p">New MRR starts at the amount you enter and grows by the monthly growth rate, so month 2 adds a little more than month 1, month 3 a little more again:</p>
+<p class="p"><code>new MRR in month m = new MRR per month &times; (1 + growth)<sup>m &minus; 1</sup></code></p>
+<p class="p">Add them up to get the month's ending MRR, which becomes the next month's starting MRR:</p>
+<p class="p"><code>ending MRR = starting MRR + new MRR + expansion MRR &minus; churned MRR</code></p>
+<p class="p">ARR at the end is the ending MRR of the last month times 12. New MRR added in a month starts churning the month after. Set growth to 0 if you expect to add the same new MRR every month, or use a negative number if new MRR is falling.</p>
+<h2>A worked example</h2>
+<p class="p">These are round illustrative numbers, the same as the defaults above, not data from a real business. A product has $10,000 of MRR, adds $2,000 of new MRR in month 1, and expects that to grow 5% a month. It loses 3% of MRR to churn and gains 1% from upgrades each month.</p>
+<p class="p">Month 1: $10,000 + $2,000 new + $100 expansion &minus; $300 churned = $11,800. Month 2 starts at $11,800 and adds $2,100 of new MRR ($2,000 &times; 1.05), $118 of expansion and loses $354 to churn, ending at $13,664. After 12 months the product ends at about $36,737 of MRR, or $440,842 of ARR, having added about $31,834 of new MRR along the way. In month 12 it loses about $1,020 to churn, against $340 of expansion: churn grows with the base, so new MRR has to keep growing to keep the curve going up.</p>
+<h2>A forecast by channel needs real data</h2>
+<p class="p">The calculator treats new MRR as one number. In practice it comes from several channels, each with its own volume, growth and churn, and a forecast is only as good as your read on which of them will keep delivering. Guessing that split is how forecasts go wrong. Read <a href="/blog/mrr-by-acquisition-channel">how to see MRR by acquisition channel</a> to measure it from your own payments, split this month's movements with the <a href="/tools/mrr-waterfall-calculator">MRR waterfall calculator</a>, and check expansion against churn with the <a href="/tools/nrr-calculator">NRR calculator</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>SaaS revenue forecast calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do I forecast SaaS revenue?</h3><p class="p">Start from your current MRR and step forward one month at a time. Each month, add new MRR from new customers and expansion MRR from upgrades, and subtract the MRR lost to churn. The result is next month's starting MRR. Repeat for as many months as you want to forecast.</p></div>
+      <div><h3>What is the difference between MRR and ARR in a forecast?</h3><p class="p">MRR is the recurring revenue you bill in a month. ARR is that figure times 12. The calculator shows ARR as ending MRR times 12, which is the annual run rate at the end of the forecast, not the revenue you collect during it.</p></div>
+      <div><h3>Why does churn matter more as MRR grows?</h3><p class="p">Churn is a percentage of the MRR you already have, so the dollars lost each month grow with your base. New MRR does not grow on its own. At some point the churned MRR catches up with the new MRR and growth flattens unless you add more new MRR or lower churn.</p></div>
+      <div><h3>How accurate is a revenue forecast like this?</h3><p class="p">It is only as good as the inputs. It uses one churn rate, one expansion rate and a steady growth rate in new MRR, while real months vary. Use your own measured rates from recent months and treat the result as a range to plan around, not a promise.</p></div>
+      <div><h3>Does the calculator store my numbers?</h3><p class="p">No. The calculation runs in your browser and nothing is uploaded or saved.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I forecast SaaS revenue?", "acceptedAnswer": {"@type": "Answer", "text": "Start from your current MRR and step forward one month at a time. Each month, add new MRR from new customers and expansion MRR from upgrades, and subtract the MRR lost to churn. The result is next month's starting MRR. Repeat for as many months as you want to forecast."}}, {"@type": "Question", "name": "What is the difference between MRR and ARR in a forecast?", "acceptedAnswer": {"@type": "Answer", "text": "MRR is the recurring revenue you bill in a month. ARR is that figure times 12. The calculator shows ARR as ending MRR times 12, which is the annual run rate at the end of the forecast, not the revenue you collect during it."}}, {"@type": "Question", "name": "Why does churn matter more as MRR grows?", "acceptedAnswer": {"@type": "Answer", "text": "Churn is a percentage of the MRR you already have, so the dollars lost each month grow with your base. New MRR does not grow on its own. At some point the churned MRR catches up with the new MRR and growth flattens unless you add more new MRR or lower churn."}}, {"@type": "Question", "name": "How accurate is a revenue forecast like this?", "acceptedAnswer": {"@type": "Answer", "text": "It is only as good as the inputs. It uses one churn rate, one expansion rate and a steady growth rate in new MRR, while real months vary. Use your own measured rates from recent months and treat the result as a range to plan around, not a promise."}}, {"@type": "Question", "name": "Does the calculator store my numbers?", "acceptedAnswer": {"@type": "Answer", "text": "No. The calculation runs in your browser and nothing is uploaded or saved."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>Forecast from the channels that actually pay</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the new MRR each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("fc"), out = document.getElementById("fc-out"), how = document.getElementById("fc-how"), rows = document.getElementById("fc-rows");
+const usd = (n) => (n < 0 ? "-$" : "$") + Math.round(Math.abs(n)).toLocaleString("en-US");
+const pct = (n) => +n.toFixed(2) + "%";
+const calc = () => {
+  const v = (n) => Math.max(+f.elements[n].value || 0, 0);
+  const s0 = v("mrr"), n0 = v("new"), g = Math.max(+f.elements.growth.value || 0, -100) / 100, c = Math.min(v("churn"), 100) / 100, e = v("exp") / 100, m = Math.min(Math.max(Math.round(v("months")), 1), 36);
+  let s = s0, added = 0, html = "";
+  for (let i = 1; i <= m; i++) {
+    const nw = n0 * Math.pow(1 + g, i - 1), ex = s * e, ch = s * c, end = s + nw + ex - ch;
+    html += `<tr><td>${i}</td><td>${usd(s)}</td><td>${usd(nw)}</td><td>${usd(ex)}</td><td>${usd(ch)}</td><td><b>${usd(end)}</b></td></tr>`;
+    added += nw; s = end;
+  }
+  rows.innerHTML = html;
+  out.innerHTML = [["Ending MRR", usd(s)], ["Ending ARR", usd(s * 12)], ["Growth over " + m + (m === 1 ? " month" : " months"), s0 > 0 ? pct((s / s0 - 1) * 100) : "No data"], ["New MRR added", usd(added)]].map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+  how.textContent = `Each month: starting MRR + new MRR + ${pct(e * 100)} expansion - ${pct(c * 100)} churn. Ending ARR = ${usd(s)} × 12 = ${usd(s * 12)}.`;
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
