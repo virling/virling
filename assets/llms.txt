@@ -130,6 +130,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Stripe agency client reporting](https://virling.com/integrations/stripe-agencies): for agencies reporting on client Stripe revenue: each client payment tied to the channel and campaign that brought the customer, one site per client
 - [Stripe ecommerce analytics](https://virling.com/integrations/stripe-ecommerce): for online stores on Stripe Checkout or Payment Links: each order tied to the channel and campaign that brought the buyer, with a read-only restricted key
 - [Polar for developer tools](https://virling.com/integrations/polar-developer-tools): for open source maintainers and developer tool makers selling licenses, sponsorships or subscriptions through Polar: each payment tied to the channel and campaign that brought the buyer
+- [LemonSqueezy for digital products](https://virling.com/integrations/lemonsqueezy-digital-products): for creators selling ebooks, templates and courses through LemonSqueezy: each payment tied to the channel and campaign that brought the buyer
 
 ## Compare
 
