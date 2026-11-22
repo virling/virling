@@ -36,7 +36,7 @@ Yes, as long as the payment carries the visitor ID. A hosted checkout from Strip
 
 ## Does it work with Shopify and WooCommerce stores?
 
-Yes. Connect the store with a read-only key, and add a short snippet that stores the visitor ID on each order: a cart attribute on Shopify, order meta data on WooCommerce. Orders, refunds and subscription renewals are imported every minute. See [Set up an online store](guides/ecommerce.md), [Shopify](payments/shopify.md) and [WooCommerce](payments/woocommerce.md).
+Yes. Connect the store with a read-only key, and add a short snippet that stores the visitor ID on each order: a cart attribute on Shopify, order meta data on WooCommerce. New orders are imported every minute, and refunds and subscription renewals are counted too. See [Set up an online store](guides/ecommerce.md), [Shopify](payments/shopify.md) and [WooCommerce](payments/woocommerce.md).
 
 ## Can I self-host it for free?
 
