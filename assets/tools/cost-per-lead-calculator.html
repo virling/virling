@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cost per lead calculator: CPL by channel and blended | Virling</title>
+<meta name="description" content="Free cost per lead calculator. Enter spend and leads for each channel to get cost per lead by channel and blended, plus optional cost per customer and revenue per lead.">
+<link rel="canonical" href="https://virling.com/tools/cost-per-lead-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/cost-per-lead-calculator">
+<meta property="og:title" content="Cost per lead calculator: CPL by channel and blended | Virling">
+<meta property="og:description" content="Free cost per lead calculator. Enter spend and leads for each channel to get cost per lead by channel and blended, plus optional cost per customer and revenue per lead.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Cost per lead calculator","url":"https://virling.com/tools/cost-per-lead-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Cost per lead calculator","item":"https://virling.com/tools/cost-per-lead-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / cost per lead calculator</span><h1>Cost per lead calculator</h1><p class="lead">Enter what each marketing channel cost and the leads it brought to see cost per lead for each channel and blended. Add your lead to customer rate and deal value to see cost per customer and revenue per lead too. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="cpl" autocomplete="off">
+  <table class="cmp" style="grid-column:1/-1"><thead><tr><th>Channel</th><th>Spend ($)</th><th>Leads</th><th>Cost per lead</th><th>Cost per customer</th><th style="width:110px"></th></tr></thead><tbody id="cpl-rows"></tbody><tfoot id="cpl-total"></tfoot></table>
+  <p><button class="btn sm light" type="button" id="cpl-add">Add channel</button></p>
+  <label>Lead to customer rate (%, optional)<input name="rate" type="number" min="0" max="100" step="0.1" value="10"><span class="dim">Share of leads that become paying customers</span></label>
+  <label>Deal value ($, optional)<input name="deal" type="number" min="0" step="0.01" value="2000"><span class="dim">What one customer pays you, such as first-year revenue</span></label>
+</form>
+<div class="tool-stats" id="cpl-sum"></div>
+<p class="fine-note">A lead is a signup, demo request or form fill. Use the same period, such as one month, for every number. The same lead to customer rate is applied to every channel; leave it blank to see cost per lead only.</p>
+<div class="txt post tool-cta">
+<p class="p">Cost per lead tells you what a form fill costs, not what a customer costs. Virling links every lead to the visit that brought it and to the payment that followed, so you see real cost per customer for each channel from your own payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Next: <a href="/tools/lead-value-calculator">lead value calculator</a>, <a href="/tools/cac-calculator">CAC calculator</a>. Related: <a href="/blog/cac-by-channel">how to calculate CAC by channel</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The cost per lead formula</h2>
+<p class="p">Cost per lead is what you spent on a channel divided by the leads it brought, over the same period:</p>
+<p class="p"><code>cost per lead = channel spend / channel leads</code><br><code>blended cost per lead = total spend / total leads</code></p>
+<p class="p">With a lead to customer rate and a deal value, the same numbers give two more figures:</p>
+<p class="p"><code>cost per customer = cost per lead / lead to customer rate</code><br><code>revenue per lead = lead to customer rate &times; deal value</code></p>
+<p class="p">A channel pays for itself on that deal value when revenue per lead is above its cost per lead.</p>
+<h2>A worked example</h2>
+<p class="p">These are made-up sample numbers, the same as the defaults above, not data from a real company or a benchmark. In one month, paid search cost $3,000 and brought 50 leads: $60 per lead. Paid social cost $2,000 for 100 leads: $20 per lead. Content cost $1,200 in freelance writing for 50 leads: $24 per lead.</p>
+<p class="p">Together that is $6,200 for 200 leads, a blended cost per lead of $31. If 10% of leads become customers, a customer costs $31 / 0.10 = $310 blended, and $600, $200 and $240 by channel. Paid search leads cost three times as much as paid social leads. At a $2,000 deal value each lead brings 0.10 &times; $2,000 = $200 of revenue, well above the cost per lead on every channel.</p>
+<h2>Cost per lead is not cost per paying customer</h2>
+<p class="p">A cheap lead is only cheap if it buys. Channels convert leads to customers at very different rates: a lead who searched for the problem you solve and a lead from a broad giveaway fill in the same form, but one is far more likely to pay. This calculator applies one rate to every channel, so its cost per customer is only a first guess. Work out what a lead from each channel is worth with the <a href="/tools/lead-value-calculator">lead value calculator</a>, then compare channels by what they cost per paying customer with the <a href="/tools/cac-calculator">CAC calculator</a>. For why that needs each payment tied to the visit that started it, see <a href="/blog/cac-by-channel">how to calculate CAC by channel</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Cost per lead calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate cost per lead?</h3><p class="p">Divide what you spent on a channel in a period by the number of leads it brought in that period. $3,000 of ad spend that brought 50 leads is a cost per lead of $60.</p></div>
+      <div><h3>What is blended cost per lead?</h3><p class="p">Total spend across all channels divided by total leads. It describes your lead generation as a whole, while per-channel cost per lead shows which channel brings leads most cheaply.</p></div>
+      <div><h3>What is the difference between cost per lead and cost per customer?</h3><p class="p">Cost per lead counts everyone who fills in a form; cost per customer counts only the ones who pay. Divide cost per lead by your lead to customer rate to get cost per customer: a $30 lead with a 10% rate is a $300 customer.</p></div>
+      <div><h3>Should I always pick the channel with the lowest cost per lead?</h3><p class="p">No. A channel with cheap leads can still be the most expensive per customer if few of its leads pay. Compare channels by cost per paying customer, measured from real payments, before moving budget.</p></div>
+      <div><h3>What counts as a lead?</h3><p class="p">Whatever action starts your sales process: a free signup, a demo request or a contact form. Count each kind separately if they convert to paid at different rates, and use the same definition for every channel.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate cost per lead?", "acceptedAnswer": {"@type": "Answer", "text": "Divide what you spent on a channel in a period by the number of leads it brought in that period. $3,000 of ad spend that brought 50 leads is a cost per lead of $60."}}, {"@type": "Question", "name": "What is blended cost per lead?", "acceptedAnswer": {"@type": "Answer", "text": "Total spend across all channels divided by total leads. It describes your lead generation as a whole, while per-channel cost per lead shows which channel brings leads most cheaply."}}, {"@type": "Question", "name": "What is the difference between cost per lead and cost per customer?", "acceptedAnswer": {"@type": "Answer", "text": "Cost per lead counts everyone who fills in a form; cost per customer counts only the ones who pay. Divide cost per lead by your lead to customer rate to get cost per customer: a $30 lead with a 10% rate is a $300 customer."}}, {"@type": "Question", "name": "Should I always pick the channel with the lowest cost per lead?", "acceptedAnswer": {"@type": "Answer", "text": "No. A channel with cheap leads can still be the most expensive per customer if few of its leads pay. Compare channels by cost per paying customer, measured from real payments, before moving budget."}}, {"@type": "Question", "name": "What counts as a lead?", "acceptedAnswer": {"@type": "Answer", "text": "Whatever action starts your sales process: a free signup, a demo request or a contact form. Count each kind separately if they convert to paid at different rates, and use the same definition for every channel."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See what each channel costs per paying customer</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the signup and the payment it led to, so you see leads, customers and revenue for each channel from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("cpl"), body = document.getElementById("cpl-rows"), tot = document.getElementById("cpl-total"), sum = document.getElementById("cpl-sum");
+const usd = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: n < 100 ? 2 : 0, maximumFractionDigits: n < 100 ? 2 : 0 });
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const add = (name, s, l) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td><input name="name" type="text" aria-label="Channel" value="${esc(name)}"></td><td><input name="s" type="number" min="0" step="0.01" aria-label="Spend" value="${s}"></td><td><input name="l" type="number" min="0" step="1" aria-label="Leads" value="${l}"></td><td data-o></td><td data-o></td><td><button class="btn sm light" type="button" data-rm>Remove</button></td>`;
+  body.appendChild(tr);
+};
+const calc = () => {
+  const trs = [...body.rows], rate = f.rate.value === "" ? 0 : Math.min(100, Math.max(0, +f.rate.value || 0)) / 100, deal = f.deal.value === "" ? 0 : Math.max(0, +f.deal.value || 0);
+  trs.forEach((tr) => (tr.querySelector("[data-rm]").disabled = trs.length < 2));
+  const rows = trs.map((tr, i) => {
+    const q = (n) => tr.querySelector(`[name=${n}]`);
+    return { tr, name: q("name").value.trim() || "Channel " + (i + 1), s: Math.max(0, +q("s").value || 0), l: Math.max(0, +q("l").value || 0) };
+  });
+  const t = rows.reduce((a, x) => ({ s: a.s + x.s, l: a.l + x.l }), { s: 0, l: 0 });
+  const cpc = (s, l) => (l > 0 ? (rate > 0 ? usd(s / l / rate) : "Add a rate") : "No leads");
+  let best = null;
+  rows.forEach((x) => { if (x.l > 0 && (!best || x.s / x.l < best.s / best.l)) best = x; });
+  rows.forEach((x) => {
+    const [a, b] = x.tr.querySelectorAll("[data-o]");
+    a.innerHTML = x.l > 0 ? usd(x.s / x.l) + (x === best ? ' <span class="dim">lowest</span>' : "") : "No leads";
+    b.textContent = cpc(x.s, x.l);
+    x.tr.style.background = x === best ? "var(--revenue-soft)" : "";
+  });
+  const blended = t.l > 0 ? usd(t.s / t.l) : "No data";
+  tot.innerHTML = `<tr><th scope="row">Total</th><td><b>${usd(t.s)}</b></td><td><b>${t.l.toLocaleString("en-US")}</b></td><td><b>${blended}</b></td><td><b>${cpc(t.s, t.l)}</b></td><td></td></tr>`;
+  const stats = [["Blended cost per lead", blended], ["Lowest cost per lead channel", best ? esc(best.name) : "No data"]];
+  if (rate > 0) stats.push(["Blended cost per customer", cpc(t.s, t.l)], ["New customers", (t.l * rate).toLocaleString("en-US", { maximumFractionDigits: 1 })]);
+  if (rate > 0 && deal > 0) stats.push(["Revenue per lead", usd(rate * deal)]);
+  sum.innerHTML = stats.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+body.addEventListener("click", (e) => { const b = e.target.closest("[data-rm]"); if (b && body.rows.length > 1) { b.closest("tr").remove(); calc(); } });
+document.getElementById("cpl-add").addEventListener("click", () => { add("", 0, 0); calc(); body.lastElementChild.querySelector("input").focus(); });
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+add("Paid search", 3000, 50);
+add("Paid social", 2000, 100);
+add("Content", 1200, 50);
+calc();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
