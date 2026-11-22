@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MRR waterfall calculator: MRR bridge for board updates | Virling</title>
+<meta name="description" content="Free MRR waterfall calculator. Enter starting, new, expansion, reactivated, contraction and churned MRR to get ending MRR, net new MRR, net MRR growth rate and a waterfall chart. Runs in your browser.">
+<link rel="canonical" href="https://virling.com/tools/mrr-waterfall-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/mrr-waterfall-calculator">
+<meta property="og:title" content="MRR waterfall calculator: MRR bridge for board updates | Virling">
+<meta property="og:description" content="Free MRR waterfall calculator. Enter starting, new, expansion, reactivated, contraction and churned MRR to get ending MRR, net new MRR, net MRR growth rate and a waterfall chart. Runs in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"MRR waterfall calculator","url":"https://virling.com/tools/mrr-waterfall-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"MRR waterfall calculator","item":"https://virling.com/tools/mrr-waterfall-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / mrr waterfall calculator</span><h1>MRR waterfall calculator</h1><p class="lead">Enter the MRR you started a month with, then the MRR you gained from new customers, upgrades and returning customers, and the MRR you lost to downgrades and cancellations. You get ending MRR, net new MRR and the net MRR growth rate, with a waterfall chart, sometimes called an MRR bridge, ready for a board or investor update. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="mw" autocomplete="off">
+  <label>Starting MRR ($)<input name="start" type="number" min="0" step="0.01" value="20000"></label>
+  <label>New MRR ($)<input name="new" type="number" min="0" step="0.01" value="2000"></label>
+  <label>Expansion MRR ($)<input name="exp" type="number" min="0" step="0.01" value="800"></label>
+  <label>Reactivated MRR ($)<input name="react" type="number" min="0" step="0.01" value="200"></label>
+  <label>Contraction MRR ($)<input name="con" type="number" min="0" step="0.01" value="400"></label>
+  <label>Churned MRR ($)<input name="churn" type="number" min="0" step="0.01" value="600"></label>
+  <p class="dim" style="grid-column:1/-1">Use the same month for every number. Starting MRR is what customers paid per month at the start of the month. New MRR comes from first-time customers, expansion from upgrades and added seats, reactivated MRR from customers who had cancelled and came back, contraction from downgrades by customers who stayed, churned MRR from customers who cancelled.</p>
+</form>
+<div class="tool-stats" id="mw-out"></div>
+<div id="mw-chart" style="overflow-x:auto"></div>
+<div class="txt post"><p class="p" id="mw-formula"></p></div>
+<div class="txt post tool-cta">
+<p class="p">This waterfall is one bar of new MRR for the whole business. Virling splits it by channel: it links every visit to the payment it led to, reads subscriptions from Stripe, Paddle and the other payment providers it connects to, and shows what the customers each channel brought pay per month now. See <a href="https://docs.virling.com/attribution/retention">retention and MRR</a> in the docs. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/mrr-calculator">MRR calculator</a>, <a href="/tools/quick-ratio-calculator">SaaS quick ratio calculator</a>, <a href="/tools/investor-update-template">investor update template</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The MRR waterfall formula</h2>
+<p class="p">An MRR waterfall starts from the MRR at the beginning of a month, adds each source of gained MRR, subtracts each source of lost MRR and lands on the MRR at the end of the month:</p>
+<p class="p"><code>Ending MRR = starting MRR + new + expansion + reactivated - contraction - churned MRR</code></p>
+<p class="p">Net new MRR is the change in the middle, and the net MRR growth rate compares it with where you started:</p>
+<p class="p"><code>Net new MRR = new + expansion + reactivated - contraction - churned MRR</code></p>
+<p class="p"><code>Net MRR growth rate = net new MRR / starting MRR</code></p>
+<p class="p">Keep each customer in one bucket per month. A customer who signs up for the first time is new MRR, even if they upgrade a week later. A customer who cancelled in an earlier month and pays again is reactivated MRR, not new MRR, so returning customers do not make acquisition look better than it is.</p>
+<h2>A worked example</h2>
+<p class="p">The defaults above are made-up sample numbers, not data from a real company. The month starts at $20,000 MRR. New customers add $2,000, upgrades add $800 and returning customers add $200, so you gained $3,000. Downgrades remove $400 and cancellations remove $600, so you lost $1,000.</p>
+<p class="p">Net new MRR is $3,000 - $1,000 = $2,000. Ending MRR is $20,000 + $2,000 = $22,000. The net MRR growth rate is $2,000 / $20,000 = 10% for the month.</p>
+<p class="p">If cancellations tripled to $1,800 with everything else the same, net new MRR would fall to $800, ending MRR to $20,800 and the growth rate to 4%. The new MRR bar would look the same, but the waterfall would show where the growth went.</p>
+<h2>Split new MRR by acquisition channel</h2>
+<p class="p">The new MRR bar is one number, but it is made of customers from search, referrals, a launch, a newsletter or paid ads. A board or investor will often ask which of those drove the month. Split new MRR by the channel that brought each customer to answer that, as described in <a href="/blog/mrr-by-acquisition-channel">MRR by acquisition channel</a>, and put the split in your <a href="/tools/investor-update-template">investor update</a>. To work out MRR from your plans, use the <a href="/tools/mrr-calculator">MRR calculator</a>; to compare MRR gained with MRR lost as one ratio, use the <a href="/tools/quick-ratio-calculator">SaaS quick ratio calculator</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>MRR waterfall calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>What is an MRR waterfall?</h3><p class="p">It is a chart that walks from starting MRR to ending MRR for a period. Bars for new, expansion and reactivated MRR step up, bars for contraction and churned MRR step down, and the last bar is the MRR you ended with. It shows not only how much MRR changed but why.</p></div>
+      <div><h3>Is an MRR bridge the same as an MRR waterfall?</h3><p class="p">Yes. Both names describe the same breakdown from starting MRR to ending MRR. Some teams show it as a chart and others as a table with one row per movement; the numbers are the same.</p></div>
+      <div><h3>What is the difference between new and reactivated MRR?</h3><p class="p">New MRR comes from customers paying you for the first time. Reactivated MRR comes from customers who cancelled before and started paying again. Keeping them apart stops returning customers from inflating what your acquisition channels brought.</p></div>
+      <div><h3>How do I calculate net MRR growth rate?</h3><p class="p">Add new, expansion and reactivated MRR, subtract contraction and churned MRR to get net new MRR, then divide by the MRR you started the month with. Net MRR growth rate = net new MRR / starting MRR.</p></div>
+      <div><h3>Why split new MRR by channel?</h3><p class="p">The waterfall shows how much new MRR you added but not where it came from. Splitting new MRR by the channel that brought each customer shows which channels feed growth, so you know where to put more time and budget and can answer the question in a board meeting.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is an MRR waterfall?", "acceptedAnswer": {"@type": "Answer", "text": "It is a chart that walks from starting MRR to ending MRR for a period. Bars for new, expansion and reactivated MRR step up, bars for contraction and churned MRR step down, and the last bar is the MRR you ended with. It shows not only how much MRR changed but why."}}, {"@type": "Question", "name": "Is an MRR bridge the same as an MRR waterfall?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Both names describe the same breakdown from starting MRR to ending MRR. Some teams show it as a chart and others as a table with one row per movement; the numbers are the same."}}, {"@type": "Question", "name": "What is the difference between new and reactivated MRR?", "acceptedAnswer": {"@type": "Answer", "text": "New MRR comes from customers paying you for the first time. Reactivated MRR comes from customers who cancelled before and started paying again. Keeping them apart stops returning customers from inflating what your acquisition channels brought."}}, {"@type": "Question", "name": "How do I calculate net MRR growth rate?", "acceptedAnswer": {"@type": "Answer", "text": "Add new, expansion and reactivated MRR, subtract contraction and churned MRR to get net new MRR, then divide by the MRR you started the month with. Net MRR growth rate = net new MRR / starting MRR."}}, {"@type": "Question", "name": "Why split new MRR by channel?", "acceptedAnswer": {"@type": "Answer", "text": "The waterfall shows how much new MRR you added but not where it came from. Splitting new MRR by the channel that brought each customer shows which channels feed growth, so you know where to put more time and budget and can answer the question in a board meeting."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring the MRR</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers, revenue and MRR each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("mw"), out = document.getElementById("mw-out"), ch = document.getElementById("mw-chart"), fx = document.getElementById("mw-formula");
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 2 }) + "%";
+const usd = (n) => { const a = Math.abs(n), d = a < 100 && a % 1 ? 2 : 0; return (n < 0 ? "-$" : "$") + a.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); };
+const v = (x) => Math.max(0, +x.value || 0);
+const chart = (steps, peak) => {
+  const W = 720, H = 280, top = 28, bot = 36, slot = W / steps.length, bw = 60, y = (x) => top + (1 - x / peak) * (H - top - bot);
+  let lvl = 0, g = "";
+  steps.forEach(([name, val, kind], i) => {
+    const lo = kind === "total" ? 0 : kind === "gain" ? lvl : lvl - val, hi = kind === "total" ? val : kind === "gain" ? lvl + val : lvl;
+    lvl = kind === "total" ? val : kind === "gain" ? hi : lo;
+    const x = i * slot + (slot - bw) / 2, fill = kind === "total" ? "#0e1116" : kind === "gain" ? "#e8471c" : "#6b717c", txt = kind === "total" ? usd(val) : (kind === "gain" ? "+" : "-") + usd(val);
+    g += `<rect x="${x}" y="${y(hi)}" width="${bw}" height="${Math.max(1, y(lo) - y(hi))}" rx="3" fill="${fill}"/>`;
+    g += `<text x="${x + bw / 2}" y="${y(hi) - 8}" text-anchor="middle" font-size="13" font-weight="600" fill="#0e1116">${txt}</text>`;
+    g += `<text x="${x + bw / 2}" y="${H - 12}" text-anchor="middle" font-size="13" fill="#4b515c">${name}</text>`;
+    if (i < steps.length - 1) g += `<line x1="${x + bw}" x2="${x + slot}" y1="${y(lvl)}" y2="${y(lvl)}" stroke="#d6d7d1" stroke-dasharray="3 3"/>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:560px;font-family:inherit" role="img" aria-label="MRR waterfall from ${usd(steps[0][1])} to ${usd(lvl)}"><line x1="0" x2="${W}" y1="${y(0)}" y2="${y(0)}" stroke="#e4e4df"/>${g}</svg>`;
+};
+const calc = () => {
+  const s = v(f.start), n = v(f.new), e = v(f.exp), r = v(f.react), c = v(f.con), l = v(f.churn);
+  const ok = s > 0 && c + l <= s, net = n + e + r - c - l, end = s + net;
+  const stats = [["Ending MRR", ok ? usd(end) : "No data"], ["Net new MRR", ok ? usd(net) : "No data"], ["Net MRR growth rate", ok ? pct(net / s) : "No data"]];
+  out.innerHTML = stats.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+  if (!ok) { ch.innerHTML = ""; fx.textContent = "Enter a starting MRR above zero, with contraction and churned MRR no larger than it."; return; }
+  ch.innerHTML = chart([["Start", s, "total"], ["New", n, "gain"], ["Expansion", e, "gain"], ["Reactivated", r, "gain"], ["Contraction", c, "loss"], ["Churned", l, "loss"], ["End", end, "total"]], s + n + e + r);
+  fx.innerHTML = `<code>Ending MRR = ${usd(s)} + ${usd(n)} + ${usd(e)} + ${usd(r)} - ${usd(c)} - ${usd(l)} = ${usd(end)}</code><br><code>Net MRR growth rate = ${usd(net)} / ${usd(s)} = ${pct(net / s)}</code>`;
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (ev) => ev.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
