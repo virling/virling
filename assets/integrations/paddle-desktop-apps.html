@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paddle attribution for desktop apps: sales by channel</title>
+<meta name="description" content="For desktop and Mac apps selling licenses or subscriptions through Paddle: tie each payment to the channel and campaign behind the visit to your download page.">
+<link rel="canonical" href="https://virling.com/integrations/paddle-desktop-apps">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/paddle-desktop-apps">
+<meta property="og:title" content="Paddle attribution for desktop apps: sales by channel">
+<meta property="og:description" content="For desktop and Mac apps selling licenses or subscriptions through Paddle: tie each payment to the channel and campaign behind the visit to your download page.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"Paddle","item":"https://virling.com/integrations/paddle"},{"@type":"ListItem","position":4,"name":"Paddle for desktop apps","item":"https://virling.com/integrations/paddle-desktop-apps"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Which channel brings the buyers of my desktop app?","acceptedAnswer":{"@type":"Answer","text":"Put the Virling script on your website, connect Paddle with a read-only API key, and pass the visitor ID as customData when you open Paddle checkout on your site. Each payment is then credited to the visits before it, such as the visit to your download page, so the Channels card shows which channels and campaigns bring buyers."}},{"@type":"Question","name":"What happens when the purchase happens inside the app?","acceptedAnswer":{"@type":"Answer","text":"A checkout shown inside the app runs outside your website, so it has no virling_vid cookie and carries no visitor ID. The payment still counts toward revenue, as Unattributed. To credit it, have the buy button open a pricing or checkout page on your own domain in the browser: if the buyer visited your site in that browser before, the cookie is still there and the payment is credited to the earlier visit."}},{"@type":"Question","name":"Does Virling track downloads or installs?","acceptedAnswer":{"@type":"Answer","text":"No. Virling tracks visits to pages on your site and the payments that carry a visitor ID. It does not see the download, the install or anything inside the app."}},{"@type":"Question","name":"Which permissions does the Paddle API key need?","acceptedAnswer":{"@type":"Answer","text":"transaction.read and adjustment.read, plus subscription.read if you sell subscriptions and want Retention to tell who still pays. No other permissions are needed, and Virling never creates, changes or refunds anything."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / paddle for desktop apps</span>
+      <h1>See which channel brings the buyers of your desktop app.</h1>
+      <p class="lead">For makers of desktop and Mac apps who sell licenses or subscriptions through Paddle. Virling ties each Paddle payment to the channel and campaign behind the visit to your download page, so you compare launch posts, searches, ads and newsletters by the buyers they bring, not by downloads. Open source under AGPL, hosted or <a href="/self-host">self-hosted</a>.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">Paddle knows who paid and how much, but not which post or search sent them to your site. Virling sets a visitor ID when someone lands on your site, keeps it in a first-party cookie on your domain for one year, and matches it when a Paddle checkout carries it. Paddle is read with a read-only API key.</p>
+<h2>What you get</h2>
+<ul class="post-list"><li><b>Each payment credited to a channel.</b> A license or first subscription payment is joined to the buyer&#x27;s visits before it. By default it goes to the latest visit in the last 90 days that was not Direct, so a buyer who found you through a launch post and came back later by typing your URL is credited to the launch post. First touch, last touch and 30, 60 or 365-day windows are the other options.</li><li><b>Campaigns and landing pages.</b> Each visit keeps its channel, referrer, UTM campaign and landing page, so you see whether your download page, pricing page or a comparison page brought the buyer.</li><li><b>Renewals that keep the first channel.</b> If you sell subscriptions, a transaction from a renewal or plan change keeps the channel of the customer&#x27;s first payment, matched by Paddle customer ID.</li><li><b>Free trials handled.</b> A subscription&#x27;s first transaction with nothing to pay starts a trial. Virling never counts it as revenue, and the customer&#x27;s later payments are credited to it.</li><li><b>Refunds and chargebacks taken off.</b> Approved refund and chargeback adjustments lower the transaction&#x27;s revenue, and transactions from the last 60 days are read again every 6 hours, so later refunds show up.</li></ul>
+<h2>When the purchase happens inside the app</h2>
+<p class="p">Virling links a payment to a visit only when the Paddle transaction carries <code>virling_vid</code> in its <code>custom_data</code>. The script runs on pages of your domain and its subdomains, not inside your app.</p>
+<ul class="post-list"><li><b>Checkout on your website:</b> links. The buyer opens Paddle checkout on a page that runs the script, and your code passes the visitor ID.</li><li><b>Buy button that opens your site in the browser:</b> links when the buyer visited your site in that browser before, because the cookie is still there. Leave UTM tags off the link your app opens: a tagged visit is not Direct, so it would take the credit from the channel that first brought the buyer.</li><li><b>Checkout shown inside the app:</b> does not link. It has no visitor ID, so the payment counts toward revenue as Unattributed.</li><li><b>Purchase in another browser or on another device:</b> does not link, since that browser has its own cookie and a new visitor ID.</li></ul>
+<h2>Set it up</h2>
+<ol class="post-list"><li><b>Add the site.</b> Click <b>+ Add a site</b> and enter your domain, such as <code>yourapp.com</code>, and its timezone.</li><li><b>Install the script.</b> Paste the tag before <code>&lt;/head&gt;</code> on every page of your site, including the download and pricing pages. The <code>virling_vid</code> cookie is set on your registrable domain, so subdomains share one visitor ID. Leave cookieless mode off.</li><li><b>Connect Paddle.</b> In Paddle, open <b>Developer tools</b>, then <b>Authentication</b>, and create an API key with <code>transaction.read</code> and <code>adjustment.read</code>, plus <code>subscription.read</code> if you sell subscriptions. Paste it under payments; live keys start with <code>pdl_live_</code> and sandbox keys with <code>pdl_sdbx_</code>. The last 90 days are imported, then new transactions every minute.</li><li><b>Link checkout to visits.</b> With Paddle.js, pass the visitor ID as <code>customData</code> when you open checkout; for transactions you create on your server, set <code>custom_data: { virling_vid: req.cookies.virling_vid }</code>. <code>window.virling?.vid?.()</code> returns nothing when the script is blocked or not loaded yet, so check the value before using it.</li></ol>
+<div class="code block"><pre>Paddle.Checkout.open({
+  items: [{ priceId: &quot;pri_...&quot;, quantity: 1 }],
+  customData: { virling_vid: window.virling?.vid?.() },
+});</pre></div>
+<p class="p">Make a test payment from a page that runs the script, wait for the next sync, and open the payments list: the payment should show a channel instead of Unattributed. The full walkthrough is in <a href="/blog/track-paddle-revenue-by-traffic-source">how to track Paddle revenue by traffic source</a>, and <a href="/blog/paddle-checkout-utm-parameters">Paddle UTM tracking</a> covers passing UTM and custom data to checkout. See also <a href="/integrations/paddle">Paddle revenue attribution</a> and, for subscription products, <a href="/integrations/paddle-saas">Paddle for SaaS</a>.</p>
+<h2>What to know</h2>
+<ul class="post-list"><li>Virling does not see downloads, installs or anything inside your app. It sees visits to your site and the payments that carry a visitor ID.</li><li>Transactions older than the 90-day backfill are not imported, and payments in the backfill were made before the script was on your site, so they are Unattributed. Channel numbers fill in as new buyers arrive.</li><li>Payments without a visitor ID still count toward revenue as Unattributed.</li></ul>
+<h2>Open source</h2>
+<p class="p">Virling is open source under AGPLv3, and the code is on <a href="https://github.com/virling/virling">GitHub</a>. Use the hosted service, or <a href="/self-host">self-host it</a> as one binary with every feature. In a load test on 2026-10-31, in a container limited to one vCPU and 1 GB of RAM, it ingested 100,000 pageviews at 2,829 a second with none failed and a p99 of 34 ms, and used 157 MB of memory after the ingest.</p>
+<h2>Frequently asked questions</h2>
+<h3>Which channel brings the buyers of my desktop app?</h3><p class="p">Put the Virling script on your website, connect Paddle with a read-only API key, and pass the visitor ID as customData when you open Paddle checkout on your site. Each payment is then credited to the visits before it, such as the visit to your download page, so the Channels card shows which channels and campaigns bring buyers.</p>
+<h3>What happens when the purchase happens inside the app?</h3><p class="p">A checkout shown inside the app runs outside your website, so it has no virling_vid cookie and carries no visitor ID. The payment still counts toward revenue, as Unattributed. To credit it, have the buy button open a pricing or checkout page on your own domain in the browser: if the buyer visited your site in that browser before, the cookie is still there and the payment is credited to the earlier visit.</p>
+<h3>Does Virling track downloads or installs?</h3><p class="p">No. Virling tracks visits to pages on your site and the payments that carry a visitor ID. It does not see the download, the install or anything inside the app.</p>
+<h3>Which permissions does the Paddle API key need?</h3><p class="p">transaction.read and adjustment.read, plus subscription.read if you sell subscriptions and want Retention to tell who still pays. No other permissions are needed, and Virling never creates, changes or refunds anything.</p>
+      <p class="p">Full guides: <a href="https://docs.virling.com/payments/paddle">Paddle in the docs</a>, <a href="https://docs.virling.com/payments/checkout">Link checkout to visits</a> and <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post"><h2>Related reading</h2><ul class="post-list"><li><a href="/integrations/paddle">Paddle revenue attribution</a></li><li><a href="/integrations/paddle-saas">Paddle for SaaS</a></li><li><a href="/blog/track-paddle-revenue-by-traffic-source">How to track Paddle revenue by traffic source</a></li><li><a href="/blog/paddle-checkout-utm-parameters">Paddle UTM tracking: pass UTM and custom data to checkout</a></li><li><a href="/tools/merchant-of-record-fee-calculator">Merchant of record fee calculator</a></li></ul></div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
