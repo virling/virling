@@ -12,6 +12,7 @@
 - [Run Virling for client sites](guides/agencies.md)
 - [Set up an online store](guides/ecommerce.md)
 - [Set up a SaaS product](guides/saas.md)
+- [Set up a merchant of record checkout](guides/merchant-of-record.md)
 - [Set up sales-led B2B SaaS](guides/b2b-sales.md)
 - [Set up a mobile app](guides/mobile-apps.md)
 - [Set up a no-code site](guides/no-code.md)
