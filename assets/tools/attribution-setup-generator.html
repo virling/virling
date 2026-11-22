@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revenue attribution setup generator: steps for your stack | Virling</title>
+<meta name="description" content="Free revenue attribution setup generator. Pick your site builder and payment provider, and get a step-by-step checklist to track revenue by traffic source.">
+<link rel="canonical" href="https://virling.com/tools/attribution-setup-generator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/attribution-setup-generator">
+<meta property="og:title" content="Revenue attribution setup generator: steps for your stack | Virling">
+<meta property="og:description" content="Free revenue attribution setup generator. Pick your site builder and payment provider, and get a step-by-step checklist to track revenue by traffic source.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Revenue attribution setup generator","url":"https://virling.com/tools/attribution-setup-generator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Revenue attribution setup generator","item":"https://virling.com/tools/attribution-setup-generator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / attribution setup generator</span><h1>Revenue attribution setup generator</h1><p class="lead">Tracking revenue by source takes three things: the script on your site, a read-only key for your payment provider, and the visitor's ID in checkout. Pick your site builder and payment provider below to get the exact steps for your stack. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="gen" autocomplete="off">
+  <div class="tool-pick" data-select><span id="site-label">Site builder or framework</span>
+    <button type="button" id="site" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="site-label site-value" data-value="html"><span id="site-value">Plain HTML</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="site-menu" role="listbox" aria-labelledby="site-label" tabindex="-1" hidden><li role="option" data-value="html" aria-selected="true">Plain HTML</li><li role="option" data-value="wordpress" aria-selected="false">WordPress</li><li role="option" data-value="webflow" aria-selected="false">Webflow</li><li role="option" data-value="framer" aria-selected="false">Framer</li><li role="option" data-value="wix" aria-selected="false">Wix</li><li role="option" data-value="squarespace" aria-selected="false">Squarespace</li><li role="option" data-value="carrd" aria-selected="false">Carrd</li><li role="option" data-value="bubble" aria-selected="false">Bubble</li><li role="option" data-value="nextjs" aria-selected="false">Next.js</li><li role="option" data-value="rails" aria-selected="false">Ruby on Rails</li><li role="option" data-value="laravel" aria-selected="false">Laravel</li><li role="option" data-value="django" aria-selected="false">Django</li></ul>
+  </div>
+  <div class="tool-pick" data-select><span id="prov-label">Payment provider</span>
+    <button type="button" id="prov" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="prov-label prov-value" data-value="stripe"><span id="prov-value">Stripe</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="prov-menu" role="listbox" aria-labelledby="prov-label" tabindex="-1" hidden><li role="option" data-value="stripe" aria-selected="true">Stripe</li><li role="option" data-value="paddle" aria-selected="false">Paddle</li><li role="option" data-value="shopify" aria-selected="false">Shopify</li><li role="option" data-value="woocommerce" aria-selected="false">WooCommerce</li><li role="option" data-value="polar" aria-selected="false">Polar</li><li role="option" data-value="lemonsqueezy" aria-selected="false">LemonSqueezy</li><li role="option" data-value="dodo" aria-selected="false">Dodo Payments</li><li role="option" data-value="creem" aria-selected="false">Creem</li><li role="option" data-value="revenuecat" aria-selected="false">RevenueCat</li></ul>
+  </div>
+</form>
+<div class="tool-out">
+<ol class="post-list" id="steps" style="flex:1 1 100%" aria-live="polite"></ol>
+<button class="btn sm" type="button" id="steps-copy">Copy checklist</button>
+</div>
+<div class="txt post tool-cta">
+<h2>See which channel brought each payment</h2>
+<p class="p">Once the checklist is done, Virling credits each payment to the visit that led to it, and shows revenue for every channel, referrer and page. Virling is open source under AGPLv3: self-host it free, or start a 14-day hosted trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/tools/checkout-snippet-generator">Checkout snippet generator</a> &middot; <a class="lk" href="/demo">See the demo</a></p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>How revenue attribution works</h2>
+<ol class="post-list"><li>The Virling script stores a visitor ID in the first-party <code>virling_vid</code> cookie and records each visit with its referrer and UTM tags.</li><li>Virling reads payments from your provider with a read-only key, polling once a minute.</li><li>When checkout carries the visitor ID, the payment is joined to the visits behind it. Payments without it still count toward revenue, as Unattributed.</li></ol>
+<p class="p">Hosted checkout links on <code>buy.stripe.com</code>, <code>buy.polar.sh</code>, <code>checkout.dodopayments.com</code> and <code>*.lemonsqueezy.com</code> need no code: the script adds the visitor ID to them. The full reference is in <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Guides on tracking revenue by source</h2>
+<ul class="post-list"><li><a href="/blog/what-is-revenue-attribution">What is revenue attribution</a>: how a payment is tied to the visit that led to it.</li><li><a href="/blog/utm-parameters-for-revenue-tracking">UTM parameters for revenue tracking</a>: tagging links so each payment shows its campaign.</li><li><a href="/blog/cross-domain-checkout-attribution">Cross-domain checkout attribution</a>: keeping the visit when checkout runs on another domain.</li><li><a href="https://docs.virling.com/track/frameworks">Framework guides</a>: where the script goes on every supported stack.</li></ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Attribution setup FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do I track revenue by traffic source?</h3><p class="p">Add the Virling script to your site, connect your payment provider with a read-only key, and pass the visitor ID from the <code>virling_vid</code> cookie into checkout. Virling then joins each payment to the visit that led to it, with its referrer and UTM tags.</p></div>
+      <div><h3>Do I need a backend?</h3><p class="p">Not always. Hosted checkout links on <code>buy.stripe.com</code>, <code>buy.polar.sh</code>, <code>checkout.dodopayments.com</code> and <code>*.lemonsqueezy.com</code> need no code, and Paddle.js can read the ID in the browser. Checkouts you create with a secret API key, such as Creem checkouts, need a server.</p></div>
+      <div><h3>Does Virling change anything in my payment account?</h3><p class="p">No. Virling reads payments with a read-only key and never creates, changes or refunds anything. LemonSqueezy keys cannot be made read-only, and Creem and RevenueCat keys need webhook access so Virling can add its one webhook.</p></div>
+      <div><h3>Are subscription renewals attributed?</h3><p class="p">Yes. A renewal keeps the channel of the customer's first payment, so every renewal is credited to the visit that led to the first one.</p></div>
+      <div><h3>What happens to payments without the visitor ID?</h3><p class="p">They still count toward revenue, as Unattributed, but are not credited to any visit or channel.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I track revenue by traffic source?", "acceptedAnswer": {"@type": "Answer", "text": "Add the Virling script to your site, connect your payment provider with a read-only key, and pass the visitor ID from the virling_vid cookie into checkout. Virling then joins each payment to the visit that led to it, with its referrer and UTM tags."}}, {"@type": "Question", "name": "Do I need a backend?", "acceptedAnswer": {"@type": "Answer", "text": "Not always. Hosted checkout links on buy.stripe.com, buy.polar.sh, checkout.dodopayments.com and *.lemonsqueezy.com need no code, and Paddle.js can read the ID in the browser. Checkouts you create with a secret API key, such as Creem checkouts, need a server."}}, {"@type": "Question", "name": "Does Virling change anything in my payment account?", "acceptedAnswer": {"@type": "Answer", "text": "No. Virling reads payments with a read-only key and never creates, changes or refunds anything. LemonSqueezy keys cannot be made read-only, and Creem and RevenueCat keys need webhook access so Virling can add its one webhook."}}, {"@type": "Question", "name": "Are subscription renewals attributed?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. A renewal keeps the channel of the customer's first payment, so every renewal is credited to the visit that led to the first one."}}, {"@type": "Question", "name": "What happens to payments without the visitor ID?", "acceptedAnswer": {"@type": "Answer", "text": "They still count toward revenue, as Unattributed, but are not credited to any visit or channel."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channel brought each payment</h2>
+<p class="p">Virling links every payment to the visit it came from, so you see the post, search or AI answer behind your revenue. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const D = "https://docs.virling.com/", B = "/blog/";
+const SITES = {
+  html: ["Plain HTML", "track/frameworks#html", "what-is-revenue-attribution", "Paste the tag before <code>&lt;/head&gt;</code> on every page."],
+  wordpress: ["WordPress", "track/frameworks#wordpress", "wordpress-revenue-tracking", "Install the Virling plugin: upload the <code>integrations/wordpress/virling</code> folder from the repository to <code>wp-content/plugins/</code>, activate it, and enter your Virling server and site domain in Settings, Virling. Without the plugin, paste the tag before <code>&lt;/head&gt;</code> in <code>header.php</code>."],
+  webflow: ["Webflow", "track/frameworks#webflow", "webflow-revenue-tracking", "In Site settings, Custom code, paste the tag into Head code, then publish the site to your domain. Custom code needs a paid site plan."],
+  framer: ["Framer", "track/frameworks#framer", "framer-revenue-tracking", "In Site settings, General, Custom code, paste the tag into End of <code>&lt;head&gt;</code> tag, then publish. Custom code only runs on the published site, not in the editor preview."],
+  wix: ["Wix", "track/frameworks#wix", "wix-revenue-tracking", "In the dashboard, open Settings, Custom code under Advanced, click Add Custom Code, paste the tag, choose All pages and Load code once, place it in Head, then publish. Custom code needs a premium plan and a connected domain."],
+  squarespace: ["Squarespace", "track/frameworks#squarespace", "squarespace-revenue-tracking", "In Settings, Developer tools, Code injection (Settings, Advanced on older menus), paste the tag into Header and save. Code injection needs a plan that includes it."],
+  carrd: ["Carrd", "track/frameworks#carrd", "carrd-revenue-tracking", "Add an Embed element, set Type to Code, paste the tag, set Style to Hidden and choose Head, then publish. Embeds need Pro Standard or higher."],
+  bubble: ["Bubble", "track/frameworks#bubble", "bubble-revenue-tracking", "In the Settings tab, SEO / metatags, paste the tag into Script/meta tags in header, then deploy the app to live."],
+  nextjs: ["Next.js", "track/frameworks#nextjs", "nextjs-stripe-utm-tracking", "Load it once with <code>next/script</code> and <code>strategy=\"afterInteractive\"</code>, in <code>app/layout.tsx</code> (App Router) or <code>pages/_app.tsx</code> (Pages Router). Leave out <code>defer</code>."],
+  rails: ["Ruby on Rails", "track/frameworks#ruby-on-rails", "rails-stripe-utm-tracking", "Paste the tag before <code>&lt;/head&gt;</code> in <code>app/views/layouts/application.html.erb</code>. Turbo page visits are counted."],
+  laravel: ["Laravel", "track/frameworks#laravel", "laravel-stripe-utm-tracking", "Paste the tag before <code>&lt;/head&gt;</code> in the Blade layout every page extends, usually <code>resources/views/layouts/app.blade.php</code>."],
+  django: ["Django", "track/frameworks#html", "django-stripe-utm-tracking", "Paste the tag before <code>&lt;/head&gt;</code> in the base template every page extends."],
+};
+const SERVER = {
+  nextjs: "In a route handler, read <code>req.cookies.get(\"virling_vid\")?.value</code>; in a server action, <code>(await cookies()).get(\"virling_vid\")?.value</code> from <code>next/headers</code>.",
+  rails: "In the controller that creates the checkout, read <code>cookies[:virling_vid]</code>.",
+  laravel: "In the controller, read <code>$request-&gt;cookie('virling_vid')</code>, and leave <code>virling_vid</code> out of cookie encryption: <code>$middleware-&gt;encryptCookies(except: ['virling_vid'])</code> in <code>bootstrap/app.php</code> on Laravel 11 and later, or <code>$except</code> in <code>EncryptCookies.php</code> before that.",
+  django: "In the view that creates the checkout, read <code>request.COOKIES.get('virling_vid')</code>.",
+};
+const PROVS = {
+  stripe: ["Stripe", "stripe", "track-stripe-revenue-by-traffic-source", "In the Stripe Dashboard, open Developers, API keys, Create restricted key, and set Read on Charges, Checkout Sessions, Customers, Events, Invoices, Subscriptions and PaymentIntents. The key starts with <code>rk_live_</code>; secret keys are refused.", "Payment Links on <code>buy.stripe.com</code> need no code: the script adds <code>client_reference_id</code> on click. For a Checkout Session you create, set <code>client_reference_id</code> (or <code>metadata.virling_vid</code>) to the visitor ID; for your own PaymentIntent, set <code>metadata.virling_vid</code>.", "link"],
+  paddle: ["Paddle", "paddle", "track-paddle-revenue-by-traffic-source", "In Paddle, open Developer tools, Authentication, and create an API key with <code>transaction.read</code> and <code>adjustment.read</code>, plus <code>subscription.read</code> for retention.", "With Paddle.js, pass <code>customData: { virling_vid: window.virling?.vid?.() }</code> to <code>Paddle.Checkout.open</code>. For transactions you create on your server, set <code>custom_data.virling_vid</code>.", "browser"],
+  shopify: ["Shopify", "shopify", "track-shopify-revenue-by-traffic-source", "In your Shopify admin, open Settings, Apps and sales channels, Develop apps, create an app with only the <code>read_orders</code> scope and install it. Paste its Admin API access token (<code>shpat_</code>) and your <code>your-store.myshopify.com</code> address; a custom domain does not work here.", "Add the cart snippet to your theme's <code>theme.liquid</code>, after the Virling tag, It stores the visitor ID as a cart attribute, which Shopify copies onto the order. Headless stores set the cart attribute from their own cart code.", "shop"],
+  woocommerce: ["WooCommerce", "woocommerce", "track-woocommerce-revenue-by-traffic-source", "In WordPress, open WooCommerce, Settings, Advanced, REST API, and add a key with Read permission. Paste the consumer key and secret as <code>ck_...:cs_...</code> and your store address. The store must answer over https with pretty permalinks on.", "Add the order snippet to your theme's <code>functions.php</code>, or a snippets plugin. It copies the visitor ID from the cookie onto every new order, in the classic and the block checkout.", "shop"],
+  polar: ["Polar", "polar", "track-polar-revenue-by-traffic-source", "In your Polar organization settings, create an Organization Access Token with <code>orders:read</code> and <code>refunds:read</code>, plus <code>subscriptions:read</code> for retention. It starts with <code>polar_oat_</code>.", "Checkout links on <code>buy.polar.sh</code> need no code: the script adds <code>reference_id</code>. For a checkout session you create on your server, set <code>metadata.virling_vid</code>.", "link"],
+  lemonsqueezy: ["LemonSqueezy", "lemonsqueezy", "track-lemonsqueezy-revenue-by-traffic-source", "In LemonSqueezy, open Settings, API, and create a key. LemonSqueezy keys cannot be made read-only.", "Checkout links on <code>STORE.lemonsqueezy.com</code> need no code: the script adds <code>checkout[custom][virling_vid]</code>. For a checkout you create on your server, set <code>checkout_data.custom.virling_vid</code>.", "link"],
+  dodo: ["Dodo Payments", "dodo", "track-dodo-payments-revenue-by-traffic-source", "Create an API key in the Dodo Payments dashboard. Live and test mode keys both work.", "Static payment links on <code>checkout.dodopayments.com/buy/...</code> need no code: the script adds <code>metadata_virling_vid</code> on click. For a checkout session you create on your server, set <code>metadata.virling_vid</code>.", "link"],
+  creem: ["Creem", "creem", "track-creem-revenue-by-traffic-source", "In Creem, open Developers, API keys, and create a key with <code>transactions:read</code>, <code>subscriptions:read</code> and <code>webhooks:write</code>, so Virling can add its webhook.", "When you create the checkout on your server, set <code>metadata.virling_vid</code> to the visitor ID.", "server"],
+  revenuecat: ["RevenueCat", "revenuecat", "track-revenuecat-revenue-by-traffic-source", "In your RevenueCat project settings, API keys, create a V2 secret key with read access to Project configuration and Customer information, and read and write access to Integrations.", "Set the customer attribute <code>virling_vid</code> before the purchase, from your app with the SDK's <code>setAttributes</code> or from your server. In-app purchases from people who never visited your site stay Unattributed.", "server"],
+};
+const HOOK = {
+  lemonsqueezy: "Virling registers a webhook on each store when you connect. If you self-host, <code>VIRLING_BASE_URL</code> must be a public https address, or LemonSqueezy payments show as Unattributed.",
+  creem: "Virling adds a <code>checkout.completed</code> webhook when you connect. If you self-host, Virling must be reachable over https, or Creem payments stay Unattributed.",
+  revenuecat: "Virling adds a webhook when you connect, and purchases arrive through it. If you self-host, Virling must be reachable over https, or only the one-time purchases from the first import arrive.",
+};
+const NOCODE = ["html", "wordpress", "webflow", "framer", "wix", "squarespace", "carrd", "bubble"];
+function steps(s, p) {
+  const [sn, sd, sb, sh] = SITES[s], [pn, pd, pb, key, vid, kind] = PROVS[p], out = [];
+  let tag = sh;
+  if (p === "shopify") tag += " Your Shopify theme needs the tag too, for the cart snippet in step 3.";
+  if (p === "woocommerce" && s !== "wordpress") tag += " If your store runs on a separate WordPress site, add the tag there too.";
+  out.push(["Add the Virling script to your " + sn + " site", "Add your site in Virling and copy the tag from its setup screen. " + tag + " Then open the site: the setup screen updates when the first pageview arrives.", [[sn + " setup docs", D + sd], [sn + " guide", B + sb]]]);
+  out.push(["Connect " + pn + " to Virling", key + " In Virling, open your site, Setup, Connect payments, pick " + pn + ", paste the key and click Connect and backfill.", [[pn + " docs", D + "payments/" + pd], [pn + " guide", B + pb]]]);
+  let v = vid;
+  if (SERVER[s] && kind !== "shop") v += " " + SERVER[s];
+  else if (NOCODE.includes(s) && kind === "link") v += " On " + sn + ", use the hosted link as a normal link or button on a page that runs the script.";
+  else if (NOCODE.includes(s) && kind === "server") v += " On " + sn + ", run that from a backend or serverless function, since it uses your secret API key.";
+  out.push(["Pass the visitor ID into " + pn + " checkout", v + " The <a href=\"/tools/checkout-snippet-generator\">checkout snippet generator</a> has the code.", [["Link checkout to visits", D + "payments/checkout"], [pn + " checkout docs", D + "payments/" + pd + "#" + (p === "lemonsqueezy" ? "checkout-attribution" : "how-a-payment-finds-its-visitor")]]]);
+  if (HOOK[p]) out.push(["Check the " + pn + " webhook", HOOK[p], [[pn + " webhook docs", D + "payments/" + pd + "#" + (p === "lemonsqueezy" ? "checkout-attribution" : "the-webhook")]]]);
+  out.push(["Make a test payment", "Pay from a page that runs the script, wait for the next sync, and open the payments list. The payment should show a channel instead of Unattributed.", [["Check that it works", D + "payments/checkout#check-that-it-works"], ["Unattributed payments", D + "attribution/unattributed"]]]);
+  return out;
+}
+const list = document.getElementById("steps"), copy = document.getElementById("steps-copy");
+let cur = [];
+function render() {
+  cur = steps(document.getElementById("site").dataset.value, document.getElementById("prov").dataset.value);
+  list.innerHTML = cur.map(([t, h, l]) => "<li><b>" + t + ".</b> " + h + "<br><span class=\"fine-note\">" + l.map(([n, u]) => "<a href=\"" + u + "\">" + n + "</a>").join(" &middot; ") + "</span></li>").join("");
+}
+function plain() {
+  const el = document.createElement("div");
+  return cur.map(([t, h, l], i) => { el.innerHTML = h; return (i + 1) + ". " + t + ". " + el.textContent + l.map(([n, u]) => "\n   " + n + ": " + new URL(u, location.origin).href).join(""); }).join("\n\n");
+}
+document.querySelectorAll(".tool-pick").forEach((pk) => {
+  const btn = pk.querySelector("button"), menu = pk.querySelector("ul"), items = [...menu.children];
+  const mark = (el) => { items.forEach((i) => i.classList.toggle("on", i === el)); menu.setAttribute("aria-activedescendant", el.id = btn.id + "-" + el.dataset.value); };
+  const show = (open) => {
+    menu.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+    if (open) { mark(items.find((i) => i.getAttribute("aria-selected") === "true")); menu.focus(); }
+  };
+  const pick = (el) => {
+    items.forEach((i) => i.setAttribute("aria-selected", String(i === el)));
+    btn.dataset.value = el.dataset.value;
+    btn.querySelector("span").textContent = el.textContent;
+    render();
+    show(false);
+    btn.focus();
+  };
+  btn.addEventListener("click", () => show(menu.hidden));
+  btn.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); show(true); } });
+  items.forEach((i) => { i.addEventListener("click", () => pick(i)); i.addEventListener("mousemove", () => mark(i)); });
+  menu.addEventListener("keydown", (e) => {
+    const at = items.findIndex((i) => i.classList.contains("on"));
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); mark(items[(at + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]); }
+    else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(items[at]); }
+    else if (e.key === "Escape" || e.key === "Tab") { show(false); btn.focus(); }
+  });
+  document.addEventListener("click", (e) => { if (!menu.hidden && !pk.contains(e.target)) show(false); });
+});
+copy.addEventListener("click", async () => { await navigator.clipboard.writeText(plain()); copy.textContent = "Copied"; setTimeout(() => (copy.textContent = "Copy checklist"), 1500); });
+render();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
