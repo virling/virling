@@ -96,6 +96,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Net revenue calculator](https://virling.com/tools/net-revenue-calculator): net revenue and the share of gross kept from gross sales, discounts, refunds, chargebacks and payment or platform fees (percent plus fixed per order), with each deduction as a line
 - [Revenue attribution setup generator](https://virling.com/tools/attribution-setup-generator): step-by-step checklist to track revenue by traffic source for a site builder or framework and a payment provider, with docs links for each step
 - [SaaS revenue forecast calculator](https://virling.com/tools/saas-revenue-forecast-calculator): month-by-month MRR forecast from current MRR, new MRR per month, monthly growth in new MRR, churn and expansion rates for up to 36 months, with ending MRR and ARR
+- [Build in public revenue update template](https://virling.com/tools/build-in-public-revenue-post-template): monthly build in public revenue update post, short and long versions, from MRR or revenue, new customers and revenue by channel, with an option to show channel shares in percent instead of amounts
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
