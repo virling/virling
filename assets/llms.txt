@@ -89,6 +89,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Bulk UTM builder](https://virling.com/tools/bulk-utm-builder): add UTM tags to many links at once from a URL list or a CSV, then copy them all or download a CSV
 - [Gross margin calculator](https://virling.com/tools/gross-margin-calculator): gross profit, gross margin and markup from revenue and cost of goods, with optional payment fees and shipping
 - [CPC calculator with revenue per click](https://virling.com/tools/cpc-calculator): cost per click, revenue per click, cost per customer and break-even CPC from ad spend, clicks, paying customers, revenue and an optional gross margin
+- [Cost per lead calculator](https://virling.com/tools/cost-per-lead-calculator): cost per lead by channel and blended from spend and leads per channel, plus cost per customer and revenue per lead from an optional lead to customer rate and deal value
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
