@@ -308,6 +308,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Direct mail tracking: how to track direct mail revenue](https://virling.com/blog/direct-mail-revenue-tracking): How to track direct mail revenue: give each postcard, catalog, insert or flyer its own tagged short link or QR code, so mail visits stop landing as Direct.
 - [Stripe pricing table UTM tracking: see which source sold](https://virling.com/blog/stripe-pricing-table-utm-tracking): An embedded Stripe pricing table drops your UTM tags and the referrer. Pass a visitor ID with client-reference-id and see which channel brought each sale.
 - [Go Stripe UTM tracking: Checkout with net/http and stripe-go](https://virling.com/blog/go-stripe-utm-tracking): How to tie a Stripe Checkout payment in a Go backend to the visit and UTM tags that brought it, with net/http and the stripe-go library.
+- [Cross-device attribution without invasive tracking](https://virling.com/blog/cross-device-attribution): A visitor finds you on a phone and pays on a laptop. Why that breaks attribution, what can be joined without fingerprinting, and what to do about it.
 
 ## Source
 
