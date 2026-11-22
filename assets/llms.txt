@@ -123,6 +123,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Polar SaaS attribution](https://virling.com/integrations/polar-saas): each order, payment after a trial and renewal for SaaS and developer tools selling through Polar, tied to the channel that brought the customer
 - [Creem SaaS attribution](https://virling.com/integrations/creem-saas): each payment, first payment after a trial and renewal for SaaS selling through Creem as merchant of record, tied to the channel that brought the customer
 - [Stripe agency client reporting](https://virling.com/integrations/stripe-agencies): for agencies reporting on client Stripe revenue: each client payment tied to the channel and campaign that brought the customer, one site per client
+- [Stripe ecommerce analytics](https://virling.com/integrations/stripe-ecommerce): for online stores on Stripe Checkout or Payment Links: each order tied to the channel and campaign that brought the buyer, with a read-only restricted key
 
 ## Compare
 
@@ -286,6 +287,12 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Express Stripe UTM tracking: Checkout in Node.js](https://virling.com/blog/express-stripe-utm-tracking): How to tie a Stripe Checkout payment in an Express app to the visit and UTM tags that brought it, with the stripe Node library.
 - [Google Tag Manager revenue tracking: add Virling in minutes](https://virling.com/blog/google-tag-manager-revenue-tracking): Add Virling through Google Tag Manager with the ready-made container or one Custom HTML tag, then connect payments to see revenue per channel.
 - [Press coverage revenue tracking: do mentions bring customers](https://virling.com/blog/press-coverage-revenue-tracking): How to see whether press coverage, roundups and mentions bring paying customers: ask for tagged links, read referrers when you cannot, know what shows as Direct, and compare revenue per mention.
+- [Le Chat traffic analytics: which Mistral referral visits pay](https://virling.com/blog/le-chat-revenue-tracking): How to track Mistral Le Chat referral traffic and revenue: the chat.mistral.ai referrer, why it lands in Referral, visits with no referrer, and how the payment is credited.
+- [Stack Overflow traffic revenue: do your answers bring paying customers?](https://virling.com/blog/stack-overflow-revenue-tracking): How to see which Stack Overflow visits turn into paying customers: the stackoverflow.com referrer, tagging profile and answer links, why old answers keep sending visits, and late payments.
+- [SvelteKit Stripe UTM tracking: tie each payment to its source](https://virling.com/blog/sveltekit-stripe-utm-tracking): How to see which traffic source each Stripe Checkout payment came from in a SvelteKit app, with a form action or a +server.ts endpoint.
+- [Nuxt Stripe UTM tracking: tie each payment to its source](https://virling.com/blog/nuxt-stripe-utm-tracking): How to see which traffic source each Stripe Checkout payment came from in a Nuxt 3 app, with a server/api route that passes the visitor ID to the session.
+- [Flask Stripe UTM tracking: Checkout in Python](https://virling.com/blog/flask-stripe-utm-tracking): How to tie a Stripe Checkout payment in a Flask app to the visit and UTM tags that brought it, with the stripe Python library.
+- [npm package traffic to customers: which package registry visits turn into paying users](https://virling.com/blog/npm-revenue-tracking): Does your npm package bring paying users? How npm, PyPI and crates.io visits show up, why README links are the lever, and how to join them to the payments that come weeks later.
 
 ## Source
 

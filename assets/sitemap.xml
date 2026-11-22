@@ -35,6 +35,7 @@
   <url><loc>https://virling.com/integrations/polar-saas</loc></url>
   <url><loc>https://virling.com/integrations/creem-saas</loc></url>
   <url><loc>https://virling.com/integrations/stripe-agencies</loc></url>
+  <url><loc>https://virling.com/integrations/stripe-ecommerce</loc></url>
   <url><loc>https://virling.com/blog</loc></url>
   <url><loc>https://virling.com/blog/woocommerce-order-attribution-unknown</loc></url>
   <url><loc>https://virling.com/blog/what-is-revenue-attribution</loc></url>
@@ -166,6 +167,12 @@
   <url><loc>https://virling.com/blog/express-stripe-utm-tracking</loc></url>
   <url><loc>https://virling.com/blog/google-tag-manager-revenue-tracking</loc></url>
   <url><loc>https://virling.com/blog/press-coverage-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/le-chat-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/stack-overflow-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/sveltekit-stripe-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/nuxt-stripe-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/flask-stripe-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/npm-revenue-tracking</loc></url>
   <url><loc>https://virling.com/vs</loc></url>
   <url><loc>https://virling.com/vs/datafast</loc></url>
   <url><loc>https://virling.com/vs/databull</loc></url>
