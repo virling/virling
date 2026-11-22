@@ -22,6 +22,30 @@ Intel Macs, yes: releases cover Linux x86_64 and arm64 and macOS on Intel and Ap
 
 Yes. Add each domain as its own site, with `add-site` or in the app, and use its domain in `data-site`. Each site has its own settings, payment connections and reports. Subdomains of a site are counted as that site.
 
+## Does it work with Stripe Payment Links and Checkout?
+
+Yes. For Checkout Sessions you create, pass the `virling_vid` cookie as `client_reference_id` or in `metadata.virling_vid`. Payment Links on `buy.stripe.com` need no code: the script adds `client_reference_id` to the link when a visitor clicks it. See [Stripe](payments/stripe.md) and [Stripe Payment Links UTM tracking](https://virling.com/blog/stripe-payment-links-utm-tracking).
+
+## Are subscription renewals credited to the original channel?
+
+Yes. A renewal takes the attribution of the customer's first payment with the same provider, so it keeps that payment's channel even years later. Upgrades and plan changes count as renewals too. Subscriptions whose first payment is older than the 90-day backfill are Unattributed; see [Renewals](attribution/renewals.md).
+
+## Can I attribute revenue when checkout is on another domain?
+
+Yes, as long as the payment carries the visitor ID. A hosted checkout from Stripe, Dodo Payments, Polar, LemonSqueezy or Paddle is matched by the ID you [pass into checkout](payments/checkout.md), and a return from it never starts a new session. Add any other checkout domain under **Same-visit domains** in Site settings. The `virling_vid` cookie is shared across subdomains, but not between two separate domains of your own; see [Checkout on another domain](guides/ecommerce.md#checkout-on-another-domain) and [Cross-domain checkout](https://virling.com/blog/cross-domain-checkout-attribution).
+
+## Does it work with Shopify and WooCommerce stores?
+
+Yes. Connect the store with a read-only key, and add a short snippet that stores the visitor ID on each order: a cart attribute on Shopify, order meta data on WooCommerce. Orders, refunds and subscription renewals are imported every minute. See [Set up an online store](guides/ecommerce.md), [Shopify](payments/shopify.md) and [WooCommerce](payments/woocommerce.md).
+
+## Can I self-host it for free?
+
+Yes. Self-hosting is free, with every feature, on your own server. Run the Docker image or a release binary for Linux or macOS, or build from source. See [Install](install/index.md), then the [Quickstart](quickstart.md).
+
+## Can agencies run it for many client sites?
+
+Yes. Add a site per client, each with its own script and payment connection, and group them by client name. Clients can open a branded report through a link without a Virling login, and the [Read API](reference/api.md) reads every site on the account. See [Run Virling for client sites](guides/agencies.md).
+
 ## Can I invite team members?
 
 Not yet. Each site has one owner account. Team members and roles are <span class="na">Not available yet</span>.
