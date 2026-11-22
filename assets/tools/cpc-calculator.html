@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CPC calculator: cost per click and break-even CPC | Virling</title>
+<meta name="description" content="Free CPC calculator. Enter ad spend and clicks to get cost per click, then add paying customers and revenue to see revenue per click, cost per customer and the break-even CPC. Runs in your browser.">
+<link rel="canonical" href="https://virling.com/tools/cpc-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/cpc-calculator">
+<meta property="og:title" content="CPC calculator: cost per click and break-even CPC | Virling">
+<meta property="og:description" content="Free CPC calculator. Enter ad spend and clicks to get cost per click, then add paying customers and revenue to see revenue per click, cost per customer and the break-even CPC. Runs in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"CPC calculator","url":"https://virling.com/tools/cpc-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"CPC calculator","item":"https://virling.com/tools/cpc-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / cpc calculator</span><h1>CPC calculator with revenue per click</h1><p class="lead">Enter what you spent on ads and the clicks it bought to get your cost per click. Add the paying customers and revenue those clicks brought to see revenue per click and the break-even CPC, the most a click can cost before the ads lose money. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="cpc" autocomplete="off">
+  <label>Ad spend ($)<input name="spend" type="number" min="0" step="0.01" value="2000"></label>
+  <label>Clicks<input name="clicks" type="number" min="0" step="1" value="1600"></label>
+  <label>Paying customers <span class="dim">optional</span><input name="cust" type="number" min="0" step="1" value="40"></label>
+  <label>Revenue from those customers ($) <span class="dim">optional</span><input name="rev" type="number" min="0" step="0.01" value="4800"></label>
+  <label>Gross margin (%) <span class="dim">optional</span><input name="margin" type="number" min="0" max="100" step="0.1" value="60"></label>
+</form>
+<div class="tool-stats" id="cpc-out"></div>
+<div class="txt post tool-cta">
+<p class="p">CPC is spend divided by clicks. Revenue per click is revenue divided by clicks. The break-even CPC is revenue per click times your gross margin; with no margin it is the CPC where spend equals revenue.</p>
+<p class="p">The revenue is the hard part. Virling measures it from your real payments: it links every visit to the payment it led to and credits each payment to the source and campaign of the visit that brought it, so each campaign gets its own revenue per click. See <a href="https://docs.virling.com/attribution/">how attribution works</a> in the docs. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/break-even-cpa-calculator">break-even CPA calculator</a>, <a href="/tools/roas-calculator">ROAS calculator</a>, <a href="/tools/cpm-calculator">CPM calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The CPC formula</h2>
+<p class="p">Cost per click is what you paid for each visit an ad sent to your site:</p>
+<p class="p"><code>CPC = ad spend / clicks</code></p>
+<p class="p">Revenue per click is what each of those visits brought back in payments:</p>
+<p class="p"><code>revenue per click = revenue / clicks</code></p>
+<p class="p">A click pays for itself when the gross profit it brings covers its cost, so the break-even CPC is:</p>
+<p class="p"><code>break-even CPC = revenue per click &times; gross margin</code></p>
+<p class="p">With paying customers, the calculator also shows the share of clicks that became customers and the cost per customer, <code>ad spend / paying customers</code>.</p>
+<h2>A worked example</h2>
+<p class="p">These are made-up numbers, the defaults above, not a benchmark. A campaign spent $2,000 and got 1,600 clicks, so the CPC is $2,000 / 1,600 = $1.25. Forty of those visitors paid, 2.5% of clicks, at a cost of $2,000 / 40 = $50 per customer.</p>
+<p class="p">They paid $4,800 in total, so revenue per click is $4,800 / 1,600 = $3.00. At a 60% gross margin, each click brings $3.00 &times; 0.60 = $1.80 of gross profit, and that is the break-even CPC. At $1.25 a click, the campaign earns $0.55 of gross profit per click; if its CPC rose above $1.80 it would lose money even though revenue per click still beat it.</p>
+<h2>Why CPC only matters next to revenue per click</h2>
+<p class="p">A CPC on its own says what a visit cost, not what it was worth. A $0.40 click from people who never buy loses money, and a $4 click from buyers who spend $300 can be the best campaign you run. Cutting CPC often means bidding on cheaper, broader traffic that converts less, so the CPC falls and revenue per click falls faster.</p>
+<p class="p">Compare each campaign's CPC with its own revenue per click, the same idea as <a href="/blog/what-is-revenue-per-visitor">revenue per visitor</a> applied to paid clicks. The gap between them is what the campaign earns per visit. Per customer, the same check is cost per customer against the <a href="/tools/break-even-cpa-calculator">break-even CPA</a>, and across a whole channel it is <a href="/blog/cac-by-channel">CAC by channel</a>. To see the return as a ratio, use the <a href="/tools/roas-calculator">ROAS calculator</a>; for placements priced per thousand impressions, the <a href="/tools/cpm-calculator">CPM calculator</a>.</p>
+<p class="p">The revenue side is where it goes wrong. Ad platforms count the conversions they can see within their own windows, buyers often come back days later through search or a typed URL, and the same customer can be claimed by two platforms. Revenue per click is only as good as the join between your payments and the visits that started them.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>CPC calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate cost per click?</h3><p class="p">Divide what you spent by the clicks it bought. $2,000 of spend that brought 1,600 clicks is a CPC of $2,000 / 1,600 = $1.25.</p></div>
+      <div><h3>What is revenue per click?</h3><p class="p">It is the revenue your paying customers brought divided by the clicks that brought them. If 1,600 clicks led to $4,800 of payments, revenue per click is $3.00. It is the number CPC has to be compared with.</p></div>
+      <div><h3>What is a break-even CPC?</h3><p class="p">It is the most you can pay per click before the ads lose money: revenue per click times your gross margin. At $3.00 of revenue per click and a 60% margin, the break-even CPC is $1.80. Leave the margin blank to see the CPC where spend equals revenue.</p></div>
+      <div><h3>Is a low CPC always better?</h3><p class="p">No. A low CPC on visitors who never buy loses money, and a high CPC can pay if those visitors buy often or spend a lot. Judge a CPC against the revenue per click of the same campaign, not against other campaigns' CPCs.</p></div>
+      <div><h3>Where does the revenue per click number come from?</h3><p class="p">From the payments made by people who arrived through the clicks you paid for. Ad platforms report the conversions they can see in their own windows, so the reliable source is your payments joined to the visits that started them, per campaign.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate cost per click?", "acceptedAnswer": {"@type": "Answer", "text": "Divide what you spent by the clicks it bought. $2,000 of spend that brought 1,600 clicks is a CPC of $2,000 / 1,600 = $1.25."}}, {"@type": "Question", "name": "What is revenue per click?", "acceptedAnswer": {"@type": "Answer", "text": "It is the revenue your paying customers brought divided by the clicks that brought them. If 1,600 clicks led to $4,800 of payments, revenue per click is $3.00. It is the number CPC has to be compared with."}}, {"@type": "Question", "name": "What is a break-even CPC?", "acceptedAnswer": {"@type": "Answer", "text": "It is the most you can pay per click before the ads lose money: revenue per click times your gross margin. At $3.00 of revenue per click and a 60% margin, the break-even CPC is $1.80. Leave the margin blank to see the CPC where spend equals revenue."}}, {"@type": "Question", "name": "Is a low CPC always better?", "acceptedAnswer": {"@type": "Answer", "text": "No. A low CPC on visitors who never buy loses money, and a high CPC can pay if those visitors buy often or spend a lot. Judge a CPC against the revenue per click of the same campaign, not against other campaigns' CPCs."}}, {"@type": "Question", "name": "Where does the revenue per click number come from?", "acceptedAnswer": {"@type": "Answer", "text": "From the payments made by people who arrived through the clicks you paid for. Ad platforms report the conversions they can see in their own windows, so the reliable source is your payments joined to the visits that started them, per campaign."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See what each click actually earned</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each campaign brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("cpc"), out = document.getElementById("cpc-out");
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 2 }) + "%";
+const usd = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const calc = () => {
+  const s = +f.spend.value, k = +f.clicks.value, c = +f.cust.value, r = +f.rev.value;
+  const hasC = f.cust.value.trim() !== "" && c >= 0, hasR = f.rev.value.trim() !== "" && r >= 0, hasM = f.margin.value.trim() !== "";
+  const m = Math.min(Math.max(+f.margin.value, 0), 100) / 100;
+  const rows = [];
+  rows.push(["CPC", s >= 0 && k > 0 ? usd(s / k) : "No data"]);
+  rows.push(["Clicks that became customers", hasC && k > 0 && c <= k ? pct(c / k) : "Add customers"]);
+  rows.push(["Cost per customer", hasC && c > 0 && s >= 0 ? usd(s / c) : "Add customers"]);
+  rows.push(["Revenue per click", hasR && k > 0 ? usd(r / k) : "Add revenue"]);
+  rows.push([hasM ? "Break-even CPC" : "Break-even CPC (on revenue)", hasR && k > 0 ? usd(r / k * (hasM ? m : 1)) : "Add revenue"]);
+  out.innerHTML = rows.map(([n, x]) => `<div><span class="dim">${n}</span><b>${x}</b></div>`).join("");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
