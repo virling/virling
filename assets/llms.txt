@@ -91,6 +91,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [CPC calculator with revenue per click](https://virling.com/tools/cpc-calculator): cost per click, revenue per click, cost per customer and break-even CPC from ad spend, clicks, paying customers, revenue and an optional gross margin
 - [Cost per lead calculator](https://virling.com/tools/cost-per-lead-calculator): cost per lead by channel and blended from spend and leads per channel, plus cost per customer and revenue per lead from an optional lead to customer rate and deal value
 - [EPC calculator](https://virling.com/tools/epc-calculator): earnings per click, earnings per 100 clicks and conversion rate from clicks, sales, average order value and commission rate, or from total earnings
+- [Sales cycle length calculator](https://virling.com/tools/sales-cycle-calculator): average, median and longest sales cycle in days from the first touch and close date of each deal, and which lookback window covers every deal
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
