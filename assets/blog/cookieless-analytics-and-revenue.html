@@ -46,7 +46,7 @@
 <p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-10-26.</p>
 <p class="p">Cookieless analytics keeps your visit counts but loses the link between a visitor and a payment. You can still see how much money came in. You can no longer see which channel it came from.</p>
 <h2>What cookieless mode does</h2>
-<p class="p">Instead of storing an ID in the browser, the server makes a visitor ID from a hash of the site, the IP address and the browser's user agent, mixed with a random salt. The salt changes every day and is never stored.</p>
+<p class="p">Instead of storing an ID in the browser, the server makes a visitor ID from a hash of the site, the IP address and the browser's user agent, mixed with a random salt. The salt changes every day and is never stored, so a returning visitor is recognised only within the same day, on the same network and browser. Even with a cookie, a second device is a new visitor; <a href="/blog/cross-device-attribution">cross-device attribution</a> explains what can be joined without cookies or fingerprinting.</p>
 <h2>What you keep</h2>
 <ul class="post-list"><li>Page views, referrers and top pages</li><li>Sessions, because they only need 30 minutes of continuity</li><li>Revenue totals from your payment provider</li><li>No cookie, so no cookie banner for this tracking</li></ul>
 <h2>What you lose</h2>
