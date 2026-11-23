@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loops email revenue tracking: see which emails lead to payments</title>
+<meta name="description" content="Loops email revenue tracking for SaaS: tag campaign, loop and transactional email links with UTM parameters and tie each click to the Stripe payment after it.">
+<link rel="canonical" href="https://virling.com/blog/loops-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/loops-revenue-tracking">
+<meta property="og:title" content="Loops email revenue tracking: see which emails lead to payments">
+<meta property="og:description" content="Loops email revenue tracking for SaaS: tag campaign, loop and transactional email links with UTM parameters and tie each click to the Stripe payment after it.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Loops email revenue tracking: see which emails lead to payments","item":"https://virling.com/blog/loops-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Loops email revenue tracking: see which emails lead to payments","description":"Loops email revenue tracking for SaaS: tag campaign, loop and transactional email links with UTM parameters and tie each click to the Stripe payment after it.","datePublished":"2026-11-23","dateModified":"2026-11-23","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/loops-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I see which Loops email led to a payment?","acceptedAnswer":{"@type":"Answer","text":"Tag every link to your site or app in the email with utm_source=loops, utm_medium=email and a utm_campaign named after the email. Connect your billing provider and pass the visitor ID into checkout. Each payment is then credited to a tagged visit before it, and the Campaign tab shows revenue per email."}},{"@type":"Question","name":"Which channel does Loops traffic land in?","acceptedAnswer":{"@type":"Answer","text":"A link tagged utm_medium=email lands in Email, because Virling checks utm_medium first and reads email, newsletter and e-mail as the Email channel, ignoring case. An untagged click usually arrives with no referrer and is counted as Direct."}},{"@type":"Question","name":"Should I tag transactional emails sent through Loops?","acceptedAnswer":{"@type":"Answer","text":"Yes, tag every link that points to your site or app, with its own utm_campaign. A click from a transactional email is a visit like any other and can be credited with the payment that follows."}},{"@type":"Question","name":"Do Loops emails get credit under first touch?","acceptedAnswer":{"@type":"Answer","text":"Rarely. Emails that nurture a trial arrive after signup, so the earliest visit is usually the channel that brought the signup. Under the default, last non-direct, an email gets credit when its click was the latest visit before the payment that was not Direct."}},{"@type":"Question","name":"Does Virling read payments from Loops?","acceptedAnswer":{"@type":"Answer","text":"No. Loops sends email; Virling reads payments from the providers it connects to, such as Stripe, Paddle, Polar, LemonSqueezy, Dodo Payments, Creem and RevenueCat, and joins them to the clicks your Loops emails bring."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-23</span>
+      <h1>Loops email revenue tracking: see which emails lead to payments</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-23.</p>
+<p class="p"><b>Loops email revenue tracking</b> joins each payment for your SaaS to the Loops campaign, loop or transactional email that sent the buyer. Tag every link to your site or app with <code>utm_source=loops</code>, <code>utm_medium=email</code> and a <code>utm_campaign</code> named after the email, pass the visitor ID into checkout, and Virling credits each payment from Stripe or your other billing provider to the tagged visit, so the Campaign tab shows revenue per email. Loops reports opens and clicks; the payment happens in your billing provider, where Loops cannot see it.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Why Loops payments land in Direct</h2>
+<p class="p">Most people read email in an email app, and most email apps send no referrer when a link is clicked. Without UTM tags, the visit has nothing that says it came from Loops, so it is counted as Direct, and so is the payment that follows. The trial email that got someone to upgrade gets no credit. For more on visits that arrive with no referrer, see <a href="/blog/dark-social-revenue-tracking">dark social revenue tracking</a>.</p>
+<h2>Tag your Loops links</h2>
+<p class="p">Use one source and one medium in every email, and change only the campaign. A link in a Loops email looks like this:</p>
+<p class="p"><code>https://app.yourproduct.com/billing?utm_source=loops&amp;utm_medium=email&amp;utm_campaign=trial-ending-3d</code></p>
+<ul class="post-list"><li><code>utm_source=loops</code>: the same value in every email, so all of your Loops traffic adds up under one source.</li><li><code>utm_medium=email</code>: puts the visit in the Email channel. <code>newsletter</code> works too; pick one and keep it.</li><li><code>utm_campaign=trial-ending-3d</code>: one value per email, lowercase, with hyphens, so each one has its own row.</li><li><code>utm_content</code>: optional, to tell two links in the same email apart, such as <code>button</code> and <code>ps</code>.</li></ul>
+<p class="p">Tag every link that points to your site or app, not only the main button. The free <a href="/tools/utm-builder">UTM builder</a> makes the tagged URLs for you, and the <a href="/tools/utm-naming-template">UTM naming template</a> keeps the values the same across your team.</p>
+<h2>Name campaigns, loops and transactional emails</h2>
+<p class="p">Loops sends three kinds of email, and each one fits the same tags with a different campaign name:</p>
+<ul class="post-list"><li><b>Campaigns</b>, one-off sends such as a launch or a feature announcement: one campaign per send, such as <code>launch-teams</code>.</li><li><b>Loops</b>, the automated sequences that start on signup or an event: one campaign per email, starting with the loop name, such as <code>onboarding-1</code>, <code>onboarding-2</code> and <code>trial-ending-3d</code>.</li><li><b>Transactional</b> emails sent from your code through the Loops API: tag the links in the template too, such as <code>utm_campaign=invite-accepted</code>, since a link in a receipt or invite can bring a buyer back.</li></ul>
+<p class="p">After you send, click a link from the email in your own inbox and check the address bar on your site. The tags that arrive there are the ones Virling reads.</p>
+<h2>How Virling ties the click to the payment</h2>
+<p class="p">Every session gets one channel from its first pageview, and <code>utm_medium</code> is checked first, ignoring case. A medium of <code>email</code>, <code>newsletter</code> or <code>e-mail</code> is the <b>Email</b> channel, whatever the referrer says, so <code>loops</code> does not need to be a known source. A page that loads with UTM tags different from the current session&rsquo;s starts a new session, so a click into your app is recorded even when the user was already signed in. See <a href="https://docs.virling.com/attribution/channels">how channels are decided</a>.</p>
+<p class="p">When a payment comes in, it is joined to the visits before it through the visitor ID that checkout carries, and credited by the site&rsquo;s attribution model to one of the visits in the lookback window, 90 days by default.</p>
+<h2>First touch vs last touch for emails that nurture trials</h2>
+<p class="p">Loops emails usually reach people after they signed up, so the model decides most of the credit they get:</p>
+<ul class="post-list"><li><b>Last non-direct, the default.</b> The latest visit that was not Direct. A user who clicks your trial-ending email and pays the next day after typing your address is credited to that email. If they come back from a search result after the click, the search gets the credit.</li><li><b>Last touch.</b> The latest visit, Direct included. The email gets credit only if nothing came after its click, so a direct login before paying takes it away.</li><li><b>First touch.</b> The earliest visit in the window. That is usually the channel that brought the signup, so emails that nurture a trial almost never get credit.</li></ul>
+<p class="p">Use last non-direct to see which emails close the sale and first touch to see which channels bring the people your emails convert. Changing the model rebuilds history right away. See <a href="https://docs.virling.com/attribution/model">the attribution model</a>, and for the trade-offs, <a href="/blog/first-touch-vs-last-touch-attribution-saas">first-touch or last-touch attribution for a SaaS</a>.</p>
+<p class="p">Two cases give an email no credit whatever the model. A trial that started with a card on file converts with no new checkout, so on Stripe, Polar and Dodo Payments the first payment is credited to the visits before the trial started. Upgrades and renewals keep the channel of the customer&rsquo;s first payment. See <a href="https://docs.virling.com/attribution/renewals">renewals and free trials</a>, and for the full picture of onboarding, trial and upgrade emails, <a href="/blog/lifecycle-email-revenue-tracking">SaaS email revenue attribution</a>.</p>
+<h2>Connect Stripe or your billing provider</h2>
+<p class="p">Virling reads payments from your billing provider, not from Loops. Connect Stripe, Paddle, Polar, LemonSqueezy, Dodo Payments, Creem or RevenueCat. Virling imports recent payments, then picks up new ones every minute or by webhook, and never creates, changes or refunds a payment.</p>
+<p class="p">Then make sure checkout carries the visitor ID from the <code>virling_vid</code> cookie. Hosted checkout links on <code>buy.stripe.com</code>, <code>buy.polar.sh</code>, <code>checkout.dodopayments.com</code> and <code>*.lemonsqueezy.com</code> need nothing: the script adds the visitor ID. For Stripe Checkout created on your server, set <code>client_reference_id</code> to the <code>virling_vid</code> cookie; other providers use metadata or custom data. See <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</p>
+<p class="p">Link from your email to a page that runs the script, such as your pricing or billing page, not straight to a checkout URL. A checkout link opened from an email carries no visitor ID, so that payment is Unattributed. Put the script on your marketing site and in your app; the cookie is set on your registrable domain, so both share one visitor ID. See <a href="/integrations/saas">Virling for SaaS</a>.</p>
+<h2>See payments per email</h2>
+<h3>1. Open the Email channel</h3>
+<p class="p">On the dashboard, the Channels card lists each channel with visitors, revenue and revenue per visitor. Click <b>Email</b> and the whole page filters to visits from your emails.</p>
+<h3>2. Switch to the Campaign tab</h3>
+<p class="p">The Campaign tab on the same card has one row per <code>utm_campaign</code>, so each campaign, each email in a loop and each tagged transactional email shows its own visitors and revenue. Compare them by revenue per visitor, not by visitors.</p>
+<h3>3. Open the payments</h3>
+<p class="p">The <b>Payments</b> page lists every payment with its source; open one to see the journey: the sessions before the payment and which one got the credit.</p>
+<h2>What to check if the numbers look off</h2>
+<ul class="post-list"><li><b>Loops clicks still show as Direct.</b> A link was left untagged, or a redirect or link tracker dropped the tags before your page. Click a link from a sent email and check the address bar.</li><li><b>One email is split across rows.</b> Values differ in case or spelling, such as <code>Trial-Ending-3d</code> and <code>trial-ending-3d</code>. Pick one format and keep it.</li><li><b>Payments show as Unattributed.</b> The link went straight to checkout, or checkout did not carry the visitor ID; see <a href="https://docs.virling.com/attribution/unattributed">unattributed revenue</a>.</li><li><b>Upgrade emails show no revenue.</b> Expected: upgrades keep the first payment&rsquo;s channel. Send a goal such as <code>virling(&quot;goal&quot;, &quot;upgrade&quot;)</code> and look for the email visit before it on the visitor&rsquo;s timeline.</li></ul>
+<p class="p">For newsletters sent from other tools, see <a href="/blog/kit-revenue-tracking">Kit revenue tracking</a> and <a href="/blog/beehiiv-revenue-tracking">beehiiv UTM tracking</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I see which Loops email led to a payment?</h3><p class="p">Tag every link to your site or app in the email with utm_source=loops, utm_medium=email and a utm_campaign named after the email. Connect your billing provider and pass the visitor ID into checkout. Each payment is then credited to a tagged visit before it, and the Campaign tab shows revenue per email.</p>
+<h3>Which channel does Loops traffic land in?</h3><p class="p">A link tagged utm_medium=email lands in Email, because Virling checks utm_medium first and reads email, newsletter and e-mail as the Email channel, ignoring case. An untagged click usually arrives with no referrer and is counted as Direct.</p>
+<h3>Should I tag transactional emails sent through Loops?</h3><p class="p">Yes, tag every link that points to your site or app, with its own utm_campaign. A click from a transactional email is a visit like any other and can be credited with the payment that follows.</p>
+<h3>Do Loops emails get credit under first touch?</h3><p class="p">Rarely. Emails that nurture a trial arrive after signup, so the earliest visit is usually the channel that brought the signup. Under the default, last non-direct, an email gets credit when its click was the latest visit before the payment that was not Direct.</p>
+<h3>Does Virling read payments from Loops?</h3><p class="p">No. Loops sends email; Virling reads payments from the providers it connects to, such as Stripe, Paddle, Polar, LemonSqueezy, Dodo Payments, Creem and RevenueCat, and joins them to the clicks your Loops emails bring.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which Loops email pays</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
