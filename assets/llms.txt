@@ -356,6 +356,10 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Kit revenue tracking: see which broadcast brings sales](https://virling.com/blog/kit-revenue-tracking): Kit (formerly ConvertKit) sales attribution: tag broadcast and sequence links with UTM parameters, pass the visitor ID into checkout, and see revenue per email.
 - [Klaviyo revenue tracking: see which email sold each order](https://virling.com/blog/klaviyo-revenue-tracking): Klaviyo revenue attribution for Shopify and WooCommerce: tag campaign and flow links with UTMs, and see the orders each email's clicks brought.
 - [Next.js Creem UTM tracking: pass the visit into checkout](https://virling.com/blog/nextjs-creem-utm-tracking): How to tie a Creem payment from a Next.js app to the visit and UTM tags that brought it, with the visitor ID in checkout metadata from a route handler or server action.
+- [Loops email revenue tracking: see which emails lead to payments](https://virling.com/blog/loops-revenue-tracking): Loops email revenue tracking for SaaS: tag campaign, loop and transactional email links with UTM parameters and tie each click to the Stripe payment after it.
+- [Brevo revenue tracking: see which campaign brought each payment](https://virling.com/blog/brevo-revenue-tracking): Brevo revenue attribution for Shopify, WooCommerce and Stripe: turn on UTM tracking in campaigns and automations, and see the payments each click brought.
+- [Laravel Paddle UTM tracking: Cashier Paddle checkout](https://virling.com/blog/laravel-paddle-utm-tracking): How to tie a Paddle Billing payment in a Laravel app to the visit and UTM tags that brought it, with Laravel Cashier Paddle or the Paddle API.
+- [Laravel LemonSqueezy UTM tracking: checkout custom data](https://virling.com/blog/laravel-lemonsqueezy-utm-tracking): How to tie a LemonSqueezy order in a Laravel app to the visit and UTM tags that brought it, with the lemonsqueezy/laravel package or the API.
 
 ## Source
 
