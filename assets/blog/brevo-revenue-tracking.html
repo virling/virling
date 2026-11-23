@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brevo revenue tracking: see which campaign brought each payment</title>
+<meta name="description" content="Brevo revenue attribution for Shopify, WooCommerce and Stripe: turn on UTM tracking in campaigns and automations, and see the payments each click brought.">
+<link rel="canonical" href="https://virling.com/blog/brevo-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/brevo-revenue-tracking">
+<meta property="og:title" content="Brevo revenue tracking: see which campaign brought each payment">
+<meta property="og:description" content="Brevo revenue attribution for Shopify, WooCommerce and Stripe: turn on UTM tracking in campaigns and automations, and see the payments each click brought.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Brevo revenue tracking: see which campaign brought each payment","item":"https://virling.com/blog/brevo-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Brevo revenue tracking: see which campaign brought each payment","description":"Brevo revenue attribution for Shopify, WooCommerce and Stripe: turn on UTM tracking in campaigns and automations, and see the payments each click brought.","datePublished":"2026-11-23","dateModified":"2026-11-23","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/brevo-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I see which Brevo campaign brought a payment?","acceptedAnswer":{"@type":"Answer","text":"Turn on UTM tracking in Brevo so every campaign and automation email link carries utm_source=brevo, utm_medium=email and a utm_campaign. Connect Shopify, WooCommerce or Stripe and store the visitor ID on each order or checkout. Each payment is then credited to the tagged visit before it, and the Campaign tab shows revenue per campaign and automation email."}},{"@type":"Question","name":"Does turning on UTM tracking in Brevo tag existing automations?","acceptedAnswer":{"@type":"Answer","text":"No. The account-wide setting applies to new campaigns, templates and automation messages. Open each existing message and turn UTM tracking on there."}},{"@type":"Question","name":"Which channel does Brevo traffic land in?","acceptedAnswer":{"@type":"Answer","text":"An email click carries utm_medium=email, so it lands in Email whatever the referrer. An SMS click tagged utm_medium=sms has no referrer and is not an email medium, so it lands in Referral with brevo as its source."}},{"@type":"Question","name":"Does Virling replace Brevo?","acceptedAnswer":{"@type":"Answer","text":"No. Virling does not send email or texts. It reads tagged visits and your Shopify, WooCommerce or Stripe payments, so keep sending with Brevo."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-23</span>
+      <h1>Brevo revenue tracking: see which campaign brought each payment</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-23.</p>
+<p class="p"><b>Brevo revenue tracking</b> works best when you join each payment to the click that brought the buyer. Turn on Brevo&rsquo;s UTM tracking so every campaign and automation email link carries <code>utm_source=brevo</code>, <code>utm_medium=email</code> and a <code>utm_campaign</code>, tag your SMS links yourself, and store the visitor ID on each Shopify or WooCommerce order or Stripe checkout. Virling then credits each payment to the tagged visit before it, and the Campaign tab shows revenue per campaign and automation email, counted once, next to every other channel.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Why Brevo clicks land in Direct</h2>
+<p class="p">Most people read email and texts in an app, and most of those apps send no referrer when a link is clicked. Without UTM tags, the visit has nothing that says it came from Brevo, so it is counted as Direct, and so is the order or payment that follows. Brevo&rsquo;s own reports show opens and clicks, but the payment happens in your store or billing provider. For the wider picture, see <a href="/blog/email-marketing-revenue-tracking-ecommerce">email marketing revenue tracking for online stores</a>.</p>
+<h2>Turn on UTM tracking in Brevo</h2>
+<p class="p">Per <a href="https://help.brevo.com/hc/en-us/articles/209580405">Brevo&rsquo;s help article on UTM parameters</a>, the account-wide setting is under <b>Settings &gt; UTM parameters</b>: click <b>Activate UTM tracking</b>. It then applies to new campaigns, templates and automation messages. It does not change messages that already exist, so open each live one and turn UTM tracking on there too.</p>
+<ul class="post-list"><li><b>Email campaigns.</b> Each campaign has its own UTM tracking option in its additional settings, so you can check or change it before you send.</li><li><b>Automations.</b> The <b>Send an email</b> step has its own tracking option, with a custom UTM campaign name, such as the name of the automation; by default the name of the email template is used. See <a href="https://help.brevo.com/hc/en-us/articles/24257124386066">set up a Send an email step in an automation</a>.</li><li><b>SMS.</b> Brevo&rsquo;s help articles on UTM tracking cover email. For texts, add the tags to the full URL yourself before you paste it into the message.</li></ul>
+<p class="p">By default Brevo uses <code>brevo</code> as the source, <code>email</code> as the medium, and the campaign, automation or template name as the campaign. Check the values on the settings page and keep them. A link from a campaign named <code>winter-sale-2026</code> then arrives like this:</p>
+<p class="p"><code>https://yourstore.com/collections/sale?utm_source=brevo&amp;utm_medium=email&amp;utm_campaign=winter-sale-2026</code></p>
+<p class="p">After you send, click a link in your own inbox and check the address bar on your site. The tags that arrive there are the ones Virling reads. If a link already had its own query string, check that it survived as well.</p>
+<h2>Name campaigns and automations so they read well</h2>
+<p class="p">Because <code>utm_campaign</code> comes from the name in Brevo, your names become report rows. Write the convention down once with the free <a href="/tools/utm-naming-template">UTM naming template</a>, then follow it:</p>
+<ul class="post-list"><li><b>Campaigns:</b> one name per send, lowercase, with the date, such as <code>winter-sale-2026</code> or <code>launch-teams-2026-11</code>.</li><li><b>Automation emails:</b> the automation name and the step, such as <code>abandoned-cart-1</code> and <code>abandoned-cart-2</code>, so each email is its own row and you can tell which automation it belongs to.</li><li><b>SMS:</b> <code>utm_source=brevo</code>, <code>utm_medium=sms</code> and a campaign starting with <code>sms-</code>, such as <code>sms-winter-sale-2026</code>, so a text and an email about the same sale stay on separate rows.</li><li><b>Keep names stable.</b> If you rename a live automation, later clicks carry the new name and show as a new row. <code>Winter sale</code> and <code>winter-sale</code> are two rows too.</li></ul>
+<h2>How Virling sorts a Brevo visit</h2>
+<p class="p">Every session gets one channel from its first pageview, and <code>utm_medium</code> is checked first, ignoring case. A medium of <code>email</code>, <code>newsletter</code> or <code>e-mail</code> is the <b>Email</b> channel, whatever the referrer says, so Brevo email clicks land there with <code>brevo</code> as the source. A text has no referrer and <code>sms</code> is not an email medium, so the next rule reads <code>utm_source</code>; <code>brevo</code> is not a known search, social or AI source, so SMS clicks land in <b>Referral</b>, with <code>brevo</code> as the source and the campaign stored with the visit. See <a href="https://docs.virling.com/attribution/channels">how channels are decided</a> and <a href="/blog/sms-marketing-revenue-tracking">SMS marketing revenue tracking</a>.</p>
+<h2>Join the click to the payment</h2>
+<p class="p">Virling reads payments from where they happen, not from Brevo, and joins them to visits through the visitor ID:</p>
+<ul class="post-list"><li><b>Shopify or WooCommerce.</b> Connect <a href="/integrations/shopify">Shopify</a> with a custom app token that can only read orders, or <a href="/integrations/woocommerce">WooCommerce</a> with a read-only REST API key. Virling imports new orders every minute and lowers revenue when you refund. A short snippet stores the visitor ID on each order.</li><li><b>Stripe.</b> Connect <a href="/integrations/stripe">Stripe</a>. Hosted payment links on <code>buy.stripe.com</code> need nothing, because the script adds the visitor ID. For Stripe Checkout created on your server, set <code>client_reference_id</code> to the <code>virling_vid</code> cookie.</li></ul>
+<p class="p">Link your emails to a page that runs the script, such as a product, pricing or billing page, not straight to a checkout URL, so the visitor ID is there when the buyer pays. See <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</p>
+<p class="p">Under the default model, the whole payment is credited to the latest visit in the last 90 days that was not Direct, with its channel, source and campaign. A shopper who clicks your abandoned cart email and comes back the next day by typing your address is credited to that email. A shopper who only opened the email and later arrived from a search result is credited to Organic search. See <a href="https://docs.virling.com/attribution/model">the attribution model</a>.</p>
+<h2>See revenue per campaign and automation</h2>
+<h3>1. Open the Email channel</h3>
+<p class="p">On the dashboard, the Channels card lists each channel with visitors, revenue and revenue per visitor. Click <b>Email</b> to filter the whole page to visits from your emails. For texts, click <b>Referral</b>, then the <code>brevo</code> source.</p>
+<h3>2. Switch to the Campaign tab</h3>
+<p class="p">The Campaign tab on the same card has one row per <code>utm_campaign</code>, so each campaign and each automation email shows its own visitors and revenue. Compare them by revenue per visitor, not by visitors: an automation email that sends a few buyers can be worth more than a campaign that sends many who do not buy.</p>
+<h3>3. Open the payments</h3>
+<p class="p">The <b>Payments</b> page lists every order and payment with the channel it was credited to. Open one to see the visits before it and which one got the credit.</p>
+<h2>What to check if the numbers look off</h2>
+<ul class="post-list"><li><b>Brevo clicks show as Direct.</b> UTM tracking is off for that message, or a redirect dropped the tags. Messages created before you turned tracking on keep their old setting, so check each live automation, not only campaigns.</li><li><b>Payments show as Unattributed.</b> The order or checkout has no visitor ID: the snippet is missing, or the link went straight to checkout. See <a href="https://docs.virling.com/attribution/unattributed">unattributed revenue</a>.</li><li><b>One automation is split across rows.</b> An email was renamed, or names differ in case. Pick one name and keep it.</li><li><b>Texts show as Direct.</b> The SMS link had no tags, or the tags were added after the link was shortened. Tag the full URL first and send a test to your own phone.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>How do I see which Brevo campaign brought a payment?</h3><p class="p">Turn on UTM tracking in Brevo so every campaign and automation email link carries utm_source=brevo, utm_medium=email and a utm_campaign. Connect Shopify, WooCommerce or Stripe and store the visitor ID on each order or checkout. Each payment is then credited to the tagged visit before it, and the Campaign tab shows revenue per campaign and automation email.</p>
+<h3>Does turning on UTM tracking in Brevo tag existing automations?</h3><p class="p">No. The account-wide setting applies to new campaigns, templates and automation messages. Open each existing message and turn UTM tracking on there.</p>
+<h3>Which channel does Brevo traffic land in?</h3><p class="p">An email click carries utm_medium=email, so it lands in Email whatever the referrer. An SMS click tagged utm_medium=sms has no referrer and is not an email medium, so it lands in Referral with brevo as its source.</p>
+<h3>Does Virling replace Brevo?</h3><p class="p">No. Virling does not send email or texts. It reads tagged visits and your Shopify, WooCommerce or Stripe payments, so keep sending with Brevo.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which Brevo campaigns bring real payments</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
