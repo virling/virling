@@ -148,6 +148,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Stripe for AI apps](https://virling.com/integrations/stripe-ai-apps): for founders of AI apps billing on Stripe: each subscription, credit purchase and top-up tied to the post, search or AI answer that brought the user
 - [Stripe for memberships](https://virling.com/integrations/stripe-memberships): for membership sites and paid communities billing on Stripe: each new member and every renewal tied to the channel that brought them
 - [Creem for digital products](https://virling.com/integrations/creem-digital-products): for creators and indie makers selling templates, ebooks and courses through Creem: each sale tied to the post, launch or link that brought the buyer
+- [Dodo Payments for AI apps](https://virling.com/integrations/dodo-payments-ai-apps): for founders of AI apps selling subscriptions, credits or one-off plans through Dodo Payments: each payment tied to the post, search or AI answer that brought the user
 
 ## Compare
 
