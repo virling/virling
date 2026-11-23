@@ -15,6 +15,7 @@
 - [Set up a merchant of record checkout](guides/merchant-of-record.md)
 - [Set up sales-led B2B SaaS](guides/b2b-sales.md)
 - [Set up a mobile app](guides/mobile-apps.md)
+- [Set up a browser extension](guides/browser-extensions.md)
 - [Set up a no-code site](guides/no-code.md)
 - [Track a launch](guides/launch.md)
 - [Sell digital products](guides/digital-products.md)
