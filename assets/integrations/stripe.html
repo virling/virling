@@ -76,7 +76,7 @@ await stripe.paymentIntents.create({
 <p class="p">The link must be a normal <code>&lt;a href&gt;</code> on a page that runs the script. Links opened from emails, QR codes or other sites carry no visitor ID and show as Unattributed.</p>
 <p class="p">See Link checkout to visits for all providers.</p>
 <h2>Who uses this</h2>
-<p class="p">SaaS founders who bill subscriptions through Stripe see trials, renewals and MRR by the channel that first brought each customer (see <a href="/integrations/saas">Virling for SaaS</a>). Agencies that report revenue by channel to clients who sell through Stripe can share it with them (see <a href="/agency">Virling for agencies</a>).</p>
+<p class="p">SaaS founders who bill subscriptions through Stripe see trials, renewals and MRR by the channel that first brought each customer (see <a href="/integrations/saas">Virling for SaaS</a>). AI apps that sell plans and credit packs through Stripe see which channel brings paying users (see <a href="/integrations/stripe-ai-apps">Stripe for AI apps</a>). Agencies that report revenue by channel to clients who sell through Stripe can share it with them (see <a href="/agency">Virling for agencies</a>).</p>
 <h2>Frequently asked questions</h2>
 <h3>How do I see which channel a Stripe payment came from?</h3><p class="p">Connect Stripe to Virling with a restricted, read-only key. Virling ties each charge to the visit before it through Checkout Sessions, PaymentIntents or Payment Links, then shows revenue by channel, referrer and page.</p>
 <h3>Does Virling need write access to Stripe?</h3><p class="p">No. It asks for a restricted key with Read on Charges, Checkout Sessions, Customers, Events, Invoices, Subscriptions and PaymentIntents, and refuses secret keys.</p>
