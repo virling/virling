@@ -59,7 +59,7 @@
   items: [{ priceId: &quot;pri_...&quot;, quantity: 1 }],
   customData: { virling_vid: window.virling?.vid?.() },
 });</pre></div>
-<p class="p">For transactions you create on your server, set <code>custom_data: { virling_vid: req.cookies.virling_vid }</code>.</p>
+<p class="p">For transactions you create on your server, set <code>custom_data: { virling_vid: req.cookies.virling_vid }</code>. For the App Router, see <a href="/blog/nextjs-paddle-utm-tracking">Next.js Paddle UTM tracking</a>.</p>
 <p class="p">Renewals carry no custom data of their own; they keep the channel of the subscription's first payment.</p>
 <h2>Who uses this</h2>
 <p class="p">SaaS founders who bill subscriptions through Paddle see trials, renewals and MRR by the channel that first brought each customer (see <a href="/integrations/saas">Virling for SaaS</a>). Agencies that report revenue by channel to clients who sell through Paddle can share it with them (see <a href="/agency">Virling for agencies</a>).</p>
