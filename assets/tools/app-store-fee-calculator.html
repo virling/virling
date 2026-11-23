@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App Store fee calculator: Apple and Google Play commission</title>
+<meta name="description" content="App Store fee calculator: enter a price, pick Apple App Store or Google Play and the standard or reduced rate to see the commission, your payout and a web checkout side by side.">
+<link rel="canonical" href="https://virling.com/tools/app-store-fee-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/app-store-fee-calculator">
+<meta property="og:title" content="App Store fee calculator: Apple and Google Play commission">
+<meta property="og:description" content="App Store fee calculator: enter a price, pick Apple App Store or Google Play and the standard or reduced rate to see the commission, your payout and a web checkout side by side.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"App Store fee calculator","url":"https://virling.com/tools/app-store-fee-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"App Store fee calculator","item":"https://virling.com/tools/app-store-fee-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / app store fees</span><h1>App Store fee calculator.</h1><p class="lead">For app founders who sell in the app and on the web. Enter a price, pick Apple App Store or Google Play and the standard or reduced rate to see the store commission and your payout, next to what a web checkout would cost. Every rate can be changed. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="fees" autocomplete="off">
+  <label>Price ($)<input name="price" type="number" min="0" step="0.01" value="9.99"></label>
+  <label>Sales a month<input name="sales" type="number" min="0" step="1" value="100"></label>
+  <div class="tool-pick" data-select><span id="store-label">Store</span>
+    <button type="button" id="store" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="store-label store-value" data-value="apple"><span id="store-value">Apple App Store</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="store-menu" role="listbox" aria-labelledby="store-label" tabindex="-1" hidden><li role="option" data-value="apple" aria-selected="true">Apple App Store</li><li role="option" data-value="google" aria-selected="false">Google Play</li></ul>
+  </div>
+  <div class="tool-pick" data-select><span id="tier-label">Rate</span>
+    <button type="button" id="tier" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="tier-label tier-value" data-value="std"><span id="tier-value">Standard (30%)</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="tier-menu" role="listbox" aria-labelledby="tier-label" tabindex="-1" hidden><li role="option" data-value="std" aria-selected="true">Standard (30%)</li><li role="option" data-value="low" aria-selected="false">Reduced (15%)</li></ul>
+  </div>
+  <label>Store commission (%)<input name="rate" type="number" min="0" max="100" step="0.1" value="30"></label>
+  <label>Web checkout fee (%)<input name="webpct" type="number" min="0" max="100" step="0.1" value="2.9"></label>
+  <label>Web checkout fee per sale ($)<input name="webfix" type="number" min="0" step="0.01" value="0.3"></label>
+</form>
+<table class="cmp"><thead><tr><th>Channel</th><th>Fee per sale</th><th>You keep per sale</th><th>Fees a month</th><th>Payout a month</th></tr></thead><tbody id="fees-out"></tbody></table>
+<p class="p" id="fees-sum"></p>
+<p class="fine-note">Rates checked on 2026-11-23 on Apple's and Google's developer pages: <a href="https://developer.apple.com/app-store/subscriptions/">Apple auto-renewable subscriptions</a> (70% of the price to you in a subscriber's first year, 85% after one year of paid service), <a href="https://developer.apple.com/app-store/small-business-program/">Apple App Store Small Business Program</a> (15% for developers with up to $1 million in proceeds in the prior calendar year) and <a href="https://support.google.com/googleplay/android-developer/answer/112622">Google Play service fees</a>. Reduced means 15%: Apple's Small Business Program or a subscription after its first paid year, and on Google Play the first $1 million of yearly earnings in the 15% tier or any auto-renewing subscription. Standard means 30%. Google Play now charges 25% (20% plus a 5% billing fee) on one-time purchases from installs made after June 30, 2026 in the US, EEA and UK, so type that rate in if it is yours. Sales tax and VAT, Apple's EU alternative terms, Google's program and external link rates and currency conversion are not modelled. The web checkout default is Stripe's standard US card rate. Rates change, so check before you decide.</p>
+<div class="txt post tool-cta">
+<h2>See which channel brought each subscriber</h2>
+<p class="p">Virling reads RevenueCat purchases from web paywalls, and from app users linked to a web visit, and credits each one to the visit that led to it, so you see which posts, searches and AI answers bring paying subscribers. Virling is open source under AGPLv3: self-host it free, or start a 14-day hosted trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free</a> <a class="lk" href="/integrations/revenuecat">RevenueCat integration</a> &middot; <a class="lk" href="/demo">See the demo</a></p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>App Store fees: a worked example</h2>
+<p class="p">A $9.99 subscription with 100 sales a month is $999.00 of revenue. With a web checkout at 2.9% + 30 cents:</p>
+<table class="cmp"><thead><tr><th>Channel</th><th>Fee per sale</th><th>Fees a month</th><th>Payout a month</th></tr></thead><tbody><tr><th scope="row">App Store, standard (30%)</th><td>$3.00</td><td>$299.70</td><td>$699.30</td></tr><tr><th scope="row">App Store, reduced (15%)</th><td>$1.50</td><td>$149.85</td><td>$849.15</td></tr><tr><th scope="row">Web checkout (2.9% + $0.30)</th><td>$0.59</td><td>$58.97</td><td>$940.03</td></tr></tbody></table>
+<p class="p">The fixed web fee per sale weighs more on cheap products: at $1.99, 30 cents is 15% of the price before the percentage fee, so the gap to a reduced store rate almost closes.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Web paywalls: the fee is the smaller question</h2>
+<p class="p">A web paywall sells the subscription on a web page, and tools like RevenueCat then unlock it in the app. The fee is lower, as the table shows, but the bigger difference is what you learn. A web buyer is a visitor first, so the purchase can be tied to the ad, post or search that sent them. An in-app purchase usually starts in the store, where that trail is lost.</p>
+<p class="p">That changes where you spend. If one channel brings buyers who pay on the web and another brings installs that never convert, the fee you save matters less than knowing which channel to grow. Apple's App Review Guidelines let apps on the United States storefront link to other ways to buy, and Google Play lists separate rates for external web links; the rules differ by country, so check them before you move a purchase out of the app.</p>
+<ul class="post-list"><li><a href="/blog/revenuecat-web-paywall-attribution">RevenueCat web paywall attribution</a>: store a visitor ID on the customer so each web purchase is credited to its channel.</li><li><a href="/integrations/revenuecat">RevenueCat</a> and <a href="/integrations/mobile-apps">mobile apps</a>: see which channel brings paying subscribers, and keep that credit for every renewal.</li><li><a href="/tools/payment-fee-calculator">Stripe fee calculator</a>: fee per sale on Stripe and merchants of record, for the web side of this sum.</li></ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>App Store fee FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How much does Apple take from app sales?</h3><p class="p">The standard commission is 30%. It drops to 15% for members of the App Store Small Business Program, open to developers with up to $1 million in proceeds in the prior calendar year, and for auto-renewable subscriptions once a subscriber has a year of paid service.</p></div>
+      <div><h3>How much does Google Play take?</h3><p class="p">Developers in the 15% tier pay 15% on their first $1 million of earnings each year, and auto-renewing subscriptions are 15% at any revenue. Above that, other purchases are up to 30%. In the US, EEA and UK, purchases from installs made after June 30, 2026 are 25% (20% plus a 5% billing fee), and Australia and Japan followed on September 30, 2026.</p></div>
+      <div><h3>How does this calculator work out the fees?</h3><p class="p">The store fee is the price times the store commission. The web fee is the price times the web checkout percentage, plus the fee per sale. Payout is the price minus the fee, and the monthly figures multiply both by sales a month.</p></div>
+      <div><h3>What does this calculator leave out?</h3><p class="p">Sales tax and VAT, so enter the price before tax. It also leaves out Apple's alternative terms in the EU, Google's program and external link rates, currency conversion, refunds and, on the web side, the cost of handling sales tax yourself or through a merchant of record.</p></div>
+      <div><h3>Should I sell through a web paywall instead?</h3><p class="p">The fee is lower, but in-app purchase is easier for the buyer and the rules on linking out differ by store and country. Many apps offer both. Knowing which channel brings the buyers who pay matters more than the fee on each sale.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How much does Apple take from app sales?", "acceptedAnswer": {"@type": "Answer", "text": "The standard commission is 30%. It drops to 15% for members of the App Store Small Business Program, open to developers with up to $1 million in proceeds in the prior calendar year, and for auto-renewable subscriptions once a subscriber has a year of paid service."}}, {"@type": "Question", "name": "How much does Google Play take?", "acceptedAnswer": {"@type": "Answer", "text": "Developers in the 15% tier pay 15% on their first $1 million of earnings each year, and auto-renewing subscriptions are 15% at any revenue. Above that, other purchases are up to 30%. In the US, EEA and UK, purchases from installs made after June 30, 2026 are 25% (20% plus a 5% billing fee), and Australia and Japan followed on September 30, 2026."}}, {"@type": "Question", "name": "How does this calculator work out the fees?", "acceptedAnswer": {"@type": "Answer", "text": "The store fee is the price times the store commission. The web fee is the price times the web checkout percentage, plus the fee per sale. Payout is the price minus the fee, and the monthly figures multiply both by sales a month."}}, {"@type": "Question", "name": "What does this calculator leave out?", "acceptedAnswer": {"@type": "Answer", "text": "Sales tax and VAT, so enter the price before tax. It also leaves out Apple's alternative terms in the EU, Google's program and external link rates, currency conversion, refunds and, on the web side, the cost of handling sales tax yourself or through a merchant of record."}}, {"@type": "Question", "name": "Should I sell through a web paywall instead?", "acceptedAnswer": {"@type": "Answer", "text": "The fee is lower, but in-app purchase is easier for the buyer and the rules on linking out differ by store and country. Many apps offer both. Knowing which channel brings the buyers who pay matters more than the fee on each sale."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>Know which channels pay for those fees</h2>
+<p class="p">Fees are one side of the sum. Virling links every visit to the payment it led to, so you see which channels bring the revenue you keep. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("fees"), out = document.getElementById("fees-out"), sum = document.getElementById("fees-sum");
+const S = { apple: "App Store", google: "Google Play" }, R = { std: 30, low: 15 };
+const usd = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const calc = (pick) => {
+  if (pick) f.rate.value = R[document.getElementById("tier").dataset.value];
+  const price = +f.price.value, sales = +f.sales.value, rate = +f.rate.value;
+  const rows = [[`${S[document.getElementById("store").dataset.value]} (${rate}%)`, price * rate / 100], ["Web checkout", price * +f.webpct.value / 100 + +f.webfix.value]];
+  out.innerHTML = rows.map(([name, fee]) => `<tr><th scope="row">${name}</th><td>${usd(fee)}</td><td>${usd(price - fee)}</td><td>${usd(fee * sales)}</td><td>${usd((price - fee) * sales)}</td></tr>`).join("");
+  const gap = (rows[0][1] - rows[1][1]) * sales;
+  sum.textContent = gap >= 0 ? `The web checkout keeps ${usd(gap)} more a month.` : `The store keeps ${usd(-gap)} more a month.`;
+};
+for (const box of document.querySelectorAll("[data-select]")) {
+  const btn = box.querySelector("button"), menu = box.querySelector("ul"), items = [...menu.children];
+  const mark = (el) => { items.forEach((i) => i.classList.toggle("on", i === el)); menu.setAttribute("aria-activedescendant", el.id = btn.id + "-" + el.dataset.value); };
+  const show = (open) => {
+    menu.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+    if (open) { mark(items.find((i) => i.getAttribute("aria-selected") === "true")); menu.focus(); }
+  };
+  const pick = (el) => {
+    items.forEach((i) => i.setAttribute("aria-selected", String(i === el)));
+    btn.dataset.value = el.dataset.value;
+    btn.querySelector("span").textContent = el.textContent;
+    show(false);
+    btn.focus();
+    calc(true);
+  };
+  btn.addEventListener("click", () => show(menu.hidden));
+  btn.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); show(true); } });
+  items.forEach((i) => { i.addEventListener("click", () => pick(i)); i.addEventListener("mousemove", () => mark(i)); });
+  menu.addEventListener("keydown", (e) => {
+    const at = items.findIndex((i) => i.classList.contains("on"));
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); mark(items[(at + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]); }
+    else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(items[at]); }
+    else if (e.key === "Escape" || e.key === "Tab") { show(false); btn.focus(); }
+  });
+  document.addEventListener("click", (e) => { if (!menu.hidden && !box.contains(e.target)) show(false); });
+}
+f.addEventListener("input", () => calc());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
