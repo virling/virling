@@ -29,6 +29,6 @@ Paddle.Checkout.open({
 });
 ```
 
-For transactions you create on your server, set `custom_data: { virling_vid: req.cookies.virling_vid }`.
+For transactions you create on your server, set `custom_data: { virling_vid: req.cookies.virling_vid }`. For the Next.js App Router, see [Next.js Paddle UTM tracking](https://virling.com/blog/nextjs-paddle-utm-tracking).
 
 Renewals carry no custom data of their own; they keep the channel of the subscription's first payment.

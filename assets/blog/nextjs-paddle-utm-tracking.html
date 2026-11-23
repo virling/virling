@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
   const { data } = await res.json();
   return NextResponse.json({ transactionId: data.id });
 }</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">The browser then opens checkout with <code>Paddle.Checkout.open({ transactionId })</code>. Renewals carry no custom data of their own; Virling credits them to the channel of the subscription's first payment. The full setup is in the <a href="https://docs.virling.com/payments/paddle">Paddle docs</a> and on the <a href="/integrations/paddle-saas">Paddle for SaaS page</a>.</p>
+<p class="p">The browser then opens checkout with <code>Paddle.Checkout.open({ transactionId })</code>. Renewals carry no custom data of their own; Virling credits them to the channel of the subscription's first payment. The full setup is in the <a href="https://docs.virling.com/payments/paddle">Paddle docs</a>, on the <a href="/integrations/paddle">Paddle integration page</a> and on the <a href="/integrations/paddle-saas">Paddle for SaaS page</a>.</p>
 <p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
 <h2>Check that it works</h2>
 <p class="p">Connect Paddle with a read-only API key, make a test purchase from a page that runs the script, wait for the next sync, and open the payments list at <code>/app/yourdomain.com/payments</code>. The payment should show a channel instead of Unattributed. Open it to see its journey. If it lists no visitor ID, checkout did not carry <code>virling_vid</code>: check that the page with the button loads the Virling script.</p>
