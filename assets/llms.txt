@@ -100,6 +100,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Paddle fee calculator](https://virling.com/tools/paddle-fee-calculator): Paddle's 5% + 50 cent fee per sale, monthly fees and net payout from price, sales per month and currency
 - [LemonSqueezy fee calculator](https://virling.com/tools/lemonsqueezy-fee-calculator): LemonSqueezy's 5% + 50 cent fee per sale with the international, PayPal and subscription extras, payout and effective rate from price, buyer location, payment method and sale type
 - [YouTube sponsorship ROI calculator](https://virling.com/tools/youtube-sponsorship-calculator): effective CPM, expected clicks, cost per click, customers, revenue, ROI and the break-even conversion rate for a sponsored video, from its price, expected views, click-through rate, conversion rate and revenue per customer
+- [Revenue attribution audit checklist](https://virling.com/tools/attribution-audit-checklist): a printable checklist for when revenue shows up as Direct or unattributed, covering the tracking script, UTM tags, redirects, cross-domain checkout, the payment connection and a test purchase, with progress saved in the browser
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
