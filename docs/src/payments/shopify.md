@@ -98,3 +98,10 @@ Keep the storefront on your own domain, where the script runs. Checkout can stay
 ### Check it works
 
 Run the test in [Test your setup](../guides/test-your-setup.md#shopify) on the storefront: open it from a tagged link in a private window, add a product, and check that the cart has a `virling_vid` attribute, for example in the Storefront API's `cart { attributes { key value } }`. Place a test order, check that the order's note attributes include `virling_vid`, and wait a minute for the next sync. For local development, add `data-dev` to the tag. For the rest of a store setup, see [Set up an online store](../guides/ecommerce.md).
+
+## Guides
+
+- [Shopify revenue attribution](https://virling.com/integrations/shopify)
+- [How to track Shopify revenue by traffic source](https://virling.com/blog/track-shopify-revenue-by-traffic-source)
+- [Shopify UTM tracking](https://virling.com/blog/shopify-utm-tracking)
+- [Shopify subscriptions: subscribers by channel](https://virling.com/integrations/shopify-subscriptions)

@@ -33,3 +33,10 @@ function virling_vid_on_order($order) {
   if (preg_match('/^[A-Za-z0-9-]{8,64}$/', $vid)) $order->update_meta_data('virling_vid', $vid);
 }
 ```
+
+## Guides
+
+- [WooCommerce revenue attribution](https://virling.com/integrations/woocommerce)
+- [How to track WooCommerce revenue by traffic source](https://virling.com/blog/track-woocommerce-revenue-by-traffic-source)
+- [WooCommerce UTM tracking](https://virling.com/blog/woocommerce-utm-tracking)
+- [WooCommerce Subscriptions: subscribers by channel](https://virling.com/integrations/woocommerce-subscriptions)

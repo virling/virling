@@ -60,3 +60,10 @@ Payment Links on `buy.stripe.com` need no code. When a visitor clicks one, the s
 The link must be a normal `<a href>` on a page that runs the script. Links opened from emails, QR codes or other sites carry no visitor ID and show as Unattributed.
 
 See [Link checkout to visits](checkout.md) for all providers.
+
+## Guides
+
+- [Stripe revenue attribution](https://virling.com/integrations/stripe)
+- [How to track Stripe revenue by traffic source](https://virling.com/blog/track-stripe-revenue-by-traffic-source)
+- [Stripe Checkout UTM parameters: how to pass them](https://virling.com/blog/stripe-checkout-utm-parameters)
+- [Stripe for SaaS: subscriptions by channel](https://virling.com/integrations/stripe-saas)

@@ -52,3 +52,10 @@ const vid = window.virling?.vid?.();
 if (vid) url.searchParams.set("metadata_virling_vid", vid);
 location.href = url.href;
 ```
+
+## Guides
+
+- [Dodo Payments revenue attribution](https://virling.com/integrations/dodo-payments)
+- [How to track Dodo Payments revenue by traffic source](https://virling.com/blog/track-dodo-payments-revenue-by-traffic-source)
+- [Dodo Payments UTM tracking](https://virling.com/blog/dodo-payments-utm-tracking)
+- [Dodo Payments for SaaS: subscriptions by traffic source](https://virling.com/integrations/dodo-payments-saas)

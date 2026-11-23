@@ -41,3 +41,9 @@ await fetch(`https://api.revenuecat.com/v2/projects/${projectId}/customers/${app
 ```
 
 That call needs a key with write access to Customer information, separate from the one you give Virling.
+
+## Guides
+
+- [RevenueCat revenue attribution](https://virling.com/integrations/revenuecat)
+- [How to track RevenueCat revenue by traffic source](https://virling.com/blog/track-revenuecat-revenue-by-traffic-source)
+- [RevenueCat for AI apps: subscribers by channel](https://virling.com/integrations/revenuecat-ai-apps)

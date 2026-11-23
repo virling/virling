@@ -44,3 +44,10 @@ const res = await fetch("https://api.creem.io/v1/checkouts", {
 ```
 
 Use `https://test-api.creem.io` with a test mode key.
+
+## Guides
+
+- [Creem revenue attribution](https://virling.com/integrations/creem)
+- [How to track Creem revenue by traffic source](https://virling.com/blog/track-creem-revenue-by-traffic-source)
+- [Creem UTM tracking](https://virling.com/blog/creem-utm-tracking)
+- [Creem for SaaS: subscriptions by traffic source](https://virling.com/integrations/creem-saas)

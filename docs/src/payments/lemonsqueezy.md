@@ -32,3 +32,10 @@ location.href = url.href;
 ```
 
 Or on your server, when you create a checkout with `POST /v1/checkouts`, set `data.attributes.checkout_data.custom` to `{ "virling_vid": "<the visitor's virling_vid cookie>" }`.
+
+## Guides
+
+- [LemonSqueezy revenue attribution](https://virling.com/integrations/lemonsqueezy)
+- [How to track LemonSqueezy revenue by traffic source](https://virling.com/blog/track-lemonsqueezy-revenue-by-traffic-source)
+- [LemonSqueezy UTM tracking](https://virling.com/blog/lemonsqueezy-utm-tracking)
+- [LemonSqueezy for digital products: sales by traffic source](https://virling.com/integrations/lemonsqueezy-digital-products)
