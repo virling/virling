@@ -35,3 +35,10 @@ const checkout = await polar.checkouts.create({
 ## Checkout links
 
 Checkout links on `buy.polar.sh` need no code. Keep the link as a normal `<a href>` on a page that runs the script: the script adds `reference_id=<visitor ID>` to it, unless it is already there, and Polar stores it in the order's metadata, where Virling reads it. A `virling_vid` custom field on the link still works too.
+
+## Guides
+
+- [Polar revenue attribution](https://virling.com/integrations/polar)
+- [How to track Polar revenue by traffic source](https://virling.com/blog/track-polar-revenue-by-traffic-source)
+- [Polar UTM tracking](https://virling.com/blog/polar-utm-tracking)
+- [Polar for developer tools: payments by traffic source](https://virling.com/integrations/polar-developer-tools)

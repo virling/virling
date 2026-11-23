@@ -60,4 +60,4 @@ To revoke Virling's access completely, also delete or roll the key in your provi
 
 The last sync time and the last error for each provider show in site settings. A failing provider keeps being retried every minute, and the other providers keep syncing.
 
-Next: [link checkout to visits](checkout.md), so new payments can be attributed.
+Next: [link checkout to visits](checkout.md), so new payments can be attributed. For all the setup steps for your stack, use the [attribution setup generator](https://virling.com/tools/attribution-setup-generator).
