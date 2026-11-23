@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klaviyo revenue tracking: see which email sold each order</title>
+<meta name="description" content="Klaviyo revenue attribution for Shopify and WooCommerce: tag campaign and flow links with UTMs, and see the orders each email's clicks brought.">
+<link rel="canonical" href="https://virling.com/blog/klaviyo-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/klaviyo-revenue-tracking">
+<meta property="og:title" content="Klaviyo revenue tracking: see which email sold each order">
+<meta property="og:description" content="Klaviyo revenue attribution for Shopify and WooCommerce: tag campaign and flow links with UTMs, and see the orders each email's clicks brought.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Klaviyo revenue tracking: see which email sold each order","item":"https://virling.com/blog/klaviyo-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Klaviyo revenue tracking: see which email sold each order","description":"Klaviyo revenue attribution for Shopify and WooCommerce: tag campaign and flow links with UTMs, and see the orders each email's clicks brought.","datePublished":"2026-11-23","dateModified":"2026-11-23","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/klaviyo-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I see which Klaviyo email brought a Shopify or WooCommerce order?","acceptedAnswer":{"@type":"Answer","text":"Turn on Klaviyo's UTM tracking so every campaign and flow link carries utm_source, utm_medium=email and utm_campaign. Connect your store and store the visitor ID on each order. Each order is then credited to the tagged visit before it, and the Campaign tab shows revenue per campaign and flow message."}},{"@type":"Question","name":"Is the revenue Klaviyo reports real?","acceptedAnswer":{"@type":"Answer","text":"The orders are real, but Klaviyo credits an order to a message when the buyer opened or clicked it within an attribution window, however they reached the store. Some opens come from mail apps that load emails on their own. Click-based revenue counts an order for email only when a click from the email led to it, so it is usually lower."}},{"@type":"Question","name":"Which channel does Klaviyo traffic land in?","acceptedAnswer":{"@type":"Answer","text":"An email click carries utm_medium=email, so it lands in Email whatever the referrer. An SMS click carries utm_medium=sms, which is not an email medium, so with no referrer it lands in Referral with Klaviyo as its source."}},{"@type":"Question","name":"Does a Klaviyo email that was only opened count in Virling?","acceptedAnswer":{"@type":"Answer","text":"No. Virling credits orders to visits, so an email counts only when someone clicks a tagged link and lands on your store. If the buyer later arrives from another channel, the default model credits the latest visit that was not Direct."}},{"@type":"Question","name":"Does Virling replace Klaviyo?","acceptedAnswer":{"@type":"Answer","text":"No. Virling does not send email. It reads tagged visits and your Shopify or WooCommerce orders, so keep sending with Klaviyo."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-23</span>
+      <h1>Klaviyo revenue tracking: see which email sold each order</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-23.</p>
+<p class="p"><b>Klaviyo revenue tracking</b> on a Shopify or WooCommerce store works best when you join each order to the click that brought the buyer. Turn on Klaviyo&rsquo;s UTM tracking so every campaign and flow link carries <code>utm_medium=email</code> and a <code>utm_campaign</code>, store the visitor ID on each order, and Virling credits the order to the tagged visit before it. The Campaign tab then shows revenue per campaign and flow message, counted once, next to every other channel. The revenue inside Klaviyo answers a different question, and this post explains why the two rarely match.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Is Klaviyo revenue real?</h2>
+<p class="p">The orders are real; the question is which email gets the credit. According to <a href="https://help.klaviyo.com/hc/en-us/articles/1260804504250">Klaviyo&rsquo;s help article on message attribution</a>, Klaviyo credits an order to the last message the buyer opened or clicked within an attribution window, and for new accounts the default window is 5 days for email opens and for email clicks. That shapes the number in a few ways:</p>
+<ul class="post-list"><li><b>Opens are not purchases.</b> A subscriber who opened your sale email and then bought from a search ad two days later counts as Klaviyo revenue, even though the email never sent them to the store.</li><li><b>Opens are not always people.</b> Some mail apps load every email on their own to protect privacy, and each load counts as an open. Klaviyo says these Apple Mail Privacy Protection opens can count unless you exclude them in your attribution settings.</li><li><b>One order, many claims.</b> Ad platforms and affiliate networks credit by their own rules, so the same order can also show up in their reports.</li></ul>
+<p class="p">Click-based revenue counts an order for email only when a click from the email led to it, and each order goes to one channel, so channel totals add up to what the store took. Neither number is wrong. Klaviyo&rsquo;s shows how many buyers had seen an email; the click-based one shows which visits led to orders, and compares fairly with search, social and ads. For the longer version, see <a href="/blog/email-marketing-revenue-tracking-ecommerce">email marketing revenue tracking for online stores</a>.</p>
+<h2>Turn on Klaviyo&rsquo;s UTM tracking</h2>
+<p class="p">Per <a href="https://help.klaviyo.com/hc/en-us/articles/115005247808">Klaviyo&rsquo;s help article on UTM tracking</a>, the setting is under your account name, then <b>Settings</b>, then <b>Other &gt; UTM tracking</b>. Turn on <b>Automatically add UTM parameters to links</b> to tag new campaigns and flow messages. It does not turn tagging on for existing messages that have it off, so check each live flow: campaigns have <b>Include tracking parameters</b> and flow emails have <b>Enable UTM Tracking</b>.</p>
+<p class="p">Klaviyo always adds <code>utm_source</code> and <code>utm_medium</code>, and <code>utm_campaign</code> is optional, so make sure it is on. By Klaviyo&rsquo;s defaults the values are:</p>
+<ul class="post-list"><li><code>utm_source</code>: <code>Klaviyo</code>.</li><li><code>utm_medium</code>: the message type, <code>email</code> for emails and <code>sms</code> for texts.</li><li><code>utm_campaign</code>: the campaign name for campaigns, or the flow message name for flows.</li></ul>
+<p class="p">A link from a campaign named <code>winter-sale-2026</code> then arrives like this:</p>
+<p class="p"><code>https://yourstore.com/collections/sale?utm_source=Klaviyo&amp;utm_medium=email&amp;utm_campaign=winter-sale-2026</code></p>
+<p class="p">Klaviyo tags links that have click tracking on; links with click tracking off are left as they are. After you send, click a link in your own inbox and check the address bar on your store. The tags that arrive there are the ones Virling reads.</p>
+<h2>Name campaigns and flow messages so they read well</h2>
+<p class="p">Because <code>utm_campaign</code> comes from the name in Klaviyo, your names become report rows. A few habits help:</p>
+<ul class="post-list"><li><b>Give each flow message a name that includes its flow</b>, such as <code>Abandoned cart 1</code> and <code>Abandoned cart 2</code>, so each email of a flow is its own row and you can tell which flow it belongs to.</li><li><b>Keep names stable.</b> If you rename a live flow message, later clicks carry the new name and show as a new row.</li><li><b>Keep one spelling and one case.</b> <code>Winter sale</code> and <code>winter sale</code> are two rows.</li><li><b>Tag links you send outside Klaviyo yourself</b>, with <code>utm_medium=email</code> and your own campaign. The free <a href="/tools/utm-builder">UTM builder</a> makes the tagged URLs for you.</li></ul>
+<h2>How Virling sorts a Klaviyo visit</h2>
+<p class="p">Every session gets one channel from its first pageview, and <code>utm_medium</code> is checked first, ignoring case. A medium of <code>email</code>, <code>newsletter</code> or <code>e-mail</code> is the <b>Email</b> channel, whatever the referrer says, so Klaviyo email clicks land there with <code>Klaviyo</code> as the source. Klaviyo&rsquo;s <code>sms</code> medium is not one of those, so a text message click is sorted by its referrer, or by its <code>utm_source</code> when there is none. <code>Klaviyo</code> is not on Virling&rsquo;s list of known sources, so SMS clicks land in <b>Referral</b>. The campaign is stored with the visit either way. See <a href="https://docs.virling.com/attribution/channels">how channels are decided</a> and <a href="/blog/sms-marketing-revenue-tracking">SMS marketing revenue tracking</a>.</p>
+<p class="p">Untagged links are the usual gap. Many mail apps send no referrer when a link is clicked, so a click without tags has nothing that says it came from Klaviyo, and it lands in Direct along with the order that follows.</p>
+<h2>Connect your store</h2>
+<p class="p">Orders come straight from the store. Connect <a href="/integrations/shopify">Shopify</a> with a custom app token that can only read orders, or <a href="/integrations/woocommerce">WooCommerce</a> with a read-only REST API key, and Virling imports new orders every minute and lowers revenue when you refund. A short snippet stores the visitor ID on each order, so the order is joined to the visits before it. See <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</p>
+<p class="p">Under the default model, the whole order is credited to the latest visit in the last 90 days that was not Direct, with its channel, source and campaign. A shopper who clicks your abandoned cart email and comes back the next day by typing your address is credited to that email. A shopper who only opened the email and later arrived from a search result is credited to Organic search. See <a href="https://docs.virling.com/attribution/model">the attribution model</a>.</p>
+<h2>See revenue per campaign and flow</h2>
+<h3>1. Open the Email channel</h3>
+<p class="p">On the dashboard, the Channels card lists each channel with visitors, revenue and revenue per visitor. Click <b>Email</b> to filter the whole page to visits from your emails.</p>
+<h3>2. Switch to the Campaign tab</h3>
+<p class="p">The Campaign tab on the same card has one row per <code>utm_campaign</code>, so each campaign and each flow message shows its own visitors and revenue. Compare them by revenue per visitor, not by visitors: a flow email that sends a few shoppers who buy can be worth more than a campaign that sends many who do not.</p>
+<h3>3. Open the orders</h3>
+<p class="p">The <b>Payments</b> page lists every order with the channel it was credited to. Open one to see the visits before it and which one got the credit, which is the quickest way to answer &ldquo;did that email really sell this?&rdquo;</p>
+<h2>What to check if the numbers look off</h2>
+<ul class="post-list"><li><b>Email revenue is lower than in Klaviyo.</b> Expected: opens, and orders that came through another channel, are not credited to email here. Compare the two as different measures, not as an error.</li><li><b>Klaviyo orders show as Direct.</b> UTM tracking is off for that message, click tracking is off for the link, or a redirect dropped the tags. Check each live flow, not only campaigns.</li><li><b>Orders show as Unattributed.</b> The order has no visitor ID. Check that the Shopify or WooCommerce snippet is in place; see <a href="https://docs.virling.com/guides/ecommerce">set up Virling for an online store</a>.</li><li><b>One flow is split across rows.</b> A flow message was renamed, or names differ in case. Pick one name and keep it.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>How do I see which Klaviyo email brought a Shopify or WooCommerce order?</h3><p class="p">Turn on Klaviyo&rsquo;s UTM tracking so every campaign and flow link carries utm_source, utm_medium=email and utm_campaign. Connect your store and store the visitor ID on each order. Each order is then credited to the tagged visit before it, and the Campaign tab shows revenue per campaign and flow message.</p>
+<h3>Is the revenue Klaviyo reports real?</h3><p class="p">The orders are real, but Klaviyo credits an order to a message when the buyer opened or clicked it within an attribution window, however they reached the store. Some opens come from mail apps that load emails on their own. Click-based revenue counts an order for email only when a click from the email led to it, so it is usually lower.</p>
+<h3>Which channel does Klaviyo traffic land in?</h3><p class="p">An email click carries utm_medium=email, so it lands in Email whatever the referrer. An SMS click carries utm_medium=sms, which is not an email medium, so with no referrer it lands in Referral with Klaviyo as its source.</p>
+<h3>Does a Klaviyo email that was only opened count in Virling?</h3><p class="p">No. Virling credits orders to visits, so an email counts only when someone clicks a tagged link and lands on your store. If the buyer later arrives from another channel, the default model credits the latest visit that was not Direct.</p>
+<h3>Does Virling replace Klaviyo?</h3><p class="p">No. Virling does not send email. It reads tagged visits and your Shopify or WooCommerce orders, so keep sending with Klaviyo.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which Klaviyo emails bring real orders</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
