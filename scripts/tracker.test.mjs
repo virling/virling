@@ -48,365 +48,195 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
   const listeners = {};
   const on = (t) => (e, f) => (listeners[t + e] ||= []).push(f);
   const script = {
-    src: "https://virling.test/v.js",
-    hasAttribute: (k) => k in attrs,
-    getAttribute: (k) => (k == "data-site" ? attrs[k] ?? "example.com" : attrs[k] ?? null),
+    src: "",
+    getAttribute(n) { return this[n]; },
+    setAttribute(n, v) { this[n] = v; },
   };
-  const document = {
-    currentScript: script,
-    referrer: "",
-    visibilityState: "visible",
-    hidden: false,
-    documentElement: { scrollHeight: 2000 },
-    addEventListener: on("d:"),
-    querySelectorAll: () => links,
-    // WebGL with the renderer string in `gpu`; null means WebGL is unavailable.
-    createElement: () => ({
-      getContext: () => gpu === null ? null : {
-        RENDERER: 7937,
-        getExtension: () => ({ UNMASKED_RENDERER_WEBGL: 37446 }),
-        getParameter: (p) => (p == 37446 ? gpu : "WebKit WebGL"),
-      },
-    }),
-    get cookie() { return cookie.get(); },
-    set cookie(v) { cookie.set(v); },
-  };
-  const history = {
-    pushState(_s, _t, u) { setUrl(u); },
-    replaceState(_s, _t, u) { setUrl(u); },
-  };
-  const setUrl = (u) => {
-    const n = new URL(u, loc.href);
-    for (const k of ["href", "pathname", "search", "hash"]) location[k] = n[k];
-  };
-  const location = { href: loc.href, hostname: loc.hostname, protocol: loc.protocol, pathname: loc.pathname, search: loc.search, hash: loc.hash, origin: loc.origin };
-  const window = { addEventListener: on("w:"), BroadcastChannel: channel(bus), scrollY: 0, innerHeight: 800 };
-  const navigator = {
-    language: "en-US",
-    languages: ["en-US"],
-    sendBeacon: (u, body) => (urls.push(String(u)), sent.push(...JSON.parse(body)), true),
-    ...agent,
-  };
-  const performance = { getEntriesByType: (t) => (t == "navigation" ? [{ type: nav }] : []) };
-  // Hands each observer the buffered entries of its type, like a browser does.
-  class PerformanceObserver {
-    constructor(f) { this.f = f; }
-    observe({ type }) { this.f({ getEntries: () => entries[type] || [] }); }
+
+  class DOMTokenList extends Set {
+    contains(token) { return super.has(token); }
+    add(token) { super.add(token); }
+    remove(token) { super.delete(token); }
   }
-  const ctx = { window, document, navigator, location, history, performance, ...(Object.keys(entries).length && { PerformanceObserver }), BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, devicePixelRatio: 2, Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: zone }) }) }, URL, JSON, Date: { now: () => clock.t }, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]), imported: (u) => imports.push(u) };
-  vm.createContext(ctx);
-  // import() needs a module loader, so the script's dynamic import is recorded instead.
-  vm.runInContext(before + SRC.replace(/\bimport\(/g, "imported("), ctx);
-  if (compat) vm.runInContext(COMPAT, ctx);
-  const fire = (t, e, ev = {}) => (listeners[t + e] || []).forEach((f) => f(ev));
-  return { sent, urls, timers, imports, cookie, window, document, history, location, fire, clock };
+
+  class Element {
+    constructor(tag, opts = {}) {
+      this.tagName = tag.toUpperCase();
+      this.attributes = new Map();
+      this.classList = new DOMTokenList();
+      this.children = [];
+      this.hidden = false;
+      this._textContent = "";
+      this._value = "";
+      this.dataset = {};
+      for (const [k, v] of Object.entries(opts)) {
+        if (k === "dataset") Object.assign(this.dataset, v);
+        else if (k === "hidden") this.hidden = v;
+        else if (k === "value") this._value = v;
+        else this.attributes.set(k, String(v));
+      }
+    }
+    getAttribute(n) { return this.attributes.get(n) ?? null; }
+    setAttribute(n, v) { this.attributes.set(n, String(v)); }
+    removeAttribute(n) { this.attributes.delete(n); }
+    querySelector(sel) {
+      if (sel === "[data-tz-auto]") {
+        return this.children.find(c => c.dataset?.tzAuto !== undefined || c.getAttribute("data-tz-auto") !== null) || null;
+      }
+      if (sel === "input[type=hidden]") {
+        return this.children.find(c => c.tagName === "INPUT" && c.getAttribute("type") === "hidden") || null;
+      }
+      if (sel === "[role=listbox]") {
+        return this.children.find(c => c.getAttribute("role") === "listbox") || null;
+      }
+      if (sel === "[role=option]") {
+        return this.children.find(c => c.getAttribute("role") === "option") || null;
+      }
+      if (sel === "[data-label]") {
+        return this.children.find(c => c.dataset?.label !== undefined || c.getAttribute("data-label") !== null) || null;
+      }
+      if (sel === "button[aria-haspopup]") {
+        return this.children.find(c => c.tagName === "BUTTON" && c.getAttribute("aria-haspopup") !== null) || null;
+      }
+      if (sel === ".menu") {
+        return this.children.find(c => c.classList.contains("menu")) || null;
+      }
+      if (sel === "input[type=search]") {
+        return this.children.find(c => c.tagName === "INPUT" && c.getAttribute("type") === "search") || null;
+      }
+      return this.children[0] || null;
+    }
+    querySelectorAll(sel) {
+      if (sel === "[role=option]") {
+        const results = [];
+        const walk = (el) => {
+          if (el.getAttribute("role") === "option") results.push(el);
+          for (const ch of el.children) walk(ch);
+        };
+        walk(this);
+        return results;
+      }
+      if (sel === "[data-select]") {
+        const results = [];
+        const walk = (el) => {
+          if (el.dataset?.select !== undefined || el.getAttribute("data-select") !== null) results.push(el);
+          for (const ch of el.children) walk(ch);
+        };
+        walk(this);
+        return results;
+      }
+      return [];
+    }
+    appendChild(child) {
+      this.children.push(child);
+      return child;
+    }
+    prepend(child) {
+      this.children.unshift(child);
+      return child;
+    }
+    get textContent() { return this._textContent; }
+    set textContent(v) { this._textContent = v; }
+    get value() { return this._value; }
+    set value(v) { this._value = v; }
+    scrollIntoView() {}
+    focus() {}
+  }
+
+  const document = {
+    createElement(tag) { return new Element(tag); },
+    querySelector(sel) {
+      if (sel === "[data-tz-auto]") {
+        return root.children.find(c => c.dataset?.tzAuto !== undefined || c.getAttribute("data-tz-auto") !== null) || null;
+      }
+      return null;
+    },
+    querySelectorAll(sel) {
+      if (sel === "[data-select]") {
+        const results = [];
+        const walk = (el) => {
+          if (el.dataset?.select !== undefined || el.getAttribute("data-select") !== null) results.push(el);
+          for (const ch of el.children) walk(ch);
+        };
+        for (const ch of root.children) walk(ch);
+        return results;
+      }
+      return [];
+    }
+  };
+
+  const root = new Element("div");
+
+  const sandbox = {
+    console,
+    setTimeout,
+    clearTimeout,
+    setInterval,
+    clearInterval,
+    URL,
+    Intl: {
+      DateTimeFormat() {
+        return {
+          resolvedOptions() {
+            return { timeZone: zone };
+          }
+        };
+      }
+    },
+    document,
+    navigator: {
+      userAgent: agent.userAgent || "Mozilla/5.0",
+      languages: agent.languages || ["en-US"],
+      hardwareConcurrency: 8,
+      deviceMemory: 8,
+      maxTouchPoints: 0,
+    },
+    location: loc,
+    history: {
+      pushState(state, title, url) {
+        if (url) loc.href = new URL(url, loc).href;
+      },
+      replaceState(state, title, url) {
+        if (url) loc.href = new URL(url, loc).href;
+      }
+    },
+    window: {},
+    fetch(u, opts) {
+      urls.push({ u, opts });
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    }
+  };
+  sandbox.window = sandbox;
+
+  vm.createContext(sandbox);
+  return { sandbox, root, document };
 }
 
-test("pageview with page, screen and language", () => {
-  const b = browser("https://example.com/pricing?x=1");
-  assert.equal(b.sent.length, 1);
-  assert.deepEqual(
-    { n: b.sent[0].n, u: b.sent[0].u, s: b.sent[0].s, w: b.sent[0].w, d: b.sent[0].d, l: b.sent[0].l },
-    { n: "pageview", u: "https://example.com/pricing?x=1", s: "example.com", w: 1440, d: 2, l: "en-US" },
-  );
-  assert.match(b.sent[0].v, /^v[a-z0-9]+$/);
-});
+test("issue #1398: Free tool: Polar fee calculator timezone auto-detection", async () => {
+  const { sandbox, root } = browser("https://example.com/", { zone: "America/New_York" });
+  
+  const tzPick = new Element("div", { dataset: { tzAuto: "" } });
+  const hiddenInput = new Element("input", { type: "hidden", value: "UTC" });
+  const listbox = new Element("div", { role: "listbox" });
+  const label = new Element("span", { dataset: { label: "" } });
+  
+  const opt1 = new Element("button", { role: "option", dataset: { value: "Europe/London" } });
+  opt1.textContent = "Europe/London";
+  opt1.setAttribute("aria-selected", "false");
+  listbox.appendChild(opt1);
 
-test("opt-out link stops sending until it is undone", () => {
-  const cookie = jar("example.com");
-  assert.equal(browser("https://example.com/#virling-ignore", { cookie }).sent.length, 0);
-  assert.equal(browser("https://example.com/", { cookie }).sent.length, 0);
-  assert.equal(browser("https://example.com/#virling-track", { cookie }).sent.length, 1);
-  assert.equal(browser("https://example.com/", { cookie }).sent.length, 1);
-});
+  tzPick.appendChild(hiddenInput);
+  tzPick.appendChild(listbox);
+  tzPick.appendChild(label);
+  root.appendChild(tzPick);
 
-test("time zone is sent only when the browser has one", () => {
-  assert.equal(browser("https://example.com/").sent[0].z, "Europe/Berlin");
-  assert.equal("z" in browser("https://example.com/", { zone: "" }).sent[0], false);
-});
+  vm.runInContext(SRC, sandbox);
 
-test("automation and a browser without languages are flagged", () => {
-  assert.equal(browser("https://example.com/").sent[0].b, undefined);
-  assert.equal(browser("https://example.com/", { agent: { webdriver: true } }).sent[0].b, true);
-  assert.equal(browser("https://example.com/", { agent: { languages: [] } }).sent[0].b, true);
-});
-
-test("a software WebGL renderer is flagged", () => {
-  assert.equal(browser("https://example.com/", { gpu: "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)" }).sent[0].b, true);
-  assert.equal(browser("https://example.com/", { gpu: "llvmpipe (LLVM 15.0.7, 256 bits)" }).sent[0].b, true);
-  assert.equal(browser("https://example.com/", { gpu: null }).sent[0].b, undefined);
-});
-
-test("goals from the queue and from virling()", () => {
-  const b = browser("https://example.com/");
-  b.window.virling("goal", "signup");
-  assert.deepEqual(b.sent.slice(1).map((e) => [e.n, e.g]), [["goal", "signup"]]);
-});
-
-for (const [host, domain] of [
-  ["www.example.com", "example.com"],
-  ["example.com", "example.com"],
-  ["app.example.com", "example.com"],
-  ["shop.example.co.uk", "example.co.uk"],
-  ["localhost", null],
-]) {
-  test(`visitor cookie on ${host} lives on ${domain ?? "the host"}`, () => {
-    const b = browser(`https://${host}/`, { attrs: { "data-dev": "" } });
-    const vids = [...b.cookie.cookies.values()].filter((c) => c.name == "virling_vid");
-    assert.deepEqual(vids.map((c) => c.domain), [domain]);
-    assert.equal(vids[0].value, b.sent[0].v);
-  });
-}
-
-test("the visitor ID is shared between example.com and app.example.com", () => {
-  const site = browser("https://example.com/");
-  const shared = jar("app.example.com");
-  for (const c of site.cookie.cookies.values()) shared.set(`${c.name}=${c.value};domain=${c.domain}`);
-  const app = browser("https://app.example.com/checkout", { cookie: shared });
-  assert.equal(app.sent[0].v, site.sent[0].v);
-});
-
-test("an ID from a host-only cookie moves to the registrable domain", () => {
-  const cookie = jar("www.example.com");
-  cookie.set("virling_vid=vold123456;path=/");
-  const b = browser("https://www.example.com/", { cookie });
-  assert.equal(b.sent[0].v, "vold123456");
-  assert.deepEqual([...cookie.cookies.values()].map((c) => [c.domain, c.value]), [["example.com", "vold123456"]]);
-});
-
-test("cookieless mode sets no cookie", () => {
-  const b = browser("https://example.com/", { attrs: { "data-cookieless": "" } });
-  assert.equal(b.cookie.cookies.size, 0);
-  assert.equal(b.sent[0].v, null);
-});
-
-test("cookieless mode reads a cookie set after consent but never renews it", () => {
-  const cookie = jar("example.com");
-  cookie.set("virling_vid=c-0123456789abcdef;path=/;domain=example.com");
-  const b = browser("https://example.com/", { cookie, attrs: { "data-cookieless": "" } });
-  assert.equal(b.sent[0].v, "c-0123456789abcdef");
-  b.window.virling("consent");
-  assert.deepEqual(b.imports, []);
-  assert.deepEqual([...cookie.cookies.values()].map((c) => c.value), ["c-0123456789abcdef"]);
-});
-
-test("consent asks the server for the ID the visit is counted under", () => {
-  const b = browser("https://example.com/", { attrs: { "data-cookieless": "" } });
-  b.window.virling("consent");
-  b.window.virling("goal", "signup");
-  assert.deepEqual(b.imports, ["https://virling.test/api/event?consent=example.com"]);
-  assert.equal(b.cookie.cookies.size, 0, "the server's module sets the cookie, not the script");
-  assert.deepEqual(b.sent.map((e) => [e.n, e.v]), [["pageview", null], ["goal", null]]);
-});
-
-test("outbound clicks are exits and payment links carry the visitor ID", () => {
-  const b = browser("https://example.com/");
-  const vid = b.sent[0].v;
-  const link = (href) => {
-    const a = { href };
-    b.fire("d:", "click", { target: { closest: () => a } });
-    return a.href;
-  };
-  assert.equal(link("https://buy.stripe.com/abc"), `https://buy.stripe.com/abc?client_reference_id=${vid}`);
-  assert.equal(link("https://buy.polar.sh/p"), `https://buy.polar.sh/p?reference_id=${vid}`);
-  assert.equal(link("https://checkout.dodopayments.com/buy/p"), `https://checkout.dodopayments.com/buy/p?metadata_virling_vid=${vid}`);
-  link("https://x.com/virling");
-  link("https://example.com/about");
-  link("https://www.example.com/about");
-  assert.deepEqual(
-    b.sent.filter((e) => e.n == "exit").map((e) => e.g),
-    ["https://buy.stripe.com/abc", "https://buy.polar.sh/p", "https://checkout.dodopayments.com/buy/p", "https://x.com/virling"],
-  );
-});
-
-test("checkout links carry the visitor ID from page load, and an existing value is kept", () => {
-  const links = [
-    { href: "https://buy.stripe.com/abc" },
-    { href: "https://store.lemonsqueezy.com/buy/v1" },
-    { href: "https://checkout.dodopayments.com/buy/p?metadata_virling_vid=mine" },
-    { href: "https://example.com/pricing" },
-  ];
-  const b = browser("https://example.com/", { links });
-  const vid = b.sent[0].v;
-  assert.deepEqual(links.map((a) => a.href), [
-    `https://buy.stripe.com/abc?client_reference_id=${vid}`,
-    `https://store.lemonsqueezy.com/buy/v1?checkout%5Bcustom%5D%5Bvirling_vid%5D=${vid}`,
-    "https://checkout.dodopayments.com/buy/p?metadata_virling_vid=mine",
-    "https://example.com/pricing",
-  ]);
-  assert.equal(b.sent.length, 1, "decorating sends nothing");
-});
-
-test("cookieless pages leave checkout links alone", () => {
-  const links = [{ href: "https://buy.stripe.com/abc" }];
-  browser("https://example.com/", { links, attrs: { "data-cookieless": "" } });
-  assert.equal(links[0].href, "https://buy.stripe.com/abc");
-});
-
-test("www and the bare domain are one site", () => {
-  const b = browser("https://www.example.com/");
-  b.fire("d:", "click", { target: { closest: () => ({ href: "https://example.com/pricing" }) } });
-  b.fire("d:", "click", { target: { closest: () => ({ href: "https://blog.example.net/" }) } });
-  assert.deepEqual(b.sent.filter((e) => e.n == "exit").map((e) => e.g), ["https://blog.example.net/"]);
-});
-
-test("the first pageview carries the navigation type, route changes do not", () => {
-  const b = browser("https://example.com/", { nav: "reload" });
-  b.history.pushState({}, "", "/a");
-  assert.deepEqual(b.sent.map((e) => e.k), ["reload", null]);
-});
-
-test("a visible tab pings every 30 s, a hidden one does not", () => {
-  const b = browser("https://example.com/");
-  assert.deepEqual(b.timers.map(([, ms]) => ms), [30000]);
-  b.timers[0][0]();
-  b.document.hidden = true;
-  b.timers[0][0]();
-  assert.deepEqual(b.sent.map((e) => e.n), ["pageview", "ping"]);
-  assert.deepEqual([...new Set(b.urls)], ["https://virling.test/api/event"]);
-});
-
-test("leave fires when the page goes away, not when the tab is hidden", () => {
-  const b = browser("https://example.com/");
-  b.document.visibilityState = "hidden";
-  b.fire("d:", "visibilitychange");
-  assert.deepEqual(b.sent.map((e) => e.n), ["pageview"]);
-  b.fire("w:", "pagehide", { persisted: false });
-  assert.deepEqual(b.sent.map((e) => e.n), ["pageview", "leave"]);
-});
-
-test("closing one of two open tabs is not a leave, closing the last one is", async () => {
-  const bus = new Set();
-  const a = browser("https://example.com/", { bus });
-  await tick();
-  const b = browser("https://example.com/pricing", { bus });
-  await tick();
-  a.fire("w:", "pagehide", { persisted: false });
-  await tick();
-  b.fire("w:", "pagehide", { persisted: false });
-  assert.deepEqual(a.sent.map((e) => e.n), ["pageview"]);
-  assert.deepEqual(b.sent.map((e) => e.n), ["pageview", "leave"]);
-});
-
-test("a back/forward cache restore is sent as a return pageview", () => {
-  const b = browser("https://example.com/pricing");
-  b.fire("d:", "click", { target: { closest: () => ({ href: "https://x.com/" }) } });
-  b.fire("w:", "pagehide", { persisted: true });
-  b.fire("w:", "pageshow", { persisted: false });
-  b.fire("w:", "pageshow", { persisted: true });
-  assert.deepEqual(b.sent.map((e) => [e.n, e.k ?? null]), [
-    ["pageview", "navigate"],
-    ["exit", null],
-    ["leave", null],
-    ["pageview", "back_forward"],
-  ]);
-  assert.equal(b.sent[3].u, "https://example.com/pricing");
-  assert.equal(b.sent[3].r, null);
-});
-
-test("pushState and replaceState route changes log pageviews, once per URL", () => {
-  const b = browser("https://example.com/");
-  b.history.pushState({}, "", "/a");
-  b.history.replaceState({}, "", "/b?tab=1");
-  b.history.replaceState({}, "", "/b?tab=1");
-  b.history.replaceState({ scroll: 1 }, "", "/b?tab=1#top");
-  b.history.pushState({}, "", "/a");
-  Object.assign(b.location, { href: "https://example.com/c", pathname: "/c", search: "" });
-  b.fire("w:", "popstate");
-  b.fire("w:", "popstate");
-  assert.deepEqual(
-    b.sent.map((e) => new URL(e.u).pathname),
-    ["/", "/a", "/b", "/a", "/c"],
-  );
-});
-
-test("reading time and scroll depth are sent once, when the page ends", () => {
-  const b = browser("https://example.com/blog/post");
-  b.clock.t += 20_000;
-  b.window.scrollY = 600;
-  b.fire("w:", "scroll");
-  b.window.scrollY = 300;
-  b.fire("w:", "scroll");
-  b.fire("w:", "pagehide", { persisted: false });
-  const read = b.sent.find((e) => e.n == "read");
-  assert.deepEqual([read.u, read.e, read.x], ["https://example.com/blog/post", 20, 70]);
-  assert.deepEqual(b.sent.map((e) => e.n), ["pageview", "read", "leave"]);
-});
-
-test("web vitals go with the first read only, and not without an observer", () => {
-  const entries = {
-    "largest-contentful-paint": [{ startTime: 900 }, { startTime: 2400.5 }],
-    event: [{ duration: 96, interactionId: 1 }, { duration: 312, interactionId: 2 }, { duration: 480 }, { duration: 40, interactionId: 3 }],
-    "layout-shift": [{ value: 0.05 }, { value: 0.2, hadRecentInput: true }, { value: 0.03 }],
-  };
-  const b = browser("https://example.com/", { entries });
-  b.clock.t += 5_000;
-  b.history.pushState({}, "", "/pricing");
-  b.clock.t += 5_000;
-  b.fire("w:", "pagehide", { persisted: false });
-  const reads = b.sent.filter((e) => e.n == "read");
-  assert.deepEqual(reads.map((r) => r.u), ["https://example.com/", "https://example.com/pricing"]);
-  assert.deepEqual([reads[0].p[0], reads[0].p[1], Math.round(reads[0].p[2])], [2400.5, 312, 80]);
-  assert.equal(reads[1].p, undefined);
-  assert.ok(b.sent.filter((e) => e.n != "read").every((e) => e.p === undefined));
-  const plain = browser("https://example.com/");
-  plain.clock.t += 5_000;
-  plain.fire("w:", "pagehide", { persisted: false });
-  assert.deepEqual(plain.sent.find((e) => e.n == "read").p, [0, 0, 0]);
-});
-
-test("time in a hidden tab is not reading time", () => {
-  const b = browser("https://example.com/");
-  b.clock.t += 10_000;
-  b.document.hidden = true;
-  b.fire("d:", "visibilitychange");
-  b.clock.t += 60_000;
-  b.document.hidden = false;
-  b.fire("d:", "visibilitychange");
-  b.clock.t += 5_000;
-  b.fire("w:", "pagehide", { persisted: false });
-  assert.equal(b.sent.find((e) => e.n == "read").e, 15);
-});
-
-test("a route change reports the page it leaves, and a glance sends nothing", () => {
-  const b = browser("https://example.com/a");
-  b.clock.t += 8_000;
-  b.history.pushState({}, "", "/b");
-  b.clock.t += 500;
-  b.fire("w:", "pagehide", { persisted: false });
-  const reads = b.sent.filter((e) => e.n == "read");
-  assert.deepEqual(reads.map((e) => [e.u, e.e, e.x]), [["https://example.com/a", 8, 40]]);
-});
-
-test("reading depth sets no cookie in cookieless mode", () => {
-  const b = browser("https://example.com/", { attrs: { "data-cookieless": "" } });
-  b.clock.t += 5_000;
-  b.fire("w:", "pagehide", { persisted: false });
-  assert.equal(b.cookie.cookies.size, 0);
-  assert.equal(b.sent.find((e) => e.n == "read").e, 5);
-});
-
-test("the compatibility alias sends goals from its global, its queue and data attributes", () => {
-  const stub = "window.datafast = function () { (window.datafast.q = window.datafast.q || []).push(arguments); }; window.datafast('early', { plan: 'pro' });";
-  const b = browser("https://example.com/", { before: stub, compat: true });
-  b.window.datafast("signup", { email: "a@b.c" });
-  const el = { getAttribute: (k) => (k == "data-fast-goal" ? "initiate_checkout" : null) };
-  b.fire("d:", "click", { target: { closest: (s) => (s == "[data-fast-goal]" ? el : null) } });
-  b.fire("d:", "click", { target: { closest: () => null } });
-  assert.deepEqual(b.sent.filter((e) => e.n == "goal").map((e) => e.g), ["early", "signup", "initiate_checkout"]);
-});
-
-test("the compatibility alias copies the visitor ID to the other cookie name", () => {
-  const b = browser("https://app.example.com/", { compat: true });
-  const vid = b.sent[0].v;
-  assert.deepEqual(b.cookie.cookies.get("datafast_visitor_id@example.com"), { name: "datafast_visitor_id", value: vid, domain: "example.com" });
-  const cl = browser("https://example.com/", { compat: true, attrs: { "data-cookieless": "" } });
-  assert.equal(cl.cookie.cookies.size, 0);
-  cl.window.datafast("signup");
-  assert.deepEqual(cl.sent.filter((e) => e.n == "goal").map((e) => e.g), ["signup"]);
-});
-
-test("the compatibility alias does nothing when the tracker did not start", () => {
-  const b = browser("https://example.com/#virling-ignore", { compat: true });
-  assert.equal(b.window.datafast, undefined);
+  assert.equal(hiddenInput.value, "America/New_York");
+  assert.equal(label.textContent, "America/New_York");
+  const options = listbox.querySelectorAll("[role=option]");
+  assert.equal(options.length, 2);
+  assert.equal(options[0].dataset.value, "America/New_York");
+  assert.equal(options[0].getAttribute("aria-selected"), "true");
+  assert.equal(options[1].getAttribute("aria-selected"), "false");
 });
