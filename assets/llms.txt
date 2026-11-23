@@ -104,6 +104,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [App Store fee calculator: Apple and Google Play commission](https://virling.com/tools/app-store-fee-calculator): store commission and payout on Apple App Store or Google Play at the standard or reduced rate, next to a web checkout fee, from price and sales a month
 - [Dodo Payments fee calculator](https://virling.com/tools/dodo-payments-fee-calculator): Dodo Payments' 4% + 40 cent fee per sale with the international and subscription extras, monthly fees and net payout from price, sales per month, share of international buyers and sale type
 - [Creem fee calculator](https://virling.com/tools/creem-fee-calculator): Creem's 3.9% + 40 cent fee per sale, monthly fees and net payout from price, sales per month, share of international buyers and sale type
+- [Polar fee calculator](https://virling.com/tools/polar-fee-calculator): the Polar.sh fee, your payout and the effective rate from price, plan, buyer's card, tax and sale type
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -158,6 +159,8 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Polar for AI apps](https://virling.com/integrations/polar-ai-apps): for founders of AI apps and GPT wrappers billing through Polar: each paying user, subscription or credit pack tied to the post, search or AI answer that brought them
 - [WooCommerce for digital products](https://virling.com/integrations/woocommerce-digital-products): for WooCommerce stores selling ebooks, templates, presets and courses: each download order tied to the channel, campaign and post that brought the buyer
 - [LemonSqueezy for AI apps](https://virling.com/integrations/lemonsqueezy-ai-apps): for founders of AI apps selling through LemonSqueezy: each paying user and renewal tied to the ChatGPT answer, Reddit thread, X post or newsletter that brought them
+- [LemonSqueezy for plugins and themes](https://virling.com/integrations/lemonsqueezy-plugins-and-themes): for plugin and theme makers on LemonSqueezy: which channel sells your plugin, with license sales and renewals tied to the visit behind them
+- [Stripe for online courses](https://virling.com/integrations/stripe-online-courses): for course creators on Stripe Checkout or Payment Links: each course sale, payment plan and refund tied to the channel and campaign behind it
 
 ## Compare
 
