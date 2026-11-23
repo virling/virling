@@ -47,6 +47,8 @@
   <url><loc>https://virling.com/integrations/stripe-memberships</loc></url>
   <url><loc>https://virling.com/integrations/creem-digital-products</loc></url>
   <url><loc>https://virling.com/integrations/dodo-payments-ai-apps</loc></url>
+  <url><loc>https://virling.com/integrations/paddle-ai-apps</loc></url>
+  <url><loc>https://virling.com/integrations/woocommerce-digital-products</loc></url>
   <url><loc>https://virling.com/blog</loc></url>
   <url><loc>https://virling.com/blog/woocommerce-order-attribution-unknown</loc></url>
   <url><loc>https://virling.com/blog/what-is-revenue-attribution</loc></url>
@@ -202,6 +204,17 @@
   <url><loc>https://virling.com/blog/lifecycle-email-revenue-tracking</loc></url>
   <url><loc>https://virling.com/blog/landing-page-revenue-tracking</loc></url>
   <url><loc>https://virling.com/blog/google-ads-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/nestjs-stripe-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/firebase-stripe-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/nextjs-paddle-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/nextjs-polar-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/beehiiv-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/nextjs-lemonsqueezy-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/nextjs-dodo-payments-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/mailchimp-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/kit-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/klaviyo-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/nextjs-creem-utm-tracking</loc></url>
   <url><loc>https://virling.com/vs</loc></url>
   <url><loc>https://virling.com/vs/datafast</loc></url>
   <url><loc>https://virling.com/vs/databull</loc></url>
