@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LemonSqueezy fee calculator: fee, payout and effective rate</title>
+<meta name="description" content="LemonSqueezy fee calculator: enter your price, buyer location, payment method and sale type to see the LemonSqueezy fee, your payout and the effective rate. Free, runs in your browser.">
+<link rel="canonical" href="https://virling.com/tools/lemonsqueezy-fee-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/lemonsqueezy-fee-calculator">
+<meta property="og:title" content="LemonSqueezy fee calculator: fee, payout and effective rate">
+<meta property="og:description" content="LemonSqueezy fee calculator: enter your price, buyer location, payment method and sale type to see the LemonSqueezy fee, your payout and the effective rate. Free, runs in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"LemonSqueezy fee calculator","url":"https://virling.com/tools/lemonsqueezy-fee-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"LemonSqueezy fee calculator","item":"https://virling.com/tools/lemonsqueezy-fee-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / lemonsqueezy fee calculator</span><h1>LemonSqueezy fee calculator.</h1><p class="lead">For software and digital product sellers on LemonSqueezy. Enter your price, where the buyer is, how they pay and whether it is a subscription to see LemonSqueezy's fee on the sale, the payout you keep and the effective rate, at LemonSqueezy's published rates. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="fees" autocomplete="off">
+  <label>Order total (USD)<input name="price" type="number" min="0" step="0.01" value="29"></label>
+  <div class="tool-pick" data-select><span id="loc-label">Buyer location</span>
+    <button type="button" id="loc" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="loc-label loc-value" data-value="0"><span id="loc-value">In the US</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="loc-menu" role="listbox" aria-labelledby="loc-label" tabindex="-1" hidden><li role="option" data-value="0" aria-selected="true">In the US</li><li role="option" data-value="1.5" aria-selected="false">Outside the US</li></ul>
+  </div>
+  <div class="tool-pick" data-select><span id="pay-label">Payment method</span>
+    <button type="button" id="pay" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="pay-label pay-value" data-value="0"><span id="pay-value">Card</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="pay-menu" role="listbox" aria-labelledby="pay-label" tabindex="-1" hidden><li role="option" data-value="0" aria-selected="true">Card</li><li role="option" data-value="1.5" aria-selected="false">PayPal</li></ul>
+  </div>
+  <div class="tool-pick" data-select><span id="kind-label">Sale type</span>
+    <button type="button" id="kind" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="kind-label kind-value" data-value="0"><span id="kind-value">One-time payment</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="kind-menu" role="listbox" aria-labelledby="kind-label" tabindex="-1" hidden><li role="option" data-value="0" aria-selected="true">One-time payment</li><li role="option" data-value="0.5" aria-selected="false">Subscription payment</li></ul>
+  </div>
+</form>
+<div class="tool-stats" id="fees-out"></div>
+<p class="fine-note">Checked on 2026-11-23 on <a href="https://www.lemonsqueezy.com/pricing">LemonSqueezy's pricing page</a> and its <a href="https://docs.lemonsqueezy.com/help/getting-started/fees">fees help page</a>: 5% + 50&cent; per transaction with no monthly fee, plus 1.5% for transactions outside the US, 1.5% for PayPal and 0.5% for subscription payments. The fees page lists these as additions to the base fee, so the calculator adds each one that applies. The percentage is taken on the order total, so enter what the buyer pays including tax. LemonSqueezy does not publish a currency conversion fee, so none is included. Its pricing page also says it no longer accepts new sign-ups and will shut down on March 31, 2027. Rates change, so check the pages before you decide.</p>
+<div class="txt post tool-cta">
+<h2>See which channels bring the sales behind those fees</h2>
+<p class="p">Virling imports your LemonSqueezy orders and subscription invoices and, through a signed webhook, credits each one to the visit that led to it, so you see which posts, searches and AI answers bring paying customers. Virling is open source under AGPLv3: self-host it free, or start a 14-day hosted trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free</a> <a class="lk" href="/integrations/lemonsqueezy">LemonSqueezy integration</a> &middot; <a class="lk" href="/demo">See the demo</a></p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>LemonSqueezy fees: a worked example</h2>
+<p class="p">One one-time sale at common price points, using the rates on <a href="https://docs.lemonsqueezy.com/help/getting-started/fees">LemonSqueezy's fees page</a>. Each cell shows the fee and its share of the price.</p>
+<table class="cmp"><thead><tr><th>Order total</th><th>US buyer, card</th><th>Outside the US, card</th><th>Outside the US, PayPal</th></tr></thead><tbody><tr><th scope="row">$9</th><td>$0.95 (10.6%)</td><td>$1.09 (12.1%)</td><td>$1.22 (13.6%)</td></tr><tr><th scope="row">$19</th><td>$1.45 (7.6%)</td><td>$1.74 (9.2%)</td><td>$2.02 (10.6%)</td></tr><tr><th scope="row">$29</th><td>$1.95 (6.7%)</td><td>$2.39 (8.2%)</td><td>$2.82 (9.7%)</td></tr><tr><th scope="row">$49</th><td>$2.95 (6.0%)</td><td>$3.69 (7.5%)</td><td>$4.42 (9.0%)</td></tr><tr><th scope="row">$99</th><td>$5.45 (5.5%)</td><td>$6.94 (7.0%)</td><td>$8.42 (8.5%)</td></tr></tbody></table>
+<p class="p">The 50 cents weighs most on cheap products: on a $9 sale to a US card it is more than 10% of the price. For subscription payments add 0.5% of the total to each cell. LemonSqueezy's fees page also lists 5% extra on payments recovered through abandoned cart emails and its affiliate fees page 3% extra on orders referred by an affiliate; this table leaves both out.</p>
+<h2>Why the channel matters more than the fee</h2>
+<p class="p">The gap between the cheapest and the dearest row above is a few percentage points of each sale. The gap between a channel that sends buyers and one that sends only visitors is the whole sale. A post, a newsletter mention or a search ranking that never turns into an order costs the time and money you put into it, and the fee calculator cannot show you that. To know which channels pay for themselves, tie each LemonSqueezy order to the visit that came before it: <a href="/blog/track-lemonsqueezy-revenue-by-traffic-source">how to track LemonSqueezy revenue by traffic source</a> walks through it.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>More on LemonSqueezy and payment fees</h2>
+<ul class="post-list"><li><a href="/integrations/lemonsqueezy">LemonSqueezy integration</a>: connect LemonSqueezy and see revenue by traffic source.</li><li><a href="/blog/track-lemonsqueezy-revenue-by-traffic-source">How to track LemonSqueezy revenue by traffic source</a>: join each order to the visit that brought the buyer.</li><li><a href="/tools/payment-fee-calculator">Stripe fee calculator</a>: fee per sale on a card processor.</li><li><a href="/tools/merchant-of-record-fee-calculator">Merchant of record fee calculator</a>: LemonSqueezy's fees next to other merchants of record.</li></ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>LemonSqueezy fee FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How much does LemonSqueezy charge per sale?</h3><p class="p">LemonSqueezy's pricing page lists 5% + 50 cents per transaction, with no monthly fee for payment processing. On a $29 sale to a US card that is $1.95, so you keep $27.05.</p></div>
+      <div><h3>What extra fees can LemonSqueezy add?</h3><p class="p">Its fees page lists 1.5% for transactions outside the US, 1.5% for PayPal, 0.5% for subscription payments and 5% for payments recovered through abandoned cart emails. Its affiliate fees page adds 3% for each order referred by an affiliate.</p></div>
+      <div><h3>Can I still sign up for LemonSqueezy?</h3><p class="p">No. LemonSqueezy's pricing page says it no longer accepts new sign-ups and will shut down on March 31, 2027. To compare other merchants of record, use the <a href="/tools/merchant-of-record-fee-calculator">merchant of record fee calculator</a>.</p></div>
+      <div><h3>What does this calculator leave out?</h3><p class="p">Custom pricing, which LemonSqueezy offers on request for products under $10; abandoned cart and affiliate fees; refunds, where LemonSqueezy deducts the refunded amount minus its platform fee from your next payout; the $15 dispute fee on chargebacks; and payout fees, which its fees page puts at nothing for US bank accounts, 1% for bank accounts outside the US, 50 cents for US PayPal accounts and 3% capped at $30 for PayPal accounts outside the US.</p></div>
+      <div><h3>Why does LemonSqueezy cost more than a card processor?</h3><p class="p">LemonSqueezy is a merchant of record: it is the seller on the receipt, so its fee covers sales tax and VAT handling as well as card processing. Compare it with a card processor in the <a href="/tools/payment-fee-calculator">Stripe fee calculator</a>.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How much does LemonSqueezy charge per sale?", "acceptedAnswer": {"@type": "Answer", "text": "LemonSqueezy's pricing page lists 5% + 50 cents per transaction, with no monthly fee for payment processing. On a $29 sale to a US card that is $1.95, so you keep $27.05."}}, {"@type": "Question", "name": "What extra fees can LemonSqueezy add?", "acceptedAnswer": {"@type": "Answer", "text": "Its fees page lists 1.5% for transactions outside the US, 1.5% for PayPal, 0.5% for subscription payments and 5% for payments recovered through abandoned cart emails. Its affiliate fees page adds 3% for each order referred by an affiliate."}}, {"@type": "Question", "name": "Can I still sign up for LemonSqueezy?", "acceptedAnswer": {"@type": "Answer", "text": "No. LemonSqueezy's pricing page says it no longer accepts new sign-ups and will shut down on March 31, 2027. To compare other merchants of record, use the merchant of record fee calculator."}}, {"@type": "Question", "name": "What does this calculator leave out?", "acceptedAnswer": {"@type": "Answer", "text": "Custom pricing, which LemonSqueezy offers on request for products under $10; abandoned cart and affiliate fees; refunds, where LemonSqueezy deducts the refunded amount minus its platform fee from your next payout; the $15 dispute fee on chargebacks; and payout fees, which its fees page puts at nothing for US bank accounts, 1% for bank accounts outside the US, 50 cents for US PayPal accounts and 3% capped at $30 for PayPal accounts outside the US."}}, {"@type": "Question", "name": "Why does LemonSqueezy cost more than a card processor?", "acceptedAnswer": {"@type": "Answer", "text": "LemonSqueezy is a merchant of record: it is the seller on the receipt, so its fee covers sales tax and VAT handling as well as card processing. Compare it with a card processor in the Stripe fee calculator."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>Know which channels your LemonSqueezy sales come from</h2>
+<p class="p">Fees are one side of the sum. Virling links every visit to the payment it led to, so you see which channels bring the revenue you keep. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("fees"), out = document.getElementById("fees-out");
+const money = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+const val = (id) => +document.getElementById(id).dataset.value;
+const calc = () => {
+  const price = +f.price.value, pct = 5 + val("loc") + val("pay") + val("kind");
+  const fee = price > 0 ? (Math.round(price * pct) + 50) / 100 : 0;
+  const rows = [["LemonSqueezy fee", money(fee)], ["Rate applied", pct + "% + $0.50"], ["Payout", money(price - fee)], ["Effective rate", price > 0 ? (fee / price * 100).toFixed(1) + "%" : "No data"]];
+  out.innerHTML = rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+for (const box of document.querySelectorAll("[data-select]")) {
+  const btn = box.querySelector("button"), menu = box.querySelector("ul"), items = [...menu.children];
+  const mark = (el) => { items.forEach((i) => i.classList.toggle("on", i === el)); menu.setAttribute("aria-activedescendant", el.id = btn.id + "-" + el.dataset.value); };
+  const show = (open) => {
+    menu.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+    if (open) { mark(items.find((i) => i.getAttribute("aria-selected") === "true")); menu.focus(); }
+  };
+  const pick = (el) => {
+    items.forEach((i) => i.setAttribute("aria-selected", String(i === el)));
+    btn.dataset.value = el.dataset.value;
+    btn.querySelector("span").textContent = el.textContent;
+    show(false);
+    btn.focus();
+    calc();
+  };
+  btn.addEventListener("click", () => show(menu.hidden));
+  btn.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); show(true); } });
+  items.forEach((i) => { i.addEventListener("click", () => pick(i)); i.addEventListener("mousemove", () => mark(i)); });
+  menu.addEventListener("keydown", (e) => {
+    const at = items.findIndex((i) => i.classList.contains("on"));
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); mark(items[(at + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]); }
+    else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(items[at]); }
+    else if (e.key === "Escape" || e.key === "Tab") { show(false); btn.focus(); }
+  });
+  document.addEventListener("click", (e) => { if (!menu.hidden && !box.contains(e.target)) show(false); });
+}
+f.addEventListener("input", calc);
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
