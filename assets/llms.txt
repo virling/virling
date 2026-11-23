@@ -329,6 +329,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Spring Boot Stripe UTM tracking: Checkout metadata with stripe-java](https://virling.com/blog/spring-boot-stripe-utm-tracking): How to tie a Stripe Checkout payment in a Spring Boot app to the visit and UTM tags that brought it, with a controller and the stripe-java library.
 - [SaaS email revenue attribution: which lifecycle emails lead to paid plans](https://virling.com/blog/lifecycle-email-revenue-tracking): How to see which onboarding, trial and upgrade emails lead to paid plans: tag every email link, pass the visitor ID into checkout, and credit each payment to the visit before it.
 - [Which landing page brings the most revenue? Landing page revenue tracking](https://virling.com/blog/landing-page-revenue-tracking): Rank landing pages by the revenue of the visitors who entered on them, not by conversion rate alone. Entry page versus page before paying, and revenue per visitor per page.
+- [Google Ads revenue tracking: see which campaign brings paying customers](https://virling.com/blog/google-ads-revenue-tracking): Add UTM tags to your Google Ads final URLs so each click arrives as Paid, then see revenue per campaign and profit by channel once you enter your spend.
 
 ## Source
 
