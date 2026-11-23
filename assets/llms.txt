@@ -153,6 +153,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Creem for digital products](https://virling.com/integrations/creem-digital-products): for creators and indie makers selling templates, ebooks and courses through Creem: each sale tied to the post, launch or link that brought the buyer
 - [Dodo Payments for AI apps](https://virling.com/integrations/dodo-payments-ai-apps): for founders of AI apps selling subscriptions, credits or one-off plans through Dodo Payments: each payment tied to the post, search or AI answer that brought the user
 - [Paddle for AI apps](https://virling.com/integrations/paddle-ai-apps): for founders of AI apps and GPT wrappers billing through Paddle: each paying user, subscription or credit pack tied to the post, search or AI answer that brought them
+- [Polar for AI apps](https://virling.com/integrations/polar-ai-apps): for founders of AI apps and GPT wrappers billing through Polar: each paying user, subscription or credit pack tied to the post, search or AI answer that brought them
 - [WooCommerce for digital products](https://virling.com/integrations/woocommerce-digital-products): for WooCommerce stores selling ebooks, templates, presets and courses: each download order tied to the channel, campaign and post that brought the buyer
 
 ## Compare
