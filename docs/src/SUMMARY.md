@@ -17,6 +17,7 @@
 - [Set up a mobile app](guides/mobile-apps.md)
 - [Set up a no-code site](guides/no-code.md)
 - [Track a launch](guides/launch.md)
+- [Sell digital products](guides/digital-products.md)
 - [Test your setup](guides/test-your-setup.md)
 - [Ask your AI assistant which channel pays](guides/ai-assistants.md)
 - [Install](install/index.md)
