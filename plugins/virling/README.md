@@ -15,6 +15,8 @@ The plugin connects to hosted Virling at https://app.virling.com. Claude opens t
 
 The plugin bundles a skill and the read-only Virling MCP server. Ask in plain words, for example "which channel made the most money last month" or "what did my last paying customer do before paying".
 
+New to Virling? Start a 14-day free trial at https://app.virling.com/login, then follow https://docs.virling.com/guides/ai-assistants.
+
 Docs: https://docs.virling.com/reference/mcp
 Privacy: https://virling.com/privacy
 License: AGPL-3.0
