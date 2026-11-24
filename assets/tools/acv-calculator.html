@@ -122,8 +122,8 @@ const avg = () => {
   const ok = [], bad = [];
   g.elements.lines.value.split(/\r?\n/).forEach((line, i) => {
     if (!line.trim()) return;
-    // A comma right before exactly three digits is a thousands separator.
-    const c = line.split(/[\t;]|,(?!\d{3}(?!\d))/).map((s) => s.trim());
+    // A comma right before exactly three digits is a thousands separator, unless the value has none.
+    const c = line.split(/^\s*\$?\d{4,}[^\s;]*\s*$/.test(line) ? "," : /[\t;]|,(?!\d{3}(?!\d))/).map((s) => s.trim());
     while (c.length > 2 && !c[c.length - 1]) c.pop();
     const v = c.map(num);
     if (v.length < 2 || v.length > 3 || check(v[0], v[1], v.length > 2 ? v[2] : 0)) bad.push(i + 1);
