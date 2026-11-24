@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stripe client_reference_id: what it is and how to use it</title>
+<meta name="description" content="client_reference_id is your own ID on a Stripe Checkout Session. See its limits, where it appears, when to use metadata, and the code to set and read it.">
+<link rel="canonical" href="https://virling.com/blog/stripe-client-reference-id">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/stripe-client-reference-id">
+<meta property="og:title" content="Stripe client_reference_id: what it is and how to use it">
+<meta property="og:description" content="client_reference_id is your own ID on a Stripe Checkout Session. See its limits, where it appears, when to use metadata, and the code to set and read it.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Stripe client_reference_id: what it is and how to use it","item":"https://virling.com/blog/stripe-client-reference-id"}]},{"@type":"BlogPosting","headline":"Stripe client_reference_id: what it is and how to use it","description":"client_reference_id is your own ID on a Stripe Checkout Session. See its limits, where it appears, when to use metadata, and the code to set and read it.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/stripe-client-reference-id"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is client_reference_id in Stripe?","acceptedAnswer":{"@type":"Answer","text":"It is a string you set on a Checkout Session to tie it to a record in your own system, such as a customer ID or a cart ID. Stripe stores it on the session and includes it in the checkout.session.completed event. It is optional, and null when you do not set it."}},{"@type":"Question","name":"What characters and length does client_reference_id allow?","acceptedAnswer":{"@type":"Answer","text":"Up to 200 characters. On Payment Links, pricing tables and buy buttons, only letters, digits, dashes and underscores are allowed, and Stripe drops an invalid value without an error. The API reference for Checkout Sessions gives only the length."}},{"@type":"Question","name":"Should I use client_reference_id or metadata?","acceptedAnswer":{"@type":"Answer","text":"Use client_reference_id for one ID, above all on a Payment Link, a pricing table or a buy button, where the buyer's page can set it. Use metadata when you need several values, or values on the PaymentIntent or Subscription. Session metadata is not copied to those, so set payment_intent_data.metadata or subscription_data.metadata."}},{"@type":"Question","name":"Is client_reference_id on the PaymentIntent or Subscription?","acceptedAnswer":{"@type":"Answer","text":"No. It is a field of the Checkout Session only. To get it from a payment, list Checkout Sessions with the payment_intent or subscription filter and read the session."}},{"@type":"Question","name":"Can I search for a client_reference_id in Stripe?","acceptedAnswer":{"@type":"Answer","text":"Not through the API. Listing Checkout Sessions has no client_reference_id filter, and Checkout Sessions are not among the resources in the Search API docs. Save the session ID with your own ID when you create the session or when the webhook arrives."}},{"@type":"Question","name":"Can I change client_reference_id after the session is created?","acceptedAnswer":{"@type":"Answer","text":"The update endpoint for Checkout Sessions does not list client_reference_id among its parameters, so set it when you create the session. It does accept metadata, so a value you need to change later belongs there."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1 style="overflow-wrap:break-word">Stripe client_reference_id: what it is and how to use it</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p">Stripe's <code>client_reference_id</code> is a string of your own, up to 200 characters, that you put on a Checkout Session so you can match the payment to a user, cart or visit in your system. Set it when your server creates the session, as a query parameter on a Payment Link, or as an attribute of a pricing table. Read it back from the <code>checkout.session.completed</code> webhook. Use <code>metadata</code> instead when you need more than one value, or need the value on the payment itself.</p>
+<p class="p">The IDs on this page, such as <code>user_1042</code>, are made up.</p>
+<h2>What the field is, and its limits</h2>
+<p class="p">Stripe describes it as a unique string to reference the Checkout Session, such as a customer ID or a cart ID, that you can use to reconcile the session with your own systems (<a href="https://docs.stripe.com/api/checkout/sessions/object">Checkout Session object</a>). Stripe's docs give these limits:</p>
+<ul class="post-list"><li><strong>Length: up to 200 characters</strong>, wherever you set it (<a href="https://docs.stripe.com/api/checkout/sessions/create">create a Checkout Session</a>).</li><li><strong>Characters on a Payment Link, pricing table or buy button: letters, digits, dashes and underscores.</strong> An invalid value is dropped without an error and the page keeps working (<a href="https://docs.stripe.com/payment-links/url-parameters">Payment Link URL parameters</a>).</li><li><strong>Characters through the API: none listed.</strong> Keep to the same set anyway, so one ID works everywhere.</li><li><strong>No secrets.</strong> Stripe asks you not to put passwords or API keys in the parameter.</li></ul>
+<h2>Where client_reference_id appears</h2>
+<ul class="post-list"><li><strong>Checkout Session:</strong> the <code>client_reference_id</code> field, or null when it was not set. Your server sets it on create.</li><li><strong>Webhook:</strong> <code>data.object.client_reference_id</code> in the Checkout Session events, such as <code>checkout.session.completed</code>.</li><li><strong>Payment Links:</strong> the <code>client_reference_id</code> query parameter on the <code>buy.stripe.com</code> URL.</li><li><strong>Pricing table:</strong> the <code>client-reference-id</code> attribute, with dashes, on <code>&lt;stripe-pricing-table&gt;</code> (<a href="https://docs.stripe.com/payments/checkout/pricing-table">pricing table docs</a>).</li><li><strong>Buy button:</strong> the same attribute on <code>&lt;stripe-buy-button&gt;</code> (<a href="https://docs.stripe.com/payment-links/buy-button">buy button docs</a>).</li></ul>
+<p class="p">It is not on the PaymentIntent, the Charge or the Subscription, so events such as <code>payment_intent.succeeded</code> do not carry it.</p>
+<h2>Set it on a Checkout Session</h2>
+<p class="p">Your server knows who is paying, so it sets the ID on create:</p>
+<div class="code block"><pre data-snippet>const session = await stripe.checkout.sessions.create({
+  client_reference_id: user.id, // such as "user_1042"
+  line_items: [{ price: "price_...", quantity: 1 }],
+  mode: "payment",
+  success_url: "https://yourdomain.com/thanks",
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>Set it on a Payment Link or pricing table</h2>
+<p class="p">A Payment Link takes it from the URL:</p>
+<div class="code block"><pre data-snippet>&lt;a href="https://buy.stripe.com/abc123?client_reference_id=user_1042"&gt;Buy now&lt;/a&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">When the ID is known only in the browser, add it to the link in JavaScript:</p>
+<div class="code block"><pre data-snippet>const url = new URL("https://buy.stripe.com/abc123");
+url.searchParams.set("client_reference_id", user.id);
+document.querySelector("#buy").href = url.href;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">A pricing table takes it as an attribute:</p>
+<div class="code block"><pre data-snippet>&lt;stripe-pricing-table
+  pricing-table-id="prctbl_..."
+  publishable-key="pk_live_..."
+  client-reference-id="user_1042"&gt;
+&lt;/stripe-pricing-table&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">To carry the marketing source this way, see <a href="/blog/stripe-payment-links-utm-tracking">Stripe Payment Link UTM tracking</a> and <a href="/blog/stripe-pricing-table-utm-tracking">Stripe pricing table UTM tracking</a>.</p>
+<h2>Read it in a webhook handler</h2>
+<p class="p">This Express handler verifies the signature on the raw body, then handles both events from Stripe's <a href="https://docs.stripe.com/checkout/fulfillment">fulfillment guide</a>. The second one covers payment methods that settle later:</p>
+<div class="code block"><pre data-snippet>// Register this route before app.use(express.json())
+app.post("/webhook", express.raw({ type: "application/json" }), async (req, res) =&gt; {
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      req.headers["stripe-signature"],
+      process.env.STRIPE_WEBHOOK_SECRET,
+    );
+  } catch {
+    return res.sendStatus(400);
+  }
+  if (
+    event.type === "checkout.session.completed" ||
+    event.type === "checkout.session.async_payment_succeeded"
+  ) {
+    const session = event.data.object;
+    if (session.client_reference_id &amp;&amp; session.payment_status !== "unpaid") {
+      // Your function: must be safe to run twice for the same session
+      await fulfill(session.client_reference_id, session.id);
+    }
+  }
+  res.sendStatus(200);
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Without a webhook, find the session from the payment and read the field:</p>
+<div class="code block"><pre data-snippet>const sessions = await stripe.checkout.sessions.list({
+  payment_intent: "pi_...",
+  limit: 1,
+});
+const id = sessions.data[0]?.client_reference_id;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>When to use metadata instead</h2>
+<p class="p">Metadata on a Checkout Session holds up to 50 keys, with key names up to 40 characters and values up to 500 (<a href="https://docs.stripe.com/metadata">Stripe metadata docs</a>). Choose it when:</p>
+<ul class="post-list"><li><strong>You need several values</strong>, such as a plan, a team ID and UTM tags. See <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>.</li><li><strong>You need the value on the payment or subscription.</strong> Session metadata is not copied, so set <code>payment_intent_data.metadata</code> or <code>subscription_data.metadata</code>.</li><li><strong>You need to change it later.</strong> The <a href="https://docs.stripe.com/api/checkout/sessions/update">update endpoint</a> takes <code>metadata</code> and does not list <code>client_reference_id</code>.</li><li><strong>You take payments without Checkout.</strong> A PaymentIntent of your own has metadata and no <code>client_reference_id</code>.</li></ul>
+<p class="p">Choose <code>client_reference_id</code> when the ID has to travel through a Payment Link, a pricing table or a buy button. You can use both on one session.</p>
+<h2>How Virling reads it</h2>
+<p class="p">Virling credits a Stripe payment to the visits behind it. It connects with a read-only restricted key, so it needs no webhook handler, and looks for a visitor ID in this order:</p>
+<ol class="post-list"><li><code>metadata.virling_vid</code> on the charge.</li><li><code>metadata.virling_vid</code> or <code>client_reference_id</code> on the Checkout Session that created it. The metadata wins when both are set.</li><li><code>metadata.virling_vid</code> on its PaymentIntent.</li></ol>
+<p class="p">The visitor ID is in the first-party <code>virling_vid</code> cookie that the script sets. Put it in <code>client_reference_id</code>, or keep that field for your own ID and put the visitor ID in metadata:</p>
+<div class="code block"><pre data-snippet>const session = await stripe.checkout.sessions.create({
+  client_reference_id: user.id,
+  metadata: { virling_vid: req.cookies.virling_vid },
+  line_items: [{ price: "price_...", quantity: 1 }],
+  mode: "subscription",
+  success_url: "https://yourdomain.com/thanks",
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">On Payment Links there is nothing to write: the script adds <code>client_reference_id</code> to every <code>buy.stripe.com</code> link on the page, unless the link already has one. The <a href="/tools/checkout-snippet-generator">checkout snippet generator</a> writes the code for your setup, the steps are in the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a>, and the full setup is on the <a href="/integrations/stripe">Stripe integration page</a>.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Usual mistakes</h2>
+<ul class="post-list"><li><strong>An email address on a Payment Link.</strong> The <code>@</code> and the dot are not allowed, so Stripe drops the value and you get null.</li><li><strong>The wrong spelling.</strong> It is <code>client_reference_id</code> in the API and the URL, and <code>client-reference-id</code> as an HTML attribute.</li><li><strong>Reading it from the wrong event.</strong> Payment, invoice and subscription events do not have it. Read it from the session, and save it with the subscription ID if you need it at renewal.</li><li><strong>Trusting it from a link.</strong> A buyer can edit a URL before paying. Check that the ID exists, and do not use it as proof of who the buyer is.</li><li><strong>Expecting it on every session.</strong> A Payment Link opened from an email or a QR code carries only what is in that URL. Handle null.</li><li><strong>Parsing the body before verifying.</strong> Signature checks need the raw body (<a href="https://docs.stripe.com/webhooks">Stripe webhook docs</a>).</li><li><strong>Running fulfillment twice.</strong> Stripe's guide warns that it can run more than once for one session, so make it safe to repeat.</li><li><strong>Your own ID where the visitor ID should be.</strong> With Virling, a user ID in <code>client_reference_id</code> is read as a visitor ID, matches no visit, and the payment shows as Unattributed unless the session's <code>metadata.virling_vid</code> is set.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>What is client_reference_id in Stripe?</h3><p class="p">It is a string you set on a Checkout Session to tie it to a record in your own system, such as a customer ID or a cart ID. Stripe stores it on the session and includes it in the checkout.session.completed event. It is optional, and null when you do not set it.</p>
+<h3>What characters and length does client_reference_id allow?</h3><p class="p">Up to 200 characters. On Payment Links, pricing tables and buy buttons, only letters, digits, dashes and underscores are allowed, and Stripe drops an invalid value without an error. The API reference for Checkout Sessions gives only the length.</p>
+<h3>Should I use client_reference_id or metadata?</h3><p class="p">Use client_reference_id for one ID, above all on a Payment Link, a pricing table or a buy button, where the buyer's page can set it. Use metadata when you need several values, or values on the PaymentIntent or Subscription. Session metadata is not copied to those, so set payment_intent_data.metadata or subscription_data.metadata.</p>
+<h3>Is client_reference_id on the PaymentIntent or Subscription?</h3><p class="p">No. It is a field of the Checkout Session only. To get it from a payment, list Checkout Sessions with the payment_intent or subscription filter and read the session.</p>
+<h3>Can I search for a client_reference_id in Stripe?</h3><p class="p">Not through the API. Listing Checkout Sessions has no client_reference_id filter, and Checkout Sessions are not among the resources in the Search API docs. Save the session ID with your own ID when you create the session or when the webhook arrives.</p>
+<h3>Can I change client_reference_id after the session is created?</h3><p class="p">The update endpoint for Checkout Sessions does not list client_reference_id among its parameters, so set it when you create the session. It does accept metadata, so a value you need to change later belongs there.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which visit is behind each Stripe payment</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
