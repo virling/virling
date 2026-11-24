@@ -61,7 +61,7 @@
 <h2>Step 2: check the links</h2>
 <p class="p">Paste your campaign links into the <a href="/tools/utm-checker">UTM checker</a> before they go out. It flags a missing source or medium, capitals, spaces, duplicate parameters, tags after the <code>#</code> and tagged internal links, which all split or lose campaign data. For buyers on Apple devices, see <a href="/blog/ios-link-tracking-protection-utm">whether Safari removes UTM parameters</a>.</p>
 <h2>Step 3: store the visitor ID on the cart</h2>
-<p class="p">Add the Virling script to your theme so it runs on every store page; it stores the UTM tags of each landing. Then add this snippet to <code>theme.liquid</code>, after the Virling script. It writes the visitor ID to the cart as <code>virling_vid</code>, and Shopify copies cart attributes onto the order as note attributes:</p>
+<p class="p">For a headless store, follow <a href="/blog/shopify-hydrogen-utm-tracking">Shopify Hydrogen UTM tracking</a> instead. Add the Virling script to your theme so it runs on every store page; it stores the UTM tags of each landing. Then add this snippet to <code>theme.liquid</code>, after the Virling script. It writes the visitor ID to the cart as <code>virling_vid</code>, and Shopify copies cart attributes onto the order as note attributes:</p>
 <div class="code block"><pre data-snippet>&lt;script&gt;
 addEventListener("load", function () {
   var vid = window.virling &amp;&amp; virling.vid &amp;&amp; virling.vid();
