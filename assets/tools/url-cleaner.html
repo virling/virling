@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remove UTM parameters from a URL: free URL cleaner | Virling</title>
+<meta name="description" content="Paste one or many links to remove UTM parameters and click IDs such as gclid and fbclid. Other parameters and the #fragment stay unchanged.">
+<link rel="canonical" href="https://virling.com/tools/url-cleaner">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/url-cleaner">
+<meta property="og:title" content="Remove UTM parameters from a URL: free URL cleaner | Virling">
+<meta property="og:description" content="Paste one or many links to remove UTM parameters and click IDs such as gclid and fbclid. Other parameters and the #fragment stay unchanged.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"URL cleaner","url":"https://virling.com/tools/url-cleaner","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"URL cleaner","item":"https://virling.com/tools/url-cleaner"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / url cleaner</span><h1>Remove UTM parameters from a URL</h1><p class="lead">Paste one link or a whole list, one per line. The URL cleaner removes every <code>utm_</code> tag and well-known click IDs such as <code>gclid</code> and <code>fbclid</code>, and keeps every other parameter and the <code>#</code> part unchanged. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="cln" autocomplete="off">
+  <label class="wide">Links to clean <span class="dim">one per line, example links shown</span><textarea name="links" rows="6" spellcheck="false">https://example.com/pricing?plan=pro&amp;utm_source=newsletter&amp;utm_medium=email&amp;gclid=EXAMPLE123&amp;ref=partner#faq
+https://example.com/blog/launch?fbclid=EXAMPLE456
+https://example.com/search?q=blue+shoes&amp;page=2
+example.com/signup?utm_source=x</textarea></label>
+  <label class="check wide"><input type="checkbox" name="amb">Also remove ref and other ambiguous parameters</label>
+  <label class="wide">Clean links <span class="dim">lines that are not full links stay as pasted</span><textarea name="clean" rows="6" spellcheck="false" readonly></textarea></label>
+</form>
+<div class="tool-out"><output id="cln-msg"></output><button class="btn sm" type="button" id="cln-copy" disabled>Copy clean links</button></div>
+<div class="tool-stats" id="cln-sum"></div>
+<div class="tool-table" id="cln-out"></div>
+<p class="p">To check the tags on a link instead of removing them, use the <a href="/tools/utm-checker">UTM checker</a>. To tag a clean link again, use the <a href="/tools/utm-builder">UTM builder</a>.</p>
+<div class="txt post tool-cta">
+<p class="p">UTM tags do their job on the landing page. Virling reads them when the visit starts and links the visit to the payment it led to, so a sale keeps its source without a click ID. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>How the URL cleaner works</h2>
+<p class="p">Each line is read as a link. The part between <code>?</code> and <code>#</code> is split into parameters, and a parameter is removed when its name starts with <code>utm_</code> or is in the first list below. Capitals in the name do not matter. The rest is put back in the same order and spelling, without re-encoding anything.</p>
+<ul class="post-list">
+<li><b>The fragment stays.</b> Everything from <code>#</code> on is kept, including any tags someone put there by mistake.</li>
+<li><b>Links inside links stay.</b> If a parameter holds another encoded address, as in <code>?next=%2Fpricing%3Futm_source%3Dx</code>, its value is kept as it is.</li>
+<li><b>Bad lines are marked.</b> A line that is not a full link is flagged in the results and left as pasted, in its place. Blank lines are skipped.</li>
+</ul>
+<h2>A worked example</h2>
+<p class="p">Take the first example link above: <code>https://example.com/pricing?plan=pro&amp;utm_source=newsletter&amp;utm_medium=email&amp;gclid=EXAMPLE123&amp;ref=partner#faq</code>. The names and values are made up for the example.</p>
+<ol class="post-list"><li><code>utm_source</code>, <code>utm_medium</code> and <code>gclid</code> are removed. <code>plan=pro</code>, <code>ref=partner</code> and <code>#faq</code> stay: <code>https://example.com/pricing?plan=pro&amp;ref=partner#faq</code>.</li><li>With the box ticked, <code>ref</code> goes too: <code>https://example.com/pricing?plan=pro#faq</code>.</li></ol>
+<h2>Parameters that are always removed</h2>
+<table class="cmp" aria-label="Parameters that are always removed"><thead><tr><th style="width: 42%">Parameter</th><th>Who sets it</th></tr></thead><tbody>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code>, <code>utm_term</code>, <code>utm_content</code></th><td>You or your marketing tools, as campaign tags. Any other name starting with <code>utm_</code> goes too</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>gclid</code>, <code>gclsrc</code></th><td>Google Ads and Search Ads 360, when auto-tagging is on</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>gbraid</code>, <code>wbraid</code></th><td>Google Ads, for clicks between the web and apps</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>gad_source</code>, <code>gad_campaignid</code></th><td>Google Ads, to name the ad source and the campaign</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>dclid</code></th><td>Campaign Manager 360 and Display &amp; Video 360</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>srsltid</code></th><td>Google Merchant Center auto-tagging, on product results</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>msclkid</code></th><td>Microsoft Advertising</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>fbclid</code></th><td>Meta, on links clicked on Facebook and Instagram</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>igsh</code>, <code>igshid</code></th><td>Instagram, on links copied from the app or site</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>ttclid</code></th><td>TikTok</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>twclid</code></th><td>X (Twitter)</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>li_fat_id</code></th><td>LinkedIn</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>epik</code></th><td>Pinterest</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>ScCid</code></th><td>Snapchat</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>rdt_cid</code></th><td>Reddit</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>yclid</code></th><td>Yandex Direct</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>mc_cid</code>, <code>mc_eid</code></th><td>Mailchimp: the campaign and the recipient</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>_kx</code></th><td>Klaviyo, to identify the person who clicked in an email</td></tr>
+</tbody></table>
+<h2>Parameters removed only when you tick the box</h2>
+<p class="p">These names are used for tracking on some sites and for something else on others, so they stay unless you ask.</p>
+<table class="cmp" aria-label="Parameters removed only when the box is ticked"><thead><tr><th style="width: 42%">Parameter</th><th>Who sets it</th></tr></thead><tbody>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>ref</code>, <code>ref_src</code>, <code>referrer</code></th><td>Directories, newsletters, referral and affiliate programs, or the site itself. Removing it can drop a partner&rsquo;s credit</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>source</code>, <code>src</code>, <code>via</code></th><td>Hand-made campaign tags, or a setting the page needs</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>campaign</code>, <code>cid</code></th><td>Campaign tags on some sites, a category or customer number on others</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>si</code></th><td>Share links from some apps, such as YouTube, or a site&rsquo;s own setting</td></tr>
+<tr><th scope="row" style="overflow-wrap: anywhere"><code>_gl</code></th><td>Google tags, to carry a visitor&rsquo;s ID between two linked domains</td></tr>
+</tbody></table>
+<h2>When tags disappear on their own</h2>
+<p class="p">Links can also lose parameters without anyone cleaning them. Apple removes tracking information from some links but does not publish which parameters; see <a href="/blog/ios-link-tracking-protection-utm">iOS Link Tracking Protection and UTM parameters</a>. Redirects, link shorteners and login pages can drop the whole query string; see <a href="/blog/utm-parameters-lost-after-redirect">why UTM parameters are lost after a redirect</a>.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Related tools and guides</h2>
+<ul class="post-list"><li><a href="/tools/utm-checker">UTM checker</a>: find mistakes in tagged links before they go out.</li><li><a href="/tools/utm-builder">UTM builder</a>: build a tagged link from a page URL.</li><li><a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after a redirect</a>: the causes, with a check and a fix for each.</li><li><a href="/blog/ios-link-tracking-protection-utm">iOS Link Tracking Protection</a>: what Apple documents and what it says about UTM tags.</li></ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>URL cleaner FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do I remove UTM parameters from a URL?</h3><p class="p">Paste the link above and copy the clean one. By hand, delete every <code>utm_</code> name and its value from the part after <code>?</code>, together with the <code>&amp;</code> that joins it to the next one. Keep the other parameters and everything from <code>#</code> on.</p></div>
+      <div><h3>Will the link still work without its UTM tags?</h3><p class="p">Almost always. UTM tags and click IDs are there for measurement, and pages rarely need them to load. Other parameters, such as a product number or a search term, can change the page, so the cleaner keeps them. Open a clean link once before you share it widely.</p></div>
+      <div><h3>What are gclid, fbclid and msclkid?</h3><p class="p">They are click IDs. Google Ads adds <code>gclid</code>, Meta adds <code>fbclid</code> and Microsoft Advertising adds <code>msclkid</code> to the link when someone clicks, so the platform can tie the visit back to that click.</p></div>
+      <div><h3>Should I remove UTM tags from my own campaign links?</h3><p class="p">Not from links you place to measure a campaign: without the tags the visit falls back to its referrer, or to Direct when there is none. Clean a link when you copy it from the address bar to share it, so the next visitor is not counted under the old campaign.</p></div>
+      <div><h3>Why is ref kept unless I tick the box?</h3><p class="p"><code>ref</code> means different things on different sites. It can be a campaign tag, an affiliate code that earns someone a commission, or a setting the page needs. Tick the box when you know it is safe to remove.</p></div>
+      <div><h3>Are my links sent anywhere?</h3><p class="p">No. The cleaning runs in your browser and nothing you paste leaves the page.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I remove UTM parameters from a URL?", "acceptedAnswer": {"@type": "Answer", "text": "Paste the link above and copy the clean one. By hand, delete every utm_ name and its value from the part after ?, together with the & that joins it to the next one. Keep the other parameters and everything from # on."}}, {"@type": "Question", "name": "Will the link still work without its UTM tags?", "acceptedAnswer": {"@type": "Answer", "text": "Almost always. UTM tags and click IDs are there for measurement, and pages rarely need them to load. Other parameters, such as a product number or a search term, can change the page, so the cleaner keeps them. Open a clean link once before you share it widely."}}, {"@type": "Question", "name": "What are gclid, fbclid and msclkid?", "acceptedAnswer": {"@type": "Answer", "text": "They are click IDs. Google Ads adds gclid, Meta adds fbclid and Microsoft Advertising adds msclkid to the link when someone clicks, so the platform can tie the visit back to that click."}}, {"@type": "Question", "name": "Should I remove UTM tags from my own campaign links?", "acceptedAnswer": {"@type": "Answer", "text": "Not from links you place to measure a campaign: without the tags the visit falls back to its referrer, or to Direct when there is none. Clean a link when you copy it from the address bar to share it, so the next visitor is not counted under the old campaign."}}, {"@type": "Question", "name": "Why is ref kept unless I tick the box?", "acceptedAnswer": {"@type": "Answer", "text": "ref means different things on different sites. It can be a campaign tag, an affiliate code that earns someone a commission, or a setting the page needs. Tick the box when you know it is safe to remove."}}, {"@type": "Question", "name": "Are my links sent anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "No. The cleaning runs in your browser and nothing you paste leaves the page."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the revenue behind every tagged link</h2>
+<p class="p">Tags tell you where a visit came from. Virling follows it to the payment, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const ALWAYS = ["gclid", "gclsrc", "gbraid", "wbraid", "gad_source", "gad_campaignid", "dclid", "srsltid", "msclkid", "fbclid", "igsh", "igshid", "ttclid", "twclid", "li_fat_id", "epik", "sccid", "rdt_cid", "yclid", "mc_cid", "mc_eid", "_kx"];
+const AMBIGUOUS = ["ref", "ref_src", "referrer", "source", "src", "via", "campaign", "cid", "si", "_gl"];
+const f = document.getElementById("cln"), sum = document.getElementById("cln-sum"), out = document.getElementById("cln-out"), msg = document.getElementById("cln-msg"), copy = document.getElementById("cln-copy");
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const dec = (x) => { try { return decodeURIComponent(x.replace(/\+/g, " ")); } catch { return x; } };
+const name = (p) => dec(p.split("=")[0]).trim();
+const drop = (p) => { const k = name(p).toLowerCase(); return k.startsWith("utm_") || ALWAYS.includes(k) || (f.amb.checked && AMBIGUOUS.includes(k)); };
+const clean = (line) => {
+  const bad = (issue) => ({ line, url: line, gone: [], issue });
+  if (!/^https?:\/\//i.test(line)) return bad("Not a full URL: start it with https://");
+  if (/\shttps?:\/\//i.test(line)) return bad("More than one link: put each on its own line");
+  try { new URL(line); } catch { return bad("Not a valid URL: check the address"); }
+  const h = line.indexOf("#"), base = h < 0 ? line : line.slice(0, h), frag = h < 0 ? "" : line.slice(h), q = base.indexOf("?");
+  if (q < 0) return { line, url: line, gone: [], issue: "" };
+  const parts = base.slice(q + 1).split("&"), gone = parts.filter(drop);
+  if (!gone.length) return { line, url: line, gone, issue: "" };
+  const left = parts.filter((p) => !drop(p)).join("&");
+  return { line, url: base.slice(0, q) + (left ? "?" + left : "") + frag, gone: gone.map(name), issue: "" };
+};
+const run = () => {
+  const rows = f.links.value.replace(/^﻿/, "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map(clean);
+  const bad = rows.filter((r) => r.issue).length, n = rows.reduce((a, r) => a + r.gone.length, 0);
+  f.clean.value = rows.map((r) => r.url).join("\n");
+  msg.textContent = rows.length ? `${n} parameter${n === 1 ? "" : "s"} removed.${bad ? ` ${bad} line${bad === 1 ? " is not a full link and stays" : "s are not full links and stay"} as pasted.` : ""}` : "Paste at least one link.";
+  copy.disabled = !rows.length;
+  sum.innerHTML = [["Links", rows.length - bad], ["Parameters removed", n], ["Lines marked", bad]].map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+  out.innerHTML = rows.length ? `<div class="tr th"><span>Clean link</span><span>Original</span><span>Result</span></div>` + rows.map((r) => {
+    const res = r.issue ? `<b class="no">Not cleaned</b><small>${esc(r.issue)}</small>` : r.gone.length ? `<b class="yes">${r.gone.length} removed</b>` + r.gone.map((k) => `<small>${esc(k)}</small>`).join("") : `<b class="yes">Already clean</b>`;
+    return `<div class="tr"><span style="word-break: break-all">${esc(r.url)}</span><span style="word-break: break-all">${esc(r.line)}</span><span style="overflow-wrap: anywhere">${res}</span></div>`;
+  }).join("") : "";
+};
+f.addEventListener("input", run);
+f.addEventListener("submit", (e) => e.preventDefault());
+copy.addEventListener("click", async () => { try { await navigator.clipboard.writeText(f.clean.value); copy.textContent = "Copied"; } catch { copy.textContent = "Copy blocked"; } setTimeout(() => (copy.textContent = "Copy clean links"), 1500); });
+run();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
