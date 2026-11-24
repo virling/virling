@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capture UTM parameters in hidden fields: JavaScript snippet</title>
+<meta name="description" content="Capture UTM parameters in hidden form fields with a short plain JavaScript snippet, a test, iframe and multi-step forms, and how to join a lead to a payment.">
+<link rel="canonical" href="https://virling.com/blog/utm-parameters-hidden-form-fields">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/utm-parameters-hidden-form-fields">
+<meta property="og:title" content="Capture UTM parameters in hidden fields: JavaScript snippet">
+<meta property="og:description" content="Capture UTM parameters in hidden form fields with a short plain JavaScript snippet, a test, iframe and multi-step forms, and how to join a lead to a payment.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Capture UTM parameters in hidden fields: JavaScript snippet","item":"https://virling.com/blog/utm-parameters-hidden-form-fields"}]},{"@type":"BlogPosting","headline":"Capture UTM parameters in hidden fields: JavaScript snippet","description":"Capture UTM parameters in hidden form fields with a short plain JavaScript snippet, a test, iframe and multi-step forms, and how to join a lead to a payment.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/utm-parameters-hidden-form-fields"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I capture UTM parameters in hidden fields?","acceptedAnswer":{"@type":"Answer","text":"Add one hidden input per tag to the form, then run a script that reads the tags from the page address and writes them into those inputs. Save the tags in a first-party cookie too, so the form still gets them when the visitor fills it in on a later page."}},{"@type":"Question","name":"Why are my hidden UTM fields empty?","acceptedAnswer":{"@type":"Answer","text":"Usually the visitor landed on one page and filled in the form on another, so the address no longer had the tags. Other causes are a redirect that dropped the tags, input names that do not match, a form inside an iframe, or a visit with no tags at all."}},{"@type":"Question","name":"Can I fill hidden fields inside an iframe form?","acceptedAnswer":{"@type":"Answer","text":"Not from the outside when the iframe is on another domain, because the browser blocks access to it. Add the tags to the iframe address instead, and have the form inside read its own address or use the form provider's prefill setting."}},{"@type":"Question","name":"What happens if a UTM tag is missing or very long?","acceptedAnswer":{"@type":"Answer","text":"With the snippet on this page, a missing tag leaves its field empty and a long one is cut to 100 characters. Check the length again on your server, because anyone can edit a hidden field."}},{"@type":"Question","name":"Can a hidden field tell me which leads paid?","acceptedAnswer":{"@type":"Answer","text":"No. It is written when the form is sent, before any payment. To know who paid, pass the visitor ID into checkout or send the lead's email in an identify event, so a payment can be joined to the lead's visits."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>Capture UTM parameters in hidden fields: JavaScript snippet</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p">To capture UTM parameters in hidden fields, add one hidden input per tag to your form, named <code>utm_source</code>, <code>utm_medium</code> and so on. Then run a short script that reads the tags from the page address and writes them into those inputs. Save the tags in a first-party cookie as well, because most visitors do not fill in the form on the page they landed on. The tags then arrive with the lead, like any other field. What they cannot tell you is whether that lead paid, and the second half of this page covers that.</p>
+<h2>Step 1: add the hidden inputs</h2>
+<p class="p">Put these inside the <code>&lt;form&gt;</code>. Form builders usually have a hidden field type; give each field the same name.</p>
+<div class="code block"><pre data-snippet>&lt;input type="hidden" name="utm_source"&gt;
+&lt;input type="hidden" name="utm_medium"&gt;
+&lt;input type="hidden" name="utm_campaign"&gt;
+&lt;input type="hidden" name="utm_content"&gt;
+&lt;input type="hidden" name="utm_term"&gt;
+&lt;input type="hidden" name="virling_vid"&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The last one is optional. It carries the Virling visitor ID, which you need later to join the lead to a payment. Leave it out if you do not use Virling.</p>
+<h2>Step 2: add the snippet</h2>
+<p class="p">Put this on every page, not only the one with the form, so the landing page can save the tags. It is plain JavaScript with no library. Save it as a file and load it with <code>defer</code>, or paste it in a <code>&lt;script&gt;</code> tag before <code>&lt;/body&gt;</code>.</p>
+<div class="code block"><pre data-snippet>(function () {
+  var KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
+  var MAX = 100;
+  var DOMAIN = ""; // "example.com" shares the cookie with subdomains
+
+  function parse(query) {
+    var from = new URLSearchParams(query || ""), tags = {};
+    KEYS.forEach(function (k) {
+      var v = Array.from((from.get(k) || "").trim()).slice(0, MAX).join("");
+      if (v) tags[k] = v;
+    });
+    return tags;
+  }
+
+  // The URL wins as a whole set, so two campaigns never mix
+  function read(search, saved) {
+    var tags = parse(search);
+    return Object.keys(tags).length ? tags : parse(saved);
+  }
+
+  function save(tags) {
+    var value = new URLSearchParams(tags);
+    KEYS.slice().reverse().forEach(function (k) {
+      if (value.toString().length &gt; 3800) value.delete(k);
+    });
+    document.cookie = "lead_utm=" + value + "; path=/; max-age=7776000; SameSite=Lax" +
+      (DOMAIN ? "; domain=" + DOMAIN : "") +
+      (location.protocol === "https:" ? "; Secure" : "");
+  }
+
+  var saved = (document.cookie.match(/(?:^|; )lead_utm=([^;]*)/) || [])[1];
+  var tags = read(location.search, saved);
+  if (Object.keys(parse(location.search)).length) save(tags);
+
+  function fill(root) {
+    KEYS.forEach(function (k) {
+      root.querySelectorAll('input[type="hidden"][name="' + k + '"]').forEach(function (el) {
+        el.value = tags[k] || "";
+      });
+    });
+    root.querySelectorAll('input[type="hidden"][name="virling_vid"]').forEach(function (el) {
+      el.value = window.virling?.vid?.() || "";
+    });
+  }
+
+  window.leadUtm = { read: read, fill: fill, tags: tags };
+  document.addEventListener("submit", function (e) { fill(e.target); }, true);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { fill(document); });
+  } else {
+    fill(document);
+  }
+})();</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<ul class="post-list"><li><b>Missing tags.</b> The field is left empty. Nothing is guessed, and an untagged page does not erase the saved tags.</li><li><b>Very long tags.</b> Each value is cut to 100 characters. If the set is still too big for a cookie, the snippet drops <code>utm_term</code> first, then <code>utm_content</code>, and so on up, from the cookie only.</li><li><b>Two campaigns.</b> A new tagged visit replaces the whole saved set, so the source of one link never sits next to the campaign of another. This keeps the last tagged visit. To keep the first instead, change the read line to <code>read(saved, location.search)</code> and call <code>save</code> only when <code>saved</code> is empty.</li><li><b>Forms added later.</b> The fields are filled again when a form is submitted, so a form in a popup works too.</li><li><b>Unsafe values.</b> The script only sets an input&rsquo;s value and never writes HTML. Your server should still treat the fields as text a stranger typed: check the length and escape them, because anyone can edit a hidden field.</li></ul>
+<p class="p">The cookie lasts 90 days, but Safari caps a cookie set by a script at seven days (source: <a href="https://webkit.org/blog/8613/intelligent-tracking-prevention-2-1/">WebKit</a>). Saving tags in the browser may need consent where you sell. If you wait for consent, load the snippet from your consent tool. If the tags are gone before the page loads, see <a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a>.</p>
+<h2>Step 3: test it</h2>
+<p class="p">Open a page with the snippet, paste this in the browser console and look for nine lines that say <code>pass</code>.</p>
+<div class="code block"><pre data-snippet>(function () {
+  var read = window.leadUtm.read, count = function (o) { return Object.keys(o).length; };
+  var tests = {
+    "reads the URL": read("?utm_source=news&amp;utm_medium=email", "").utm_medium === "email",
+    "falls back to the cookie": read("", "utm_source=news").utm_source === "news",
+    "URL wins over the cookie": read("?utm_source=a", "utm_source=b").utm_source === "a",
+    "never mixes two sets": !read("?utm_source=a", "utm_campaign=old").utm_campaign,
+    "missing tags": count(read("", undefined)) === 0,
+    "empty tag": count(read("?utm_source=&amp;utm_medium=%20", "")) === 0,
+    "very long tag": read("?utm_source=" + "x".repeat(5000), "").utm_source.length === 100,
+    "broken encoding": read("?utm_source=100%", "").utm_source === "100%",
+    "ignores other parameters": count(read("?email=a%40example.com&amp;q=1", "")) === 0
+  };
+  Object.keys(tests).forEach(function (name) {
+    console.log(tests[name] ? "pass" : "FAIL", name);
+  });
+})();</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Then test the whole path by hand:</p>
+<ol class="post-list"><li>Open your site in a private window with <code>?utm_source=test&amp;utm_medium=email</code> on the end</li><li>Click through to the page with the form, so the tags leave the address bar</li><li>Run <code>document.querySelector('[name="utm_source"]').value</code> in the console. It should say <code>test</code></li><li>Send the form and find the tags on the lead</li><li>Do it again in a new private window without tags. The fields should be empty and the form should still send</li></ol>
+<p class="p">Build the link with the <a href="/tools/utm-builder">UTM builder</a> so the names match your other campaigns.</p>
+<h2>Embedded forms in an iframe</h2>
+<p class="p">If your form provider gives you an iframe, the form lives on another domain. The browser does not let your page reach into it, the form cannot read your cookie, and its address is not your page address. A script on your page cannot fill its hidden fields. Two things work:</p>
+<ul class="post-list"><li><b>Use the script embed instead,</b> if the provider has one that renders the form in your page. Then the inputs are part of your page and the snippet fills them.</li><li><b>Put the tags in the iframe address.</b> Many form tools can fill a hidden field from a query parameter; check yours for the exact setting. If the page inside is yours, add the snippet to it and it reads its own address.</li></ul>
+<p class="p">For the second one, use <code>data-src</code> so the frame loads once, with the tags already on it. Put this after the snippet:</p>
+<div class="code block"><pre data-snippet>&lt;iframe data-src="https://forms.example.net/demo" title="Book a demo"&gt;&lt;/iframe&gt;
+&lt;script&gt;
+document.querySelectorAll("iframe[data-src]").forEach(function (frame) {
+  var url = new URL(frame.dataset.src);
+  var tags = window.leadUtm ? window.leadUtm.tags : {};
+  Object.keys(tags).forEach(function (k) { url.searchParams.set(k, tags[k]); });
+  frame.src = url.href;
+});
+&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">If you load the snippet with <code>defer</code>, put this code in the same file after it. For the visitor ID, add <code>url.searchParams.set("virling_vid", window.virling?.vid?.() || "")</code> once the Virling script has loaded.</p>
+<h2>Multi-step forms</h2>
+<ul class="post-list"><li><b>Each step is its own page.</b> The tags are gone from the address by step two. Put the hidden inputs on the last step, the one that sends the lead, and the cookie fills them.</li><li><b>Steps change within one page.</b> If the last step is still a real form submit, the fields are filled as it is sent, even if they were added a moment before.</li><li><b>Your code sends the data itself.</b> With no submit event, call <code>leadUtm.fill(form)</code> just before you read the form, or add <code>leadUtm.tags</code> to the data you send.</li><li><b>You save partial leads.</b> Store the tags with the first step on your server and do not let an empty value from a later step replace them.</li></ul>
+<h2>What a lead form cannot tell you</h2>
+<p class="p">A hidden field is written once, when the form is sent. Everything after that is out of its reach:</p>
+<ul class="post-list"><li><b>Who paid.</b> The payment happens later, often in another tool, with nothing on it that points back to the form.</li><li><b>How much, and for how long.</b> Plan size, refunds and renewals are not known yet.</li><li><b>Untagged visits.</b> Search, AI answers and plain links carry no tags, so the fields are empty or show an older campaign.</li><li><b>The other visits.</b> One set of tags stands in for every visit the lead made before the form.</li></ul>
+<p class="p">That matters because the channel with the most leads is not always the one that pays. These numbers are made up for the example:</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:560px"><thead><tr><th>utm_source</th><th>Leads</th><th>Paid</th><th>First-year revenue</th><th>Per lead</th></tr></thead><tbody><tr><th scope="row">newsletter</th><td>40</td><td>2</td><td>$600</td><td>$15</td></tr><tr><th scope="row">partner</th><td>10</td><td>4</td><td>$4,800</td><td>$480</td></tr></tbody></table></div>
+<p class="p">The form alone shows the source and the number of leads. The <a href="/tools/lead-value-calculator">lead value calculator</a> does the rest of the sum once you know how many leads paid. For leads whose fields are empty, ask them: the <a href="/tools/how-did-you-hear-about-us-template">how did you hear about us template</a> has ready answer options. It tells you what people remember, so read it next to the tags and not instead of them.</p>
+<h2>Join the lead to a payment</h2>
+<p class="p">With Virling you do not need the tags on the payment. The script records each visit with its tags and referrer, under a visitor ID in the <code>virling_vid</code> cookie. The payment only has to find that visitor, in one of two ways. Leave cookieless mode off: without the cookie there is no visitor ID to carry.</p>
+<h3>By visitor ID, when the lead pays through your checkout</h3>
+<p class="p">Save the <code>virling_vid</code> field with the lead, then pass it when your server creates the checkout. For Stripe, set <code>client_reference_id</code> or <code>metadata.virling_vid</code>:</p>
+<div class="code block"><pre data-snippet>await stripe.checkout.sessions.create({
+  client_reference_id: lead.virling_vid || undefined,
+  // ...
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">If the lead pays in the same browser, your server can read the <code>virling_vid</code> cookie and you need no field. The field for each provider is in <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</p>
+<h3>By email, when the lead pays an invoice</h3>
+<p class="p">An invoice you send from Stripe does not pass through a checkout on your site, so it has no visitor ID. Send the lead&rsquo;s email once, as an <code>identify</code> event, when the form succeeds:</p>
+<div class="code block"><pre data-snippet>// After the demo or signup form succeeds
+fetch("https://app.virling.com/api/event", {
+  method: "POST",
+  keepalive: true,
+  body: JSON.stringify({ n: "identify", u: location.href, s: "yourproduct.com", v: window.virling?.vid?.(), m: email }),
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p"><code>keepalive</code> lets the request finish if the form then opens a thank-you page. Virling keeps only a SHA-256 hash of the trimmed, lowercased email with a salt of your site. A Stripe, Shopify or WooCommerce payment with no visitor ID whose payer email matches is credited to that visitor and shows <b>Matched by email</b> on the Payments page. Matching is exact, never crosses sites and applies to payments synced after the identify, so send it at the demo request and not after the deal closes.</p>
+<p class="p">If a form tool sends you the lead by webhook, your server can send the same event: use the saved <code>virling_vid</code> as <code>v</code>, a page of your site as <code>u</code>, and set a <code>User-Agent</code> header, since events with an empty or automated one are dropped. Do not send it without a visitor ID, or the email is tied to your server and not to the lead.</p>
+<p class="p">Add <code>virling("goal", "demo request")</code> next to it and the request shows up in the payment&rsquo;s journey. The whole setup is in the <a href="https://docs.virling.com/guides/b2b-sales">sales-led B2B guide</a>. <a href="/blog/stripe-invoice-attribution">Stripe invoice attribution</a> goes through the invoice side, and <a href="/blog/b2b-saas-attribution">B2B SaaS attribution for small teams</a> covers what else to track.</p>
+<h2>What still stays unattributed</h2>
+<ul class="post-list"><li><b>A different payer.</b> If an accounts team pays the invoice, the emails do not match.</li><li><b>No identify before the payment.</b> The form did not send the email, or the payment was synced first.</li><li><b>No visit in the window.</b> The lead is known, but their visits started before the lookback window, 90 days by default.</li><li><b>A visit that was never tracked.</b> The script was missing or blocked, the visitor had Global Privacy Control with <code>data-respect-gpc</code>, or the visit was filtered as a bot.</li></ul>
+<p class="p">Those payments still count toward revenue, as Unattributed. Every cause is in <a href="https://docs.virling.com/attribution/unattributed">unattributed revenue</a>.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+<h2>Frequently asked questions</h2>
+<h3>How do I capture UTM parameters in hidden fields?</h3><p class="p">Add one hidden input per tag to the form, then run a script that reads the tags from the page address and writes them into those inputs. Save the tags in a first-party cookie too, so the form still gets them when the visitor fills it in on a later page.</p>
+<h3>Why are my hidden UTM fields empty?</h3><p class="p">Usually the visitor landed on one page and filled in the form on another, so the address no longer had the tags. Other causes are a redirect that dropped the tags, input names that do not match, a form inside an iframe, or a visit with no tags at all.</p>
+<h3>Can I fill hidden fields inside an iframe form?</h3><p class="p">Not from the outside when the iframe is on another domain, because the browser blocks access to it. Add the tags to the iframe address instead, and have the form inside read its own address or use the form provider's prefill setting.</p>
+<h3>What happens if a UTM tag is missing or very long?</h3><p class="p">With the snippet on this page, a missing tag leaves its field empty and a long one is cut to 100 characters. Check the length again on your server, because anyone can edit a hidden field.</p>
+<h3>Can a hidden field tell me which leads paid?</h3><p class="p">No. It is written when the form is sent, before any payment. To know who paid, pass the visitor ID into checkout or send the lead's email in an identify event, so a payment can be joined to the lead's visits.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which leads turned into revenue</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
