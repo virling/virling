@@ -53,6 +53,8 @@
   <url><loc>https://virling.com/integrations/polar-ai-apps</loc></url>
   <url><loc>https://virling.com/integrations/woocommerce-digital-products</loc></url>
   <url><loc>https://virling.com/integrations/lemonsqueezy-ai-apps</loc></url>
+  <url><loc>https://virling.com/integrations/lemonsqueezy-plugins-and-themes</loc></url>
+  <url><loc>https://virling.com/integrations/stripe-online-courses</loc></url>
   <url><loc>https://virling.com/blog</loc></url>
   <url><loc>https://virling.com/blog/woocommerce-order-attribution-unknown</loc></url>
   <url><loc>https://virling.com/blog/what-is-revenue-attribution</loc></url>
@@ -326,5 +328,6 @@
   <url><loc>https://virling.com/tools/app-store-fee-calculator</loc></url>
   <url><loc>https://virling.com/tools/dodo-payments-fee-calculator</loc></url>
   <url><loc>https://virling.com/tools/creem-fee-calculator</loc></url>
+  <url><loc>https://virling.com/tools/polar-fee-calculator</loc></url>
   <url><loc>https://virling.com/what-we-dont-do</loc></url>
 </urlset>
