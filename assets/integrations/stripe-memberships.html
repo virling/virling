@@ -57,7 +57,7 @@
   client_reference_id: req.cookies.virling_vid,
   // ...
 });</pre></div>
-<p class="p">Members often arrive from links shared in Discord, Slack or newsletters with no referrer. Tag the links you control with <code>utm_source</code> and <code>utm_campaign</code>; <a href="/blog/community-revenue-tracking">community revenue tracking</a> walks through it. To check a retention figure by hand, use the <a href="/tools/customer-retention-rate-calculator">customer retention rate calculator</a>.</p>
+<p class="p">Members often arrive from links shared in Discord, Slack or newsletters with no referrer. Tag the links you control with <code>utm_source</code> and <code>utm_campaign</code>; <a href="/blog/community-revenue-tracking">community revenue tracking</a> walks through it. If you also sell courses to members, <a href="/integrations/stripe-online-courses">selling courses on Stripe</a> covers payment plans and refunds. To check a retention figure by hand, use the <a href="/tools/customer-retention-rate-calculator">customer retention rate calculator</a>.</p>
 <h2>What to know</h2>
 <ul class="post-list"><li>Payments older than the 90-day backfill are not imported, so renewals of memberships that started before that are Unattributed, and those members are left out of the Retention page. Channel numbers fill in as new members join.</li><li>Payment Links opened from emails, QR codes or other sites carry no visitor ID and show as Unattributed.</li><li>Payments without a customer ID cannot be linked to a first payment, and payments without a visitor ID still count toward revenue as Unattributed.</li><li>Until a site has 60 days of payments, the Retention page leads with refund rate and 30-day churn instead of LTV.</li></ul>
 <h2>Open source</h2>
