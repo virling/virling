@@ -142,7 +142,7 @@ const clean = (line) => {
   return { line, url: base.slice(0, q) + (left ? "?" + left : "") + frag, gone: gone.map(name), issue: "" };
 };
 const run = () => {
-  const rows = f.links.value.replace(/^﻿/, "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map(clean);
+  const rows = f.links.value.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map(clean);
   const bad = rows.filter((r) => r.issue).length, n = rows.reduce((a, r) => a + r.gone.length, 0);
   f.clean.value = rows.map((r) => r.url).join("\n");
   msg.textContent = rows.length ? `${n} parameter${n === 1 ? "" : "s"} removed.${bad ? ` ${bad} line${bad === 1 ? " is not a full link and stays" : "s are not full links and stay"} as pasted.` : ""}` : "Paste at least one link.";
