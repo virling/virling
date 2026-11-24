@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robots.txt generator for AI crawlers: allow or block each bot</title>
+<meta name="description" content="Choose which AI crawlers may read your site, such as GPTBot and ClaudeBot, add disallowed paths and a sitemap, and copy or download a valid robots.txt.">
+<link rel="canonical" href="https://virling.com/tools/ai-robots-txt-generator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/ai-robots-txt-generator">
+<meta property="og:title" content="Robots.txt generator for AI crawlers: allow or block each bot">
+<meta property="og:description" content="Choose which AI crawlers may read your site, such as GPTBot and ClaudeBot, add disallowed paths and a sitemap, and copy or download a valid robots.txt.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Robots.txt generator for AI crawlers","url":"https://virling.com/tools/ai-robots-txt-generator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Robots.txt generator for AI crawlers","item":"https://virling.com/tools/ai-robots-txt-generator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<style>
+.bots .tr { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.bots .tr.th { padding-top: 20px; font-size: 14px; color: var(--ink); }
+.bots .tr b { overflow-wrap: anywhere; }
+.bots .opt { display: flex; gap: 14px; }
+.bots .opt label { display: flex; align-items: center; gap: 6px; padding: 6px 0; cursor: pointer; }
+@media (max-width: 640px) { .bots .tr.th { grid-template-columns: minmax(0, 1fr); } .bots .opt { gap: 10px; } }
+</style>
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / robots.txt generator for ai crawlers</span><h1>Robots.txt generator for AI crawlers</h1><p class="lead">Allow or block each AI crawler by what it fetches for: training, search or a user's request. Add disallowed paths and your sitemap, then copy or download the file. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-table bots" id="bots" autocomplete="off">
+<div role="group" aria-labelledby="g-train">
+<div class="tr th"><b id="g-train">Training</b><div class="opt"><button class="btn sm light" type="button" data-all="allow" aria-label="Allow all training crawlers">Allow all</button><button class="btn sm light" type="button" data-all="block" aria-label="Block all training crawlers">Block all</button></div></div>
+<div class="tr"><span><b>GPTBot</b><small>OpenAI: content that may be used to train its models. <a href="https://developers.openai.com/api/docs/bots">OpenAI docs</a></small></span><div class="opt" role="radiogroup" aria-label="GPTBot"><label><input type="radio" name="GPTBot" value="allow">Allow</label><label><input type="radio" name="GPTBot" value="block" checked>Block</label></div></div>
+<div class="tr"><span><b>ClaudeBot</b><small>Anthropic: content that could contribute to training its models. <a href="https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler">Anthropic help</a></small></span><div class="opt" role="radiogroup" aria-label="ClaudeBot"><label><input type="radio" name="ClaudeBot" value="allow">Allow</label><label><input type="radio" name="ClaudeBot" value="block" checked>Block</label></div></div>
+<div class="tr"><span><b>Google-Extended</b><small>Google: a control token for Gemini training and grounding, not a bot that visits. <a href="https://developers.google.com/crawling/docs/crawlers-fetchers/google-common-crawlers">Google docs</a></small></span><div class="opt" role="radiogroup" aria-label="Google-Extended"><label><input type="radio" name="Google-Extended" value="allow">Allow</label><label><input type="radio" name="Google-Extended" value="block" checked>Block</label></div></div>
+<div class="tr"><span><b>Applebot-Extended</b><small>Apple: a control token for training its foundation models. Applebot does the crawling. <a href="https://support.apple.com/en-us/119829">Apple support</a></small></span><div class="opt" role="radiogroup" aria-label="Applebot-Extended"><label><input type="radio" name="Applebot-Extended" value="allow">Allow</label><label><input type="radio" name="Applebot-Extended" value="block" checked>Block</label></div></div>
+<div class="tr"><span><b>Amazonbot</b><small>Amazon: improves its products and may be used to train its AI models. <a href="https://developer.amazon.com/docs/amazonbot/amazonbot">Amazon docs</a></small></span><div class="opt" role="radiogroup" aria-label="Amazonbot"><label><input type="radio" name="Amazonbot" value="allow">Allow</label><label><input type="radio" name="Amazonbot" value="block" checked>Block</label></div></div>
+<div class="tr"><span><b>meta-externalagent</b><small>Meta: training foundation models, or improving products by indexing content. <a href="https://developers.facebook.com/documentation/sharing/webmasters/web-crawlers">Meta docs</a></small></span><div class="opt" role="radiogroup" aria-label="meta-externalagent"><label><input type="radio" name="meta-externalagent" value="allow">Allow</label><label><input type="radio" name="meta-externalagent" value="block" checked>Block</label></div></div>
+<div class="tr"><span><b>MistralAI-Training</b><small>Mistral: content for datasets that train its models. <a href="https://docs.mistral.ai/robots">Mistral docs</a></small></span><div class="opt" role="radiogroup" aria-label="MistralAI-Training"><label><input type="radio" name="MistralAI-Training" value="allow">Allow</label><label><input type="radio" name="MistralAI-Training" value="block" checked>Block</label></div></div>
+<div class="tr"><span><b>CCBot</b><small>Common Crawl: an open web crawl archive that anyone can access and analyze. <a href="https://commoncrawl.org/ccbot">Common Crawl</a></small></span><div class="opt" role="radiogroup" aria-label="CCBot"><label><input type="radio" name="CCBot" value="allow">Allow</label><label><input type="radio" name="CCBot" value="block" checked>Block</label></div></div>
+</div>
+<div role="group" aria-labelledby="g-search">
+<div class="tr th"><b id="g-search">Search</b><div class="opt"><button class="btn sm light" type="button" data-all="allow" aria-label="Allow all search crawlers">Allow all</button><button class="btn sm light" type="button" data-all="block" aria-label="Block all search crawlers">Block all</button></div></div>
+<div class="tr"><span><b>OAI-SearchBot</b><small>OpenAI: shows sites in ChatGPT search. <a href="https://developers.openai.com/api/docs/bots">OpenAI docs</a></small></span><div class="opt" role="radiogroup" aria-label="OAI-SearchBot"><label><input type="radio" name="OAI-SearchBot" value="allow" checked>Allow</label><label><input type="radio" name="OAI-SearchBot" value="block">Block</label></div></div>
+<div class="tr"><span><b>Claude-SearchBot</b><small>Anthropic: indexes pages to improve search results for its users. <a href="https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler">Anthropic help</a></small></span><div class="opt" role="radiogroup" aria-label="Claude-SearchBot"><label><input type="radio" name="Claude-SearchBot" value="allow" checked>Allow</label><label><input type="radio" name="Claude-SearchBot" value="block">Block</label></div></div>
+<div class="tr"><span><b>PerplexityBot</b><small>Perplexity: shows and links sites in Perplexity results. <a href="https://docs.perplexity.ai/docs/resources/perplexity-crawlers">Perplexity docs</a></small></span><div class="opt" role="radiogroup" aria-label="PerplexityBot"><label><input type="radio" name="PerplexityBot" value="allow" checked>Allow</label><label><input type="radio" name="PerplexityBot" value="block">Block</label></div></div>
+<div class="tr"><span><b>Amzn-SearchBot</b><small>Amazon: search experiences such as Alexa. <a href="https://developer.amazon.com/docs/amazonbot/amazonbot">Amazon docs</a></small></span><div class="opt" role="radiogroup" aria-label="Amzn-SearchBot"><label><input type="radio" name="Amzn-SearchBot" value="allow" checked>Allow</label><label><input type="radio" name="Amzn-SearchBot" value="block">Block</label></div></div>
+<div class="tr"><span><b>meta-webindexer</b><small>Meta: improves Meta AI search and helps it cite and link pages. <a href="https://developers.facebook.com/documentation/sharing/webmasters/web-crawlers">Meta docs</a></small></span><div class="opt" role="radiogroup" aria-label="meta-webindexer"><label><input type="radio" name="meta-webindexer" value="allow" checked>Allow</label><label><input type="radio" name="meta-webindexer" value="block">Block</label></div></div>
+<div class="tr"><span><b>MistralAI-Index</b><small>Mistral: indexes pages for Mistral search. <a href="https://docs.mistral.ai/robots">Mistral docs</a></small></span><div class="opt" role="radiogroup" aria-label="MistralAI-Index"><label><input type="radio" name="MistralAI-Index" value="allow" checked>Allow</label><label><input type="radio" name="MistralAI-Index" value="block">Block</label></div></div>
+</div>
+<div role="group" aria-labelledby="g-user">
+<div class="tr th"><b id="g-user">User request</b><div class="opt"><button class="btn sm light" type="button" data-all="allow" aria-label="Allow all user request crawlers">Allow all</button><button class="btn sm light" type="button" data-all="block" aria-label="Block all user request crawlers">Block all</button></div></div>
+<div class="tr"><span><b>ChatGPT-User</b><small>OpenAI: opens a page because a user asked. robots.txt rules may not apply. <a href="https://developers.openai.com/api/docs/bots">OpenAI docs</a></small></span><div class="opt" role="radiogroup" aria-label="ChatGPT-User"><label><input type="radio" name="ChatGPT-User" value="allow" checked>Allow</label><label><input type="radio" name="ChatGPT-User" value="block">Block</label></div></div>
+<div class="tr"><span><b>Claude-User</b><small>Anthropic: opens a page when a user asks a question. <a href="https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler">Anthropic help</a></small></span><div class="opt" role="radiogroup" aria-label="Claude-User"><label><input type="radio" name="Claude-User" value="allow" checked>Allow</label><label><input type="radio" name="Claude-User" value="block">Block</label></div></div>
+<div class="tr"><span><b>Perplexity-User</b><small>Perplexity: opens a page because a user asked. Generally ignores robots.txt. <a href="https://docs.perplexity.ai/docs/resources/perplexity-crawlers">Perplexity docs</a></small></span><div class="opt" role="radiogroup" aria-label="Perplexity-User"><label><input type="radio" name="Perplexity-User" value="allow" checked>Allow</label><label><input type="radio" name="Perplexity-User" value="block">Block</label></div></div>
+<div class="tr"><span><b>Amzn-User</b><small>Amazon: live pages for questions to Alexa. May not follow all robots.txt directives. <a href="https://developer.amazon.com/docs/amazonbot/amazonbot">Amazon docs</a></small></span><div class="opt" role="radiogroup" aria-label="Amzn-User"><label><input type="radio" name="Amzn-User" value="allow" checked>Allow</label><label><input type="radio" name="Amzn-User" value="block">Block</label></div></div>
+<div class="tr"><span><b>meta-externalfetcher</b><small>Meta: opens single links at a user's request. May bypass robots.txt. <a href="https://developers.facebook.com/documentation/sharing/webmasters/web-crawlers">Meta docs</a></small></span><div class="opt" role="radiogroup" aria-label="meta-externalfetcher"><label><input type="radio" name="meta-externalfetcher" value="allow" checked>Allow</label><label><input type="radio" name="meta-externalfetcher" value="block">Block</label></div></div>
+<div class="tr"><span><b>MistralAI-User</b><small>Mistral: opens a page when a user asks a question. <a href="https://docs.mistral.ai/robots">Mistral docs</a></small></span><div class="opt" role="radiogroup" aria-label="MistralAI-User"><label><input type="radio" name="MistralAI-User" value="allow" checked>Allow</label><label><input type="radio" name="MistralAI-User" value="block">Block</label></div></div>
+<div class="tr"><span><b>DuckAssistBot</b><small>DuckDuckGo: crawls pages in real time for AI-assisted answers. <a href="https://duckduckgo.com/duckduckgo-help-pages/results/duckassistbot">DuckDuckGo help</a></small></span><div class="opt" role="radiogroup" aria-label="DuckAssistBot"><label><input type="radio" name="DuckAssistBot" value="allow" checked>Allow</label><label><input type="radio" name="DuckAssistBot" value="block">Block</label></div></div>
+</div>
+</form>
+<form class="tool-form" id="opts" autocomplete="off">
+  <label class="wide">Disallowed paths <span class="dim">optional, one per line, for the crawlers you allow</span><textarea name="paths" rows="3" spellcheck="false" placeholder="/members/&#10;/search" aria-describedby="rt-msg"></textarea></label>
+  <label class="wide">Sitemap <span class="dim">optional, full address</span><input name="sitemap" type="text" inputmode="url" spellcheck="false" placeholder="https://example.com/sitemap.xml" aria-describedby="rt-msg"></label>
+</form>
+<p class="p" id="rt-msg" role="status" style="margin:0;color:var(--revenue-text)"></p>
+<div class="code block" style="align-items:flex-start"><pre id="rt-out" tabindex="0" role="region" aria-label="Your robots.txt"># AI crawlers asked to stay out
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: Amazonbot
+User-agent: meta-externalagent
+User-agent: MistralAI-Training
+User-agent: CCBot
+Disallow: /
+
+# AI crawlers allowed
+User-agent: OAI-SearchBot
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: Amzn-SearchBot
+User-agent: meta-webindexer
+User-agent: MistralAI-Index
+User-agent: ChatGPT-User
+User-agent: Claude-User
+User-agent: Perplexity-User
+User-agent: Amzn-User
+User-agent: meta-externalfetcher
+User-agent: MistralAI-User
+User-agent: DuckAssistBot
+Allow: /
+</pre><button class="btn sm copy" type="button" id="rt-copy">Copy</button></div>
+<p class="fine-note"><a class="lk" id="rt-dl" download="robots.txt" href="data:text/plain;charset=utf-8,">Download robots.txt</a></p>
+<p class="fine-note">The starting choice, blocking training and allowing the rest, is an example and not advice. Every token was checked on 2026-11-24 against the operator page linked in its row. Crawlers with no such page are not listed.</p>
+<div class="txt post tool-cta">
+<h2>See which AI crawlers read your pages and which assistants send buyers</h2>
+<p class="p">Virling counts the pages each AI company's crawlers read, next to the visitors and revenue its assistant sends you. Virling is open source under AGPLv3: self-host it free, or start a 14-day hosted trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="https://docs.virling.com/track/ai-crawlers">AI crawlers</a> &middot; <a class="lk" href="/demo">See the demo</a></p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Training, search and user request: what each choice does</h2>
+<ul class="post-list">
+<li><b>Training.</b> Blocking asks the operator not to use your pages to train models. Google-Extended and Applebot-Extended do not visit: they tell Google and Apple how to use what their normal crawlers fetch. Google-Extended also covers grounding in some Gemini products. Common Crawl is listed here because its archive is open to anyone.</li>
+<li><b>Search.</b> These crawlers build the indexes AI search answers from. Blocking them can remove your site from AI answers: OpenAI says sites opted out of OAI-SearchBot will not be shown in ChatGPT search answers, though they can still appear as navigational links.</li>
+<li><b>User request.</b> These open a page because someone asked about it. Blocking them can stop an assistant from reading the page it was asked about, and several operators say robots.txt may not apply.</li>
+</ul>
+<p class="p"><b>robots.txt is a request, not enforcement.</b> A crawler has to choose to follow it, and it hides nothing: the file is public, so anyone can read the paths you list. Keep private pages behind a login, and block unwanted bots at your server, firewall or CDN.</p>
+<h2>How to publish the file</h2>
+<ol class="post-list"><li>Choose Allow or Block for each crawler, and add the paths allowed crawlers should skip.</li><li>If your site has no robots.txt, upload this one to the root of your domain. If it has one, first remove its old groups for the crawlers named here, then add these lines and keep the rest.</li><li>Open <code>/robots.txt</code> on your own domain and check that the new lines are there. Each subdomain needs its own file.</li><li>Paste the live file into the <a href="/tools/ai-crawler-checker">AI crawler checker</a>, which shows the verdict and the deciding rule for most of these crawlers.</li></ol>
+<p class="p">A crawler that has its own group ignores your <code>User-agent: *</code> group. If that group blocks paths, enter them as disallowed paths too, or the crawlers you allow will no longer be asked to skip them. The file has no <code>*</code> group of its own, so search engines and other bots keep following your current rules.</p>
+<p class="p">Changes are not instant: OpenAI says its search results can take about 24 hours to adjust, Amazon says about 24 hours, Perplexity and Meta say up to 24 hours, and DuckDuckGo says 72 hours.</p>
+<h2>A worked example</h2>
+<p class="p">Example: a site at <code>example.com</code> wants to stay out of model training, stay in AI search, and keep its members area out of both. It keeps the starting choices, enters <code>/members/</code> as a disallowed path and adds its sitemap. The generator returns:</p>
+<div class="code block" style="align-items:flex-start"><pre data-snippet tabindex="0" role="region" aria-label="Example robots.txt"># AI crawlers asked to stay out
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: Amazonbot
+User-agent: meta-externalagent
+User-agent: MistralAI-Training
+User-agent: CCBot
+Disallow: /
+
+# AI crawlers allowed
+User-agent: OAI-SearchBot
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: Amzn-SearchBot
+User-agent: meta-webindexer
+User-agent: MistralAI-Index
+User-agent: ChatGPT-User
+User-agent: Claude-User
+User-agent: Perplexity-User
+User-agent: Amzn-User
+User-agent: meta-externalfetcher
+User-agent: MistralAI-User
+User-agent: DuckAssistBot
+Allow: /
+Disallow: /members/
+
+Sitemap: https://example.com/sitemap.xml
+</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The eight training tokens share one <code>Disallow: /</code>. The other crawlers may read everything except <code>/members/</code>, because the longest matching path wins. The sitemap line is outside every group and applies to all crawlers.</p>
+<h2>After you publish: do AI visits pay?</h2>
+<p class="p">What a block costs depends on what the assistant sends you. Compare the pages its crawlers read with the visits and payments that follow, before and after the change.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Related tools and guides</h2>
+<ul class="post-list"><li><a href="/tools/ai-crawler-checker">AI crawler checker</a>: paste a robots.txt and see which AI crawlers it lets in.</li><li><a href="/blog/is-ai-search-traffic-worth-anything">Is AI search traffic worth anything?</a>: how to measure the visitors and revenue AI answers send.</li><li><a href="/blog/perplexity-revenue-tracking">Perplexity revenue tracking</a>: see which visits from Perplexity lead to payments.</li><li><a href="https://docs.virling.com/track/ai-crawlers">AI crawlers</a>: count which pages GPTBot, ClaudeBot and other bots read on your site.</li></ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>AI robots.txt FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do I block AI crawlers in robots.txt?</h3><p class="p">Name each crawler in a <code>User-agent</code> line and put <code>Disallow: /</code> below it. Several <code>User-agent</code> lines can share one set of rules. Save the file as <code>robots.txt</code> at the root of your domain, such as <code>https://example.com/robots.txt</code>.</p></div>
+      <div><h3>Can I block AI training and still appear in AI answers?</h3><p class="p">Often, because several operators use separate crawlers. OpenAI says you can disallow GPTBot and allow OAI-SearchBot, and each setting is independent. Not every token splits this cleanly: Google-Extended covers grounding as well as training, and meta-externalagent also covers indexing for Meta's products.</p></div>
+      <div><h3>Does blocking search crawlers remove my site from AI answers?</h3><p class="p">It can. OpenAI says sites opted out of OAI-SearchBot will not be shown in ChatGPT search answers, though they can still appear as navigational links. Anthropic says disabling Claude-SearchBot or Claude-User may reduce your visibility in user searches.</p></div>
+      <div><h3>Does robots.txt force AI crawlers to stay out?</h3><p class="p">No. It is a request that well-behaved crawlers follow, not enforcement. Perplexity says Perplexity-User generally ignores it, and OpenAI says the rules may not apply to ChatGPT-User. To keep a page private, put it behind a login. To stop a bot, block it at your server, firewall or CDN.</p></div>
+      <div><h3>Does blocking Google-Extended affect Google Search?</h3><p class="p">No. Google says Google-Extended does not impact a site's inclusion in Google Search and is not used as a ranking signal.</p></div>
+      <div><h3>Is anything I enter sent to a server?</h3><p class="p">No. The file is built in your browser, and the crawlers, paths and sitemap you enter stay on this page.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I block AI crawlers in robots.txt?", "acceptedAnswer": {"@type": "Answer", "text": "Name each crawler in a User-agent line and put Disallow: / below it. Several User-agent lines can share one set of rules. Save the file as robots.txt at the root of your domain, such as https://example.com/robots.txt."}}, {"@type": "Question", "name": "Can I block AI training and still appear in AI answers?", "acceptedAnswer": {"@type": "Answer", "text": "Often, because several operators use separate crawlers. OpenAI says you can disallow GPTBot and allow OAI-SearchBot, and each setting is independent. Not every token splits this cleanly: Google-Extended covers grounding as well as training, and meta-externalagent also covers indexing for Meta's products."}}, {"@type": "Question", "name": "Does blocking search crawlers remove my site from AI answers?", "acceptedAnswer": {"@type": "Answer", "text": "It can. OpenAI says sites opted out of OAI-SearchBot will not be shown in ChatGPT search answers, though they can still appear as navigational links. Anthropic says disabling Claude-SearchBot or Claude-User may reduce your visibility in user searches."}}, {"@type": "Question", "name": "Does robots.txt force AI crawlers to stay out?", "acceptedAnswer": {"@type": "Answer", "text": "No. It is a request that well-behaved crawlers follow, not enforcement. Perplexity says Perplexity-User generally ignores it, and OpenAI says the rules may not apply to ChatGPT-User. To keep a page private, put it behind a login. To stop a bot, block it at your server, firewall or CDN."}}, {"@type": "Question", "name": "Does blocking Google-Extended affect Google Search?", "acceptedAnswer": {"@type": "Answer", "text": "No. Google says Google-Extended does not impact a site's inclusion in Google Search and is not used as a ranking signal."}}, {"@type": "Question", "name": "Is anything I enter sent to a server?", "acceptedAnswer": {"@type": "Answer", "text": "No. The file is built in your browser, and the crawlers, paths and sitemap you enter stay on this page."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See what AI answers send you in revenue</h2>
+<p class="p">robots.txt decides who may read. Virling shows what comes back: it links every visit to the payment it led to, so you see the customers and revenue each assistant brings. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const bots = document.getElementById("bots"), f = document.getElementById("opts"), out = document.getElementById("rt-out"), msg = document.getElementById("rt-msg"), copy = document.getElementById("rt-copy"), dl = document.getElementById("rt-dl");
+const WHOLE = /^\/(\*+\$?)?$/;
+const problem = (p) => !p.startsWith("/") ? "must start with /, such as /members/" : WHOLE.test(p) ? "covers the whole site, so choose Block for the crawler instead" : /\s/.test(p) ? "has a space, so write it as %20" : p.includes("#") ? "has a #, which starts a comment in robots.txt" : /[^\x21-\x7e]/.test(p) ? "has special characters, so copy the encoded path from your browser's address bar" : "";
+const sitemap = (v) => { if (!/^https?:\/\/[^\s#]+$/i.test(v)) return ""; try { return new URL(v).href; } catch { return ""; } };
+const flag = (el, bad) => { if (bad) el.setAttribute("aria-invalid", "true"); else el.removeAttribute("aria-invalid"); };
+const render = () => {
+  const on = [...bots.querySelectorAll("input:checked")], names = (v) => on.filter((i) => i.value === v).map((i) => `User-agent: ${i.name}`);
+  const block = names("block"), allow = names("allow"), paths = [], notes = [];
+  f.paths.value.split(/\r?\n/).forEach((line, i) => {
+    const p = line.trim(), why = p && problem(p);
+    if (why) notes.push(`Path line ${i + 1} was left out: it ${why}.`);
+    else if (p && !paths.includes(p)) paths.push(p);
+  });
+  flag(f.paths, notes.length);
+  if (paths.length && !allow.length) notes.push("Every crawler is blocked, so the disallowed paths are not used.");
+  const typed = f.sitemap.value.trim(), map = sitemap(typed);
+  flag(f.sitemap, typed && !map);
+  if (typed && !map) notes.push("The sitemap was left out: it needs a full address, such as https://example.com/sitemap.xml.");
+  const parts = [];
+  if (block.length) parts.push(["# AI crawlers asked to stay out", ...block, "Disallow: /"]);
+  if (allow.length) parts.push(["# AI crawlers allowed", ...allow, "Allow: /", ...paths.map((p) => `Disallow: ${p}`)]);
+  if (map) parts.push([`Sitemap: ${map}`]);
+  out.textContent = parts.map((p) => p.join("\n")).join("\n\n") + "\n";
+  msg.textContent = notes.join(" ");
+  dl.href = "data:text/plain;charset=utf-8," + encodeURIComponent(out.textContent);
+};
+bots.addEventListener("change", render);
+bots.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-all]");
+  if (!b) return;
+  b.closest("[role=group]").querySelectorAll(`input[value="${b.dataset.all}"]`).forEach((i) => (i.checked = true));
+  render();
+});
+f.addEventListener("input", render);
+f.addEventListener("submit", (e) => e.preventDefault());
+copy.addEventListener("click", async () => { await navigator.clipboard.writeText(out.textContent); copy.textContent = "Copied"; setTimeout(() => (copy.textContent = "Copy"), 1500); });
+render();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
