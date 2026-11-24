@@ -57,7 +57,7 @@
   client_reference_id: req.cookies.virling_vid,
   // ...
 });</pre></div>
-<p class="p">The full walkthrough is in <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>. For how channels add up to recurring revenue, read <a href="/blog/mrr-by-acquisition-channel">MRR by acquisition channel</a>, and compare trial conversion per channel with the <a href="/tools/trial-to-paid-calculator">trial to paid calculator</a>.</p>
+<p class="p">The full walkthrough is in <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>. For how channels add up to recurring revenue, read <a href="/blog/mrr-by-acquisition-channel">MRR by acquisition channel</a>, and compare trial conversion per channel with the <a href="/tools/trial-to-paid-calculator">trial to paid calculator</a>. To see how channel revenue tools differ from MRR and churn tools, read the <a href="/blog/best-revenue-analytics-tools">guide to revenue analytics tools</a>.</p>
 <h2>What to know</h2>
 <ul class="post-list"><li>Stripe trial starts are read from the time you connect, so trials that started before that are not seen.</li><li>Payments older than the 90-day backfill are not imported, so renewals of subscriptions that started before that are Unattributed. Channel numbers fill in as new customers arrive.</li><li>Payments without a customer ID cannot be linked to a first payment, and payments without a visitor ID still count toward revenue as Unattributed.</li></ul>
 <h2>Open source</h2>

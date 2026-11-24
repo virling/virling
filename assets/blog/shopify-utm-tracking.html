@@ -59,7 +59,7 @@
 <h2>Step 1: name your UTMs</h2>
 <p class="p">Pick one spelling for each source and medium and keep it: <code>utm_source=newsletter</code> and <code>utm_source=Newsletter</code> split one source in two. Tag every link you control with <code>utm_source</code>, <code>utm_medium</code> and <code>utm_campaign</code>, and use <code>utm_content</code> to tell apart two links in the same campaign. The <a href="/tools/utm-builder">UTM builder</a> makes the links, and the rules are in <a href="/blog/utm-parameters-for-revenue-tracking">which UTM parameters to use</a>.</p>
 <h2>Step 2: check the links</h2>
-<p class="p">Paste your campaign links into the <a href="/tools/utm-checker">UTM checker</a> before they go out. It flags a missing source or medium, capitals, spaces, duplicate parameters, tags after the <code>#</code> and tagged internal links, which all split or lose campaign data.</p>
+<p class="p">Paste your campaign links into the <a href="/tools/utm-checker">UTM checker</a> before they go out. It flags a missing source or medium, capitals, spaces, duplicate parameters, tags after the <code>#</code> and tagged internal links, which all split or lose campaign data. For buyers on Apple devices, see <a href="/blog/ios-link-tracking-protection-utm">whether Safari removes UTM parameters</a>.</p>
 <h2>Step 3: store the visitor ID on the cart</h2>
 <p class="p">Add the Virling script to your theme so it runs on every store page; it stores the UTM tags of each landing. Then add this snippet to <code>theme.liquid</code>, after the Virling script. It writes the visitor ID to the cart as <code>virling_vid</code>, and Shopify copies cart attributes onto the order as note attributes:</p>
 <div class="code block"><pre data-snippet>&lt;script&gt;
