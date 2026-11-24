@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Persist UTM parameters across pages: three ways with code</title>
+<meta name="description" content="How to persist UTM parameters across pages until checkout: cookie, localStorage or tagged links, with code, when each breaks, and the visitor ID way.">
+<link rel="canonical" href="https://virling.com/blog/persist-utm-parameters">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/persist-utm-parameters">
+<meta property="og:title" content="Persist UTM parameters across pages: three ways with code">
+<meta property="og:description" content="How to persist UTM parameters across pages until checkout: cookie, localStorage or tagged links, with code, when each breaks, and the visitor ID way.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Persist UTM parameters across pages: three ways with code","item":"https://virling.com/blog/persist-utm-parameters"}]},{"@type":"BlogPosting","headline":"Persist UTM parameters across pages: three ways with code","description":"How to persist UTM parameters across pages until checkout: cookie, localStorage or tagged links, with code, when each breaks, and the visitor ID way.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/persist-utm-parameters"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I keep UTM parameters across pages?","acceptedAnswer":{"@type":"Answer","text":"Read them from the landing page address and save them in a first-party cookie, or in localStorage if you only need them in the browser on one host. Adding them to every internal link also works within one visit, but breaks on forms, redirects and return visits."}},{"@type":"Question","name":"Should I store UTM parameters in a cookie or localStorage?","acceptedAnswer":{"@type":"Answer","text":"Use a cookie if your server or a subdomain needs the tags, because the browser sends it with each request and it can cover subdomains. Use localStorage if one host reads them in the browser and adds them to a form. Safari limits how long both last."}},{"@type":"Question","name":"How long do saved UTM parameters last?","acceptedAnswer":{"@type":"Answer","text":"A cookie lasts as long as its max-age, except in Safari, which caps cookies set by a script at seven days and in some cases one day. localStorage has no expiry of its own, but Safari deletes it after seven days of use without interaction on the site."}},{"@type":"Question","name":"Should I save the first or the last UTM parameters?","acceptedAnswer":{"@type":"Answer","text":"Save both if you can. The first set says which campaign introduced the buyer and the last set says which came most recently. Replace the last set as a whole, so tags from two campaigns never mix."}},{"@type":"Question","name":"Should I add UTM parameters to internal links?","acceptedAnswer":{"@type":"Answer","text":"Not by hand with new values, because that overwrites the source the visitor arrived with. Copying the arriving tags onto internal links keeps the source, but a copied or bookmarked address then counts as another campaign click."}},{"@type":"Question","name":"Do I need to pass UTM parameters to Stripe?","acceptedAnswer":{"@type":"Answer","text":"Only if you want them on the payment itself, in metadata. To see revenue by source, pass a visitor ID such as client_reference_id instead, and join the payment to the visits that ID made."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>Persist UTM parameters across pages: three ways with code</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p">To persist UTM parameters across pages, read the tags on the landing page and save them somewhere the next page can find them. There are three common ways: a first-party cookie, <code>localStorage</code>, or adding the tags to every internal link. A cookie is the best of the three if your server needs the tags at checkout, because subdomains can share it and your server receives it with each request. The other way is to save no tags at all: keep one visitor ID, record the tagged visit under it, and join the payment to that visit later.</p>
+<h2>The options at a glance</h2>
+<table class="cmp"><thead><tr><th>Way</th><th>Carries the tags to</th><th>Breaks when</th></tr></thead><tbody><tr><th scope="row">First-party cookie</th><td>Every page and subdomain, and your server</td><td>The cookie expires or is cleared, or cookies are refused</td></tr><tr><th scope="row"><code>localStorage</code></th><td>Pages on the same origin, in the browser only</td><td>The visitor moves to a subdomain, or your server needs the tags</td></tr><tr><th scope="row">Tags on every link</th><td>Pages opened from a link the script rewrote</td><td>The visitor uses a form, a redirect or a bookmark, or comes back later</td></tr><tr><th scope="row">Visitor ID only</th><td>Nothing, the tags stay with the recorded visit</td><td>The ID is lost, or checkout does not carry it</td></tr></tbody></table>
+<p class="p">All four start from tags that reached the landing page. If they are already gone when the page loads, fix that first: see <a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a>. Check the link itself with the <a href="/tools/utm-checker">UTM checker</a>.</p>
+<h2>Way 1: a first-party cookie</h2>
+<p class="p">Put this on every page. It saves the tags as one value, only when the page has some, and keeps both the first and the last set.</p>
+<pre>var keys = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
+var query = new URLSearchParams(location.search);
+var tags = new URLSearchParams();
+keys.forEach(function (k) {
+  if (query.get(k)) tags.set(k, query.get(k).slice(0, 100));
+});
+
+function save(name) {
+  document.cookie = name + "=" + encodeURIComponent(tags) +
+    "; path=/; domain=example.com; max-age=7776000; SameSite=Lax; Secure";
+}
+
+if (tags.toString()) {
+  save("utm_last");
+  if (!/(^|; )utm_first=/.test(document.cookie)) save("utm_first");
+}</pre>
+<p class="p">Replace <code>example.com</code> with your own domain. The <code>domain</code> part shares the cookie with subdomains such as <code>app.example.com</code>; leave it out to keep the cookie on one host. 7776000 seconds is 90 days. Your server then reads the cookie when it creates the checkout. With Express, <code>cookie-parser</code> and Stripe:</p>
+<pre>const saved = new URLSearchParams(req.cookies.utm_last || "");
+const metadata = {};
+for (const k of ["utm_source", "utm_medium", "utm_campaign"]) {
+  if (saved.get(k)) metadata[k] = saved.get(k);
+}
+const session = await stripe.checkout.sessions.create({
+  mode: "payment",
+  line_items: [{ price: "price_...", quantity: 1 }],
+  success_url: "https://example.com/thanks",
+  metadata,
+});</pre>
+<p class="p"><b>When it breaks:</b></p>
+<ul class="post-list"><li><b>Safari shortens it.</b> Safari caps a cookie set with <code>document.cookie</code> at seven days (source: <a href="https://webkit.org/blog/8613/intelligent-tracking-prevention-2-1/">WebKit</a>). It is one day when a domain Safari classifies as a cross-site tracker sent the visitor and the landing URL has a query string, which a tagged link always has (source: <a href="https://webkit.org/blog/8828/intelligent-tracking-prevention-2-2/">WebKit</a>).</li><li><b>Another browser or device.</b> The cookie stays in the browser that saw the tagged link.</li><li><b>Another domain.</b> A cookie on <code>example.com</code> is not sent to a checkout hosted elsewhere, so hand the value over before the buyer leaves. See <a href="/blog/cross-domain-checkout-attribution">cross-domain checkout attribution</a>.</li><li><b>No consent.</b> Storing tags in the browser may need consent where you sell. If you wait for it, save the tags from the page the visitor accepts on, and expect to miss those who left the landing page first.</li></ul>
+<h2>Way 2: localStorage</h2>
+<p class="p">The same idea without a cookie. Build <code>tags</code> as in way 1, then:</p>
+<pre>if (tags.toString()) {
+  try {
+    localStorage.setItem("utm_last", tags);
+    if (!localStorage.getItem("utm_first")) localStorage.setItem("utm_first", tags);
+  } catch (e) {}
+}</pre>
+<p class="p">The server never sees <code>localStorage</code>, so add the value to the signup or checkout form before it is sent:</p>
+<pre>&lt;input type="hidden" name="utm" id="utm"&gt;
+&lt;script&gt;
+try {
+  document.getElementById("utm").value = localStorage.getItem("utm_last") || "";
+} catch (e) {}
+&lt;/script&gt;</pre>
+<p class="p"><b>When it breaks:</b></p>
+<ul class="post-list"><li><b>A different origin.</b> Storage belongs to one scheme, host and port. <code>www.example.com</code>, <code>example.com</code> and <code>app.example.com</code> each have their own.</li><li><b>No form to put it in.</b> A checkout your server creates without data from the page never gets the value.</li><li><b>It never expires by itself.</b> An old tag can be credited a year later unless you save a date next to it and check it.</li><li><b>Safari deletes it.</b> Safari removes script-writable storage after seven days of Safari use without the visitor interacting with the site (source: <a href="https://webkit.org/blog/10218/full-third-party-cookie-blocking-and-more/">WebKit</a>).</li></ul>
+<p class="p"><code>sessionStorage</code> is shorter still: it belongs to one tab and goes away with it.</p>
+<h2>Way 3: add the tags to every link</h2>
+<p class="p">Nothing is stored. A click handler copies the tags from the current address onto each link within the site.</p>
+<pre>var keys = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
+document.addEventListener("click", function (e) {
+  var a = e.target.closest("a[href]");
+  if (!a || a.origin !== location.origin) return;
+  var query = new URLSearchParams(location.search);
+  var url = new URL(a.href);
+  if (keys.some(function (k) { return url.searchParams.has(k); })) return;
+  keys.forEach(function (k) {
+    if (query.get(k)) url.searchParams.set(k, query.get(k));
+  });
+  if (url.href !== a.href) a.href = url.href;
+}, true);</pre>
+<p class="p"><b>When it breaks:</b></p>
+<ul class="post-list"><li><b>Anything that is not a link.</b> Forms, buttons that set <code>location.href</code>, router calls and server redirects skip the handler. One untagged page ends the chain.</li><li><b>A return visit.</b> The visitor who types your address next week has no tags in it.</li><li><b>Shared and bookmarked pages.</b> A copied address still carries the tags, so a friend who opens it is counted as a click on your campaign.</li><li><b>Duplicate addresses.</b> Each page now exists with and without tags. Set a canonical link, and check that your cache does not treat each query string as a separate page.</li></ul>
+<h2>First or last value?</h2>
+<p class="p">A visitor can arrive from two campaigns before paying, so decide what happens to the first set of tags. A made-up journey:</p>
+<table class="cmp"><thead><tr><th>Visit</th><th><code>utm_first</code></th><th><code>utm_last</code></th></tr></thead><tbody><tr><th scope="row">Day 1: link in a newsletter, tagged</th><td>newsletter</td><td>newsletter</td></tr><tr><th scope="row">Day 4: link on a partner site, tagged</th><td>newsletter</td><td>partner</td></tr><tr><th scope="row">Day 6: Google search, no tags, pays</th><td>newsletter</td><td>partner</td></tr></tbody></table>
+<ul class="post-list"><li><b>First value</b> says which campaign introduced the buyer. Write it once and never replace it.</li><li><b>Last value</b> says which campaign came most recently. Replace the whole set at once. If you replace key by key, the source of one link ends up next to the campaign of another.</li><li><b>Neither sees the Google search.</b> An untagged visit writes nothing, so the last stored tag is not always the last visit. Search, AI answers and links you did not tag never show up in saved tags.</li></ul>
+<p class="p">Saving both keeps the choice open. Whichever you report, use the same one everywhere. <a href="/blog/first-touch-vs-last-touch-attribution-saas">First touch vs last touch attribution</a> covers which fits which business.</p>
+<h2>The other way: keep a visitor ID and join later</h2>
+<p class="p">Saved tags are a copy of something your analytics already recorded on the landing page. Instead of carrying the copy to checkout, you can carry one random ID and look the visits up afterwards. This is how Virling works:</p>
+<ol class="post-list"><li>The script reads <code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code>, <code>utm_content</code> and <code>utm_term</code> from the address on each pageview, and the referrer on the first one of a page load. They are stored with the visit on the server, not in the browser.</li><li>It sets one first-party cookie, <code>virling_vid</code>, with a random ID. The cookie is on your registrable domain, so subdomains share it.</li><li>Your checkout carries that ID, and the payment arrives with it.</li><li>Virling finds the visits of that ID before the payment and credits one of them.</li></ol>
+<p class="p">Your server has one value to pass on, whatever the campaign was:</p>
+<pre>const session = await stripe.checkout.sessions.create({
+  client_reference_id: req.cookies.virling_vid,
+  mode: "payment",
+  line_items: [{ price: "price_...", quantity: 1 }],
+  success_url: "https://example.com/thanks",
+});</pre>
+<p class="p">The <a href="/tools/checkout-snippet-generator">checkout snippet generator</a> writes this line for Stripe, Paddle, Shopify and the other providers, and the <a href="https://docs.virling.com/payments/checkout">checkout guide</a> explains each one. On Stripe, Polar, Dodo Payments and LemonSqueezy checkout links on your pages the script adds the ID itself.</p>
+<p class="p">Two things change. In the journey above, all three visits are on record, including the Google search. And first or last becomes a setting: Virling credits the last visit that was not Direct by default, so the Google search here. Switching the site to first touch recomputes past payments too and credits the newsletter. See <a href="https://docs.virling.com/attribution/model">model and lookback window</a>.</p>
+<p class="p"><b>When it breaks:</b> the ID is also a cookie set by a script, so the Safari caps above apply to it. The script renews it on each page load, but a Safari visitor who stays away longer comes back as a new one, and earlier visits are not joined. A cleared cookie or a second device does the same. In <a href="https://docs.virling.com/track/cookieless">cookieless mode</a> there is no ID to pass, and a payment link opened straight from an email carries none. A payment without an ID still counts toward revenue, as Unattributed, unless it can be <a href="https://docs.virling.com/attribution/unattributed">matched by email</a>.</p>
+<h2>Which one to use</h2>
+<ul class="post-list"><li><b>You want the tags inside your CRM or payment records:</b> the cookie, first and last</li><li><b>One host, and a form you control:</b> <code>localStorage</code> with a hidden field is enough</li><li><b>You cannot store anything, and the visit ends in one sitting:</b> tags on links, knowing that return visits are lost</li><li><b>You want revenue by channel, untagged visits included:</b> a visitor ID, joined to the visits later</li></ul>
+<h2>How to check it works</h2>
+<ol class="post-list"><li>Open your site in a private window with <code>?utm_source=test&amp;utm_medium=email</code> on the end</li><li>Click through two or three pages, including one subdomain if you have one</li><li>In the browser tools, look under Storage or Application for the cookie or the stored value</li><li>Open the site again in the same window without tags, and confirm the saved value is still there</li><li>Pay in your provider&rsquo;s test mode and find the tags, or the visitor ID, on the payment</li></ol>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+<h2>Frequently asked questions</h2>
+<h3>How do I keep UTM parameters across pages?</h3><p class="p">Read them from the landing page address and save them in a first-party cookie, or in localStorage if you only need them in the browser on one host. Adding them to every internal link also works within one visit, but breaks on forms, redirects and return visits.</p>
+<h3>Should I store UTM parameters in a cookie or localStorage?</h3><p class="p">Use a cookie if your server or a subdomain needs the tags, because the browser sends it with each request and it can cover subdomains. Use localStorage if one host reads them in the browser and adds them to a form. Safari limits how long both last.</p>
+<h3>How long do saved UTM parameters last?</h3><p class="p">A cookie lasts as long as its max-age, except in Safari, which caps cookies set by a script at seven days and in some cases one day. localStorage has no expiry of its own, but Safari deletes it after seven days of use without interaction on the site.</p>
+<h3>Should I save the first or the last UTM parameters?</h3><p class="p">Save both if you can. The first set says which campaign introduced the buyer and the last set says which came most recently. Replace the last set as a whole, so tags from two campaigns never mix.</p>
+<h3>Should I add UTM parameters to internal links?</h3><p class="p">Not by hand with new values, because that overwrites the source the visitor arrived with. Copying the arriving tags onto internal links keeps the source, but a copied or bookmarked address then counts as another campaign click.</p>
+<h3>Do I need to pass UTM parameters to Stripe?</h3><p class="p">Only if you want them on the payment itself, in metadata. To see revenue by source, pass a visitor ID such as client_reference_id instead, and join the payment to the visits that ID made.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>Join each payment to the visit that brought it</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
