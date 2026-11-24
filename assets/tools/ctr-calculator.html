@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CTR calculator: click-through rate formula and example | Virling</title>
+<meta name="description" content="Work out CTR from clicks and impressions, or find the clicks or impressions you need. Add cost and orders for cost per click and revenue per thousand.">
+<link rel="canonical" href="https://virling.com/tools/ctr-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/ctr-calculator">
+<meta property="og:title" content="CTR calculator: click-through rate formula and example | Virling">
+<meta property="og:description" content="Work out CTR from clicks and impressions, or find the clicks or impressions you need. Add cost and orders for cost per click and revenue per thousand.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"CTR calculator","url":"https://virling.com/tools/ctr-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"CTR calculator","item":"https://virling.com/tools/ctr-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / ctr calculator</span><h1>CTR calculator: work out click-through rate</h1><p class="lead">CTR, click-through rate, is the share of impressions that became clicks: <code>CTR = clicks / impressions &times; 100</code>. Enter any two of impressions, clicks and CTR to get the third. Add cost and orders to see cost per click and revenue per 1,000 impressions. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="ctr" autocomplete="off">
+  <label>Impressions<input name="imps" type="number" min="0" step="1" value="40000"></label>
+  <label>Clicks<input name="clicks" type="number" min="0" step="1" value="600"></label>
+  <label>CTR (%) <span class="dim">leave one of these three empty</span><input name="rate" type="number" min="0" max="100" step="any"></label>
+  <label>Cost ($, optional)<input name="cost" type="number" min="0" step="any" value="900"></label>
+  <label>Orders (optional)<input name="orders" type="number" min="0" step="1" value="12"></label>
+  <label>Average order value ($, optional)<input name="aov" type="number" min="0" step="any" value="80"></label>
+</form>
+<div class="tool-stats" id="ctr-out"></div>
+<p class="fine-note" id="ctr-read" aria-live="polite"></p>
+<p class="fine-note">The numbers filled in above are an example. Replace them with your own. To get clicks or impressions, empty that field and enter a CTR.</p>
+<div class="txt post tool-cta">
+<p class="p">Cost per click is cost divided by clicks. Revenue per 1,000 impressions is orders times average order value, divided by impressions, times 1,000.</p>
+<p class="p">The orders are the hard part. Virling measures them from your real payments: it links every visit to the payment it led to and credits each payment to the source and campaign of the visit that brought it. See <a href="https://docs.virling.com/attribution/">how attribution works</a> in the docs. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/cpc-calculator">CPC calculator</a>, <a href="/tools/cpm-calculator">CPM calculator</a>, <a href="/tools/conversion-rate-calculator">conversion rate calculator</a>, <a href="/blog/conversion-rate-by-traffic-source">conversion rate by traffic source</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The CTR formula</h2>
+<p class="p">Click-through rate is clicks divided by impressions, as a percentage:</p>
+<p class="p"><code>CTR = clicks / impressions &times; 100</code></p>
+<p class="p">The same formula turned around gives the other two:</p>
+<p class="p"><code>clicks = impressions &times; CTR / 100</code> and <code>impressions = clicks / CTR &times; 100</code></p>
+<p class="p">With a cost, orders and an average order value, the calculator also shows what a click cost and what a thousand impressions earned:</p>
+<p class="p"><code>cost per click = cost / clicks</code> and <code>revenue per 1,000 impressions = orders &times; average order value / impressions &times; 1,000</code></p>
+<p class="p">For an ad, use the impressions and clicks in the ad report. For search, use the impressions and clicks of one page or query. For email, say whether you divide by emails delivered or by opens, because dividing by opens gives a higher rate, and keep to one.</p>
+<h2>A worked example</h2>
+<p class="p">These are made-up numbers, the ones the calculator starts with, not a benchmark. An ad was shown 40,000 times and clicked 600 times, so its CTR is 600 / 40,000 &times; 100 = 1.5%. It cost $900, so each click cost $900 / 600 = $1.50.</p>
+<p class="p">The clicks led to 12 orders at an average of $80, which is $960 of revenue. Revenue per 1,000 impressions is $960 / 40,000 &times; 1,000 = $24.00.</p>
+<p class="p">To plan instead, empty the clicks field: 100,000 impressions at the same 1.5% would give 1,500 clicks.</p>
+<h2>Why a high CTR can still bring no customers</h2>
+<p class="p">CTR stops at the click. It says the headline, picture or offer made people curious, not that they wanted to buy. A vague promise, a free giveaway or a surprising headline can raise CTR by bringing people who were never going to pay. If the page then shows something else, or a price they did not expect, they leave. Some reports also count accidental taps and bots as clicks.</p>
+<p class="p">Take another made-up ad next to the one above, with the same 40,000 impressions and the same $80 orders. It gets 1,200 clicks, a CTR of 3%, but only 3 orders. Its revenue per 1,000 impressions is $240 / 40,000 &times; 1,000 = $6.00, a quarter of the first ad's $24.00, with twice the CTR.</p>
+<p class="p">So read CTR with what happens after it. The <a href="/tools/conversion-rate-calculator">conversion rate calculator</a> shows how many visitors pay, the <a href="/tools/cpc-calculator">CPC calculator</a> the most you can pay for a click, and the <a href="/tools/cpm-calculator">CPM calculator</a> what a thousand impressions cost. To compare channels by the visitors who pay, read <a href="/blog/conversion-rate-by-traffic-source">conversion rate by traffic source</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>CTR calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate CTR?</h3><p class="p">Divide clicks by impressions and multiply by 100. 600 clicks from 40,000 impressions is 600 / 40,000 &times; 100 = 1.5%. Count both for the same ad, page or email over the same dates.</p></div>
+      <div><h3>How do I find clicks or impressions from CTR?</h3><p class="p">Clicks are impressions times CTR: 40,000 impressions at 1.5% is 600 clicks. Impressions are clicks divided by CTR: 600 clicks at 1.5% is 40,000 impressions. Fill in any two in the calculator and leave the third empty.</p></div>
+      <div><h3>Can CTR be over 100%?</h3><p class="p">Not when each impression is counted once and can be clicked once. Some reports count every click, so one person clicking twice on a single view can push it over. If clicks are above impressions, check that both cover the same dates, the same placement and the same way of counting.</p></div>
+      <div><h3>What is a good CTR?</h3><p class="p">There is no figure that fits every channel, because a search result, a banner and an email are seen in different ways. Compare an ad, page or email with your own earlier ones in the same place, and then with the orders each one brought.</p></div>
+      <div><h3>Is CTR the same as conversion rate?</h3><p class="p">No. CTR is the share of impressions that became clicks, before anyone reaches your site. Conversion rate is the share of visitors who then did what you wanted, such as paying. A page can have a high CTR and a low conversion rate.</p></div>
+      <div><h3>Why does my high-CTR ad bring no sales?</h3><p class="p">Usually the people who click are curious, not buyers, or the page does not deliver what the ad promised. Accidental taps and bots also count as clicks in some reports. Payments joined to visits show which clicks turned into customers.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate CTR?", "acceptedAnswer": {"@type": "Answer", "text": "Divide clicks by impressions and multiply by 100. 600 clicks from 40,000 impressions is 600 / 40,000 × 100 = 1.5%. Count both for the same ad, page or email over the same dates."}}, {"@type": "Question", "name": "How do I find clicks or impressions from CTR?", "acceptedAnswer": {"@type": "Answer", "text": "Clicks are impressions times CTR: 40,000 impressions at 1.5% is 600 clicks. Impressions are clicks divided by CTR: 600 clicks at 1.5% is 40,000 impressions. Fill in any two in the calculator and leave the third empty."}}, {"@type": "Question", "name": "Can CTR be over 100%?", "acceptedAnswer": {"@type": "Answer", "text": "Not when each impression is counted once and can be clicked once. Some reports count every click, so one person clicking twice on a single view can push it over. If clicks are above impressions, check that both cover the same dates, the same placement and the same way of counting."}}, {"@type": "Question", "name": "What is a good CTR?", "acceptedAnswer": {"@type": "Answer", "text": "There is no figure that fits every channel, because a search result, a banner and an email are seen in different ways. Compare an ad, page or email with your own earlier ones in the same place, and then with the orders each one brought."}}, {"@type": "Question", "name": "Is CTR the same as conversion rate?", "acceptedAnswer": {"@type": "Answer", "text": "No. CTR is the share of impressions that became clicks, before anyone reaches your site. Conversion rate is the share of visitors who then did what you wanted, such as paying. A page can have a high CTR and a low conversion rate."}}, {"@type": "Question", "name": "Why does my high-CTR ad bring no sales?", "acceptedAnswer": {"@type": "Answer", "text": "Usually the people who click are curious, not buyers, or the page does not deliver what the ad promised. Accidental taps and bots also count as clicks in some reports. Payments joined to visits show which clicks turned into customers."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which clicks became customers</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each campaign and channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("ctr"), out = document.getElementById("ctr-out"), read = document.getElementById("ctr-read");
+const num = (n) => n.toLocaleString("en-US", n > 0 && n < 0.01 ? { maximumSignificantDigits: 2 } : { maximumFractionDigits: 2 });
+const pct = (n) => num(n) + "%";
+const usd = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: n && n < 0.01 ? 6 : 2 });
+const MAX = 1e9;
+const problem = (v) => {
+  const all = Object.values(v), three = [v.imps, v.clicks, v.rate];
+  if (all.some(Number.isNaN)) return "Enter numbers only.";
+  if (all.some((n) => n < 0)) return "Enter numbers of zero or more.";
+  if (Math.max(...all) > MAX) return "Enter numbers of at most 1 billion.";
+  if ([v.imps, v.clicks, v.orders].some((n) => n !== null && !Number.isInteger(n))) return "Enter impressions, clicks and orders as whole numbers.";
+  const filled = three.filter((n) => n !== null).length;
+  if (filled < 2) return "Enter two of impressions, clicks and CTR to get the third.";
+  if (filled > 2) return "Leave one of impressions, clicks and CTR empty to work it out.";
+  if (v.imps === 0) return "Enter impressions above zero.";
+  if (v.imps !== null && v.clicks > v.imps) return "Clicks cannot be above impressions. Check that both cover the same placement and the same dates.";
+  if (v.rate > 100) return "Enter a CTR of at most 100%.";
+  if (v.rate > 0 && v.rate < 0.000001) return "Enter a CTR of 0 or at least 0.000001%.";
+  if (v.orders * v.aov > MAX) return "Enter orders and order value that multiply to at most $1 billion.";
+  if (v.imps === null && (v.clicks === 0 || v.rate === 0)) return "Enter clicks and a CTR above zero to get impressions.";
+  if (v.imps === null && v.clicks / v.rate * 100 > MAX) return "That CTR is too low to work out impressions. Enter a higher one.";
+  return "";
+};
+const calc = () => {
+  const get = (k) => { const i = f.elements[k]; return i.validity.badInput ? NaN : i.value === "" ? null : +i.value; };
+  const v = Object.fromEntries(["imps", "clicks", "rate", "cost", "orders", "aov"].map((k) => [k, get(k)]));
+  const show = (...x) => { out.innerHTML = ["CTR", "Clicks", "Impressions", "Cost per click", "Revenue per 1,000 impressions"].map((n, i) => `<div><span class="dim">${n}</span><b>${x[i]}</b></div>`).join(""); };
+  const msg = problem(v);
+  if (msg) {
+    show("No data", "No data", "No data", "No data", "No data");
+    read.textContent = msg;
+    return;
+  }
+  const r = v.rate ?? v.clicks / v.imps * 100;
+  const k = v.clicks ?? +(v.imps * v.rate / 100).toPrecision(12);
+  const i = v.imps ?? +(v.clicks / v.rate * 100).toPrecision(12);
+  const rpm = v.orders !== null && v.aov !== null ? usd(v.orders * v.aov / i * 1000) : v.orders === null ? "Add orders" : "Add order value";
+  show(pct(r), num(k), num(i), v.cost === null ? "Add cost" : k > 0 ? usd(v.cost / k) : "No clicks", rpm);
+  read.textContent = `${num(k)} ${k === 1 ? "click" : "clicks"} from ${num(i)} ${i === 1 ? "impression" : "impressions"} is a CTR of ${pct(r)}.`;
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
