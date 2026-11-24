@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cookie consent revenue tracking: what a banner hides</title>
+<meta name="description" content="Cookie consent limits revenue tracking to visitors who accept. What a decline does to attribution, how to measure your share, and the consent callback code.">
+<link rel="canonical" href="https://virling.com/blog/cookie-consent-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/cookie-consent-revenue-tracking">
+<meta property="og:title" content="Cookie consent revenue tracking: what a banner hides">
+<meta property="og:description" content="Cookie consent limits revenue tracking to visitors who accept. What a decline does to attribution, how to measure your share, and the consent callback code.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Cookie consent revenue tracking: what a banner hides","item":"https://virling.com/blog/cookie-consent-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Cookie consent revenue tracking: what a banner hides","description":"Cookie consent limits revenue tracking to visitors who accept. What a decline does to attribution, how to measure your share, and the consent callback code.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/cookie-consent-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can I track revenue without cookie consent?","acceptedAnswer":{"@type":"Answer","text":"The total, yes, because payments are imported from your payment provider. Revenue by channel, only in part: a payment is linked to a visit when checkout carries a visitor ID, and with Virling set to Until consent a visitor who has not accepted has none. Those payments show as Unattributed."}},{"@type":"Question","name":"What happens to a payment when the visitor ignores the cookie banner?","acceptedAnswer":{"@type":"Answer","text":"The same as when they decline. The visit is counted with a daily hash, no cookie is set, and the payment counts toward revenue as Unattributed. If they accept later in the same visit, that visit continues under the same ID and a payment made after it can be credited to it."}},{"@type":"Question","name":"How do I find my own consent rate for buyers?","acceptedAnswer":{"@type":"Answer","text":"Log one line per checkout with the saved consent choice and whether the visitor ID cookie is there. After a month, the checkouts with a decline or no answer, divided by all checkouts, is the share of buyers the banner leaves without a channel."}},{"@type":"Question","name":"What should happen when a visitor withdraws consent?","acceptedAnswer":{"@type":"Answer","text":"Your consent tool's callback should delete the virling_vid cookie, and the page should reload so the script drops the ID it has in memory. Visits and payments already recorded stay. From then on the visitor is counted with the daily hash."}},{"@type":"Question","name":"Does Global Privacy Control count as declining the banner?","acceptedAnswer":{"@type":"Answer","text":"That is a legal question for the places you sell to. In Virling, data-respect-gpc on the script tag makes the script send nothing for a browser with the signal on, whatever the banner says. Without the attribute the signal is not read."}},{"@type":"Question","name":"Can I use the same consent callback with any consent tool?","acceptedAnswer":{"@type":"Answer","text":"Yes, if the tool can run your code when a visitor accepts and when they change their mind. Virling has no banner of its own and does not read a consent tool's signals, so it only knows what your callback tells it."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>Cookie consent revenue tracking: what a banner hides</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p">Cookie consent limits revenue tracking to the buyers who accept. When a visitor declines or ignores the banner, the payment still reaches your payment provider, but no visitor ID goes into checkout, so the money has no channel. Your revenue total stays right; your revenue by channel covers only part of it. To find out how big that part is, log the consent choice and the visitor ID at each checkout. To get every payment you may link, call <code>virling("consent")</code> from your consent tool when the visitor accepts.</p>
+<p class="p">This page is about how the tracking works. It is not legal advice: whether you need consent, and for what, depends on where your visitors live and how you use the data.</p>
+<h2>What a banner does to attribution</h2>
+<p class="p">Revenue by channel needs one ID on both sides: on the visit, and on the payment. The cookie is what carries it from the first page to checkout. The table shows what is left for each answer, with Virling set to <b>Until consent</b>.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:560px"><thead><tr><th>What the visitor does</th><th>The visit</th><th>The payment</th></tr></thead><tbody><tr><th scope="row">Accepts on the first page</th><td>Counted, and continues under the same ID with its referrer and campaign</td><td>Credited to a visit, when checkout carries the ID</td></tr><tr><th scope="row">Accepts on a later day</th><td>Every visit is counted. The ones on earlier days were under other IDs</td><td>Credited to a visit from the day they accepted or after it</td></tr><tr><th scope="row">Ignores the banner</th><td>Counted with a hash that changes every day. Nothing is stored</td><td>Counts toward revenue, as Unattributed</td></tr><tr><th scope="row">Declines</th><td>The same as ignoring it</td><td>Counts toward revenue, as Unattributed</td></tr><tr><th scope="row">Sends Global Privacy Control, on a tag with <code>data-respect-gpc</code></th><td>Not counted</td><td>Counts toward revenue, as Unattributed</td></tr></tbody></table></div>
+<p class="p">Ignoring the banner is easy to forget, because a consent report may show only yes and no. For attribution, no answer is a no.</p>
+<p class="p">The loss is not spread evenly. If people from one channel accept less often, that channel keeps its visitors and loses more of its revenue, so its revenue per visitor looks worse than it is. Whether to use the cookie from the first page, after consent or never is a separate choice, and <a href="/blog/cookieless-analytics-and-revenue">cookieless analytics and revenue</a> compares the three modes.</p>
+<h2>Measure your own share</h2>
+<p class="p">A published consent rate says little about your site: the banner, the country and the audience all change it. There are two shares to measure, and the second is the one that matters for revenue.</p>
+<h3>Share of banners</h3>
+<p class="p">Your consent tool may report this already. If it does not, send three <a href="https://docs.virling.com/track/goals">goals</a>, only when a visitor is asked for the first time and not each time a saved answer is read:</p>
+<div class="code block"><pre data-snippet>virling("goal", "banner shown");    // the banner opened for a first answer
+virling("goal", "banner accepted"); // the first answer was yes
+virling("goal", "banner declined"); // the first answer was no</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Banners shown, minus accepted and declined, is the number left unanswered. It counts banners, not people, since someone who ignores it may see it again. On the Visitors page you can filter by goal and by source, which shows whether one source accepts less often. With Global Privacy Control respected, those browsers send no goals.</p>
+<h3>Share of buyers</h3>
+<p class="p">Buyers may answer differently from visitors, so count them where they pay. If your server creates the checkout, log one line each time:</p>
+<div class="code block"><pre data-snippet>// Node, with cookie-parser
+// savedChoice reads your consent tool's record: "yes", "no" or "none"
+console.log("checkout", savedChoice(req), req.cookies.virling_vid ? "with ID" : "no ID");</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">After a finished month, count the lines. Example only, with made-up numbers for an imaginary store:</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:480px"><thead><tr><th>Saved choice at checkout</th><th>With ID</th><th>No ID</th></tr></thead><tbody><tr><th scope="row">Yes</th><td>93</td><td>7</td></tr><tr><th scope="row">No</th><td>0</td><td>25</td></tr><tr><th scope="row">No answer</th><td>0</td><td>35</td></tr></tbody></table></div>
+<ul class="post-list"><li><b>The banner.</b> 60 of 160 checkouts had no consent, so 37.5% cannot be linked to a visit by ID.</li><li><b>A gap that is not the banner.</b> 7 buyers accepted and still had no ID. Look for a blocked script, a callback that did not run or a cookie your server does not receive.</li><li><b>A mistake.</b> An ID next to No or No answer should be zero. If it is not, the tag may be missing <code>data-cookieless</code>, or a cookie from before the banner is still there.</li></ul>
+<p class="p">These are checkouts started, not payments. If order sizes differ, log the amount too. The Virling dashboard also says what share of revenue is matched to a visit and how much had no visitor ID, but that count includes every cause, such as links opened from an email; <a href="https://docs.virling.com/attribution/unattributed">the Unattributed docs</a> list them.</p>
+<h2>Set up the consent callback</h2>
+<ol class="post-list"><li>In the site&#x27;s settings, set <b>Visitor cookie</b> to <b>Until consent</b>. In plain Cookieless mode the call does nothing.</li><li>Put the tag on every page, with <code>data-cookieless</code>. Without that attribute the script sets its cookie on the first page, before any answer. Leave out <code>data-respect-gpc</code> if you do not want the signal read.</li></ol>
+<div class="code block"><pre data-snippet>&lt;script&gt;
+  window.virling = window.virling || function () {
+    (window.virling.q = window.virling.q || []).push(arguments);
+  };
+&lt;/script&gt;
+&lt;script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com" data-cookieless data-respect-gpc&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The small script first is the <a href="https://docs.virling.com/track/goals#calling-before-the-script-loads">stub that queues calls</a>. It keeps your code from failing when the consent tool is faster than the script, or when the script is blocked or does not run because of Global Privacy Control.</p>
+<ol class="post-list" start="3"><li>Call <code>virling("consent")</code> from your consent tool when the answer is yes, and delete the cookie when it is no. This is for a generic tool, so swap in the names yours uses:</li></ol>
+<div class="code block"><pre data-snippet>// consentTool, onChoice and analytics stand for your tool's own names
+consentTool.onChoice((choice) =&gt; {
+  if (choice.analytics &amp;&amp; !navigator.globalPrivacyControl) virling("consent");
+  else forgetVisitor();
+});
+
+function forgetVisitor() {
+  const gone = "virling_vid=;path=/;max-age=0";
+  document.cookie = gone;
+  const parts = location.hostname.split(".");
+  for (let i = 0; i &lt; parts.length - 1; i++) {
+    document.cookie = gone + ";domain=" + parts.slice(i).join(".");
+  }
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<ul class="post-list"><li>If your tool runs the callback on every page with the saved answer, that is fine. <code>virling("consent")</code> does nothing once the cookie is there.</li><li>Pick the consent category that matches what your banner says. The cookie recognises a returning visitor and links a payment to the visits before it.</li><li>If you serve the script through your own proxy with <code>data-api</code>, forward <code>GET</code> requests to that path too.</li><li>The cookie only helps when <a href="https://docs.virling.com/payments/checkout">checkout carries the ID</a>. Your server can read <code>virling_vid</code> as soon as the cookie is set. In the browser, <code>window.virling?.vid?.()</code> and the ID added to payment links start with the next page load, which in a single-page app means a full reload.</li></ul>
+<p class="p">To test it, open your site in a private window and check that there is no <code>virling_vid</code> cookie. Accept, and it should appear. Withdraw, and it should be gone.</p>
+<h2>Pages before consent</h2>
+<p class="p">With Until consent, the pages a visitor sees before answering are counted under a hash made from the site, the IP address, the user agent and a salt kept only in memory. The IP address is not stored. When they accept, that hash ID becomes the cookie, so the landing page, referrer and campaign of that visit stay with them. The hash changes at midnight UTC and when the server restarts, so a visit that crosses either one starts over.</p>
+<p class="p">Some rules cover more than cookies. If you decide that nothing may be sent before consent, leave the tag off the page and add it from the callback, without <code>data-cookieless</code> and with the site set to <b>Cookie</b>. Visits without consent are then not counted. When someone accepts on their second page, the landing page is not recorded, and the visit can look Direct because the referrer is your own site and the tags were on the first address.</p>
+<h2>When consent is withdrawn</h2>
+<ul class="post-list"><li><b>Delete the cookie.</b> Virling does not watch your consent tool. The cookie is set on your main domain, which is why <code>forgetVisitor</code> tries each parent of the current host.</li><li><b>Reload the page.</b> An open page can keep the ID in memory until it loads again. A visitor who accepts again without a reload may not get the cookie until the next page.</li><li><b>Run it for a plain no as well.</b> The script reads a <code>virling_vid</code> cookie that is already there, so one set before you added the banner keeps working until it is deleted.</li><li><b>Know what stays.</b> Deleting the cookie does not remove recorded visits and payments, and an ID already saved on a cart or a checkout stays there. <a href="https://docs.virling.com/track/privacy">Privacy and consent</a> covers what can be deleted.</li></ul>
+<h2>Global Privacy Control</h2>
+<p class="p">Global Privacy Control is a signal the browser sends on every site, before any banner. With <code>data-respect-gpc</code> on the tag, the Virling script sends nothing for that browser, sets no cookie and adds no ID to checkout links. It does not delete a cookie from before, and your server would still read that one at checkout, so the callback above treats the signal as a no and deletes it. This only happens if your tool runs the callback for those visitors.</p>
+<p class="p">A visitor can send the signal and still press accept. The code above lets the signal win. Whether it should is a question for whoever advises you on privacy.</p>
+<h2>What to do with revenue you cannot link</h2>
+<ol class="post-list"><li>Keep the total from your payment provider as the revenue number, and show Unattributed as its own line. Do not spread it over the channels, because people who decline may come from different places than people who accept.</li><li>Compare channels on attributed revenue, and compare their accept rates before you cut one.</li><li>Ask buyers how they heard of you. <a href="/blog/self-reported-attribution">Self-reported attribution</a> needs no tracking cookie and reaches the buyers a banner hides.</li><li>Do not use <a href="https://docs.virling.com/attribution/unattributed#recover-payments-by-email">matching by email</a> as a way around a no. Send the email only where your own policy and the visitor&#x27;s answer allow it.</li></ol>
+<p class="p">On a WooCommerce store, the built-in order attribution can follow the banner too, and a decline then shows as Unknown; see <a href="/blog/woocommerce-order-attribution-unknown">why WooCommerce order attribution says Unknown</a>. For how Virling links store orders to visits, see <a href="/integrations/ecommerce">revenue attribution for ecommerce</a>.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+<h2>Frequently asked questions</h2>
+<h3>Can I track revenue without cookie consent?</h3><p class="p">The total, yes, because payments are imported from your payment provider. Revenue by channel, only in part: a payment is linked to a visit when checkout carries a visitor ID, and with Virling set to Until consent a visitor who has not accepted has none. Those payments show as Unattributed.</p>
+<h3>What happens to a payment when the visitor ignores the cookie banner?</h3><p class="p">The same as when they decline. The visit is counted with a daily hash, no cookie is set, and the payment counts toward revenue as Unattributed. If they accept later in the same visit, that visit continues under the same ID and a payment made after it can be credited to it.</p>
+<h3>How do I find my own consent rate for buyers?</h3><p class="p">Log one line per checkout with the saved consent choice and whether the visitor ID cookie is there. After a month, the checkouts with a decline or no answer, divided by all checkouts, is the share of buyers the banner leaves without a channel.</p>
+<h3>What should happen when a visitor withdraws consent?</h3><p class="p">Your consent tool's callback should delete the virling_vid cookie, and the page should reload so the script drops the ID it has in memory. Visits and payments already recorded stay. From then on the visitor is counted with the daily hash.</p>
+<h3>Does Global Privacy Control count as declining the banner?</h3><p class="p">That is a legal question for the places you sell to. In Virling, data-respect-gpc on the script tag makes the script send nothing for a browser with the signal on, whatever the banner says. Without the attribute the signal is not read.</p>
+<h3>Can I use the same consent callback with any consent tool?</h3><p class="p">Yes, if the tool can run your code when a visitor accepts and when they change their mind. Virling has no banner of its own and does not read a consent tool's signals, so it only knows what your callback tells it.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>Link every payment you have consent for</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
