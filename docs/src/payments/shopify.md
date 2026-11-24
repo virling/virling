@@ -99,6 +99,42 @@ Keep the storefront on your own domain, where the script runs. Checkout can stay
 
 Run the test in [Test your setup](../guides/test-your-setup.md#shopify) on the storefront: open it from a tagged link in a private window, add a product, and check that the cart has a `virling_vid` attribute, for example in the Storefront API's `cart { attributes { key value } }`. Place a test order, check that the order's note attributes include `virling_vid`, and wait a minute for the next sync. For local development, add `data-dev` to the tag. For the rest of a store setup, see [Set up an online store](../guides/ecommerce.md).
 
+## Check that it works
+
+1. Put Shopify Payments in test mode or turn on the Bogus Gateway, and add the theme snippet or your own cart code.
+2. Open a private window and visit your store through a tagged link, such as `https://yourstore.com/?utm_source=test&utm_medium=email`.
+3. In the same window, add a product to the cart, go to checkout from the cart and place a test order.
+4. In your Shopify admin, open the order and check that its note attributes, shown as additional details, include `virling_vid`.
+5. Wait a minute or two for the next sync, then open the payments list at `/app/yourstore.com/payments`. The payment shows the `test` source and the **Email** channel of your tagged visit instead of Unattributed.
+
+Use a new customer email for each test: a later order by the same customer is a renewal and keeps the first order's channel. If a step fails, see [Test your setup](../guides/test-your-setup.md#shopify).
+
+## Common questions
+
+### Do Shopify guest orders link to a visit?
+
+Yes. The link comes from the order's note attributes, not from a customer account. An order that Shopify returns without a customer counts as its own customer, so later orders are not tied to it.
+
+### Does Shop Pay or Buy it now keep the visitor ID?
+
+Virling does not look at how the order was paid, only at whether its note attributes include `virling_vid`. The theme snippet writes it to the cart, so a button that skips the cart may leave it out, and Virling does not handle that case separately. Place a test order with each button you use and check its note attributes.
+
+### How are Shopify refunds and cancellations counted?
+
+A full or partial refund lowers the revenue of its order, on that order's date. A voided order counts as failed, and a canceled order that was paid counts until it is refunded. Chargebacks are not read.
+
+### How are Shopify renewals and repeat orders credited?
+
+Shopify Subscriptions renewals, and any later order by the same customer, keep the channel of that customer's first order. An order from a subscription app with another source is tied to the first order only through the customer. If the first order is older than the first import, [renewals](../attribution/renewals.md) are usually Unattributed.
+
+### How far back does Shopify history go?
+
+The first import asks for orders created in the last 60 days. Orders from before the snippet was on your store count as revenue but are Unattributed, unless their email matches.
+
+### Why is a Shopify order Unattributed?
+
+Usually because its note attributes have no `virling_vid`: the snippet was missing, the script was blocked or cookieless, or the order came from a cart permalink, a Buy Button, or another sales channel. An order with a visitor ID is also Unattributed when no visit of that visitor falls inside the lookback window. See [Unattributed revenue](../attribution/unattributed.md).
+
 ## Guides
 
 - [Shopify revenue attribution](https://virling.com/integrations/shopify)
