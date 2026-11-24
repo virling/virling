@@ -59,6 +59,8 @@
   <url><loc>https://virling.com/integrations/stripe-developer-tools</loc></url>
   <url><loc>https://virling.com/integrations/polar-digital-products</loc></url>
   <url><loc>https://virling.com/integrations/woocommerce-online-courses</loc></url>
+  <url><loc>https://virling.com/integrations/stripe-mobile-apps</loc></url>
+  <url><loc>https://virling.com/integrations/woocommerce-memberships</loc></url>
   <url><loc>https://virling.com/blog</loc></url>
   <url><loc>https://virling.com/blog/woocommerce-order-attribution-unknown</loc></url>
   <url><loc>https://virling.com/blog/what-is-revenue-attribution</loc></url>
@@ -246,6 +248,15 @@
   <url><loc>https://virling.com/blog/self-reported-attribution</loc></url>
   <url><loc>https://virling.com/blog/phoenix-stripe-utm-tracking</loc></url>
   <url><loc>https://virling.com/blog/microsoft-ads-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/utm-content-vs-utm-term</loc></url>
+  <url><loc>https://virling.com/blog/angular-stripe-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/vue-stripe-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/convex-stripe-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/youtube-ads-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/social-media-roi</loc></url>
+  <url><loc>https://virling.com/blog/live-chat-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/pinterest-ads-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/woocommerce-attribution-plugin</loc></url>
   <url><loc>https://virling.com/vs</loc></url>
   <url><loc>https://virling.com/vs/datafast</loc></url>
   <url><loc>https://virling.com/vs/databull</loc></url>
@@ -355,5 +366,8 @@
   <url><loc>https://virling.com/tools/llms-txt-generator</loc></url>
   <url><loc>https://virling.com/tools/ai-robots-txt-generator</loc></url>
   <url><loc>https://virling.com/tools/qr-code-utm-generator</loc></url>
+  <url><loc>https://virling.com/tools/runway-calculator</loc></url>
+  <url><loc>https://virling.com/tools/acv-calculator</loc></url>
+  <url><loc>https://virling.com/tools/break-even-point-calculator</loc></url>
   <url><loc>https://virling.com/what-we-dont-do</loc></url>
 </urlset>

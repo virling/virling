@@ -110,6 +110,9 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [llms.txt generator](https://virling.com/tools/llms-txt-generator): build an llms.txt file from a site name, a summary and sections of links or a pasted list of URLs, then copy or download it
 - [Robots.txt generator for AI crawlers](https://virling.com/tools/ai-robots-txt-generator): allow or block each AI crawler, such as GPTBot and ClaudeBot, add disallowed paths and a sitemap, then copy or download the file
 - [QR code generator with UTM tags](https://virling.com/tools/qr-code-utm-generator): add source, medium and campaign to a page URL, then download the QR code as SVG or PNG
+- [Startup runway calculator](https://virling.com/tools/runway-calculator): net burn, months of runway and the month you run out of cash or break even, from cash, monthly costs, revenue and growth
+- [ACV calculator](https://virling.com/tools/acv-calculator): annual contract value, total contract value and the monthly equivalent from a contract's value, term and fees, with an average over several contracts
+- [Break-even point calculator](https://virling.com/tools/break-even-point-calculator): units and revenue you need to break even, and units for a target profit, from fixed costs, price, variable cost and payment fees
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -170,6 +173,8 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Stripe for developer tools](https://virling.com/integrations/stripe-developer-tools): for developer tool founders billing on Stripe: each subscription and usage payment tied to the GitHub link, docs page or Hacker News post that brought the buyer
 - [Polar for digital products](https://virling.com/integrations/polar-digital-products): for creators selling templates, downloads and licences through Polar: each order tied to the post, newsletter or launch that brought the buyer
 - [WooCommerce for online courses](https://virling.com/integrations/woocommerce-online-courses): for course creators on WooCommerce: each enrolment order tied to the video, email or partner that brought the student, with refunds and renewals on the same channel
+- [Stripe for mobile apps](https://virling.com/integrations/stripe-mobile-apps): for apps that sell on the web with Stripe before the install: each payment and renewal tied to the ad, post or search that brought the buyer, trials included
+- [WooCommerce for memberships](https://virling.com/integrations/woocommerce-memberships): for membership sites on WooCommerce: each member's first payment tied to the channel that brought them, with renewals and refunds on the same channel
 
 ## Compare
 
@@ -389,6 +394,15 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Self-reported attribution vs tracked attribution](https://virling.com/blog/self-reported-attribution): Self-reported attribution asks buyers how they heard about you. What it catches that clicks miss, what it gets wrong, when to ask and how to compare.
 - [Phoenix Elixir Stripe UTM tracking: controllers and LiveView](https://virling.com/blog/phoenix-stripe-utm-tracking): How to tie a Stripe Checkout payment in a Phoenix app to the visit and UTM tags behind it: read one cookie in a controller or before a LiveView mounts.
 - [Microsoft Ads revenue tracking: which campaign brings customers](https://virling.com/blog/microsoft-ads-revenue-tracking): Microsoft Ads revenue tracking: tag your ads with utm_medium=cpc so Bing clicks count as Paid, link checkout, and see payments and revenue per campaign.
+- [utm_content vs utm_term: what each one is for](https://virling.com/blog/utm-content-vs-utm-term): utm_content names the link or ad that was clicked; utm_term names the paid search keyword. Examples for ads, email and social, and when to leave them out.
+- [Angular Stripe UTM tracking: pass UTMs to Stripe Checkout](https://virling.com/blog/angular-stripe-utm-tracking): How to tie a Stripe Checkout payment in an Angular app to the visit and UTM tags behind it, with a small service and a Node endpoint.
+- [Vue Stripe UTM tracking: pass UTM tags to Stripe Checkout](https://virling.com/blog/vue-stripe-utm-tracking): How to tie a Stripe Checkout payment in a Vue and Vite app to the visit and UTM tags behind it, with one script tag and a small Node endpoint.
+- [Convex Stripe UTM tracking: Checkout from a Convex action](https://virling.com/blog/convex-stripe-utm-tracking): How to tie a Stripe Checkout payment created in a Convex action to the visit and UTM tags that brought it, with code for the browser and the action.
+- [YouTube Ads revenue tracking: which campaign brings customers](https://virling.com/blog/youtube-ads-revenue-tracking): YouTube Ads revenue tracking: tag your video ads so clicks count as Paid, link checkout to the visit, and see real payments per campaign.
+- [How to measure social media ROI: which platform brings customers](https://virling.com/blog/social-media-roi): How to measure social media ROI: the formula, how to tag profile and post links, and how to compare revenue per platform with the hours and money you spend.
+- [Live chat revenue tracking: do chats bring paying customers](https://virling.com/blog/live-chat-revenue-tracking): Live chat revenue tracking: record each chat start as a goal, see how many visitors who chatted went on to pay, and tag the links your agents send.
+- [Pinterest Ads revenue tracking: which campaign brings customers](https://virling.com/blog/pinterest-ads-revenue-tracking): Pinterest Ads revenue tracking: tag paid Pins so clicks count as Paid, keep organic Pins apart, link checkout, and see real payments per campaign.
+- [WooCommerce attribution plugin: a buyer's checklist](https://virling.com/blog/woocommerce-attribution-plugin): WooCommerce attribution plugin checklist: order meta, block checkout, refunds, subscriptions, caching, ad blockers, data ownership and page weight.
 
 ## Source
 
