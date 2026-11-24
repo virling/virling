@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Server-side revenue tracking without a tag manager</title>
+<meta name="description" content="Server-side revenue tracking compared: browser events, server events and payments read from the provider, with Node and Python checkout code.">
+<link rel="canonical" href="https://virling.com/blog/server-side-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/server-side-revenue-tracking">
+<meta property="og:title" content="Server-side revenue tracking without a tag manager">
+<meta property="og:description" content="Server-side revenue tracking compared: browser events, server events and payments read from the provider, with Node and Python checkout code.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Server-side revenue tracking without a tag manager","item":"https://virling.com/blog/server-side-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Server-side revenue tracking without a tag manager","description":"Server-side revenue tracking compared: browser events, server events and payments read from the provider, with Node and Python checkout code.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/server-side-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is server-side revenue tracking?","acceptedAnswer":{"@type":"Answer","text":"It is counting sales from your server or from your payment provider instead of from the buyer's browser. Either your server sends a purchase event when the provider confirms a payment, or a tool reads the payments from the provider. The second way needs no events from you."}},{"@type":"Question","name":"Do I need a server-side tag manager to track revenue?","acceptedAnswer":{"@type":"Answer","text":"No. A tag manager's server container forwards events that something else sends to it. If your checkout carries a visitor ID and your analytics reads payments from the provider, there is no purchase event to forward."}},{"@type":"Question","name":"Does server-side tracking get around ad blockers?","acceptedAnswer":{"@type":"Answer","text":"Only for the payment. A blocker cannot stop your server or your provider, so the sale is counted. The visit is still recorded in the browser, and when that is blocked the payment has no channel to be credited to."}},{"@type":"Question","name":"Does server-side tracking remove the need for consent?","acceptedAnswer":{"@type":"Answer","text":"Do not assume so. The visitor ID still comes from a cookie in the buyer's browser, and whether you need consent depends on where your visitors live and how you use the data. This is not legal advice."}},{"@type":"Question","name":"Can I read the visitor ID in a payment webhook?","acceptedAnswer":{"@type":"Answer","text":"Not from a cookie. The webhook request comes from the provider's servers, so it carries none of the buyer's cookies. Read the cookie on the request that creates the checkout and put the ID on the checkout."}},{"@type":"Question","name":"How are refunds and renewals tracked server-side?","acceptedAnswer":{"@type":"Answer","text":"With events, you send one for each refund and each renewal. With payments read from the provider, the refund lowers the payment it belongs to, and a renewal takes the channel of the customer's first payment."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>Server-side revenue tracking without a tag manager</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p">Server-side revenue tracking means a sale is counted by a server, not by a script on the thank-you page. There are two ways to do it without a tag manager. Your server can send a purchase event when the payment provider confirms a payment, or your analytics can read payments from the provider itself. Both need one thing from your code: at checkout, read the visitor ID cookie on the server and put it on the payment, so the sale can be matched to a visit. Reading payments also covers refunds and renewals with no events to send.</p>
+<h2>Browser event, server event or payments from the provider</h2>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>What to compare</th><th>Browser event</th><th>Server event</th><th>Payments read from the provider</th></tr></thead><tbody>
+<tr><th scope="row">What reports the sale</th><td>A script on the thank-you page</td><td>Your code, usually in a payment webhook handler</td><td>The provider's own records</td></tr>
+<tr><th scope="row">Buyer closes the tab after paying</th><td>The sale is missed</td><td>Counted</td><td>Counted</td></tr>
+<tr><th scope="row">Sale is counted twice when</th><td>The thank-you page is reloaded and nothing removes the duplicate</td><td>A webhook is delivered again and your handler does not check for it</td><td>Not expected: each payment is stored once, under its payment ID</td></tr>
+<tr><th scope="row">Refunds and renewals</th><td>No page is open, so nothing is sent</td><td>One more event for each, which you write</td><td>Read with the payments</td></tr>
+<tr><th scope="row">Amount and currency</th><td>Whatever the page sends</td><td>Whatever your code sends</td><td>What was charged</td></tr>
+<tr><th scope="row">What you maintain</th><td>A tag and its trigger</td><td>A handler, its retries and one event per case</td><td>A key, and the visitor ID at checkout</td></tr>
+<tr><th scope="row">What links it to a channel</th><td>The browser's cookie</td><td>An ID you saved at checkout</td><td>An ID you saved at checkout</td></tr>
+</tbody></table></div>
+<p class="p">The last row is the one that is easy to miss. Moving the event to a server makes the total better, but a server does not know which visit the buyer came from unless checkout carried an ID.</p>
+<h3>Where a tag manager's server container fits</h3>
+<p class="p">In the usual setup, the browser still sends the event, to a container on your own subdomain, and the container forwards it. That changes where the event goes, not what starts it: a thank-you page that never loads still sends nothing, and a renewal has no page. If you only need a script on every page, <a href="/blog/google-tag-manager-revenue-tracking">Google Tag Manager revenue tracking</a> covers the ordinary container.</p>
+<h2>Read the visitor ID cookie on your server</h2>
+<p class="p">The Virling script sets a first-party cookie, <code>virling_vid</code>, on your registrable domain, so your backend receives it with requests from the browser. Read it on the request that creates the checkout:</p>
+<ul class="post-list"><li><strong>Not in the webhook handler.</strong> That request comes from the payment provider and has none of the buyer's cookies.</li><li><strong>On the same domain.</strong> Subdomains such as <code>app.example.com</code> share the cookie. A backend on another domain does not get it, so send <code>window.virling?.vid?.()</code> from the page in the request body.</li><li><strong>With credentials.</strong> A <code>fetch</code> from <code>www.example.com</code> to <code>api.example.com</code> is cross-origin, so add <code>credentials: "include"</code> and allow credentials in the API's CORS headers.</li><li><strong>Expect it to be missing.</strong> Create the checkout anyway. The payment still counts, as Unattributed.</li></ul>
+<h3>Node</h3>
+<p class="p">With Express, <code>cookie-parser</code> and the <code>stripe</code> package:</p>
+<div class="code block"><pre data-snippet>import express from "express";
+import cookieParser from "cookie-parser";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const app = express();
+app.use(cookieParser());
+
+app.post("/checkout", async (req, res) =&gt; {
+  const session = await stripe.checkout.sessions.create({
+    client_reference_id: req.cookies.virling_vid,
+    line_items: [{ price: "price_...", quantity: 1 }],
+    mode: "subscription",
+    success_url: "https://yourdomain.com/thanks",
+  });
+  res.redirect(303, session.url);
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h3>Python</h3>
+<p class="p">With Flask and the <code>stripe</code> library:</p>
+<div class="code block"><pre data-snippet>import os
+
+import stripe
+from flask import Flask, redirect, request
+
+app = Flask(__name__)
+stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
+
+
+@app.post("/checkout")
+def checkout():
+    params = {
+        "line_items": [{"price": "price_...", "quantity": 1}],
+        "mode": "subscription",
+        "success_url": "https://yourdomain.com/thanks",
+    }
+    vid = request.cookies.get("virling_vid")
+    if vid:
+        params["client_reference_id"] = vid
+
+    session = stripe.checkout.Session.create(**params)
+    return redirect(session.url, code=303)</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h3>Your own payment form</h3>
+<p class="p">If you create a PaymentIntent yourself, there is no <code>client_reference_id</code>, so use metadata. In Node:</p>
+<div class="code block"><pre data-snippet>const intent = await stripe.paymentIntents.create({
+  amount: 4900,
+  currency: "usd",
+  metadata: { virling_vid: req.cookies.virling_vid },
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">In Python:</p>
+<div class="code block"><pre data-snippet>vid = request.cookies.get("virling_vid")
+intent = stripe.PaymentIntent.create(
+    amount=4900,
+    currency="usd",
+    metadata={"virling_vid": vid} if vid else {},
+)</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The amount is an example. If <code>client_reference_id</code> already holds your own ID, put the visitor ID in the Checkout Session's <code>metadata.virling_vid</code> instead: <a href="/blog/stripe-client-reference-id">Stripe client_reference_id</a> explains the field and its limits, and <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a> shows how to keep the tags in Stripe as well. For Paddle, Polar, LemonSqueezy, Dodo Payments, Creem, RevenueCat, WooCommerce and Shopify, the <a href="/tools/checkout-snippet-generator">checkout snippet generator</a> writes the code, and the <a href="https://docs.virling.com/payments/checkout">checkout docs</a> say which field Virling reads.</p>
+<h2>How the payment finds its visit</h2>
+<p class="p">There is no purchase event to send. You connect your provider with a key, and for Stripe that is a restricted key that can only read. Virling asks the provider for new payments once a minute, takes the visitor ID from each one, and credits the payment to one of that visitor's visits inside the lookback window, 90 days by default. LemonSqueezy, Creem and RevenueCat also send a webhook, which Virling adds for you when you connect.</p>
+<p class="p">On Stripe you can check it with a test key: pay once from a page that runs the script, wait for the next sync, and open the payments list. The payment should show a channel. The steps are in the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a>.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Refunds without an event</h2>
+<p class="p">A refund belongs to a payment that is already there. When Virling reads it, it lowers that payment's revenue, on the payment's own date, and the channel that was credited loses the same amount. How soon a later refund shows up depends on the provider:</p>
+<ul class="post-list"><li><strong>Stripe:</strong> a refund made after you connect counts even when the charge is older than 90 days, and a dispute that closes as lost after you connect counts as refunded.</li><li><strong>Paddle, WooCommerce, LemonSqueezy and Creem:</strong> payments from the last 60 days are read again every 6 hours. A refund on an older one is not picked up automatically.</li><li><strong>RevenueCat:</strong> a refund event marks the whole purchase refunded, and partial refunds are not handled separately.</li></ul>
+<p class="p">The page for each provider in the <a href="https://docs.virling.com/payments/">payments docs</a> has the rest.</p>
+<h2>Renewals without an event</h2>
+<p class="p">A renewal has no visit and no browser, so there is no cookie to read. It takes the attribution of the customer's first payment instead: the earliest payment that did not fail, from the same provider, matched by the provider's customer ID. On Stripe, a charge is a renewal when its invoice has the billing reason <code>subscription_cycle</code>, and plan changes with <code>subscription_update</code> keep the first payment's channel too.</p>
+<p class="p">Two limits follow from that. The first payment has to be in Virling, and payments older than the 90-day import, 60 days on Shopify, are not. And a payment without a customer ID cannot be linked to a first payment. The rule for every provider, and for free trials, is in the <a href="https://docs.virling.com/attribution/renewals">renewals docs</a>.</p>
+<h3>Example</h3>
+<p class="p">Made-up numbers for one imaginary customer. They arrive from a newsletter, subscribe at $40 a month, renew twice, and get the last month refunded in full.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:480px"><thead><tr><th>Method</th><th>Revenue recorded</th></tr></thead><tbody>
+<tr><th scope="row">Browser event</th><td>$40, if the thank-you page loads</td></tr>
+<tr><th scope="row">Server event for the first checkout only</th><td>$40</td></tr>
+<tr><th scope="row">Server events for checkout and renewals, none for refunds</th><td>$120</td></tr>
+<tr><th scope="row">Server events for all three</th><td>$80</td></tr>
+<tr><th scope="row">Payments read from the provider</th><td>$80</td></tr>
+</tbody></table></div>
+<p class="p">With the visitor ID on the first checkout, the $80 is credited to the newsletter.</p>
+<h2>What server-side tracking does not fix</h2>
+<ul class="post-list"><li><strong>Visits that were never recorded.</strong> The visit still starts in the browser. If the script is blocked, the payment is counted with no channel.</li><li><strong>Cookies the buyer declined.</strong> In cookieless mode, or before consent, there is no visitor ID to read. Moving the sale to a server does not settle whether you need consent. <a href="https://docs.virling.com/track/privacy">Privacy and consent</a> lists what each mode stores.</li><li><strong>A second device.</strong> A cookie from a phone is not on the laptop that pays.</li><li><strong>Links opened elsewhere.</strong> A payment link in an email or a QR code never passes through your server or your page, so it carries no ID.</li><li><strong>Missing sources.</strong> A visit with no referrer and no UTM tags is Direct, wherever the sale was counted.</li><li><strong>History.</strong> Payments from before the script was installed count as revenue and stay Unattributed.</li><li><strong>The choice of model.</strong> Which of several visits gets the credit is still a setting you pick.</li></ul>
+<p class="p">When checkout cannot carry the ID, a Stripe, Shopify or WooCommerce payment can be <a href="https://docs.virling.com/attribution/unattributed#recover-payments-by-email">matched by email</a> instead.</p>
+<h2>If you do send server events</h2>
+<p class="p">Some tools take no other input, such as an ad platform's conversion API. Then:</p>
+<ol class="post-list"><li>Send from the provider's webhook, after checking its signature, not from the route the buyer returns to.</li><li>Handle the same event twice without sending twice. Stripe says an endpoint might receive an event more than once (<a href="https://docs.stripe.com/webhooks">Stripe webhook docs</a>).</li><li>Send the payment ID with the event, so the receiving tool can drop duplicates if it supports that.</li><li>Write separate events for renewals and refunds.</li><li>Compare a finished month with the provider's own total.</li></ol>
+<h2>Frequently asked questions</h2>
+<h3>What is server-side revenue tracking?</h3><p class="p">It is counting sales from your server or from your payment provider instead of from the buyer's browser. Either your server sends a purchase event when the provider confirms a payment, or a tool reads the payments from the provider. The second way needs no events from you.</p>
+<h3>Do I need a server-side tag manager to track revenue?</h3><p class="p">No. A tag manager's server container forwards events that something else sends to it. If your checkout carries a visitor ID and your analytics reads payments from the provider, there is no purchase event to forward.</p>
+<h3>Does server-side tracking get around ad blockers?</h3><p class="p">Only for the payment. A blocker cannot stop your server or your provider, so the sale is counted. The visit is still recorded in the browser, and when that is blocked the payment has no channel to be credited to.</p>
+<h3>Does server-side tracking remove the need for consent?</h3><p class="p">Do not assume so. The visitor ID still comes from a cookie in the buyer's browser, and whether you need consent depends on where your visitors live and how you use the data. This is not legal advice.</p>
+<h3>Can I read the visitor ID in a payment webhook?</h3><p class="p">Not from a cookie. The webhook request comes from the provider's servers, so it carries none of the buyer's cookies. Read the cookie on the request that creates the checkout and put the ID on the checkout.</p>
+<h3>How are refunds and renewals tracked server-side?</h3><p class="p">With events, you send one for each refund and each renewal. With payments read from the provider, the refund lowers the payment it belongs to, and a renewal takes the channel of the customer's first payment.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>Count revenue from the payment, and see the visit behind it</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
