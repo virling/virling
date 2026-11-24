@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Markup calculator: markup, margin and price | Virling</title>
+<meta name="description" content="Work out price, markup or margin from cost and one other number, with profit per sale after an optional payment fee and a markup against margin table.">
+<link rel="canonical" href="https://virling.com/tools/markup-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/markup-calculator">
+<meta property="og:title" content="Markup calculator: markup, margin and price | Virling">
+<meta property="og:description" content="Work out price, markup or margin from cost and one other number, with profit per sale after an optional payment fee and a markup against margin table.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Markup calculator","url":"https://virling.com/tools/markup-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Markup calculator","item":"https://virling.com/tools/markup-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / markup calculator</span><h1>Markup calculator: markup, margin and price</h1><p class="lead">Markup is profit as a share of cost: <code>markup % = (price - cost) / cost &times; 100</code>. Margin is the same profit as a share of the price: <code>margin % = (price - cost) / price &times; 100</code>. Enter a cost and one of price, markup or margin to get the other two and the profit per sale. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="mk" autocomplete="off">
+  <label>Cost ($)<input name="cost" type="number" min="0" step="any" value="40"></label>
+  <label>Price ($) <span class="dim">fill in one of price, markup and margin</span><input name="price" type="number" min="0" step="any"></label>
+  <label>Markup (%)<input name="markup" type="number" min="0" step="any" value="50"></label>
+  <label>Margin (%)<input name="margin" type="number" min="0" step="any"></label>
+  <label>Payment fee (% of price, optional)<input name="fee" type="number" min="0" max="100" step="any" value="3"></label>
+  <label>Fixed payment fee ($ per sale, optional)<input name="fixed" type="number" min="0" step="any" value="0.30"></label>
+</form>
+<div class="tool-stats" id="mk-out"></div>
+<p class="fine-note" id="mk-read" aria-live="polite"></p>
+<p class="fine-note">The numbers filled in above are an example. Replace them with your own. Typing in one of price, markup and margin clears the other two. Enter the price without sales tax.</p>
+<div class="txt post tool-cta">
+<p class="p">A markup tells you what one sale leaves, not which channel brought it. Virling links every visit to the payment it led to, so you see the orders and revenue each channel brings from your real payments. See <a href="/integrations/ecommerce">revenue attribution for ecommerce</a>. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/gross-margin-calculator">gross margin calculator</a>, <a href="/tools/break-even-point-calculator">break-even point calculator</a>, <a href="/tools/discount-break-even-calculator">discount break-even calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The markup formula</h2>
+<p class="p">Profit per sale is price minus cost. Divide it by the cost for markup, or by the price for margin. Turned around, the same formulas give the price:</p>
+<p class="p"><code>price = cost &times; (1 + markup / 100)</code></p>
+<p class="p"><code>price = cost / (1 - margin / 100)</code></p>
+<p class="p">To change one into the other without a price:</p>
+<p class="p"><code>margin % = markup / (100 + markup) &times; 100</code> and <code>markup % = margin / (100 - margin) &times; 100</code></p>
+<p class="p">A payment fee comes off the profit, not the markup. The calculator works out markup and margin from the cost alone, then takes the fee off in its own line:</p>
+<p class="p"><code>profit after fee = price - cost - price &times; fee / 100 - fixed fee</code></p>
+<h2>Markup against margin</h2>
+<p class="p">Each row is worked out from the formula above. The last column is the number to multiply the cost by to get the price.</p>
+<table class="cmp"><thead><tr><th>Markup</th><th>Margin</th><th>Price</th></tr></thead><tbody id="mk-rows"></tbody></table>
+<h2>A worked example</h2>
+<p class="p">These are made-up numbers, the ones the calculator starts with, not data from a real store. A product costs $40 and the store adds a 50% markup. The price is $40 &times; 1.5 = $60, so the profit per sale is $20 and the margin is $20 / $60 = 33.33%.</p>
+<p class="p">With an example payment fee of 3% plus $0.30, the fee on a $60 sale is $1.80 + $0.30 = $2.10, which leaves $17.90.</p>
+<p class="p">If the store wanted a 50% margin instead, the price would be $40 / (1 - 0.5) = $80, a 100% markup. Using 50% as a markup when you meant a margin would price it $20 too low.</p>
+<h2>After you set the price</h2>
+<p class="p">Profit per sale has to cover everything the cost leaves out, such as rent, salaries and ads. The <a href="/tools/break-even-point-calculator">break-even point calculator</a> shows how many sales that takes, and the <a href="/tools/gross-margin-calculator">gross margin calculator</a> does the same sum for a whole month of revenue. A discount comes straight out of the profit per sale, so check it first with the <a href="/tools/discount-break-even-calculator">discount break-even calculator</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Markup calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate markup?</h3><p class="p">Subtract the cost from the price, divide by the cost and multiply by 100. A product that costs $40 and sells for $60 has a markup of 20 / 40 &times; 100 = 50%.</p></div>
+      <div><h3>What is the difference between markup and margin?</h3><p class="p">Both use the same profit. Markup divides it by the cost and margin divides it by the price. When there is a profit the price is higher than the cost, so the margin is always the smaller number: a 50% markup is a 33.33% margin.</p></div>
+      <div><h3>How do I find the price from a margin?</h3><p class="p">Divide the cost by 1 minus the margin. For a 50% margin on a $40 cost, the price is 40 / (1 - 0.5) = $80. Adding 50% to the cost would give $60, which is only a 33.33% margin.</p></div>
+      <div><h3>Can margin be 100% or more?</h3><p class="p">Not when the product costs something. Margin is the share of the price left after the cost, so it stays below 100% however high the price is. Markup has no upper limit: selling at three times the cost is a 200% markup.</p></div>
+      <div><h3>Should I include payment fees and shipping in the cost?</h3><p class="p">You can, as long as you do it the same way for every product. Shipping that you pay can be added to the cost. A payment fee usually depends on the price, so the calculator takes it off the profit in its own line instead of adding it to the cost.</p></div>
+      <div><h3>What is a good markup?</h3><p class="p">There is no figure that fits every product, because the profit has to cover different costs in each business. Start from what you spend on rent, salaries and ads, work out how many sales you can expect, and check that the profit per sale covers it.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate markup?", "acceptedAnswer": {"@type": "Answer", "text": "Subtract the cost from the price, divide by the cost and multiply by 100. A product that costs $40 and sells for $60 has a markup of 20 / 40 × 100 = 50%."}}, {"@type": "Question", "name": "What is the difference between markup and margin?", "acceptedAnswer": {"@type": "Answer", "text": "Both use the same profit. Markup divides it by the cost and margin divides it by the price. When there is a profit the price is higher than the cost, so the margin is always the smaller number: a 50% markup is a 33.33% margin."}}, {"@type": "Question", "name": "How do I find the price from a margin?", "acceptedAnswer": {"@type": "Answer", "text": "Divide the cost by 1 minus the margin. For a 50% margin on a $40 cost, the price is 40 / (1 - 0.5) = $80. Adding 50% to the cost would give $60, which is only a 33.33% margin."}}, {"@type": "Question", "name": "Can margin be 100% or more?", "acceptedAnswer": {"@type": "Answer", "text": "Not when the product costs something. Margin is the share of the price left after the cost, so it stays below 100% however high the price is. Markup has no upper limit: selling at three times the cost is a 200% markup."}}, {"@type": "Question", "name": "Should I include payment fees and shipping in the cost?", "acceptedAnswer": {"@type": "Answer", "text": "You can, as long as you do it the same way for every product. Shipping that you pay can be added to the cost. A payment fee usually depends on the price, so the calculator takes it off the profit in its own line instead of adding it to the cost."}}, {"@type": "Question", "name": "What is a good markup?", "acceptedAnswer": {"@type": "Answer", "text": "There is no figure that fits every product, because the profit has to cover different costs in each business. Start from what you spend on rent, salaries and ads, work out how many sales you can expect, and check that the profit per sale covers it."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring your sales</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the orders and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("mk"), out = document.getElementById("mk-out"), read = document.getElementById("mk-read");
+const one = ["price", "markup", "margin"], MAX = 1e7;
+const usd = (n) => { const r = Math.round(n * 100) / 100; return (r < 0 ? "-$" : "$") + Math.abs(r).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+const pct = (n) => n.toLocaleString("en-US", n && Math.abs(n) < 0.01 ? { maximumSignificantDigits: 2 } : { maximumFractionDigits: n > 99.99 && n < 100 ? 8 : 2 }) + "%";
+const blank = (i) => i.value === "" && !i.validity.badInput;
+const priceOf = (v) => +(v.price ?? (v.markup !== null ? v.cost * (1 + v.markup / 100) : v.cost / (1 - v.margin / 100))).toPrecision(12);
+const problem = (v) => {
+  const all = Object.values(v), filled = one.filter((k) => v[k] !== null).length;
+  if (all.some(Number.isNaN)) return "Enter numbers only.";
+  if (all.some((n) => n < 0)) return "Enter numbers of zero or more.";
+  if (v.cost === null) return "Enter a cost.";
+  if (v.cost < 0.01) return "Enter a cost of at least $0.01. Markup is a share of the cost, so it needs one.";
+  if (filled < 1) return "Enter a price, a markup or a margin.";
+  if (filled > 1) return "Fill in only one of price, markup and margin.";
+  if (v.price !== null && v.price < 0.01) return "Enter a price of at least $0.01.";
+  if (v.margin >= 100) return "Margin must be below 100%. It is the share of the price left after the cost, so it cannot reach 100% when the product costs something.";
+  if (v.fee > 100) return "Enter a payment fee of at most 100%.";
+  if (v.cost > MAX || v.price > MAX || v.fixed > MAX) return "Enter amounts of at most $10 million.";
+  if (priceOf(v) > MAX) return "That gives a price above $10 million. Enter a lower cost, markup or margin.";
+  return "";
+};
+const calc = () => {
+  const get = (k) => { const i = f.elements[k]; return i.validity.badInput ? NaN : blank(i) ? null : +i.value; };
+  const v = Object.fromEntries(["cost", ...one, "fee", "fixed"].map((k) => [k, get(k)]));
+  const show = (...x) => { out.innerHTML = ["Price", "Markup", "Margin", "Profit per sale", "Profit after payment fee"].map((n, i) => `<div><span class="dim">${n}</span><b>${x[i]}</b></div>`).join(""); };
+  const msg = problem(v);
+  if (msg) {
+    show("No data", "No data", "No data", "No data", "No data");
+    read.textContent = msg;
+    return;
+  }
+  const p = priceOf(v), profit = p - v.cost, mk = v.markup ?? profit / v.cost * 100, mg = v.margin ?? profit / p * 100;
+  const net = +(profit - p * v.fee / 100 - v.fixed).toFixed(8);
+  show(usd(p), pct(mk), pct(mg), usd(profit), v.fee === null && v.fixed === null ? "Add a fee" : usd(net));
+  read.textContent = `A cost of ${usd(v.cost)} and a price of ${usd(p)} is a markup of ${pct(mk)} and a margin of ${pct(mg)}.` + (profit < 0 ? " The price is below the cost, so each sale loses money." : net < 0 ? " The payment fee is more than the profit, so each sale loses money." : "");
+};
+document.getElementById("mk-rows").innerHTML = [10, 20, 25, 30, 40, 50, 75, 100, 150, 200, 300, 400].map((m) => `<tr><th scope="row">${pct(m)}</th><td>${pct(m / (100 + m) * 100)}</td><td>${+(1 + m / 100).toFixed(2)} &times; cost</td></tr>`).join("");
+f.addEventListener("input", (e) => {
+  if (one.includes(e.target.name) && !blank(e.target)) one.forEach((k) => { if (k !== e.target.name) f.elements[k].value = ""; });
+  calc();
+});
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
