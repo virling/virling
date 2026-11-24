@@ -64,7 +64,7 @@ Yes, when `virling_vid` is set on that customer before the purchase. Virling gro
 
 ### How are RevenueCat refunds counted?
 
-A refund event marks the whole payment refunded, on the purchase's date; partial refunds are not handled separately. RevenueCat sends one only when the latest subscription period is refunded, and a reversed refund is not read. Turning off auto-renewal changes nothing.
+A refund event marks the whole payment refunded, on the purchase's date; partial refunds are not handled separately. For a subscription, RevenueCat sends one only when the latest period is refunded. A reversed refund is not read. Turning off auto-renewal changes nothing.
 
 ### How are RevenueCat renewals and trials credited?
 
