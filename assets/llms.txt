@@ -113,6 +113,9 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Startup runway calculator](https://virling.com/tools/runway-calculator): net burn, months of runway and the month you run out of cash or break even, from cash, monthly costs, revenue and growth
 - [ACV calculator](https://virling.com/tools/acv-calculator): annual contract value, total contract value and the monthly equivalent from a contract's value, term and fees, with an average over several contracts
 - [Break-even point calculator](https://virling.com/tools/break-even-point-calculator): units and revenue you need to break even, and units for a target profit, from fixed costs, price, variable cost and payment fees
+- [CTR calculator](https://virling.com/tools/ctr-calculator): click-through rate from clicks and impressions, or the clicks or impressions you need, with cost per click and revenue per 1,000 impressions
+- [Markup calculator](https://virling.com/tools/markup-calculator): price, markup or margin from cost and one other number, with profit per sale after an optional payment fee
+- [Bulk UTM parser](https://virling.com/tools/bulk-utm-parser): paste up to 2,000 links to extract source, medium, campaign, content, term, ref and the clean URL, then copy the table or download it as CSV
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -175,6 +178,10 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [WooCommerce for online courses](https://virling.com/integrations/woocommerce-online-courses): for course creators on WooCommerce: each enrolment order tied to the video, email or partner that brought the student, with refunds and renewals on the same channel
 - [Stripe for mobile apps](https://virling.com/integrations/stripe-mobile-apps): for apps that sell on the web with Stripe before the install: each payment and renewal tied to the ad, post or search that brought the buyer, trials included
 - [WooCommerce for memberships](https://virling.com/integrations/woocommerce-memberships): for membership sites on WooCommerce: each member's first payment tied to the channel that brought them, with renewals and refunds on the same channel
+- [Shopify for digital products](https://virling.com/integrations/shopify-digital-products): for Shopify stores selling downloads, presets, templates or courses: each order tied to the channel, campaign and page that brought the buyer, with refunds taken off
+- [Paddle for developer tools](https://virling.com/integrations/paddle-developer-tools): for APIs, CLIs and SDKs sold through Paddle Billing: each payment tied to the GitHub, docs or package page that brought the buyer
+- [Stripe for coaches and consultants](https://virling.com/integrations/stripe-coaching-and-consulting): for coaches and consultants paid through Stripe: which Payment Links, invoices, deposits and retainers link to a visit, and which stay Unattributed
+- [Stripe for browser extensions](https://virling.com/integrations/stripe-browser-extensions): for browser extensions that sell upgrades through Stripe: which post, search or video brought each paying user, how to pass the visitor ID and what stays Unattributed
 
 ## Compare
 
@@ -403,6 +410,20 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Live chat revenue tracking: do chats bring paying customers](https://virling.com/blog/live-chat-revenue-tracking): Live chat revenue tracking: record each chat start as a goal, see how many visitors who chatted went on to pay, and tag the links your agents send.
 - [Pinterest Ads revenue tracking: which campaign brings customers](https://virling.com/blog/pinterest-ads-revenue-tracking): Pinterest Ads revenue tracking: tag paid Pins so clicks count as Paid, keep organic Pins apart, link checkout, and see real payments per campaign.
 - [WooCommerce attribution plugin: a buyer's checklist](https://virling.com/blog/woocommerce-attribution-plugin): WooCommerce attribution plugin checklist: order meta, block checkout, refunds, subscriptions, caching, ad blockers, data ownership and page weight.
+- [Stripe client_reference_id: what it is and how to use it](https://virling.com/blog/stripe-client-reference-id): client_reference_id is your own ID on a Stripe Checkout Session. See its limits, where it appears, when to use metadata, and the code to set and read it.
+- [Shopify Hydrogen UTM tracking: setup for headless stores](https://virling.com/blog/shopify-hydrogen-utm-tracking): Set up Shopify Hydrogen UTM tracking: add the script and CSP, store a visitor ID as a cart attribute, and check the order's note attributes.
+- [gclid vs UTM tags: gclid, fbclid and msclkid explained](https://virling.com/blog/gclid-fbclid-msclkid-vs-utm): gclid vs UTM: a click ID is a code its ad platform looks up, a UTM tag names the campaign in plain words. Who adds each click ID, and why you still need tags.
+- [Do UTM parameters affect SEO? Canonicals, links and sitemaps](https://virling.com/blog/do-utm-parameters-affect-seo): UTM tags do not hurt SEO by themselves if tagged URLs share a clean canonical. What Google documents on duplicates, internal links, backlinks and sitemaps.
+- [utm_source vs utm_medium: the difference, with examples](https://virling.com/blog/utm-source-vs-utm-medium): utm_source names where the link is; utm_medium names the kind of channel. Right and wrong pairs for ads, email, social, partners and QR codes, and fixes.
+- [X Ads revenue tracking: which campaign brings customers](https://virling.com/blog/x-ads-revenue-tracking): X Ads revenue tracking: tag promoted posts so clicks count as Paid, keep them apart from organic posts, link checkout, and see payments per campaign.
+- [TikTok Ads revenue tracking: which campaign brings customers](https://virling.com/blog/tiktok-ads-revenue-tracking): TikTok Ads revenue tracking: tag ads with macros so clicks count as Paid, link checkout to the visit, and see real payments per campaign.
+- [Quora Ads revenue tracking: which campaign brings customers](https://virling.com/blog/quora-ads-revenue-tracking): Quora Ads revenue tracking: tag ads and promoted answers so clicks count as Paid, link checkout to the visit, and see real payments per campaign.
+- [Email signature tracking: which links bring customers](https://virling.com/blog/email-signature-revenue-tracking): Email signature tracking without pixels: give each person one tagged link, keep the clicks out of Direct, and see which signatures bring paying customers.
+- [Revenue by device: mobile vs desktop, and how to read it](https://virling.com/blog/revenue-by-device): Revenue by device, mobile vs desktop: how to compare revenue per visitor, why phones get too little credit, and what to check before changing a page.
+- [Revenue by campaign: how to see which campaign paid](https://virling.com/blog/revenue-by-campaign): Revenue by campaign shows which campaign brought paying customers. Name campaigns, read them next to your spend, and find out why one shows no revenue.
+- [New vs returning customer revenue by channel](https://virling.com/blog/new-vs-returning-customer-revenue): New vs returning customer revenue by channel: both definitions, who gets credit for repeat payments, and a worked table for stores and subscriptions.
+- [Ecommerce attribution: a plain guide for store owners](https://virling.com/blog/ecommerce-attribution): What ecommerce attribution means, why ad platforms claim more orders than you had, which orders can be linked, and a first-week plan for your store.
+- [Why is document.referrer empty? Causes and fixes](https://virling.com/blog/referrer-policy-lost-traffic-source): document.referrer is empty when no page passed it on: noreferrer links, a strict referrer policy, HTTPS to HTTP, apps or a redirect. How to check and fix it.
 
 ## Source
 

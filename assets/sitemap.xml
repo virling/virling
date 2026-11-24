@@ -61,6 +61,10 @@
   <url><loc>https://virling.com/integrations/woocommerce-online-courses</loc></url>
   <url><loc>https://virling.com/integrations/stripe-mobile-apps</loc></url>
   <url><loc>https://virling.com/integrations/woocommerce-memberships</loc></url>
+  <url><loc>https://virling.com/integrations/shopify-digital-products</loc></url>
+  <url><loc>https://virling.com/integrations/paddle-developer-tools</loc></url>
+  <url><loc>https://virling.com/integrations/stripe-coaching-and-consulting</loc></url>
+  <url><loc>https://virling.com/integrations/stripe-browser-extensions</loc></url>
   <url><loc>https://virling.com/blog</loc></url>
   <url><loc>https://virling.com/blog/woocommerce-order-attribution-unknown</loc></url>
   <url><loc>https://virling.com/blog/what-is-revenue-attribution</loc></url>
@@ -257,6 +261,20 @@
   <url><loc>https://virling.com/blog/live-chat-revenue-tracking</loc></url>
   <url><loc>https://virling.com/blog/pinterest-ads-revenue-tracking</loc></url>
   <url><loc>https://virling.com/blog/woocommerce-attribution-plugin</loc></url>
+  <url><loc>https://virling.com/blog/stripe-client-reference-id</loc></url>
+  <url><loc>https://virling.com/blog/shopify-hydrogen-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/gclid-fbclid-msclkid-vs-utm</loc></url>
+  <url><loc>https://virling.com/blog/do-utm-parameters-affect-seo</loc></url>
+  <url><loc>https://virling.com/blog/utm-source-vs-utm-medium</loc></url>
+  <url><loc>https://virling.com/blog/x-ads-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/tiktok-ads-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/quora-ads-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/email-signature-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/revenue-by-device</loc></url>
+  <url><loc>https://virling.com/blog/revenue-by-campaign</loc></url>
+  <url><loc>https://virling.com/blog/new-vs-returning-customer-revenue</loc></url>
+  <url><loc>https://virling.com/blog/ecommerce-attribution</loc></url>
+  <url><loc>https://virling.com/blog/referrer-policy-lost-traffic-source</loc></url>
   <url><loc>https://virling.com/vs</loc></url>
   <url><loc>https://virling.com/vs/datafast</loc></url>
   <url><loc>https://virling.com/vs/databull</loc></url>
@@ -369,5 +387,8 @@
   <url><loc>https://virling.com/tools/runway-calculator</loc></url>
   <url><loc>https://virling.com/tools/acv-calculator</loc></url>
   <url><loc>https://virling.com/tools/break-even-point-calculator</loc></url>
+  <url><loc>https://virling.com/tools/ctr-calculator</loc></url>
+  <url><loc>https://virling.com/tools/markup-calculator</loc></url>
+  <url><loc>https://virling.com/tools/bulk-utm-parser</loc></url>
   <url><loc>https://virling.com/what-we-dont-do</loc></url>
 </urlset>
