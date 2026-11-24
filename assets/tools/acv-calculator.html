@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ACV calculator: annual contract value and TCV | Virling</title>
+<meta name="description" content="Get annual contract value (ACV), total contract value and the monthly equivalent from a contract's value, term and fees, then average several contracts.">
+<link rel="canonical" href="https://virling.com/tools/acv-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/acv-calculator">
+<meta property="og:title" content="ACV calculator: annual contract value and TCV | Virling">
+<meta property="og:description" content="Get annual contract value (ACV), total contract value and the monthly equivalent from a contract's value, term and fees, then average several contracts.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"ACV calculator","url":"https://virling.com/tools/acv-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"ACV calculator","item":"https://virling.com/tools/acv-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / acv calculator</span><h1>ACV calculator</h1><p class="lead">ACV = contract value / term in months &times; 12, without one-time fees. Enter one contract to get its annual contract value (ACV), total contract value (TCV) and monthly equivalent, or paste several to average their ACV. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="acv" autocomplete="off">
+  <label>Contract value ($)<span class="dim">Recurring charges over the whole term, after discounts</span><input name="value" type="number" min="0" step="0.01" value="36000"></label>
+  <label>Term (months)<span class="dim">From 1 to 120</span><input name="term" type="number" min="1" max="120" step="any" value="24"></label>
+  <label>One-time fees ($)<span class="dim">Optional. Setup, training or migration, not in the value above</span><input name="fees" type="number" min="0" step="0.01" value="3000"></label>
+</form>
+<div class="tool-stats" id="acv-out"></div>
+<p class="fine-note" id="acv-how" role="status"></p>
+<p class="fine-note">The numbers filled in on this page are examples, not benchmarks.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<div class="txt post"><h2>Average ACV over several contracts</h2></div>
+<form class="tool-form" id="avg" autocomplete="off">
+  <label class="wide">Contracts <span class="dim">one per line: contract value, term in months, one-time fees (optional); tabs, commas or semicolons between them</span><textarea name="lines" rows="6" spellcheck="false">36000, 24, 3000
+12000, 12
+90000, 36, 3000</textarea></label>
+</form>
+<div class="tool-stats" id="avg-out"></div>
+<p class="fine-note" id="avg-how" role="status"></p>
+<div class="txt post tool-cta">
+<p class="p">Average ACV is one blended number. Virling shows which channels bring the customers behind it: it links every visit to the payment it led to, invoices included, from your real payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/arr-calculator">ARR calculator</a>, <a href="/tools/sales-cycle-calculator">sales cycle calculator</a>, <a href="/blog/b2b-saas-attribution">B2B SaaS attribution for small teams</a>, <a href="/integrations/saas">revenue attribution for SaaS</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The ACV formula</h2>
+<p class="p">ACV is the recurring value of one contract, spread evenly over its term and scaled to a year:</p>
+<p class="p"><code>ACV = contract value / term in months &times; 12</code></p>
+<p class="p">Contract value here means the recurring charges over the whole term, after discounts and without one-time fees or taxes. Total contract value adds the one-time fees back, and the monthly equivalent is the recurring value per month:</p>
+<p class="p"><code>TCV = contract value + one-time fees</code> and <code>monthly equivalent = contract value / term in months</code></p>
+<p class="p">The average of several contracts is the sum of their ACVs divided by how many there are:</p>
+<p class="p"><code>average ACV = sum of ACVs / number of contracts</code></p>
+<h2>ACV, TCV and ARR compared</h2>
+<table class="cmp"><thead><tr><th>Metric</th><th>What it covers</th><th>Formula</th></tr></thead><tbody>
+<tr><th>ACV</th><td>One contract, per year, without one-time fees</td><td>Contract value / term in months &times; 12</td></tr>
+<tr><th>TCV</th><td>One contract, whole term, with one-time fees</td><td>Contract value + one-time fees</td></tr>
+<tr><th>ARR</th><td>All active customers, per year, recurring revenue only</td><td>MRR &times; 12</td></tr>
+</tbody></table>
+<p class="p">Use ACV to compare deals with different terms, TCV for what a customer has committed to in total, and ARR for the size of the recurring business. The <a href="/tools/arr-calculator">ARR calculator</a> works out the last one from MRR or plans.</p>
+<h2>A worked example</h2>
+<p class="p">These are the example numbers filled in above. A customer signs for $36,000 over 24 months and pays a $3,000 setup fee. ACV is $36,000 / 24 &times; 12 = $18,000, TCV is $36,000 + $3,000 = $39,000 and the monthly equivalent is $36,000 / 24 = $1,500.</p>
+<p class="p">Add two more contracts: $12,000 over 12 months, with an ACV of $12,000, and $90,000 over 36 months with a $3,000 fee, with an ACV of $30,000. Average ACV is ($18,000 + $12,000 + $30,000) / 3 = $20,000. Average TCV is ($39,000 + $12,000 + $93,000) / 3 = $48,000, higher because two of the contracts run for more than a year and carry fees.</p>
+<h2>What this number misses</h2>
+<p class="p">ACV says how large a deal is per year, not when the cash arrives, whether the customer renews or which marketing brought them. A few large contracts can also lift the average above what most customers pay. Read it next to how long deals take, with the <a href="/tools/sales-cycle-calculator">sales cycle calculator</a>, and next to the channel that started each deal: <a href="/blog/b2b-saas-attribution">B2B SaaS attribution for small teams</a> covers trials, invoices and sales calls, and <a href="/integrations/saas">revenue attribution for SaaS</a> shows how payments are joined to visits.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>ACV calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate ACV?</h3><p class="p">Divide the recurring value of the contract by its term in months, then multiply by 12. Leave one-time fees out. A contract worth $36,000 over 24 months has an ACV of $18,000.</p></div>
+      <div><h3>What is the difference between ACV and TCV?</h3><p class="p">ACV is the recurring value of one contract per year. TCV is everything the customer commits to over the whole term, one-time fees included. For a 12-month contract with no one-time fees the two are the same.</p></div>
+      <div><h3>What is the difference between ACV and ARR?</h3><p class="p">ACV describes one contract, or the average of several. ARR adds up the yearly recurring revenue of every active customer. If every active contract is counted, with no one-time fees in either number, the sum of their ACVs usually matches ARR.</p></div>
+      <div><h3>Should one-time fees count in ACV?</h3><p class="p">This calculator leaves them out, because setup, training and other one-time fees do not repeat each year. They count in TCV. Some teams include them in the first year's ACV, so check which definition is used before comparing numbers.</p></div>
+      <div><h3>How do you calculate ACV for a contract shorter than a year?</h3><p class="p">The same formula scales it up to 12 months: $3,000 over 6 months gives an ACV of $6,000. That assumes the contract renews at the same price. If it will not renew, TCV is the safer number to report.</p></div>
+      <div><h3>How do you calculate average ACV?</h3><p class="p">Work out the ACV of each contract, add them up and divide by the number of contracts. Each contract counts once, whatever its term, so a three-year deal does not weigh more than a one-year deal.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate ACV?", "acceptedAnswer": {"@type": "Answer", "text": "Divide the recurring value of the contract by its term in months, then multiply by 12. Leave one-time fees out. A contract worth $36,000 over 24 months has an ACV of $18,000."}}, {"@type": "Question", "name": "What is the difference between ACV and TCV?", "acceptedAnswer": {"@type": "Answer", "text": "ACV is the recurring value of one contract per year. TCV is everything the customer commits to over the whole term, one-time fees included. For a 12-month contract with no one-time fees the two are the same."}}, {"@type": "Question", "name": "What is the difference between ACV and ARR?", "acceptedAnswer": {"@type": "Answer", "text": "ACV describes one contract, or the average of several. ARR adds up the yearly recurring revenue of every active customer. If every active contract is counted, with no one-time fees in either number, the sum of their ACVs usually matches ARR."}}, {"@type": "Question", "name": "Should one-time fees count in ACV?", "acceptedAnswer": {"@type": "Answer", "text": "This calculator leaves them out, because setup, training and other one-time fees do not repeat each year. They count in TCV. Some teams include them in the first year's ACV, so check which definition is used before comparing numbers."}}, {"@type": "Question", "name": "How do you calculate ACV for a contract shorter than a year?", "acceptedAnswer": {"@type": "Answer", "text": "The same formula scales it up to 12 months: $3,000 over 6 months gives an ACV of $6,000. That assumes the contract renews at the same price. If it will not renew, TCV is the safer number to report."}}, {"@type": "Question", "name": "How do you calculate average ACV?", "acceptedAnswer": {"@type": "Answer", "text": "Work out the ACV of each contract, add them up and divide by the number of contracts. Each contract counts once, whatever its term, so a three-year deal does not weigh more than a one-year deal."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring your contracts</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("acv"), out = document.getElementById("acv-out"), how = document.getElementById("acv-how");
+const g = document.getElementById("avg"), avgOut = document.getElementById("avg-out"), avgHow = document.getElementById("avg-how");
+const usd = (n) => { const d = n < 100 ? 2 : 0; return "$" + n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); };
+const stats = (rows) => rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+const max = 1e12;
+const check = (value, term, fees) => !(value > 0 && value <= max) ? "Enter a contract value above 0, up to 1 trillion."
+  : !(term >= 1 && term <= 120) ? "Enter a term from 1 to 120 months."
+  : !(fees >= 0 && fees <= max) ? "Enter one-time fees from 0 to 1 trillion, or leave them empty." : "";
+const calc = () => {
+  const e = f.elements, value = e.value.valueAsNumber, term = e.term.valueAsNumber;
+  const fees = e.fees.value === "" && !e.fees.validity.badInput ? 0 : e.fees.valueAsNumber;
+  const err = check(value, term, fees);
+  out.innerHTML = err ? "" : stats([["Annual contract value", usd(value / term * 12)], ["Total contract value", usd(value + fees)], ["Monthly equivalent", usd(value / term)]]);
+  how.textContent = err || `ACV is ${usd(value)} / ${term} months times 12. TCV is ${usd(value)} plus ${usd(fees)} of one-time fees.` + (term < 12 ? " The term is shorter than a year, so ACV assumes it renews at the same price." : "");
+};
+const num = (s) => /^\$?(\d+|\d{1,3}(,\d{3})+)(\.\d+)?$/.test(s) ? Number(s.replace(/[$,]/g, "")) : NaN;
+const avg = () => {
+  const ok = [], bad = [];
+  g.elements.lines.value.split(/\r?\n/).forEach((line, i) => {
+    if (!line.trim()) return;
+    // A comma right before exactly three digits is a thousands separator.
+    const c = line.split(/[\t;]|,(?!\d{3}(?!\d))/).map((s) => s.trim());
+    while (c.length > 2 && !c[c.length - 1]) c.pop();
+    const v = c.map(num);
+    if (v.length < 2 || v.length > 3 || check(v[0], v[1], v.length > 2 ? v[2] : 0)) bad.push(i + 1);
+    else ok.push({ acv: v[0] / v[1] * 12, tcv: v[0] + (v[2] || 0) });
+  });
+  const n = ok.length, sum = (k) => ok.reduce((s, x) => s + x[k], 0);
+  avgOut.innerHTML = n ? stats([["Average ACV", usd(sum("acv") / n)], ["Total ACV", usd(sum("acv"))], ["Average TCV", usd(sum("tcv") / n)], ["Contracts counted", n.toLocaleString("en-US")]]) : "";
+  const skip = bad.length ? `Skipped line${bad.length === 1 ? "" : "s"} ${bad.slice(0, 10).join(", ")}${bad.length > 10 ? ` and ${bad.length - 10} more` : ""}: each line needs a value above 0, a term from 1 to 120 months and, if any, fees of 0 or more.` : "";
+  avgHow.textContent = n ? `Average ACV is ${usd(sum("acv"))} / ${n.toLocaleString("en-US")}. ${skip}`.trim() : skip || "Paste at least one contract to see the average.";
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+g.addEventListener("input", avg);
+calc();
+avg();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
