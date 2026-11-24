@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Angular Stripe UTM tracking: pass UTMs to Stripe Checkout</title>
+<meta name="description" content="How to tie a Stripe Checkout payment in an Angular app to the visit and UTM tags behind it, with a small service and a Node endpoint.">
+<link rel="canonical" href="https://virling.com/blog/angular-stripe-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/angular-stripe-utm-tracking">
+<meta property="og:title" content="Angular Stripe UTM tracking: pass UTMs to Stripe Checkout">
+<meta property="og:description" content="How to tie a Stripe Checkout payment in an Angular app to the visit and UTM tags behind it, with a small service and a Node endpoint.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Angular Stripe UTM tracking: pass UTMs to Stripe Checkout","item":"https://virling.com/blog/angular-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"Angular Stripe UTM tracking: pass UTMs to Stripe Checkout","description":"How to tie a Stripe Checkout payment in an Angular app to the visit and UTM tags behind it, with a small service and a Node endpoint.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/angular-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Stripe Checkout from an Angular app?","acceptedAnswer":{"@type":"Answer","text":"Read the visitor ID in a service with window.virling?.vid?.(), post it to the endpoint that creates the Checkout Session, and set it as metadata.virling_vid. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them."}},{"@type":"Question","name":"Why are my UTM parameters gone after the first route change?","acceptedAnswer":{"@type":"Answer","text":"Angular's router replaces the query parameters on navigation unless you set queryParamsHandling to preserve or merge. The Virling script records the tags from the landing pageview, so checkout only needs the visitor ID and you do not have to keep the tags in the URL."}},{"@type":"Question","name":"Can I create the Checkout Session in Angular, without a backend?","acceptedAnswer":{"@type":"Answer","text":"No. Creating a session needs your Stripe secret key, and everything in an Angular bundle is public. Use a small endpoint or serverless function. If you do not want a backend, link to a Stripe Payment Link instead."}},{"@type":"Question","name":"Should I use client_reference_id or metadata.virling_vid?","acceptedAnswer":{"@type":"Answer","text":"Either works. Virling reads metadata.virling_vid on the session first, then client_reference_id. Metadata leaves client_reference_id free for your own user or order ID."}},{"@type":"Question","name":"Can I put the visitor ID in subscription_data.metadata?","acceptedAnswer":{"@type":"Answer","text":"Not for Virling. It reads the charge, its PaymentIntent and the Checkout Session, not the metadata of the subscription. Set metadata.virling_vid on the session itself."}},{"@type":"Question","name":"What happens if the visitor ID is missing?","acceptedAnswer":{"@type":"Answer","text":"The session is created without it, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>Angular Stripe UTM tracking: pass UTMs to Stripe Checkout</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p">Angular Stripe UTM tracking takes one value. Add the Virling script to <code>src/index.html</code>, read the visitor ID in a service with <code>window.virling?.vid?.()</code>, post it to the Node endpoint that creates the Stripe Checkout Session, and set it as <code>metadata.virling_vid</code>. Stripe keeps that one ID on the session, and Virling joins the payment to every visit behind it, with the UTM tags of each, so you see which channel brought the buyer.</p>
+<p class="p">The code follows the Angular 22 and Stripe documentation linked in each step. For the same flow in React, see <a href="/blog/react-stripe-utm-tracking">React Stripe UTM tracking</a>. For Payment Links and where the values show up in Stripe, see the general guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Why Angular apps lose UTM tags before checkout</h2>
+<p class="p">A visitor lands on <code>/?utm_source=newsletter&amp;utm_campaign=launch</code>, then clicks a <code>routerLink</code> to <code>/pricing</code>. By default the router replaces the current query parameters with those of the new link (<a href="https://angular.dev/api/router/QueryParamsHandling">QueryParamsHandling</a>), so the tags are gone from the URL by the time the visitor clicks Buy. Stripe Checkout then runs on Stripe's domain and only stores what your server passes when it creates the session.</p>
+<p class="p">Setting <code>queryParamsHandling="preserve"</code> on every link keeps the tags only for that one visit. The Virling script records them with the landing pageview instead. It hooks into <code>history.pushState</code>, <code>history.replaceState</code> and the back button, so route changes are counted as pageviews and stay in the same session and channel as the landing. Checkout only needs the visitor ID. If the tags never reach your landing page at all, see <a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a>.</p>
+<h2>Step 1: add the script to src/index.html</h2>
+<p class="p">Paste the tag before <code>&lt;/head&gt;</code> in <code>src/index.html</code>, the main HTML page of the app (<a href="https://angular.dev/reference/configs/file-structure">Angular file structure</a>). If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<div class="code block"><pre data-snippet>&lt;!-- src/index.html --&gt;
+&lt;script defer src="https://app.virling.com/v.js"
+  data-site="yourdomain.com"&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain and records the UTM tags of each visit against it. Load it once, here: Angular does not support <code>&lt;script&gt;</code> in component templates (<a href="https://angular.dev/guide/templates">Angular templates</a>).</p>
+<h2>Step 2: read the visitor ID in a service</h2>
+<p class="p">The script loads with <code>defer</code>, so checkout code can run before it; wait for it briefly. <code>window.virling?.vid?.()</code> returns <code>null</code> in cookieless mode and nothing when the script is blocked, so the service sends <code>null</code> in both cases:</p>
+<div class="code block"><pre data-snippet>// src/app/checkout.ts
+import { HttpClient } from "@angular/common/http";
+import { Injectable, inject } from "@angular/core";
+import { from, switchMap } from "rxjs";
+
+declare global {
+  interface Window {
+    virling?: { vid?: () =&gt; string | null };
+  }
+}
+
+@Injectable({ providedIn: "root" })
+export class Checkout {
+  private http = inject(HttpClient);
+
+  start() {
+    return from(this.visitorId()).pipe(
+      switchMap((vid) =&gt; this.http.post&lt;{ url: string }&gt;("/api/checkout", { vid })),
+    );
+  }
+
+  private async visitorId() {
+    for (let i = 0; i &lt; 20 &amp;&amp; !window.virling?.vid; i++) {
+      await new Promise((r) =&gt; setTimeout(r, 100));
+    }
+    return window.virling?.vid?.() || null;
+  }
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">In Angular 21 and later <code>HttpClient</code> can be injected by default. In earlier versions, add <code>provideHttpClient()</code> to the providers in <code>app.config.ts</code> (<a href="https://angular.dev/guide/http/setup">HttpClient setup</a>). The newer <code>@Service()</code> decorator is a shorthand for <code>@Injectable({ providedIn: "root" })</code> (<a href="https://angular.dev/guide/di/creating-and-using-services">Angular services</a>); use either.</p>
+<p class="p">Call the service from the button. The request is sent only when you subscribe (<a href="https://angular.dev/guide/http/making-requests">HttpClient requests</a>):</p>
+<div class="code block"><pre data-snippet>// src/app/buy-button.ts
+import { Component, inject, signal } from "@angular/core";
+import { Checkout } from "./checkout";
+
+@Component({
+  selector: "app-buy-button",
+  template: `&lt;button type="button" [disabled]="busy()" (click)="buy()"&gt;Buy&lt;/button&gt;`,
+})
+export class BuyButton {
+  private checkout = inject(Checkout);
+  protected readonly busy = signal(false);
+
+  protected buy() {
+    this.busy.set(true);
+    this.checkout.start().subscribe({
+      next: ({ url }) =&gt; {
+        window.location.href = url;
+      },
+      error: () =&gt; this.busy.set(false),
+    });
+  }
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The ID is read on click, so this also works with server-side rendering, where <code>window</code> does not exist during the render.</p>
+<h2>Step 3: create the Checkout Session in Node with metadata</h2>
+<p class="p">The endpoint holds the Stripe secret key. Install it with <code>npm install express stripe</code>, outside the Angular bundle. It sets the visitor ID as <code>metadata.virling_vid</code> and returns the session URL (<a href="https://docs.stripe.com/api/checkout/sessions/create?lang=node">Stripe API reference</a>):</p>
+<div class="code block"><pre data-snippet>// server.mjs
+import express from "express";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const appUrl = process.env.APP_URL || "http://localhost:4200";
+const app = express();
+app.use(express.json());
+
+app.post("/api/checkout", async (req, res) =&gt; {
+  const vid = String(req.body.vid ?? "");
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
+    success_url: `${appUrl}/thanks`,
+    metadata: /^[A-Za-z0-9-]{8,64}$/.test(vid) ? { virling_vid: vid } : {},
+  });
+  res.json({ url: session.url });
+});
+
+app.listen(3000);</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The price stays on the server, so the browser cannot choose its own. For a one-time payment, use a one-time price and set <code>mode</code> to <code>payment</code>. The regular expression drops anything that does not look like a visitor ID, and a missing ID leaves the metadata empty.</p>
+<p class="p">Stripe allows 50 metadata keys per object, with up to 40 characters in a key and 500 in a value (<a href="https://docs.stripe.com/metadata">Stripe metadata</a>). The key must be exactly <code>virling_vid</code>. Passing the ID as <code>client_reference_id</code>, which holds up to 200 characters, works too; use metadata when that field has your own user or order ID. If you create your own PaymentIntent for Elements, set the same <code>metadata</code> on it.</p>
+<p class="p">The full lookup order is in the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a>, and the <a href="/integrations/stripe">Stripe integration page</a> shows what Virling imports. The <a href="/tools/checkout-snippet-generator">checkout snippet generator</a> writes the server call for other providers.</p>
+<h2>Test it locally</h2>
+<p class="p">Send <code>/api</code> requests from <code>ng serve</code> to the Node endpoint with a proxy file (<a href="https://angular.dev/tools/cli/serve#proxying-to-a-backend-server">Angular CLI serve</a>):</p>
+<div class="code block"><pre data-snippet>{
+  "/api/**": {
+    "target": "http://localhost:3000",
+    "secure": false
+  }
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Save it as <code>src/proxy.conf.json</code>, point the <code>serve</code> target in <code>angular.json</code> at it, and restart <code>ng serve</code>:</p>
+<div class="code block"><pre data-snippet>"serve": {
+  "builder": "@angular/build:dev-server",
+  "options": {
+    "proxyConfig": "src/proxy.conf.json"
+  }
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<ol class="post-list"><li>Add <code>data-dev</code> to the script tag while you test. Without it the script does nothing on <code>localhost</code>, so there is no visitor ID. Put a separate test site of yours in <code>data-site</code> to keep these visits out of your real reports.</li><li>Connect a restricted Stripe key that starts with <code>rk_test_</code> to that test site in Virling, and start the endpoint with your test secret key and a test price: <code>STRIPE_SECRET_KEY=sk_test_... STRIPE_PRICE_ID=price_... node server.mjs</code>.</li><li>In a private window, open <code>http://localhost:4200/?utm_source=test&amp;utm_medium=test</code>, go to another route and click Buy.</li><li>Pay with the card <code>4242 4242 4242 4242</code>, any future date and any three-digit CVC (<a href="https://docs.stripe.com/testing">Stripe testing</a>).</li><li>Wait a minute for the next sync and open the site's payments list in Virling. The payment should show the <code>test</code> source instead of Unattributed. Open it to see its journey.</li></ol>
+<p class="p">Virling reads payments from Stripe, so this needs no webhook on your machine. Before you deploy, remove <code>data-dev</code>, set <code>data-site</code> back to your domain, set <code>APP_URL</code>, and serve <code>/api/checkout</code> from the same domain as the app: the CLI proxy only exists in <code>ng serve</code>. If the API is on another domain, allow the app's origin with CORS. The full checklist is in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>.</p>
+<h2>Usual mistakes</h2>
+<ul class="post-list"><li><b>The script is in the <code>scripts</code> array of <code>angular.json</code>.</b> It reads <code>data-site</code> from its own tag, so bundled it sends nothing. Keep the plain tag in <code>src/index.html</code>.</li><li><b>The ID is read once at startup.</b> The script may not have loaded yet. Read it on click and wait for it, as in the service above.</li><li><b>Nothing subscribes to the request.</b> <code>http.post()</code> alone sends nothing.</li><li><b>The app uses hash URLs.</b> With <code>HashLocationStrategy</code> the path never changes, so only the first page is counted. The default path URLs are tracked (<a href="https://angular.dev/guide/routing/common-router-tasks">Angular routing tasks</a>).</li><li><b>The ID is only in <code>subscription_data.metadata</code>.</b> That goes to the subscription, which Virling does not read. Set <code>metadata</code> on the session itself.</li><li><b>The secret key is in an Angular environment file.</b> Those values are compiled into the public bundle. Keep the key in the environment of the Node process.</li></ul>
+<p class="p">If a payment still shows Unattributed, check in the browser console that <code>window.virling.vid()</code> returns an ID, that the request to <code>/api/checkout</code> carries it, and that the session in Stripe has <code>virling_vid</code> in its metadata. How the join works from visit to payment is in <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>. With Express or NestJS behind Angular, see <a href="/blog/express-stripe-utm-tracking">Express Stripe UTM tracking</a> and <a href="/blog/nestjs-stripe-utm-tracking">NestJS Stripe UTM tracking</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I pass UTM parameters to Stripe Checkout from an Angular app?</h3><p class="p">Read the visitor ID in a service with window.virling?.vid?.(), post it to the endpoint that creates the Checkout Session, and set it as metadata.virling_vid. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them.</p>
+<h3>Why are my UTM parameters gone after the first route change?</h3><p class="p">Angular's router replaces the query parameters on navigation unless you set queryParamsHandling to preserve or merge. The Virling script records the tags from the landing pageview, so checkout only needs the visitor ID and you do not have to keep the tags in the URL.</p>
+<h3>Can I create the Checkout Session in Angular, without a backend?</h3><p class="p">No. Creating a session needs your Stripe secret key, and everything in an Angular bundle is public. Use a small endpoint or serverless function. If you do not want a backend, link to a Stripe Payment Link instead.</p>
+<h3>Should I use client_reference_id or metadata.virling_vid?</h3><p class="p">Either works. Virling reads metadata.virling_vid on the session first, then client_reference_id. Metadata leaves client_reference_id free for your own user or order ID.</p>
+<h3>Can I put the visitor ID in subscription_data.metadata?</h3><p class="p">Not for Virling. It reads the charge, its PaymentIntent and the Checkout Session, not the metadata of the subscription. Set metadata.virling_vid on the session itself.</p>
+<h3>What happens if the visitor ID is missing?</h3><p class="p">The session is created without it, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed.</p>
+  </div></div></section>
+
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring Stripe revenue</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
