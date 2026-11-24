@@ -55,6 +55,8 @@
   <url><loc>https://virling.com/integrations/lemonsqueezy-ai-apps</loc></url>
   <url><loc>https://virling.com/integrations/lemonsqueezy-plugins-and-themes</loc></url>
   <url><loc>https://virling.com/integrations/stripe-online-courses</loc></url>
+  <url><loc>https://virling.com/integrations/stripe-digital-products</loc></url>
+  <url><loc>https://virling.com/integrations/stripe-developer-tools</loc></url>
   <url><loc>https://virling.com/blog</loc></url>
   <url><loc>https://virling.com/blog/woocommerce-order-attribution-unknown</loc></url>
   <url><loc>https://virling.com/blog/what-is-revenue-attribution</loc></url>
@@ -225,6 +227,10 @@
   <url><loc>https://virling.com/blog/brevo-revenue-tracking</loc></url>
   <url><loc>https://virling.com/blog/laravel-paddle-utm-tracking</loc></url>
   <url><loc>https://virling.com/blog/laravel-lemonsqueezy-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/churn-by-acquisition-channel</loc></url>
+  <url><loc>https://virling.com/blog/conversion-rate-by-traffic-source</loc></url>
+  <url><loc>https://virling.com/blog/refund-rate-by-traffic-source</loc></url>
+  <url><loc>https://virling.com/blog/profit-by-marketing-channel</loc></url>
   <url><loc>https://virling.com/vs</loc></url>
   <url><loc>https://virling.com/vs/datafast</loc></url>
   <url><loc>https://virling.com/vs/databull</loc></url>
