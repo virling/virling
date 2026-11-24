@@ -59,7 +59,7 @@
 <h3>1. Send a goal when the trial starts</h3>
 <p class="p">Fire one goal at the moment the trial exists, on the page after signup or after the trial checkout:</p>
 <div class="code block"><pre>virling("goal", "trial_started");</pre></div>
-<p class="p">If every signup is a trial, your signup goal is the trial start and you can use that. Goals are stored with the visitor, the session and the page. See <a href="https://docs.virling.com/track/goals">goals</a>.</p>
+<p class="p">If every signup is a trial, your signup goal is the trial start and you can use that. Goals are stored with the visitor, the session and the page. See <a href="https://docs.virling.com/track/goals">goals</a>. A chat before the trial can be a goal too; see <a href="/blog/live-chat-revenue-tracking">live chat revenue tracking</a>.</p>
 <h3>2. Build a trial funnel</h3>
 <p class="p">Open the Goals tab at the top of the dashboard. The funnel always starts at Visit and ends at Paid, which comes from your payments with no setup. Choose <code>trial_started</code> as the step between them, and save it as a named funnel such as "Trial to paid" so it is one click away next time. Each step counts the visitors who did the step before it, shows the drop between steps, and shows the median time from the trial to the payment.</p>
 <p class="p">The channel tabs above the funnel filter it to one channel, and the headline changes to the share of visitors from that channel who became paying customers. Divide the Paid step by the trial step for that channel's trial-to-paid rate.</p>
