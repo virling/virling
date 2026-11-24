@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phoenix Elixir Stripe UTM tracking: controllers and LiveView</title>
+<meta name="description" content="How to tie a Stripe Checkout payment in a Phoenix app to the visit and UTM tags behind it: read one cookie in a controller or before a LiveView mounts.">
+<link rel="canonical" href="https://virling.com/blog/phoenix-stripe-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/phoenix-stripe-utm-tracking">
+<meta property="og:title" content="Phoenix Elixir Stripe UTM tracking: controllers and LiveView">
+<meta property="og:description" content="How to tie a Stripe Checkout payment in a Phoenix app to the visit and UTM tags behind it: read one cookie in a controller or before a LiveView mounts.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Phoenix Elixir Stripe UTM tracking: controllers and LiveView","item":"https://virling.com/blog/phoenix-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"Phoenix Elixir Stripe UTM tracking: controllers and LiveView","description":"How to tie a Stripe Checkout payment in a Phoenix app to the visit and UTM tags behind it: read one cookie in a controller or before a LiveView mounts.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/phoenix-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Stripe Checkout in Phoenix?","acceptedAnswer":{"@type":"Answer","text":"Read the visitor ID with get_cookies(conn)[\"virling_vid\"] in the controller that creates the Checkout Session and pass it as client_reference_id. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them."}},{"@type":"Question","name":"Can a LiveView read the cookie from the socket?","acceptedAnswer":{"@type":"Answer","text":"No. Cookies are not among the connect info a socket offers. Post a normal form to a controller, or read the cookie from the conn in the session function of a live_session."}},{"@type":"Question","name":"Do I need fetch_cookies in the router?","acceptedAnswer":{"@type":"Answer","text":"Not in the default browser pipeline. Its fetch_session plug also fetches cookies. In a pipeline without it, add plug :fetch_cookies, or get_cookies/1 raises an error."}},{"@type":"Question","name":"Should I use client_reference_id or metadata.virling_vid?","acceptedAnswer":{"@type":"Answer","text":"Use client_reference_id unless it already holds your own user or order ID. In that case put the visitor ID in the session's metadata.virling_vid. Virling reads either."}},{"@type":"Question","name":"Are subscription renewals attributed?","acceptedAnswer":{"@type":"Answer","text":"Yes. A renewal takes the attribution of the customer's first payment, so every monthly or yearly charge is credited to the visit that led to the first one, even though the renewal itself has no visit."}},{"@type":"Question","name":"What happens if the cookie is missing?","acceptedAnswer":{"@type":"Answer","text":"The session is created without a visitor ID, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>Phoenix Elixir Stripe UTM tracking: controllers and LiveView</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p">Phoenix Elixir Stripe UTM tracking comes down to one value. Load the Virling script in <code>root.html.heex</code>, read the <code>virling_vid</code> cookie from the <code>conn</code> in the controller that creates the Stripe Checkout Session, and pass it as <code>client_reference_id</code>. A LiveView cannot read cookies from its socket, so post a form to that controller, or read the cookie before the LiveView mounts. Virling joins the payment to every visit behind that ID, with the UTM tags of each.</p>
+<p class="p">This post covers Phoenix with the community library stripity_stripe. The code follows the Phoenix 1.8, LiveView 1.2 and Stripe documentation linked in each step. For another stack, see <a href="/blog/nextjs-stripe-utm-tracking">Next.js Stripe UTM tracking</a> or <a href="/blog/rails-stripe-utm-tracking">Rails Stripe UTM tracking</a>. For Payment Links, metadata limits and where the values show up in Stripe, see the general guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Why Stripe Checkout loses your UTM tags</h2>
+<p class="p">UTM tags live on the landing URL. Stripe Checkout runs on Stripe's domain and only stores what your server passes when it creates the session, so the tags of the visit are gone unless you carry them over. The same thing happens on any redirect that drops the query string, as covered in <a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a>. Passing one visitor ID instead of the tags keeps earlier visits and untagged ones, such as search and referrals, too.</p>
+<h2>Step 1: add the script to the root layout</h2>
+<p class="p">Paste the tag before <code>&lt;/head&gt;</code> in <code>lib/my_app_web/components/layouts/root.html.heex</code>, the base template around every page, LiveViews included (<a href="https://hexdocs.pm/phoenix/components.html#layouts">Phoenix layouts</a>). If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<div class="code block"><pre data-snippet>&lt;%!-- lib/my_app_web/components/layouts/root.html.heex --%&gt;
+&lt;script defer src="https://app.virling.com/v.js"
+  data-site="yourdomain.com"&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain and records the UTM tags of each visit against it. LiveView navigation uses <code>history.pushState</code>, so each page is counted.</p>
+<h2>Step 2: read the cookie on the server</h2>
+<p class="p">The browser sends the cookie with every HTTP request. In a controller, read it with <code>get_cookies/1</code> (<a href="https://hexdocs.pm/plug/Plug.Conn.html#get_cookies/1">Plug.Conn</a>):</p>
+<div class="code block"><pre data-snippet>vid = get_cookies(conn)["virling_vid"]</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The cookies must be fetched first. The default <code>:browser</code> pipeline does it, since <code>fetch_session</code> also fetches cookies (<a href="https://hexdocs.pm/plug/Plug.Conn.html#fetch_session/2">Plug.Conn</a>). The cookie is plain, so it needs no <code>:signed</code> or <code>:encrypted</code> option. When it is not there, the value is <code>nil</code>.</p>
+<h2>Step 3: create the Checkout Session with client_reference_id</h2>
+<p class="p">Add <code>{:stripity_stripe, "~&gt; 3.3"}</code> to <code>mix.exs</code> and set the key in <code>config/runtime.exs</code> (<a href="https://hex.pm/packages/stripity_stripe">stripity_stripe</a>):</p>
+<div class="code block"><pre data-snippet>config :stripity_stripe, api_key: System.get_env("STRIPE_SECRET_KEY")</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">This controller takes a one-time payment (<a href="https://hexdocs.pm/stripity_stripe/Stripe.Checkout.Session.html">Stripe.Checkout.Session</a>) and redirects to Stripe with <code>:external</code>, which Phoenix requires for a URL outside the app (<a href="https://hexdocs.pm/phoenix/controllers.html#redirection">Phoenix controllers</a>):</p>
+<div class="code block"><pre data-snippet># lib/my_app_web/controllers/checkout_controller.ex
+defmodule MyAppWeb.CheckoutController do
+  use MyAppWeb, :controller
+
+  def create(conn, _params) do
+    params =
+      put_visitor(
+        %{
+          line_items: [%{price: "price_...", quantity: 1}],
+          mode: :payment,
+          success_url: "https://yourdomain.com/thanks"
+        },
+        get_cookies(conn)["virling_vid"]
+      )
+
+    case Stripe.Checkout.Session.create(params) do
+      {:ok, session} -&gt;
+        conn
+        |&gt; put_status(:see_other)
+        |&gt; redirect(external: session.url)
+
+      {:error, _error} -&gt;
+        conn
+        |&gt; put_flash(:error, "Checkout is not available right now.")
+        |&gt; redirect(to: ~p"/")
+    end
+  end
+
+  defp put_visitor(params, vid) when vid in [nil, ""], do: params
+  defp put_visitor(params, vid), do: Map.put(params, :client_reference_id, vid)
+end</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Add the route inside the scope that pipes through <code>:browser</code>:</p>
+<div class="code block"><pre data-snippet>post "/checkout", CheckoutController, :create</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Then post to it from a template. With an <code>action</code>, <code>&lt;.form&gt;</code> adds the CSRF token that the pipeline checks (<a href="https://hexdocs.pm/phoenix_live_view/Phoenix.Component.html#form/1">Phoenix.Component</a>):</p>
+<div class="code block"><pre data-snippet>&lt;.form for={%{}} action={~p"/checkout"}&gt;
+  &lt;button type="submit"&gt;Buy&lt;/button&gt;
+&lt;/.form&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Stripe allows up to 200 characters in <code>client_reference_id</code> (<a href="https://docs.stripe.com/api/checkout/sessions/create#create_checkout_session-client_reference_id">Stripe API reference</a>). If it already holds your own user or order ID, put the visitor ID in the session's metadata instead. Virling reads either:</p>
+<div class="code block"><pre data-snippet>defp put_visitor(params, vid), do: Map.put(params, :metadata, %{"virling_vid" =&gt; vid})</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The <a href="/tools/checkout-snippet-generator">checkout snippet generator</a> has the code for other providers, the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a> have the full lookup order, including PaymentIntents you create for Elements, and the <a href="/integrations/stripe">Stripe integration page</a> shows what Virling imports.</p>
+<h2>Checkout from a LiveView page</h2>
+<p class="p">A LiveView talks over a WebSocket, and cookies are not among the keys of <code>get_connect_info/2</code> (<a href="https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.html#get_connect_info/2">Phoenix.LiveView</a>). The cookie has to be read from the connection of an HTTP request, not from the socket.</p>
+<h3>Post a form to the controller</h3>
+<p class="p">This is the simplest way. The form above works unchanged inside a LiveView: without <code>phx-submit</code> the browser submits it over HTTP, and the request carries the current cookie.</p>
+<p class="p">To run your own checks in the LiveView first, add <code>phx-submit</code> and <code>phx-trigger-action</code>. LiveView handles the event, then submits the form to the controller (<a href="https://hexdocs.pm/phoenix_live_view/form-bindings.html#submitting-the-form-action-over-http">LiveView form bindings</a>):</p>
+<div class="code block"><pre data-snippet># lib/my_app_web/live/pricing_live.ex
+defmodule MyAppWeb.PricingLive do
+  use MyAppWeb, :live_view
+
+  def mount(_params, _session, socket) do
+    {:ok, assign(socket, trigger_submit: false)}
+  end
+
+  def handle_event("buy", _params, socket) do
+    {:noreply, assign(socket, trigger_submit: true)}
+  end
+
+  def render(assigns) do
+    ~H"""
+    &lt;.form
+      for={%{}}
+      id="checkout"
+      action={~p"/checkout"}
+      phx-submit="buy"
+      phx-trigger-action={@trigger_submit}
+    &gt;
+      &lt;button type="submit"&gt;Buy&lt;/button&gt;
+    &lt;/.form&gt;
+    """
+  end
+end</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h3>Or read the cookie before the LiveView mounts</h3>
+<p class="p">If the LiveView must create the Checkout Session itself, pass the cookie in with the <code>:session</code> option of <code>live_session</code>. Phoenix calls the function with the <code>conn</code> of the page request and merges the map, which needs string keys, into the LiveView session (<a href="https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.Router.html#live_session/3">live_session</a>):</p>
+<div class="code block"><pre data-snippet># lib/my_app_web/visitor.ex
+defmodule MyAppWeb.Visitor do
+  def session(conn) do
+    %{"virling_vid" =&gt; Plug.Conn.get_cookies(conn)["virling_vid"]}
+  end
+end
+
+# lib/my_app_web/router.ex, in the scope that pipes through :browser
+live_session :pricing, session: {MyAppWeb.Visitor, :session, []} do
+  live "/pricing", PricingLive
+end</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">In the LiveView, keep the value from the second argument of <code>mount/3</code> and use it when you create the session, with the same <code>put_visitor/2</code> as in the controller:</p>
+<div class="code block"><pre data-snippet>def mount(_params, session, socket) do
+  {:ok, assign(socket, vid: session["virling_vid"])}
+end
+
+def handle_event("buy", _params, socket) do
+  params =
+    put_visitor(
+      %{
+        line_items: [%{price: "price_...", quantity: 1}],
+        mode: :payment,
+        success_url: "https://yourdomain.com/thanks"
+      },
+      socket.assigns.vid
+    )
+
+  case Stripe.Checkout.Session.create(params) do
+    {:ok, session} -&gt;
+      {:noreply, redirect(socket, external: session.url)}
+
+    {:error, _error} -&gt;
+      {:noreply, put_flash(socket, :error, "Checkout is not available right now.")}
+  end
+end</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">This value is as old as the page request. On a new visitor's first page the script has not set the cookie yet when the server reads it, and live navigation inside the same <code>live_session</code> makes no new HTTP request. A visitor who lands on the LiveView and buys there has no ID, so prefer the form when the page can be a landing page.</p>
+<h2>A subscription example</h2>
+<p class="p">For a subscription, use a recurring price and set <code>mode</code> to <code>:subscription</code>. The visitor ID stays on the session. Virling does not read <code>subscription_data.metadata</code>, so an ID placed only there is not found:</p>
+<div class="code block"><pre data-snippet>params =
+  put_visitor(
+    %{
+      # a recurring price
+      line_items: [%{price: "price_...", quantity: 1}],
+      mode: :subscription,
+      success_url: "https://yourdomain.com/thanks"
+    },
+    get_cookies(conn)["virling_vid"]
+  )</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Only the first payment needs the visitor ID. A renewal takes the attribution of the customer's first payment, so each monthly or yearly charge is credited to the same visit, with no code on your side.</p>
+<h2>Cookieless mode and visitors without an ID</h2>
+<p class="p">With <code>data-cookieless</code> on the script tag there is no <code>virling_vid</code> cookie, so the value is <code>nil</code>. The same happens when a browser blocks the script. The first <code>put_visitor/2</code> clause leaves the field out, checkout works as before, and the payment counts toward revenue as Unattributed. Do not send a session or user ID in its place: Virling has no visits recorded under it.</p>
+<p class="p">To set the cookie only after the visitor agrees, use <a href="https://docs.virling.com/track/cookieless#cookieless-until-consent">cookieless until consent</a>. The controller does not change.</p>
+<h2>Step 4: verify with a test payment</h2>
+<ol class="post-list"><li>Connect a restricted Stripe key that starts with <code>rk_test_</code> in Virling, and use your test secret key in Phoenix. Payments imported with a test key stay in your reports, so use a separate site in Virling if you want to keep them out.</li><li>In a private window, open your deployed site with <code>?utm_source=test&amp;utm_medium=test</code>. The script does not count <code>localhost</code> unless the tag has <code>data-dev</code>.</li><li>Go to checkout and pay with the card <code>4242 4242 4242 4242</code>, any future date and any three-digit CVC (<a href="https://docs.stripe.com/testing">Stripe testing</a>).</li><li>Wait a minute for the next sync and open <code>/app/yourdomain.com/payments</code>. The payment should show the <code>test</code> source instead of Unattributed. Open it to see its journey.</li></ol>
+<p class="p">If it shows Unattributed, check that the page you bought from loads the script, that the form posts to the same domain, so the cookie is sent, and that the session in Stripe has a <code>client_reference_id</code>. If only LiveView purchases lack it, use the form. The full checklist is in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>, and how the join works from visit to payment is in <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I pass UTM parameters to Stripe Checkout in Phoenix?</h3><p class="p">Read the visitor ID with get_cookies(conn)["virling_vid"] in the controller that creates the Checkout Session and pass it as client_reference_id. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them.</p>
+<h3>Can a LiveView read the cookie from the socket?</h3><p class="p">No. Cookies are not among the connect info a socket offers. Post a normal form to a controller, or read the cookie from the conn in the session function of a live_session.</p>
+<h3>Do I need fetch_cookies in the router?</h3><p class="p">Not in the default browser pipeline. Its fetch_session plug also fetches cookies. In a pipeline without it, add plug :fetch_cookies, or get_cookies/1 raises an error.</p>
+<h3>Should I use client_reference_id or metadata.virling_vid?</h3><p class="p">Use client_reference_id unless it already holds your own user or order ID. In that case put the visitor ID in the session's metadata.virling_vid. Virling reads either.</p>
+<h3>Are subscription renewals attributed?</h3><p class="p">Yes. A renewal takes the attribution of the customer's first payment, so every monthly or yearly charge is credited to the visit that led to the first one, even though the renewal itself has no visit.</p>
+<h3>What happens if the cookie is missing?</h3><p class="p">The session is created without a visitor ID, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring Stripe revenue</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
