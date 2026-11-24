@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WooCommerce attribution plugin: a buyer's checklist</title>
+<meta name="description" content="WooCommerce attribution plugin checklist: order meta, block checkout, refunds, subscriptions, caching, ad blockers, data ownership and page weight.">
+<link rel="canonical" href="https://virling.com/blog/woocommerce-attribution-plugin">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/woocommerce-attribution-plugin">
+<meta property="og:title" content="WooCommerce attribution plugin: a buyer's checklist">
+<meta property="og:description" content="WooCommerce attribution plugin checklist: order meta, block checkout, refunds, subscriptions, caching, ad blockers, data ownership and page weight.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"WooCommerce attribution plugin: a buyer's checklist","item":"https://virling.com/blog/woocommerce-attribution-plugin"}]},{"@type":"BlogPosting","headline":"WooCommerce attribution plugin: a buyer's checklist","description":"WooCommerce attribution plugin checklist: order meta, block checkout, refunds, subscriptions, caching, ad blockers, data ownership and page weight.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/woocommerce-attribution-plugin"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Do I need a WooCommerce attribution plugin?","acceptedAnswer":{"@type":"Answer","text":"Not always. WooCommerce has order attribution built in, which shows the last source of each order within a session. Look for something more when buyers come back days later, when you want refunds and subscription renewals counted by channel, or when you want to see every visit before an order."}},{"@type":"Question","name":"What should I look for in a WooCommerce attribution plugin?","acceptedAnswer":{"@type":"Answer","text":"Check that it saves the source or a visitor ID in the order meta, works with the block checkout, subtracts refunds, keeps the channel on subscription renewals, survives page caching, is honest about ad blockers, lets you own the data and adds little to each page."}},{"@type":"Question","name":"Does WooCommerce have built-in attribution?","acceptedAnswer":{"@type":"Answer","text":"Yes. Order attribution is turned on or off under WooCommerce, Settings, Advanced, Features. It uses last-click attribution, saves the referrer, UTM tags, device type and session page views with the order, and shows an Origin column in the orders list."}},{"@type":"Question","name":"Is Virling a WooCommerce plugin?","acceptedAnswer":{"@type":"Answer","text":"Not in the usual sense. Reports are in Virling, not in wp-admin. You add the Virling script, by hand or with its WordPress plugin, add a short PHP snippet that saves the visitor ID on each order, and connect a read-only REST API key."}},{"@type":"Question","name":"Does page caching break WooCommerce attribution?","acceptedAnswer":{"@type":"Answer","text":"Caching the HTML does not break Virling, because the script sets the visitor ID in the browser. Combining, inlining or delaying the script can, and so can caching checkout, so exclude v.js from those settings and keep cart, checkout and account pages out of the cache."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>WooCommerce attribution plugin: a buyer's checklist</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p">A WooCommerce attribution plugin links each order to the visit that brought the buyer, so you see revenue per channel and campaign. Before you pick one, check eight things: that it saves its data in the order meta, works with the block checkout, subtracts refunds, keeps the channel on subscription renewals, survives page caching, is honest about ad blockers, lets you own the data, and adds little weight to each page. WooCommerce's built-in order attribution may already be enough. Below is what it does, what to ask for each point, and where Virling meets it or falls short.</p>
+<h2>What WooCommerce already does</h2>
+<p class="p">Order attribution is part of WooCommerce. Turn it on or off under <b>WooCommerce, Settings, Advanced, Features</b>. With each order it saves the referring site, the UTM source, medium, campaign, content and term, the device type and the session's page views. You see them in the <b>Order attribution</b> box on the order, and the orders list has an Origin column.</p>
+<p class="p">It uses last-click attribution. A session lasts 30 minutes by default, and WooCommerce says it cannot be used to track visitors across sessions. A UTM or organic visit always overrides an earlier source, and a direct visit never does. Orders placed while it is off get no attribution data. Source: <a href="https://woocommerce.com/document/order-attribution-tracking/">WooCommerce order attribution tracking</a>.</p>
+<p class="p">If most of your buyers click and buy in one visit, that may be all you need. Where the values show up and why they go missing is in <a href="/blog/woocommerce-utm-tracking">WooCommerce UTM tracking</a>, and orders with no source at all are covered in <a href="/blog/woocommerce-order-attribution-unknown">why WooCommerce order attribution says Unknown</a>.</p>
+<h2>The checklist at a glance</h2>
+<table class="cmp"><thead><tr><th>Point</th><th>Ask</th><th>Virling</th></tr></thead><tbody>
+<tr><th scope="row">Order meta</th><td>Is the link saved on the order itself?</td><td>Yes, with a snippet you add</td></tr>
+<tr><th scope="row">Block checkout</th><td>Does it cover both checkouts?</td><td>Yes</td></tr>
+<tr><th scope="row">Refunds</th><td>Do refunds lower a channel's revenue?</td><td>Yes, for orders from the last 60 days</td></tr>
+<tr><th scope="row">Subscriptions</th><td>Do renewals keep the first channel?</td><td>Yes with WooCommerce Subscriptions, for customers with an account</td></tr>
+<tr><th scope="row">Page caching</th><td>Does it work on cached pages?</td><td>Yes, if the script is left out of combine and delay settings</td></tr>
+<tr><th scope="row">Ad blockers</th><td>What happens to a blocked visit?</td><td>Partly: the order counts, the visit is lost</td></tr>
+<tr><th scope="row">Data ownership</th><td>Where do visits and orders live?</td><td>Your own server if you self-host</td></tr>
+<tr><th scope="row">Page weight</th><td>What does each page load?</td><td>One script, about 2 KB compressed</td></tr>
+</tbody></table>
+<h2>1. Order meta</h2>
+<p class="p"><b>What to check:</b> whether the source, or an ID that leads to it, is saved in the order's meta data when the order is placed. Data on the order can be checked and exported, and does not depend on the thank-you page loading.</p>
+<p class="p"><b>Virling:</b> a short PHP snippet saves the visitor ID on each new order as <code>virling_vid</code>, and Virling joins it to that visitor's earlier visits. Open any order on the Payments page to see them. If an order has no visitor ID, Virling compares its billing email with emails your site sent as <code>identify</code> events, kept only as salted hashes. An exact match credits that visitor and shows <b>Matched by email</b>. <b>Falls short:</b> you add the snippet yourself, in <code>functions.php</code> or a snippets plugin, and Virling does not read the source values WooCommerce's own attribution saves on an order.</p>
+<h2>2. Block checkout</h2>
+<p class="p"><b>What to check:</b> WooCommerce has a classic checkout and a block checkout, and code written for one may not run in the other. Place a test order through every checkout path you offer, express buttons included.</p>
+<p class="p"><b>Virling:</b> the snippet covers the classic and the block checkout. Copy it from the <a href="/integrations/woocommerce">WooCommerce integration page</a>.</p>
+<h2>3. Refunds</h2>
+<p class="p"><b>What to check:</b> whether a refund lowers the revenue of the channel that brought the order. In a made-up example, a campaign with $4,000 of orders and $1,500 of refunds brought $2,500, and a report that stops at the order hides that.</p>
+<p class="p"><b>Virling:</b> full and partial refunds lower the revenue of the order's channel. Orders from the last 60 days are read again every 6 hours, so later refunds show up. <b>Falls short:</b> a refund made on an order older than that is not picked up.</p>
+<h2>4. Subscriptions</h2>
+<p class="p"><b>What to check:</b> a renewal has no visit of its own, so ask which channel it is credited to, and whether you can compare channels by the subscribers who keep paying.</p>
+<p class="p"><b>Virling:</b> with WooCommerce Subscriptions, a renewal order keeps the channel of the customer's first payment, and subscription status is read once an hour; see <a href="/integrations/woocommerce-subscriptions">WooCommerce Subscriptions attribution</a>. <b>Falls short:</b> the first run imports 90 days of orders, so renewals of older subscriptions are usually Unattributed. Guest orders have no customer ID, so each counts as its own customer, and without WooCommerce Subscriptions retention uses payment recency.</p>
+<h2>5. Page caching</h2>
+<p class="p"><b>What to check:</b> whether the source is read in the browser or written into the page by PHP. A cached page is the same for every visitor, so anything PHP writes into it can be wrong for the next one.</p>
+<p class="p"><b>Virling:</b> the script reads UTM tags and creates the visitor ID in the browser, so a cached page or a CDN copy works for everyone. <b>Falls short:</b> combining, inlining, delaying or locally hosting <code>v.js</code> can stop or delay it, so exclude it from those settings. The order snippet runs on your server, so keep cart, checkout and account pages out of the cache. The settings are in <a href="https://docs.virling.com/track/caching">page caching and CDNs</a>.</p>
+<h2>6. Ad blockers</h2>
+<p class="p"><b>What to check:</b> what still gets counted when the script is blocked. Be careful with any promise to see every visitor.</p>
+<p class="p"><b>Virling:</b> orders come from your store's REST API, so a blocked visitor's order still counts toward revenue, as Unattributed. Serving the script and <code>/api/event</code> from your own domain through a proxy helps. <b>Falls short:</b> a visit that was blocked cannot be recovered, and a tested proxy setup for each platform is not available yet. The visitor ID is a first-party cookie in one browser, so cookieless mode, declined consent, cleared cookies or a second device also break the link.</p>
+<h2>7. Data ownership</h2>
+<p class="p"><b>What to check:</b> where visits and orders are stored, what access it needs to your store, and what you keep if you stop paying. WooCommerce's own attribution saves its data in your store.</p>
+<p class="p"><b>Virling:</b> it is open source under AGPL and free to self-host with every feature, so visits and orders stay on your own server. The hosted version starts at $19 a month after a 14-day free trial; see <a href="/pricing">pricing</a>. It connects with a REST API key set to <b>Read</b>, so it cannot change or refund anything. <b>Falls short:</b> it runs outside WordPress, so its reports are not in wp-admin and self-hosting means running a server for it.</p>
+<h2>8. Page weight</h2>
+<p class="p"><b>What to check:</b> load a product page with and without the plugin, and compare the scripts, requests and bytes in the browser's network tab. Reports that run on your store's database also use the same server as checkout.</p>
+<p class="p"><b>Virling:</b> one deferred script of about 2 KB compressed, which sends events to your Virling server. Reports run there, not on your store. <b>Falls short:</b> Virling asks your store's REST API for new orders every minute, and the store must be reachable over https with pretty permalinks on.</p>
+<h2>What Virling does not do</h2>
+<ul class="post-list"><li>It does not show reports inside wp-admin</li><li>It does not import ad spend, so return on ad spend needs your ad platform's numbers</li><li>It does not read coupon codes; orders are credited by visit</li><li>It does not read the source values WooCommerce saves on an order; an order needs <code>virling_vid</code> or an email match</li><li>Linear and position-based models are not available yet; the choices are last non-direct (the default), first touch and last touch</li><li>The first import goes back 90 days, and orders placed before the snippet was added are mostly Unattributed</li></ul>
+<p class="p">To try it, add the script, the snippet and a read-only key, then open your store from a link with <code>?utm_source=test&amp;utm_medium=test</code> in a private window and place a test order. Self-host Virling free, or start the hosted version with a 14-day free trial.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Frequently asked questions</h2>
+<h3>Do I need a WooCommerce attribution plugin?</h3><p class="p">Not always. WooCommerce has order attribution built in, which shows the last source of each order within a session. Look for something more when buyers come back days later, when you want refunds and subscription renewals counted by channel, or when you want to see every visit before an order.</p>
+<h3>What should I look for in a WooCommerce attribution plugin?</h3><p class="p">Check that it saves the source or a visitor ID in the order meta, works with the block checkout, subtracts refunds, keeps the channel on subscription renewals, survives page caching, is honest about ad blockers, lets you own the data and adds little to each page.</p>
+<h3>Does WooCommerce have built-in attribution?</h3><p class="p">Yes. Order attribution is turned on or off under WooCommerce, Settings, Advanced, Features. It uses last-click attribution, saves the referrer, UTM tags, device type and session page views with the order, and shows an Origin column in the orders list.</p>
+<h3>Is Virling a WooCommerce plugin?</h3><p class="p">Not in the usual sense. Reports are in Virling, not in wp-admin. You add the Virling script, by hand or with its WordPress plugin, add a short PHP snippet that saves the visitor ID on each order, and connect a read-only REST API key.</p>
+<h3>Does page caching break WooCommerce attribution?</h3><p class="p">Caching the HTML does not break Virling, because the script sets the visitor ID in the browser. Combining, inlining or delaying the script can, and so can caching checkout, so exclude v.js from those settings and keep cart, checkout and account pages out of the cache.</p>
+</div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the source of every WooCommerce order</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
