@@ -51,7 +51,7 @@
 <p class="p"><code>utm_source=google&amp;utm_medium=cpc&amp;utm_campaign={campaignid}</code></p>
 <p class="p"><code>{campaignid}</code> is one of Google&rsquo;s ValueTrack parameters and is filled in with the campaign&rsquo;s ID when the ad is clicked. You can type a readable name instead, such as <code>brand-search</code>. Pick one style and keep it, because a campaign named two ways becomes two rows. The free <a href="/tools/utm-builder">UTM builder</a> makes the tagged URLs for you.</p>
 <h2>What about the gclid?</h2>
-<p class="p">Auto-tagging adds a <code>gclid</code> to every ad click, and it is useful to Google. Virling does not read it. Its channel rules look at <code>utm_medium</code>, the referrer, <code>utm_source</code> and <code>ref</code>, so leave auto-tagging on for Google and add UTM tags for Virling. The two do not conflict.</p>
+<p class="p">Auto-tagging adds a <code>gclid</code> to every ad click, and it is useful to Google. Virling does not read it. Its channel rules look at <code>utm_medium</code>, the referrer, <code>utm_source</code> and <code>ref</code>, so leave auto-tagging on for Google and add UTM tags for Virling. The two do not conflict; <a href="/blog/gclid-fbclid-msclkid-vs-utm">gclid vs UTM tags</a> explains what each one does.</p>
 <h2>Why untagged ad clicks show as Organic search</h2>
 <p class="p">An ad click comes from a Google page, so with no UTM tags the referrer says Google and the visit is sorted as <b>Organic search</b>. That puts ad revenue in the same row as your free search traffic, and you can no longer tell whether the ads or the articles paid. Tagging fixes it because <code>utm_medium</code> is checked first: a click from google.com that carries <code>utm_medium=cpc</code> is Paid. See <a href="/blog/organic-search-revenue-tracking">organic search revenue tracking</a> for the free side.</p>
 <h2>How Virling sorts a Google Ads visit</h2>
@@ -63,7 +63,7 @@
 <h3>1. Open the Paid channel</h3>
 <p class="p">On the dashboard, the Channels card lists each channel with visitors, revenue and revenue per visitor. Click <b>Paid</b> and the whole page filters to visits from your ads.</p>
 <h3>2. Switch to the Campaign tab</h3>
-<p class="p">The Campaign tab has one row per <code>utm_campaign</code>, with visitors and revenue. Compare campaigns by revenue per visitor, not clicks. A campaign with fewer visitors can bring more revenue per visitor than a broad one. See <a href="/blog/what-is-revenue-per-visitor">what revenue per visitor is</a>.</p>
+<p class="p">The Campaign tab has one row per <code>utm_campaign</code>, with visitors and revenue. Compare campaigns by revenue per visitor, not clicks. <a href="/blog/revenue-by-campaign">Revenue by campaign</a> shows how to read the rows next to your spend. A campaign with fewer visitors can bring more revenue per visitor than a broad one. See <a href="/blog/what-is-revenue-per-visitor">what revenue per visitor is</a>.</p>
 <h3>3. Add what you spend</h3>
 <p class="p">In <b>Site settings</b>, under <b>Monthly spend per channel</b>, enter a line such as <code>Paid 300</code>. The <b>Profit by channel</b> card then shows spend, revenue, profit and return per dollar spent for the range you pick. Nothing connects to Google Ads, so the numbers are only as good as the amount you type. For the arithmetic, try the <a href="/tools/roas-calculator">ROAS calculator</a> and the <a href="/tools/cac-calculator">CAC calculator</a>.</p>
 <h3>4. Give it time</h3>
