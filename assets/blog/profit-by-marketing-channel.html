@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profit by marketing channel: formula and worked example</title>
+<meta name="description" content="Profit by marketing channel is net revenue minus spend minus payment fees. The formula, a worked example, and how to price channels that cost time.">
+<link rel="canonical" href="https://virling.com/blog/profit-by-marketing-channel">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/profit-by-marketing-channel">
+<meta property="og:title" content="Profit by marketing channel: formula and worked example">
+<meta property="og:description" content="Profit by marketing channel is net revenue minus spend minus payment fees. The formula, a worked example, and how to price channels that cost time.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Profit by marketing channel: formula and worked example","item":"https://virling.com/blog/profit-by-marketing-channel"}]},{"@type":"BlogPosting","headline":"Profit by marketing channel: formula and worked example","description":"Profit by marketing channel is net revenue minus spend minus payment fees. The formula, a worked example, and how to price channels that cost time.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/profit-by-marketing-channel"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do you calculate profit by marketing channel?","acceptedAnswer":{"@type":"Answer","text":"For one channel and one date range, take the revenue credited to the channel after refunds, then subtract what you spent on the channel and the payment fees on its sales. Do the same for every channel over the same dates."}},{"@type":"Question","name":"What is the difference between ROAS and profit by channel?","acceptedAnswer":{"@type":"Answer","text":"ROAS is revenue divided by ad spend, so it is a ratio and leaves out payment fees. Profit is an amount of money. A small channel can have the highest ratio and still add less profit than a larger one, so read both."}},{"@type":"Question","name":"Should payment fees be part of channel profit?","acceptedAnswer":{"@type":"Answer","text":"Yes, if your channels bring payments of different sizes. A fixed fee per payment takes a larger share of a small payment, so a channel with many small orders can look profitable before fees and lose money after them."}},{"@type":"Question","name":"How do I work out profit for SEO or social posts that cost time instead of money?","acceptedAnswer":{"@type":"Answer","text":"Multiply the hours by one hourly rate, such as what you would pay someone to do the work, and subtract that as the channel's spend. Price the hours of every channel, or keep the time out of all of them, so the comparison stays fair."}},{"@type":"Question","name":"Does Virling import my ad spend?","acceptedAnswer":{"@type":"Answer","text":"No. You type a monthly amount per channel in Site settings, and nothing connects to an ad platform. Virling takes the revenue from your payment provider and credits it to channels."}},{"@type":"Question","name":"Why does a channel show No data for its return?","acceptedAnswer":{"@type":"Answer","text":"It has revenue but no spend entered, so there is nothing to divide by. With a Fees line such a channel still appears on the Profit by channel card, with only its fees as costs."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>Profit by marketing channel: formula and worked example</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p"><b>Profit by marketing channel</b> is the revenue a channel brought, net of refunds, minus what you spent on the channel and the payment fees on its sales. Work it out for every channel over the same dates, then compare the amounts. In a made-up example, a channel that brought $6,000 on $3,500 of spend and $204 of fees made $2,296. Channels that cost time instead of money need a price on the hours, or they will look free.</p>
+<p class="p">This post is for founders and stores comparing channels after spend and fees. If you want to know what one new customer costs instead, read <a href="/blog/cac-by-channel">CAC by channel</a>.</p>
+<h2>The formula</h2>
+<div class="code block"><pre>profit of a channel = net revenue - spend - payment fees
+payment fees = net revenue x fee percent + payments x fixed fee
+return = net revenue / (spend + payment fees)</pre></div>
+<ul class="post-list"><li><b>Net revenue</b> is the money credited to the channel in the range, after refunds and lost disputes. Include renewals, since the channel that won the customer earned them too.</li><li><b>Spend</b> is what the channel cost in the same range: ads, sponsorships, freelancers, and tools only that channel uses.</li><li><b>Payment fees</b> are the percent and the fixed amount your provider takes from each payment. The <a href="/tools/payment-fee-calculator">payment fee calculator</a> estimates them.</li></ul>
+<p class="p">This stops before the cost of the product. If you sell physical goods, product and shipping costs can turn a profitable channel into a losing one, so work out what each order leaves with the <a href="/tools/contribution-margin-calculator">contribution margin calculator</a> too. Salaries and rent stay out, since they do not change with the channel.</p>
+<h3>Profit or return?</h3>
+<p class="p">Return says how hard each dollar works, and profit says how much is left. A newsletter can return ten dollars per dollar and still make less than ads that return under two, because it is small. Use profit to see what pays the bills and return to see where a dollar goes furthest. Neither tells you what the next dollar will earn: most channels get less efficient as you spend more.</p>
+<h2>A worked example</h2>
+<p class="p">Made-up numbers for an imaginary business, not results from a real one. One month, with fees of 2.9% + $0.30 per payment. Paid, email and social have money spent on them, and organic search has none:</p>
+<table class="cmp"><thead><tr><th>Channel</th><th>Net revenue</th><th>Payments</th><th>Spend</th><th>Fees</th><th>Profit</th><th>Return</th></tr></thead><tbody><tr><th scope="row">Paid</th><td>$6,000</td><td>100</td><td>$3,500</td><td>$204</td><td>$2,296</td><td>1.6x</td></tr><tr><th scope="row">Email</th><td>$2,400</td><td>60</td><td>$150</td><td>$87.60</td><td>$2,162.40</td><td>10.1x</td></tr><tr><th scope="row">Organic search</th><td>$3,000</td><td>75</td><td>$0</td><td>$109.50</td><td>$2,890.50</td><td>No data</td></tr><tr><th scope="row">Social</th><td>$2,000</td><td>250</td><td>$1,980</td><td>$133</td><td>-$113</td><td>0.9x</td></tr></tbody></table>
+<ul class="post-list"><li><b>Return and profit disagree.</b> Email has by far the highest return, yet Paid leaves more money.</li><li><b>Fees decide Social.</b> Before fees it made $20. Its payments average only $8, so the fixed $0.30 alone costs $75, and after $133 of fees it lost $113.</li><li><b>Organic search looks best</b> because nothing was typed as its cost. That is the next problem to fix.</li></ul>
+<h2>Channels that cost time, not money</h2>
+<p class="p">Writing posts, answering in communities and sending emails cost hours, and a channel with no invoice wins every comparison by default. Three rules keep it fair:</p>
+<ul class="post-list"><li><b>Use one hourly rate.</b> Pick what you would pay someone to do the work, and use it for every channel. An exact rate matters less than the same rate.</li><li><b>Price the hours of every channel.</b> Ads need time too. Adding time only to organic channels tilts the result the other way.</li><li><b>Spread work that keeps earning.</b> An article written in March can bring sales all year. Divide its cost over the months you expect it to last instead of charging it all to March, and say how many months you assumed.</li></ul>
+<p class="p">The same made-up month, with hours at $60: 4 on Paid, 5 on Email, 20 on Organic search and 10 on Social.</p>
+<table class="cmp"><thead><tr><th>Channel</th><th>Profit before time</th><th>Cost of time</th><th>Profit after time</th><th>Return after time</th></tr></thead><tbody><tr><th scope="row">Paid</th><td>$2,296</td><td>$240</td><td>$2,056</td><td>1.5x</td></tr><tr><th scope="row">Email</th><td>$2,162.40</td><td>$300</td><td>$1,862.40</td><td>4.5x</td></tr><tr><th scope="row">Organic search</th><td>$2,890.50</td><td>$1,200</td><td>$1,690.50</td><td>2.3x</td></tr><tr><th scope="row">Social</th><td>-$113</td><td>$600</td><td>-$713</td><td>0.7x</td></tr></tbody></table>
+<p class="p">Organic search falls from first to third, and Paid is now ahead. That is not a reason to stop writing: 20 hours at $60 still left $1,690.50. Keep both tables. Profit before time is close to the cash you have left, and profit after time tells you whether the hours would do more elsewhere.</p>
+<h2>What to do with the answer</h2>
+<ul class="post-list"><li><b>High profit, high return.</b> Put a little more in, and check that profit grows as well as revenue.</li><li><b>High profit, low return.</b> Keep it, and look for the part that wastes money. One campaign is often behind it.</li><li><b>Low profit, high return.</b> A small channel that works. Test whether it can grow.</li><li><b>A loss.</b> Check how long its customers take to pay before you cut it. Spend comes first and revenue follows, so a short range punishes slow channels. For subscriptions, also read <a href="/blog/ltv-by-acquisition-channel">LTV by acquisition channel</a>.</li></ul>
+<p class="p">To turn this into next month's plan, the <a href="/tools/marketing-budget-calculator">marketing budget calculator</a> splits a budget between paid channels by the revenue each brought. It does not take off fees, so check the split against the profit column.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See what each channel leaves after spend and fees</h2>
+<p class="p">Virling credits each payment to the visit before it, and takes the spend you type and your payment fees off each channel. Self-host it free, or use the hosted version with a 14-day free trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Set up the Profit by channel card in Virling</h2>
+<p class="p">Spend is typed by hand. Nothing connects to an ad platform, and the numbers are only as good as the amounts you type.</p>
+<ol class="post-list"><li><b>Credit revenue to channels.</b> Add the script, connect your payment provider and link checkout to visits. See <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>, and tag paid links so they land in Paid, as the rules in <a href="https://docs.virling.com/attribution/channels">channels</a> explain.</li><li><b>Type your spend.</b> In <b>Site settings</b>, under <b>Monthly spend per channel</b>, put one channel per line with what you spend on it each month in dollars. The channels are Paid, Email, AI, Organic search, Communities, Social, Referral and Direct.</li><li><b>Add the Fees line.</b> To take payment fees off too, add a line such as <code>Fees 2.9% + 0.30</code>: the percent of each channel's revenue plus the fixed amount for each of its payments. Use your own provider's rate.</li><li><b>Save, then pick a range.</b> When any channel has a spend, a <b>Profit by channel</b> card appears on the dashboard, below the main grid.</li></ol>
+<p class="p">For the example above, the box would hold:</p>
+<div class="code block"><pre>Paid 3500
+Email 150
+Social 1980
+Fees 2.9% + 0.30</pre></div>
+<p class="p">To count time as well, add its cost to the amount, such as <code>Paid 3740</code>, and give Organic search its own line, <code>Organic search 1200</code>. The box takes any dollar amount, so write down which view you saved.</p>
+<h3>Read the card</h3>
+<ul class="post-list"><li><b>Without a Fees line</b>, it shows each channel's spend, the revenue credited to it, the profit, and the return per dollar spent. Only channels with a spend are listed.</li><li><b>With a Fees line</b>, it lists every channel with revenue. Its costs are spend plus fees, and profit is what is left. A channel with no spend entered shows only its fees as costs, and its return shows No data rather than an endless return.</li><li><b>Spend is the monthly amount scaled to the range.</b> Pick 7 days and the card takes a little under a quarter of it. If your spend changed, type the amount that fits the range you are reading.</li><li><b>Revenue is already net of refunds and lost disputes</b>, so do not subtract them again. To see which channels lose money that way, read <a href="/blog/refund-rate-by-traffic-source">refund rate by traffic source</a>.</li></ul>
+<p class="p">The Time to pay card shows the median time from first visit to first payment for each channel with at least three first payments in the range. Use it to pick a range long enough to be fair. Every row is in <a href="https://docs.virling.com/guides/dashboard">read your dashboard</a>.</p>
+<h2>What to check when the profit looks wrong</h2>
+<ul class="post-list"><li><b>Paid loses money and Direct has high revenue.</b> Some ad links may be untagged, so their sales count elsewhere. Add <code>utm_medium=cpc</code> and a <code>utm_source</code> to every ad.</li><li><b>The channels add up to less than your revenue.</b> Unattributed payments belong to no channel and are not on the card. See <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</li><li><b>An old channel beats a new one by a lot.</b> Renewals keep the channel of the first payment, so a channel that won subscribers last year still earns from them. See <a href="https://docs.virling.com/attribution/renewals">renewals</a>.</li><li><b>Fees do not match your payout report.</b> The line is one rate for the whole site, so it is an estimate. Real fees can differ by card, country and plan.</li><li><b>Two ad platforms share one row.</b> Both are Paid. Open Paid on the Channels card for the revenue of each source, and subtract its spend and fees yourself.</li><li><b>The ranking changes when the model does.</b> A payment is credited to one visit, by default the latest one in the last 90 days that was not Direct. See <a href="https://docs.virling.com/attribution/model">model and lookback window</a>.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>How do you calculate profit by marketing channel?</h3><p class="p">For one channel and one date range, take the revenue credited to the channel after refunds, then subtract what you spent on the channel and the payment fees on its sales. Do the same for every channel over the same dates.</p>
+<h3>What is the difference between ROAS and profit by channel?</h3><p class="p">ROAS is revenue divided by ad spend, so it is a ratio and leaves out payment fees. Profit is an amount of money. A small channel can have the highest ratio and still add less profit than a larger one, so read both.</p>
+<h3>Should payment fees be part of channel profit?</h3><p class="p">Yes, if your channels bring payments of different sizes. A fixed fee per payment takes a larger share of a small payment, so a channel with many small orders can look profitable before fees and lose money after them.</p>
+<h3>How do I work out profit for SEO or social posts that cost time instead of money?</h3><p class="p">Multiply the hours by one hourly rate, such as what you would pay someone to do the work, and subtract that as the channel's spend. Price the hours of every channel, or keep the time out of all of them, so the comparison stays fair.</p>
+<h3>Does Virling import my ad spend?</h3><p class="p">No. You type a monthly amount per channel in Site settings, and nothing connects to an ad platform. Virling takes the revenue from your payment provider and credits it to channels.</p>
+<h3>Why does a channel show No data for its return?</h3><p class="p">It has revenue but no spend entered, so there is nothing to divide by. With a Fees line such a channel still appears on the Profit by channel card, with only its fees as costs.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels make money</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
