@@ -105,6 +105,11 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Dodo Payments fee calculator](https://virling.com/tools/dodo-payments-fee-calculator): Dodo Payments' 4% + 40 cent fee per sale with the international and subscription extras, monthly fees and net payout from price, sales per month, share of international buyers and sale type
 - [Creem fee calculator](https://virling.com/tools/creem-fee-calculator): Creem's 3.9% + 40 cent fee per sale, monthly fees and net payout from price, sales per month, share of international buyers and sale type
 - [Polar fee calculator](https://virling.com/tools/polar-fee-calculator): the Polar.sh fee, your payout and the effective rate from price, plan, buyer's card, tax and sale type
+- [URL cleaner: remove UTM parameters](https://virling.com/tools/url-cleaner): remove UTM tags and click IDs such as gclid and fbclid from one or many links, with other parameters and the #fragment unchanged
+- [Email marketing ROI calculator](https://virling.com/tools/email-marketing-roi-calculator): revenue, revenue per email sent, profit and ROI from your sends, clicks, conversions, order value and costs
+- [llms.txt generator](https://virling.com/tools/llms-txt-generator): build an llms.txt file from a site name, a summary and sections of links or a pasted list of URLs, then copy or download it
+- [Robots.txt generator for AI crawlers](https://virling.com/tools/ai-robots-txt-generator): allow or block each AI crawler, such as GPTBot and ClaudeBot, add disallowed paths and a sitemap, then copy or download the file
+- [QR code generator with UTM tags](https://virling.com/tools/qr-code-utm-generator): add source, medium and campaign to a page URL, then download the QR code as SVG or PNG
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -163,6 +168,8 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Stripe for online courses](https://virling.com/integrations/stripe-online-courses): for course creators on Stripe Checkout or Payment Links: each course sale, payment plan and refund tied to the channel and campaign behind it
 - [Stripe for digital products](https://virling.com/integrations/stripe-digital-products): for creators selling downloads, templates and ebooks on Stripe: each Checkout or Payment Link sale tied to the channel and campaign behind it
 - [Stripe for developer tools](https://virling.com/integrations/stripe-developer-tools): for developer tool founders billing on Stripe: each subscription and usage payment tied to the GitHub link, docs page or Hacker News post that brought the buyer
+- [Polar for digital products](https://virling.com/integrations/polar-digital-products): for creators selling templates, downloads and licences through Polar: each order tied to the post, newsletter or launch that brought the buyer
+- [WooCommerce for online courses](https://virling.com/integrations/woocommerce-online-courses): for course creators on WooCommerce: each enrolment order tied to the video, email or partner that brought the student, with refunds and renewals on the same channel
 
 ## Compare
 
@@ -369,6 +376,19 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Conversion rate by traffic source: formula and worked example](https://virling.com/blog/conversion-rate-by-traffic-source): Conversion rate by traffic source is paying customers divided by visitors, per channel. The formula, sessions or visitors, and when a low rate still wins.
 - [Refund rate by traffic source: formula and worked example](https://virling.com/blog/refund-rate-by-traffic-source): Refund rate by traffic source is the share of each source's payments refunded. See the formula, a gross vs net example and how to read it.
 - [Profit by marketing channel: formula and worked example](https://virling.com/blog/profit-by-marketing-channel): Profit by marketing channel is net revenue minus spend minus payment fees. The formula, a worked example, and how to price channels that cost time.
+- [Meta Ads revenue tracking: which campaign brings customers](https://virling.com/blog/meta-ads-revenue-tracking): Meta Ads revenue tracking: tag Facebook and Instagram ads so clicks count as Paid, link checkout to the visit, and see real payments per campaign.
+- [LinkedIn Ads revenue tracking: which campaign brings customers](https://virling.com/blog/linkedin-ads-revenue-tracking): LinkedIn Ads revenue tracking: tag campaigns so each click counts as Paid, link checkout to the visit, and read payments per campaign over a long sales cycle.
+- [Reddit Ads revenue tracking: which campaign brings customers](https://virling.com/blog/reddit-ads-revenue-tracking): Reddit Ads revenue tracking: tag promoted posts so each click counts as Paid, keep them apart from organic Reddit posts, and read payments per campaign.
+- [Average order value by traffic source: formula and example](https://virling.com/blog/aov-by-traffic-source): Average order value by traffic source is revenue divided by orders, per channel. The formula, a worked table, and why a high average can mislead.
+- [Stripe embedded checkout UTM tracking: keep the source](https://virling.com/blog/stripe-embedded-checkout-utm-tracking): Stripe embedded checkout does not copy UTM tags from your page URL. Pass a visitor ID when your server creates the session and see which source sold.
+- [Stripe Elements UTM parameters: track the source of each sale](https://virling.com/blog/stripe-elements-utm-tracking): Stripe Elements does not copy UTM tags onto a payment. Put a visitor ID in PaymentIntent metadata, for one-time sales and subscriptions, to see the source.
+- [Do coupon sites bring new customers? How to check your orders](https://virling.com/blog/coupon-site-revenue-tracking): Do coupon sites bring new customers or take credit at checkout? How to tag partner links, compare first and last visits, and fix your checkout page.
+- [Facebook Ads purchases don't match Shopify orders: how to check](https://virling.com/blog/meta-ads-purchases-do-not-match-shopify): Meta counts purchase events inside its attribution windows, views included, and Shopify counts orders. The causes, and a check per campaign.
+- [Symfony Stripe UTM tracking: Checkout Sessions in PHP](https://virling.com/blog/symfony-stripe-utm-tracking): How to tie a Stripe Checkout payment in a Symfony app to the visit and UTM tags behind it: read one cookie and pass it as client_reference_id.
+- [Retargeting ROI tracking: why last touch flatters it](https://virling.com/blog/retargeting-revenue-tracking): Retargeting ROI tracking: why retargeting looks good under last touch, how to tag it apart from prospecting, and a simple pause test to see what it adds.
+- [Self-reported attribution vs tracked attribution](https://virling.com/blog/self-reported-attribution): Self-reported attribution asks buyers how they heard about you. What it catches that clicks miss, what it gets wrong, when to ask and how to compare.
+- [Phoenix Elixir Stripe UTM tracking: controllers and LiveView](https://virling.com/blog/phoenix-stripe-utm-tracking): How to tie a Stripe Checkout payment in a Phoenix app to the visit and UTM tags behind it: read one cookie in a controller or before a LiveView mounts.
+- [Microsoft Ads revenue tracking: which campaign brings customers](https://virling.com/blog/microsoft-ads-revenue-tracking): Microsoft Ads revenue tracking: tag your ads with utm_medium=cpc so Bing clicks count as Paid, link checkout, and see payments and revenue per campaign.
 
 ## Source
 

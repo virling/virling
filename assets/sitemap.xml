@@ -57,6 +57,8 @@
   <url><loc>https://virling.com/integrations/stripe-online-courses</loc></url>
   <url><loc>https://virling.com/integrations/stripe-digital-products</loc></url>
   <url><loc>https://virling.com/integrations/stripe-developer-tools</loc></url>
+  <url><loc>https://virling.com/integrations/polar-digital-products</loc></url>
+  <url><loc>https://virling.com/integrations/woocommerce-online-courses</loc></url>
   <url><loc>https://virling.com/blog</loc></url>
   <url><loc>https://virling.com/blog/woocommerce-order-attribution-unknown</loc></url>
   <url><loc>https://virling.com/blog/what-is-revenue-attribution</loc></url>
@@ -231,6 +233,19 @@
   <url><loc>https://virling.com/blog/conversion-rate-by-traffic-source</loc></url>
   <url><loc>https://virling.com/blog/refund-rate-by-traffic-source</loc></url>
   <url><loc>https://virling.com/blog/profit-by-marketing-channel</loc></url>
+  <url><loc>https://virling.com/blog/meta-ads-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/linkedin-ads-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/reddit-ads-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/aov-by-traffic-source</loc></url>
+  <url><loc>https://virling.com/blog/stripe-embedded-checkout-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/stripe-elements-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/coupon-site-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/meta-ads-purchases-do-not-match-shopify</loc></url>
+  <url><loc>https://virling.com/blog/symfony-stripe-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/retargeting-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/self-reported-attribution</loc></url>
+  <url><loc>https://virling.com/blog/phoenix-stripe-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/microsoft-ads-revenue-tracking</loc></url>
   <url><loc>https://virling.com/vs</loc></url>
   <url><loc>https://virling.com/vs/datafast</loc></url>
   <url><loc>https://virling.com/vs/databull</loc></url>
@@ -335,5 +350,10 @@
   <url><loc>https://virling.com/tools/dodo-payments-fee-calculator</loc></url>
   <url><loc>https://virling.com/tools/creem-fee-calculator</loc></url>
   <url><loc>https://virling.com/tools/polar-fee-calculator</loc></url>
+  <url><loc>https://virling.com/tools/url-cleaner</loc></url>
+  <url><loc>https://virling.com/tools/email-marketing-roi-calculator</loc></url>
+  <url><loc>https://virling.com/tools/llms-txt-generator</loc></url>
+  <url><loc>https://virling.com/tools/ai-robots-txt-generator</loc></url>
+  <url><loc>https://virling.com/tools/qr-code-utm-generator</loc></url>
   <url><loc>https://virling.com/what-we-dont-do</loc></url>
 </urlset>
