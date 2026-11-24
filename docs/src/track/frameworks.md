@@ -103,6 +103,28 @@ Paste the tag into `index.html` at the project root, before `</head>`. Vite uses
 
 To pass the visitor ID to a checkout you open from the browser, read it with `window.virling?.vid?.()`; see [Link checkout to visits](../payments/checkout.md#read-the-visitor-id).
 
+## Vue (Vite)
+
+Paste the tag into `index.html` at the project root, before `</head>`. Vite [treats that file as the entry point](https://vite.dev/guide/#index-html-and-project-root) of the app. Route changes from Vue Router are tracked through `history.pushState` with `createWebHistory()`; `createWebHashHistory()` keeps the route in the hash, which is not counted. See [Single-page apps](spa.md).
+
+```html,file:index.html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+To pass the visitor ID to a checkout you open from the browser, read it with `window.virling?.vid?.()`; see [Link checkout to visits](../payments/checkout.md#read-the-visitor-id).
+
+## Angular
+
+Paste the tag into `src/index.html`, before `</head>`. That file is [the main HTML page](https://angular.dev/reference/configs/file-structure) of the app. Angular's router uses `history.pushState` by default, so client-side navigation is counted; with the hash location strategy it is not. See [Single-page apps](spa.md).
+
+```html,file:src/index.html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+To pass the visitor ID to a checkout you open from the browser, read it with `window.virling?.vid?.()`; see [Link checkout to visits](../payments/checkout.md#read-the-visitor-id).
+
 ## Remix
 
 Add the tag to the `<head>` in the root route, next to `<Meta />` and `<Links />`. Remix renders it into the HTML of every page, and client-side navigation is counted on its own; see [Single-page apps](spa.md).
@@ -156,6 +178,39 @@ Paste the tag before `</head>` in `app/views/layouts/application.html.erb`. With
 ```
 
 To pass the visitor ID to checkout, read `cookies[:virling_vid]` in the controller that creates the checkout, for example as `client_reference_id` on a Stripe Checkout Session. See [Link checkout to visits](../payments/checkout.md).
+
+## Django
+
+Paste the tag before `</head>` in the template every page extends, usually `templates/base.html`.
+
+```html,file:templates/base.html
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+To pass the visitor ID to checkout, read [`request.COOKIES.get("virling_vid")`](https://docs.djangoproject.com/en/stable/ref/request-response/#django.http.HttpRequest.COOKIES) in the view that creates the checkout. It is a plain cookie, so do not use `get_signed_cookie()`. See [Link checkout to visits](../payments/checkout.md) and [Django Stripe UTM tracking](https://virling.com/blog/django-stripe-utm-tracking).
+
+## Symfony
+
+Paste the tag before `</head>` in `templates/base.html.twig`, outside any block a child template overrides.
+
+```html,file:templates/base.html.twig
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+To pass the visitor ID to checkout, read `$request->cookies->get('virling_vid')` in the controller that creates the checkout; [`cookies` is the equivalent of `$_COOKIE`](https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data). See [Link checkout to visits](../payments/checkout.md) and [Symfony Stripe UTM tracking](https://virling.com/blog/symfony-stripe-utm-tracking).
+
+## Phoenix
+
+Paste the tag before `</head>` in the root layout, `lib/my_app_web/components/layouts/root.html.heex`, with your app's name in place of `my_app`. Controllers and LiveViews [share it](https://hexdocs.pm/phoenix/components.html#layouts). LiveView navigation uses `history.pushState`, so each page is counted; see [Single-page apps](spa.md).
+
+```html,file:lib/my_app_web/components/layouts/root.html.heex
+<script defer src="https://stats.example.com/v.js"
+  data-site="yourdomain.com"></script>
+```
+
+To pass the visitor ID to checkout, read `get_cookies(conn)["virling_vid"]` in the controller that creates the checkout. The default `:browser` pipeline has already fetched the cookies. A LiveView cannot read cookies from its socket, so post a form to that controller. See [Link checkout to visits](../payments/checkout.md) and [Phoenix Stripe UTM tracking](https://virling.com/blog/phoenix-stripe-utm-tracking).
 
 ## WordPress
 
