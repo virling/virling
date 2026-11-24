@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paddle revenue attribution for developer tools: sales by channel</title>
+<meta name="description" content="Paddle revenue attribution for developer tools: credit each API, CLI or SDK payment to the GitHub, docs or package page that brought the buyer.">
+<link rel="canonical" href="https://virling.com/integrations/paddle-developer-tools">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/paddle-developer-tools">
+<meta property="og:title" content="Paddle revenue attribution for developer tools: sales by channel">
+<meta property="og:description" content="Paddle revenue attribution for developer tools: credit each API, CLI or SDK payment to the GitHub, docs or package page that brought the buyer.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"Paddle","item":"https://virling.com/integrations/paddle"},{"@type":"ListItem","position":4,"name":"Paddle for developer tools","item":"https://virling.com/integrations/paddle-developer-tools"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I see which channel brings my Paddle customers?","acceptedAnswer":{"@type":"Answer","text":"Add the Virling script to your site and docs, connect Paddle with a read-only API key, and pass the visitor ID as customData when you open Paddle checkout. Each payment is credited to the visits before it, so the Channels card and its Source and Campaign tabs show whether GitHub, your docs, a package page or a search brought the developers who pay."}},{"@type":"Question","name":"Does Virling track installs or CLI use?","acceptedAnswer":{"@type":"Answer","text":"No. Virling does not see package installs, terminal commands, API calls or SDK use. It sees visits to pages that run the script and the Paddle transactions that follow."}},{"@type":"Question","name":"Can a checkout created on my server be credited?","acceptedAnswer":{"@type":"Answer","text":"Yes, when the request comes from the buyer's browser on your domain. Read the virling_vid cookie from that request and set custom_data: { virling_vid } on the transaction you create. A transaction created from a terminal or an API call has no cookie, so it counts toward revenue as Unattributed, unless the customer already has an attributed first payment."}},{"@type":"Question","name":"How are Paddle trials and renewals credited?","acceptedAnswer":{"@type":"Answer","text":"A subscription's first transaction with nothing to pay, from a checkout opened with Paddle.js, starts a trial and is never counted as revenue. The customer's later payment is credited to the visits before the trial started. Renewals and plan changes keep the channel of the customer's first payment."}},{"@type":"Question","name":"Which permissions does the Paddle API key need?","acceptedAnswer":{"@type":"Answer","text":"transaction.read and adjustment.read, plus subscription.read so Retention can tell who still pays. No other permissions are needed, and Virling never creates, changes or refunds anything."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / paddle for developer tools</span>
+      <h1>Paddle revenue attribution for developer tools.</h1>
+      <p class="lead">For APIs, CLIs and SDKs sold through Paddle Billing. Virling ties each Paddle transaction to the visit that brought the buyer, such as your docs, GitHub repository or package page, by passing a visitor ID to checkout in <code>customData</code>. You see which channel brings developers who pay, not only stars and downloads. Installs and terminal use are not tracked. Open source under AGPL, hosted or <a href="/self-host">self-hosted</a>.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">A developer may find your package, read the docs, try the free tier and pay weeks later. Paddle records who paid and how much, but not the visit that brought them. Virling reads your Paddle Billing transactions with a read-only API key and joins each one to the visitor who checked out.</p>
+<h2>From docs, GitHub and package pages to checkout</h2>
+<ul class="post-list"><li><b>Docs.</b> With the same <code>data-site</code>, pages on <code>yourtool.dev</code>, <code>docs.yourtool.dev</code> and <code>app.yourtool.dev</code> count for one site and share the <code>virling_vid</code> cookie, so reading the docs never changes the channel the visit came from. A docs page that starts a visit is its landing page. See <a href="/blog/docs-revenue-tracking">do your docs bring paying customers</a>.</li><li><b>GitHub.</b> Clicks from github.com land in Referral and show as GitHub in the Source tab. GitHub sends only its origin, so give the README, repository website field and release notes one <code>utm_campaign</code> each. <a href="/blog/github-revenue-tracking">GitHub revenue tracking</a> has the links to copy.</li><li><b>Package pages.</b> npmjs.com, pypi.org and crates.io are Referral rows under their own domain. Tag the README and homepage links to tell placements apart; <a href="/blog/npm-revenue-tracking">package registry traffic</a> covers each one.</li><li><b>Links printed by your CLI.</b> A link opened from a terminal has no referrer. Tag it, such as <code>?utm_source=cli&amp;utm_medium=referral&amp;utm_campaign=upgrade-hint</code>, or it is Direct. A tagged visit can take the credit from the channel that first brought the developer; switch to first touch to see that one.</li></ul>
+<p class="p">By default a payment goes to the latest visit in the last 90 days that was not Direct. <a href="/integrations/developer-tools">Virling for developer tools</a> covers other channels and lookback windows up to a year.</p>
+<h2>What is not tracked</h2>
+<p class="p">Virling does not track installs, terminal use, API calls or anything your SDK does. <code>npm install</code>, <code>pip install</code> and a command in a shell never open your site, so they are not visits. Virling sees visits to pages that run the script, and the Paddle payments that follow.</p>
+<h2>Set it up</h2>
+<ol class="post-list"><li><b>Add the site.</b> Click <b>+ Add a site</b> and enter your domain, such as <code>yourtool.dev</code>, and its timezone.</li><li><b>Install the script.</b> Paste the tag before <code>&lt;/head&gt;</code> on the site, the docs and the app, with the same <code>data-site</code>. Leave cookieless mode off.</li><li><b>Connect Paddle.</b> In Paddle, open <b>Developer tools</b>, then <b>Authentication</b>, and create an API key with <code>transaction.read</code> and <code>adjustment.read</code>, plus <code>subscription.read</code> for retention. Paste it under payments; live keys start with <code>pdl_live_</code> and sandbox keys with <code>pdl_sdbx_</code>. Completed transactions from the last 90 days are imported on the first run, then new ones every minute.</li><li><b>Pass the visitor ID.</b> The script does not add it to Paddle checkouts by itself. With Paddle.js, overlay or inline, pass it as <code>customData</code>. <code>window.virling?.vid?.()</code> returns nothing when the script is blocked or not loaded yet.</li></ol>
+<div class="code block"><pre>Paddle.Checkout.open({
+  items: [{ priceId: &quot;pri_...&quot;, quantity: 1 }],
+  customData: { virling_vid: window.virling?.vid?.() },
+});</pre></div>
+<h2>Server-created transactions</h2>
+<p class="p">If your backend creates the transaction, read the <code>virling_vid</code> cookie from the buyer&#x27;s request and set it in <code>custom_data</code>. Use your own Paddle key here, not the read-only one you gave Virling.</p>
+<div class="code block"><pre>const res = await fetch(&quot;https://api.paddle.com/transactions&quot;, {
+  method: &quot;POST&quot;,
+  headers: { authorization: `Bearer ${process.env.PADDLE_API_KEY}`, &quot;content-type&quot;: &quot;application/json&quot; },
+  body: JSON.stringify({
+    items: [{ price_id: &quot;pri_...&quot;, quantity: 1 }],
+    custom_data: { virling_vid: req.cookies.virling_vid },
+  }),
+});
+// Open checkout in the browser with Paddle.Checkout.open({ transactionId })</pre></div>
+<p class="p">A transaction created from a terminal command or an API call has no browser cookie, so there is no visitor ID to pass. Have the CLI open your pricing page in the browser instead and start checkout there. Custom data on a customer, product or price is not read.</p>
+<h2>Trials and renewals</h2>
+<ul class="post-list"><li><b>Trials kept apart from revenue.</b> A subscription&#x27;s first transaction with nothing to pay starts a trial. It is never counted as revenue, a payment or a customer, and the customer&#x27;s later payment is credited to the visits before the trial started. Virling reads the trial start from a checkout opened with Paddle.js, not from a transaction your server created, so open trial checkouts with <code>items</code> and <code>customData</code>.</li><li><b>Renewals that keep the first channel.</b> A transaction whose origin is <code>subscription_recurring</code>, <code>subscription_update</code> or <code>subscription_charge</code> is a renewal. It carries no custom data of its own and keeps the channel of the customer&#x27;s first payment, matched by Paddle customer ID. Plan changes and one-time charges on a subscription, such as usage overage, count as renewals too.</li><li><b>Refunds and chargebacks taken off.</b> Approved refund and chargeback adjustments lower the transaction&#x27;s revenue, and transactions from the last 60 days are read again every 6 hours, so later refunds show up.</li><li><b>Who still pays.</b> With <code>subscription.read</code>, subscription status is read once an hour so <a href="https://docs.virling.com/attribution/retention">Retention</a> can tell who still pays; without it, retention falls back to payment recency.</li></ul>
+<h2>An example</h2>
+<p class="p">These numbers are made up, to show the method. Over 90 days the GitHub row has 4,000 visitors and $800, and one docs guide is the landing page for 500 visitors and $1,000. GitHub is $0.20 per visitor and the guide is $2.00, so the next guide is likely worth more of your time than the next star. Virling shows the revenue of each transaction, not your payout; the <a href="/tools/paddle-fee-calculator">Paddle fee calculator</a> works out the fee and what is left.</p>
+<h2>Check that it works</h2>
+<p class="p">Connect a sandbox key, visit a page that runs the script in a private window through a tagged link, and pay with one of Paddle&#x27;s test cards. Wait a minute for the next sync and open the payments list: the payment should show your test source instead of Unattributed. Use a new email address for each test, since a later payment by the same customer keeps the first payment&#x27;s channel. Sandbox payments stay in your reports after you replace the key with a live one.</p>
+<p class="p">Every setting is on the <a href="/integrations/paddle">Paddle integration page</a>. The full walkthrough is in <a href="/blog/track-paddle-revenue-by-traffic-source">how to track Paddle revenue by traffic source</a>, and <a href="/blog/nextjs-paddle-utm-tracking">Next.js Paddle UTM tracking</a> covers the App Router.</p>
+<h2>What to know</h2>
+<ul class="post-list"><li>Transactions older than the 90-day backfill are not imported, so renewals of subscriptions that started before that are usually Unattributed. Transactions from before the script was on your site count as revenue but are Unattributed.</li><li>A visit in one browser and a checkout in another, or on another device, cannot be tied together.</li><li>Payments without a customer ID cannot be linked to a first payment, and payments without a visitor ID still count toward revenue as Unattributed.</li></ul>
+<h2>Open source</h2>
+<p class="p">Virling is open source under AGPLv3, and the code is on <a href="https://github.com/virling/virling">GitHub</a>. Use the hosted service, or <a href="/self-host">self-host it</a> as one binary with every feature. In a load test on 2026-10-31, in a container limited to one vCPU and 1 GB of RAM, it ingested 100,000 pageviews at 2,829 a second with none failed and a p99 of 34 ms, and used 157 MB of memory after the ingest.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I see which channel brings my Paddle customers?</h3><p class="p">Add the Virling script to your site and docs, connect Paddle with a read-only API key, and pass the visitor ID as customData when you open Paddle checkout. Each payment is credited to the visits before it, so the Channels card and its Source and Campaign tabs show whether GitHub, your docs, a package page or a search brought the developers who pay.</p>
+<h3>Does Virling track installs or CLI use?</h3><p class="p">No. Virling does not see package installs, terminal commands, API calls or SDK use. It sees visits to pages that run the script and the Paddle transactions that follow.</p>
+<h3>Can a checkout created on my server be credited?</h3><p class="p">Yes, when the request comes from the buyer's browser on your domain. Read the virling_vid cookie from that request and set custom_data: { virling_vid } on the transaction you create. A transaction created from a terminal or an API call has no cookie, so it counts toward revenue as Unattributed, unless the customer already has an attributed first payment.</p>
+<h3>How are Paddle trials and renewals credited?</h3><p class="p">A subscription's first transaction with nothing to pay, from a checkout opened with Paddle.js, starts a trial and is never counted as revenue. The customer's later payment is credited to the visits before the trial started. Renewals and plan changes keep the channel of the customer's first payment.</p>
+<h3>Which permissions does the Paddle API key need?</h3><p class="p">transaction.read and adjustment.read, plus subscription.read so Retention can tell who still pays. No other permissions are needed, and Virling never creates, changes or refunds anything.</p>
+      <p class="p">Full guides: <a href="https://docs.virling.com/payments/paddle">Paddle in the docs</a>, <a href="https://docs.virling.com/payments/checkout">Link checkout to visits</a> and <a href="https://docs.virling.com/attribution/renewals">Renewals</a>.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post"><h2>Related reading</h2><ul class="post-list"><li><a href="/integrations/paddle">Paddle revenue attribution</a></li><li><a href="/integrations/developer-tools">Revenue attribution for developer tools</a></li><li><a href="/blog/docs-revenue-tracking">Do your docs bring paying customers?</a></li><li><a href="/blog/github-revenue-tracking">GitHub revenue tracking</a></li><li><a href="/tools/paddle-fee-calculator">Paddle fee calculator</a></li><li><a href="/integrations/paddle-saas">Paddle for SaaS</a></li></ul></div></div></section>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
