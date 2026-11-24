@@ -85,7 +85,7 @@ www.example.com {
 <h2>Cause 2: link shorteners</h2>
 <p class="p">A shortener is one more redirect. Some keep the tags that were part of the destination you shortened but ignore tags added to the short link afterwards, and some redirect through a page of their own first.</p>
 <p class="p"><b>Check:</b> <code>curl -sIL https://short.link/abc | grep -i '^location'</code> and confirm the last hop has your tags.</p>
-<p class="p"><b>Fix:</b> build the tagged destination first with the <a href="/tools/utm-builder">UTM builder</a>, then shorten that full URL. Do not add tags to the short link itself.</p>
+<p class="p"><b>Fix:</b> build the tagged destination first with the <a href="/tools/utm-builder">UTM builder</a>, then shorten that full URL. Do not add tags to the short link itself. If the page URL already carries old tags or click IDs, strip them first with the <a href="/tools/url-cleaner">URL cleaner</a>.</p>
 <h2>Cause 3: consent and login walls</h2>
 <p class="p">A page that sends visitors to <code>/login?next=/pricing</code> or reloads after a cookie banner often keeps the path and forgets the rest. If your analytics only loads after consent, the tagged landing page may be gone by the time the script runs.</p>
 <p class="p"><b>Check:</b> open the tagged link in a private window, go through the banner or the login, and watch the address bar at each step.</p>
