@@ -55,7 +55,7 @@ A charge for an upgrade or another plan change keeps the channel of the customer
 
 ### What happens when a renewal fails and is paid later?
 
-A failed payment adds no revenue and is never used as the first payment. The payment that succeeds keeps the channel of the customer's first payment. Dodo Payments, Paddle and RevenueCat failures are not imported at all. When the provider updates the same order, invoice or transaction instead of making a new one, the change can take up to 6 hours to show on LemonSqueezy, Creem and WooCommerce, which are read again for 60 days.
+A failed payment adds no revenue and is never used as the first payment. The payment that succeeds keeps the channel of the customer's first payment. Dodo Payments, Paddle and RevenueCat failures are not imported at all. When the provider updates the same order, invoice or transaction instead of making a new one, the change can take up to 6 hours to show on LemonSqueezy, Creem, Paddle and WooCommerce, which are read again for 60 days.
 
 ### Does changing the model later change old renewals?
 
