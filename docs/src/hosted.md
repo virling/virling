@@ -44,7 +44,7 @@ Keys are encrypted with AES-256-GCM before they are stored, are never logged, an
 ## Who can see the data
 
 - **You and your team.** The owner and, on Agency, each member can open every site on the account. Roles other than owner and member are <span class="na">Not available yet</span>.
-- **People you share with.** A public dashboard, client links and report emails show a site's reports to whoever you give them to. You can turn off the public dashboard and revoke a client link. See [Share a site](guides/dashboard.md#share-a-site).
+- **People you share with.** A public dashboard, client links and report emails show a site's reports to whoever you give them to. You can turn off the public dashboard and revoke a client link. See [Share a site](guides/dashboard.md#share-a-site). A [partner's](guides/dashboard.md#the-other-pages) report link shows only their own numbers until you remove the partner.
 - **Apps you connect.** [API keys](reference/api.md) and the [MCP server](reference/mcp.md) read every site on the account. Only the owner can connect an app or create a key, and can revoke both.
 - **Virling, as the operator.** Stacklance Infotech LLP runs the service and handles your visitors' data on your behalf. A Virling admin can open an account read only for 30 minutes, and each time is recorded. See [Admin panel](self-host/admin.md#what-it-does).
 - **Service providers.** The app and its databases run on Oracle Cloud Infrastructure in Mumbai, India. The [privacy policy](https://virling.com/privacy) lists every provider and what it receives.
