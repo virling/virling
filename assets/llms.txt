@@ -124,6 +124,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [LinkedIn ads dynamic UTM parameters builder](https://virling.com/tools/linkedin-ads-utm-builder): build LinkedIn dynamic UTM parameters to paste in Campaign Manager, with the new or old campaign names, and preview the landing URL in your browser
 - [Microsoft Ads tracking template and UTM builder](https://virling.com/tools/microsoft-ads-utm-builder): build a Microsoft Ads tracking template and final URL suffix with UTM tags and URL parameters, and preview the landing URL in your browser
 - [TikTok ads UTM parameters builder](https://virling.com/tools/tiktok-ads-utm-builder): build TikTok ads UTM parameters with campaign, ad group and ad macros, get the full URL for TikTok Ads Manager, and preview it in your browser
+- [Influencer UTM link generator](https://virling.com/tools/influencer-utm-link-generator): paste a list of creators to get one UTM link each for Instagram, TikTok, YouTube and more, then copy the links or download a CSV
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -446,6 +447,9 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Shopify checkout extensibility tracking: what still works](https://virling.com/blog/shopify-checkout-extensibility-tracking): Which tracking breaks under Shopify checkout extensibility, what replaces checkout scripts, and why a visitor ID stored on the cart still works.
 - [SvelteKit Polar UTM tracking: see the source of each order](https://virling.com/blog/sveltekit-polar-utm-tracking): Add the script to app.html, read the virling_vid cookie with event.cookies and set it in Polar checkout metadata, so each order shows its source.
 - [Typeform hidden fields UTM tracking: from form answer to payment](https://virling.com/blog/typeform-utm-tracking): Typeform hidden fields UTM tracking, step by step: declare the fields, pass tags in a link or embed, test each step, then join a lead to a later payment.
+- [Nuxt Polar UTM tracking: see which source brought each order](https://virling.com/blog/nuxt-polar-utm-tracking): Read the virling_vid cookie in a Nuxt server route and set it in Polar checkout metadata, so each order and renewal shows the source behind it.
+- [Rails Paddle UTM tracking: pass the visitor ID to checkout](https://virling.com/blog/rails-paddle-utm-tracking): Rails Paddle UTM tracking: read the visitor ID cookie in a controller, pass it to Paddle as custom data, and handle Turbo, sandbox tests and renewals.
+- [Telegram revenue tracking: which channels and groups bring paying customers](https://virling.com/blog/telegram-revenue-tracking): Telegram revenue tracking: tag links in channels, groups, bots and ads, see which visits stay Direct, and compare payments and revenue per visitor.
 
 ## Source
 
