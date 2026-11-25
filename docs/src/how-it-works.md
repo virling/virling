@@ -34,5 +34,5 @@ SQLite migrations run on every start, so upgrading is replacing the binary. See 
 ## What Virling never does
 
 - It never stores visitor IP addresses. The IP is used only for the daily cookieless hash and is not written anywhere.
-- It never writes to your payment provider. Keys are read-only where the provider allows it, and are encrypted at rest.
+- It never creates, changes or refunds a payment. Keys are read-only wherever the provider allows it, and are encrypted at rest. For LemonSqueezy, Creem and RevenueCat, Virling adds a webhook. See [the access for each provider](payments/index.md#which-key-to-create).
 - It never calls a third party from your visitors' browsers. The script only talks to your Virling server.
