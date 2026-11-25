@@ -115,5 +115,5 @@ It prints the reason and exits:
 ### How do I go back to the old version?
 
 1. Stop Virling.
-2. [Restore the backup](data.md#restore-the-binarys-data-folder) you made before the upgrade. Downgrading after a migration ran is not supported, so the old binary needs the old data. Events and changes since the backup are lost.
+2. [Restore the backup](data.md#restore-the-binarys-data-folder) you made before the upgrade, without starting Virling yet. Downgrading after a migration ran is not supported, so the old binary needs the old data. Events and changes since the backup are lost.
 3. [Download](../install/binary.md#download-and-verify) the old version, replace the binary and start it.
