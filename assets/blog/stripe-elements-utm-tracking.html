@@ -53,7 +53,7 @@
 <h2>Add the script</h2>
 <p class="p">Put one tag in the <code>&lt;head&gt;</code> of every page, landing pages included. The app shows the exact tag for your site:</p>
 <div class="code block"><pre data-snippet>&lt;script defer src="https://app.virling.com/v.js" data-site="yourdomain.com"&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">The script records the referrer and UTM tags of every visit against a visitor ID in the first-party <code>virling_vid</code> cookie. The cookie is on your domain, so your server receives it. If your API is on another domain, send <code>window.virling?.vid?.()</code> in the request body instead. Both ways are in the <a href="https://docs.virling.com/payments/checkout">checkout docs</a>.</p>
+<p class="p">The script records the referrer and UTM tags of every visit against a visitor ID in the first-party <code>virling_vid</code> cookie. The cookie is on your domain, so your server receives it. If your API is on another domain, send <code>window.virling?.vid?.()</code> in the request body instead. Both ways are in the <a href="https://docs.virling.com/payments/checkout">checkout docs</a> and in <a href="/blog/server-side-revenue-tracking">server-side revenue tracking</a>.</p>
 <h2>One-time payments: the PaymentIntent</h2>
 <p class="p">Set the metadata where you create the PaymentIntent. This is Express with <code>cookie-parser</code>; the amount is a made-up example:</p>
 <div class="code block"><pre data-snippet>app.post("/create-intent", async (req, res) =&gt; {
