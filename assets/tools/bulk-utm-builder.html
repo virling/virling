@@ -63,12 +63,32 @@ example.com/signup</textarea></label>
   <section class="band"><div class="wrap"><div class="txt post">
 <h2>How the bulk UTM builder works</h2>
 <ol class="post-list"><li>Paste your links, one per line. Each line must be a full URL starting with <code>https://</code>.</li><li>Fill in the source, medium and campaign once. They are added to every link, the same way the <a href="/tools/utm-builder">UTM builder</a> does for one link: spaces become hyphens and values are lowercased unless you untick the box.</li><li>To tag rows differently, paste a CSV instead. The first line names the columns: <code>url</code> is required, and <code>source</code>, <code>medium</code>, <code>campaign</code>, <code>content</code> and <code>term</code> (or <code>utm_source</code> and so on) are optional.</li><li>Copy all the tagged links, or download a CSV with the original URL, the tagged URL and the result for each row.</li></ol>
-<p class="p">Query strings already on a link are kept, and the tags go before any <code>#fragment</code>, so <code>https://example.com/#features</code> becomes <code>https://example.com/?utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=october-launch#features</code>. A line that is not a full URL, or a row left without a source, is flagged in the results and left out of the copied links, not dropped silently.</p>
-<p class="p">A CSV for three channels of one launch looks like this:</p>
-<div class="code block"><pre>url,source,medium,campaign,content
+<p class="p" style="overflow-wrap:anywhere">Query strings already on a link are kept, and the tags go before any <code>#fragment</code>, so <code>https://example.com/#features</code> becomes <code>https://example.com/?utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=october-launch#features</code>. A line that is not a full URL, or a row left without a source, is flagged in the results and left out of the copied links, not dropped silently.</p>
+<h2>A sample CSV to copy</h2>
+<p class="p">Five links of one made-up launch. Copy it, paste it over the list in the tool, and all five rows are tagged. Then replace the links and names with yours.</p>
+<div class="code block"><pre data-snippet>url,source,medium,campaign,content
 https://example.com/pricing,newsletter,email,october-launch,header-button
+https://example.com/pricing,newsletter,email,october-launch,footer-link
 https://example.com/pricing,linkedin,social,october-launch,
-https://example.com/,podcast-name,podcast,october-launch,</pre></div>
+https://example.com/pricing,linkedin,paidsocial,october-launch,video-ad
+https://example.com/,google,cpc,october-launch,</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The source stays the same for the LinkedIn post and the LinkedIn ad, and the medium tells them apart: see <a href="/blog/utm-source-vs-utm-medium">utm_source vs utm_medium</a>. The campaign is the same on every row, so the launch is one row when you read <a href="/blog/revenue-by-campaign">revenue by campaign</a>.</p>
+<h2>Common input problems</h2>
+<table class="cmp" style="overflow-wrap:anywhere"><thead><tr><th style="width:38%">Input</th><th>What the tool does</th></tr></thead><tbody>
+<tr><th scope="row">A link without <code>https://</code>, such as <code>example.com/signup</code></th><td>Flags it as not a full URL and leaves it out of the copied links. The CSV download keeps the row with its error.</td></tr>
+<tr><th scope="row"><code>mailto:</code> and other links that are not web pages</th><td>Flags them the same way. Only <code>http</code> and <code>https</code> links are tagged.</td></tr>
+<tr><th scope="row">No <code>url</code> column, a title row above the header, or no header</th><td>Does not read the text as a CSV. A header line is flagged, and in each row the commas and the cells after them become part of the link. Make the header the first line and call the link column <code>url</code>.</td></tr>
+<tr><th scope="row">Semicolons or tabs between columns</th><td>Also not read as a CSV, so the values end up inside the link. Cells copied straight from a spreadsheet are separated by tabs: save the sheet as a comma-separated CSV and paste that.</td></tr>
+<tr><th scope="row">A comma inside a cell</th><td>Starts a new cell, so the values after it move one column to the right. Wrap the cell in double quotes.</td></tr>
+<tr><th scope="row">A column it does not know, such as <code>owner</code> or <code>campaign name</code></th><td>Ignores the column. With no <code>campaign</code> column, the Campaign field above the list is used.</td></tr>
+<tr><th scope="row">An empty cell</th><td>Uses the field with the same name above the list. If that is empty too, the tag is not added.</td></tr>
+<tr><th scope="row">No source in the row, the field or the link</th><td>Flags the row with <code>No utm_source: add a source</code> and leaves it out of the copied links.</td></tr>
+<tr><th scope="row">A link that already has UTM tags</th><td>Replaces each tag that has a new value and keeps the others.</td></tr>
+<tr><th scope="row">Capitals and spaces in a value</th><td>Turns spaces into hyphens, and lowercases unless you untick the box. <code>Paid Social</code> becomes <code>paid-social</code>, which Virling does not count as Paid. Write <code>paidsocial</code>.</td></tr>
+<tr><th scope="row">Two links on one line</th><td>Usually reads them as one link and tags it without a flag. Put each link on its own line.</td></tr>
+<tr><th scope="row">The same link twice</th><td>Keeps and tags both rows.</td></tr>
+<tr><th scope="row">Blank rows</th><td>Skips them.</td></tr>
+</tbody></table>
 <h2>Name tags consistently and check the results</h2>
 <ul class="post-list"><li><b>Agree the names before you tag.</b> Pick one source per platform and a short, fixed list of mediums. The <a href="/tools/utm-naming-template">UTM naming template</a> gives you a table to fill in and share.</li><li><b>Lowercase with hyphens.</b> <code>Newsletter</code> and <code>news letter</code> become separate rows in most reports; this builder writes <code>newsletter</code> and <code>news-letter</code>.</li><li><b>Use <code>utm_content</code> to tell links apart.</b> When one email or page has several links, give each a content value such as <code>header-button</code> or <code>footer-link</code>.</li><li><b>Do not tag links between your own pages.</b> The tag replaces the visitor's real source.</li><li><b>Start from clean links.</b> Remove old tags and click IDs with the <a href="/tools/url-cleaner">URL cleaner</a> before you paste your list.</li><li><b>Printing a link instead?</b> The <a href="/tools/qr-code-utm-generator">QR code generator with UTM tags</a> makes one tagged code per placement.</li><li><b>Check the list before it goes out.</b> Paste the tagged links into the <a href="/tools/utm-checker">UTM checker</a> to catch capitals, spaces, missing mediums and tags after the <code>#</code>. To read the tags back into columns, use the <a href="/tools/bulk-utm-parser">bulk UTM parser</a>.</li></ul>
 <p class="p">For which parameters to use and why, read <a href="/blog/utm-parameters-for-revenue-tracking">which UTM parameters to use to trace revenue</a>.</p>
