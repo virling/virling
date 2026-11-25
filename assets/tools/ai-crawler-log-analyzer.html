@@ -83,7 +83,7 @@ combined: 192.0.2.10 - - [02/Nov/2026:08:15:02 +0000] "GET /pricing HTTP/1.1" 20
 <p class="p">If the log is over 50 MB, keep only the lines that name an AI crawler and load the result. The unnamed traffic is then left out:</p>
 <div class="code block"><pre data-snippet>grep -iE "GPTBot|OAI-SearchBot|ChatGPT-User|ClaudeBot|Claude-(SearchBot|User)|Perplexity(Bot|-User)|Google-Extended|Applebot-Extended|Amazonbot|Amzn-(SearchBot|User)|meta-(externalagent|webindexer|externalfetcher)|DuckAssistBot|CCBot|Bytespider" access.log > ai.log</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
 <h2>Which AI crawlers it looks for</h2>
-<p class="p">The names match the list in the <a href="/tools/ai-crawler-checker">AI crawler checker</a>, which links the page where each operator documents its bot.</p>
+<p class="p">The names match the list in the <a href="/tools/ai-crawler-checker">AI crawler checker</a>, which links the page where each operator documents its bot. Bytespider has no such page there.</p>
 <table class="cmp"><thead><tr><th>Operator</th><th>Names in the user agent</th></tr></thead><tbody>
 <tr><th scope="row">OpenAI</th><td>GPTBot, OAI-SearchBot, ChatGPT-User</td></tr>
 <tr><th scope="row">Anthropic</th><td>ClaudeBot, Claude-SearchBot, Claude-User</td></tr>
