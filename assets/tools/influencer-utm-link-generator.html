@@ -107,7 +107,7 @@ Ana Ruíz</textarea></label>
 <script>
 const f = document.getElementById("inf"), out = document.getElementById("inf-out"), msg = document.getElementById("inf-msg"), issues = document.getElementById("inf-issues"), chan = document.getElementById("inf-channel"), all = document.getElementById("inf-all"), csv = document.getElementById("inf-csv"), plat = document.getElementById("plat");
 const KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"];
-const clean = (s) => s.normalize("NFKD").replace(/[̀-ͯ⃐-⃿︀-️]/g, "").normalize("NFC").toLowerCase().replace(/['’]/g, "").replace(/[^\p{L}\p{N}\p{M}]+/gu, "-").replace(/^-+|-+$/g, "");
+const clean = (s) => s.normalize("NFKD").replace(/[\u0300-\u036f\u20d0-\u20ff\ufe00-\ufe0f]/g, "").normalize("NFC").toLowerCase().replace(/['\u2019]/g, "").replace(/[^\p{L}\p{N}\p{M}]+/gu, "-").replace(/^-+|-+$/g, "");
 const cell = (s) => (/[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s);
 const copy = async (b, text, label) => { try { await navigator.clipboard.writeText(text); b.textContent = "Copied"; } catch { b.textContent = "Copy blocked"; } setTimeout(() => (b.textContent = label), 1500); };
 let links = [];
@@ -182,7 +182,7 @@ all.addEventListener("click", () => copy(all, links.map((l) => `${l.who}: ${l.hr
 csv.addEventListener("click", () => {
   const channel = document.querySelector("#plat-menu [aria-selected=true]").dataset.channel;
   const rows = [["creator", "link", "utm_source", "utm_medium", "utm_campaign", "virling_channel"]].concat(links.map((l) => [l.who.replace(/^[=+\-@\s]+/, ""), l.href, plat.dataset.value, "influencer", l.value, channel]));
-  const a = document.createElement("a"), href = URL.createObjectURL(new Blob(["﻿" + rows.map((r) => r.map(cell).join(",")).join("\r\n")], { type: "text/csv;charset=utf-8" }));
+  const a = document.createElement("a"), href = URL.createObjectURL(new Blob(["\ufeff" + rows.map((r) => r.map(cell).join(",")).join("\r\n")], { type: "text/csv;charset=utf-8" }));
   a.href = href; a.download = "influencer-utm-links.csv"; a.click();
   setTimeout(() => URL.revokeObjectURL(href), 1000);
 });
