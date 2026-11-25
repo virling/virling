@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Incrementality testing on a small budget: three simple tests</title>
+<meta name="description" content="Incrementality testing for small teams: three tests you can run, what to record, a worked example with the arithmetic, and when there are too few sales.">
+<link rel="canonical" href="https://virling.com/blog/incrementality-testing-small-budget">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/incrementality-testing-small-budget">
+<meta property="og:title" content="Incrementality testing on a small budget: three simple tests">
+<meta property="og:description" content="Incrementality testing for small teams: three tests you can run, what to record, a worked example with the arithmetic, and when there are too few sales.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Incrementality testing on a small budget","item":"https://virling.com/blog/incrementality-testing-small-budget"}]},{"@type":"BlogPosting","headline":"Incrementality testing on a small budget: three simple tests","description":"Incrementality testing for small teams: three tests you can run, what to record, a worked example with the arithmetic, and when there are too few sales.","datePublished":"2026-11-25","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/incrementality-testing-small-budget"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is incrementality testing?","acceptedAnswer":{"@type":"Answer","text":"It is a way to find out how many sales a channel caused. You switch the channel off, or change its spend, for some people, places or weeks, and compare total sales with a group or period where it did not change. The difference is the estimate of what the channel added."}},{"@type":"Question","name":"How is incrementality different from attribution?","acceptedAnswer":{"@type":"Answer","text":"Attribution credits each payment to a visit that came before it. It shows which channels buyers came through, but not which of them would have paid anyway. An incrementality test changes the spend and counts all sales, so it can answer that second question."}},{"@type":"Question","name":"How long should an incrementality test run?","acceptedAnswer":{"@type":"Answer","text":"Longer than most buyers take from their first visit to paying, in full weeks, and long enough to collect the sales you need. Fix the length before you start. Stopping on the first good day finds differences that are only chance."}},{"@type":"Question","name":"How many sales do I need for an incrementality test?","acceptedAnswer":{"@type":"Answer","text":"It depends on the size of the effect. With an average of 25 sales per period, two equal periods must differ by about 14 sales to be outside chance. With 100 it is about 28, and with 400 about 56. If the effect you expect is smaller than that, the test cannot show it."}},{"@type":"Question","name":"Can Virling run an incrementality test for me?","acceptedAnswer":{"@type":"Answer","text":"No. Virling does not split audiences, hold out regions or change your spend. You make the change in your ad platform, and read new customers and revenue by channel, date and country in Virling before and after."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-25</span>
+      <h1>Incrementality testing on a small budget</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-25.</p>
+<p class="p"><b>Incrementality testing</b> means changing one channel on purpose and counting how many sales go missing or appear. It answers the question attribution cannot: would these people have bought anyway? A small team can run three versions with no special software: switch a channel off and on, hold one region out, or step the spend up or down. Each needs a fixed length, one change at a time, and a count of all new customers, not only the ones credited to the channel. With few sales the honest answer is often that you cannot tell yet.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>What it answers that attribution does not</h2>
+<p class="p">Attribution takes a payment that happened and credits a visit before it. That tells you which channels your buyers came through, every day, with nothing switched off. It cannot say what would have happened without the channel, because no one saw that. Splitting the credit does not help, as <a href="/blog/multi-touch-attribution">multi-touch attribution</a> explains: it divides the same sales in another way.</p>
+<p class="p">An incrementality test creates that comparison: the channel is off somewhere, and you count what sells there. The gap is widest where ads reach people who already know you, which is why <a href="/blog/retargeting-revenue-tracking">retargeting looks better under last touch</a> than in a test.</p>
+<h2>Before any test</h2>
+<ul class="post-list"><li><b>Write down one question.</b> For example: if paid search stops, how many new customers do we lose?</li><li><b>Fix the length.</b> Use full weeks, and longer than most buyers take to pay. The <b>Time to pay</b> card in Virling shows the median per channel.</li><li><b>Change one thing.</b> Keep prices, offers, emails and other ads as they are. Avoid holidays, sales and launches.</li><li><b>Count new customers.</b> Renewals keep coming whatever you do to the ads and hide the effect.</li><li><b>Decide the rule.</b> Say what result would make you cut, keep or raise the spend, before you see any numbers.</li></ul>
+<h2>Test 1: channel on and off</h2>
+<p class="p">The simplest test, for a channel you can pause.</p>
+<ul class="post-list"><li><b>Steps.</b> Run it as usual for a baseline, pause it for the same number of weeks, then turn it back on for the same number again. Leave out the first days after each switch, since someone who clicked before the pause may still pay.</li><li><b>Length.</b> Three equal blocks, each at least four full weeks, and longer if buyers take longer to pay.</li><li><b>Record.</b> For each block: start and end dates, spend, all new customers, new customers credited to the channel.</li><li><b>Read.</b> Compare all new customers. The channel&rsquo;s own row falls to near zero whatever happens, so it proves nothing. If the total drops and then recovers, the drop is more likely to be real.</li></ul>
+<p class="p">Its weakness is time. Season, news and competitors change between blocks.</p>
+<h2>Test 2: holdout region</h2>
+<p class="p">Better when you sell in two or more countries, because both run through the same weeks.</p>
+<ul class="post-list"><li><b>Steps.</b> Pick two regions whose sales have moved together. Run the channel in both for a baseline, then stop it in one with the location setting of the ad platform and keep the other unchanged.</li><li><b>Length.</b> Baseline and test of equal length, at least four full weeks each, longer for small regions.</li><li><b>Record.</b> For each region and period: spend, new customers, and the new customers credited to the channel.</li><li><b>Read.</b> Use the unchanged region to work out what the holdout would have sold, then compare that with what it sold.</li></ul>
+<p class="p">Its weaknesses are leakage, when people in the holdout still see the ads, and a local event in one region.</p>
+<h2>Test 3: spend step</h2>
+<p class="p">For a channel you do not want to pause. It asks what the next dollar brings, not what the whole channel is worth.</p>
+<ul class="post-list"><li><b>Steps.</b> Hold the spend steady for a baseline, change it once by a large step, such as half as much again, hold it there, then go back.</li><li><b>Length.</b> Four full weeks or more at each level. A small step needs far more sales to show.</li><li><b>Record.</b> Spend at each level, and all new customers at each level.</li><li><b>Read.</b> Extra spend divided by extra new customers is the cost of one more customer. Compare it with your <a href="/tools/break-even-cpa-calculator">break-even CPA</a>, not with the average cost you pay today.</li></ul>
+<h2>A made-up worked example</h2>
+<p class="p">These numbers are invented to show the arithmetic. They are not from a real business. A shop runs paid search in Canada and Australia. For eight weeks the ads run in both. For the next eight they stop in Australia only. The Australian ads cost $2,000 per eight weeks, and each new customer pays $60. New customers in each period:</p>
+<table class="cmp"><thead><tr><th>Region</th><th>Ads in both</th><th>Off in Australia</th></tr></thead><tbody><tr><th scope="row">Canada</th><td>200</td><td>210</td></tr><tr><th scope="row">Australia</th><td>160</td><td>128</td></tr></tbody></table>
+<ul class="post-list"><li><b>What Australia would have sold:</b> Canada went from 200 to 210, which is 1.05 times. 160 &times; 1.05 = 168.</li><li><b>Customers the ads added:</b> 168 - 128 = 40.</li><li><b>Added return:</b> 40 &times; $60 = $2,400, and $2,400 / $2,000 is 1.2x.</li><li><b>Credited return:</b> in the first period, 90 Australian customers were credited to the ads. 90 &times; $60 = $5,400, and $5,400 / $2,000 is 2.7x.</li><li><b>Profit:</b> at a 70% gross margin, $2,400 leaves $1,680, so $2,000 of ads lost $320.</li></ul>
+<p class="p">Now check it against chance. Add 1 divided by each of the four counts, take the square root and multiply by 1.96:</p>
+<div class="code block"><pre>1/200 + 1/160 + 1/210 + 1/128 = 0.0238
+&radic;0.0238 = 0.154
+0.154 &times; 1.96 = 0.302
+ln(128 / 168) = -0.272</pre></div>
+<p class="p">The result is outside chance at 95% only if the last number, without its sign, is larger than the one above it. 0.272 is smaller than 0.302, so this test <b>does not show that the ads add any sales</b>. It does not show that they add none either: sales without ads could be anywhere from about 56% to 103% of sales with them. With twice the customers in every cell and the same ratios, the limit falls to 0.214 and the same drop would count.</p>
+<p class="p">This is a minimum check. It treats each sale as independent and assumes the two countries would otherwise move together, so real uncertainty is larger.</p>
+<h2>When there are too few sales to conclude anything</h2>
+<p class="p">For two equal periods, a gap is outside chance at 95% when it is larger than 1.96 times the square root of all sales in both. The table shows that limit.</p>
+<table class="cmp"><thead><tr><th>Average sales per period</th><th>Smallest gap outside chance</th><th>Example</th></tr></thead><tbody><tr><th scope="row">25</th><td>14 sales</td><td>32 and 18</td></tr><tr><th scope="row">100</th><td>28 sales</td><td>114 and 86</td></tr><tr><th scope="row">400</th><td>56 sales</td><td>428 and 372</td></tr><tr><th scope="row">1,000</th><td>88 sales</td><td>1,044 and 956</td></tr></tbody></table>
+<p class="p"><b>If the channel could not plausibly bring a gap that large, do not run the test yet.</b> With 25 sales a period, sales would have to fall by close to half. Even a real effect exactly at the limit shows up only about half the time, so aim well past it. A region test needs more sales than this, because it has four counts, not two.</p>
+<p class="p">Below that, run longer, test a bigger change, or count an earlier step such as signups. A result inside the limit means &ldquo;we cannot tell&rdquo;, not &ldquo;the channel does nothing&rdquo;.</p>
+<p class="p">If you can split people at random, such as an email held back from part of a list, the <a href="/tools/ab-test-calculator">A/B test calculator</a> checks the two groups: enter people in place of visitors and buyers in place of conversions. The <a href="/tools/incrementality-calculator">incrementality calculator</a> adds the cost per extra customer. Neither is made for before and after periods.</p>
+<h2>What to read in Virling before and after</h2>
+<p class="p">Virling <b>does not run the test</b>. It does not split audiences, hold out regions or change your spend. It records the visits and payments, so you can read both sides.</p>
+<ul class="post-list"><li><b>Channel revenue by date.</b> Set a custom range for each block and note New customers and Revenue for the whole site. Then click the channel in the Channels card: the page, with its revenue chart per day, shows that channel alone. Use <b>Compare to other dates</b> to put two blocks side by side.</li><li><b>One campaign.</b> Paid covers every platform with a paid tag, so open the <b>Campaign</b> tab if you are testing one.</li><li><b>Revenue by country.</b> Click a country in the Location card, with no channel filter, and note New customers and Revenue for each period. All channels count, so a buyer who came back another way is included. See <a href="/blog/revenue-by-country">revenue by country</a>.</li><li><b>Matched revenue.</b> A payment with no credited visit has no country, so check that the matched share is similar in both periods.</li><li><b>The switch dates.</b> Log them in <b>Launches</b> so they show as markers on the chart.</li></ul>
+<p class="p">Country comes from the visit, so a buyer on a VPN can count in the wrong region. An ad seen but not clicked leaves no visit and gets no credit, but its sale still counts in the totals when the buyer pays.</p>
+<h2>Frequently asked questions</h2>
+<h3>What is incrementality testing?</h3><p class="p">It is a way to find out how many sales a channel caused. You switch the channel off, or change its spend, for some people, places or weeks, and compare total sales with a group or period where it did not change. The difference is the estimate of what the channel added.</p>
+<h3>How is incrementality different from attribution?</h3><p class="p">Attribution credits each payment to a visit that came before it. It shows which channels buyers came through, but not which of them would have paid anyway. An incrementality test changes the spend and counts all sales, so it can answer that second question.</p>
+<h3>How long should an incrementality test run?</h3><p class="p">Longer than most buyers take from their first visit to paying, in full weeks, and long enough to collect the sales you need. Fix the length before you start. Stopping on the first good day finds differences that are only chance.</p>
+<h3>How many sales do I need for an incrementality test?</h3><p class="p">It depends on the size of the effect. With an average of 25 sales per period, two equal periods must differ by about 14 sales to be outside chance. With 100 it is about 28, and with 400 about 56. If the effect you expect is smaller than that, the test cannot show it.</p>
+<h3>Can Virling run an incrementality test for me?</h3><p class="p">No. Virling does not split audiences, hold out regions or change your spend. You make the change in your ad platform, and read new customers and revenue by channel, date and country in Virling before and after.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>Read both sides of your test</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
