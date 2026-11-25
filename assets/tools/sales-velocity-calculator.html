@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sales velocity calculator: revenue per day and per month</title>
+<meta name="description" content="Work out sales velocity from open opportunities, deal value, win rate and sales cycle, see which 10 percent change moves it most and compare channels.">
+<link rel="canonical" href="https://virling.com/tools/sales-velocity-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/sales-velocity-calculator">
+<meta property="og:title" content="Sales velocity calculator: revenue per day and per month">
+<meta property="og:description" content="Work out sales velocity from open opportunities, deal value, win rate and sales cycle, see which 10 percent change moves it most and compare channels.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Sales velocity calculator","url":"https://virling.com/tools/sales-velocity-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Sales velocity calculator","item":"https://virling.com/tools/sales-velocity-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<style>
+.sv .cmp td, .sv .cmp tbody th { vertical-align: middle; overflow-wrap: anywhere; }
+.sv-lev .cmp thead th:first-child { width: 44%; }
+.sv-rows .cmp th, .sv-rows .cmp td { padding: 8px 6px; }
+.sv-rows .cmp thead th:first-child { width: 20%; }
+@media (max-width: 760px) {
+  .sv-rows thead { display: none; }
+  .sv-rows tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 8px; border-bottom: 1px solid var(--rule); }
+  .sv-rows .cmp tbody td { border-bottom: 0; }
+  .sv-rows td:first-child { grid-column: 1 / -1; }
+  .sv-rows td::before { content: attr(data-l); display: block; margin-bottom: 4px; font-size: 12px; color: var(--ink-3); }
+}
+</style>
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / sales velocity calculator</span><h1>Sales velocity calculator</h1><p class="lead">Sales velocity = opportunities &times; deal value &times; win rate / sales cycle in days. Enter four numbers to see revenue per day and per month and which 10 percent change moves it most, then compare the channels your deals come from. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool sv sv-lev">
+<form class="tool-form" id="sv" autocomplete="off">
+  <label>Open opportunities<span class="dim">Qualified deals, not every lead</span><input name="n" type="number" min="0" step="any" value="40"></label>
+  <label>Average deal value ($)<span class="dim">One definition for every deal</span><input name="d" type="number" min="0" step="any" value="6000"></label>
+  <label>Win rate (%)<span class="dim">Won deals out of won and lost</span><input name="w" type="number" min="0" max="100" step="any" value="25"></label>
+  <label>Sales cycle (days)<span class="dim">From 1 to 3,650 calendar days</span><input name="c" type="number" min="1" max="3650" step="any" value="60"></label>
+</form>
+<div class="tool-stats" id="sv-out"></div>
+<p class="fine-note" id="sv-how" role="status"></p>
+<table class="cmp" id="sv-lev" hidden><thead><tr><th scope="col">10 percent change</th><th scope="col">Revenue per day</th><th scope="col">Added per day</th></tr></thead><tbody></tbody></table>
+<p class="fine-note">A month is 30 days. Each change is 10 percent of the number itself, so a 25% win rate becomes 27.5%, and a win rate stops at 100%. The numbers filled in on this page are made up, not benchmarks.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="tool sv sv-rows">
+<div class="txt post"><h2>Sales velocity by channel</h2><p class="p">Optional. Add one row per channel to compare where your deals come from. Empty rows are ignored.</p></div>
+<form class="tool-form" id="ch" autocomplete="off">
+  <table class="cmp" style="grid-column:1/-1"><thead><tr><th scope="col">Channel</th><th scope="col">Open opps</th><th scope="col">Deal value ($)</th><th scope="col">Win rate (%)</th><th scope="col">Cycle (days)</th><th scope="col">Per day</th><th scope="col">Per month</th><th scope="col" style="width:92px"></th></tr></thead><tbody id="ch-rows"></tbody></table>
+  <p><button class="btn sm light" type="button" id="ch-add">Add channel</button></p>
+</form>
+<div class="tool-stats" id="ch-out"></div>
+<p class="fine-note" id="ch-how" role="status"></p>
+<div class="txt post tool-cta">
+<p class="p">This split is only as good as the channel you write next to each deal. Virling shows which channel brought the buyers who paid: it links every visit to the payment it led to, invoices included, from your real payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+<p class="p">Related: <a href="/tools/sales-cycle-calculator">sales cycle length calculator</a>, <a href="/tools/acv-calculator">ACV calculator</a>, <a href="/blog/b2b-saas-attribution">B2B SaaS attribution for small teams</a>, <a href="/blog/demo-booking-revenue-tracking">how to track revenue from demo bookings</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The sales velocity formula</h2>
+<p class="p">Sales velocity is how much revenue your open pipeline turns into per day, at the rate you win deals now:</p>
+<p class="p"><code>sales velocity = open opportunities &times; average deal value &times; win rate / sales cycle in days</code></p>
+<p class="p">The top of the formula is the revenue you expect from the deals that are open today. The bottom spreads it over the days a deal takes. Multiply the result by 30 for a month:</p>
+<p class="p"><code>revenue per month = sales velocity &times; 30</code></p>
+<h2>Where to get the four numbers</h2>
+<table class="cmp"><thead><tr><th>Number</th><th>How to count it</th><th>Common mistake</th></tr></thead><tbody>
+<tr><th>Open opportunities</th><td>Deals someone is working on, past your own qualifying step, on the day you measure</td><td>Counting every lead, which makes the win rate from qualified deals far too high for the list</td></tr>
+<tr><th>Deal value</th><td>Average of the deals you won in the period, as annual or total contract value</td><td>Using list price when most deals close with a discount</td></tr>
+<tr><th>Win rate</th><td>Won / (won + lost), for deals that closed in the period</td><td>Dividing by all deals, including the ones still open</td></tr>
+<tr><th>Sales cycle</th><td>Days from first touch, or from opening the deal, to the close</td><td>Starting the clock at a different step from one deal to the next</td></tr>
+</tbody></table>
+<p class="p">The <a href="/tools/sales-cycle-calculator">sales cycle length calculator</a> works out the cycle from your dates, as an average and a median, and the <a href="/tools/acv-calculator">ACV calculator</a> works out deal value from contracts with different terms. Use the same period for deal value, win rate and cycle, long enough to hold more than a handful of closed deals.</p>
+<h2>A worked example</h2>
+<p class="p">The numbers filled in above are made up to show the method. A team has 40 open opportunities worth $6,000 each, wins 25% of them and takes 60 days to close. The pipeline is worth 40 &times; $6,000 = $240,000, of which 25%, or $60,000, should be won. Spread over 60 days that is $60,000 / 60 = $1,000 per day, or $30,000 per 30-day month.</p>
+<p class="p">With 10 percent more opportunities (44), a 10 percent higher deal value ($6,600) or a 10 percent higher win rate (27.5%), the result is $1,100 per day. With a cycle 10 percent shorter (54 days) it is $60,000 / 54 = $1,111 per day.</p>
+<p class="p">Now split the same 40 opportunities by channel:</p>
+<table class="cmp"><thead><tr><th>Channel (made up)</th><th>Formula</th><th>Per day</th></tr></thead><tbody>
+<tr><th>Organic search</th><td>20 &times; $5,000 &times; 25% / 50 days</td><td>$500</td></tr>
+<tr><th>Outbound email</th><td>10 &times; $8,000 &times; 10% / 100 days</td><td>$80</td></tr>
+<tr><th>Referrals</th><td>10 &times; $6,000 &times; 40% / 40 days</td><td>$600</td></tr>
+<tr><th>All channels</th><td>$500 + $80 + $600</td><td>$1,180</td></tr>
+</tbody></table>
+<p class="p">The averages across these three channels are the same $6,000, 25% and 60 days, yet the channels add up to $1,180 and not $1,000. Averages mix the short cycle and high win rate of referrals with the slow outbound deals. Outbound has the largest deals and the lowest velocity: a tenth of them close, and each takes 100 days.</p>
+<h2>Why a shorter cycle moves it most</h2>
+<p class="p">The first three numbers multiply, so 10 percent more of any of them adds exactly 10 percent. The cycle divides, and dividing by 0.9 adds 11.1 percent. That is true for every team, whatever the inputs. The one thing that can break the tie between the others is a win rate already close to 100%, which has no room left to grow.</p>
+<p class="p">The gap is about one point, so treat it as a starting place, not an answer. The useful question is which 10 percent is cheapest to get. Replying to demo requests the same day may cost nothing, while 10 percent more opportunities may mean 10 percent more ad spend. Cutting the cycle with a discount lowers deal value and can cancel the gain: closing 10 percent faster for 10 percent less leaves velocity where it was.</p>
+<h2>What sales velocity misses</h2>
+<p class="p">It is a rate, not a forecast. It assumes you replace each deal that closes with a new one and that the next deals behave like the last ones. It says nothing about when cash arrives, whether customers renew or what each channel costs. A few very large deals can also lift the average value above what most buyers pay.</p>
+<p class="p">It also depends on knowing where a deal came from, and deals with a call in the middle often lose that. <a href="/blog/b2b-saas-attribution">B2B SaaS attribution for small teams</a> covers trials, invoices and sales calls, and <a href="/blog/demo-booking-revenue-tracking">how to track revenue from demo bookings</a> shows how to join a booked call to the invoice paid weeks later.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Sales velocity calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate sales velocity?</h3><p class="p">Multiply open opportunities by average deal value and by win rate, then divide by the sales cycle in days. 40 opportunities at $6,000 with a 25% win rate and a 60-day cycle give 40 &times; $6,000 &times; 0.25 / 60 = $1,000 of revenue per day.</p></div>
+      <div><h3>What is a good sales velocity?</h3><p class="p">There is no figure that fits every business, because it depends on your price, the size of your pipeline and how long buyers take. Compare your own number with the same number last quarter, and compare your channels with each other.</p></div>
+      <div><h3>Which of the four numbers should I improve first?</h3><p class="p">For the same 10 percent change, a shorter sales cycle adds the most: 11.1% against 10% for each of the other three. The gap is small, so pick the number you can move with the least work and cost.</p></div>
+      <div><h3>How do I turn sales velocity into a monthly number?</h3><p class="p">Multiply revenue per day by the days in the month. This calculator uses 30 days, so $1,000 per day is $30,000 per month. Use calendar days for both the cycle and the month, not working days for one of them.</p></div>
+      <div><h3>Should I use annual or total contract value as the deal value?</h3><p class="p">Either works if every deal uses the same one. With annual contract value the result is new yearly contract value won per day, and with total contract value it is everything the customer commits to. Neither is cash received per day.</p></div>
+      <div><h3>Why do my channels add up to a different number than the total?</h3><p class="p">The total multiplies and divides averages, and a channel with a high win rate or a short cycle gets diluted by the others. In the made-up example the averages give $1,000 per day and the three channels add up to $1,180. When channels differ a lot, trust the split.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate sales velocity?", "acceptedAnswer": {"@type": "Answer", "text": "Multiply open opportunities by average deal value and by win rate, then divide by the sales cycle in days. 40 opportunities at $6,000 with a 25% win rate and a 60-day cycle give 40 × $6,000 × 0.25 / 60 = $1,000 of revenue per day."}}, {"@type": "Question", "name": "What is a good sales velocity?", "acceptedAnswer": {"@type": "Answer", "text": "There is no figure that fits every business, because it depends on your price, the size of your pipeline and how long buyers take. Compare your own number with the same number last quarter, and compare your channels with each other."}}, {"@type": "Question", "name": "Which of the four numbers should I improve first?", "acceptedAnswer": {"@type": "Answer", "text": "For the same 10 percent change, a shorter sales cycle adds the most: 11.1% against 10% for each of the other three. The gap is small, so pick the number you can move with the least work and cost."}}, {"@type": "Question", "name": "How do I turn sales velocity into a monthly number?", "acceptedAnswer": {"@type": "Answer", "text": "Multiply revenue per day by the days in the month. This calculator uses 30 days, so $1,000 per day is $30,000 per month. Use calendar days for both the cycle and the month, not working days for one of them."}}, {"@type": "Question", "name": "Should I use annual or total contract value as the deal value?", "acceptedAnswer": {"@type": "Answer", "text": "Either works if every deal uses the same one. With annual contract value the result is new yearly contract value won per day, and with total contract value it is everything the customer commits to. Neither is cash received per day."}}, {"@type": "Question", "name": "Why do my channels add up to a different number than the total?", "acceptedAnswer": {"@type": "Answer", "text": "The total multiplies and divides averages, and a channel with a high win rate or a short cycle gets diluted by the others. In the made-up example the averages give $1,000 per day and the three channels add up to $1,180. When channels differ a lot, trust the split."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels your paying deals come from</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("sv"), out = document.getElementById("sv-out"), how = document.getElementById("sv-how"), lev = document.getElementById("sv-lev");
+const g = document.getElementById("ch"), body = document.getElementById("ch-rows"), chOut = document.getElementById("ch-out"), chHow = document.getElementById("ch-how");
+const usd = (n) => { const d = n < 100 ? 2 : 0; return "$" + n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); };
+const num = (n) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const stats = (rows) => rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+const check = (n, d, w, c) => !(n > 0 && n <= 1e6) ? "Enter open opportunities above 0, up to 1 million."
+  : !(d > 0 && d <= 1e9) ? "Enter a deal value above 0, up to 1 billion."
+  : !(w > 0 && w <= 100) ? "Enter a win rate above 0, up to 100%."
+  : !(c >= 1 && c <= 3650) ? "Enter a sales cycle from 1 to 3,650 days." : "";
+const vel = (n, d, w, c) => n * d * w / 100 / c;
+const calc = () => {
+  const [n, d, w, c] = ["n", "d", "w", "c"].map((k) => f.elements[k].valueAsNumber);
+  const err = check(n, d, w, c);
+  lev.hidden = !!err;
+  how.textContent = err;
+  if (err) { out.innerHTML = ""; return; }
+  const v = vel(n, d, w, c), w2 = Math.min(100, w * 1.1);
+  const rows = [
+    [`Open opportunities ${num(n)} to ${num(n * 1.1)}`, vel(n * 1.1, d, w, c)],
+    [`Deal value ${usd(d)} to ${usd(d * 1.1)}`, vel(n, d * 1.1, w, c)],
+    [w < 100 ? `Win rate ${num(w)}% to ${num(w2)}%` : "Win rate is already 100%", vel(n, d, w2, c)],
+    [`Sales cycle ${num(c)} to ${num(c * 0.9)} days`, vel(n, d, w, c * 0.9)],
+  ];
+  const top = rows[3];
+  out.innerHTML = stats([["Revenue per day", usd(v)], ["Revenue per month", usd(v * 30)], ["Biggest 10 percent change", "Shorter cycle"]]);
+  how.textContent = `${num(n)} opportunities × ${usd(d)} × ${num(w)}% / ${num(c)} days = ${usd(v)} per day. Times 30 is ${usd(v * 30)} per month. A cycle 10 percent shorter adds most: ${usd(top[1] - v)} per day.`;
+  lev.tBodies[0].innerHTML = rows.map((r) => `<tr${r === top ? ' style="background:var(--revenue-soft)"' : ""}><th scope="row">${r[0]}</th><td>${usd(r[1])}</td><td>${usd(r[1] - v)}${r === top ? ' <span class="dim">most</span>' : ""}</td></tr>`).join("");
+};
+const cell = (name, label, v) => `<td data-l="${label}"><input name="${name}" type="number" min="0" step="any" aria-label="${label}" value="${v}"></td>`;
+const add = (name, n, d, w, c) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td data-l="Channel"><input name="name" type="text" aria-label="Channel" value="${esc(name)}"></td>${cell("n", "Open opportunities", n)}${cell("d", "Deal value ($)", d)}${cell("w", "Win rate (%)", w)}${cell("c", "Cycle (days)", c)}<td data-l="Per day" data-o></td><td data-l="Per month" data-o></td><td><button class="btn sm light" type="button" data-rm>Remove</button></td>`;
+  body.appendChild(tr);
+};
+const channels = () => {
+  const trs = [...body.rows], ok = [], bad = [];
+  trs.forEach((tr, i) => {
+    tr.querySelector("[data-rm]").disabled = trs.length < 2;
+    const q = ["n", "d", "w", "c"].map((k) => tr.querySelector(`[name=${k}]`)), [a, b] = tr.querySelectorAll("[data-o]");
+    const name = tr.querySelector("[name=name]").value.trim() || "Channel " + (i + 1);
+    a.textContent = b.textContent = tr.style.background = "";
+    if (q.every((x) => x.value === "" && !x.validity.badInput)) return;
+    const x = q.map((e) => e.valueAsNumber), err = check(...x);
+    if (err) { bad.push(`${name}: ${err}`); return; }
+    const v = vel(...x);
+    a.textContent = usd(v);
+    b.textContent = usd(v * 30);
+    ok.push({ tr, name, v });
+  });
+  const total = ok.reduce((s, x) => s + x.v, 0), best = ok.reduce((m, x) => (!m || x.v > m.v ? x : m), null);
+  if (ok.length > 1) best.tr.style.background = "var(--revenue-soft)";
+  chOut.innerHTML = ok.length ? stats([["All channels per day", usd(total)], ["All channels per month", usd(total * 30)], ["Fastest channel", esc(best.name)]]) : "";
+  chHow.textContent = [ok.length > 1 ? `${best.name}: ${num(Math.round(best.v / total * 1000) / 10)}% of the revenue per day, the largest share.` : "", ...bad, ok.length || bad.length ? "" : "Fill in a row to see its sales velocity."].filter(Boolean).join(" ");
+};
+body.addEventListener("click", (e) => { const b = e.target.closest("[data-rm]"); if (b && body.rows.length > 1) { b.closest("tr").remove(); channels(); document.getElementById("ch-add").focus(); } });
+document.getElementById("ch-add").addEventListener("click", () => { add("", "", "", "", ""); channels(); body.lastElementChild.querySelector("input").focus(); });
+[f, g].forEach((x) => x.addEventListener("submit", (e) => e.preventDefault()));
+f.addEventListener("input", calc);
+g.addEventListener("input", channels);
+add("Organic search", 20, 5000, 25, 50);
+add("Outbound email", 10, 8000, 10, 100);
+add("Referrals", 10, 6000, 40, 40);
+calc();
+channels();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
