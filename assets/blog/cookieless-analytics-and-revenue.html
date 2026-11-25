@@ -51,6 +51,8 @@
 <ul class="post-list"><li>Page views, referrers and top pages</li><li>Sessions, because they only need 30 minutes of continuity</li><li>Revenue totals from your payment provider</li><li>No cookie, so no cookie banner for this tracking</li></ul>
 <h2>What you lose</h2>
 <ul class="post-list"><li>A returning visitor counts as new each day, so visitor totals run high</li><li>Two people behind one IP address with the same browser can count as one</li><li>Payments cannot be linked to visits, because there is no stable ID to pass into checkout. New payments show as Unattributed</li></ul>
+<p class="p">Virling runs either way: cookieless, it shows visits by channel and your revenue total, and with the cookie it also credits payments to a channel when checkout carries the ID.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
 <h2>Until consent: cookieless first, cookie after a yes</h2>
 <p class="p">In Virling, set <b>Visitor cookie</b> to <b>Until consent</b> in your site's settings, keep <code>data-cookieless</code> on the script tag, and call this from your consent tool when the visitor accepts:</p>
 <div class="code block"><pre data-snippet>virling("consent");</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
