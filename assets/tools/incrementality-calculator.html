@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Incrementality calculator: incremental lift and ROAS</title>
+<meta name="description" content="Free incrementality calculator: enter test and control results to get incremental lift, customers, revenue, cost per customer and ROAS, with a 95% check.">
+<link rel="canonical" href="https://virling.com/tools/incrementality-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/incrementality-calculator">
+<meta property="og:title" content="Incrementality calculator: incremental lift and ROAS">
+<meta property="og:description" content="Free incrementality calculator: enter test and control results to get incremental lift, customers, revenue, cost per customer and ROAS, with a 95% check.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Incrementality calculator","url":"https://virling.com/tools/incrementality-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Incrementality calculator","item":"https://virling.com/tools/incrementality-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / incrementality calculator</span><h1>Incrementality calculator: incremental lift and ROAS</h1><p class="lead">Enter the visitors and customers in your test and control groups to see the lift and how many customers the spend added. Add the spend and the average revenue per customer for incremental revenue, cost per incremental customer and incremental ROAS. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="inc" autocomplete="off">
+  <label>Visitors in test<input name="nt" type="number" min="0" step="1" value="40000"></label>
+  <label>Visitors in control<input name="nc" type="number" min="0" step="1" value="10000"></label>
+  <label>Customers in test<input name="ct" type="number" min="0" step="1" value="960"></label>
+  <label>Customers in control<input name="cc" type="number" min="0" step="1" value="200"></label>
+  <label>Spend on the test group ($)<input name="spend" type="number" min="0" step="0.01" value="4000"></label>
+  <label>Average revenue per customer ($)<input name="arpc" type="number" min="0" step="0.01" value="50"></label>
+</form>
+<table class="cmp"><thead><tr><th>Group</th><th>Customers</th><th>Conversion rate</th></tr></thead><tbody id="inc-rows"></tbody></table>
+<div class="tool-stats" id="inc-out"></div>
+<p class="p" id="inc-note" role="status"></p>
+<p class="fine-note">Expected is how many customers the test group would have had at the control rate. The chance check is a two-sided two-proportion z-test with a pooled standard error.</p>
+<div class="txt post tool-cta">
+<p class="p">A test is only as good as its customer and revenue counts. Virling links every visit to the payment it led to, so you see the customers and revenue behind each channel and campaign from your real payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/ab-test-calculator">A/B test calculator</a>, <a href="/tools/roas-calculator">ROAS calculator</a>, <a href="/blog/retargeting-revenue-tracking">retargeting revenue tracking</a>, <a href="/blog/multi-touch-attribution">multi-touch attribution</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The incrementality formulas</h2>
+<p class="p">The control group shows what happens without the spend. Apply its conversion rate to the test group and you get the customers you would have expected anyway. Whatever is above that is incremental:</p>
+<p class="p"><code>conversion rate = customers / visitors</code><br><code>lift = (test rate - control rate) / control rate</code><br><code>incremental customers = (test rate - control rate) &times; test visitors</code><br><code>incremental revenue = incremental customers &times; average revenue per customer</code><br><code>cost per incremental customer = spend / incremental customers</code><br><code>incremental ROAS = incremental revenue / spend</code></p>
+<p class="p">To see whether the difference is larger than chance, the calculator measures it against how much two groups of this size would differ if the spend changed nothing:</p>
+<p class="p"><code>pooled rate = all customers / all visitors</code><br><code>standard error = &radic;(pooled rate &times; (1 - pooled rate) &times; (1 / test visitors + 1 / control visitors))</code><br><code>z = (test rate - control rate) / standard error</code></p>
+<p class="p">A z above 1.96 or below -1.96 means a two-sided p-value under 0.05, which is larger than chance at 95 percent. The test needs a few customers to work with: if either group would have fewer than 5 customers, or fewer than 5 visitors who did not buy, at the pooled rate, the calculator says too few instead of giving a verdict.</p>
+<h2>A worked example</h2>
+<p class="p">These are made-up numbers, the defaults above. An ad was shown to a test group of 40,000 visitors and held back from a control group of 10,000. The test group had 960 customers, a 2.40% conversion rate. Control had 200, or 2.00%.</p>
+<ul class="post-list"><li>Lift: (2.40% - 2.00%) / 2.00% = 20%.</li><li>Expected customers in test: 40,000 &times; 2.00% = 800.</li><li>Incremental customers: 960 - 800 = 160.</li><li>Incremental revenue: 160 &times; $50 = $8,000.</li><li>Cost per incremental customer: $4,000 / 160 = $25.</li><li>Incremental ROAS: $8,000 / $4,000 = 2x.</li></ul>
+<p class="p">The pooled rate is 1,160 / 50,000 = 2.32%. The standard error is &radic;(0.0232 &times; 0.9768 &times; (1 / 40,000 + 1 / 10,000)) = 0.001683, so z = 0.004 / 0.001683 = 2.38 and the p-value is 0.0175. The difference is larger than chance at 95 percent.</p>
+<p class="p">Counting all 960 customers as caused by the ad would give $48,000 / $4,000 = 12x. Most of those sales also appeared, in proportion, in the group that never got the ad. At a 60% gross margin, the $8,000 leaves $4,800 of gross profit, or $800 after the spend. The same 2x would lose money below a 50% margin, because the break-even ROAS is 1 divided by the gross margin. The <a href="/tools/roas-calculator">ROAS calculator</a> works that out for yours.</p>
+<h2>The same lift at four test sizes</h2>
+<p class="p">A 20% lift can be noise or a clear result, depending on how many people were in the test. These made-up tests all have 2.0% in control and 2.4% in test, with two groups of equal size:</p>
+<table class="cmp"><thead><tr><th>Visitors per group</th><th>Customers, test and control</th><th>p-value, and larger than chance at 95%?</th></tr></thead><tbody><tr><th scope="row">2,000</th><td>48 and 40</td><td>0.3885, no</td></tr><tr><th scope="row">5,000</th><td>120 and 100</td><td>0.1727, no</td></tr><tr><th scope="row">10,000</th><td>240 and 200</td><td>0.0538, no</td></tr><tr><th scope="row">20,000</th><td>480 and 400</td><td>0.0064, yes</td></tr></tbody></table>
+<p class="p">A "no" does not mean the spend did nothing. It means a test this small cannot tell the difference from luck, and the incremental customers it shows could easily be zero. Decide the size before you start and read the result once, at the end. Stopping on the first good day finds lifts that are not there.</p>
+<h2>How to set up the two groups</h2>
+<ul class="post-list"><li><b>Split at random.</b> People who chose to click are not comparable with people who did not. Use a holdout from your ad platform if it offers one, or hold a random part of your list back from an email.</li><li><b>Count everyone assigned.</b> Include the people in the test group who never saw the ad. If you drop them from test but not from control, the groups no longer match. For an ad or email audience, enter people in place of visitors in both groups.</li><li><b>Change one thing.</b> Keep prices, offers and other campaigns the same for both groups.</li><li><b>Use the same dates and counting rule.</b> Count customers in both groups from your payments, over the same days, and leave enough time for late buyers to pay.</li><li><b>Count each person once.</b> A customer who orders twice is one customer. Put the extra order in the average revenue per customer.</li></ul>
+<h2>When the calculator shows a message instead of a number</h2>
+<ul class="post-list"><li><b>Zero spend:</b> lift and incremental customers still work, but there is nothing to divide for cost per incremental customer or incremental ROAS.</li><li><b>Zero customers:</b> with none in either group there is nothing to compare. With none in control, lift has no baseline, though incremental customers can still be counted.</li><li><b>More customers than visitors:</b> one of the two numbers is wrong, so nothing is calculated.</li><li><b>Negative lift:</b> the test group bought less often. Incremental customers and revenue go below zero, and cost per incremental customer and incremental ROAS are not shown, because the spend gained nothing to price.</li></ul>
+<h2>Incrementality and attribution answer different questions</h2>
+<p class="p">Attribution credits each payment to a visit. It shows which channels your buyers came through, every day, without stopping any campaign. It does not say which of those buyers would have paid anyway. Splitting the credit over more visits does not change that: see <a href="/blog/multi-touch-attribution">multi-touch attribution for a small business</a>. The gap tends to matter most for ads shown to people who already know you, which is why <a href="/blog/retargeting-revenue-tracking">retargeting looks better under last touch</a> than in a pause test.</p>
+<p class="p">A pause test compares two periods rather than two random groups, so season and other campaigns get in, and this calculator's chance check does not cover that. Virling does not split audiences or run holdouts. It records the visits and payments, so you can read revenue by campaign and the total for the dates of your test. To compare two versions of a page rather than spend against no spend, use the <a href="/tools/ab-test-calculator">A/B test calculator</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Incrementality calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate incrementality?</h3><p class="p">Subtract the control group's conversion rate from the test group's, then multiply by the visitors in the test group. With 2.4% in a test group of 40,000 and 2.0% in control, 0.4% of 40,000 is 160 incremental customers: the ones you would not expect without the spend.</p></div>
+      <div><h3>How is incremental lift calculated?</h3><p class="p">Divide the difference between the two conversion rates by the control rate. A test group at 2.4% against a control group at 2.0% is a lift of 0.4 / 2.0 = 20%. Lift has no value when control has no customers, because there is no baseline to divide by.</p></div>
+      <div><h3>What is incremental ROAS?</h3><p class="p">Incremental revenue divided by the spend being tested. It leaves out the sales that control suggests would have happened anyway, so with a positive baseline it is lower than a ROAS that counts every sale in the test group.</p></div>
+      <div><h3>What does a negative lift mean?</h3><p class="p">The test group bought less often than control. If the difference is not larger than chance, the test does not show that the spend hurt sales, only that it found no gain. If it is larger than chance, first check that the groups were split at random and counted the same way.</p></div>
+      <div><h3>Do the test and control groups have to be the same size?</h3><p class="p">No. Conversion rates are compared, and the control rate is scaled to the size of the test group. A very small control group makes the result less certain, though, so the same difference is harder to tell from chance.</p></div>
+      <div><h3>Is an incrementality test the same as attribution?</h3><p class="p">No. Attribution credits recorded payments to visits by a rule. An incrementality test compares people who got the spend with people who did not, to estimate how many sales it caused. Attribution runs all the time on every channel; a test answers one question about one spend.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate incrementality?", "acceptedAnswer": {"@type": "Answer", "text": "Subtract the control group's conversion rate from the test group's, then multiply by the visitors in the test group. With 2.4% in a test group of 40,000 and 2.0% in control, 0.4% of 40,000 is 160 incremental customers: the ones you would not expect without the spend."}}, {"@type": "Question", "name": "How is incremental lift calculated?", "acceptedAnswer": {"@type": "Answer", "text": "Divide the difference between the two conversion rates by the control rate. A test group at 2.4% against a control group at 2.0% is a lift of 0.4 / 2.0 = 20%. Lift has no value when control has no customers, because there is no baseline to divide by."}}, {"@type": "Question", "name": "What is incremental ROAS?", "acceptedAnswer": {"@type": "Answer", "text": "Incremental revenue divided by the spend being tested. It leaves out the sales that control suggests would have happened anyway, so with a positive baseline it is lower than a ROAS that counts every sale in the test group."}}, {"@type": "Question", "name": "What does a negative lift mean?", "acceptedAnswer": {"@type": "Answer", "text": "The test group bought less often than control. If the difference is not larger than chance, the test does not show that the spend hurt sales, only that it found no gain. If it is larger than chance, first check that the groups were split at random and counted the same way."}}, {"@type": "Question", "name": "Do the test and control groups have to be the same size?", "acceptedAnswer": {"@type": "Answer", "text": "No. Conversion rates are compared, and the control rate is scaled to the size of the test group. A very small control group makes the result less certain, though, so the same difference is harder to tell from chance."}}, {"@type": "Question", "name": "Is an incrementality test the same as attribution?", "acceptedAnswer": {"@type": "Answer", "text": "No. Attribution credits recorded payments to visits by a rule. An incrementality test compares people who got the spend with people who did not, to estimate how many sales it caused. Attribution runs all the time on every channel; a test answers one question about one spend."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the revenue behind each channel</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("inc"), rows = document.getElementById("inc-rows"), out = document.getElementById("inc-out"), note = document.getElementById("inc-note");
+const num = (n, d) => n.toLocaleString("en-US", n !== 0 && Math.abs(n) < 1 ? { maximumSignificantDigits: 2 } : { maximumFractionDigits: d });
+const usd = (n) => { const a = Math.abs(n), d = a < 100 ? 2 : 0; return (n < 0 ? "-$" : "$") + a.toLocaleString("en-US", a > 0 && a < 0.01 ? { maximumSignificantDigits: 2 } : { minimumFractionDigits: d, maximumFractionDigits: d }); };
+const pct = (n) => (n * 100).toFixed(2) + "%";
+// Normal CDF via the Abramowitz and Stegun 7.1.26 erf approximation.
+const phi = (z) => { const x = Math.abs(z) / Math.SQRT2, t = 1 / (1 + 0.3275911 * x), e = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x); return z < 0 ? (1 - e) / 2 : (1 + e) / 2; };
+const check = (nt, nc, ct, cc) => {
+  const counts = [f.nt, f.nc, f.ct, f.cc];
+  if (counts.some((i) => i.value.trim() === "" || !Number.isInteger(+i.value) || +i.value < 0)) return "Enter visitors and customers for both groups as whole numbers of zero or more.";
+  if (nt === 0 || nc === 0) return "Both groups need at least one visitor before their rates can be compared.";
+  if (ct > nt || cc > nc) return `The ${ct > nt ? "test" : "control"} group has more customers than visitors, so one of those numbers is wrong. Count each customer once.`;
+  if (ct + cc === 0) return "Neither group has any customers, so there is nothing to compare yet.";
+  if (+f.spend.value < 0 || +f.arpc.value < 0) return "Spend and average revenue per customer cannot be below zero.";
+  return "";
+};
+const calc = () => {
+  const nt = +f.nt.value, nc = +f.nc.value, ct = +f.ct.value, cc = +f.cc.value, bad = check(nt, nc, ct, cc);
+  if (bad) {
+    rows.innerHTML = '<tr><th scope="row">No data</th><td></td><td></td></tr>';
+    out.innerHTML = "";
+    note.textContent = bad;
+    return;
+  }
+  const hasS = f.spend.value.trim() !== "", hasR = f.arpc.value.trim() !== "", spend = +f.spend.value, arpc = +f.arpc.value;
+  const d = ct * nc - cc * nt, inc = d / nc, rev = inc * arpc, p = (ct + cc) / (nt + nc);
+  const few = Math.min(p, 1 - p) * Math.min(nt, nc) < 5;
+  const z = few ? null : d / nt / nc / Math.sqrt(p * (1 - p) * (1 / nt + 1 / nc)), pv = few ? null : 2 * (1 - phi(Math.abs(z)));
+  rows.innerHTML = [["Test", ct, ct / nt], ["Control", cc, cc / nc], ["Expected", (cc * nt) / nc, cc / nc]].map(([k, c, r]) => `<tr><th scope="row">${k}</th><td>${num(c, 1)}</td><td>${pct(r)}</td></tr>`).join("");
+  const perSpend = (v) => (!hasS ? "Add spend" : spend === 0 ? "No spend" : d <= 0 ? "No gain" : v());
+  out.innerHTML = [
+    ["Lift", cc === 0 ? "No baseline" : (d > 0 ? "+" : "") + num((d / (cc * nt)) * 100, 1) + "%"],
+    ["Incremental customers", num(inc, 1)],
+    ["Incremental revenue", hasR ? usd(rev) : "Add revenue"],
+    ["Cost per incremental customer", perSpend(() => usd(spend / inc))],
+    ["Incremental ROAS", perSpend(() => (hasR ? num(rev / spend, 2) + "x" : "Add revenue"))],
+    ["Larger than chance at 95%?", few ? "Too few" : pv < 0.05 ? "Yes" : "No"],
+    ["p-value (two-sided)", few ? "Too few" : pv < 0.0001 ? "Under 0.0001" : pv.toFixed(4)],
+  ].map(([k, v]) => `<div><span class="dim">${k}</span><b>${v}</b></div>`).join("");
+  const msg = [];
+  if (ct === 0) msg.push("The test group has no customers.");
+  if (cc === 0) msg.push("The control group has no customers, so lift has no baseline to divide by.");
+  if (d < 0) msg.push("Negative lift: the test group bought less often than control, so there is no gain to work out a cost per incremental customer or an incremental ROAS from.");
+  if (d === 0) msg.push("Both groups convert at the same rate, so there is no lift and there are no incremental customers.");
+  if (hasS && spend === 0) msg.push("With zero spend there is no cost per incremental customer and no incremental ROAS.");
+  if (few) msg.push("There are too few customers, or too few visitors who did not buy, for the chance check. Treat the incremental numbers as unproven.");
+  else if (pv < 0.05) msg.push("Larger than chance at 95 percent: if the spend changed nothing, a difference this large in either direction would turn up less than 5% of the time.");
+  else if (d !== 0) msg.push(`Not larger than chance at 95 percent: a difference this large would turn up about ${(pv * 100).toFixed(1)}% of the time even if the spend changed nothing. The incremental numbers could be zero, so plan a larger test before acting on them.`);
+  note.textContent = msg.join(" ");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
