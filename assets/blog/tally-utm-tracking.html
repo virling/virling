@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tally form UTM tracking: from form answer to payment</title>
+<meta name="description" content="Tally form UTM tracking: pass UTM tags and a visitor ID into hidden fields on an embed or a tally.so link, then join the lead to a later payment.">
+<link rel="canonical" href="https://virling.com/blog/tally-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/tally-utm-tracking">
+<meta property="og:title" content="Tally form UTM tracking: from form answer to payment">
+<meta property="og:description" content="Tally form UTM tracking: pass UTM tags and a visitor ID into hidden fields on an embed or a tally.so link, then join the lead to a later payment.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Tally form UTM tracking: from form answer to payment","item":"https://virling.com/blog/tally-utm-tracking"}]},{"@type":"BlogPosting","headline":"Tally form UTM tracking: from form answer to payment","description":"Tally form UTM tracking: pass UTM tags and a visitor ID into hidden fields on an embed or a tally.so link, then join the lead to a later payment.","datePublished":"2026-11-25","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/tally-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I track UTM parameters in a Tally form?","acceptedAnswer":{"@type":"Answer","text":"Add one hidden field per tag, named utm_source, utm_medium and so on, and publish the form. Then put the values after the ? of the tally.so link, or let the embed code forward them from your page. Each submission then carries the tags."}},{"@type":"Question","name":"Why are my Tally hidden fields empty?","acceptedAnswer":{"@type":"Answer","text":"Often the visitor landed on one page and filled in the form on another, so there were no tags in the page address. Other causes are a hidden field that is missing or spelled differently, a standard embed added with the embed link, and a visit that had no tags."}},{"@type":"Question","name":"Can a Tally embed read a cookie from my site?","acceptedAnswer":{"@type":"Answer","text":"No. The form is a frame from tally.so, and browsers keep it apart from your cookies. Your page has to read the value and pass it to the form, as the code in step 3 does with the visitor ID."}},{"@type":"Question","name":"Does Virling read Tally answers?","acceptedAnswer":{"@type":"Answer","text":"No. Virling does not connect to Tally. It sees the visit to your page, the goal your page sends, and the email your page or server sends in an identify event, which it keeps only as a salted hash."}},{"@type":"Question","name":"How is a Tally lead joined to a payment?","acceptedAnswer":{"@type":"Answer","text":"By visitor ID, if the ID goes into the checkout the lead pays through. Otherwise by email: after an identify event, a later Stripe, Shopify or WooCommerce payment with no visitor ID and the same payer email is credited to that visitor. A form answer alone is never counted as a payment."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-25</span>
+      <h1>Tally form UTM tracking: from form answer to payment</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post" style="overflow-wrap:anywhere">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-25.</p>
+<p class="p">For <b>Tally form UTM tracking</b>, add one hidden field per tag to the form, then pass the values in the address of a tally.so link or through the embed code. Submissions then show their campaign. They do not show who paid later: for that, carry the Virling visitor ID in one more hidden field and join it to the payment.</p>
+<p class="p">Tally facts here come from its help and developer pages, linked below and read on 2026-11-25. Virling does not connect to Tally.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Step 1: add the hidden fields</h2>
+<p class="p">In the form editor type <code>/hidden</code> and add a hidden field for each name below, then publish. Tally says hidden fields are free for all users, and that their values show in the <b>Submissions</b> tab (source: <a href="https://tally.so/help/hidden-fields">Tally, hidden fields</a>). The last name is only for Virling.</p>
+<div class="code block"><pre data-snippet>utm_source
+utm_medium
+utm_campaign
+utm_content
+utm_term
+virling_vid</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>Step 2: pass the values in a tally.so link</h2>
+<p class="p">Start with <code>?</code> and join the values with <code>&amp;</code> (source: <a href="https://tally.so/help/hidden-fields">Tally, hidden fields</a>):</p>
+<div class="code block"><pre data-snippet>https://tally.so/r/FORM_ID?utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=october-launch</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">When the link is on your own site, add the visitor&rsquo;s tags and the ID from the <code>virling_vid</code> cookie. This replaces any tags already on the link:</p>
+<div class="code block"><pre data-snippet>&lt;script&gt;
+addEventListener("load", function () {
+  var query = new URLSearchParams(location.search), vid = window.virling?.vid?.();
+  document.querySelectorAll('a[href^="https://tally.so/r/"]').forEach(function (a) {
+    var url = new URL(a.href);
+    ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"].forEach(function (k) {
+      var v = window.leadUtm ? leadUtm.tags[k] : query.get(k);
+      if (v) url.searchParams.set(k, v);
+    });
+    if (vid) url.searchParams.set("virling_vid", vid);
+    a.href = url.href;
+  });
+});
+&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p"><code>leadUtm</code> comes from the snippet in <a href="/blog/utm-parameters-hidden-form-fields">UTM parameters in hidden form fields</a>, which keeps the tags in a first-party cookie. Put that on every page. Without it, the code reads only the page address.</p>
+<p class="p">A link in an email or a post cannot carry the ID, and tally.so does not run your script, so there is no visit. If you want revenue, link to a page of yours with the form embedded.</p>
+<h2>Step 3: pass the values in an embed</h2>
+<p class="p">Tally forwards your page&rsquo;s query parameters to the form. It says this is on by default for popups and full page embeds, and that a standard embed does it only with the HTML snippet or JavaScript (source: <a href="https://tally.so/help/embed-your-form">Tally, embed your form</a>). So tags on the landing page arrive on their own. Tags from an earlier page do not, and neither does the cookie, which a frame from tally.so cannot read. This standard embed adds both. Use it in place of the script Tally gives you, and replace <code>FORM_ID</code>:</p>
+<div class="code block"><pre data-snippet>&lt;iframe id="lead-form" data-tally-src="https://tally.so/embed/FORM_ID?dynamicHeight=1"
+  loading="lazy" width="100%" height="200" frameborder="0" title="Demo request"&gt;&lt;/iframe&gt;
+&lt;script src="https://tally.so/widgets/embed.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+addEventListener("load", function () {
+  var frame = document.getElementById("lead-form"), url = new URL(frame.dataset.tallySrc);
+  var query = new URLSearchParams(location.search), vid = window.virling?.vid?.();
+  var tags = window.leadUtm ? leadUtm.tags : {};
+  Object.keys(tags).forEach(function (k) {
+    if (!query.has(k)) url.searchParams.set(k, tags[k]);
+  });
+  if (vid) url.searchParams.set("virling_vid", vid);
+  frame.dataset.tallySrc = url.href;
+  Tally.loadEmbeds();
+});
+&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The form loads when <code>Tally.loadEmbeds()</code> runs (source: <a href="https://developers.tally.so/widgets/embeds">Tally, embeds</a>). For a popup, pass the same values in the <code>hiddenFields</code> option of <code>Tally.openPopup</code> (source: <a href="https://developers.tally.so/widgets/popups">Tally, popups</a>).</p>
+<h2>Step 4: record the submission</h2>
+<p class="p">An embed sends your page a <code>Tally.FormSubmitted</code> message with all the answers (source: <a href="https://developers.tally.so/widgets/events">Tally, JavaScript events</a>). Turn it into a goal, and send the email once as an <code>identify</code> event for payments that cannot carry the ID:</p>
+<div class="code block"><pre data-snippet>&lt;script&gt;
+addEventListener("message", function (e) {
+  if (e.origin !== "https://tally.so" || typeof e.data !== "string" || !e.data.includes("Tally.FormSubmitted")) return;
+  var fields = JSON.parse(e.data).payload.fields, vid = window.virling?.vid?.();
+  var email = fields.find(function (f) { return f.type === "INPUT_EMAIL"; })?.answer?.value;
+  window.virling?.("goal", "demo request");
+  if (vid &amp;&amp; email) fetch("https://app.virling.com/api/event", {
+    method: "POST",
+    keepalive: true,
+    body: JSON.stringify({ n: "identify", u: location.href, s: "yourproduct.com", v: vid, m: email }),
+  });
+});
+&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">For a form on tally.so, no page of yours gets the message. A webhook brings the same data to your server, with each hidden field as a <code>HIDDEN_FIELDS</code> entry and its name in <code>label</code> (source: <a href="https://tally.so/help/webhooks">Tally, webhooks</a>). Add a signing secret and check the <code>Tally-Signature</code> header, then send the same event with the saved <code>virling_vid</code> as <code>v</code>, a page of your site as <code>u</code> and a <code>User-Agent</code> header, since events with an empty or automated one are dropped. Never send it without a visitor ID.</p>
+<p class="p">Virling keeps only a SHA-256 hash of the trimmed, lowercased email with a salt of your site. Cover the email and the visitor ID in your privacy policy.</p>
+<h2>What Virling can join, and what it cannot</h2>
+<ul class="post-list"><li><b>It can join</b> the visit to your page, the goal, and a later payment that carries the same visitor ID or, on some providers, the same email.</li><li><b>It cannot join a form answer alone.</b> An answer is not a payment, and Virling adds no revenue for one.</li><li><b>It cannot join a lead with no visit,</b> such as one who opened a tally.so link from an email and never came to your site.</li><li><b>It does not trust the hidden fields as proof.</b> Anyone can edit a value in an address.</li></ul>
+<p class="p">A made-up example: campaign A brings 50 submissions and 2 customers who pay $200 each. Campaign B brings 20 submissions and 5 who pay $400 each. Tally shows A ahead. The money is $400 for A, or $8 per submission, and $2,000 for B, or $100.</p>
+<h2>How a later payment finds its visitor</h2>
+<ul class="post-list"><li><b>Same browser.</b> The <code>virling_vid</code> cookie is still there. Your server reads it when it creates the checkout, and payment links from Stripe, Polar, Dodo Payments and LemonSqueezy get the ID from the script on your page.</li><li><b>Checkout made from the saved lead.</b> Pass the hidden field: for Stripe, <code>client_reference_id: lead.virling_vid || undefined</code>. The field for each provider is in <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</li><li><b>Invoice.</b> With no visitor ID, a Stripe, Shopify or WooCommerce payment with the same payer email is credited to the identified visitor and shows <b>Matched by email</b>. Matching is exact and applies to payments synced after the identify.</li><li><b>None of these.</b> The payment still counts toward revenue, as <b>Unattributed</b>.</li></ul>
+<h3>If the form takes the payment</h3>
+<p class="p">Tally&rsquo;s payment block charges through the Stripe account you connect (source: <a href="https://tally.so/help/payment-forms">Tally, payment forms</a>). That page does not say hidden fields are copied to Stripe, so do not count on the ID being there. Email can match if Stripe has the same address, but Tally takes the money on <b>Next</b> or <b>Submit</b>, and the code above sends the identify only after the form is submitted. A payment synced first stays Unattributed. It is safer to collect the lead in Tally and take the money in a checkout that carries the ID: <b>Redirect on completion</b> can send the lead to your own page with the payment link on it (source: <a href="https://tally.so/help/redirect-on-completion">Tally, redirect on completion</a>).</p>
+<h2>Symptom, cause and fix</h2>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:560px"><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">One tag arrives, another does not</th><td>No hidden field with that exact name</td><td>Add it, spelled the same, and publish</td></tr><tr><th scope="row">Tags arrive only on the landing page</th><td>The form is on a later page with no tags in its address</td><td>Use the code in step 3 with the cookie snippet</td></tr><tr><th scope="row">A popup gets tags, a standard embed does not</th><td>It was added with <b>Copy embed link</b></td><td>Use the HTML code</td></tr><tr><th scope="row">The embed stays blank</th><td><code>Tally.loadEmbeds()</code> did not run</td><td>Check the console, and that <code>embed.js</code> loads first</td></tr><tr><th scope="row">Only <code>virling_vid</code> is empty</th><td>Script missing or blocked, cookieless mode, or Tally&rsquo;s own code loaded the form first</td><td>Run <code>window.virling.vid()</code> in the console, and keep only the code in step 3</td></tr><tr><th scope="row">A submission, but no visit in Virling</th><td>The form was opened on tally.so</td><td>Embed it on your site</td></tr><tr><th scope="row">The lead paid, but shows Unattributed</th><td>The ID stayed in Tally, or the payer used another email</td><td>Pass the ID into checkout</td></tr><tr><th scope="row">The redirect does nothing</th><td>Preview mode, where Tally says it does not work</td><td>Test the published form</td></tr></tbody></table></div>
+<h2>Test it in a private window</h2>
+<ol class="post-list"><li>Open your live page with <code>?utm_source=test&amp;utm_medium=email</code>. <b>Expected:</b> Virling shows a visit from <code>test</code>.</li><li>Scroll to the form and run <code>document.getElementById("lead-form").src</code> in the console. <b>Expected:</b> the tags and <code>virling_vid</code> are in the address.</li><li>Submit the form. <b>Expected:</b> the submission has both, and the visitor has a <code>demo request</code> goal.</li><li>With a Stripe test key connected, send a test invoice to that email and pay it with a test card. <b>Expected:</b> after the next sync, the payment shows <code>test</code> and <b>Matched by email</b>.</li></ol>
+<p class="p">For other tools, read <a href="/blog/typeform-utm-tracking">Typeform UTM tracking</a> and <a href="/blog/calendly-utm-tracking">Calendly UTM tracking</a>. For a form that gives away a download, read <a href="/blog/lead-magnet-revenue-tracking">lead magnet revenue tracking</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I track UTM parameters in a Tally form?</h3><p class="p">Add one hidden field per tag, named utm_source, utm_medium and so on, and publish the form. Then put the values after the ? of the tally.so link, or let the embed code forward them from your page. Each submission then carries the tags.</p>
+<h3>Why are my Tally hidden fields empty?</h3><p class="p">Often the visitor landed on one page and filled in the form on another, so there were no tags in the page address. Other causes are a hidden field that is missing or spelled differently, a standard embed added with the embed link, and a visit that had no tags.</p>
+<h3>Can a Tally embed read a cookie from my site?</h3><p class="p">No. The form is a frame from tally.so, and browsers keep it apart from your cookies. Your page has to read the value and pass it to the form, as the code in step 3 does with the visitor ID.</p>
+<h3>Does Virling read Tally answers?</h3><p class="p">No. Virling does not connect to Tally. It sees the visit to your page, the goal your page sends, and the email your page or server sends in an identify event, which it keeps only as a salted hash.</p>
+<h3>How is a Tally lead joined to a payment?</h3><p class="p">By visitor ID, if the ID goes into the checkout the lead pays through. Otherwise by email: after an identify event, a later Stripe, Shopify or WooCommerce payment with no visitor ID and the same payer email is credited to that visitor. A form answer alone is never counted as a payment.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which Tally leads turn into payments</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
