@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marketing attribution for startups: the smallest setup that works</title>
+<meta name="description" content="Marketing attribution for startups in four steps, with what to set up and skip at 0, 10 and 100 customers, and how to decide with few payments.">
+<link rel="canonical" href="https://virling.com/blog/marketing-attribution-for-startups">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/marketing-attribution-for-startups">
+<meta property="og:title" content="Marketing attribution for startups: the smallest setup that works">
+<meta property="og:description" content="Marketing attribution for startups in four steps, with what to set up and skip at 0, 10 and 100 customers, and how to decide with few payments.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Marketing attribution for startups: the smallest setup that works","item":"https://virling.com/blog/marketing-attribution-for-startups"}]},{"@type":"BlogPosting","headline":"Marketing attribution for startups: the smallest setup that works","description":"Marketing attribution for startups in four steps, with what to set up and skip at 0, 10 and 100 customers, and how to decide with few payments.","datePublished":"2026-11-25","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/marketing-attribution-for-startups"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"When should a startup set up marketing attribution?","acceptedAnswer":{"@type":"Answer","text":"Before the first payment. Tagging links, storing a visitor ID and passing it to checkout is a small job, and a payment made without a visitor ID usually cannot be traced later. Reading the results can wait until you have about 10 customers."}},{"@type":"Question","name":"Which attribution model should a startup use?","acceptedAnswer":{"@type":"Answer","text":"Start with last non-direct, which credits the latest visit before the payment that was not Direct. It is the default in Virling. Look at first touch once you have about 100 customers, to see which channels introduce buyers. Keep one model while you compare weeks."}},{"@type":"Question","name":"Can I do startup attribution in a spreadsheet?","acceptedAnswer":{"@type":"Answer","text":"Yes, for the first few customers. Keep one row per customer with the payment date, the amount, the tracked source and their own answer to how they heard about you. You still need tagged links and a visitor ID in checkout, because a spreadsheet cannot recover a source that was never stored."}},{"@type":"Question","name":"How many customers do I need before I can trust the numbers?","acceptedAnswer":{"@type":"Answer","text":"There is no exact line. Below about ten customers in a channel, treat the result as a hint, since one or two customers can change the order. Count customers per channel, not in total: 100 customers across eight channels can still leave most of them small."}},{"@type":"Question","name":"Do startups need multi-touch attribution?","acceptedAnswer":{"@type":"Answer","text":"Usually not at first. Splitting credit over several visits adds choices to explain and does not add payments. One visitor ID and one simple model answer the early question, which is where paying customers come from."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-25</span>
+      <h1>Marketing attribution for startups: the smallest setup that works</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-25.</p>
+<p class="p"><b>Marketing attribution for startups</b> means knowing which channel brought each paying customer. The smallest setup that works has four steps, in this order: tag the links you share, give each visitor one ID, carry that ID to checkout, and read revenue per channel once a week. Do the first three before your first payment, because a payment made without a visitor ID usually cannot be traced later. Start the weekly reading at around 10 customers, and compare retention and cost at around 100. Skip everything else until then.</p>
+<p class="p">The stages are rough markers, not benchmarks. A startup with 10 customers on yearly contracts has different questions from one with 10 customers on a small monthly plan. The order of the steps stays the same.</p>
+<h2>What to set up at 0, 10 and 100 customers</h2>
+<h3>At 0 customers: do not lose the first ones</h3>
+<p class="p">There is no revenue to compare yet. The job is to make sure the first payments arrive with a source attached, since you cannot go back and record a visit that was never stored.</p>
+<ul class="post-list"><li><b>Set up:</b> tagged links, the script on every page, and the visitor ID in checkout. Make one test payment before launch.</li><li><b>Set up:</b> an optional &ldquo;How did you first hear about us?&rdquo; at signup. Early customers often arrive through conversations that leave no click; see <a href="/blog/self-reported-attribution">self-reported attribution</a>.</li><li><b>Skip:</b> comparing attribution models, revenue targets per channel and weekly reports. With no payments, all of them are empty.</li></ul>
+<h3>At 10 customers: read, but do not rank</h3>
+<p class="p">Ten payments are enough to find a broken setup and to notice a channel you did not expect. They are not enough to say which channel is best.</p>
+<ul class="post-list"><li><b>Set up:</b> a weekly look at revenue per channel, and a check of every Unattributed payment. With ten customers you can open each payment and read the visits before it.</li><li><b>Set up:</b> one signup goal, so you have a number that moves more often than payments do.</li><li><b>Skip:</b> cutting a channel because it has no customers yet, moving a budget on one good week, and retention by channel. Too few customers have had time to leave.</li></ul>
+<h3>At 100 customers: compare cost and who stays</h3>
+<p class="p">Your larger channels may now have enough customers to compare. Small ones still do not, so keep reading the customer count next to every ratio.</p>
+<ul class="post-list"><li><b>Set up:</b> retention by channel, time to pay by channel and, if you buy ads, spend per channel next to the revenue credited to it.</li><li><b>Set up:</b> a second look under first touch, to see which channels introduce buyers. <a href="/blog/first-touch-vs-last-touch-attribution-saas">First-touch or last-touch attribution for a SaaS</a> covers the choice.</li><li><b>Skip:</b> multi-touch weighting, a data warehouse built only for attribution, and statistical models of your media mix. They need more payments than you have, or more upkeep than a small team can give.</li></ul>
+<h2>The four steps, in order</h2>
+<p class="p">Each step depends on the one before it. A weekly report is only as good as the checkout link, and the checkout link only as good as the visits behind it.</p>
+<h3>1. Tag the links you share</h3>
+<p class="p">A visit from an email app, a chat or some mobile apps often arrives with no referrer and is counted as Direct. A tag fixes that for the links you control. Write down one set of names before you post anything, all in lowercase, and use it every time. The <a href="/tools/utm-naming-template">UTM naming template</a> gives you a table of values to fill in and copy. A tagged launch post can look like this:</p>
+<div class="code block"><pre>https://yourproduct.com/?utm_source=linkedin&amp;utm_medium=social&amp;utm_campaign=launch-2026-11</pre></div>
+<p class="p">Do not tag links between your own pages, since the tag replaces the visitor's real source. Ordinary search results cannot be tagged, and do not need to be when the browser sends the search engine as the referrer.</p>
+<h3>2. Give each visitor one ID</h3>
+<p class="p">Someone who reads a post on Monday and pays on Friday should be one visitor, not two. A first-party ID in a cookie does that in the same browser. With Virling, one tag before <code>&lt;/head&gt;</code> on every page of your site and app stores each visit and sets the <code>virling_vid</code> cookie:</p>
+<div class="code block"><pre>&lt;script defer src="https://app.virling.com/v.js"
+  data-site="yourproduct.com"&gt;&lt;/script&gt;</pre></div>
+<p class="p">The cookie is shared between <code>yourproduct.com</code> and <code>app.yourproduct.com</code>. Cookieless mode sets no cookie, so there is no ID for checkout to carry and those payments are Unattributed. If you ask visitors for consent first, the <a href="https://docs.virling.com/track/cookieless">Until consent setting</a> switches to the cookie once they accept.</p>
+<h3>3. Carry the ID to checkout</h3>
+<p class="p">This step links the money to the visit. Connect your payment provider with a read-only key where it offers one, then put the visitor ID in a field on the checkout. For a Stripe Checkout Session your server creates, that is one line:</p>
+<div class="code block"><pre>await stripe.checkout.sessions.create({
+  client_reference_id: req.cookies.virling_vid,
+  // ...
+});</pre></div>
+<p class="p">Stripe Payment Links on <code>buy.stripe.com</code> need no code when they are normal links on a page that runs the script. The <a href="/tools/attribution-setup-generator">attribution setup generator</a> lists the exact steps for your site builder and payment provider. If you sell subscriptions, <a href="/integrations/saas">Virling for SaaS</a> covers trials, renewals and where the ID goes for each billing provider: a renewal keeps the channel of the customer's first payment, so getting the first one right is enough.</p>
+<p class="p">Then test it. Open your site in a private window from a tagged link, pay, and check that the payment shows that source. <a href="https://docs.virling.com/guides/test-your-setup">Test your setup</a> has the test mode steps for each provider.</p>
+<h3>4. Read revenue per channel weekly</h3>
+<p class="p">Pick one day and look at the same things in the same order. It should take ten minutes.</p>
+<ol class="post-list"><li><b>Unattributed.</b> If its share is growing, fix checkout before you read anything else.</li><li><b>New customers per channel,</b> as a count. Read it before any ratio.</li><li><b>Revenue per visitor per channel,</b> over the last 90 days. A single week is too short.</li><li><b>One action.</b> Write down the one thing you will try next week and the date you will judge it.</li></ol>
+<p class="p">In Virling this is the Channels card, the Payments page filtered to unattributed, and a weekly email if you turn it on. <a href="/blog/find-which-channel-pays">How to find which marketing channel pays</a> goes further into the weekly reading.</p>
+<h2>How to decide with few payments</h2>
+<p class="p">Here is a 90-day table for an imaginary startup with ten customers on a $40 plan, first payments only. <b>Every number is made up</b> to show the method, and none is a benchmark. The last column shows revenue per visitor with one customer fewer and one customer more.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:600px"><thead><tr><th>Channel (made-up numbers)</th><th>Visitors</th><th>Customers</th><th>Revenue</th><th>Revenue per visitor</th><th>One fewer to one more</th></tr></thead><tbody><tr><th scope="row">Organic search</th><td>800</td><td>4</td><td>$160</td><td>$0.20</td><td>$0.15 to $0.25</td></tr><tr><th scope="row">Communities</th><td>1,000</td><td>3</td><td>$120</td><td>$0.12</td><td>$0.08 to $0.16</td></tr><tr><th scope="row">Email</th><td>200</td><td>2</td><td>$80</td><td>$0.40</td><td>$0.20 to $0.60</td></tr><tr><th scope="row">Social</th><td>500</td><td>1</td><td>$40</td><td>$0.08</td><td>$0.00 to $0.16</td></tr><tr><th scope="row">All</th><td>2,500</td><td>10</td><td>$400</td><td>$0.16</td><td>$0.14 to $0.18</td></tr></tbody></table></div>
+<p class="p">Email looks like the winner at 2.5 times the average. Take away one customer and it ties with organic search. Communities and Social swap places if each moves by one. The table cannot tell you the order of these channels.</p>
+<p class="p"><b>A plain warning on small numbers:</b> one customer either way is not the worst case. If a channel brings two customers per quarter on average, and each one buys independently, chance alone will give it a quarter with none about one time in seven. Ranges that do not overlap in this table are not proof of a difference either. Treat anything under about ten customers in a channel as a hint.</p>
+<p class="p">You still have to choose what to do next week. These rules hold up with few payments:</p>
+<ul class="post-list"><li><b>Prefer choices you can undo.</b> &ldquo;Send two more emails this month&rdquo; is a fair response to this table. &ldquo;Stop posting in communities&rdquo; is not.</li><li><b>Judge a zero by its visitors.</b> This site turns 10 of 2,500 visitors into customers, or 0.4%. At that rate a channel needs 750 visitors to expect three customers, so none from 200 visitors says very little.</li><li><b>Widen the range before you split it.</b> Ninety days of channels beats one week of campaigns. Every extra split leaves fewer customers in each row.</li><li><b>Use signups as a second signal.</b> They are more frequent than payments. If a channel is low on both, that is a better reason to spend less time there than payments alone.</li><li><b>Read the journeys and ask.</b> With ten customers, their visits and their own answers tell you more than a ratio does.</li><li><b>Set the limit first.</b> Before you test a paid channel, write down what you will spend and when you will stop, so one early sale does not extend the test.</li></ul>
+<h2>What this setup will not tell you</h2>
+<ul class="post-list"><li><b>Other devices.</b> A visit on a phone and a payment on a laptop are two visitors, unless something such as a matching email links them.</li><li><b>Word of mouth.</b> A recommendation made out loud leaves no click. Ask at signup.</li><li><b>Blocked visits.</b> Visitors who block the script are not recorded. Their payments still count in total revenue, as Unattributed.</li><li><b>Cause.</b> Credit for a payment goes to one visit. It does not prove the customer would not have paid without it.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>When should a startup set up marketing attribution?</h3><p class="p">Before the first payment. Tagging links, storing a visitor ID and passing it to checkout is a small job, and a payment made without a visitor ID usually cannot be traced later. Reading the results can wait until you have about 10 customers.</p>
+<h3>Which attribution model should a startup use?</h3><p class="p">Start with last non-direct, which credits the latest visit before the payment that was not Direct. It is the default in Virling. Look at first touch once you have about 100 customers, to see which channels introduce buyers. Keep one model while you compare weeks.</p>
+<h3>Can I do startup attribution in a spreadsheet?</h3><p class="p">Yes, for the first few customers. Keep one row per customer with the payment date, the amount, the tracked source and their own answer to how they heard about you. You still need tagged links and a visitor ID in checkout, because a spreadsheet cannot recover a source that was never stored.</p>
+<h3>How many customers do I need before I can trust the numbers?</h3><p class="p">There is no exact line. Below about ten customers in a channel, treat the result as a hint, since one or two customers can change the order. Count customers per channel, not in total: 100 customers across eight channels can still leave most of them small.</p>
+<h3>Do startups need multi-touch attribution?</h3><p class="p">Usually not at first. Splitting credit over several visits adds choices to explain and does not add payments. One visitor ID and one simple model answer the early question, which is where paying customers come from.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channel brought your first customers</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
