@@ -432,6 +432,9 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Persist UTM parameters across pages: three ways with code](https://virling.com/blog/persist-utm-parameters): How to persist UTM parameters across pages until checkout: cookie, localStorage or tagged links, with code, when each breaks, and the visitor ID way.
 - [Capture UTM parameters in hidden fields: JavaScript snippet](https://virling.com/blog/utm-parameters-hidden-form-fields): Capture UTM parameters in hidden form fields with a short plain JavaScript snippet, a test, iframe and multi-step forms, and how to join a lead to a payment.
 - [Revenue attribution glossary: 40 terms in plain words](https://virling.com/blog/revenue-attribution-glossary): A revenue attribution glossary of 40 terms: models, windows, UTM tags, click IDs, Direct, Unattributed, CAC, LTV, ROAS, MER and MRR in plain words.
+- [Marketing attribution for startups: the smallest setup that works](https://virling.com/blog/marketing-attribution-for-startups): Marketing attribution for startups in four steps, with what to set up and skip at 0, 10 and 100 customers, and how to decide with few payments.
+- [Open-source marketing attribution: what to check](https://virling.com/blog/open-source-marketing-attribution): Open-source marketing attribution checklist: licence, hosted versus self-hosted code, payment keys, services, backups, export and unmatched payments.
+- [SvelteKit Polar UTM tracking: see the source of each order](https://virling.com/blog/sveltekit-polar-utm-tracking): Add the script to app.html, read the virling_vid cookie with event.cookies and set it in Polar checkout metadata, so each order shows its source.
 
 ## Source
 
