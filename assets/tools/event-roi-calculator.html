@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event ROI calculator: trade show cost per lead and ROI</title>
+<meta name="description" content="Free event ROI calculator for trade shows and conferences: total cost, cost per lead, customers needed to break even and ROI, with every formula shown.">
+<link rel="canonical" href="https://virling.com/tools/event-roi-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/event-roi-calculator">
+<meta property="og:title" content="Event ROI calculator: trade show cost per lead and ROI">
+<meta property="og:description" content="Free event ROI calculator for trade shows and conferences: total cost, cost per lead, customers needed to break even and ROI, with every formula shown.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Event ROI calculator","url":"https://virling.com/tools/event-roi-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Event ROI calculator","item":"https://virling.com/tools/event-roi-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / event roi calculator</span><h1>Event ROI calculator</h1><p class="lead">Enter what a trade show, conference or meetup cost you, the leads it brought and what a customer is worth to get total cost, cost per lead, the customers you need to break even and ROI. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="evroi" autocomplete="off" novalidate>
+  <label>Booth or ticket cost ($)<input name="booth" type="number" min="0" max="1000000000" step="0.01" value="3000" data-n="Booth or ticket cost" aria-describedby="evroi-msg"><span class="dim">Include the stand, printing and shipping</span></label>
+  <label>Travel cost ($)<input name="travel" type="number" min="0" max="1000000000" step="0.01" value="1200" data-n="Travel cost" aria-describedby="evroi-msg"><span class="dim">Flights, hotels, food and local travel</span></label>
+  <label>Staff days<input name="days" type="number" min="0" max="100000" step="0.5" value="6" data-n="Staff days" aria-describedby="evroi-msg"><span class="dim">People &times; days, with travel and follow-up</span></label>
+  <label>Cost per staff day ($)<input name="day" type="number" min="0" max="1000000000" step="0.01" value="300" data-n="Cost per staff day" aria-describedby="evroi-msg"><span class="dim">Pay and payroll costs for one day</span></label>
+  <label>Leads from the event<input name="leads" type="number" min="0" max="1000000000" step="1" value="80" data-n="Leads" aria-describedby="evroi-msg"><span class="dim">People you can follow up with</span></label>
+  <label>Leads that become customers (%)<input name="rate" type="number" min="0" max="100" step="0.01" value="5" data-n="Share that become customers" aria-describedby="evroi-msg"><span class="dim">Over your whole sales cycle</span></label>
+  <label>Value per customer ($)<input name="value" type="number" min="0" max="1000000000" step="0.01" value="2500" data-n="Value per customer" aria-describedby="evroi-msg"><span class="dim">Gross profit, or revenue if you prefer</span></label>
+</form>
+<p class="p" id="evroi-msg" role="status" style="margin:0;color:var(--revenue-text)"></p>
+<div class="tool-stats" id="evroi-out" style="overflow-wrap:anywhere"></div>
+<p class="fine-note">The starting numbers are made up, not a benchmark. Count everyone's time in staff days: two people for three days is 6. The share that become customers should cover everyone who buys in the end, not only the people who bought in the first weeks.</p>
+<div class="txt post tool-cta">
+<p class="p">This is an estimate from a rate you type in. Virling links each tagged event visit to the payment that followed, so it shows the customers and revenue each event brought from your real payments, including Stripe, Shopify and WooCommerce. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/qr-code-utm-generator">QR code generator with UTM tags</a>, <a href="/tools/cost-per-lead-calculator">cost per lead calculator</a>, <a href="/blog/event-revenue-tracking">event revenue tracking</a>, <a href="/blog/attribution-window">how to choose an attribution window</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The event ROI formula</h2>
+<p class="p">Cost is everything you spent to be there, including time. Value is the leads you met, times the share that buy, times what one customer is worth:</p>
+<p class="p"><code>total cost = booth or ticket + travel + staff days &times; cost per staff day</code></p>
+<p class="p"><code>cost per lead = total cost / leads</code></p>
+<p class="p"><code>customers = leads &times; share that become customers</code></p>
+<p class="p"><code>customers to break even = total cost / value per customer, rounded up</code></p>
+<p class="p"><code>ROI = (customers &times; value per customer - total cost) / total cost</code></p>
+<p class="p">An ROI of 0% means the event exactly paid for itself, and below 0% it lost money. Value per customer works best as gross profit: what a customer pays you, less what it costs to serve them. If you enter revenue instead, the result is return on revenue and will look higher.</p>
+<h2>A worked example</h2>
+<p class="p">These are made-up numbers, the same ones the calculator starts with, not data from a real business. A booth costs $3,000 and travel $1,200. Two people spend three days each, so 6 staff days at $300 is $1,800. The total cost is $3,000 + $1,200 + $1,800 = $6,000.</p>
+<p class="p">You come home with 80 leads, so a lead cost $6,000 / 80 = $75. If 5% become customers, that is 80 &times; 5% = 4 customers. At $2,500 each they are worth $10,000, and ROI is ($10,000 - $6,000) / $6,000 = 66.7%. Breaking even takes $6,000 / $2,500 = 2.4, so 3 customers.</p>
+<p class="p">Leave out the staff days and the cost drops to $4,200, and the same 4 customers look like an ROI of 138.1%. Nothing about the event changed, only the cost that was counted.</p>
+<h2>Count customers who buy months later</h2>
+<p class="p">Few people pay at a booth. They go home, talk to their team, try the product and pay weeks or months later. Two things decide whether that payment is still counted for the event: a tag that says where the visit came from, and a window long enough to reach back to it.</p>
+<h3>Give each event its own QR code or short link</h3>
+<p class="p">A phone camera opens a QR code with no referrer, so an untagged code counts as Direct. The <a href="/tools/qr-code-utm-generator">QR code generator with UTM tags</a> puts the tags in the code. Use one campaign per event and placement, such as <code>event-spring-expo-2027-booth</code>, and never reuse last year's code. For a slide or a badge, a short link is easier to type: a <a href="https://docs.virling.com/track/links">tracked link</a> in Virling adds the tags on each click.</p>
+<p class="p">Point both at a page on your site, not straight at a payment link, so the visit is recorded. Tag the follow-up email with the event's name too. Many people scan on a phone and buy on a laptop, and a visit on one does not match a payment on the other by itself. The email gives them a tagged visit on the device they buy on. The full setup is in <a href="/blog/event-revenue-tracking">event revenue tracking</a>.</p>
+<h3>Use a window longer than your sales cycle</h3>
+<p class="p">An attribution window is the number of days before a payment in which a visit can earn credit. A visit older than the window is ignored, so a customer who buys after it closes is not counted for the event. Virling uses 90 days by default and offers 30, 60, 90 or 365. <a href="/blog/attribution-window">How to choose an attribution window</a> explains how to base it on your own time to pay.</p>
+<p class="p">Take the same made-up event, with its cost of $6,000. Four people scan the booth code on the day, and later come back only by typing the address, in the same browser. They pay 18, 55, 120 and 174 days after the event, and each is worth $2,500. This is what each window counts:</p>
+<table class="cmp"><thead><tr><th>Window</th><th>Buyers</th><th>Value</th><th>ROI</th></tr></thead><tbody><tr><th scope="row">30 days</th><td>1</td><td>$2,500</td><td>-58.3%</td></tr><tr><th scope="row">60 days</th><td>2</td><td>$5,000</td><td>-16.7%</td></tr><tr><th scope="row">90 days</th><td>2</td><td>$5,000</td><td>-16.7%</td></tr><tr><th scope="row">365 days</th><td>4</td><td>$10,000</td><td>66.7%</td></tr></tbody></table>
+<p class="p">Same event, same customers. At 90 days it looks like a loss, because two of the four had not paid yet. Only the longest window counts all of them, and only once 174 days have passed.</p>
+<h2>How to use the result</h2>
+<ul class="post-list"><li><b>Before you book:</b> work out the customers to break even, then divide by the share of leads that usually buy. In the example, 3 customers at 5% means 60 leads. If you cannot picture meeting that many people, the event is too expensive at that price.</li><li><b>After the event:</b> replace the guessed leads with the real count. <a href="/tools/cost-per-lead-calculator">Compare cost per lead</a> with your other channels, but do not stop there, since a cheap lead who never buys is worth nothing.</li><li><b>When your sales cycle has passed:</b> replace the share that become customers with the real one, and compare events on ROI.</li></ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Event ROI calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate event ROI?</h3><p class="p">Add the booth or ticket, travel and staff time to get the total cost. Multiply leads by the share that become customers, then by what one customer is worth. Subtract the cost from that value and divide by the cost. In the example on this page, $10,000 of value on $6,000 of cost is an ROI of 66.7%.</p></div>
+      <div><h3>What costs should I include in trade show ROI?</h3><p class="p">The booth or ticket, anything you pay to fit it out, shipping, travel, hotels and food, and the working days of everyone who prepares, travels and follows up. Staff time is easy to leave out because no invoice arrives for it, and leaving it out makes the ROI look better than it is.</p></div>
+      <div><h3>How many customers does an event need to break even?</h3><p class="p">Divide the total cost by the value of one customer and round up, since you cannot win part of a customer. An event that cost $6,000 with customers worth $2,500 each needs 2.4, so 3 customers.</p></div>
+      <div><h3>What is a good ROI for a trade show?</h3><p class="p">Above 0% means the event returned more than it cost. Beyond that it depends on your margin and on how long your deals take, so compare it with your other events and channels, worked out with the same formula over the same number of days.</p></div>
+      <div><h3>How long should I wait before working out event ROI?</h3><p class="p">At least as long as your customers usually take from first contact to payment. Work out a first figure soon after the event if you like, label it as early, and run the numbers again once that time has passed.</p></div>
+      <div><h3>How do I know which customers came from an event?</h3><p class="p">Give every event its own tagged QR code or short link that opens a page on your site, put a tag on the follow-up email too, and use a tool that joins each payment to the visits before it. Keep the lead list as well, because someone who never used a tagged link cannot be found by any tag.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate event ROI?", "acceptedAnswer": {"@type": "Answer", "text": "Add the booth or ticket, travel and staff time to get the total cost. Multiply leads by the share that become customers, then by what one customer is worth. Subtract the cost from that value and divide by the cost. In the example on this page, $10,000 of value on $6,000 of cost is an ROI of 66.7%."}}, {"@type": "Question", "name": "What costs should I include in trade show ROI?", "acceptedAnswer": {"@type": "Answer", "text": "The booth or ticket, anything you pay to fit it out, shipping, travel, hotels and food, and the working days of everyone who prepares, travels and follows up. Staff time is easy to leave out because no invoice arrives for it, and leaving it out makes the ROI look better than it is."}}, {"@type": "Question", "name": "How many customers does an event need to break even?", "acceptedAnswer": {"@type": "Answer", "text": "Divide the total cost by the value of one customer and round up, since you cannot win part of a customer. An event that cost $6,000 with customers worth $2,500 each needs 2.4, so 3 customers."}}, {"@type": "Question", "name": "What is a good ROI for a trade show?", "acceptedAnswer": {"@type": "Answer", "text": "Above 0% means the event returned more than it cost. Beyond that it depends on your margin and on how long your deals take, so compare it with your other events and channels, worked out with the same formula over the same number of days."}}, {"@type": "Question", "name": "How long should I wait before working out event ROI?", "acceptedAnswer": {"@type": "Answer", "text": "At least as long as your customers usually take from first contact to payment. Work out a first figure soon after the event if you like, label it as early, and run the numbers again once that time has passed."}}, {"@type": "Question", "name": "How do I know which customers came from an event?", "acceptedAnswer": {"@type": "Answer", "text": "Give every event its own tagged QR code or short link that opens a page on your site, put a tag on the follow-up email too, and use a tool that joins each payment to the visits before it. Keep the lead list as well, because someone who never used a tagged link cannot be found by any tag."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the revenue behind every event</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel and campaign brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("evroi"), out = document.getElementById("evroi-out"), msg = document.getElementById("evroi-msg");
+const num = (n, d) => n.toLocaleString("en-US", { maximumFractionDigits: d });
+const fmt = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+const pct = (n) => num((Math.round(n * 1000) / 10) || 0, 1) + "%";
+const problem = (i) => {
+  if (i.validity.badInput || i.value === "") return "must be a number. Enter 0 if there is none.";
+  if (+i.value < 0) return "cannot be below 0.";
+  if (+i.value > +i.max) return i.max === "100" ? "cannot be above 100%." : "cannot be above " + num(+i.max) + ".";
+  if (i.step === "1" && +i.value % 1) return "must be a whole number.";
+  return "";
+};
+const calc = () => {
+  let text = "";
+  f.querySelectorAll("input").forEach((i) => {
+    const p = problem(i);
+    if (p) i.setAttribute("aria-invalid", "true"); else i.removeAttribute("aria-invalid");
+    if (p && !text) text = i.dataset.n + " " + p;
+  });
+  if (msg.textContent !== text) msg.textContent = text;
+  if (text) { out.innerHTML = ""; return; }
+  const v = (n) => +f[n].value, cents = (n) => Math.round(n * 100) / 100;
+  const cost = cents(v("booth") + v("travel") + v("days") * v("day")), leads = v("leads"), each = cents(v("value"));
+  const won = leads * v("rate") / 100, worth = cents(won * each), need = each > 0 ? Math.ceil(Math.round(cost * 100) / Math.round(each * 100)) : 0;
+  const rows = [
+    ["Total cost", fmt(cost), `${fmt(v("booth"))} + ${fmt(v("travel"))} + ${num(v("days"), 2)} &times; ${fmt(v("day"))}`],
+    ["Cost per lead", leads > 0 ? fmt(cents(cost / leads)) : "Add leads", leads > 0 ? `${fmt(cost)} / ${num(leads)}` : ""],
+    ["Customers to break even", each > 0 ? num(need) : "Add a value", each > 0 ? `${fmt(cost)} / ${fmt(each)}, rounded up` : ""],
+    ["Customers expected", num(won, 2), `${num(leads)} &times; ${num(v("rate"), 2)}%`],
+    ["ROI", cost > 0 ? pct((worth - cost) / cost) : "Add a cost", cost > 0 ? `(${num(won, 2)} &times; ${fmt(each)} - ${fmt(cost)}) / ${fmt(cost)}` : ""],
+  ];
+  out.innerHTML = rows.map(([k, val, how]) => `<div><span class="dim">${k}</span><b>${val}</b>${how && `<span class="dim">${how}</span>`}</div>`).join("");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
