@@ -53,6 +53,8 @@
 <p class="p">If your link is built before the analytics script has loaded, the value will be empty, so wait for the script first.</p>
 <h2>Step 3: catch the custom data in a webhook</h2>
 <p class="p">This is the step that surprises people. LemonSqueezy only returns checkout custom data in webhooks. Reading orders from the API is not enough, because the ID will not be there. Register a webhook for <code>order_created</code> and <code>subscription_payment_success</code>, check each request's <code>X-Signature</code> against your signing secret, and attach the ID to the order or invoice it came with. The webhook address must be a public <code>https://</code> URL that LemonSqueezy can reach.</p>
+<p class="p">When you connect LemonSqueezy, Virling registers this webhook on each of your stores, and you can filter its Payments page to Unattributed to find the orders that joined no visit.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
 <h2>Step 4: join orders to visits</h2>
 <p class="p">Match each order's ID to that visitor's earlier visits and credit one of them with a rule you keep fixed (see <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch or last touch</a>). Orders with no ID have no visit to join, so they show as Unattributed.</p>
 <h2>Step 5: handle refunds and renewals</h2>

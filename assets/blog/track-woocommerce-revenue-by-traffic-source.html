@@ -62,6 +62,8 @@ function virling_vid_on_order($order) {
 <h2>Step 4: join orders to visits</h2>
 <p class="p">Match each order's <code>virling_vid</code> to that visitor's earlier visits and credit one of them with a rule you keep fixed (see <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch or last touch</a>). Orders with no ID have no visit to join, so they show as Unattributed. They still count toward revenue, so your totals stay right even when the channel is missing.</p>
 <p class="p">WooCommerce allows guest checkout. Guest orders have no customer ID, so each one counts as its own customer. That is worth knowing before you read a customers column next to a revenue column.</p>
+<p class="p">For each channel with at least three matched first orders, Virling's Time to pay card shows the median time from a WooCommerce customer's first visit to that order.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
 <h2>Step 5: handle refunds and renewals</h2>
 <p class="p">Two things change the numbers after the first order. Refunds lower an order's revenue, and they can arrive weeks after the sale, so read recent orders again from time to time to catch them. Otherwise a channel that looks good on day one keeps looking good after its buyers asked for their money back.</p>
 <p class="p">If you sell subscriptions with WooCommerce Subscriptions, each renewal is a new order created without a store visit, so it carries no visitor ID of its own. Mark renewal orders as renewals and give them the channel of the customer's first payment, or they will pile up as Unattributed and the channel that won the customer will look smaller than it is.</p>
