@@ -121,6 +121,9 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Sales velocity calculator](https://virling.com/tools/sales-velocity-calculator): revenue per day and per month from open opportunities, deal value, win rate and sales cycle, which 10 percent change moves it most, and a comparison of channels
 - [Shopify profit calculator](https://virling.com/tools/shopify-profit-calculator): profit per order and per month after product, shipping, Shopify fees, refunds and ads, plus margin and break-even ad spend
 - [AI crawler log analyzer](https://virling.com/tools/ai-crawler-log-analyzer): paste access log lines or choose a file to count hits per AI crawler, with top pages, status codes, first and last seen, and a CSV
+- [LinkedIn ads dynamic UTM parameters builder](https://virling.com/tools/linkedin-ads-utm-builder): build LinkedIn dynamic UTM parameters to paste in Campaign Manager, with the new or old campaign names, and preview the landing URL in your browser
+- [Microsoft Ads tracking template and UTM builder](https://virling.com/tools/microsoft-ads-utm-builder): build a Microsoft Ads tracking template and final URL suffix with UTM tags and URL parameters, and preview the landing URL in your browser
+- [TikTok ads UTM parameters builder](https://virling.com/tools/tiktok-ads-utm-builder): build TikTok ads UTM parameters with campaign, ad group and ad macros, get the full URL for TikTok Ads Manager, and preview it in your browser
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -437,6 +440,12 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Persist UTM parameters across pages: three ways with code](https://virling.com/blog/persist-utm-parameters): How to persist UTM parameters across pages until checkout: cookie, localStorage or tagged links, with code, when each breaks, and the visitor ID way.
 - [Capture UTM parameters in hidden fields: JavaScript snippet](https://virling.com/blog/utm-parameters-hidden-form-fields): Capture UTM parameters in hidden form fields with a short plain JavaScript snippet, a test, iframe and multi-step forms, and how to join a lead to a payment.
 - [Revenue attribution glossary: 40 terms in plain words](https://virling.com/blog/revenue-attribution-glossary): A revenue attribution glossary of 40 terms: models, windows, UTM tags, click IDs, Direct, Unattributed, CAC, LTV, ROAS, MER and MRR in plain words.
+- [Calendly UTM tracking: which channel books calls that pay](https://virling.com/blog/calendly-utm-tracking): Calendly UTM tracking step by step: tag a link, an inline embed or a popup, see where the tags show, and join the booked call to the invoice that is paid later.
+- [Marketing attribution for startups: the smallest setup that works](https://virling.com/blog/marketing-attribution-for-startups): Marketing attribution for startups in four steps, with what to set up and skip at 0, 10 and 100 customers, and how to decide with few payments.
+- [Open-source marketing attribution: what to check](https://virling.com/blog/open-source-marketing-attribution): Open-source marketing attribution checklist: licence, hosted versus self-hosted code, payment keys, services, backups, export and unmatched payments.
+- [Shopify checkout extensibility tracking: what still works](https://virling.com/blog/shopify-checkout-extensibility-tracking): Which tracking breaks under Shopify checkout extensibility, what replaces checkout scripts, and why a visitor ID stored on the cart still works.
+- [SvelteKit Polar UTM tracking: see the source of each order](https://virling.com/blog/sveltekit-polar-utm-tracking): Add the script to app.html, read the virling_vid cookie with event.cookies and set it in Polar checkout metadata, so each order shows its source.
+- [Typeform hidden fields UTM tracking: from form answer to payment](https://virling.com/blog/typeform-utm-tracking): Typeform hidden fields UTM tracking, step by step: declare the fields, pass tags in a link or embed, test each step, then join a lead to a later payment.
 
 ## Source
 
