@@ -135,7 +135,7 @@
 <p class="p">Build the link with the <a href="/tools/utm-builder">UTM builder</a> so the names match your other campaigns.</p>
 <h2>Embedded forms in an iframe</h2>
 <p class="p">If your form provider gives you an iframe, the form lives on another domain. The browser does not let your page reach into it, the form cannot read your cookie, and its address is not your page address. A script on your page cannot fill its hidden fields. Two things work:</p>
-<ul class="post-list"><li><b>Use the script embed instead,</b> if the provider has one that renders the form in your page. Then the inputs are part of your page and the snippet fills them.</li><li><b>Put the tags in the iframe address.</b> Many form tools can fill a hidden field from a query parameter; check yours for the exact setting. If the page inside is yours, add the snippet to it and it reads its own address.</li></ul>
+<ul class="post-list"><li><b>Use the script embed instead,</b> if the provider has one that renders the form in your page. Then the inputs are part of your page and the snippet fills them.</li><li><b>Put the tags in the iframe address.</b> Many form tools can fill a hidden field from a query parameter; check yours for the exact setting. For Typeform, see <a href="/blog/typeform-utm-tracking">Typeform hidden fields for UTM tracking</a>. If the page inside is yours, add the snippet to it and it reads its own address.</li></ul>
 <p class="p">For the second one, use <code>data-src</code> so the frame loads once, with the tags already on it. Put this after the snippet:</p>
 <div class="code block"><pre data-snippet>&lt;iframe data-src="https://forms.example.net/demo" title="Book a demo"&gt;&lt;/iframe&gt;
 &lt;script&gt;
