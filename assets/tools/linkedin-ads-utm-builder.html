@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LinkedIn ads dynamic UTM parameters builder</title>
+<meta name="description" content="Build LinkedIn dynamic UTM parameters to paste in Campaign Manager, with the new or old campaign names, and preview the landing URL in your browser.">
+<link rel="canonical" href="https://virling.com/tools/linkedin-ads-utm-builder">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/linkedin-ads-utm-builder">
+<meta property="og:title" content="LinkedIn ads dynamic UTM parameters builder">
+<meta property="og:description" content="Build LinkedIn dynamic UTM parameters to paste in Campaign Manager, with the new or old campaign names, and preview the landing URL in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"LinkedIn ads dynamic UTM parameters builder","url":"https://virling.com/tools/linkedin-ads-utm-builder","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"LinkedIn ads dynamic UTM parameters builder","item":"https://virling.com/tools/linkedin-ads-utm-builder"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / linkedin ads utm builder</span><h1>LinkedIn ads dynamic UTM parameters builder</h1><p class="lead">Enter your landing page, source and medium, then tick the dynamic parameters you want. You get the parameter string to paste in Campaign Manager and a preview of the landing URL. Everything is built in your browser as you type.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="li" autocomplete="off">
+  <label class="wide">Landing page URL<input name="url" type="url" value="https://example.com/pricing" aria-describedby="li-msg" required></label>
+  <label>Source <span class="dim">utm_source</span><input name="source" value="linkedin" maxlength="100" aria-describedby="li-msg"></label>
+  <label>Medium <span class="dim">utm_medium</span><input name="medium" value="paid_social" maxlength="100" aria-describedby="li-msg"></label>
+  <fieldset style="grid-column:1/-1;min-width:0;margin:0;padding:0;border:0"><legend style="padding:0 0 10px;font-size:14px;font-weight:600">Dynamic parameters to include</legend><div class="tool-form">
+    <label class="check"><input type="checkbox" name="dp" value="campaign:NAME" checked><span data-dp="campaign:NAME">Campaign name <span class="dim">{{CAMPAIGN_NAME}}</span></span></label>
+    <label class="check"><input type="checkbox" name="dp" value="campaign:ID"><span data-dp="campaign:ID">Campaign ID <span class="dim">{{CAMPAIGN_ID}}</span></span></label>
+    <label class="check"><input type="checkbox" name="dp" value="ad_set:NAME"><span data-dp="ad_set:NAME">Ad set name <span class="dim">{{AD_SET_NAME}}</span></span></label>
+    <label class="check"><input type="checkbox" name="dp" value="ad_set:ID"><span data-dp="ad_set:ID">Ad set ID <span class="dim">{{AD_SET_ID}}</span></span></label>
+    <label class="check"><input type="checkbox" name="dp" value="ad:NAME"><span data-dp="ad:NAME">Ad name <span class="dim">{{AD_NAME}}</span></span></label>
+    <label class="check"><input type="checkbox" name="dp" value="ad:ID" checked><span data-dp="ad:ID">Ad ID <span class="dim">{{AD_ID}}</span></span></label>
+    <label class="check"><input type="checkbox" name="dp" value="account:NAME"><span data-dp="account:NAME">Account name <span class="dim">{{ACCOUNT_NAME}}</span></span></label>
+    <label class="check"><input type="checkbox" name="dp" value="account:ID"><span data-dp="account:ID">Account ID <span class="dim">{{ACCOUNT_ID}}</span></span></label>
+  </div></fieldset>
+  <label class="check wide"><input type="checkbox" name="old"><span>My Campaign Manager still shows campaign groups <span class="dim">use the old names</span></span></label>
+</form>
+<p class="p" id="li-msg" role="status" aria-live="polite" style="margin:0"></p>
+<div class="tool-out"><span class="dim">URL tracking parameters for Campaign Manager</span><output id="li-params"></output><button class="btn sm" type="button" data-copy="li-params">Copy parameters</button></div>
+<div class="tool-out"><span class="dim">Landing URL preview, with example values</span><output id="li-preview"></output></div>
+<p class="p dim">How it is built: the source and medium are lowercased with spaces turned into hyphens, and each parameter you tick goes to the UTM tag it fits. A parameter with no UTM tag left is sent under its own name. The preview swaps in made-up names and IDs.</p>
+<div class="txt post tool-cta">
+<p class="p">These tags say which campaign a click came from. Virling shows what it was worth: it links every visit to the payment it led to and credits each payment to the source, campaign and landing page of the visit that brought it. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/blog/linkedin-ads-revenue-tracking">LinkedIn Ads revenue tracking</a>, <a href="/blog/linkedin-revenue-tracking">LinkedIn revenue tracking</a>, <a href="/blog/b2b-saas-attribution">B2B SaaS attribution</a>, <a href="/tools/utm-naming-template">UTM naming convention template</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Fixed and dynamic parameters</h2>
+<p class="p">LinkedIn calls them static and dynamic URL tracking parameters. A key and its value are joined with an equals sign, and parameters are joined with an ampersand:</p>
+<table class="cmp" style="overflow-wrap:anywhere"><thead><tr><th></th><th>Fixed parameter</th><th>Dynamic parameter</th></tr></thead><tbody><tr><th scope="row">What it holds</th><td>A value you type, the same on every click</td><td>A value LinkedIn fills in, such as a campaign name or ID</td></tr><tr><th scope="row">How it looks</th><td><code>utm_source=linkedin</code></td><td><code>utm_campaign={{CAMPAIGN_NAME}}</code></td></tr><tr><th scope="row">Where it can be set</th><td>Account, campaign and ad level</td><td>Account or campaign level</td></tr><tr><th scope="row">Use it for</th><td><code>utm_source</code> and <code>utm_medium</code></td><td><code>utm_campaign</code> and <code>utm_content</code></td></tr></tbody></table>
+<p class="p">A dynamic value must be in capital letters with double curly brackets before and after it. LinkedIn lists letters, numbers and underscores as supported in keys, and the plus sign and hyphen as well in values. This builder is stricter with the source and medium: it leaves out the plus sign, because a plus in a query string is read as a space.</p>
+<p class="p">The parameters do not replace the ones already in the destination URL. LinkedIn says the full set is a combination of the account, campaign and ad level parameters, so keep each tag in one place. The builder warns you when the landing page already carries a tag it is about to add.</p>
+<p class="p">Sources, all read on 2026-11-25: LinkedIn Help, <a href="https://www.linkedin.com/help/lms/answer/a5968064">URL tracking parameters in Campaign Manager</a>, <a href="https://www.linkedin.com/help/lms/answer/a8323033">Changes to campaign hierarchy in Campaign Manager</a> and <a href="https://www.linkedin.com/help/lms/answer/a1324756">Create an ad set in Campaign Manager</a>; LinkedIn API docs, <a href="https://learn.microsoft.com/en-us/linkedin/marketing/integrations/ads-reporting/dynamic-utm-tracking?view=li-lms-2026-10">Dynamic UTM Tracking</a>.</p>
+<h2>New and old parameter names</h2>
+<p class="p">Starting in October 2025, LinkedIn renames two of the four levels in Campaign Manager: a campaign group becomes a campaign, and a campaign becomes an ad set. Creative parameters become ad parameters. The change is gradual, so you might not see the new terms yet.</p>
+<p class="p">This matters because two names are used on both sides. <code>{{CAMPAIGN_NAME}}</code> and <code>{{CAMPAIGN_ID}}</code> used to mean what is now the ad set, and now mean what was the campaign group. LinkedIn says existing ad sets are updated to the new values by themselves while the key stays the same, and that new or edited ad sets must use the new ones.</p>
+<p class="p">If your account shows ad sets, leave the last box empty. If it still shows campaign groups, tick it. Your choices stay on the same level and only the names in the string change. An old tag list or a template saved before the rename is worth checking by hand.</p>
+<h2>Which UTM tag each LinkedIn parameter fits</h2>
+<p class="p">The names are from LinkedIn Help, <a href="https://www.linkedin.com/help/lms/answer/a5968064">URL tracking parameters in Campaign Manager</a> and <a href="https://www.linkedin.com/help/lms/answer/a8323033">Changes to campaign hierarchy in Campaign Manager</a>, read on 2026-11-25. The last column is our mapping, and the one this builder uses.</p>
+<table class="cmp" style="overflow-wrap:anywhere"><thead><tr><th>New parameter</th><th>Old parameter</th><th>UTM tag</th></tr></thead><tbody><tr><th scope="row"><code>{{CAMPAIGN_NAME}}</code></th><td><code>{{CAMPAIGN_GROUP_NAME}}</code></td><td><code>utm_campaign</code></td></tr><tr><th scope="row"><code>{{CAMPAIGN_ID}}</code></th><td><code>{{CAMPAIGN_GROUP_ID}}</code></td><td><code>utm_campaign</code>, if the campaign name is off</td></tr><tr><th scope="row"><code>{{AD_SET_NAME}}</code></th><td><code>{{CAMPAIGN_NAME}}</code></td><td><code>utm_campaign</code> if both campaign boxes are off, or <code>utm_content</code> if both ad boxes are off</td></tr><tr><th scope="row"><code>{{AD_SET_ID}}</code></th><td><code>{{CAMPAIGN_ID}}</code></td><td>The same as the ad set name, if that is off</td></tr><tr><th scope="row"><code>{{AD_NAME}}</code></th><td><code>{{CREATIVE_NAME}}</code></td><td><code>utm_content</code></td></tr><tr><th scope="row"><code>{{AD_ID}}</code></th><td><code>{{CREATIVE_ID}}</code></td><td><code>utm_content</code>, if the ad name is off</td></tr><tr><th scope="row"><code>{{ACCOUNT_NAME}}</code></th><td><code>{{ACCOUNT_NAME}}</code></td><td>None, sent as <code>account_name</code></td></tr><tr><th scope="row"><code>{{ACCOUNT_ID}}</code></th><td><code>{{ACCOUNT_ID}}</code></td><td>None, sent as <code>account_id</code></td></tr></tbody></table>
+<p class="p">There is no keyword in LinkedIn&rsquo;s list, so the builder leaves <code>utm_term</code> out. If you tick both the name and the ID of one level, the ID is sent under its own key, such as <code>campaign_id</code>.</p>
+<p class="p">A name is easy to read in a report, but a campaign that is renamed becomes a new row. An ID stays the same and has to be looked up. LinkedIn&rsquo;s pages do not say how spaces or symbols in a name are written into the URL, so plain names such as <code>demo-cfo-q4</code> are the safe choice.</p>
+<h2>Where to paste it in Campaign Manager</h2>
+<ol class="post-list"><li>Copy the parameter string, with no question mark in front.</li><li>Create an ad set. Adding URL tracking parameters for the ads in it is one of the optional steps. If your account still has the old names, this is a campaign.</li><li>Paste the string into the URL tracking parameters and save.</li><li>Keep the landing page URL in the ad itself free of the same tags.</li><li>Click through from an ad and check that the tags are still in the address bar once the page has loaded. A redirect on your own site can drop them.</li></ol>
+<p class="p">LinkedIn&rsquo;s help page shows a dynamic value under the key <code>campaign_id</code>, and has no example with a UTM key. Its API docs do show <code>utm_campaign</code> filled with <code>CAMPAIGN_NAME</code>, though still with the old level names. So test one ad before you roll the string out. If Campaign Manager does not accept it, type the campaign name in place of the part in curly brackets.</p>
+<p class="p">The API docs also say dynamic tracking does not support Conversation Ads and Message Ads. For those, put a fully tagged link in the message. The <a href="/tools/utm-builder">UTM builder</a> makes one.</p>
+<h2>A worked example</h2>
+<p class="p">With the defaults above, the string is <code>utm_source=linkedin&amp;utm_medium=paid_social&amp;utm_campaign={{CAMPAIGN_NAME}}&amp;utm_content={{AD_ID}}</code>.</p>
+<p class="p">If the landing page is <code>https://example.com/pricing</code>, the campaign is named <code>demo-cfo-q4</code> and the ad ID is <code>123456789</code>, the visitor lands on <code>https://example.com/pricing?utm_source=linkedin&amp;utm_medium=paid_social&amp;utm_campaign=demo-cfo-q4&amp;utm_content=123456789</code>. These values are invented. With first-party cookies on, LinkedIn also adds a <code>li_fat_id</code> (LinkedIn Help, <a href="https://www.linkedin.com/help/lms/answer/a476761">Troubleshoot implementing first-party cookies on your website</a>, read on 2026-11-25). The preview leaves it out because its value only exists for a real click.</p>
+<h2>What Virling reads from these tags</h2>
+<p class="p">Virling reads <code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code>, <code>utm_content</code> and <code>utm_term</code> from the landing URL to find the channel and campaign, and not the <code>li_fat_id</code>. It only checks whether a <code>li_fat_id</code> is there, so that a Direct visit can be labelled a shared link. Parameters sent under their own name, such as <code>account_id</code>, are for other tools: Virling does not store them.</p>
+<p class="p">The builder defaults to <code>utm_medium=paid_social</code> so the visit is Paid. The values <code>cpc</code>, <code>ppc</code>, <code>paid</code>, <code>paidsearch</code>, <code>paid_social</code> and <code>paidsocial</code> all count as Paid and are checked before the referrer. Without one of them, a click from linkedin.com is sorted as Social, next to your unpaid posts. The full rules are in <a href="https://docs.virling.com/attribution/channels">how channels are decided</a>.</p>
+<p class="p">The campaign tag is the one to get right, because Virling groups revenue by it. The <a href="/tools/utm-naming-template">UTM naming convention template</a> helps you keep one style; it writes the medium as <code>paidsocial</code>, which is Paid too, so pick one of the two. <a href="/blog/linkedin-ads-revenue-tracking">LinkedIn Ads revenue tracking</a> goes from the tag to the payment, <a href="/blog/linkedin-revenue-tracking">LinkedIn revenue tracking</a> covers unpaid posts, and <a href="/blog/b2b-saas-attribution">B2B SaaS attribution</a> covers payments that come months after the click.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>LinkedIn dynamic UTM parameters FAQ</h2>
+    <div class="faq-list">
+      <div><h3>Can LinkedIn fill in utm_campaign with the campaign name?</h3><p class="p">LinkedIn's API docs show <code>utm_campaign</code> filled with CAMPAIGN_NAME. The Campaign Manager help page shows dynamic values under keys such as <code>campaign_id</code> and has no utm_campaign example, so save it and test one ad. If it is not accepted, type the campaign name as a fixed value.</p></div>
+      <div><h3>Which dynamic parameters does LinkedIn support?</h3><p class="p">The new list is ACCOUNT_ID, ACCOUNT_NAME, CAMPAIGN_ID, CAMPAIGN_NAME, AD_SET_ID, AD_SET_NAME, AD_ID and AD_NAME. Each one goes in capital letters between double curly brackets, such as <code>{{CAMPAIGN_ID}}</code>. An account that has not switched yet still shows campaign group and creative names.</p></div>
+      <div><h3>Why did CAMPAIGN_NAME change meaning?</h3><p class="p">Starting in October 2025, LinkedIn renamed campaign groups to campaigns and campaigns to ad sets. In the new naming CAMPAIGN_NAME is the name of what was a campaign group, and AD_SET_NAME is the name of what was a campaign.</p></div>
+      <div><h3>Where do I add URL parameters in Campaign Manager?</h3><p class="p">LinkedIn lists an optional step to add URL tracking parameters while you create an ad set, and says dynamic parameters can be added at the account or campaign level. Paste the string without a question mark in front.</p></div>
+      <div><h3>Which utm_medium should LinkedIn ads use?</h3><p class="p">Use a medium your analytics counts as paid. Virling counts <code>paid_social</code>, <code>paidsocial</code>, <code>paid</code>, <code>cpc</code>, <code>ppc</code> and <code>paidsearch</code> as Paid. With <code>social</code>, a click from linkedin.com is Social, next to your unpaid posts.</p></div>
+      <div><h3>Does Virling read the li_fat_id?</h3><p class="p">Virling reads the UTM tags to find the channel and campaign, not the li_fat_id. It only checks whether a li_fat_id is there, so a Direct visit can be labelled a shared link. Leave it on the URL for LinkedIn.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Can LinkedIn fill in utm_campaign with the campaign name?", "acceptedAnswer": {"@type": "Answer", "text": "LinkedIn's API docs show utm_campaign filled with CAMPAIGN_NAME. The Campaign Manager help page shows dynamic values under keys such as campaign_id and has no utm_campaign example, so save it and test one ad. If it is not accepted, type the campaign name as a fixed value."}}, {"@type": "Question", "name": "Which dynamic parameters does LinkedIn support?", "acceptedAnswer": {"@type": "Answer", "text": "The new list is ACCOUNT_ID, ACCOUNT_NAME, CAMPAIGN_ID, CAMPAIGN_NAME, AD_SET_ID, AD_SET_NAME, AD_ID and AD_NAME. Each one goes in capital letters between double curly brackets, such as {{CAMPAIGN_ID}}. An account that has not switched yet still shows campaign group and creative names."}}, {"@type": "Question", "name": "Why did CAMPAIGN_NAME change meaning?", "acceptedAnswer": {"@type": "Answer", "text": "Starting in October 2025, LinkedIn renamed campaign groups to campaigns and campaigns to ad sets. In the new naming CAMPAIGN_NAME is the name of what was a campaign group, and AD_SET_NAME is the name of what was a campaign."}}, {"@type": "Question", "name": "Where do I add URL parameters in Campaign Manager?", "acceptedAnswer": {"@type": "Answer", "text": "LinkedIn lists an optional step to add URL tracking parameters while you create an ad set, and says dynamic parameters can be added at the account or campaign level. Paste the string without a question mark in front."}}, {"@type": "Question", "name": "Which utm_medium should LinkedIn ads use?", "acceptedAnswer": {"@type": "Answer", "text": "Use a medium your analytics counts as paid. Virling counts paid_social, paidsocial, paid, cpc, ppc and paidsearch as Paid. With social, a click from linkedin.com is Social, next to your unpaid posts."}}, {"@type": "Question", "name": "Does Virling read the li_fat_id?", "acceptedAnswer": {"@type": "Answer", "text": "Virling reads the UTM tags to find the channel and campaign, not the li_fat_id. It only checks whether a li_fat_id is there, so a Direct visit can be labelled a shared link. Leave it on the URL for LinkedIn."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which LinkedIn campaign brings paying customers</h2>
+<p class="p">This tool writes the tags. Virling measures what they bring: it links every visit to the payment it led to, so you see the customers and revenue behind each campaign from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("li"), msg = document.getElementById("li-msg"), paramsOut = document.getElementById("li-params"), previewOut = document.getElementById("li-preview"), copies = document.querySelectorAll("[data-copy]");
+const EX = { "campaign:NAME": "demo-cfo-q4", "campaign:ID": "600000001", "ad_set:NAME": "finance-leads", "ad_set:ID": "200000002", "ad:NAME": "short-video", "ad:ID": "123456789", "account:NAME": "example-co", "account:ID": "500000003" };
+const OLD = { campaign: "campaign_group", ad_set: "campaign", ad: "creative", account: "account" };
+const FIT = { utm_campaign: ["campaign:NAME", "campaign:ID", "ad_set:NAME", "ad_set:ID"], utm_content: ["ad:NAME", "ad:ID", "ad_set:NAME", "ad_set:ID"] };
+const PAID = ["cpc", "ppc", "paid", "paidsearch", "paid_social", "paidsocial"];
+const clean = (v) => v.trim().toLowerCase().replace(/\s+/g, "-");
+const key = (p) => { const [level, kind] = p.split(":"); return `${f.old.checked ? OLD[level] : level}_${kind.toLowerCase()}`; };
+const token = (p) => `{{${key(p).toUpperCase()}}}`;
+const read = () => {
+  const raw = f.url.value.trim(), source = clean(f.source.value), medium = clean(f.medium.value);
+  let u;
+  try { u = new URL(raw); } catch { u = null; }
+  if (!u || !/^https?:$/.test(u.protocol) || !u.hostname.includes(".")) return { err: "Fill in a full landing page URL, starting with https://" };
+  if (/[{}]/.test(raw)) return { err: "Remove the { } parameters from the landing page URL. The builder adds them to the string." };
+  if (!source) return { err: "Fill in a source, such as linkedin." };
+  if (!medium) return { err: "Fill in a medium, such as paid_social." };
+  if (!/^[a-z0-9_-]+$/.test(source + medium)) return { err: "Use only letters, numbers, hyphens and underscores in the source and medium." };
+  const left = new Set([...f.querySelectorAll("[name=dp]:checked")].map((b) => b.value)), tags = [["utm_source", source], ["utm_medium", medium]];
+  let taken;
+  for (const [tag, list] of Object.entries(FIT)) {
+    const p = list.find((x) => left.has(x) && x.split(":")[0] !== taken);
+    if (p) { tags.push([tag, token(p), EX[p]]); left.delete(p); taken = p.split(":")[0]; }
+  }
+  for (const p of left) tags.push([key(p), token(p), EX[p]]);
+  const params = tags.map((t) => t[0] + "=" + t[1]).join("&");
+  const base = new URL(u);
+  base.hash = "";
+  const href = base.href.replace(/[?#]+$/, "");
+  const preview = href + (href.includes("?") ? "&" : "?") + tags.map((t) => t[0] + "=" + (t[2] || t[1])).join("&") + u.hash;
+  const twice = [...tags.map((t) => t[0]), "li_fat_id"].filter((k) => u.searchParams.has(k)), notes = [];
+  if (twice.length) notes.push(`Your landing page URL already has ${twice.join(", ")}. Remove ${twice.length > 1 ? "them" : "it"} from the URL so nothing is sent twice.`);
+  if (u.hash) notes.push("Your landing page URL has a # part. Tags after a # are not read, so test the ad before you rely on it.");
+  if (!tags.some((t) => t[0] === "utm_campaign")) notes.push("There is no utm_campaign. Tick a campaign or ad set parameter to see which campaign a click came from.");
+  if (!PAID.includes(medium)) notes.push("Virling does not count this medium as Paid. Use paid_social for LinkedIn ads.");
+  return { params, preview, notes };
+};
+const build = () => {
+  const r = read();
+  f.querySelectorAll("[data-dp]").forEach((s) => {
+    const name = key(s.dataset.dp).replace(/_/g, " ").replace(/\bid$/, "ID");
+    s.firstChild.data = name[0].toUpperCase() + name.slice(1) + " ";
+    s.lastChild.textContent = token(s.dataset.dp);
+  });
+  msg.textContent = r.err || r.notes.join(" ");
+  paramsOut.textContent = r.err ? "" : r.params;
+  previewOut.textContent = r.err ? "" : r.preview;
+  copies.forEach((b) => (b.disabled = !!r.err));
+};
+f.addEventListener("input", build);
+f.addEventListener("submit", (e) => e.preventDefault());
+copies.forEach((b) => {
+  const label = b.textContent;
+  b.addEventListener("click", async () => { try { await navigator.clipboard.writeText(document.getElementById(b.dataset.copy).textContent); b.textContent = "Copied"; } catch { b.textContent = "Copy blocked"; } setTimeout(() => (b.textContent = label), 1500); });
+});
+build();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
