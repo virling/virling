@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Django Paddle UTM tracking: pass the visitor ID to checkout</title>
+<meta name="description" content="Django Paddle UTM tracking: read the virling_vid cookie in a view, pass it to Paddle Checkout as custom data with json_script, and test it in the sandbox.">
+<link rel="canonical" href="https://virling.com/blog/django-paddle-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/django-paddle-utm-tracking">
+<meta property="og:title" content="Django Paddle UTM tracking: pass the visitor ID to checkout">
+<meta property="og:description" content="Django Paddle UTM tracking: read the virling_vid cookie in a view, pass it to Paddle Checkout as custom data with json_script, and test it in the sandbox.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Django Paddle UTM tracking: pass the visitor ID to checkout","item":"https://virling.com/blog/django-paddle-utm-tracking"}]},{"@type":"BlogPosting","headline":"Django Paddle UTM tracking: pass the visitor ID to checkout","description":"Django Paddle UTM tracking: read the virling_vid cookie in a view, pass it to Paddle Checkout as custom data with json_script, and test it in the sandbox.","datePublished":"2026-11-25","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/django-paddle-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Paddle checkout in Django?","acceptedAnswer":{"@type":"Answer","text":"Pass the Virling visitor ID instead. Read it with request.COOKIES.get('virling_vid') in a view, hand it to the template with json_script, and set it as virling_vid in customData when Paddle.js opens checkout. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them."}},{"@type":"Question","name":"How do I pass Django data to Paddle.js safely?","acceptedAnswer":{"@type":"Answer","text":"Put it in a dictionary in the view and print it with the json_script filter, then read it in JavaScript with JSON.parse on the textContent of that element. Django escapes the HTML characters, so a changed cookie cannot close the script tag. Do not use the safe filter, and send only values the buyer may see."}},{"@type":"Question","name":"Do I need a Python package for Paddle in Django?","acceptedAnswer":{"@type":"Answer","text":"No. The overlay checkout needs only Paddle.js, and a server-created transaction is one POST request, which urllib from the standard library can send. If you use a package, set custom_data on the transaction it creates."}},{"@type":"Question","name":"Why is request.COOKIES.get('virling_vid') None in my Django view?","acceptedAnswer":{"@type":"Answer","text":"On a visitor's first page the script has not set the cookie yet, so that request does not carry it. It is also None in a Celery task or a webhook, with cookieless mode, or when the script is blocked. In the browser, window.virling?.vid?.() returns the ID once the script has run."}},{"@type":"Question","name":"Which channel do Paddle renewals get?","acceptedAnswer":{"@type":"Answer","text":"The channel of the customer's first payment, matched by Paddle customer ID. Renewals and plan changes need no code in your Django app."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-25</span>
+      <h1>Django Paddle UTM tracking: pass the visitor ID to checkout</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-25.</p>
+<p class="p"><b>Django Paddle UTM tracking</b> comes down to one value. Load the Virling script in your base template, read the <code>virling_vid</code> cookie with <code>request.COOKIES.get("virling_vid")</code> in a view, and pass it to Paddle Checkout as <code>customData</code>. Paddle keeps it in the transaction's <code>custom_data</code>, and Virling joins the payment to every visit behind that ID, with the UTM tags of each.</p>
+<p class="p">This post covers Paddle Billing with the overlay checkout and with transactions your server creates. For hosted checkout, see <a href="/blog/paddle-checkout-utm-parameters">Paddle checkout UTM parameters</a>. Other stacks are in <a href="/blog/django-stripe-utm-tracking">Django Stripe UTM tracking</a> and <a href="/blog/rails-paddle-utm-tracking">Rails Paddle UTM tracking</a>.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Why Paddle checkout loses your UTM tags</h2>
+<p class="p">UTM tags are on the landing URL, and buyers often open checkout from a later page. Paddle stores what you hand it: its docs list capturing UTM information as a use for custom data (source: <a href="https://developer.paddle.com/build/transactions/custom-data">Paddle, Work with custom data</a>). Passing one visitor ID instead of copied tags also keeps earlier visits and untagged ones, such as search and referrals.</p>
+<h2>Step 1: add the scripts to the base template</h2>
+<p class="p">Put these lines before <code>&lt;/head&gt;</code>. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<div class="code block"><pre data-snippet>{# templates/base.html #}
+&lt;script defer src="https://app.virling.com/v.js"
+  data-site="yourdomain.com"&gt;&lt;/script&gt;
+&lt;script src="https://cdn.paddle.com/paddle/v2/paddle.js"&gt;&lt;/script&gt;
+{% block head %}{% endblock %}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The Virling script sets the first-party <code>virling_vid</code> cookie on your domain and records each visit against it. Add the Paddle values to your settings. The client-side token is made for the browser; the API key is not. The API URL and key are only for the server-created transaction below.</p>
+<div class="code block"><pre data-snippet># settings.py
+import os
+
+PADDLE_CLIENT_TOKEN = os.environ["PADDLE_CLIENT_TOKEN"]
+PADDLE_PRICE_ID = os.environ["PADDLE_PRICE_ID"]
+PADDLE_API_URL = os.environ.get("PADDLE_API_URL")
+PADDLE_API_KEY = os.environ.get("PADDLE_API_KEY")</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>Step 2: read the cookie in a view</h2>
+<p class="p">The script sets a plain cookie, so read <code>request.COOKIES</code>, not <code>get_signed_cookie()</code>.</p>
+<div class="code block"><pre data-snippet># billing/views.py
+from django.conf import settings
+from django.shortcuts import render
+from django.views.decorators.cache import never_cache
+
+
+@never_cache
+def pricing(request):
+    paddle = {
+        "token": settings.PADDLE_CLIENT_TOKEN,
+        "priceId": settings.PADDLE_PRICE_ID,
+        "vid": request.COOKIES.get("virling_vid"),
+    }
+    return render(request, "pricing.html", {"paddle": paddle})</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The page now holds one visitor's ID, so <code>never_cache</code> keeps shared caches from serving it to someone else. Map it with <code>path("pricing/", views.pricing, name="pricing")</code>.</p>
+<h2>Step 3: print it as safe JSON</h2>
+<div class="code block"><pre data-snippet>{# templates/pricing.html #}
+{% extends "base.html" %}
+{% load static %}
+
+{% block head %}
+{{ paddle|json_script:"paddle-config" }}
+&lt;script defer src="{% static 'checkout.js' %}"&gt;&lt;/script&gt;
+{% endblock %}
+
+{% block content %}
+&lt;button type="button" id="subscribe"&gt;Subscribe&lt;/button&gt;
+{% endblock %}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">A cookie is input: its owner can set it to anything. <code>json_script</code> writes the dictionary into a <code>&lt;script type="application/json"&gt;</code> tag and escapes <code>&lt;</code>, <code>&gt;</code> and <code>&amp;</code>, so a value cannot close the tag (source: <a href="https://docs.djangoproject.com/en/stable/ref/templates/builtins/#json-script">Django, json_script</a>). Do not build the JavaScript with <code>{{ paddle|safe }}</code>. Everything in the dictionary is readable in the page source, so keep the API key out of it.</p>
+<h2>Step 4: open the overlay checkout</h2>
+<div class="code block"><pre data-snippet>// static/checkout.js
+const config = JSON.parse(
+  document.getElementById("paddle-config").textContent
+);
+if (config.token.startsWith("test_")) {
+  Paddle.Environment.set("sandbox");
+}
+Paddle.Initialize({ token: config.token });
+
+document.getElementById("subscribe").addEventListener("click", () =&gt; {
+  const vid = window.virling?.vid?.() || config.vid;
+  Paddle.Checkout.open({
+    items: [{ priceId: config.priceId, quantity: 1 }],
+    ...(vid &amp;&amp; { customData: { virling_vid: vid } }),
+  });
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The ID from the browser comes first, because a visitor's first page request has no cookie yet. The one from Django is the fallback. Paddle requires <code>customData</code> to hold at least one key, so the code leaves it out when there is no ID (source: <a href="https://developer.paddle.com/paddle-js/methods/paddle-checkout-open">Paddle.Checkout.open</a>). An inline checkout takes the same <code>customData</code>.</p>
+<h2>Or create the transaction on your server</h2>
+<p class="p">If Django creates the transaction, set <code>custom_data</code> on it. This uses only the standard library:</p>
+<div class="code block"><pre data-snippet># billing/views.py
+import json
+from urllib.request import Request, urlopen
+
+from django.conf import settings
+from django.shortcuts import redirect
+from django.views.decorators.http import require_POST
+
+
+@require_POST
+def checkout(request):
+    body = {"items": [{"price_id": settings.PADDLE_PRICE_ID, "quantity": 1}]}
+    vid = request.COOKIES.get("virling_vid")
+    if vid:
+        body["custom_data"] = {"virling_vid": vid}
+
+    api_request = Request(
+        f"{settings.PADDLE_API_URL}/transactions",
+        data=json.dumps(body).encode(),
+        headers={
+            "Authorization": f"Bearer {settings.PADDLE_API_KEY}",
+            "Content-Type": "application/json",
+        },
+    )
+    with urlopen(api_request, timeout=10) as response:
+        transaction = json.load(response)["data"]
+    return redirect(transaction["checkout"]["url"])</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Add <code>path("checkout/", views.checkout, name="checkout")</code> and post to it from the template, in place of the button:</p>
+<div class="code block"><pre data-snippet>&lt;form action="{% url 'checkout' %}" method="post"&gt;
+  {% csrf_token %}
+  &lt;button type="submit"&gt;Subscribe&lt;/button&gt;
+&lt;/form&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">With the form there is no <code>#subscribe</code> button, so remove the click listener from <code>checkout.js</code> and keep <code>Paddle.Initialize</code>. <code>PADDLE_API_URL</code> is <code>https://api.paddle.com</code>, or <code>https://sandbox-api.paddle.com</code> for the sandbox. This key needs <code>transaction.write</code> (source: <a href="https://developer.paddle.com/api-reference/transactions/create-transaction">Paddle, Create a transaction</a>), so keep it apart from the read-only key you give Virling. <code>checkout.url</code> is your default payment link with <code>?_ptxn=</code> and the transaction ID, and Paddle.js on that page opens the checkout (source: <a href="https://developer.paddle.com/build/transactions/pass-transaction-checkout">Paddle, Pass a transaction to a checkout</a>). Set the link to a page that runs <code>checkout.js</code> with its config, such as <code>/pricing/</code>.</p>
+<p class="p">Create the transaction in the request the buyer sends. A Celery task or a webhook view has no cookie to read.</p>
+<h2>What a renewal is credited to</h2>
+<p class="p">A renewal is credited to the channel of the customer's first payment, matched by Paddle customer ID, and so is a plan change. Paddle also copies a subscription's custom data to the transactions created from it. When the first payment has a channel, the renewal takes that one, whatever the copied ID says.</p>
+<p class="p">A made-up example: a buyer clicks a newsletter link tagged <code>utm_medium=email</code> in May and pays $40. In June they visit from a Google result, and the plan renews the next day. Both payments, $80 in all, are credited to <b>Email</b>.</p>
+<p class="p">Two limits. The first import reads 90 days, so renewals of older subscriptions are usually Unattributed. And a free trial is recorded only from a $0 subscription transaction of origin <code>web</code>, the origin of checkouts Paddle.js creates. Transactions your server creates have origin <code>api</code>, so open trials with the overlay from step 4. More is in <a href="https://docs.virling.com/attribution/renewals">renewals</a> and on <a href="/integrations/paddle-saas">Paddle for SaaS</a>.</p>
+<h2>Test it in the sandbox</h2>
+<ol class="post-list"><li>In Virling, connect a sandbox API key that starts with <code>pdl_sdbx_</code>, with the permissions in the <a href="https://docs.virling.com/payments/paddle">Paddle docs</a>.</li><li>Give Django the sandbox token, which starts with <code>test_</code>, and the sandbox API key, API URL and price ID. Sandbox and live accounts share none of these. Set the sandbox default payment link too.</li><li>Run the app on your domain or a subdomain, such as <code>staging.yourdomain.com</code>, and add that host to <code>ALLOWED_HOSTS</code>. Visits on <code>localhost</code> are not recorded for your site.</li><li>Open a private window at <code>https://staging.yourdomain.com/pricing/?utm_source=test&amp;utm_medium=email</code>, press Subscribe, and pay with <code>4242 4242 4242 4242</code> and a future date (source: <a href="https://developer.paddle.com/sdks/sandbox">Paddle, Sandbox</a>).</li><li>In Paddle, check that the transaction's custom data lists <code>virling_vid</code>, with the ID that <code>window.virling.vid()</code> returns in the browser console.</li><li>Wait a minute for the next sync, then open <code>/app/yourdomain.com/payments</code>. The payment shows the <code>test</code> source and the <b>Email</b> channel.</li></ol>
+<p class="p">Sandbox payments stay in your reports after you replace the key with a live one. If a step fails, see <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>.</p>
+<h2>Symptoms, causes and fixes</h2>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">The payment lists no visitor ID</th><td>Checkout opened without <code>customData</code>. The script does not add the ID to Paddle checkouts by itself</td><td>Pass <code>virling_vid</code> in <code>customData</code>, as in step 4</td></tr><tr><th scope="row"><code>vid</code> is <code>null</code> in the JSON on a visitor's first page</th><td>The browser had no cookie when it asked for that page</td><td>Read <code>window.virling?.vid?.()</code> on click and use <code>config.vid</code> as the fallback</td></tr><tr><th scope="row">The view fails with <code>BadSignature</code></th><td><code>get_signed_cookie()</code> was used, and the cookie is plain</td><td>Read <code>request.COOKIES.get("virling_vid")</code></td></tr><tr><th scope="row"><code>config.token</code> is undefined</th><td>The view passed a <code>json.dumps()</code> string, so it was encoded twice</td><td>Pass the dictionary itself to <code>json_script</code></td></tr><tr><th scope="row">A JavaScript syntax error shows <code>&amp;#x27;</code></th><td>The template prints <code>{{ paddle }}</code>, which is an escaped Python dictionary, not JSON</td><td>Use <code>json_script</code> and <code>JSON.parse</code>, as in steps 3 and 4</td></tr><tr><th scope="row">Payments from different buyers share one visitor ID</th><td>A cached page or <code>{% cache %}</code> block served one visitor's <code>vid</code> to buyers with no ID of their own</td><td>Use <code>never_cache</code> on the view and keep <code>json_script</code> out of cached blocks</td></tr><tr><th scope="row">Paddle.js reports a second <code>Initialize</code></th><td>Two templates or scripts call it on one page</td><td>Call it once, in <code>checkout.js</code></td></tr><tr><th scope="row">The page opens with <code>?_ptxn=</code> but no checkout</th><td>The default payment link points to a page without Paddle.js and its token</td><td>Point it to a page that runs <code>checkout.js</code></td></tr><tr><th scope="row">The form answers 403</th><td>The CSRF token is missing</td><td>Add <code>{% csrf_token %}</code> to the form</td></tr><tr><th scope="row">A second test keeps the first test's channel</th><td>Any later payment by the same customer is a renewal</td><td>Use a new email address for each test</td></tr></tbody></table></div>
+<p class="p">Payments without a visitor ID still count toward revenue, as Unattributed. Every other cause is in <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I pass UTM parameters to Paddle checkout in Django?</h3><p class="p">Pass the Virling visitor ID instead. Read it with request.COOKIES.get('virling_vid') in a view, hand it to the template with json_script, and set it as virling_vid in customData when Paddle.js opens checkout. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them.</p>
+<h3>How do I pass Django data to Paddle.js safely?</h3><p class="p">Put it in a dictionary in the view and print it with the json_script filter, then read it in JavaScript with JSON.parse on the textContent of that element. Django escapes the HTML characters, so a changed cookie cannot close the script tag. Do not use the safe filter, and send only values the buyer may see.</p>
+<h3>Do I need a Python package for Paddle in Django?</h3><p class="p">No. The overlay checkout needs only Paddle.js, and a server-created transaction is one POST request, which urllib from the standard library can send. If you use a package, set custom_data on the transaction it creates.</p>
+<h3>Why is request.COOKIES.get('virling_vid') None in my Django view?</h3><p class="p">On a visitor's first page the script has not set the cookie yet, so that request does not carry it. It is also None in a Celery task or a webhook, with cookieless mode, or when the script is blocked. In the browser, window.virling?.vid?.() returns the ID once the script has run.</p>
+<h3>Which channel do Paddle renewals get?</h3><p class="p">The channel of the customer's first payment, matched by Paddle customer ID. Renewals and plan changes need no code in your Django app.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring Paddle revenue</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
