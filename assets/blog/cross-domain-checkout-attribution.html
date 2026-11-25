@@ -50,6 +50,8 @@
 <h2>Why the source gets lost</h2>
 <p class="p">Your analytics script sets a first-party cookie on your domain. When the buyer moves to checkout.stripe.com, a hosted Paddle checkout or a store on another domain, that cookie does not travel with them. The provider records who paid. Your analytics records a visit that ended at checkout. Nothing connects the two, so the sale lands in Direct or stays unattributed.</p>
 <p class="p">The fix depends on where checkout lives. There are three cases.</p>
+<p class="p">When a checkout drops the visitor ID, Virling tells you under its main numbers: what share of revenue is matched to a visit, and how many payments arrived with no ID.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
 <h2 id="case-1">Case 1: checkout on a subdomain</h2>
 <p class="p">If visitors move from example.com to app.example.com or shop.example.com, you may have nothing to do. A first-party cookie set on the registrable domain, example.com, is shared with its subdomains, so the visitor keeps the same ID. Check that the same script runs on both and that your tool counts them as one site.</p>
 <h2 id="case-2">Case 2: checkout hosted by your payment provider</h2>
