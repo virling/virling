@@ -53,7 +53,7 @@
   <label>Subscription extra (%)<input name="subx" type="number" min="0" step="0.1" value="0"></label>
 </form>
 <div class="tool-stats" id="fees-out"></div>
-<p class="fine-note">Checked on 2026-11-23 on <a href="https://www.creem.io/pricing">Creem's pricing page</a>: the pay as you go plan is 3.9% + 40&cent; per successful transaction, with no international card fees, no monthly fee and no setup fee. The Partner plan has custom pricing. Enter your price before tax. Rates change, so check the page before you decide.</p>
+<p class="fine-note">Checked on 2026-11-25 on <a href="https://www.creem.io/pricing">Creem's pricing page</a>: the pay as you go plan is 3.9% + 40&cent; per successful transaction, with no international card fees, no monthly fee and no setup fee. The Partner plan has custom pricing. Enter your price before tax. Rates change, so check the page before you decide.</p>
 <div class="txt post tool-cta">
 <h2>See which channels bring the sales behind those fees</h2>
 <p class="p">Virling reads your Creem payments with a scoped API key and credits each one to the visit that led to it, so you see which posts, searches and AI answers bring paying customers. Virling is open source under AGPLv3: self-host it free, or start a 14-day hosted trial.</p>
@@ -65,6 +65,15 @@
 <p class="p">One sale at Creem's pay as you go rates from <a href="https://www.creem.io/pricing">its pricing page</a>: 3.9% + 40 cents, with no extra for international cards or subscriptions.</p>
 <table class="cmp"><thead><tr><th>Sale</th><th>Rate on this sale</th><th>Creem fee</th><th>Share of price</th><th>You keep</th></tr></thead><tbody><tr><th scope="row">$50 one-time sale, US buyer</th><td>3.9% + $0.40</td><td>$2.35</td><td>4.7%</td><td>$47.65</td></tr><tr><th scope="row">$20 monthly subscription, US buyer</th><td>3.9% + $0.40</td><td>$1.18</td><td>5.9%</td><td>$18.82</td></tr><tr><th scope="row">$50 one-time sale, international buyer</th><td>3.9% + $0.40</td><td>$2.35</td><td>4.7%</td><td>$47.65</td></tr></tbody></table>
 <p class="p">The rate is the same for every buyer, so the 40 cents is what moves the share: a $20 subscription costs 5.9% of the price, a $50 one-time product 4.7%. At 100 sales a month of a $20 subscription, Creem's fees come to $118.00 and the payout to $1,882.00.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>What you keep on Creem at common prices</h2>
+<p class="p">One sale at the calculator's default rates, 3.9% + 40 cents, read on 2026-11-25 on <a href="https://www.creem.io/pricing">Creem's pricing page</a>. At those defaults one-time sales and subscriptions, and US and international buyers, cost the same. Fees are rounded to the cent.</p>
+<table class="cmp"><thead><tr><th>Price</th><th>Creem fee</th><th>Share of price</th><th>You keep</th></tr></thead><tbody><tr><th scope="row">$5</th><td>$0.60</td><td>11.9%</td><td>$4.40</td></tr><tr><th scope="row">$10</th><td>$0.79</td><td>7.9%</td><td>$9.21</td></tr><tr><th scope="row">$29</th><td>$1.53</td><td>5.3%</td><td>$27.47</td></tr><tr><th scope="row">$49</th><td>$2.31</td><td>4.7%</td><td>$46.69</td></tr><tr><th scope="row">$99</th><td>$4.26</td><td>4.3%</td><td>$94.74</td></tr><tr><th scope="row">$299</th><td>$12.06</td><td>4.0%</td><td>$286.94</td></tr></tbody></table>
+<p class="p">At $29 a subscription sold to a US buyer costs $1.53 on Creem, $1.71 on <a href="/tools/dodo-payments-fee-calculator">Dodo Payments</a> and $1.95 on <a href="/tools/paddle-fee-calculator">Paddle</a>. The <a href="/tools/merchant-of-record-fee-calculator">merchant of record fee calculator</a> compares them for a whole month of sales.</p>
+<h2>Why the 40 cents hurts small prices</h2>
+<p class="p">The 3.9% grows with the price; the 40 cents does not. On a $5 sale 40 cents is 8% of the price, so the whole fee is 11.9%. On a $99 sale it is 0.4%, and the whole fee is 4.3%. Billing less often helps: twelve $5 monthly charges pay the 40 cents twelve times, $4.80 a year, while one $60 annual charge pays it once.</p>
+<p class="p">To find the price that leaves a target amount, add the fixed fee to the target and divide by 1 minus the rate: price = (target + 0.40) / (1 - 0.039). To keep $25.00 that is 25.40 / 0.961, or $26.43. The fee on it is $1.43.</p>
   </div></div></section>
   <section class="band"><div class="wrap"><div class="txt post">
 <h2>More on Creem and payment fees</h2>
