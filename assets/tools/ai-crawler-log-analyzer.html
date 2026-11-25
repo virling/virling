@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI crawler log analyzer: GPTBot and ClaudeBot hits | Virling</title>
+<meta name="description" content="Paste access log lines or choose a file to count hits per AI crawler, with top pages, status codes, first and last seen, and a CSV. Runs in your browser.">
+<link rel="canonical" href="https://virling.com/tools/ai-crawler-log-analyzer">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/ai-crawler-log-analyzer">
+<meta property="og:title" content="AI crawler log analyzer: GPTBot and ClaudeBot hits | Virling">
+<meta property="og:description" content="Paste access log lines or choose a file to count hits per AI crawler, with top pages, status codes, first and last seen, and a CSV. Runs in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"AI crawler log analyzer","url":"https://virling.com/tools/ai-crawler-log-analyzer","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"AI crawler log analyzer","item":"https://virling.com/tools/ai-crawler-log-analyzer"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+<style>
+.tool.al { max-width: 1100px; }
+.al-scroll { overflow-x: auto; }
+.al-scroll .cmp { min-width: 900px; font-size: 14px; }
+.al-scroll .cmp th, .al-scroll .cmp td { padding: 8px; overflow-wrap: anywhere; }
+.post .al-scroll .cmp { min-width: 700px; }
+#al-out h2 { margin: 12px 0; font-size: 22px; }
+#al-out details { margin: 8px 0; }
+#al-out summary { padding: 8px 0; font-weight: 600; cursor: pointer; }
+.al-bad li { overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / ai crawler log analyzer</span><h1>AI crawler log analyzer</h1><p class="lead">Paste lines from your access log, or choose the file, and this AI crawler log analyzer counts the hits from GPTBot, ClaudeBot, PerplexityBot and other AI crawlers. For each one you get its top pages, its status codes and when it was first and last seen, with a CSV download. The log is read in your browser and is not uploaded.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool al">
+<form class="tool-form" id="al" autocomplete="off">
+  <label class="wide">Access log lines <span class="dim">common or combined format, up to 200,000 lines, made-up example lines shown</span><textarea name="log" rows="9" wrap="off" spellcheck="false" autocapitalize="off">192.0.2.10 - - [02/Nov/2026:08:15:02 +0000] "GET /pricing HTTP/1.1" 200 5120 "-" "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; GPTBot/1.2; +https://openai.com/gptbot"
+192.0.2.10 - - [02/Nov/2026:08:15:09 +0000] "GET /old-guide HTTP/1.1" 404 312 "-" "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; GPTBot/1.2; +https://openai.com/gptbot"
+198.51.100.7 - - [02/Nov/2026:09:40:31 +0000] "GET /blog/setup?page=2 HTTP/1.1" 200 8841 "-" "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; ClaudeBot/1.0; +claudebot@anthropic.com)"
+203.0.113.24 - - [02/Nov/2026:10:02:44 +0000] "GET /pricing HTTP/1.1" 200 5120 "https://example.com/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0"
+198.51.100.7 - - [03/Nov/2026:01:20:00 +0530] "GET /blog/setup HTTP/1.1" 200 8841 "-" "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; ClaudeBot/1.0; +claudebot@anthropic.com)"
+192.0.2.10 - - [03/Nov/2026:07:55:18 +0000] "GET /pricing HTTP/1.1" 200 5120 "-" "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; GPTBot/1.2; +https://openai.com/gptbot"
+203.0.113.24 - - [03/Nov/2026:11:30:00 +0000] "GET / HTTP/1.1" 200 2326
+this line is not an access log line</textarea></label>
+  <label class="wide">Or choose a log file <span class="dim">plain text, up to 50 MB, not uploaded</span><input type="file" name="file"></label>
+</form>
+<div class="tool-out"><output id="al-msg"></output><button class="btn sm" type="button" id="al-csv" disabled>Download crawlers CSV</button><button class="btn sm" type="button" id="al-pages" disabled>Download pages CSV</button></div>
+<div class="tool-stats" id="al-sum"></div>
+<div id="al-out" hidden></div>
+<div class="al-bad" id="al-bad"></div>
+<p class="p"><b>Two limits to keep in mind.</b> A user agent can be faked, so each hit is a claim and not proof of who sent it. And a crawl is not a visit from a person: a bot that reads a page cannot buy anything.</p>
+<div class="txt post tool-cta">
+<h2>See crawler hits next to the revenue each assistant sends</h2>
+<p class="p">Virling counts the pages each AI company's crawlers read, next to the visitors and revenue its assistants send you. Virling is open source under AGPLv3: self-host it free, or start a 14-day hosted trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="https://docs.virling.com/track/ai-crawlers">AI crawlers</a> &middot; <a class="lk" href="/demo">See the demo</a></p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>How the AI crawler log analyzer works</h2>
+<ol class="post-list"><li>Each line is read as common or combined log format. Blank lines are skipped. A line in any other shape is counted as not parsed and listed with its line number.</li><li>The user agent is searched for the crawler names in the list below, in any case. A line whose user agent names none of them counts as other traffic.</li><li>Hits are grouped by crawler, then by page. The part of the path after <code>?</code> is dropped, so <code>/blog/setup?page=2</code> counts as <code>/blog/setup</code>.</li><li>Times are converted to UTC with the offset in each line, so lines from servers in different time zones compare correctly. The lines can be in any order.</li><li>One CSV has a row per crawler. The other has a row for every page each crawler asked for, not only the top 10 shown on the page. Neither holds IP addresses.</li></ol>
+<p class="p">Lines are read in small batches, so the page keeps responding on long logs. A large paste is kept in memory and not drawn in the box.</p>
+<h2>Common and combined log format</h2>
+<p class="p">The combined format is the common format with two more fields, the referrer and the user agent:</p>
+<div class="code block"><pre>common:   192.0.2.10 - - [02/Nov/2026:08:15:02 +0000] "GET /pricing HTTP/1.1" 200 5120
+combined: 192.0.2.10 - - [02/Nov/2026:08:15:02 +0000] "GET /pricing HTTP/1.1" 200 5120 "-" "GPTBot/1.2"</pre></div>
+<p class="p">Only the combined format says who asked, so no crawler can be named in a common format line. Those lines are counted apart. Nginx uses the <a href="https://nginx.org/en/docs/http/ngx_http_log_module.html">combined format by default</a>, and the <a href="https://httpd.apache.org/docs/2.4/logs.html#combined">Apache documentation</a> shows how to switch it on. Extra fields after the user agent are ignored, and a virtual host at the start of the line is fine. JSON logs are not read.</p>
+<p class="p">If the log is over 50 MB, keep only the lines that name an AI crawler and load the result. The unnamed traffic is then left out:</p>
+<div class="code block"><pre data-snippet>grep -iE "GPTBot|OAI-SearchBot|ChatGPT-User|ClaudeBot|Claude-(SearchBot|User)|Perplexity(Bot|-User)|Google-Extended|Applebot-Extended|Amazonbot|Amzn-(SearchBot|User)|meta-(externalagent|webindexer|externalfetcher)|DuckAssistBot|CCBot|Bytespider" access.log > ai.log</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>Which AI crawlers it looks for</h2>
+<p class="p">The names match the list in the <a href="/tools/ai-crawler-checker">AI crawler checker</a>, which links the page where each operator documents its bot.</p>
+<table class="cmp"><thead><tr><th>Operator</th><th>Names in the user agent</th></tr></thead><tbody>
+<tr><th scope="row">OpenAI</th><td>GPTBot, OAI-SearchBot, ChatGPT-User</td></tr>
+<tr><th scope="row">Anthropic</th><td>ClaudeBot, Claude-SearchBot, Claude-User</td></tr>
+<tr><th scope="row">Perplexity</th><td>PerplexityBot, Perplexity-User</td></tr>
+<tr><th scope="row">Google</th><td>Google-Extended</td></tr>
+<tr><th scope="row">Apple</th><td>Applebot-Extended</td></tr>
+<tr><th scope="row">Amazon</th><td>Amazonbot, Amzn-SearchBot, Amzn-User</td></tr>
+<tr><th scope="row">Meta</th><td>meta-externalagent, meta-webindexer, meta-externalfetcher</td></tr>
+<tr><th scope="row">DuckDuckGo</th><td>DuckAssistBot</td></tr>
+<tr><th scope="row">Common Crawl</th><td>CCBot</td></tr>
+<tr><th scope="row">ByteDance</th><td>Bytespider</td></tr>
+</tbody></table>
+<p class="p">Google-Extended and Applebot-Extended are robots.txt tokens and not bots that visit, so they should not appear in a log. If one does, look at that line closely.</p>
+<h2>How to read the result</h2>
+<ul class="post-list"><li><b>Training, search and answer bots differ.</b> An answer bot such as ChatGPT-User opens a page because someone asked an assistant. A training bot such as GPTBot collects pages for models. Read them apart.</li><li><b>Many 404 codes.</b> The crawler asks for pages that are gone. Redirect the ones that moved.</li><li><b>Codes 403 or 429.</b> Your server, firewall or CDN turns the bot away, whatever robots.txt says.</li><li><b>Code 304.</b> The page had not changed since the last fetch, so it was not sent again.</li><li><b>Requests for /robots.txt.</b> The crawler is checking your rules. To change them, use the <a href="/tools/ai-robots-txt-generator">robots.txt generator for AI crawlers</a>.</li><li><b>No hits at all.</b> The log may cover a short time, the format may lack the user agent, or a CDN may answer from its cache so the request never reaches your server.</li></ul>
+<h2>A worked example</h2>
+<p class="p">The eight example lines above are made up. They give these two rows:</p>
+<div class="al-scroll" tabindex="0" role="region" aria-label="Worked example"><table class="cmp"><thead><tr><th>Crawler</th><th>Hits</th><th>Status codes</th><th>First seen (UTC)</th><th>Last seen (UTC)</th></tr></thead><tbody>
+<tr><th scope="row">GPTBot</th><td>3</td><td>200 (2), 404 (1)</td><td>2026-11-02 08:15:02</td><td>2026-11-03 07:55:18</td></tr>
+<tr><th scope="row">ClaudeBot</th><td>2</td><td>200 (2)</td><td>2026-11-02 09:40:31</td><td>2026-11-02 19:50:00</td></tr>
+</tbody></table></div>
+<p class="p">ClaudeBot's second hit is logged as 01:20 on 3 November at +0530, which is 19:50 on 2 November in UTC. Both of its hits count for <code>/blog/setup</code>. The Firefox line is other traffic, one line has no user agent and one line does not parse.</p>
+<h2>A user agent can be faked, and a crawl is not a visit</h2>
+<p class="p">Anyone can send a request that calls itself GPTBot. Before you act on a number, compare the IP addresses in those lines with the list the operator publishes: OpenAI, Anthropic, Perplexity and DuckDuckGo publish theirs. This tool does not check addresses.</p>
+<p class="p">A crawl also tells you nothing about sales. A bot that reads a page may lead to a cited link, the link may bring a person, and the person may buy. To judge AI search, measure those people: <a href="/blog/is-ai-search-traffic-worth-anything">is AI search traffic worth anything?</a></p>
+<h2>How Virling shows crawlers next to revenue</h2>
+<p class="p">A log file shows one server at one point in time. The AI card in Virling has one row per AI company, with the pages its crawlers read next to the visitors and revenue its assistants sent. Hover a company's pages read to see each bot's hits, pages, most-read page and when it was last seen. Crawler hits are stored apart from visits, so they never count as visitors.</p>
+<p class="p">Most crawlers never run JavaScript, so the tracking script alone counts a small share of them. To count the rest, forward AI crawler requests from your server or edge with a short snippet. The <a href="https://docs.virling.com/track/ai-crawlers">AI crawlers docs</a> have one for Next.js, Express, Cloudflare Workers and Rails, and list the bots Virling names.</p>
+<h2>Related tools and guides</h2>
+<ul class="post-list"><li><a href="/tools/ai-crawler-checker">AI crawler checker</a>: see which AI crawlers your robots.txt allows.</li><li><a href="/tools/ai-robots-txt-generator">Robots.txt generator for AI crawlers</a>: allow or block each bot and copy the file.</li><li><a href="/blog/is-ai-search-traffic-worth-anything">Is AI search traffic worth anything?</a>: measure the visitors and revenue AI answers send.</li><li><a href="https://docs.virling.com/track/ai-crawlers">AI crawlers</a>: count which pages each bot reads on your site.</li></ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>AI crawler log analyzer FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do I find AI crawlers in my access log?</h3><p class="p">Look for their names in the user agent field of each line, such as GPTBot, ClaudeBot or PerplexityBot. Paste the lines here, or choose the file, and the hits are counted per crawler.</p></div>
+      <div><h3>Which log formats can I paste?</h3><p class="p">The common and combined formats that Apache and Nginx write. Common format lines have no user agent, so they are counted but no crawler can be named in them. JSON logs are not read.</p></div>
+      <div><h3>Can a crawler's user agent be faked?</h3><p class="p">Yes. Any program can send any user agent, so treat a hit as a claim. To check it, compare the IP address in the log line with the addresses the operator publishes.</p></div>
+      <div><h3>Is an AI crawler hit the same as a visit?</h3><p class="p">No. A crawl is a bot reading a page. A visit is a person opening your site, for example by clicking a link in an assistant's answer, and only a person can buy.</p></div>
+      <div><h3>How large a log can it read?</h3><p class="p">Up to 200,000 lines that are not blank, or a 50 MB file. Lines past the limit are counted and left out. For a larger log, keep only the AI crawler lines with grep first.</p></div>
+      <div><h3>Is my log sent anywhere?</h3><p class="p">No. The lines are read in your browser with plain JavaScript, and the CSV files are created on your device.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I find AI crawlers in my access log?", "acceptedAnswer": {"@type": "Answer", "text": "Look for their names in the user agent field of each line, such as GPTBot, ClaudeBot or PerplexityBot. Paste the lines here, or choose the file, and the hits are counted per crawler."}}, {"@type": "Question", "name": "Which log formats can I paste?", "acceptedAnswer": {"@type": "Answer", "text": "The common and combined formats that Apache and Nginx write. Common format lines have no user agent, so they are counted but no crawler can be named in them. JSON logs are not read."}}, {"@type": "Question", "name": "Can a crawler's user agent be faked?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Any program can send any user agent, so treat a hit as a claim. To check it, compare the IP address in the log line with the addresses the operator publishes."}}, {"@type": "Question", "name": "Is an AI crawler hit the same as a visit?", "acceptedAnswer": {"@type": "Answer", "text": "No. A crawl is a bot reading a page. A visit is a person opening your site, for example by clicking a link in an assistant's answer, and only a person can buy."}}, {"@type": "Question", "name": "How large a log can it read?", "acceptedAnswer": {"@type": "Answer", "text": "Up to 200,000 lines that are not blank, or a 50 MB file. Lines past the limit are counted and left out. For a larger log, keep only the AI crawler lines with grep first."}}, {"@type": "Question", "name": "Is my log sent anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "No. The lines are read in your browser with plain JavaScript, and the CSV files are created on your device."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which AI assistants bring buyers</h2>
+<p class="p">A log shows who read your pages. Virling links every visit to the payment it led to, so each assistant shows the customers and revenue it brought from real payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const BOTS = [["GPTBot", "OpenAI", "Training"], ["OAI-SearchBot", "OpenAI", "Search"], ["ChatGPT-User", "OpenAI", "Answers"], ["ClaudeBot", "Anthropic", "Training"], ["Claude-SearchBot", "Anthropic", "Search"], ["Claude-User", "Anthropic", "Answers"], ["PerplexityBot", "Perplexity", "Search"], ["Perplexity-User", "Perplexity", "Answers"], ["Google-Extended", "Google", "robots.txt token"], ["Applebot-Extended", "Apple", "robots.txt token"], ["Amazonbot", "Amazon", "Products, may train"], ["Amzn-SearchBot", "Amazon", "Search"], ["Amzn-User", "Amazon", "Answers"], ["meta-externalagent", "Meta", "Training and indexing"], ["meta-webindexer", "Meta", "Search"], ["meta-externalfetcher", "Meta", "Answers"], ["DuckAssistBot", "DuckDuckGo", "Answers"], ["CCBot", "Common Crawl", "Open dataset"], ["Bytespider", "ByteDance", "Not documented"]];
+const MAX = 200000, BATCH = 4000, BIG = 300000, BYTES = 50 * 1024 * 1024, TOP = 10, SHOWN = 50;
+const MONTHS = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+const LINE = /^\S+ \S+ [^\[]+\[(0[1-9]|[12]\d|3[01])\/([A-Z][a-z]{2})\/(\d{4}):([01]\d|2[0-3]):([0-5]\d):([0-6]\d) ([+-])(\d{2})(\d{2})\] "((?:[^"\\]|\\.)*)" (\d{3}) (?:\d+|-)(?: "(?:[^"\\]|\\.)*" "((?:[^"\\]|\\.)*)".*|\s*)$/;
+const NAME = new RegExp(BOTS.map((b) => b[0]).join("|"), "i"), BY = new Map(BOTS.map((b) => [b[0].toLowerCase(), b]));
+const f = document.getElementById("al"), msg = document.getElementById("al-msg"), sum = document.getElementById("al-sum"), out = document.getElementById("al-out"), bad = document.getElementById("al-bad"), dl = document.getElementById("al-csv"), dlp = document.getElementById("al-pages"), example = f.log.value;
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const safe = (s) => (/^\s*[=+\-@]/.test(s) ? "'" + s : s);
+const cell = (v) => { const s = safe(String(v)); return /[",\t\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+const num = (n) => n.toLocaleString("en-US");
+const lines = (n) => `${num(n)} line${n === 1 ? "" : "s"}`;
+const utc = (t) => new Date(t).toISOString().slice(0, 19).replace("T", " ");
+const codes = (r) => [...r.codes].sort((a, b) => b[1] - a[1] || a[0] - b[0]).map(([c, n]) => `${c} (${n})`).join(", ");
+const byHits = (m) => [...m].sort((a, b) => b[1].hits - a[1].hits || (a[0] < b[0] ? -1 : 1));
+const add = (m, key, code, t) => {
+  let r = m.get(key);
+  if (!r) m.set(key, (r = { hits: 0, codes: new Map(), first: t, last: t, pages: new Map() }));
+  r.hits++; r.codes.set(code, (r.codes.get(code) || 0) + 1);
+  if (t < r.first) r.first = t;
+  if (t > r.last) r.last = t;
+  return r;
+};
+const page = (req) => {
+  const m = req.match(/^[A-Za-z]+ (.+?)(?: HTTP\/[\d.]+)?$/);
+  return m ? m[1].replace(/^https?:\/\/[^/?#]*/i, "").replace(/[?#].*$/, "") || "/" : "(no page in the request)";
+};
+const parse = (line) => {
+  const m = LINE.exec(line);
+  if (!m || !(m[2] in MONTHS)) return null;
+  const off = (+m[8] * 60 + +m[9]) * 60000 * (m[7] === "-" ? -1 : 1);
+  return { t: Date.UTC(+m[3], MONTHS[m[2]], +m[1], +m[4], +m[5], +m[6]) - off, req: m[10], code: m[11], ua: m[12] };
+};
+let job = 0, timer = 0, sheets = [];
+const row = (cells) => `<tr>${cells.map((c, i) => (i ? `<td>${c}</td>` : `<th scope="row">${c}</th>`)).join("")}</tr>`;
+const grid = (label, heads, rows) => `<div class="al-scroll" role="region" aria-label="${label}" tabindex="0"><table class="cmp"><thead><tr>${heads.map((h) => `<th scope="col">${h}</th>`).join("")}</tr></thead><tbody>${rows.map(row).join("")}</tbody></table></div>`;
+const fail = (text) => { msg.textContent = text; sum.innerHTML = out.innerHTML = bad.innerHTML = ""; out.hidden = dl.disabled = dlp.disabled = true; };
+const show = (r, from) => {
+  const parsed = r.read - r.bad, hits = [...r.bots.values()].reduce((s, b) => s + b.hits, 0), bots = byHits(r.bots);
+  if (!r.read) return fail("Paste at least one access log line, or choose a file.");
+  msg.textContent = from + (!parsed ? "No line is in the common or combined log format. Check that you copied whole lines, starting with the address and ending with the status and size or the user agent." :
+    hits ? `${num(hits)} AI crawler hit${hits === 1 ? "" : "s"} in ${lines(r.read)}.` :
+    r.noUa === parsed ? "These lines have no user agent, so no crawler can be named. Use a log in the combined format." : `No AI crawler named in ${lines(r.read)}.`) +
+    (r.bad && parsed ? ` ${lines(r.bad)} did not parse.` : "") + (r.over ? ` Only the first ${num(MAX)} lines are read; ${num(r.over)} more left out.` : "");
+  dl.disabled = dlp.disabled = !hits;
+  out.hidden = !hits;
+  sum.innerHTML = [["Lines read", r.read], ["AI crawler hits", hits], ["Other traffic", parsed - hits - r.noUa], ["No user agent", r.noUa], ["Not parsed", r.bad]].map(([k, x]) => `<div><span class="dim">${k}</span><b>${num(x)}</b></div>`).join("");
+  out.innerHTML = hits ? "<h2>Hits per AI crawler</h2>" + grid("Hits per AI crawler", ["Crawler", "Operator", "Fetches for", "Hits", "Pages", "Status codes", "First seen (UTC)", "Last seen (UTC)"], bots.map(([n, b]) => [n, BY.get(n.toLowerCase())[1], BY.get(n.toLowerCase())[2], num(b.hits), num(b.pages.size), codes(b), utc(b.first), utc(b.last)])) +
+    "<h2>Top pages per crawler</h2>" + bots.map(([n, b], i) => `<details${i ? "" : " open"}><summary>${n} <span class="dim">${b.pages.size > TOP ? `top ${TOP} of ${num(b.pages.size)} pages` : `${num(b.pages.size)} page${b.pages.size === 1 ? "" : "s"}`}</span></summary>${grid(`Top pages for ${n}`, ["Page", "Hits", "Status codes", "First seen (UTC)", "Last seen (UTC)"], byHits(b.pages).slice(0, TOP).map(([p, x]) => [esc(p), num(x.hits), codes(x), utc(x.first), utc(x.last)]))}</details>`).join("") : "";
+  bad.innerHTML = r.bad ? `<h3>Lines that did not parse</h3><ul class="post-list">${r.list.map((b) => `<li><b>Line ${num(b.n)}</b>: ${esc(b.text)}</li>`).join("")}</ul>${r.bad > r.list.length ? `<p class="p">The first ${SHOWN} are shown, ${num(r.bad - r.list.length)} more are not.</p>` : ""}` : "";
+  sheets = [
+    [["crawler", "operator", "fetches_for", "hits", "pages", "status_codes", "first_seen_utc", "last_seen_utc"], ...bots.map(([n, b]) => [...BY.get(n.toLowerCase()), b.hits, b.pages.size, codes(b), utc(b.first), utc(b.last)])],
+    [["crawler", "page", "hits", "status_codes", "first_seen_utc", "last_seen_utc"], ...bots.flatMap(([n, b]) => byHits(b.pages).map(([p, x]) => [n, p, x.hits, codes(x), utc(x.first), utc(x.last)]))],
+  ];
+};
+const analyze = async (text, from) => {
+  const id = ++job, r = { read: 0, bad: 0, noUa: 0, over: 0, list: [], bots: new Map() };
+  if (/^\x1f|\0/.test(text.slice(0, 4000))) return fail("That is not plain text. If the log is compressed, unzip it first.");
+  for (let i = text.charCodeAt(0) === 0xfeff ? 1 : 0, n = 1; i < text.length; n++) {
+    let end = text.indexOf("\n", i); if (end < 0) end = text.length;
+    const line = text.slice(i, end).trim(); i = end + 1;
+    if (n % BATCH === 0) {
+      msg.textContent = `Reading, ${lines(n)} so far.`;
+      await new Promise((go) => setTimeout(go));
+      if (id !== job) return;
+    }
+    if (!line) continue;
+    if (r.read === MAX) { r.over++; continue; }
+    r.read++;
+    const p = parse(line);
+    if (!p) { r.bad++; if (r.list.length < SHOWN) r.list.push({ n, text: line.length > 300 ? line.slice(0, 300) + "..." : line }); continue; }
+    if (p.ua === undefined) { r.noUa++; continue; }
+    const m = NAME.exec(p.ua);
+    if (m) add(add(r.bots, BY.get(m[0].toLowerCase())[0], p.code, p.t).pages, page(p.req), p.code, p.t);
+  }
+  show(r, from);
+};
+const hold = (text, what) => { clearTimeout(timer); f.log.value = ""; f.log.placeholder = `The ${what} is kept in memory and not drawn here. Type or paste here to replace it.`; analyze(text, what === "pasted log" ? "" : `${what}: `); };
+f.log.addEventListener("input", () => { job++; f.file.value = ""; f.log.placeholder = ""; clearTimeout(timer); timer = setTimeout(() => analyze(f.log.value, ""), 200); });
+f.log.addEventListener("paste", (e) => {
+  const t = e.clipboardData ? e.clipboardData.getData("text/plain") : "";
+  if (t.length > BIG) { e.preventDefault(); f.file.value = ""; hold(t, "pasted log"); }
+  else if (f.log.value === example) f.log.select();
+});
+f.file.addEventListener("change", async () => {
+  const file = f.file.files[0]; if (!file) return;
+  clearTimeout(timer);
+  const id = ++job;
+  if (file.size > BYTES) return fail("That file is over 50 MB. Split it, or keep only the AI crawler lines with the grep command below.");
+  msg.textContent = `Reading ${file.name}.`;
+  try { const t = await file.text(); if (id === job) hold(t, file.name); } catch { if (id === job) fail("The file could not be read. Choose it again, or paste its lines."); }
+});
+f.addEventListener("submit", (e) => e.preventDefault());
+const save = (i, name) => {
+  const a = document.createElement("a"), href = URL.createObjectURL(new Blob(["﻿" + sheets[i].map((r) => r.map(cell).join(",")).join("\r\n")], { type: "text/csv;charset=utf-8" }));
+  a.href = href; a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(href), 1000);
+};
+dl.addEventListener("click", () => save(0, "ai-crawlers.csv"));
+dlp.addEventListener("click", () => save(1, "ai-crawler-pages.csv"));
+analyze(f.log.value, "");
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
