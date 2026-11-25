@@ -84,7 +84,7 @@
 }</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
 <p class="p">Send <code>attributes: [{ key: "virling_vid", value: vid }]</code>, with the ID from the cookie on your server or from <code>window.virling?.vid?.()</code> in the browser.</p>
 <h2>Step 4: read the order's note attributes</h2>
-<p class="p">Shopify copies the cart attribute onto the order. In the Admin API's <a href="https://shopify.dev/docs/api/admin-rest/latest/resources/order">order resource</a> it looks like this, with a made-up visitor ID:</p>
+<p class="p">Shopify copies the cart attribute onto the order. No checkout script is involved; see <a href="/blog/shopify-checkout-extensibility-tracking">what still works for tracking under Shopify checkout extensibility</a>. In the Admin API's <a href="https://shopify.dev/docs/api/admin-rest/latest/resources/order">order resource</a> it looks like this, with a made-up visitor ID:</p>
 <div class="code block"><pre data-snippet>"note_attributes": [
   { "name": "virling_vid", "value": "vexample123" }
 ]</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
