@@ -86,6 +86,34 @@ example.com/signup?utm_source=x</textarea></label>
 <p class="p">In the CSV the row looks like this:</p>
 <div class="code block"><pre>url,utm_source,utm_medium,utm_campaign,utm_content,utm_term,ref,clean_url
 https://example.com/?plan=pro&amp;utm_source=linkedin&amp;utm_medium=social&amp;utm_campaign=example-launch#faq,linkedin,social,example-launch,,,,https://example.com/?plan=pro#faq</pre></div>
+<h2>A sample CSV to copy</h2>
+<p class="p">The parser takes a CSV with one column, the link, and no header row. Copy these made-up links, paste them over the list in the tool, and all five lines are parsed.</p>
+<div class="code block"><pre data-snippet>https://example.com/pricing?utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=october-launch&amp;utm_content=header-button
+https://example.com/pricing?utm_source=linkedin&amp;utm_medium=social&amp;utm_campaign=october-launch
+https://example.com/pricing?utm_source=LinkedIn&amp;utm_medium=paid-social&amp;utm_campaign=October+Launch
+https://example.com/shoes?utm_source=google&amp;utm_medium=cpc&amp;utm_campaign=october-launch&amp;utm_term=blue+shoes
+https://example.com/blog/launch?ref=partner-site</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>What to look for in the columns</h2>
+<p class="p">Every line of the sample is valid, but the third one would split a report. Read each column from top to bottom:</p>
+<ul class="post-list"><li><b>Source: one spelling per place.</b> <code>LinkedIn</code> and <code>linkedin</code> are two sources in tools that compare values exactly. Keep the lowercase one.</li><li><b>Medium: only values from your list.</b> Virling counts <code>paidsocial</code> as Paid, but not <code>paid-social</code>, so that ad is grouped by its referrer or source with your unpaid posts. A platform name in this column means the two tags are swapped: see <a href="/blog/utm-source-vs-utm-medium">utm_source vs utm_medium</a>.</li><li><b>Campaign: one name per push.</b> <code>October Launch</code> and <code>october-launch</code> are two rows in Virling, each with part of the money. <a href="/blog/revenue-by-campaign">Revenue by campaign</a> shows how to read those rows.</li></ul>
+<p class="p">Then write the agreed names into the <a href="/tools/utm-naming-template">UTM naming template</a> and tag the clean URLs again with the <a href="/tools/bulk-utm-builder">bulk UTM builder</a>.</p>
+<h2>Common input problems</h2>
+<table class="cmp" style="overflow-wrap:anywhere"><thead><tr><th style="width:38%">Input</th><th>What the tool does</th></tr></thead><tbody>
+<tr><th scope="row">A link without <code>https://</code>, such as <code>example.com/signup</code></th><td>Lists it under the table with its line number and leaves it out of the copied table and the CSV.</td></tr>
+<tr><th scope="row">A header line such as <code>url</code></th><td>Lists the header as not a full URL and parses the lines below it.</td></tr>
+<tr><th scope="row">A link in quotes</th><td>Lists it as not a full URL. Remove the quotes.</td></tr>
+<tr><th scope="row">More columns after the link, separated by commas or tabs</th><td>Reads the whole line as one link, so the extra cells become part of the last value or of the clean URL. Paste only the link column.</td></tr>
+<tr><th scope="row">A column before the link</th><td>Lists the line as not a full URL. Paste only the link column.</td></tr>
+<tr><th scope="row">Two links on one line</th><td>With a space between them, lists the line as more than one link. With only a comma, reads them as one link.</td></tr>
+<tr><th scope="row">The same parameter twice</th><td>Uses the first value that is not empty.</td></tr>
+<tr><th scope="row">Capitals, such as <code>UTM_Source=LinkedIn</code></th><td>Reads the name in any case and shows the value as written, <code>LinkedIn</code>.</td></tr>
+<tr><th scope="row">Tags after the <code>#</code></th><td>Does not read them. They stay in the clean URL.</td></tr>
+<tr><th scope="row"><code>&amp;amp;</code> between tags, copied from HTML</th><td>Does not read the tag after it, and leaves that tag in the clean URL. Replace <code>&amp;amp;</code> with <code>&amp;</code>.</td></tr>
+<tr><th scope="row">A second <code>?</code> where <code>&amp;</code> should be</th><td>Treats the rest as part of the value before it, so those tags are not read as tags.</td></tr>
+<tr><th scope="row"><code>utm_id</code> and other <code>utm_</code> names</th><td>Has no column for them, and removes them from the clean URL.</td></tr>
+<tr><th scope="row">The same link twice</th><td>Keeps both rows.</td></tr>
+<tr><th scope="row">More than 2,000 links</th><td>Reads the first 2,000 and says how many are left out.</td></tr>
+</tbody></table>
 <h2>Related tools and guides</h2>
 <ul class="post-list"><li><a href="/tools/utm-checker">UTM checker</a>: find capitals, spaces, duplicates and missing tags.</li><li><a href="/tools/utm-builder">UTM builder</a>: build one tagged link from a page URL.</li><li><a href="/tools/bulk-utm-builder">Bulk UTM builder</a>: tag a whole list of links at once.</li><li><a href="/tools/url-cleaner">URL cleaner</a>: remove click IDs such as <code>gclid</code> and <code>fbclid</code> as well as UTM tags.</li><li><a href="/blog/utm-parameters-for-revenue-tracking">Which UTM parameters to use to trace revenue</a>: the five parameters and the mistakes that send revenue to Direct.</li></ul>
   </div></div></section>
