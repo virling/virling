@@ -10,11 +10,17 @@ Virling is open-source revenue analytics. It joins every visit to the payment th
 
 ## What works today
 
-- A tracking script about 1.4 KB gzipped that records pageviews, referrers, UTM tags, single-page-app route changes and custom goals, with a first-party visitor ID. See [Add the script](track/script.md).
+- A tracking script about 2 KB gzipped that records pageviews, referrers, UTM tags, single-page-app route changes and custom goals, with a first-party visitor ID. See [Add the script](track/script.md).
 - An optional [cookieless mode](track/cookieless.md) that counts visitors with a daily salted hash.
 - Event ingest into embedded DuckDB with bot filtering, a per-site rate limit and [channel rules](attribution/channels.md). Visitor IPs are never stored.
-- Payment sync from [Stripe](payments/stripe.md), [Dodo Payments](payments/dodo.md), [Polar](payments/polar.md), [LemonSqueezy](payments/lemonsqueezy.md), [Creem](payments/creem.md) and [RevenueCat](payments/revenuecat.md), with a read-only key where the provider allows one: a 90-day backfill, then a poll every minute.
-- [Attribution](attribution/index.md) with two models and a configurable lookback window, renewals that inherit the first payment's channel, and payment journeys in the app.
+- Payment sync from nine providers: [Stripe](payments/stripe.md), [Dodo Payments](payments/dodo.md), [Polar](payments/polar.md), [LemonSqueezy](payments/lemonsqueezy.md), [Creem](payments/creem.md), [RevenueCat](payments/revenuecat.md), [Paddle](payments/paddle.md), [WooCommerce](payments/woocommerce.md) and [Shopify](payments/shopify.md), with a read-only key where the provider allows one. Virling backfills 90 days, then checks for new payments every minute. Shopify backfills 60 days. RevenueCat imports one-time purchases from the last 90 days, once, then sends purchases, renewals and refunds by webhook; subscription payments from before you connected are not imported.
+- Imports of daily traffic history from [Plausible](track/import-plausible.md) and [Google Analytics 4](track/import-google-analytics.md) CSV exports, from the command line. Payments are only credited to tracked visits.
+- [Attribution](attribution/index.md) with [three models](attribution/model.md), last non-direct, first touch or last touch, and a 30, 60, 90 or 365 day lookback window. Renewals keep the channel of the customer's first payment.
+- A [revenue dashboard](guides/dashboard.md) with revenue, revenue per visitor and conversion by channel, referrer, campaign, page and country, payment journeys, a Visitors page, [retention by first channel](attribution/retention.md), [tracked short links](track/links.md), and AI assistant visits next to [AI crawler](track/ai-crawlers.md) hits.
+- Weekly email reports with agency branding, client report links and an optional public dashboard. See [Run Virling for client sites](guides/agencies.md).
+- Team members on Agency accounts, up to 3 users when self-hosting.
+- A [read API](reference/api.md), a [CLI](reference/cli.md) and a read-only [MCP server](reference/mcp.md) with OAuth sign-in, so AI assistants can answer revenue questions. API keys read your numbers and can only add chart notes.
+- A [WordPress plugin](track/frameworks.md#wordpress).
 - Magic-link sign-in and an onboarding flow, served when you start the server with `--app`.
 
 Virling runs as one Rust binary with embedded storage. There is no Postgres, ClickHouse or Redis to run next to it. See [How Virling works](how-it-works.md).

@@ -5,7 +5,7 @@ Run Virling on your own server, add the tracking script to your site and connect
 <div class="meta"><span class="chip"><i></i>Self-host</span><span class="chip">6 steps</span><span class="chip mono" style="font-size:12px">vVIRLING_VERSION</span></div>
 
 > [!NOTE]
-> **Hosted plan coming soon.** app.virling.com is not open yet, so this guide covers self-hosting. Steps 4 to 6 will be the same on the hosted plan.
+> **No server to run?** Hosted Virling is open with a 14-day free trial: see [Hosted plan](hosted.md). Skip steps 1 and 2, [sign in at app.virling.com](https://app.virling.com/login) instead of step 3, and add your site in the app. Then follow steps 4 to 6, with `https://app.virling.com/v.js` as the script address.
 
 You need a Linux or macOS server with Docker or one of the release binaries, and a domain pointing at it. Virling listens on port `8080` and keeps everything in one data folder: SQLite for settings, DuckDB for events.
 
