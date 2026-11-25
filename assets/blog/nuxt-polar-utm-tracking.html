@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuxt Polar UTM tracking: see which source brought each order</title>
+<meta name="description" content="Read the virling_vid cookie in a Nuxt server route and set it in Polar checkout metadata, so each order and renewal shows the source behind it.">
+<link rel="canonical" href="https://virling.com/blog/nuxt-polar-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/nuxt-polar-utm-tracking">
+<meta property="og:title" content="Nuxt Polar UTM tracking: see which source brought each order">
+<meta property="og:description" content="Read the virling_vid cookie in a Nuxt server route and set it in Polar checkout metadata, so each order and renewal shows the source behind it.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Nuxt Polar UTM tracking: see which source brought each order","item":"https://virling.com/blog/nuxt-polar-utm-tracking"}]},{"@type":"BlogPosting","headline":"Nuxt Polar UTM tracking: see which source brought each order","description":"Read the virling_vid cookie in a Nuxt server route and set it in Polar checkout metadata, so each order and renewal shows the source behind it.","datePublished":"2026-11-25","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/nuxt-polar-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to a Polar checkout in Nuxt?","acceptedAnswer":{"@type":"Answer","text":"Pass the Virling visitor ID instead. In the server/api route that calls polar.checkouts.create, read it with getCookie(event, \"virling_vid\") and set it in metadata as virling_vid. The Virling script records the UTM tags of every visit against that ID, so the order is joined to all of them."}},{"@type":"Question","name":"Do Polar checkout links in a Nuxt app need server code?","acceptedAnswer":{"@type":"Answer","text":"No. Keep the link to buy.polar.sh as a normal <a href> on a page that runs the script. The script adds reference_id=<visitor ID> to it, unless it is already there, and Polar stores it in the order's metadata, where Virling reads it."}},{"@type":"Question","name":"What happens if the virling_vid cookie is missing?","acceptedAnswer":{"@type":"Answer","text":"Create the checkout without it. The order still counts toward revenue, as Unattributed unless it is a renewal. Do not send an empty string: Polar requires metadata text values to have at least one character."}},{"@type":"Question","name":"Does this work with nuxt generate?","acceptedAnswer":{"@type":"Answer","text":"Yes, with checkout links. A site built with nuxt generate includes no server, so a server/api route cannot run there. To create checkouts in a route, deploy with nuxt build."}},{"@type":"Question","name":"Does this work with the Polar sandbox?","acceptedAnswer":{"@type":"Answer","text":"Yes, for checkouts your server creates. Set environment: \"sandbox\" on the Polar client and connect a sandbox token to Virling. The script does not add the visitor ID to sandbox links, so test with a session that has virling_vid in its metadata."}},{"@type":"Question","name":"Which channel does a Polar renewal go to?","acceptedAnswer":{"@type":"Answer","text":"To the channel of that customer's first order, matched by Polar customer ID. If that order has no channel, or is older than the first import, the renewal is usually Unattributed."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-25</span>
+      <h1>Nuxt Polar UTM tracking: see which source brought each order</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-25.</p>
+<p class="p">For Nuxt Polar UTM tracking, add the Virling script to <code>app.head</code> in <code>nuxt.config.ts</code>, then read the <code>virling_vid</code> cookie in the server route that creates the Polar checkout and set it in <code>metadata</code>. Checkout links on <code>buy.polar.sh</code> need no server code: the script adds the ID as <code>reference_id</code>. Polar keeps that one ID on the order, and Virling joins the order to every visit behind it, with the UTM tags of each.</p>
+<p class="p">This post covers Nuxt 4. For the reasoning, see <a href="/blog/polar-utm-tracking">Polar UTM tracking</a>. Using Stripe instead? See <a href="/blog/nuxt-stripe-utm-tracking">Nuxt Stripe UTM tracking</a>. On Svelte, see <a href="/blog/sveltekit-polar-utm-tracking">SvelteKit Polar UTM tracking</a>.</p>
+<h2>Why Polar checkout loses your UTM tags</h2>
+<p class="p">UTM tags live on the landing URL. By the time someone presses Buy, they have usually moved to another route, and Polar checkout runs on Polar's domain, which knows only what you pass into it. A visitor ID points back to every visit, including earlier ones and untagged ones such as search.</p>
+<h2>Step 1: add the script to nuxt.config.ts</h2>
+<p class="p">Nuxt renders this entry into the HTML of every page, and route changes are tracked through <code>history.pushState</code>. Use the domain you added in Virling as <code>data-site</code>. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<div class="code block"><pre data-snippet>// nuxt.config.ts
+export default defineNuxtConfig({
+  app: {
+    head: {
+      script: [
+        { src: "https://app.virling.com/v.js", defer: true,
+          "data-site": "yourdomain.com" },
+      ],
+    },
+  },
+  runtimeConfig: {
+    polarAccessToken: "", // set NUXT_POLAR_ACCESS_TOKEN
+  },
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain. Subdomains such as <code>app.yourdomain.com</code> share it. The <code>runtimeConfig</code> entry keeps the Polar token on the server: Nuxt fills it from <code>NUXT_POLAR_ACCESS_TOKEN</code> (source: <a href="https://nuxt.com/docs/4.x/guide/going-further/runtime-config">Nuxt, runtime config</a>). A built server does not read <code>.env</code>, so set the variable on your host.</p>
+<h2>Step 2a: checkout links, no server code</h2>
+<p class="p">If you sell through Polar checkout links, keep the link as a normal <code>&lt;a href&gt;</code> on a page that runs the script:</p>
+<div class="code block"><pre data-snippet>&lt;!-- app/pages/pricing.vue --&gt;
+&lt;template&gt;
+  &lt;a href="https://buy.polar.sh/YOUR_CHECKOUT_LINK"&gt;Buy now&lt;/a&gt;
+&lt;/template&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script adds <code>reference_id=&lt;visitor ID&gt;</code> when the page loads and again on click, so links that appear after a route change are covered. It never replaces a <code>reference_id</code> that is already there. Polar attaches that parameter to the checkout session's metadata (source: <a href="https://polar.sh/docs/features/checkout/links">Polar, checkout links</a>), and Virling reads it from the order.</p>
+<h2>Step 2b: create the checkout in a server route</h2>
+<p class="p">Install <code>@polar-sh/sdk</code> and create an access token with the <code>checkouts:write</code> scope. It is a different token from the one you give Virling. <code>getCookie</code> reads the visitor ID from the request:</p>
+<div class="code block"><pre data-snippet>// server/api/checkout.post.ts
+import { createPolar } from "@polar-sh/sdk/2026-10";
+
+export default defineEventHandler(async (event) =&gt; {
+  const { polarAccessToken } = useRuntimeConfig(event);
+  const polar = createPolar({ accessToken: polarAccessToken });
+  const vid = getCookie(event, "virling_vid");
+  const checkout = await polar.checkouts.create({
+    products: ["PRODUCT_ID"],
+    success_url: "https://yourdomain.com/thanks",
+    metadata: vid ? { virling_vid: vid } : {},
+  });
+  // Send the customer to checkout.url
+  return sendRedirect(event, checkout.url, 303);
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">A plain form posts to it, and the browser sends the cookie along:</p>
+<div class="code block"><pre data-snippet>&lt;!-- app/pages/pricing.vue --&gt;
+&lt;template&gt;
+  &lt;form method="POST" action="/api/checkout"&gt;
+    &lt;button type="submit"&gt;Buy&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/template&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The import path pins the API version (source: <a href="https://polar.sh/docs/integrate/sdk/typescript">Polar, TypeScript SDK</a>). On 0.x releases of the SDK, use <code>new Polar({ accessToken })</code> from <code>@polar-sh/sdk</code> and write <code>successUrl</code>. Polar copies checkout metadata to the resulting order and/or subscription, with text values of 1 to 500 characters (source: <a href="https://polar.sh/docs/api-reference/current/checkouts/create-checkout-session">Polar, create checkout session</a>). So the route sends no key, not an empty string, when there is no cookie.</p>
+<p class="p">Polar also has a <a href="https://polar.sh/docs/integrate/sdk/adapters/nuxt">Nuxt module</a>. Its checkout handler takes <code>metadata</code> from the query string of a <code>GET</code> request, so you would have to put the ID in the URL yourself.</p>
+<p class="p">Virling reads <code>virling_vid</code> from, in order: the order's <code>metadata</code>, its custom field data, then the customer's <code>metadata</code>. A checkout link's <code>reference_id</code> is read after those. See the <a href="https://docs.virling.com/payments/polar">Polar docs</a>.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Step 3: connect Polar to Virling</h2>
+<p class="p">In Polar, create an Organization Access Token with the <code>orders:read</code> and <code>refunds:read</code> scopes, plus <code>subscriptions:read</code> so Retention can tell who still pays, and paste it into Virling. The last 90 days of orders are imported first, then new orders every minute. Your Nuxt app needs no webhook for this.</p>
+<h2>Rendering modes: where the cookie is read</h2>
+<p class="p">The script runs in the browser, so it works the same in every mode. What changes is whether your own code can see the cookie. See <a href="https://nuxt.com/docs/4.x/guide/concepts/rendering">Nuxt, rendering modes</a>.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>Page</th><th>What happens</th><th>How to pass the ID</th></tr></thead><tbody><tr><th scope="row">Server rendered, the default</th><td>The first visit is rendered before the script has set the cookie</td><td>Read it in the <code>POST</code> route</td></tr><tr><th scope="row"><code>ssr: false</code></th><td>The browser renders the page, and server routes still run</td><td>Read it in the <code>POST</code> route</td></tr><tr><th scope="row">Prerendered with <code>routeRules</code></th><td>The HTML is made once, at build time, with no visitor</td><td>Post a form from the page to the route</td></tr><tr><th scope="row">Cached with <code>swr</code> or <code>isr</code></th><td>One copy of the HTML serves many visitors</td><td>Post a form to the route, and keep the route out of the cached patterns</td></tr><tr><th scope="row">Whole app built with <code>nuxt generate</code></th><td>No server is included in the output</td><td>Use checkout links</td></tr></tbody></table></div>
+<p class="p">Read the cookie in the request that creates the checkout, never while a page is rendered.</p>
+<h2>Test it in the Polar sandbox</h2>
+<p class="p">The sandbox has its own account, products and tokens, and production tokens do not work there (source: <a href="https://polar.sh/docs/integrate/sandbox">Polar, sandbox</a>).</p>
+<ol class="post-list"><li>In the sandbox, create a product and two tokens: one with <code>checkouts:write</code> for your app, one with the read scopes for Virling. Connect the second one.</li><li>Deploy a test version on your domain or a subdomain of it, with the sandbox token and product ID, and <code>createPolar({ accessToken: polarAccessToken, environment: "sandbox" })</code> in the route. On SDK 0.x the option is <code>server: "sandbox"</code>.</li><li>Open a private window and visit a page that runs the script through a tagged link, such as <code>https://yourdomain.com/?utm_source=test&amp;utm_medium=email</code>, on the host of your test version. Click through to the pricing page.</li><li>In the same window, press Buy and pay with the card <code>4242 4242 4242 4242</code>, a future date and any CVC.</li><li>Wait a minute for the next sync and open <code>/app/yourdomain.com/payments</code>. The payment shows the <code>test</code> source and the <b>Email</b> channel instead of Unattributed.</li></ol>
+<p class="p">The script does not tag sandbox links, so step 2a cannot be tested there. Test it with one small live payment, then refund it. Sandbox orders stay in your reports after you switch to a production token.</p>
+<h2>What a renewal is credited to</h2>
+<p class="p">A renewal has no visit of its own, so it keeps the channel, referrer, campaign and landing page of the customer's first order, matched by Polar customer ID. Orders with billing reason <code>subscription_cycle</code> or <code>subscription_update</code> count as renewals, and so does any later order by that customer.</p>
+<p class="p">A made-up example: someone reads your newsletter on Monday through a link tagged <code>utm_source=newsletter&amp;utm_medium=email</code>, and buys a $20 monthly plan on Thursday after typing your address. With the default model the first order goes to Email. Three renewals later, Email has $80 from that customer, and nothing in your Nuxt app ran again.</p>
+<p class="p">A free trial starts with a $0 order of billing reason <code>subscription_create</code>. Virling does not count it as a payment; a later payment with no visitor ID of its own is credited from the visits before the trial. If the first order is older than the 90-day import, its renewals are usually Unattributed. More is in <a href="https://docs.virling.com/attribution/renewals">the renewals docs</a> and on <a href="/integrations/polar-saas">Polar for SaaS</a>.</p>
+<h2>Symptoms, causes and fixes</h2>
+<p class="p">Open an Unattributed payment and look for <b>Visitor</b> under <b>Details</b>. If there is none, checkout did not carry the ID.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">No visitor ID, though the browser has the cookie</th><td>Checkout is a <code>GET</code> route under a <code>swr</code> or <code>cache</code> rule, and Nitro <a href="https://nitro.build/guide/cache">strips cookies</a> before a cached handler runs</td><td>Use <code>checkout.post.ts</code>. Only <code>GET</code> and <code>HEAD</code> are cached</td></tr><tr><th scope="row">No visitor ID when <code>$fetch</code> runs in <code>setup</code></th><td>During server rendering, <code>$fetch</code> does not pass on the browser's cookies</td><td>Use the form, or call it from a click handler</td></tr><tr><th scope="row">404 on <code>/api/checkout</code> after deploy</th><td>The site was built with <code>nuxt generate</code></td><td>Deploy with <code>nuxt build</code>, or use checkout links</td></tr><tr><th scope="row">405 on <code>/api/checkout</code></th><td>The route was opened as a link, but <code>.post.ts</code> answers only <code>POST</code></td><td>Submit a form to it</td></tr><tr><th scope="row">Polar rejects the metadata</th><td><code>virling_vid</code> is an empty string</td><td>Leave the key out when there is no cookie</td></tr><tr><th scope="row">Polar rejects the token</th><td>A sandbox token is used against production, or the reverse</td><td>Match the token to <code>environment</code></td></tr><tr><th scope="row">A checkout link order is Unattributed</th><td>The link was opened from code or an email, or already had its own <code>reference_id</code></td><td>Use a plain link on a page that runs the script, without a <code>reference_id</code></td></tr><tr><th scope="row">A second test keeps the first channel</th><td>A later order by the same customer is a renewal</td><td>Use a new email address for each test</td></tr></tbody></table></div>
+<p class="p">Some orders stay Unattributed with correct code, when the script was blocked or the site is in cookieless mode or waiting for consent. See <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I pass UTM parameters to a Polar checkout in Nuxt?</h3><p class="p">Pass the Virling visitor ID instead. In the server/api route that calls polar.checkouts.create, read it with getCookie(event, "virling_vid") and set it in metadata as virling_vid. The Virling script records the UTM tags of every visit against that ID, so the order is joined to all of them.</p>
+<h3>Do Polar checkout links in a Nuxt app need server code?</h3><p class="p">No. Keep the link to buy.polar.sh as a normal &lt;a href&gt; on a page that runs the script. The script adds reference_id=&lt;visitor ID&gt; to it, unless it is already there, and Polar stores it in the order's metadata, where Virling reads it.</p>
+<h3>What happens if the virling_vid cookie is missing?</h3><p class="p">Create the checkout without it. The order still counts toward revenue, as Unattributed unless it is a renewal. Do not send an empty string: Polar requires metadata text values to have at least one character.</p>
+<h3>Does this work with nuxt generate?</h3><p class="p">Yes, with checkout links. A site built with nuxt generate includes no server, so a server/api route cannot run there. To create checkouts in a route, deploy with nuxt build.</p>
+<h3>Does this work with the Polar sandbox?</h3><p class="p">Yes, for checkouts your server creates. Set environment: "sandbox" on the Polar client and connect a sandbox token to Virling. The script does not add the visitor ID to sandbox links, so test with a session that has virling_vid in its metadata.</p>
+<h3>Which channel does a Polar renewal go to?</h3><p class="p">To the channel of that customer's first order, matched by Polar customer ID. If that order has no channel, or is older than the first import, the renewal is usually Unattributed.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring your Polar orders</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
