@@ -116,6 +116,11 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [CTR calculator](https://virling.com/tools/ctr-calculator): click-through rate from clicks and impressions, or the clicks or impressions you need, with cost per click and revenue per 1,000 impressions
 - [Markup calculator](https://virling.com/tools/markup-calculator): price, markup or margin from cost and one other number, with profit per sale after an optional payment fee
 - [Bulk UTM parser](https://virling.com/tools/bulk-utm-parser): paste up to 2,000 links to extract source, medium, campaign, content, term, ref and the clean URL, then copy the table or download it as CSV
+- [Google Ads tracking template builder](https://virling.com/tools/google-ads-utm-builder): build a final URL suffix and tracking template with UTM tags and ValueTrack parameters, and preview the landing URL
+- [Event ROI calculator](https://virling.com/tools/event-roi-calculator): total cost, cost per lead, customers needed to break even and ROI for a trade show, conference or meetup
+- [Sales velocity calculator](https://virling.com/tools/sales-velocity-calculator): revenue per day and per month from open opportunities, deal value, win rate and sales cycle, which 10 percent change moves it most, and a comparison of channels
+- [Shopify profit calculator](https://virling.com/tools/shopify-profit-calculator): profit per order and per month after product, shipping, Shopify fees, refunds and ads, plus margin and break-even ad spend
+- [AI crawler log analyzer](https://virling.com/tools/ai-crawler-log-analyzer): paste access log lines or choose a file to count hits per AI crawler, with top pages, status codes, first and last seen, and a CSV
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
