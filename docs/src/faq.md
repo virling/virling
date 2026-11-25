@@ -64,7 +64,7 @@ Yes, on an Agency account, hosted or self-hosted. The owner invites people by em
 
 ## Can I import data from another analytics tool?
 
-Yes, when self-hosting. Two commands import daily traffic from CSV exports: `virling import-plausible` ([Import from Plausible](track/import-plausible.md)) and `virling import-ga` for Google Analytics 4 ([Import from Google Analytics](track/import-google-analytics.md)). Imported days fill dashboard ranges from before your first tracked event, but payments are only credited to tracked visits. The commands run on the server, so hosted accounts cannot use them, and uploading an export in site settings is <span class="na">Not available yet</span>.
+Yes, when self-hosting. Two commands import daily traffic from other analytics tools' CSV exports: [`virling import-plausible`](track/import-plausible.md) and [`virling import-ga`](track/import-google-analytics.md). Imported days fill dashboard ranges from before your first tracked event, but payments are only credited to tracked visits. The commands run on the server, so hosted accounts cannot use them, and uploading an export in site settings is <span class="na">Not available yet</span>.
 
 ## Why is my revenue Unattributed?
 
