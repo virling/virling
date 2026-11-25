@@ -64,6 +64,8 @@
 <h2>Step 3: catch the metadata in a webhook</h2>
 <p class="p">This is where Creem differs. Creem returns checkout metadata only in webhooks, not on transactions. Reading transactions from the API tells you what was paid, but not which visitor paid it. So you need a webhook for <code>checkout.completed</code> that stores the visitor ID next to the checkout, and you need to verify each delivery: Creem signs the body with HMAC-SHA256 and sends the result in the <code>creem-signature</code> header.</p>
 <p class="p">A webhook needs an https address that Creem can reach. If your analytics run on a server only reachable over plain http, payments can still be imported, but nothing links them to a visit, so they stay Unattributed.</p>
+<p class="p">Virling adds this webhook when you connect Creem, and its Payments page shows each Creem payment with the source it was credited to, or as Unattributed.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
 <h2>Step 4: read payments and join them to visits</h2>
 <p class="p">Read transactions from the Creem API with a scoped key and look for the visitor ID in a fixed order: the checkout's metadata from the webhook, then the subscription's metadata, then the customer's metadata. Match each ID to that visitor's earlier visits and credit one of them with a rule you keep fixed (see <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch or last touch</a>). Payments with no ID have no visit to join, so they show as Unattributed. They still count toward revenue, which keeps your totals honest.</p>
 <h2>Step 5: handle refunds, renewals and trials</h2>

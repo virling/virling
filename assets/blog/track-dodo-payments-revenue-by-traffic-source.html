@@ -70,6 +70,8 @@ location.href = url.href;</pre></div>
 <p class="p">Payments can succeed some time after they are created, so a single pass over yesterday's list will miss some. Re-read a recent window on every run instead of only asking for what is new. Keep an eye on Dodo's rate limit of 240 requests per minute while you backfill.</p>
 <h2>Step 4: join payments to visits</h2>
 <p class="p">Match each payment's ID to that visitor's earlier visits and credit one of them with a rule you keep fixed (see <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch or last touch</a>). Payments with no ID have no visit to join, so they show as Unattributed. They still count toward revenue; you just cannot say where they came from.</p>
+<p class="p">Virling does this join for Dodo Payments, and its Channels card puts each channel's visitors next to the revenue and revenue per visitor they brought.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
 <h2>Step 5: handle refunds, disputes and renewals</h2>
 <p class="p">A refund does not change when a payment was made. Read refunds on their own and apply each one to the payment it belongs to, or a channel will look better than it is. Treat a lost or accepted dispute the same way, since the money went back to the customer.</p>
 <p class="p">Subscriptions need one more rule. A subscription produces a payment every billing period, and only the first paid one is a new customer. Mark every later paid payment as a renewal, so a channel is not credited with a new sale each month. Counting from the first paid payment, not the first payment, means the first charge after a free trial is still the first payment.</p>

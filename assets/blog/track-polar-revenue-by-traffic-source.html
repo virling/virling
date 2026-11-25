@@ -55,6 +55,8 @@
 <p class="p">Create an organization access token and read orders from the Polar API. The ID can sit in more than one place, so look in the order's metadata first, then its custom field data, then the customer's metadata. Unpaid orders can turn paid later, so check them again for a while before giving up on them.</p>
 <h2>Step 4: join orders to visits</h2>
 <p class="p">Match each order's ID to that visitor's earlier visits and credit one of them with a rule you keep fixed (see <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch or last touch</a>). Orders with no ID have no visit to join, so they show as Unattributed.</p>
+<p class="p">Until every payment is matched, the Matched revenue line in Virling shows what share of your revenue, Polar orders included, was matched to a visit and why the rest was not.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
 <h2>Step 5: handle refunds and renewals</h2>
 <p class="p">A refund does not change an order's creation time, and a pending refund can settle later. Read refunds on their own and apply them to the order they belong to, or a channel will look better than it is. Mark subscription renewals as renewals so they are not mistaken for new customers.</p>
 <h2>Step 6: report revenue per channel</h2>

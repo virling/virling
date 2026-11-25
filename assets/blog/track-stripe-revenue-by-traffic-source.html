@@ -81,6 +81,8 @@
 <h3>What an email match can and cannot do</h3>
 <p class="p">It can credit a payment whose checkout carried no ID, if your site sent that visitor's email in an <code>identify</code> event, for example after signup. Virling compares it with the charge's billing email, or its receipt email when there is none. The payment then shows <b>Matched by email</b>. It cannot do everything an ID does:</p>
 <ul class="post-list"><li>The match is exact, apart from capitals and spaces around the address, so a customer who pays with another email is not matched.</li><li>It never replaces an ID that reached Stripe, even a wrong one.</li><li>It only applies to payments synced after the <code>identify</code> event, and never across sites.</li><li>It finds the visitor, not a visit. If none of that visitor's visits falls inside the lookback window, the payment stays Unattributed.</li></ul>
+<p class="p">Once your Stripe payments are joined, the Campaign tab on Virling's Channels card lists visitors, revenue and revenue per visitor for each campaign you tagged.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
 <h2>Step 4: report revenue per channel</h2>
 <p class="p">Group the joined payments by channel and divide by visitors to get <a href="/blog/what-is-revenue-per-visitor">revenue per visitor</a>. That is the table that tells you where to spend time.</p>
 <p class="p">Here is what it can look like for one month. The product, its single $50 plan and every number are made up. It counts first payments only, with no refunds, and leaves out Unattributed payments because they have no visitors to divide by:</p>
