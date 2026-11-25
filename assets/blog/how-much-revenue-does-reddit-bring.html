@@ -50,6 +50,8 @@
 <p class="p">There are two ways a visit gets marked as Reddit, and you want both working.</p>
 <ul class="post-list"><li><b>The referrer.</b> A click from reddit.com in a desktop or mobile browser usually arrives with reddit.com as the referrer. In Virling, reddit.com and its subdomains, such as old.reddit.com, are in the Communities channel and show as Reddit in the Source tab.</li><li><b>A UTM tag.</b> Links opened inside the Reddit app often arrive with no referrer. With no referrer and no tag, the visit lands in Direct. A <code>utm_source=reddit</code> on the link fixes that: with no referrer, Virling reads the source, and <code>reddit</code> is a known Communities source.</li></ul>
 <p class="p">Virling credits some in-app browsers to their app even without a referrer, such as Instagram, LinkedIn and Slack, but Reddit's app is not on that list. Tag your links. The full rule order is in <a href="https://docs.virling.com/attribution/channels">channels</a>.</p>
+<p class="p">Virling counts Reddit under Communities, and once that channel has three first payments in the range, the Time to pay card shows the median time its customers took from first visit to paying.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
 <h2>Tag your Reddit links</h2>
 <p class="p">One link per post, so you can tell posts apart:</p>
 <div class="code block"><pre>https://yourdomain.com/?utm_source=reddit&amp;utm_medium=community&amp;utm_campaign=r-saas-launch-nov</pre></div>
