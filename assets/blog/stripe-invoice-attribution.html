@@ -57,7 +57,7 @@
 <ul class="post-list"><li><b>Last non-direct</b>, the default: the latest session in the window that was not Direct</li><li><b>First touch</b>: the earliest session in the window, the channel that introduced the buyer</li><li><b>Last touch</b>: the latest session in the window, Direct included</li></ul>
 <p class="p">First touch fits longer buying cycles, where the buyer often comes back by typing your URL before the call. See <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch vs last touch attribution for SaaS</a> for the trade-offs. Changing the model rebuilds attribution for every past payment of the site.</p>
 <h2>Making sales-led deals attributable</h2>
-<p class="p">The goal is to capture the visitor ID or the buyer's email while they are still on your site, before the deal moves to calls and email.</p>
+<p class="p">The goal is to capture the visitor ID or the buyer's email while they are still on your site, before the deal moves to calls and email. If the booking form is a calendar embedded from another site, see <a href="/blog/demo-booking-revenue-tracking">how to track revenue from demo bookings</a>.</p>
 <p class="p"><b>At signup or demo booking, send the email.</b> When someone signs up or fills in a demo form on your own page, send an <code>identify</code> event with their email. Virling keeps only a salted SHA-256 hash of the trimmed, lowercased email. A later Stripe payment with no visitor ID whose payer email matches is credited to that visitor:</p>
 <div class="code block"><pre data-snippet>await fetch("https://app.virling.com/api/event", {
   method: "POST",
