@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Google Ads tracking template builder and UTM suffix tool</title>
+<meta name="description" content="Build a Google Ads final URL suffix and tracking template with UTM tags and ValueTrack parameters, and preview the landing URL in your browser.">
+<link rel="canonical" href="https://virling.com/tools/google-ads-utm-builder">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/google-ads-utm-builder">
+<meta property="og:title" content="Google Ads tracking template builder and UTM suffix tool">
+<meta property="og:description" content="Build a Google Ads final URL suffix and tracking template with UTM tags and ValueTrack parameters, and preview the landing URL in your browser.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Google Ads tracking template builder","url":"https://virling.com/tools/google-ads-utm-builder","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Google Ads tracking template builder","item":"https://virling.com/tools/google-ads-utm-builder"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / google ads utm builder</span><h1>Google Ads tracking template builder</h1><p class="lead">Enter your final URL and a campaign name, then tick the ValueTrack parameters you want. You get a final URL suffix and a tracking template to copy into Google Ads, and a preview of the landing URL. Everything is built in your browser as you type.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="gads" autocomplete="off">
+  <label class="wide">Final URL<input name="url" type="url" value="https://example.com/pricing" aria-describedby="gads-msg" required></label>
+  <label>Campaign name <span class="dim">utm_campaign</span><input name="campaign" value="brand-search" maxlength="200" aria-describedby="gads-msg"></label>
+  <label>Medium <span class="dim">utm_medium</span><input name="medium" value="cpc" maxlength="200" aria-describedby="gads-msg"></label>
+  <fieldset style="grid-column:1/-1;min-width:0;margin:0;padding:0;border:0"><legend style="padding:0 0 10px;font-size:14px;font-weight:600">ValueTrack parameters to include</legend><div class="tool-form">
+    <label class="check"><input type="checkbox" name="vt" value="campaignid"><span>Campaign ID <span class="dim">{campaignid}</span></span></label>
+    <label class="check"><input type="checkbox" name="vt" value="adgroupid"><span>Ad group ID <span class="dim">{adgroupid}</span></span></label>
+    <label class="check"><input type="checkbox" name="vt" value="creative" checked><span>Ad ID <span class="dim">{creative}</span></span></label>
+    <label class="check"><input type="checkbox" name="vt" value="assetgroupid"><span>Asset group ID <span class="dim">{assetgroupid}</span></span></label>
+    <label class="check"><input type="checkbox" name="vt" value="keyword" checked><span>Keyword <span class="dim">{keyword}</span></span></label>
+    <label class="check"><input type="checkbox" name="vt" value="targetid"><span>Target ID <span class="dim">{targetid}</span></span></label>
+    <label class="check"><input type="checkbox" name="vt" value="placement"><span>Placement <span class="dim">{placement}</span></span></label>
+    <label class="check"><input type="checkbox" name="vt" value="matchtype"><span>Match type <span class="dim">{matchtype}</span></span></label>
+    <label class="check"><input type="checkbox" name="vt" value="network"><span>Network <span class="dim">{network}</span></span></label>
+    <label class="check"><input type="checkbox" name="vt" value="device"><span>Device <span class="dim">{device}</span></span></label>
+    <label class="check"><input type="checkbox" name="vt" value="loc_physical_ms"><span>Click location ID <span class="dim">{loc_physical_ms}</span></span></label>
+  </div></fieldset>
+</form>
+<p class="p" id="gads-msg" role="status" aria-live="polite" style="margin:0"></p>
+<div class="tool-out"><span class="dim">Final URL suffix</span><output id="gads-suffix"></output><button class="btn sm" type="button" data-copy="gads-suffix">Copy suffix</button></div>
+<div class="tool-out"><span class="dim">Tracking template, if you use that field instead</span><output id="gads-template"></output><button class="btn sm" type="button" data-copy="gads-template">Copy template</button></div>
+<div class="tool-out"><span class="dim">Landing URL preview, with example values</span><output id="gads-preview"></output></div>
+<p class="p dim">How it is built: <code>utm_source</code> is always <code>google</code>, the campaign name and medium are lowercased with spaces turned into hyphens, and each parameter you tick goes to the UTM tag it fits. A parameter with no UTM tag left is sent under its own name. The preview swaps in made-up IDs and a made-up keyword.</p>
+<div class="txt post tool-cta">
+<p class="p">These tags say which campaign a click came from. Virling shows what it was worth: it links every visit to the payment it led to and credits each payment to the source, campaign and landing page of the visit that brought it. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/blog/google-ads-revenue-tracking">Google Ads revenue tracking</a>, <a href="/blog/gclid-fbclid-msclkid-vs-utm">gclid vs UTM tags</a>, <a href="/tools/utm-builder">UTM builder</a>, <a href="/tools/utm-naming-template">UTM naming convention template</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Final URL suffix or tracking template</h2>
+<p class="p">Both fields sit under URL options in Google Ads, and both accept ValueTrack parameters, which Google replaces with details of the click. They do different jobs:</p>
+<table class="cmp" style="overflow-wrap:anywhere"><thead><tr><th></th><th>Final URL suffix</th><th>Tracking template</th></tr></thead><tbody><tr><th scope="row">What you enter</th><td>Parameters only, such as <code>utm_source=google</code></td><td>A whole URL with a tag that inserts the final URL, such as <code>{lpurl}</code></td></tr><tr><th scope="row">What it does</th><td>Attaches the parameters to the end of the landing page URL</td><td>Builds the URL from the template, which can send the click through a tracker</td></tr><tr><th scope="row">With parallel tracking</th><td>The visitor lands on the final URL with the suffix on it</td><td>The visitor goes to the final URL and the template URL loads in the background</td></tr><tr><th scope="row">If it is wrong</th><td>A tag is missing or misspelled</td><td>With no URL tag at account, campaign or ad group level, the landing page URL breaks</td></tr></tbody></table>
+<p class="p">For UTM tags, use the suffix. It is the field Google describes for tracking where people go after they click, and it only adds to the address of your page. Use the template when a click tracker needs it. Google&rsquo;s own examples also use a template such as <code>{lpurl}?device={device}</code> to add parameters to the landing page, so the builder gives you that form too. Fill in one of them with these tags, not both: Google adds the suffix to the final URL first and then puts the result in place of <code>{lpurl}</code>, so the tags would appear twice.</p>
+<p class="p">A suffix or template can be set on the account and on narrower levels such as the campaign. The most specific one is used, and it replaces the broader one, so a campaign suffix has to repeat every tag you still want from the account suffix.</p>
+<p class="p">Sources, all read on 2026-11-25: Google Ads Help, <a href="https://support.google.com/google-ads/answer/9054021">Add a Final URL suffix</a>, <a href="https://support.google.com/google-ads/answer/6076199">About tracking in Google Ads</a>, <a href="https://support.google.com/google-ads/answer/10070427">Set up your tracking template</a>, <a href="https://support.google.com/google-ads/answer/7544674">About parallel tracking</a> and <a href="https://support.google.com/google-ads/answer/6305348">Set up tracking with ValueTrack parameters</a>; Google Ads API docs, <a href="https://developers.google.com/google-ads/api/docs/ads/upgraded-urls/serving-url-rules">Serving URL rules</a>.</p>
+<h2>Which UTM tag each ValueTrack parameter fits</h2>
+<p class="p">The names and what they return are from Google Ads Help, <a href="https://support.google.com/google-ads/answer/6305348">Set up tracking with ValueTrack parameters</a>, read on 2026-11-25. The last column is our mapping, and the one this builder uses.</p>
+<table class="cmp" style="overflow-wrap:anywhere"><thead><tr><th>Parameter</th><th>What it returns</th><th>UTM tag</th></tr></thead><tbody><tr><th scope="row"><code>{campaignid}</code></th><td>The campaign ID</td><td><code>utm_campaign</code>, when the campaign name is empty</td></tr><tr><th scope="row"><code>{creative}</code></th><td>A unique ID for your ad</td><td><code>utm_content</code></td></tr><tr><th scope="row"><code>{adgroupid}</code></th><td>The ad group ID</td><td><code>utm_content</code>, if the ad ID is off</td></tr><tr><th scope="row"><code>{assetgroupid}</code></th><td>The asset group ID, for Performance Max</td><td><code>utm_content</code>, if the ad ID and ad group ID are off</td></tr><tr><th scope="row"><code>{keyword}</code></th><td>The keyword in your account that matched; blank when the ad matched without keywords</td><td><code>utm_term</code></td></tr><tr><th scope="row"><code>{targetid}</code></th><td>The ID of the keyword, remarketing list or other target that triggered the ad</td><td><code>utm_term</code>, if the keyword is off</td></tr><tr><th scope="row"><code>{placement}</code></th><td>The site where the ad was clicked, or the placement targeting that matched it</td><td><code>utm_term</code>, if the keyword and target ID are off</td></tr><tr><th scope="row"><code>{matchtype}</code></th><td><code>e</code> exact, <code>p</code> phrase, <code>b</code> broad, <code>a</code> AI Max keywordless</td><td>None, sent as <code>matchtype</code></td></tr><tr><th scope="row"><code>{network}</code></th><td><code>g</code> Google search, <code>s</code> search partners, <code>d</code> Display, <code>ytv</code> YouTube, <code>x</code> Performance Max, and others</td><td>None, sent as <code>network</code></td></tr><tr><th scope="row"><code>{device}</code></th><td><code>m</code> mobile, <code>t</code> tablet, <code>c</code> computer</td><td>None, sent as <code>device</code></td></tr><tr><th scope="row"><code>{loc_physical_ms}</code></th><td>The ID of the location of the click</td><td>None, sent as <code>loc_physical_ms</code></td></tr></tbody></table>
+<p class="p">When Google cannot insert a value, it puts an empty space in place of the parameter, so <code>utm_term={keyword}</code> can arrive empty. Not every campaign type fills in every parameter. Google lists <code>{campaignid}</code>, <code>{assetgroupid}</code>, <code>{device}</code> and <code>{loc_physical_ms}</code> as fully supported in Performance Max, and says Demand Gen does not support <code>{keyword}</code>, <code>{targetid}</code>, <code>{placement}</code> or <code>{network}</code>. See also <a href="https://support.google.com/google-ads/answer/2375447">About ValueTrack parameters</a>, read on 2026-11-25.</p>
+<h2>Where to paste it in Google Ads</h2>
+<ol class="post-list"><li>For the whole account, open <b>Account settings</b> in the Admin menu and select <b>Tracking Template</b>.</li><li>For one campaign, open <b>Campaigns</b>, select the <b>Settings</b> tab and click the pencil in the Tracking template column.</li><li>Paste the suffix into <b>Final URL suffix</b>, with no question mark in front, and save.</li><li>Use the <b>Test</b> button in URL options to check that the URL still leads to your page. See <a href="https://support.google.com/google-ads/answer/6328603">test your landing page</a>.</li><li>Open the tested URL and check that the tags are still in the address bar once the page has loaded. A redirect on your own site can drop them.</li></ol>
+<p class="p">A typed campaign name only makes sense on that one campaign. If you set the suffix on the account, clear the campaign name and tick Campaign ID, so every campaign gets its own <code>utm_campaign</code>. Google says changes to tracking templates take 24 to 48 hours to show in your ads, and that setting URL options at the ad group, campaign or account level does not send your ads back for approval.</p>
+<h2>A worked example</h2>
+<p class="p">With the defaults above, the suffix is <code>utm_source=google&amp;utm_medium=cpc&amp;utm_campaign=brand-search&amp;utm_content={creative}&amp;utm_term={keyword}</code>. The template is the same text after <code>{lpurl}?</code>.</p>
+<p class="p">If the final URL is <code>https://example.com/pricing</code>, the ad ID is <code>123456789012</code> and the keyword is <code>analytics</code>, the visitor lands on <code>https://example.com/pricing?utm_source=google&amp;utm_medium=cpc&amp;utm_campaign=brand-search&amp;utm_content=123456789012&amp;utm_term=analytics</code>. With auto-tagging on, Google also adds a <code>gclid</code> (<a href="https://support.google.com/google-ads/answer/3095550">About auto-tagging</a>, read on 2026-11-25). The preview leaves it out because its value only exists for a real click.</p>
+<h2>What Virling reads from these tags</h2>
+<p class="p">Virling reads <code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code>, <code>utm_content</code> and <code>utm_term</code> from the landing URL, and not the <code>gclid</code>. Leave auto-tagging on for Google and add the UTM tags for Virling. Parameters sent under their own name, such as <code>device</code> or <code>matchtype</code>, are for other tools: Virling does not store them.</p>
+<p class="p">The builder defaults to <code>utm_medium=cpc</code> so the visit is Paid. The values <code>cpc</code>, <code>ppc</code>, <code>paid</code>, <code>paidsearch</code>, <code>paid_social</code> and <code>paidsocial</code> all count as Paid and are checked before the referrer. Without one of them, a click from google.com is sorted as Organic search, next to your unpaid visits. The full rules are in <a href="https://docs.virling.com/attribution/channels">how channels are decided</a>.</p>
+<p class="p">The campaign tag is the one to get right, because Virling groups revenue by it. Keep one style, a name or an ID, for every campaign: the same campaign tagged two ways becomes two rows. The <a href="/tools/utm-naming-template">UTM naming convention template</a> helps you write the list down, and <a href="/blog/google-ads-revenue-tracking">Google Ads revenue tracking</a> shows how to go from the tag to the payment.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Google Ads tracking template FAQ</h2>
+    <div class="faq-list">
+      <div><h3>What is the difference between a final URL suffix and a tracking template?</h3><p class="p">A final URL suffix holds only parameters, and Google Ads attaches them to the end of your landing page URL. A tracking template is a whole URL that needs a tag such as <code>{lpurl}</code> to insert the final URL, and it can point at a click tracker first. For UTM tags alone, the suffix is the simpler field.</p></div>
+      <div><h3>What should a Google Ads tracking template for UTM tags look like?</h3><p class="p">Start with <code>{lpurl}</code>, then a question mark, then the tags joined with an ampersand: <code>{lpurl}?utm_source=google&amp;utm_medium=cpc&amp;utm_campaign=brand-search</code>. If the final URL already has a question mark, Google Ads replaces the one in the template with an ampersand.</p></div>
+      <div><h3>Should I fill in both the suffix and the tracking template?</h3><p class="p">Not with the same tags. Google adds the suffix to the final URL and then puts that URL into the template, so each tag would appear twice. Put UTM tags in the suffix, and keep the template for a click tracker if you use one.</p></div>
+      <div><h3>Is there a ValueTrack parameter for the campaign name?</h3><p class="p">Google's list has <code>{campaignid}</code>, which returns the campaign ID, and no parameter for the campaign name. To see a readable name, type it in a suffix set on that campaign. To cover the whole account with one suffix, use the ID and look it up later.</p></div>
+      <div><h3>Do I need UTM tags if auto-tagging is on?</h3><p class="p">Yes, for any tool that does not read the gclid. Auto-tagging adds a gclid that Google can look up. Virling reads <code>utm_source</code>, <code>utm_medium</code> and the other UTM tags and not the gclid, so use both on the same ads.</p></div>
+      <div><h3>Why does my Google Ads traffic show as organic search?</h3><p class="p">The landing URL had no paid medium. Without <code>utm_medium=cpc</code>, Virling sorts a click that arrives from google.com by its referrer, which is Organic search. With it, the visit is Paid, because the medium is checked before the referrer.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the difference between a final URL suffix and a tracking template?", "acceptedAnswer": {"@type": "Answer", "text": "A final URL suffix holds only parameters, and Google Ads attaches them to the end of your landing page URL. A tracking template is a whole URL that needs a tag such as {lpurl} to insert the final URL, and it can point at a click tracker first. For UTM tags alone, the suffix is the simpler field."}}, {"@type": "Question", "name": "What should a Google Ads tracking template for UTM tags look like?", "acceptedAnswer": {"@type": "Answer", "text": "Start with {lpurl}, then a question mark, then the tags joined with an ampersand: {lpurl}?utm_source=google&utm_medium=cpc&utm_campaign=brand-search. If the final URL already has a question mark, Google Ads replaces the one in the template with an ampersand."}}, {"@type": "Question", "name": "Should I fill in both the suffix and the tracking template?", "acceptedAnswer": {"@type": "Answer", "text": "Not with the same tags. Google adds the suffix to the final URL and then puts that URL into the template, so each tag would appear twice. Put UTM tags in the suffix, and keep the template for a click tracker if you use one."}}, {"@type": "Question", "name": "Is there a ValueTrack parameter for the campaign name?", "acceptedAnswer": {"@type": "Answer", "text": "Google's list has {campaignid}, which returns the campaign ID, and no parameter for the campaign name. To see a readable name, type it in a suffix set on that campaign. To cover the whole account with one suffix, use the ID and look it up later."}}, {"@type": "Question", "name": "Do I need UTM tags if auto-tagging is on?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, for any tool that does not read the gclid. Auto-tagging adds a gclid that Google can look up. Virling reads utm_source, utm_medium and the other UTM tags and not the gclid, so use both on the same ads."}}, {"@type": "Question", "name": "Why does my Google Ads traffic show as organic search?", "acceptedAnswer": {"@type": "Answer", "text": "The landing URL had no paid medium. Without utm_medium=cpc, Virling sorts a click that arrives from google.com by its referrer, which is Organic search. With it, the visit is Paid, because the medium is checked before the referrer."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which Google Ads campaign brings paying customers</h2>
+<p class="p">This tool writes the tags. Virling measures what they bring: it links every visit to the payment it led to, so you see the customers and revenue behind each campaign from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("gads"), msg = document.getElementById("gads-msg"), suffixOut = document.getElementById("gads-suffix"), templateOut = document.getElementById("gads-template"), previewOut = document.getElementById("gads-preview"), copies = document.querySelectorAll("[data-copy]");
+const EX = { campaignid: "1234567890", adgroupid: "2345678901", creative: "123456789012", assetgroupid: "3456789012", keyword: "analytics", targetid: "kwd-4567890123", placement: "example.org", matchtype: "e", network: "g", device: "m", loc_physical_ms: "1023191" };
+const FIT = { utm_content: ["creative", "adgroupid", "assetgroupid"], utm_term: ["keyword", "targetid", "placement"] };
+const PAID = ["cpc", "ppc", "paid", "paidsearch", "paid_social", "paidsocial"];
+const clean = (v) => v.trim().toLowerCase().replace(/\s+/g, "-");
+const read = () => {
+  const raw = f.url.value.trim(), campaign = clean(f.campaign.value), medium = clean(f.medium.value);
+  const vt = [...f.querySelectorAll("[name=vt]:checked")].map((b) => b.value);
+  let u;
+  try { u = new URL(raw); } catch { u = null; }
+  if (!u || !/^https?:$/.test(u.protocol) || !u.hostname.includes(".")) return { err: "Fill in a full final URL, starting with https://" };
+  if (/[{}]/.test(raw)) return { err: "Remove the { } parameters from the final URL. The builder adds them to the suffix." };
+  if (/[{}]/.test(campaign + medium)) return { err: "Leave { } out of the campaign name and medium. Tick the parameter below instead." };
+  if (!medium) return { err: "Fill in a medium, such as cpc." };
+  if (!campaign && !vt.includes("campaignid")) return { err: "Fill in a campaign name, or tick Campaign ID to use the ID instead." };
+  let enc;
+  try { enc = [campaign, medium].map(encodeURIComponent); } catch { return { err: "The campaign name or medium has a character that cannot go in a URL." }; }
+  const left = new Set(vt), tags = [["utm_source", "google"], ["utm_medium", enc[1]], ["utm_campaign", enc[0] || "{campaignid}"]];
+  if (!campaign) left.delete("campaignid");
+  for (const [tag, list] of Object.entries(FIT)) {
+    const p = list.find((x) => left.has(x));
+    if (p) { tags.push([tag, `{${p}}`]); left.delete(p); }
+  }
+  for (const p of left) tags.push([p, `{${p}}`]);
+  const suffix = tags.map((t) => t.join("=")).join("&");
+  const base = new URL(u);
+  base.hash = "";
+  const href = base.href.replace(/[?#]+$/, "");
+  const preview = href + (href.includes("?") ? "&" : "?") + suffix.replace(/\{(\w+)\}/g, (_, k) => EX[k]) + u.hash;
+  const twice = [...tags.map((t) => t[0]), "gclid"].filter((k) => u.searchParams.has(k)), notes = [];
+  if (twice.length) notes.push(`Your final URL already has ${twice.join(", ")}. Remove ${twice.length > 1 ? "them" : "it"} from the final URL so nothing is sent twice.`);
+  if (u.hash) notes.push("Your final URL has a # part. Tags after a # are not read, so test the ad URL before you rely on it.");
+  if (!PAID.includes(medium)) notes.push("Virling does not count this medium as Paid. Use cpc for search ads.");
+  return { suffix, preview, notes };
+};
+const build = () => {
+  const r = read();
+  msg.textContent = r.err || r.notes.join(" ");
+  suffixOut.textContent = r.err ? "" : r.suffix;
+  templateOut.textContent = r.err ? "" : "{lpurl}?" + r.suffix;
+  previewOut.textContent = r.err ? "" : r.preview;
+  copies.forEach((b) => (b.disabled = !!r.err));
+};
+f.addEventListener("input", build);
+f.addEventListener("submit", (e) => e.preventDefault());
+copies.forEach((b) => {
+  const label = b.textContent;
+  b.addEventListener("click", async () => { try { await navigator.clipboard.writeText(document.getElementById(b.dataset.copy).textContent); b.textContent = "Copied"; } catch { b.textContent = "Copy blocked"; } setTimeout(() => (b.textContent = label), 1500); });
+});
+build();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
