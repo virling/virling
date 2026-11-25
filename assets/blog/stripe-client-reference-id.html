@@ -113,7 +113,7 @@ const id = sessions.data[0]?.client_reference_id;</pre><button class="btn sm cop
 <h2>How Virling reads it</h2>
 <p class="p">Virling credits a Stripe payment to the visits behind it. It connects with a read-only restricted key, so it needs no webhook handler, and looks for a visitor ID in this order:</p>
 <ol class="post-list"><li><code>metadata.virling_vid</code> on the charge.</li><li><code>metadata.virling_vid</code> or <code>client_reference_id</code> on the Checkout Session that created it. The metadata wins when both are set.</li><li><code>metadata.virling_vid</code> on its PaymentIntent.</li></ol>
-<p class="p">The visitor ID is in the first-party <code>virling_vid</code> cookie that the script sets. Put it in <code>client_reference_id</code>, or keep that field for your own ID and put the visitor ID in metadata:</p>
+<p class="p">The visitor ID is in the first-party <code>virling_vid</code> cookie that the script sets, and <a href="/blog/server-side-revenue-tracking">server-side revenue tracking</a> covers reading it on your server. Put it in <code>client_reference_id</code>, or keep that field for your own ID and put the visitor ID in metadata:</p>
 <div class="code block"><pre data-snippet>const session = await stripe.checkout.sessions.create({
   client_reference_id: user.id,
   metadata: { virling_vid: req.cookies.virling_vid },
