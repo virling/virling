@@ -49,6 +49,16 @@
 <p class="p">WooCommerce records who bought a download and how much they paid, but not always the visit that brought them: its own order attribution can mark orders as Unknown. Virling joins the two: a visitor ID set when someone lands, saved on the order at checkout, and read from the order with a read-only key.</p>
 <h2>What you get</h2>
 <ul class="post-list"><li><b>Each download order credited to a channel.</b> Orders are imported and joined to the visits before them. Every visit gets one channel from its first pageview: Paid, Email, AI, Organic search, Communities, Social, Referral or Direct. By default an order goes to the latest visit in the last 90 days that was not Direct.</li><li><b>Revenue per source, campaign and landing page.</b> The dashboard lists visitors, revenue and revenue per visitor for each channel, source, campaign and landing page, so a post that sent many visitors and no sales stands apart from a small one that paid.</li><li><b>Posts and newsletters measured by sales.</b> Share a <a href="https://docs.virling.com/track/links">tracked link</a> or a link with UTM tags in each post, newsletter or bio, and the Campaign tab and Links show the revenue each one brought.</li><li><b>Refunds taken off.</b> Each order&#x27;s refunds lower its revenue. Orders from the last 60 days are read again every 6 hours, so later refunds show up.</li></ul>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channel sells your downloads</h2>
+<p class="p">For WooCommerce stores that sell digital downloads. Virling is open source under AGPL: self-host it free, or use the hosted version with a 14-day free trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
 <h2>Set it up</h2>
 <ol class="post-list"><li><b>Add the site.</b> Click <b>+ Add a site</b>, enter your store&#x27;s domain and paste the script before <code>&lt;/head&gt;</code> on every page. Leave cookieless mode off: without the <code>virling_vid</code> cookie there is no visitor ID for the order to carry.</li><li><b>Create a read-only key.</b> In WordPress, open <b>WooCommerce</b>, <b>Settings</b>, <b>Advanced</b>, <b>REST API</b>, add a key and set <b>Permissions</b> to <b>Read</b>. In Virling, paste the consumer key and the consumer secret joined by a colon, as <code>ck_...:cs_...</code>, with your store&#x27;s address. The store must be reachable over https, with pretty permalinks on so <code>/wp-json/wc/v3/</code> answers. Orders from the last 90 days are imported on the first run, then new ones every minute.</li><li><b>Save the visitor ID on each order.</b> Add this to your theme&#x27;s <code>functions.php</code>, or to a snippets plugin. It covers the classic and the block checkout.</li></ol>
 <div class="code block"><pre>add_action(&#x27;woocommerce_checkout_create_order&#x27;, &#x27;virling_vid_on_order&#x27;);

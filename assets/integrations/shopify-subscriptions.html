@@ -78,6 +78,16 @@ addEventListener(&quot;load&quot;, function () {
 <p class="p">These numbers are made up, to show how to read the Retention page. They are not from a real store and not a benchmark. A store sells a $30 monthly box and nothing else, and looks at the customers who first ordered in one month, five months later:</p>
 <div style="overflow-x:auto"><table class="cmp" style="min-width:560px"><thead><tr><th>Channel</th><th>Customers</th><th>Still paying</th><th>Net LTV</th><th>Avg LTV</th></tr></thead><tbody><tr><th scope="row">Paid</th><td>100</td><td>20</td><td>$7,800</td><td>$78.00</td></tr><tr><th scope="row">Social</th><td>50</td><td>10</td><td>$4,050</td><td>$81.00</td></tr><tr><th scope="row">Organic search</th><td>40</td><td>24</td><td>$5,400</td><td>$135.00</td></tr><tr><th scope="row">Email</th><td>20</td><td>14</td><td>$3,000</td><td>$150.00</td></tr><tr><th scope="row">Unattributed</th><td>10</td><td>4</td><td>$1,200</td><td>$120.00</td></tr><tr><th scope="row">Total</th><td>220</td><td>72</td><td>$21,450</td><td>$97.50</td></tr></tbody></table></div>
 <p class="p">By first boxes, Paid wins: 100 of 220 customers, about 45%. Of the 72 still paying it has 20, about 28%. Organic search brought 40 customers and 24 of them still pay, so it has more subscribers left than Paid from fewer than half as many first orders, and each customer has paid $135 so far against $78. Before you raise the ad budget, compare that $78, minus what the boxes cost you, with what an ad customer costs. Email has the highest Avg LTV, but from 20 customers, so read it as a hint. Unattributed is 10 customers here; if it is much larger in your store, check that the snippet is in the theme and that first orders carry <code>virling_vid</code>. Still paying is read from payments, so someone who cancelled last week can still count.</p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channel brings subscribers who stay</h2>
+<p class="p">For Shopify stores that sell subscriptions. Virling is open source under AGPL: self-host it free, or use the hosted version with a 14-day free trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
 <h2>What to know</h2>
 <ul class="post-list"><li>The first payment must be in Virling. Orders older than the 60-day import are not read, so renewals of subscriptions that started before that are usually Unattributed. They still count toward revenue.</li><li>A renewal is linked by customer ID. Orders without a customer cannot be linked to a first payment.</li><li>Paid, partially refunded and refunded orders count, and voided ones count as failed. Pending and authorized orders wait until they are paid.</li><li>MRR comes from subscription prices, which are not read from Shopify, so Shopify subscribers are not part of it.</li><li>Customers are matched per provider. A subscriber who moved to your store from another payment provider counts as two customers.</li></ul>
 <h2>Frequently asked questions</h2>
