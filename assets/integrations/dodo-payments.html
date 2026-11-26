@@ -79,6 +79,16 @@ location.href = url.href;</pre></div>
 <h2>What you can see</h2>
 <p class="p">Once payments come in, these cards on the <a href="https://docs.virling.com/guides/dashboard">dashboard</a> answer questions a seller asks:</p>
 <ul class="post-list"><li><b>Which channels bring paying customers, not only visits?</b> The <b>Channels</b> card lists visitors, revenue and revenue per visitor for each channel, with Source and Campaign tabs for the site or tagged campaign behind it.</li><li><b>Which countries do buyers come from?</b> The <b>Location</b> card shows visitors, revenue and revenue per visitor by country, city and language.</li><li><b>Where do visitors drop off before paying?</b> The <b>Goals</b> card's Funnel tab shows the share that reached Visit, Signup, Checkout started and Paid, with the drop between steps.</li><li><b>Which channel's payments get refunded?</b> The <b>Channels</b> card also shows Refunded, the share of a row's payments that were refunded in whole or part.</li><li><b>Does a channel earn more than it costs?</b> The <b>Profit by channel</b> card appears once you type your monthly spend per channel in Site settings. It shows spend, credited revenue, profit and the return per dollar spent.</li></ul>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post tool-cta">
+<h2>See your Dodo Payments sales by channel</h2>
+<p class="p">For SaaS founders and sellers of digital products who sell through Dodo Payments. Virling is open source under AGPL: self-host it free, or use the hosted version with a 14-day free trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
 <h2>What stays Unattributed</h2>
 <p class="p">These payments still count toward revenue, but no channel is credited, unless the same customer has an earlier payment or trial that was credited:</p>
 <ul class="post-list"><li>Payments from a checkout session created with no <code>virling_vid</code> in its <code>metadata</code>, or from a payment link built in code without <code>metadata_virling_vid</code>.</li><li>Payments from a payment link opened from an email, a QR code or another site, or by a visitor with no visitor ID because the script was blocked or cookieless mode was on.</li><li>Payments from before the script was on your site, which usually includes the 90-day import.</li><li>Payments with a visitor ID when no visit of that visitor falls inside the <a href="https://docs.virling.com/attribution/model">lookback window</a>.</li><li>Renewals, usually, when the first payment is Unattributed or older than the first import.</li></ul>

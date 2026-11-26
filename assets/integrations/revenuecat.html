@@ -69,6 +69,16 @@
 <h2>What you can see</h2>
 <p class="p">Once purchases come in, these cards on the <a href="https://docs.virling.com/guides/dashboard">dashboard</a> answer questions an app seller asks. They credit a channel only for purchases that carry a visitor ID:</p>
 <ul class="post-list"><li><b>Which channels bring paying subscribers, not only visits?</b> The <b>Channels</b> card lists visitors, revenue and revenue per visitor for each channel, with Source and Campaign tabs for the site or tagged campaign behind it.</li><li><b>Which page do buyers see before they pay?</b> The <b>Pages</b> card shows revenue by the last page before paying, and by the first page of the visit.</li><li><b>Which channel's purchases get refunded?</b> The <b>Channels</b> card also shows Refunded, the share of a row's payments that were refunded.</li><li><b>How long do people take from first visit to first purchase?</b> The <b>Time to pay</b> card shows the median time for each channel with at least three first payments in the range. Renewals do not count.</li><li><b>Who bought most recently, and from where?</b> The <b>Recent customers</b> card shows the last 10 paying customers with amount, first source, visits before paying and time to convert.</li></ul>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channel brings paying subscribers</h2>
+<p class="p">For app and SaaS teams who sell subscriptions through a RevenueCat web paywall. Virling is open source under AGPL: self-host it free, or use the hosted version with a 14-day free trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
 <h2>What stays Unattributed</h2>
 <p class="p">These payments still count toward revenue, but no channel is credited, unless the same customer has an earlier payment or trial that was credited:</p>
 <ul class="post-list"><li>In-app purchases from people who never came through your site, since there is no visit to credit.</li><li>Purchases by a customer with no <code>virling_vid</code> attribute, or one set only after the purchase.</li><li>Purchases with a visitor ID when no visit of that visitor falls inside the <a href="https://docs.virling.com/attribution/model">lookback window</a>.</li><li>One-time purchases in the 90-day import whose customer has no <code>virling_vid</code>.</li><li>Renewals with no <code>virling_vid</code> of their own whose first payment is Unattributed or not in Virling.</li></ul>
