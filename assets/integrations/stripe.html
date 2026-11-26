@@ -71,6 +71,15 @@ await stripe.paymentIntents.create({
   metadata: { virling_vid: req.cookies.virling_vid },
 });</pre></div>
 <p class="p">If you already use <code>client_reference_id</code> for something else, put the ID in the session's <code>metadata.virling_vid</code> instead.</p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post tool-cta">
+<h2>See your Stripe payments by channel</h2>
+<p class="p">For SaaS and other businesses that bill through Stripe, Virling connects with a read-only restricted key. Self-host it free under AGPL, or use the hosted version with a 14-day free trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
 <h2>Which checkout needs code</h2>
 <p class="p">Each way of charging on Stripe carries the visitor ID in its own place.</p>
 <div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>How you charge</th><th>How the visit is joined</th><th>Code needed</th><th>Guide</th></tr></thead><tbody><tr><th scope="row">Checkout</th><td><code>client_<wbr>reference_<wbr>id</code> or <code>metadata.<wbr>virling_<wbr>vid</code> on the Checkout Session</td><td>Yes, one line where your server creates the session</td><td><a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a></td></tr><tr><th scope="row">Payment Links</th><td>The script adds <code>client_<wbr>reference_<wbr>id</code> to the <code>buy.stripe.com</code> link, and Stripe copies it onto the Checkout Session</td><td>No, for a normal link on a page that runs the script</td><td><a href="/blog/stripe-payment-links-utm-tracking">Stripe Payment Link UTM tracking</a></td></tr><tr><th scope="row">Elements</th><td><code>metadata.<wbr>virling_<wbr>vid</code> on the PaymentIntent</td><td>Yes, where your server creates the PaymentIntent. For a subscription, set it on the PaymentIntent of the first invoice</td><td><a href="/blog/stripe-elements-utm-tracking">Stripe Elements UTM tracking</a></td></tr><tr><th scope="row">Pricing table</th><td>The <code>client-<wbr>reference-<wbr>id</code> attribute, which Stripe copies onto the Checkout Session</td><td>Yes, a short snippet on the page</td><td><a href="/blog/stripe-pricing-table-utm-tracking">Stripe pricing table UTM tracking</a></td></tr><tr><th scope="row">Invoices</th><td>First invoice of a subscription: its Checkout Session. Invoice without a subscription: <code>metadata.<wbr>virling_<wbr>vid</code> on the charge or its PaymentIntent, or a match by email</td><td>Yes, to set the ID at checkout or on the PaymentIntent, or to send the email as an <code>identify</code> event</td><td><a href="/blog/stripe-invoice-attribution">Stripe invoice attribution</a></td></tr></tbody></table></div>
