@@ -1,10 +1,11 @@
 use duckdb::{Connection, params};
 
-const TABLES: [&str; 12] = [
+const TABLES: [&str; 13] = [
     "events",
     "bot_events",
     "reads",
     "vitals",
+    "js_errors",
     "payments",
     "trials",
     "attribution_dirty",

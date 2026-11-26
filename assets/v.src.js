@@ -21,8 +21,8 @@
     i < 0 && ck(31536000, dom = 0);
   }
 
-  var send = (name, goal, u, e, x, p) => {
-    var body = JSON.stringify([{ n: name, u: u || L.href, e, x, p, r: ref, s: site, v: vid, w: screen.width, d: devicePixelRatio, g: goal, l: n.language, z: Intl.DateTimeFormat().resolvedOptions().timeZone || void 0, k: nav, b: n.webdriver || !n.languages?.length || soft || void 0 }]);
+  var send = (name, goal, u, e, x, p, f) => {
+    var body = JSON.stringify([{ n: name, u: u || L.href, e, x, p, f, r: ref, s: site, v: vid, w: screen.width, d: devicePixelRatio, g: goal, l: n.language, z: Intl.DateTimeFormat().resolvedOptions().timeZone || void 0, k: nav, b: n.webdriver || !n.languages?.length || soft || void 0 }]);
     ref = nav = null;
     n.sendBeacon?.(endpoint, body) || fetch(endpoint, { method: "POST", body, keepalive: true });
   };
@@ -41,9 +41,15 @@
   on(d, "visibilitychange", tick);
   on(w, "scroll", depth);
 
+  // Uncaught errors and rejections: message, file without its query and line, each once and at most 5 per page view.
+  var errs, oops = (m, f = "", l = 0, k = m + f + l) =>
+    errs[k] || errs.n > 4 || send("error", (errs[k] = ++errs.n, "" + m).slice(0, 300), 0, 0, l, 0, f.split(/[?#]/)[0]);
+  on(w, "error", (e) => e.message && oops(e.message, e.filename, e.lineno));
+  on(w, "unhandledrejection", (e) => oops(e.reason?.message || e.reason));
+
   var pageview = () => {
     var path = L.pathname + L.search;
-    if (path != last) { last && report(); last = path; href = L.href; send("pageview"); }
+    if (path != last) { last && report(); last = path; href = L.href; errs = { n: 0 }; send("pageview"); }
   };
 
   // Routers navigate with pushState or replaceState; pageview skips a repeat of the same URL.

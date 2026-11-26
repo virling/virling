@@ -642,6 +642,65 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn browser_errors_are_stored_scrubbed_capped_and_expire() {
+        let (_dir, state, store) = setup().await;
+        let site = site_id(&state).await;
+        let err = |m: &str| {
+            format!(
+                r#"{{"n":"error","u":"https://example.com/app?id=7","s":"example.com","v":"verrors01","g":"{m}","f":"https://example.com/app.js?v=3","x":12}}"#
+            )
+        };
+        let one = err("Failed https://api.x.com/a?token=s3cret for ann@x.com");
+        assert_eq!(post(&state, &one, UA).await, StatusCode::ACCEPTED);
+        let batch: Vec<String> = (0..8).map(|i| err(&format!("boom {i}"))).collect();
+        post(&state, &format!("[{}]", batch.join(",")), UA).await;
+        post(&state, &err(" "), UA).await;
+        let rows = || -> Vec<(String, String, String, String, u32)> {
+            let conn = store.conn_for_test();
+            let mut stmt = conn
+                .prepare("SELECT visitor_id, path, message, source, line FROM js_errors ORDER BY message")
+                .unwrap();
+            stmt.query_map([], |r| {
+                Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?, r.get(4)?))
+            })
+            .unwrap()
+            .map(Result::unwrap)
+            .collect()
+        };
+        let stored = rows();
+        assert_eq!(
+            stored.len(),
+            6,
+            "one request stores at most 5 errors, a blank one none"
+        );
+        assert_eq!(
+            stored[0],
+            (
+                "verrors01".into(),
+                "/app".into(),
+                "Failed https://api.x.com/a for [email]".into(),
+                "https://example.com/app.js".into(),
+                12
+            )
+        );
+        assert_eq!(
+            store.count_events(&site).unwrap(),
+            0,
+            "errors are not visits"
+        );
+        store
+            .conn_for_test()
+            .execute_batch(
+                "UPDATE js_errors SET ts = now() - INTERVAL 31 DAY WHERE message LIKE 'boom%'",
+            )
+            .unwrap();
+        post(&state, &err("later"), UA).await;
+        assert_eq!(rows().len(), 2, "errors older than 30 days are dropped");
+        store.purge_site(&site).unwrap();
+        assert!(rows().is_empty());
+    }
+
+    #[tokio::test]
     async fn identify_keeps_only_a_hash_of_the_email() {
         let (_dir, state, _store) = setup().await;
         let mac = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
