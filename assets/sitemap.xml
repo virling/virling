@@ -61,6 +61,8 @@
   <url><loc>https://virling.com/integrations/woocommerce-online-courses</loc></url>
   <url><loc>https://virling.com/integrations/stripe-mobile-apps</loc></url>
   <url><loc>https://virling.com/integrations/woocommerce-memberships</loc></url>
+  <url><loc>https://virling.com/integrations/paddle-digital-products</loc></url>
+  <url><loc>https://virling.com/integrations/woocommerce-agencies</loc></url>
   <url><loc>https://virling.com/integrations/shopify-digital-products</loc></url>
   <url><loc>https://virling.com/integrations/paddle-developer-tools</loc></url>
   <url><loc>https://virling.com/integrations/stripe-coaching-and-consulting</loc></url>
@@ -310,6 +312,11 @@
   <url><loc>https://virling.com/blog/omnisend-revenue-tracking</loc></url>
   <url><loc>https://virling.com/blog/path-to-purchase-by-channel</loc></url>
   <url><loc>https://virling.com/blog/utm-id-and-newer-utm-parameters</loc></url>
+  <url><loc>https://virling.com/blog/remix-paddle-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/sveltekit-lemonsqueezy-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/customer-io-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/tiktok-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/google-ai-mode-revenue-tracking</loc></url>
   <url><loc>https://virling.com/vs</loc></url>
   <url><loc>https://virling.com/vs/datafast</loc></url>
   <url><loc>https://virling.com/vs/databull</loc></url>
@@ -436,5 +443,8 @@
   <url><loc>https://virling.com/tools/influencer-utm-link-generator</loc></url>
   <url><loc>https://virling.com/tools/incrementality-calculator</loc></url>
   <url><loc>https://virling.com/tools/stripe-mrr-calculator</loc></url>
+  <url><loc>https://virling.com/tools/meta-ads-url-parameters-builder</loc></url>
+  <url><loc>https://virling.com/tools/ga4-channel-group-checker</loc></url>
+  <url><loc>https://virling.com/tools/poas-calculator</loc></url>
   <url><loc>https://virling.com/what-we-dont-do</loc></url>
 </urlset>

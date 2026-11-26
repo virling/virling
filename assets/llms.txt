@@ -127,6 +127,9 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Influencer UTM link generator](https://virling.com/tools/influencer-utm-link-generator): paste a list of creators to get one UTM link each for Instagram, TikTok, YouTube and more, then copy the links or download a CSV
 - [Incrementality calculator](https://virling.com/tools/incrementality-calculator): enter test and control results to get incremental lift, customers, revenue, cost per customer and ROAS, with a 95% check
 - [Stripe MRR calculator](https://virling.com/tools/stripe-mrr-calculator): drop a Stripe subscriptions CSV export to get MRR, ARR, active subscriptions and ARPU, with yearly, monthly and weekly plans normalised in your browser
+- [Facebook ads URL parameters builder](https://virling.com/tools/meta-ads-url-parameters-builder): build the URL parameters string for Facebook and Instagram ads from Meta's campaign, ad set and ad parameters, with a paid utm_medium and a preview
+- [GA4 default channel grouping checker](https://virling.com/tools/ga4-channel-group-checker): check which GA4 default channel group a UTM link or source and medium lands in, the rule that matched, and why traffic shows as Unassigned
+- [POAS calculator](https://virling.com/tools/poas-calculator): profit on ad spend from ad spend, revenue, product cost, fees, shipping and refunds, with ROAS, gross profit and break-even ROAS beside it
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -193,6 +196,8 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Paddle for developer tools](https://virling.com/integrations/paddle-developer-tools): for APIs, CLIs and SDKs sold through Paddle Billing: each payment tied to the GitHub, docs or package page that brought the buyer
 - [Stripe for coaches and consultants](https://virling.com/integrations/stripe-coaching-and-consulting): for coaches and consultants paid through Stripe: which Payment Links, invoices, deposits and retainers link to a visit, and which stay Unattributed
 - [Stripe for browser extensions](https://virling.com/integrations/stripe-browser-extensions): for browser extensions that sell upgrades through Stripe: which post, search or video brought each paying user, how to pass the visitor ID and what stays Unattributed
+- [Paddle for digital products](https://virling.com/integrations/paddle-digital-products): for sellers of templates, ebooks, fonts and downloads on Paddle: each one-time sale and license tied to the channel and campaign that brought the buyer
+- [WooCommerce agency client reporting](https://virling.com/integrations/woocommerce-agencies): for agencies running several client WooCommerce stores: each order tied to the channel and campaign that brought the buyer, per client site, with a shareable report
 
 ## Compare
 
@@ -470,6 +475,11 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [Omnisend revenue tracking: which emails bring orders](https://virling.com/blog/omnisend-revenue-tracking): Omnisend revenue tracking: set UTM tags on campaigns, automations and SMS, store the visitor ID on each Shopify or WooCommerce order, and see which email sold.
 - [Path to purchase: how many visits before a customer pays](https://virling.com/blog/path-to-purchase-by-channel): What a path to purchase is, how to read time to buy and visits before paying per channel, and why the first visit and the credited visit often differ.
 - [utm_id parameter and the newer UTM tags, explained](https://virling.com/blog/utm-id-and-newer-utm-parameters): What utm_id, utm_source_platform, utm_creative_format and utm_marketing_tactic mean, with example URLs, and how to name utm_id to join a spend sheet.
+- [Customer.io revenue tracking: see which emails lead to payments](https://virling.com/blog/customer-io-revenue-tracking): Customer.io revenue tracking for SaaS: set UTM tags on campaign, broadcast and transactional links and tie each click to the Stripe payment after it.
+- [Google AI Mode traffic tracking: what you can see and what pays](https://virling.com/blog/google-ai-mode-revenue-tracking): AI Mode clicks arrive from google.com and count as Organic search. What Google documents, what you cannot split, and how to test one click and payment.
+- [Remix Paddle checkout UTM tracking: pass the visitor ID](https://virling.com/blog/remix-paddle-utm-tracking): Remix Paddle checkout UTM tracking: read the virling_vid cookie in a loader, pass it to Paddle.js as customData, and see which channel brought each sale.
+- [SvelteKit LemonSqueezy UTM tracking: the source of each order](https://virling.com/blog/sveltekit-lemonsqueezy-utm-tracking): Add the script to app.html, read the virling_vid cookie in a SvelteKit form action and pass it as LemonSqueezy custom data, so each order shows its source.
+- [TikTok revenue tracking: which videos bring paying customers](https://virling.com/blog/tiktok-revenue-tracking): How to track revenue from TikTok: tag your bio link and link-in-bio buttons, handle the in-app browser, and see which TikTok visits turn into paying customers.
 
 ## Source
 
