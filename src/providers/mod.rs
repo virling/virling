@@ -8,6 +8,7 @@ mod shopify;
 mod stripe;
 mod woocommerce;
 
+pub(crate) use dodo::BACKFILL as DODO_BACKFILL;
 use time::OffsetDateTime;
 
 /// One payment as a provider reports it, before currency conversion.

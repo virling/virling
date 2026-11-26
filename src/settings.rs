@@ -1069,6 +1069,12 @@ pub async fn products(
         tracing::error!(%err, "saving connection products failed");
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     }
+    let store = state.events.clone();
+    let (site, provider) = (ctx.site.id.clone(), input.provider.clone());
+    let since = OffsetDateTime::now_utc() - crate::providers::DODO_BACKFILL;
+    if let Err(code) = blocking(move || store.forget_payments(&site, &provider, since)).await {
+        return code.into_response();
+    }
     Redirect::to(&app_path(&ctx.site.domain, "settings#payments")).into_response()
 }
 
