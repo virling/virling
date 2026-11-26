@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>utm_id parameter and the newer UTM tags, explained</title>
+<meta name="description" content="What utm_id, utm_source_platform, utm_creative_format and utm_marketing_tactic mean, with example URLs, and how to name utm_id to join a spend sheet.">
+<link rel="canonical" href="https://virling.com/blog/utm-id-and-newer-utm-parameters">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/utm-id-and-newer-utm-parameters">
+<meta property="og:title" content="utm_id parameter and the newer UTM tags, explained">
+<meta property="og:description" content="What utm_id, utm_source_platform, utm_creative_format and utm_marketing_tactic mean, with example URLs, and how to name utm_id to join a spend sheet.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"utm_id parameter and the newer UTM tags, explained","item":"https://virling.com/blog/utm-id-and-newer-utm-parameters"}]},{"@type":"BlogPosting","headline":"utm_id parameter and the newer UTM tags, explained","description":"What utm_id, utm_source_platform, utm_creative_format and utm_marketing_tactic mean, with example URLs, and how to name utm_id to join a spend sheet.","datePublished":"2026-11-26","dateModified":"2026-11-26","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/utm-id-and-newer-utm-parameters"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the utm_id parameter?","acceptedAnswer":{"@type":"Answer","text":"utm_id is the campaign ID. Google describes it as the parameter that identifies a specific campaign or promotion, and asks you to use the same IDs you use when you upload campaign data to Google Analytics."}},{"@type":"Question","name":"Is utm_id required?","acceptedAnswer":{"@type":"Answer","text":"No. A link with utm_source, utm_medium and utm_campaign is complete. Add utm_id when a report or a spend sheet joins rows on a campaign ID rather than a campaign name."}},{"@type":"Question","name":"What is utm_source_platform for?","acceptedAnswer":{"@type":"Answer","text":"It names the platform that sent the traffic, such as a buying platform that sets budgets and targeting. Google gives Search Ads 360 and Display & Video 360 as examples."}},{"@type":"Question","name":"Does Google Analytics report utm_creative_format and utm_marketing_tactic?","acceptedAnswer":{"@type":"Answer","text":"Not at the time of writing. Google's help page says both are not currently reported in Google Analytics properties, so they only help a tool that reads the raw URL."}},{"@type":"Question","name":"Does Virling store utm_id or the other newer tags?","acceptedAnswer":{"@type":"Answer","text":"No. Virling stores utm_source, utm_medium, utm_campaign, utm_content and utm_term. It ignores utm_id, utm_source_platform, utm_creative_format and utm_marketing_tactic, and keeps the page path without its query string, so those values are not saved."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-26</span>
+      <h1>utm_id parameter and the newer UTM tags, explained</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-26.</p>
+<p class="p">The <b>utm_id</b> parameter is the campaign ID: a short, stable code that names one campaign, so a report can join visits to rows in another system, such as a spend sheet or a campaign data upload. Google's help page lists it next to three other tags: <code>utm_source_platform</code> for the platform that sent the traffic, <code>utm_creative_format</code> for the type of creative and <code>utm_marketing_tactic</code> for the targeting. All four are optional. If your analytics tool does not read them, the five classic tags are enough.</p>
+<h2>The four newer UTM parameters</h2>
+<p class="p">The definitions below come from Google's help page <a href="https://support.google.com/analytics/answer/10917952">URL builders: collect campaign data with custom URLs</a>, as it reads in November 2026. Every example URL is made up.</p>
+<table class="cmp"><thead><tr><th>Parameter</th><th>What Google says it is</th><th>Google's examples</th><th>Reported in Google Analytics</th></tr></thead><tbody><tr><th scope="row"><code>utm_id</code></th><td>Campaign ID for a specific campaign or promotion</td><td>The same IDs you use when uploading campaign data</td><td>Yes</td></tr><tr><th scope="row"><code>utm_<wbr>source_<wbr>platform</code></th><td>The platform that directed the traffic, such as a buying platform that sets budgets and targeting</td><td>Search Ads 360, Display &amp; Video 360</td><td>Yes</td></tr><tr><th scope="row"><code>utm_<wbr>creative_<wbr>format</code></th><td>Type of creative</td><td>display, native, video, search</td><td>Not currently</td></tr><tr><th scope="row"><code>utm_<wbr>marketing_<wbr>tactic</code></th><td>Targeting criteria applied to a campaign</td><td>remarketing, prospecting</td><td>Not currently</td></tr></tbody></table>
+<p class="p">Google's page also says values are case sensitive, recommends setting <code>utm_id</code> and <code>utm_source_platform</code> next to source, medium and campaign, and shows <code>(not set)</code> in reports for any of them that is missing.</p>
+<h3>utm_id</h3>
+<p class="p">Use one ID per campaign and keep it for the life of the campaign. Google asks you to use the same ID you use in a <a href="https://support.google.com/analytics/answer/10071305">campaign data upload</a>, which is the point of the tag: the ID is the key that joins the two.</p>
+<div class="code block"><pre>https://example.com/pricing?utm_source=linkedin&amp;utm_medium=paidsocial&amp;utm_campaign=spring-launch&amp;utm_id=c0142</pre></div>
+<h3>utm_source_platform</h3>
+<p class="p">This is the tool that bought or managed the traffic, which is not always the site that sent it. A search ad bought through Search Ads 360 has <code>utm_source=google</code> and a source platform of Search Ads 360. The space must be encoded in the URL.</p>
+<div class="code block"><pre>https://example.com/?utm_source=google&amp;utm_medium=cpc&amp;utm_campaign=brand-search&amp;utm_id=c0150&amp;utm_source_platform=Search+Ads+360</pre></div>
+<h3>utm_creative_format</h3>
+<p class="p">The kind of ad, not which ad. Two video ads in one campaign share <code>utm_creative_format=video</code>; <a href="/blog/utm-content-vs-utm-term">utm_content</a> is what tells them apart.</p>
+<div class="code block"><pre>https://example.com/?utm_source=youtube&amp;utm_medium=cpv&amp;utm_campaign=spring-launch&amp;utm_creative_format=video</pre></div>
+<h3>utm_marketing_tactic</h3>
+<p class="p">Who the ad was shown to: people who visited before, or new people.</p>
+<div class="code block"><pre>https://example.com/pricing?utm_source=facebook&amp;utm_medium=paidsocial&amp;utm_campaign=spring-launch&amp;utm_marketing_tactic=remarketing</pre></div>
+<p class="p">For the five tags these sit beside, see <a href="/blog/utm-source-vs-utm-medium">utm_source vs utm_medium</a> and <a href="/blog/utm-content-vs-utm-term">utm_content vs utm_term</a>.</p>
+<h2>What Virling stores from them today</h2>
+<p class="p">When the <a href="https://docs.virling.com/track/script">Virling script</a> sends a pageview, the server reads five tags from the landing URL's query string: <code>utm_source</code> (or <code>ref</code> when it is missing), <code>utm_medium</code>, <code>utm_campaign</code>, <code>utm_content</code> and <code>utm_term</code>. Each value is trimmed and cut to 200 characters and stored with the pageview.</p>
+<ul class="post-list"><li><b>utm_id, utm_source_platform, utm_creative_format and utm_marketing_tactic are not read.</b> The page is stored as its path without the query string, so these values are not kept anywhere in Virling.</li><li><b>They do no harm.</b> The link still works, the five classic tags on it are still read, and the channel is set the same way as without them.</li><li><b>The <a href="/tools/utm-checker">UTM checker</a> knows all nine names.</b> It does not flag the newer four as unknown, but it does flag a made-up <code>utm_</code> name such as <code>utm_campain</code>.</li><li><b>The <a href="/tools/utm-builder">UTM builder</a> has fields for the five classic tags only.</b> Add <code>utm_id</code> to the end of the link by hand if you need it.</li></ul>
+<h3>Do you need the newer tags?</h3>
+<p class="p">For revenue in Virling, no: rows come from <code>utm_campaign</code> (the Campaign tab), <code>utm_term</code> (the Keyword tab) and the channel set from <code>utm_medium</code>, the referrer and <code>utm_source</code>. Add <code>utm_id</code> when another tool joins on it, such as a Google Analytics campaign data upload, or when your own spend sheet keys rows on an ID. Leave <code>utm_creative_format</code> and <code>utm_marketing_tactic</code> out unless a tool you use reads them, because Google says its own reports do not yet.</p>
+<h2>A naming table to join campaigns to a spend sheet</h2>
+<p class="p">A small team usually keeps spend in a sheet: one row per campaign, with what it cost. The join only works if every link for that campaign carries the same ID, and the ID maps to exactly one campaign name. Since Virling reports by <code>utm_campaign</code>, keep the two locked together: one ID, one name, for good. This sheet is made up:</p>
+<table class="cmp"><thead><tr><th>utm_id</th><th>utm_campaign</th><th>Where it runs, and spend</th></tr></thead><tbody><tr><th scope="row"><code>c0142</code></th><td><code>spring-launch</code></td><td>LinkedIn ads (<code>linkedin</code>, <code>paidsocial</code>), $600</td></tr><tr><th scope="row"><code>c0143</code></th><td><code>spring-launch-search</code></td><td>Google search ads (<code>google</code>, <code>cpc</code>), $450</td></tr><tr><th scope="row"><code>c0144</code></th><td><code>issue-42</code></td><td>Newsletter (<code>newsletter</code>, <code>email</code>), $0</td></tr></tbody></table>
+<p class="p">The rules behind it:</p>
+<ul class="post-list"><li><b>The ID is a code, not a description.</b> A letter and a number, such as <code>c0142</code>. Descriptions belong in <code>utm_campaign</code>.</li><li><b>Give out IDs from the sheet.</b> Add the row first, then build the links, so no one invents an ID in an ad platform.</li><li><b>One source and medium per ID</b> if you want spend per channel. A campaign on LinkedIn and Google gets two IDs and two names, as above.</li><li><b>Never reuse an ID.</b> When a campaign ends, its ID retires with it.</li><li><b>Lowercase, no spaces.</b> Google treats values as case sensitive, so <code>C0142</code> and <code>c0142</code> are two campaigns.</li></ul>
+<p class="p">Then the join is a lookup: take the rows of the Campaign tab in Virling, or the <code>campaign</code> dimension of the <a href="https://docs.virling.com/reference/api">read API</a>, look up each <code>utm_campaign</code> in the sheet, and put spend next to revenue.</p>
+<h2>Mistakes that split one campaign into many rows</h2>
+<ul class="post-list"><li><b>Capitals in one link.</b> <code>Spring-Launch</code> and <code>spring-launch</code> are two rows in Virling and two in Google Analytics.</li><li><b>Two names for one ID.</b> An ad set copied from last month keeps <code>utm_id=c0142</code> but says <code>utm_campaign=spring-launch-v2</code>. The ID join still works in a tool that reads <code>utm_id</code>, but Virling shows two campaign rows and your lookup misses one.</li><li><b>The spreadsheet ate the ID.</b> An ID such as <code>0142</code> becomes <code>142</code> when a sheet reads it as a number. Start IDs with a letter.</li><li><b>The month in the campaign name.</b> <code>spring-launch-march</code> and <code>spring-launch-april</code> split one campaign in two. Use the date range of the report instead.</li><li><b>A space or a stray character.</b> <code>spring launch</code> may arrive as <code>spring+launch</code> or <code>spring%20launch</code>, and a trailing space copied from a sheet makes another value in tools that do not trim.</li><li><b>The platform ID in one place and yours in another.</b> If the Google Ads URL suffix fills <code>utm_id</code> with the platform's campaign ID and your other links use sheet IDs, pick one scheme and use it everywhere.</li></ul>
+<p class="p">Paste a batch of finished links into the <a href="/tools/utm-checker">UTM checker</a> before they go out. It flags capitals, spaces, empty values and duplicate tags. Two names for one ID only show up in the sheet, so check new rows there.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+<h2>Frequently asked questions</h2>
+<h3>What is the utm_id parameter?</h3><p class="p">utm_id is the campaign ID. Google describes it as the parameter that identifies a specific campaign or promotion, and asks you to use the same IDs you use when you upload campaign data to Google Analytics.</p>
+<h3>Is utm_id required?</h3><p class="p">No. A link with utm_source, utm_medium and utm_campaign is complete. Add utm_id when a report or a spend sheet joins rows on a campaign ID rather than a campaign name.</p>
+<h3>What is utm_source_platform for?</h3><p class="p">It names the platform that sent the traffic, such as a buying platform that sets budgets and targeting. Google gives Search Ads 360 and Display &amp; Video 360 as examples.</p>
+<h3>Does Google Analytics report utm_creative_format and utm_marketing_tactic?</h3><p class="p">Not at the time of writing. Google's help page says both are not currently reported in Google Analytics properties, so they only help a tool that reads the raw URL.</p>
+<h3>Does Virling store utm_id or the other newer tags?</h3><p class="p">No. Virling stores utm_source, utm_medium, utm_campaign, utm_content and utm_term. It ignores utm_id, utm_source_platform, utm_creative_format and utm_marketing_tactic, and keeps the page path without its query string, so those values are not saved.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the revenue behind every campaign</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
