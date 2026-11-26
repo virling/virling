@@ -66,7 +66,7 @@
 });
 // Send the customer to checkout.url</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
 <p class="p">Virling looks for <code>virling_vid</code> in the order's <code>metadata</code> first, then the order's custom field data, then the customer's <code>metadata</code>, then a checkout link's <code>reference_id</code>.</p>
-<p class="p">On Next.js, the route handler version is in <a href="/blog/nextjs-polar-utm-tracking">Next.js Polar UTM tracking</a>. On SvelteKit, the server route version is in <a href="/blog/sveltekit-polar-utm-tracking">SvelteKit Polar UTM tracking</a>.</p>
+<p class="p">On Next.js, the route handler version is in <a href="/blog/nextjs-polar-utm-tracking">Next.js Polar UTM tracking</a>. On SvelteKit, the server route version is in <a href="/blog/sveltekit-polar-utm-tracking">SvelteKit Polar UTM tracking</a>. On Laravel, the controller version is in <a href="/blog/laravel-polar-utm-tracking">Laravel Polar UTM tracking</a>.</p>
 <h2>Step 4: connect Polar</h2>
 <p class="p">In Polar, create an Organization Access Token with the <code>orders:read</code> and <code>refunds:read</code> scopes, plus <code>subscriptions:read</code> so Retention can tell who still pays, and paste it into Virling. Production and sandbox tokens both work. Virling imports orders from the last 90 days on the first run, then new orders every minute, and checks unpaid orders again every 10 minutes for up to 30 days. There is no webhook to set up.</p>
 <p class="p">The full setup is in <a href="https://docs.virling.com/payments/polar">the Polar docs</a> and on the <a href="/integrations/polar">Polar integration page</a>.</p>
