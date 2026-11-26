@@ -292,6 +292,17 @@
   <url><loc>https://virling.com/blog/nuxt-polar-utm-tracking</loc></url>
   <url><loc>https://virling.com/blog/rails-paddle-utm-tracking</loc></url>
   <url><loc>https://virling.com/blog/telegram-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/cal-com-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/django-paddle-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/ga4-unassigned-traffic-revenue</loc></url>
+  <url><loc>https://virling.com/blog/gbraid-wbraid-gad-source</loc></url>
+  <url><loc>https://virling.com/blog/incrementality-testing-small-budget</loc></url>
+  <url><loc>https://virling.com/blog/mailerlite-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/native-ads-revenue-tracking</loc></url>
+  <url><loc>https://virling.com/blog/react-paddle-utm-tracking</loc></url>
+  <url><loc>https://virling.com/blog/srsltid-parameter</loc></url>
+  <url><loc>https://virling.com/blog/stripe-checkout-referral-traffic</loc></url>
+  <url><loc>https://virling.com/blog/tally-utm-tracking</loc></url>
   <url><loc>https://virling.com/vs</loc></url>
   <url><loc>https://virling.com/vs/datafast</loc></url>
   <url><loc>https://virling.com/vs/databull</loc></url>
@@ -416,5 +427,6 @@
   <url><loc>https://virling.com/tools/microsoft-ads-utm-builder</loc></url>
   <url><loc>https://virling.com/tools/tiktok-ads-utm-builder</loc></url>
   <url><loc>https://virling.com/tools/influencer-utm-link-generator</loc></url>
+  <url><loc>https://virling.com/tools/incrementality-calculator</loc></url>
   <url><loc>https://virling.com/what-we-dont-do</loc></url>
 </urlset>
