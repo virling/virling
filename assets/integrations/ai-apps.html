@@ -60,6 +60,16 @@
 <h2>Credit packs, subscriptions, upgrades and refunds</h2>
 <p class="p">This is the same on Stripe, Polar, Creem and Dodo Payments, except where a provider is named.</p>
 <table class="cmp"><thead><tr><th>What happens</th><th>How Virling credits it</th><th>Where it shows</th></tr></thead><tbody><tr><th scope="row">First credit pack</th><td>To a visit of the visitor ID that checkout carried, by default the latest visit in the last 90 days that was not Direct</td><td>Channels, Payments, New customers and Retention</td></tr><tr><th scope="row">Later credit pack</th><td>A renewal, as any payment after the customer&#x27;s first. It keeps the channel of that first payment, whether a pack or a plan</td><td>Channels and Payments, marked as a renewal, and in net LTV on Retention</td></tr><tr><th scope="row">Subscription</th><td>A first payment is credited like a first credit pack, and every renewal keeps its channel. After a free trial, a first charge with no visitor ID of its own is credited to the visits before the trial. On Stripe, only for trials that started after you connected</td><td>Channels, Payments, New customers and Retention. Renewals show like a later credit pack, and so does the first charge after a trial on Stripe and Polar</td></tr><tr><th scope="row">Upgrade</th><td>The charge keeps the channel of the customer&#x27;s first payment</td><td>Same as a later credit pack</td></tr><tr><th scope="row">Refund</th><td>Lowers its payment, on that payment&#x27;s date. The credit stays with the same channel. How disputes and refunds on older payments are read differs, so see your provider&#x27;s page in the <a href="https://docs.virling.com/payments/">payments docs</a></td><td>Refunded on the Channels card, the refunded filter on Payments, and refund rate and net LTV on Retention</td></tr></tbody></table>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channel brings users who pay</h2>
+<p class="p">For AI apps that sell credits or subscriptions. Virling is open source under AGPL: self-host it free, or use the hosted version with a 14-day free trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
 <h2>X, Product Hunt, Reddit, YouTube and AI assistants</h2>
 <p class="p">Every session gets one channel from its first pageview, and the referrer is kept too, so each source shows on its own row:</p>
 <ul class="post-list"><li><b>Social</b>: X (<code>x.com</code>, <code>t.co</code>), YouTube, LinkedIn, TikTok and others.</li><li><b>Communities</b>: Product Hunt, Reddit, Hacker News, Indie Hackers and others.</li><li><b>AI</b>: visits from ChatGPT, Perplexity, Claude, Gemini, Copilot and DeepSeek.</li></ul>

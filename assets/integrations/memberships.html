@@ -59,6 +59,16 @@
 <p class="p">The Retention page groups members by the channel, referrer and campaign of their first payment: members acquired, how many are still paying, first-payment revenue, refunded amount, net LTV, average LTV, refund rate and 30-day churn. A member is still paying while the provider reports a live subscription for them; a subscription cancelled at the end of its period stays live until the period ends. MRR, the list price of live subscriptions per month in USD, shows on Latest payments. Until a site has 60 days of payments, the Retention page leads with refund rate and 30-day churn instead of LTV.</p>
 <p class="p">Communities run on many hosts. A visit from <code>reddit.com</code> or <code>indiehackers.com</code> counts as Communities, and one from <code>discord.com</code> or <code>slack.com</code> as Social. Links shared inside apps often arrive with no referrer, so tag the ones you control with <code>utm_source</code> and <code>utm_campaign</code>, or make a <a href="https://docs.virling.com/track/links">tracked link</a>. <a href="/blog/community-revenue-tracking">Community revenue tracking</a> and <a href="/blog/discord-revenue-tracking">Discord revenue tracking</a> walk through the tags.</p>
 <p class="p">Each site has one attribution model. Last non-direct is the default; first touch credits the earliest session in the lookback window of 30, 60, 90 or 365 days. Saving either setting rebuilds attribution for every payment, history included.</p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channel brings members who stay</h2>
+<p class="p">For membership sites and paid communities. Virling is open source under AGPL: self-host it free, or use the hosted version with a 14-day free trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
 <h2>What to know</h2>
 <ul class="post-list"><li>The first payment must be in Virling. Payments older than the 90-day backfill are not imported, so renewals of memberships that started before that are Unattributed. They still count toward revenue.</li><li>Members are matched per provider by the provider&#x27;s customer ID. A member who moved from one provider to another counts as two.</li><li>A member who pays from a link in an email or a DM, without visiting your site first, has no visit to credit and is Unattributed.</li><li>Virling does not manage access, gate content or run the community itself; keep your membership platform for that.</li></ul>
 <h2>Open source, hosted or on your server</h2>
