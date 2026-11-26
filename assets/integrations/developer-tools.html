@@ -52,6 +52,16 @@
 <p class="p">Every session gets one channel from its first pageview. The places developers actually come from land in different ones, and many arrive with no referrer at all:</p>
 <ul class="post-list"><li><b>GitHub</b>: github.com is not a community host, so clicks land in <b>Referral</b> and show as GitHub in the Source tab. GitHub sends only its origin, not the README, issue or release the link was on. See <a href="/blog/github-revenue-tracking">GitHub revenue tracking</a>.</li><li><b>Hacker News</b> and <b>dev.to</b>: both are community hosts, so clicks land in <b>Communities</b>. See <a href="/blog/hacker-news-revenue-tracking">Hacker News launch revenue</a> and <a href="/blog/dev-to-medium-revenue-tracking">dev.to and Medium</a>.</li><li><b>Package registries, newsletters and other blogs</b>: any host not on a known list is <b>Referral</b>, under its own domain.</li><li><b>AI assistants</b>: clicks from chatgpt.com, claude.ai, perplexity.ai, gemini.google.com and other known assistants land in <b>AI</b>.</li><li><b>Terminals, editors, desktop apps, notification emails and copied links</b>: no referrer and no tag, so they are <b>Direct</b>.</li></ul>
 <p class="p">Tag the links you control, in the README, release notes, CLI output and package description, with <code>utm_source</code> and one <code>utm_campaign</code> per placement. A click that arrives with no referrer then keeps its source, and the Campaign tab splits placements the referrer cannot.</p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which developers paid, and where they came from</h2>
+<p class="p">For developer tools with a paid plan. Virling is open source under AGPL: self-host it free, or use the hosted version with a 14-day free trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
 <h2>Docs and app subdomains as one site</h2>
 <p class="p">Developers move between the marketing site, the docs and the app before they pay. With <code>data-site="example.com"</code>, pages on <code>docs.example.com</code> and <code>app.example.com</code> count for the same site, share the <code>virling_vid</code> cookie, and links between them are not exits. Referrers from your own domain and its subdomains are ignored, so reading the docs never changes the channel the visit came from.</p>
 <p class="p">Docs or an app on a separate domain, such as <code>example.dev</code>, keep their own cookie. Add that domain under <b>Same-visit domains</b> in Site settings: clicks to it are no longer counted as exits, and a return from it continues the visit instead of starting a new one. A return from GitHub login, Google and Apple sign-in and the supported checkouts already continues the visit. See <a href="https://docs.virling.com/track/script">Add the script</a>.</p>
