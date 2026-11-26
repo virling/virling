@@ -1,4 +1,4 @@
-# Import from Plausible
+# Import Plausible Analytics data
 
 Bring your Plausible history into Virling, so dashboard ranges before you added the Virling script still show your traffic.
 
