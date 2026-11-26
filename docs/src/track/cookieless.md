@@ -27,11 +27,19 @@ The same salted hash is also used for any event that arrives without a valid vis
 > [!WARNING]
 > **Payments become Unattributed.** Without a visitor ID there is nothing to pass into checkout, so new payments cannot be linked to a visit. They still count toward revenue, as Unattributed.
 
-- A returning visitor counts as a new visitor each day.
+- A visitor is recognised only until midnight UTC or the next server restart, whichever comes first. After that they count as a new visitor.
+- A visit that runs past midnight UTC splits into two visits by two visitors.
 - Two people behind the same IP address with the same browser version count as one.
-- Sessions still work, since they only need 30 minutes of continuity.
+- Sessions still work within a day, since they only need 30 minutes of continuity.
+- The browser language is stored without its region, such as `en` instead of `en-GB`.
 
 Payments imported before you switched keep the attribution they already had.
+
+### A payment days later
+
+Say a visitor arrives from a newsletter on Monday and pays on Thursday. Checkout carries no visitor ID, so the payment is Unattributed, whatever the [model and lookback window](../attribution/model.md). Even a payment a minute after the visit is Unattributed, for the same reason.
+
+The one way back is an [identify event](../attribution/unattributed.md#recover-payments-by-email) with the visitor's email, for Stripe, Shopify and WooCommerce. A later payment with the same payer email is then credited to the visitor who identified. In cookieless mode that visitor is the daily hash, so only visits on the day they identified, from the same browser, can get the credit. If they identify on Thursday, the newsletter visit on Monday was a different visitor and gets none.
 
 ## Cookieless until consent
 
@@ -50,4 +58,10 @@ Before consent, visitors are counted with the daily hash, exactly as above. On c
 
 ## When to use it
 
-Use it when you would rather not ask for cookie consent and revenue attribution does not matter for that site. See [Privacy and consent](privacy.md).
+| Mode | Visitor recognised for | Payments linked to visits | Pick it when |
+| --- | --- | --- | --- |
+| **Cookie** | One year | Yes, when checkout carries the ID | Revenue by channel matters and the cookie may be set on the first page |
+| **Until consent** | One day before consent, one year after | Only for visitors who accept | You ask for consent and still want revenue by channel |
+| **Cookieless** | One day, or until a server restart | No, except by email match | You would rather not ask for consent and revenue attribution does not matter for that site |
+
+This is not legal advice. Whether your site needs a consent banner depends on where you and your visitors are. See [Privacy and consent](privacy.md) for what Virling stores, and the [privacy policy](https://virling.com/privacy) for the hosted service.
