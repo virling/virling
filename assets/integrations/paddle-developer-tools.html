@@ -51,6 +51,16 @@
 <h2>From docs, GitHub and package pages to checkout</h2>
 <ul class="post-list"><li><b>Docs.</b> With the same <code>data-site</code>, pages on <code>yourtool.dev</code>, <code>docs.yourtool.dev</code> and <code>app.yourtool.dev</code> count for one site and share the <code>virling_vid</code> cookie, so reading the docs never changes the channel the visit came from. A docs page that starts a visit is its landing page. See <a href="/blog/docs-revenue-tracking">do your docs bring paying customers</a>.</li><li><b>GitHub.</b> Clicks from github.com land in Referral and show as GitHub in the Source tab. GitHub sends only its origin, so give the README, repository website field and release notes one <code>utm_campaign</code> each. <a href="/blog/github-revenue-tracking">GitHub revenue tracking</a> has the links to copy.</li><li><b>Package pages.</b> npmjs.com, pypi.org and crates.io are Referral rows under their own domain. Tag the README and homepage links to tell placements apart; <a href="/blog/npm-revenue-tracking">package registry traffic</a> covers each one.</li><li><b>Links printed by your CLI.</b> A link opened from a terminal has no referrer. Tag it, such as <code>?utm_source=cli&amp;utm_medium=referral&amp;utm_campaign=upgrade-hint</code>, or it is Direct. A tagged visit can take the credit from the channel that first brought the developer; switch to first touch to see that one.</li></ul>
 <p class="p">By default a payment goes to the latest visit in the last 90 days that was not Direct. <a href="/integrations/developer-tools">Virling for developer tools</a> covers other channels, and the <a href="https://docs.virling.com/attribution/model">lookback window</a> can be 30, 60, 90 or 365 days.</p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which developers paid, and where they came from</h2>
+<p class="p">For developer tools that bill through Paddle. Virling is open source under AGPL: self-host it free, or use the hosted version with a 14-day free trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
 <h2>What is not tracked</h2>
 <p class="p">Virling does not track installs, terminal use, API calls or anything your SDK does. <code>npm install</code>, <code>pip install</code> and a command in a shell never open your site, so they are not visits. Virling sees visits to pages that run the script, and the Paddle payments that follow.</p>
 <h2>Set it up</h2>
