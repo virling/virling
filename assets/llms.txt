@@ -126,6 +126,7 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [TikTok ads UTM parameters builder](https://virling.com/tools/tiktok-ads-utm-builder): build TikTok ads UTM parameters with campaign, ad group and ad macros, get the full URL for TikTok Ads Manager, and preview it in your browser
 - [Influencer UTM link generator](https://virling.com/tools/influencer-utm-link-generator): paste a list of creators to get one UTM link each for Instagram, TikTok, YouTube and more, then copy the links or download a CSV
 - [Incrementality calculator](https://virling.com/tools/incrementality-calculator): enter test and control results to get incremental lift, customers, revenue, cost per customer and ROAS, with a 95% check
+- [Stripe MRR calculator](https://virling.com/tools/stripe-mrr-calculator): drop a Stripe subscriptions CSV export to get MRR, ARR, active subscriptions and ARPU, with yearly, monthly and weekly plans normalised in your browser
 - [Full description for LLMs](https://virling.com/llms-full.txt): facts, limits and answers to common questions in one file
 - [About Virling](https://virling.com/about): who builds it, why it exists, how it is built and how to reach us
 - [Privacy policy](https://virling.com/privacy): what Virling collects, the cookie, payment and AI data, the MCP server, and how to ask for deletion
@@ -462,6 +463,14 @@ Every page on virling.com also has a Markdown copy at its address plus .md, such
 - [srsltid parameter: what it is and how it affects reports](https://virling.com/blog/srsltid-parameter): The srsltid parameter is added to product links by Google Merchant Center auto-tagging. What it tells you, how to turn it off, and what it does to reports.
 - [checkout.stripe.com referral traffic: why it shows and the fix](https://virling.com/blog/stripe-checkout-referral-traffic): checkout.stripe.com shows as a referral when buyers return from paying. Why it happens, how to exclude it in Google Analytics 4, and how to check it worked.
 - [Tally form UTM tracking: from form answer to payment](https://virling.com/blog/tally-utm-tracking): Tally form UTM tracking: pass UTM tags and a visitor ID into hidden fields on an embed or a tally.so link, then join the lead to a later payment.
+- [ActiveCampaign revenue tracking: which emails lead to paid plans](https://virling.com/blog/activecampaign-revenue-tracking): ActiveCampaign revenue tracking for SaaS: tag campaign and automation links, link checkout, and see which email led to each trial and paid plan.
+- [Astro LemonSqueezy checkout: tie each order to its source](https://virling.com/blog/astro-lemonsqueezy-utm-tracking): Astro LemonSqueezy checkout: add the script to your layout, pass the visitor ID as custom data from a link or an endpoint, and see each order's source.
+- [Expansion revenue by acquisition channel: which channels grow](https://virling.com/blog/expansion-revenue-by-acquisition-channel): Expansion revenue by acquisition channel shows which channels bring customers who upgrade. See the rule for upgrades, an example and how to read NRR.
+- [Laravel Polar checkout UTM tracking with metadata](https://virling.com/blog/laravel-polar-utm-tracking): How to tie a Polar order in a Laravel app to the visit and UTM tags that brought it, with checkout session metadata or a no-code checkout link.
+- [Marketing mix modeling vs attribution for small budgets](https://virling.com/blog/marketing-mix-modeling-vs-attribution): Marketing mix modeling vs attribution: what each needs, when a small SaaS or store should use which, and a made-up month of payments with a holdout.
+- [Omnisend revenue tracking: which emails bring orders](https://virling.com/blog/omnisend-revenue-tracking): Omnisend revenue tracking: set UTM tags on campaigns, automations and SMS, store the visitor ID on each Shopify or WooCommerce order, and see which email sold.
+- [Path to purchase: how many visits before a customer pays](https://virling.com/blog/path-to-purchase-by-channel): What a path to purchase is, how to read time to buy and visits before paying per channel, and why the first visit and the credited visit often differ.
+- [utm_id parameter and the newer UTM tags, explained](https://virling.com/blog/utm-id-and-newer-utm-parameters): What utm_id, utm_source_platform, utm_creative_format and utm_marketing_tactic mean, with example URLs, and how to name utm_id to join a spend sheet.
 
 ## Source
 
