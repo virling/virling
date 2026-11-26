@@ -62,6 +62,16 @@
 <p class="p">A customer is still paying while the provider reports a live subscription for them, such as <code>active</code>, <code>trialing</code> or <code>past_due</code> on Stripe. A subscription cancelled at the end of its period stays live until the period ends. Without subscription access, Virling falls back to payment recency.</p>
 <h2>MRR</h2>
 <p class="p">Once an hour Virling reads each subscription&#x27;s price, currency and billing interval with the same read-only key. MRR is the sum of those prices per month, converted to USD, over subscriptions that are live, past any trial and not ended. It is the list price before discounts and tax. MRR shows on Latest payments, and the retention view adds what the customers from a date range pay per month now.</p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channel brings paying SaaS customers</h2>
+<p class="p">For SaaS founders who bill subscriptions and want trials, renewals and retention by first source. Virling is open source under AGPL: self-host it free, or use the hosted version with a 14-day free trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
 <h2>SaaS billing providers</h2>
 <p class="p">Each provider marks renewals its own way. Virling reads them all into the same model:</p>
 <ul class="post-list"><li><a href="/integrations/stripe-saas">Stripe Billing</a>: the invoice&#x27;s billing reason is <code>subscription_cycle</code>.</li><li><a href="/integrations/paddle-saas">Paddle subscriptions</a>: the origin is <code>subscription_recurring</code>, <code>subscription_update</code> or <code>subscription_charge</code>.</li><li><a href="/integrations/polar-saas">Polar for SaaS</a>: the order&#x27;s billing reason is <code>subscription_cycle</code>.</li><li><a href="/integrations/lemonsqueezy-saas">SaaS on LemonSqueezy</a>: a subscription invoice with billing reason <code>renewal</code>.</li><li><a href="/integrations/dodo-payments-saas">Dodo Payments subscriptions</a>: the subscription already had a paid payment before it.</li><li><a href="/integrations/creem-saas">Creem as merchant of record for SaaS</a>: the customer already had a payment before it.</li></ul>
