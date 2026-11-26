@@ -720,10 +720,28 @@ async fn stats_page(req: Request, ctx: RouteContext<()>) -> Result<Response> {
 }
 
 /// Pages merged into another, answered with a permanent redirect.
-const MOVED: &[(&str, &str)] = &[(
-    "/blog/facebook-revenue-tracking",
-    "/blog/instagram-revenue-tracking#facebook",
-)];
+const MOVED: &[(&str, &str)] = &[
+    (
+        "/blog/facebook-revenue-tracking",
+        "/blog/instagram-revenue-tracking#facebook",
+    ),
+    (
+        "/blog/grok-revenue-tracking",
+        "/blog/is-ai-search-traffic-worth-anything#grok",
+    ),
+    (
+        "/blog/le-chat-revenue-tracking",
+        "/blog/is-ai-search-traffic-worth-anything#le-chat",
+    ),
+    (
+        "/blog/deepseek-revenue-tracking",
+        "/blog/is-ai-search-traffic-worth-anything#deepseek",
+    ),
+    (
+        "/blog/meta-ai-revenue-tracking",
+        "/blog/is-ai-search-traffic-worth-anything#meta-ai",
+    ),
+];
 
 fn moved(path: &str) -> Option<&'static str> {
     let path = path.trim_end_matches('/').trim_end_matches(".html");
@@ -856,5 +874,17 @@ mod tests {
         assert_eq!(moved("/blog/facebook-revenue-tracking/"), to);
         assert_eq!(moved("/blog/facebook-revenue-tracking.html"), to);
         assert_eq!(moved("/blog/instagram-revenue-tracking"), None);
+    }
+
+    #[test]
+    fn assistant_posts_redirect() {
+        for slug in ["grok", "le-chat", "deepseek", "meta-ai"] {
+            let to = format!("/blog/is-ai-search-traffic-worth-anything#{slug}");
+            let from = format!("/blog/{slug}-revenue-tracking");
+            assert_eq!(moved(&from), Some(to.as_str()));
+            assert_eq!(moved(&format!("{from}/")), Some(to.as_str()));
+            assert_eq!(moved(&format!("{from}.html")), Some(to.as_str()));
+        }
+        assert_eq!(moved("/blog/is-ai-search-traffic-worth-anything"), None);
     }
 }
