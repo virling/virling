@@ -9,6 +9,18 @@ Page caching and a CDN do not break tracking. The tag is static, and everything 
 - **UTM tags.** The script reads `utm_source`, `ref` and the other tags from the address in the browser, not from the HTML. A cache that ignores the query string when it picks a cached copy is fine, as long as the visitor's address still has it. See [UTM tags and ref](script.md#utm-tags-and-ref).
 - **Checkout links.** The visitor ID is added to hosted checkout links in the browser when the page loads and again on click, so links in cached HTML get it too. See [Checkout links need no code](../payments/checkout.md#checkout-links-need-no-code).
 
+## Reading the visitor cookie in server code
+
+The script runs in the browser, so it works the same on every kind of page: it creates the cookie and reads the UTM tags from the address there, never from your HTML. What changes is when your own server code runs, and so whether it can see the cookie. This matters when your server creates the checkout session, for example a Stripe Checkout Session with `client_reference_id`.
+
+One rule covers every case: read the cookie in the request that creates the session, not when the page is rendered to be viewed.
+
+- **First visit.** On a first visit the server renders the page before the script has set the cookie, so code that runs while the page renders finds none. By the time the buyer presses Buy, the browser has the cookie and sends it with that request.
+- **Prerendered and cached pages.** A page made at build time, or one copy of the HTML served to many visitors from a cache, is not rendered for this visitor, so there is no cookie of this visitor at all. The tag is the same for everyone, so the copy itself is safe. Create the session in a server route that runs on request, which a form on the prerendered page can post to, and keep `POST` requests to it out of the cache.
+- **Hidden fields.** The same goes for a hidden form field filled in while the page renders: from a shared copy, every buyer would send the same value. Read the cookie on the server when the form is posted instead.
+- **No server.** A fully static site has no server code to read the cookie. The script adds the visitor ID to hosted checkout links in the browser, so use those. See [Checkout links need no code](../payments/checkout.md#checkout-links-need-no-code).
+- **Client-side route changes.** Routers that navigate with the History API have their route changes counted on their own. Each change of path or query is one pageview, and a change of only the `#hash` is none. Later routes carry no referrer, so they stay in the channel of the landing page. The cookie stays in the browser through all of it, so it is sent from whichever page the buyer presses Buy on. Checkout links that appear after a route change get the visitor ID when they are clicked. See [Single-page apps](spa.md).
+
 ## What can break it
 
 - **Combining or inlining scripts.** The script finds its own tag to read `data-site` and to know which server to send events to. Merged into a combined file or inlined into the page, it no longer has its tag, and it sends nothing.
