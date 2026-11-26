@@ -82,3 +82,33 @@ All endpoints and fields are in [Read API](../reference/api.md).
 ## Self-host for your clients
 
 Self-hosting is free, with every feature, on your own server. Start with the [Quickstart](../quickstart.md), then [Docker](../self-host/docker.md) or a [release binary](../self-host/binary.md) behind a [reverse proxy](../self-host/reverse-proxy.md). Set up [sign-in email](../self-host/smtp.md) so invites and weekly client emails go out, and keep [backups](../self-host/data.md) of the data folder. On a self-hosted server, an Agency account includes up to 3 users. Teams larger than that use the hosted Agency plan.
+
+## Questions agencies ask
+
+### How many client sites can one account hold?
+
+Virling sets no limit on the number of sites in an account. Add one per client domain, as in [step 1](#1-add-each-client-site). Hosted plans include a monthly event allowance, listed on [virling.com/pricing](https://virling.com/pricing). A self-hosted server has no plan limits.
+
+### Can a client see other clients?
+
+No. A client link, its PDF and the weekly email each show one site's report. The client name only groups sites for you, in the site switcher and on **All clients**, which need a Virling login. Team members, API keys and the MCP server read every site on the account, so keep those for your own staff. See [Who can see the data](../hosted.md#who-can-see-the-data).
+
+### Does the client have to share a payment key?
+
+Yes. Virling reads payments with a key from the client's own provider account, and never creates, changes or refunds anything. For most providers the key can be read-only. Creem and RevenueCat keys also need write access to add a webhook, and [LemonSqueezy](../payments/lemonsqueezy.md) keys cannot be limited. Keys are encrypted before they are stored, are never logged, and the app shows only their last characters. See [Which key to create](../payments/index.md#which-key-to-create) and [How keys are stored](../payments/index.md#how-keys-are-stored).
+
+### What happens to the data when a client leaves?
+
+1. **Revoke link** in **Site settings** stops the client report at once. Remove their addresses from the weekly email too.
+2. **Disconnect** deletes the stored payment key and stops syncing. Payments already imported stay in the reports. The client should also delete the key at their provider. See [Replace or disconnect a key](../payments/index.md#replace-or-disconnect-a-key).
+3. To delete the site and its data on the hosted plan, email hello@virling.com and it is deleted within 30 days. On a self-hosted server, the [admin panel](../self-host/admin.md#what-it-does) deletes a site with its stored events at once.
+
+A hosted site cannot be exported or moved to another account, so past visits stay behind if the client sets up their own Virling. See [Can I move from hosted to self-hosted?](../faq.md#can-i-move-from-hosted-to-self-hosted).
+
+### How are reports branded?
+
+Branding is set per site under **Client report** in **Site settings**: your agency name, a logo URL, an accent colour and a footer, with **Show Powered by Virling on reports** to turn off. It applies to the client link, **Download PDF** and the weekly email. White-label client reports come with the Agency plan. See [step 4](#4-give-the-client-access-to-their-numbers) and [Share a site](dashboard.md#share-a-site).
+
+### Can I self-host Virling for my clients?
+
+Yes. One self-hosted server holds every client site, with every feature and no plan to buy, and an Agency account on it includes up to 3 users. A client can also run their own server from the same open-source code. Payments are credited the same way on either, as in [How attribution works](../attribution/index.md). See [Self-host for your clients](#self-host-for-your-clients).
