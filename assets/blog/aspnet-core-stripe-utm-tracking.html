@@ -13,7 +13,7 @@
 <meta property="og:description" content="How to tie a Stripe Checkout payment in an ASP.NET Core backend to the visit and UTM tags that brought it, with a minimal API and the Stripe.net library.">
 <meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"ASP.NET Core Stripe UTM tracking: Checkout with Stripe.net","item":"https://virling.com/blog/aspnet-core-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"ASP.NET Core Stripe UTM tracking: Checkout with Stripe.net","description":"How to tie a Stripe Checkout payment in an ASP.NET Core backend to the visit and UTM tags that brought it, with a minimal API and the Stripe.net library.","datePublished":"2026-11-22","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/aspnet-core-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Stripe Checkout in ASP.NET Core?","acceptedAnswer":{"@type":"Answer","text":"Read the visitor ID with Request.Cookies[\"virling_vid\"] in the endpoint that creates the Checkout Session and set it as ClientReferenceId on SessionCreateOptions. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them."}},{"@type":"Question","name":"Does this work with MVC controllers, Razor Pages or Blazor?","acceptedAnswer":{"@type":"Answer","text":"Yes. In a controller action or a Razor Pages handler, read Request.Cookies[\"virling_vid\"] the same way. In Blazor, create the session in a server endpoint or controller that the checkout button posts to, so the request carries the cookie. The Stripe.net code stays the same."}},{"@type":"Question","name":"Should I use ClientReferenceId or metadata.virling_vid?","acceptedAnswer":{"@type":"Answer","text":"Use ClientReferenceId unless it already holds your own user or order ID. In that case put the visitor ID in the session's Metadata under virling_vid. Virling reads either."}},{"@type":"Question","name":"What happens if the cookie is missing?","acceptedAnswer":{"@type":"Answer","text":"TryGetValue returns false, and the session is created without a visitor ID, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"ASP.NET Core Stripe UTM tracking: Checkout with Stripe.net","item":"https://virling.com/blog/aspnet-core-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"ASP.NET Core Stripe UTM tracking: Checkout with Stripe.net","description":"How to tie a Stripe Checkout payment in an ASP.NET Core backend to the visit and UTM tags that brought it, with a minimal API and the Stripe.net library.","datePublished":"2026-11-22","dateModified":"2026-11-26","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/aspnet-core-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Stripe Checkout in ASP.NET Core?","acceptedAnswer":{"@type":"Answer","text":"Pass the visitor ID rather than the tags themselves. In the endpoint that creates the session, read Request.Cookies[\"virling_vid\"] and assign it to ClientReferenceId on SessionCreateOptions; Virling matches that ID to the UTM tags it recorded for each visit."}},{"@type":"Question","name":"Does this work with MVC controllers, Razor Pages or Blazor?","acceptedAnswer":{"@type":"Answer","text":"Controllers and Razor Pages handlers read Request.Cookies exactly like a minimal API. Interactive Blazor components cannot, so have the checkout button post a form to a server endpoint. The Stripe.net code does not change."}},{"@type":"Question","name":"ClientReferenceId or the Metadata dictionary?","acceptedAnswer":{"@type":"Answer","text":"Start with ClientReferenceId. If your app already uses it for its own IDs, add a virling_vid entry to the session's Metadata dictionary instead; Virling checks metadata first."}},{"@type":"Question","name":"What if the visitor has no virling_vid cookie?","acceptedAnswer":{"@type":"Answer","text":"TryGetValue returns false and the indexer returns null, so ClientReferenceId stays unset. That is normal with a blocked script or cookieless mode, and the payment is still counted toward revenue as Unattributed."}},{"@type":"Question","name":"Does the ASP.NET Core cookie consent policy hide the cookie?","acceptedAnswer":{"@type":"Answer","text":"No. CookiePolicyOptions.CheckConsentNeeded only stops cookies your app writes with Response.Cookies. The Virling script sets virling_vid in the browser, so it shows up in Request.Cookies whenever the browser has it."}}]}]}</script>
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
@@ -43,27 +43,26 @@
     </div>
   </div></section>
   <section class="band"><div class="wrap"><div class="txt post">
-<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-22, updated 2026-11-25.</p>
-<p class="p">ASP.NET Core Stripe UTM tracking comes down to one value. Load the Virling script in your shared layout, then read the <code>virling_vid</code> cookie with <code>Request.Cookies</code> in the endpoint that creates the Stripe Checkout Session and pass it as <code>ClientReferenceId</code>, or as <code>metadata.virling_vid</code>. Stripe keeps that one ID, and Virling joins the payment to every visit behind it, with the UTM tags of each.</p>
-<p class="p">This post covers a .NET backend with ASP.NET Core and Stripe.net. The same steps for other stacks are in <a href="/blog/spring-boot-stripe-utm-tracking">Spring Boot Stripe UTM tracking</a>, <a href="/blog/go-stripe-utm-tracking">Go Stripe UTM tracking</a> and <a href="/blog/nextjs-stripe-utm-tracking">Next.js Stripe UTM tracking</a>. For Payment Links, metadata limits and where the values show up in Stripe, see the general guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>.</p>
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-22, updated 2026-11-26.</p>
+<p class="p">In ASP.NET Core, attribution lives in whichever endpoint creates the Stripe Checkout Session: take <code>virling_vid</code> from <code>Request.Cookies</code> and set it as <code>ClientReferenceId</code> on Stripe.net's <code>SessionCreateOptions</code>. Minimal APIs, controllers and Razor Pages each reach the request a little differently, so this post shows all three.</p>
+<p class="p">Stripe hosts the payment page, so the campaign tags on your landing page are gone by the time the buyer pays. Virling keeps them on its side, keyed by a visitor ID that its script writes to a cookie, and credits a payment to those visits when the Checkout Session carries the ID. Payment Links and how the values appear in the Stripe dashboard are in <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>; the same flow for other stacks is in <a href="/blog/spring-boot-stripe-utm-tracking">Spring Boot</a>, <a href="/blog/go-stripe-utm-tracking">Go</a> and <a href="/blog/nextjs-stripe-utm-tracking">Next.js</a>.</p>
 <p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
-<h2>Step 1: add the script to the shared layout</h2>
-<p class="p">Paste the tag before <code>&lt;/head&gt;</code> in the layout that every page uses: <code>Pages/Shared/_Layout.cshtml</code> for Razor Pages, <code>Views/Shared/_Layout.cshtml</code> for MVC, or <code>Components/App.razor</code> for Blazor. If your pages are served by a separate frontend, put it in that app's layout instead. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<h2>Add the script to _Layout.cshtml or App.razor</h2>
+<p class="p">The tag goes in the <code>&lt;head&gt;</code> of <code>Pages/Shared/_Layout.cshtml</code> for Razor Pages, <code>Views/Shared/_Layout.cshtml</code> for MVC, or <code>Components/App.razor</code> for Blazor. A self-hosted Virling serves the same file from your own server.</p>
 <div class="code block"><pre data-snippet>&lt;!-- Pages/Shared/_Layout.cshtml --&gt;
 &lt;script defer src="https://app.virling.com/v.js"
   data-site="yourdomain.com"&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain and records the UTM tags of each visit against it.</p>
-<h2>Step 2: create the Checkout Session in an endpoint</h2>
-<p class="p">Your server receives the cookie with every request from the browser on the same domain. Read it from <code>Request.Cookies</code> where you create the session and pass it as <code>ClientReferenceId</code>. Here it is as a minimal API in <code>Program.cs</code>:</p>
+<h2>Minimal API endpoint</h2>
+<p class="p">A minimal API handler can ask for <code>HttpRequest</code> as a parameter and ASP.NET Core binds it without attributes. There is no <code>[FromCookie]</code> binding source, so read the collection directly; <code>TryGetValue</code> returns false when the visitor has no cookie.</p>
 <div class="code block"><pre data-snippet>using Stripe;
 using Stripe.Checkout;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton&lt;IStripeClient&gt;(
+    new StripeClient(builder.Configuration["Stripe:SecretKey"]));
 var app = builder.Build();
 
-StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
-
-app.MapPost("/checkout", async (HttpRequest request) =&gt;
+app.MapPost("/checkout", async (HttpRequest request, IStripeClient stripe) =&gt;
 {
     var options = new SessionCreateOptions
     {
@@ -79,60 +78,96 @@ app.MapPost("/checkout", async (HttpRequest request) =&gt;
         options.ClientReferenceId = vid;
     }
 
-    var session = await new SessionService().CreateAsync(options);
+    var session = await new SessionService(stripe).CreateAsync(options);
     return Results.Redirect(session.Url);
 });
 
 app.Run();</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">Install the <code>Stripe.net</code> NuGet package and keep the secret key in user secrets or an environment variable (<code>Stripe__SecretKey</code>), not in <code>appsettings.json</code>. Post to the endpoint from a plain form, so the browser follows the redirect to Stripe's domain:</p>
-<div class="code block"><pre data-snippet>&lt;form method="post" action="/checkout"&gt;
+<p class="p">Add the <code>Stripe.net</code> package from NuGet. Registering one <code>StripeClient</code> and passing it to <code>SessionService</code> keeps the key out of the static <code>StripeConfiguration.ApiKey</code>; read it from user secrets in development and from the <code>Stripe__SecretKey</code> environment variable in production. Properties you leave null on <code>SessionCreateOptions</code> are not sent to Stripe, so a missing cookie simply means no <code>ClientReferenceId</code>.</p>
+<p class="p">This endpoint binds nothing from the form, so the antiforgery middleware in .NET 8 and later does not ask it for a token, and a plain <code>&lt;form method="post" action="/checkout"&gt;</code> on any page works.</p>
+<h2>Controller action</h2>
+<p class="p">In MVC or an API controller, <code>Request</code> is a property of the base class. Its cookie indexer returns null for a missing cookie instead of throwing:</p>
+<div class="code block"><pre data-snippet>public class CheckoutController(IStripeClient stripe) : Controller
+{
+    [HttpPost("/checkout")]
+    public async Task&lt;IActionResult&gt; Create()
+    {
+        var options = new SessionCreateOptions
+        {
+            Mode = "subscription",
+            LineItems = new List&lt;SessionLineItemOptions&gt;
+            {
+                new() { Price = "price_...", Quantity = 1 },
+            },
+            SuccessUrl = "https://yourdomain.com/thanks",
+        };
+        var vid = Request.Cookies["virling_vid"];
+        if (!string.IsNullOrEmpty(vid))
+        {
+            options.ClientReferenceId = vid;
+        }
+
+        var session = await new SessionService(stripe).CreateAsync(options);
+        return Redirect(session.Url);
+    }
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">If you register the global <code>AutoValidateAntiforgeryTokenAttribute</code> filter, the action rejects a form without a token with 400 Bad Request. Render the form from a Razor view with the form tag helper, which adds the hidden <code>__RequestVerificationToken</code> field.</p>
+<h2>Razor Pages handler</h2>
+<p class="p">On a Razor Page, put a named POST handler on the page model of your pricing page and point the form at it with <code>asp-page-handler</code>. Razor Pages validate the antiforgery token on every POST, and the form tag helper inserts it for you:</p>
+<div class="code block"><pre data-snippet>// Pages/Pricing.cshtml.cs
+public class PricingModel(IStripeClient stripe) : PageModel
+{
+    public async Task&lt;IActionResult&gt; OnPostCheckoutAsync()
+    {
+        var options = new SessionCreateOptions
+        {
+            Mode = "subscription",
+            LineItems = new List&lt;SessionLineItemOptions&gt;
+            {
+                new() { Price = "price_...", Quantity = 1 },
+            },
+            SuccessUrl = "https://yourdomain.com/thanks",
+        };
+        var vid = Request.Cookies["virling_vid"];
+        if (!string.IsNullOrEmpty(vid))
+        {
+            options.ClientReferenceId = vid;
+        }
+
+        var session = await new SessionService(stripe).CreateAsync(options);
+        return Redirect(session.Url);
+    }
+}
+
+&lt;!-- Pages/Pricing.cshtml --&gt;
+&lt;form method="post" asp-page-handler="Checkout"&gt;
   &lt;button type="submit"&gt;Subscribe&lt;/button&gt;
 &lt;/form&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<h2>Using metadata instead</h2>
-<p class="p">If <code>ClientReferenceId</code> already holds your own user or order ID, put the visitor ID in the session's metadata. Virling reads either:</p>
-<div class="code block"><pre data-snippet>if (request.Cookies.TryGetValue("virling_vid", out var vid) &amp;&amp; !string.IsNullOrEmpty(vid))
+<p class="p">Return <code>Redirect</code>, not <code>LocalRedirect</code>: the session URL is on <code>checkout.stripe.com</code>, and <code>LocalRedirect</code> throws for any URL outside your app.</p>
+<h2>Metadata and subscriptions in Stripe.net</h2>
+<p class="p">If <code>ClientReferenceId</code> is already your own user or order ID, set the session's <code>Metadata</code> dictionary instead; Virling reads <code>metadata.virling_vid</code> first. <code>SubscriptionData.Metadata</code> is a different dictionary that ends up on the subscription object, which Virling does not read:</p>
+<div class="code block"><pre data-snippet>options.SubscriptionData = new SessionSubscriptionDataOptions
 {
-    options.Metadata = new Dictionary&lt;string, string&gt; { ["virling_vid"] = vid };
-}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">The full lookup order, including PaymentIntents you create for Elements, is in the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a>, and the <a href="/integrations/stripe">Stripe integration page</a> shows what Virling imports. How to pass the visitor ID with other providers is in <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>, and the script tag for other frameworks in the <a href="https://docs.virling.com/track/frameworks">framework docs</a>.</p>
-<h2>Subscriptions and renewals</h2>
-<p class="p">Only the first payment needs the visitor ID: each renewal keeps the channel of the customer's first payment, with no code on your side, as described in <a href="https://docs.virling.com/attribution/renewals">renewals</a>. Set the visitor ID on the Checkout Session, not only on the subscription:</p>
-<div class="code block"><pre data-snippet>var options = new SessionCreateOptions
-{
-    Mode = "subscription",
-    LineItems = new List&lt;SessionLineItemOptions&gt;
-    {
-        new() { Price = "price_...", Quantity = 1 },
-    },
-    SuccessUrl = "https://yourdomain.com/thanks",
-    // Virling does not read the subscription's metadata
-    SubscriptionData = new SessionSubscriptionDataOptions
-    {
-        Metadata = new Dictionary&lt;string, string&gt; { ["plan"] = "pro" },
-    },
+    Metadata = new Dictionary&lt;string, string&gt; { ["plan"] = "pro" }, // not read
 };
-if (request.Cookies.TryGetValue("virling_vid", out var vid) &amp;&amp; !string.IsNullOrEmpty(vid))
+if (!string.IsNullOrEmpty(vid))
 {
-    // Virling reads this one, on the session
-    options.Metadata = new Dictionary&lt;string, string&gt; { ["virling_vid"] = vid };
+    options.Metadata = new Dictionary&lt;string, string&gt; { ["virling_vid"] = vid }; // read
 }</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">If the buyer already has a Stripe customer, set <code>options.Customer</code> to its ID so a plan they buy later is matched to their first payment. A free trial that starts through Checkout after you connect Stripe is kept too: its first charge is credited to the visit before the trial.</p>
-<h2>Check that it works</h2>
-<p class="p">Run one tagged visit and one test payment through the form that posts to <code>/checkout</code>, as in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>. Connect a <a href="https://docs.virling.com/payments/stripe">restricted Stripe key</a> that starts with <code>rk_test_</code> in Virling; your app keeps its own test secret key in <code>Stripe__SecretKey</code> and uses a price created in test mode.</p>
-<p class="p">To see the visitor ID on the Checkout Session, add this right after <code>CreateAsync</code> and remove it afterwards. <code>ClientReferenceId</code>, or <code>virling_vid</code> in the session's metadata, should match <code>window.virling.vid()</code> in the browser console:</p>
-<div class="code block"><pre data-snippet>app.Logger.LogInformation("{Id} {Ref} {Vid}", session.Id, session.ClientReferenceId,
+<p class="p">Later renewals carry the first payment's channel with no extra code (see <a href="https://docs.virling.com/attribution/renewals">renewals</a>), and the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a> list every place Virling looks for the ID.</p>
+<h2>Testing locally and in staging</h2>
+<p class="p">Kestrel's <code>https://localhost:7xxx</code> address from <code>launchSettings.json</code> counts as localhost, where the script stays silent unless the tag carries <code>data-dev</code>. Visits also have to happen on your <code>data-site</code> domain or a subdomain of it, so a staging slot such as <code>staging.yourdomain.com</code> is the place for a full run through <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>, with an <code>rk_test_</code> restricted key connected in Virling. If you changed <code>AllowedHosts</code> in <code>appsettings.json</code>, include that host. To compare the stored ID with <code>window.virling.vid()</code> in the console, log it after <code>CreateAsync</code>:</p>
+<div class="code block"><pre data-snippet>logger.LogInformation("{Id} {Ref} {Vid}", session.Id, session.ClientReferenceId,
     session.Metadata?.GetValueOrDefault("virling_vid"));</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">If you changed <code>AllowedHosts</code> in <code>appsettings.json</code>, include the host you test on. If the endpoint sets <code>options.Customer</code>, use a new customer for each test: a later payment by the same customer is a renewal and keeps the first payment's channel.</p>
-<p class="p">Payments without a visitor ID still count toward revenue, as Unattributed. How the join works from visit to payment is in <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>, and the <a href="/integrations/saas">SaaS page</a> shows what you get per channel.</p>
 <h2>Common mistakes</h2>
-<p class="p">Open an Unattributed payment and look for <b>Visitor</b> under <b>Details</b>. If there is none, checkout did not carry the ID.</p>
-<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>What you see</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">No visitor ID from a Blazor page</th><td>The session is created in an interactive component's event handler, which has no request of its own to read cookies from</td><td>Post a form to the <code>/checkout</code> endpoint and read the cookie there</td></tr><tr><th scope="row">No visitor ID, though the browser has the cookie</th><td>The session is created outside the buyer's request, such as in a hosted service or a webhook endpoint, where there is no cookie</td><td>Read <code>Request.Cookies</code> in the endpoint the browser posts to and pass the value on</td></tr><tr><th scope="row">No visitor ID when a separate frontend calls the API</th><td><code>fetch</code> to another origin sends no cookies by default</td><td>Post a plain form, or use <code>credentials: "include"</code> with a CORS policy that names the origin and calls <code>AllowCredentials()</code>. The API must be on the same domain or a subdomain of it</td></tr><tr><th scope="row">No <code>virling_vid</code> cookie on <code>localhost</code></th><td>The script does nothing on <code>localhost</code> and <code>127.*</code> without <code>data-dev</code></td><td>Add <code>data-dev</code> to the tag in <code>_Layout.cshtml</code> or <code>App.razor</code> while you develop</td></tr><tr><th scope="row">The payment has a visitor ID but is Unattributed after a local test</th><td>Visits are kept only when the page's host is your site's domain or one of its subdomains</td><td>Test on a subdomain of the domain in <code>data-site</code></td></tr><tr><th scope="row">Several buyers are sent to the same Checkout Session</th><td>A GET page or endpoint that creates the session is cached, for example with <code>[OutputCache]</code> or <code>[ResponseCache]</code></td><td>Create it in the POST endpoint, as in step 2. By default only GET and HEAD responses are cached</td></tr><tr><th scope="row">Stripe shows the ID on the subscription, but the payment is Unattributed</th><td>It is only in <code>SubscriptionData.Metadata</code>, which is not read</td><td>Set it on the session itself, as in the subscription example</td></tr><tr><th scope="row">The visitor ID on the payment is your own user or order ID</th><td><code>ClientReferenceId</code> holds your ID and is read as the visitor ID</td><td>Put the visitor ID in the session's <code>metadata.virling_vid</code>, which is read first</td></tr><tr><th scope="row">A second test keeps the channel of the first</th><td>Any later payment by the same Stripe customer is a renewal</td><td>Use a new customer for each test</td></tr><tr><th scope="row">Some payments are Unattributed</th><td>The visitor had no cookie: the script was blocked, or the site is in cookieless mode or still waiting for consent</td><td>Nothing to fix in the code. Create the session without the ID; the payment still counts toward revenue</td></tr></tbody></table></div>
-<p class="p">Caching an ordinary page is fine, because the script sets the cookie in the browser. Checkout requests have to reach your server with their cookies, as in <a href="https://docs.virling.com/track/caching">page caching and CDNs</a>. Every other cause is in <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>. A payment made before a fix usually stays Unattributed, so make a new one to check.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>What you see</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">No visitor ID from a Blazor page</th><td>An interactive component's event handler has no HTTP request of its own to read cookies from</td><td>Post a form to the <code>/checkout</code> endpoint and read the cookie there</td></tr><tr><th scope="row">400 Bad Request when the form is submitted</th><td>A Razor Page or a controller with antiforgery validation got a form without the token</td><td>Render the form with the form tag helper</td></tr><tr><th scope="row"><code>InvalidOperationException</code> after the session is created</th><td><code>LocalRedirect</code> refuses the <code>checkout.stripe.com</code> URL</td><td>Use <code>Redirect</code> or <code>Results.Redirect</code></td></tr><tr><th scope="row">No visitor ID when a separate frontend calls the API</th><td>A cross-origin <code>fetch</code> sends no cookies by default</td><td>Use <code>credentials: "include"</code> with a CORS policy that names the origin and calls <code>AllowCredentials()</code>, or post a form</td></tr><tr><th scope="row">Several buyers are sent to the same Checkout Session</th><td>A GET page that creates the session is cached with <code>[OutputCache]</code> or <code>[ResponseCache]</code></td><td>Create it in a POST handler; output caching skips POST by default</td></tr><tr><th scope="row">No visitor ID, though the browser has the cookie</th><td>The session is created in a hosted service or webhook endpoint, where there is no buyer request</td><td>Read <code>Request.Cookies</code> in the browser-facing endpoint and pass the value on</td></tr></tbody></table></div>
+<p class="p">A buyer whose browser blocks the script has no cookie; that payment still counts toward revenue, as Unattributed. The rest of the causes are in <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>, and the <a href="/integrations/stripe">Stripe integration page</a> shows what Virling imports.</p>
 <h2>Frequently asked questions</h2>
-<h3>How do I pass UTM parameters to Stripe Checkout in ASP.NET Core?</h3><p class="p">Read the visitor ID with Request.Cookies["virling_vid"] in the endpoint that creates the Checkout Session and set it as ClientReferenceId on SessionCreateOptions. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them.</p>
-<h3>Does this work with MVC controllers, Razor Pages or Blazor?</h3><p class="p">Yes. In a controller action or a Razor Pages handler, read Request.Cookies["virling_vid"] the same way. In Blazor, create the session in a server endpoint or controller that the checkout button posts to, so the request carries the cookie. The Stripe.net code stays the same.</p>
-<h3>Should I use ClientReferenceId or metadata.virling_vid?</h3><p class="p">Use ClientReferenceId unless it already holds your own user or order ID. In that case put the visitor ID in the session's Metadata under virling_vid. Virling reads either.</p>
-<h3>What happens if the cookie is missing?</h3><p class="p">TryGetValue returns false, and the session is created without a visitor ID, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed.</p>
+<h3>How do I pass UTM parameters to Stripe Checkout in ASP.NET Core?</h3><p class="p">Pass the visitor ID rather than the tags themselves. In the endpoint that creates the session, read Request.Cookies["virling_vid"] and assign it to ClientReferenceId on SessionCreateOptions; Virling matches that ID to the UTM tags it recorded for each visit.</p>
+<h3>Does this work with MVC controllers, Razor Pages or Blazor?</h3><p class="p">Controllers and Razor Pages handlers read Request.Cookies exactly like a minimal API. Interactive Blazor components cannot, so have the checkout button post a form to a server endpoint. The Stripe.net code does not change.</p>
+<h3>ClientReferenceId or the Metadata dictionary?</h3><p class="p">Start with ClientReferenceId. If your app already uses it for its own IDs, add a virling_vid entry to the session's Metadata dictionary instead; Virling checks metadata first.</p>
+<h3>What if the visitor has no virling_vid cookie?</h3><p class="p">TryGetValue returns false and the indexer returns null, so ClientReferenceId stays unset. That is normal with a blocked script or cookieless mode, and the payment is still counted toward revenue as Unattributed.</p>
+<h3>Does the ASP.NET Core cookie consent policy hide the cookie?</h3><p class="p">No. CookiePolicyOptions.CheckConsentNeeded only stops cookies your app writes with Response.Cookies. The Virling script sets virling_vid in the browser, so it shows up in Request.Cookies whenever the browser has it.</p>
   </div></div></section>
   <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
 <h2>See which campaigns bring Stripe revenue</h2>
