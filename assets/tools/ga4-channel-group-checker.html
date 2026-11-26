@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GA4 default channel grouping checker: why traffic is Unassigned</title>
+<meta name="description" content="Check which GA4 default channel group a UTM link or source and medium lands in, the rule that matched, and why traffic shows as Unassigned.">
+<link rel="canonical" href="https://virling.com/tools/ga4-channel-group-checker">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/ga4-channel-group-checker">
+<meta property="og:title" content="GA4 default channel grouping checker: why traffic is Unassigned">
+<meta property="og:description" content="Check which GA4 default channel group a UTM link or source and medium lands in, the rule that matched, and why traffic shows as Unassigned.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"GA4 default channel grouping checker","url":"https://virling.com/tools/ga4-channel-group-checker","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"GA4 default channel grouping checker","item":"https://virling.com/tools/ga4-channel-group-checker"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / ga4 channel group checker</span><h1>GA4 default channel grouping checker</h1><p class="lead">Wondering why your traffic is Unassigned in GA4, or which channel a tagged link will land in? Paste a URL with UTM tags, or type the source, medium and campaign. The checker runs Google&rsquo;s published default channel rules and shows the group, the rule that matched and the channel Virling gives the same visit. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="ga" autocomplete="off">
+  <label class="wide">URL with UTM tags <span class="dim">fills the three fields below</span><input name="url" spellcheck="false" value="https://example.com/?utm_source=newsletter&amp;utm_medium=emial&amp;utm_campaign=november"></label>
+  <label>utm_source <span class="dim">blank is (not set)</span><input name="source" spellcheck="false"></label>
+  <label>utm_medium <span class="dim">blank is (not set)</span><input name="medium" spellcheck="false"></label>
+  <label class="wide">utm_campaign <span class="dim">optional: read by the Cross-network and Shopping rules</span><input name="campaign" spellcheck="false"></label>
+</form>
+<div class="tool-stats" id="ga-sum"></div>
+<div class="tool-table" id="ga-out"></div>
+<div class="tool-table" id="ga-why"></div>
+<p class="p" id="ga-reason" aria-live="polite"></p>
+<div class="txt post tool-cta">
+<p class="p">GA4 sorts the visit into a channel. Virling sorts it and links it to the payment it led to, so you see the customers and revenue each channel brings, Unassigned included. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>How GA4 picks the default channel group</h2>
+<p class="p">Google publishes the rules in <a href="https://support.google.com/analytics/answer/9756891">Default channel group</a>. They read the session source, medium and campaign name, ignore case and cannot be edited. The checker tests them in the order Google lists them and reports the first that matches:</p>
+<ol class="post-list">
+<li><b>Direct.</b> Source is exactly <code>(direct)</code> and medium is <code>(not set)</code> or <code>(none)</code>.</li>
+<li><b>Cross-network.</b> Campaign name contains <code>cross-network</code>.</li>
+<li><b>Paid Shopping.</b> Source is on the shopping list or the campaign name matches <code>^(.*(([^a-df-z]|^)shop|shopping).*)$</code>, and the medium matches the paid pattern <code>^(.*cp.*|ppc|retargeting|paid.*)$</code>.</li>
+<li><b>Paid Search, Paid Social, Paid Video.</b> Source is on the search, social or video list, and the medium matches the paid pattern.</li>
+<li><b>Display.</b> Medium is <code>display</code>, <code>banner</code>, <code>expandable</code>, <code>interstitial</code> or <code>cpm</code>.</li>
+<li><b>Paid Other.</b> Medium matches the paid pattern, whatever the source.</li>
+<li><b>Organic Shopping.</b> Source is on the shopping list or the campaign name matches the shop pattern.</li>
+<li><b>Organic Social.</b> Source is on the social list, or medium is <code>social</code>, <code>social-network</code>, <code>social-media</code>, <code>sm</code>, <code>social network</code> or <code>social media</code>.</li>
+<li><b>Organic Video.</b> Source is on the video list, or the medium contains <code>video</code>.</li>
+<li><b>Organic Search.</b> Source is on the search list, or medium is exactly <code>organic</code>.</li>
+<li><b>AI Assistant.</b> Medium is exactly <code>ai-assistant</code>.</li>
+<li><b>Referral.</b> Medium is <code>referral</code>, <code>app</code> or <code>link</code>.</li>
+<li><b>Email.</b> Source or medium is <code>email</code>, <code>e-mail</code>, <code>e_mail</code> or <code>e mail</code>.</li>
+<li><b>Affiliates, Audio, SMS.</b> Medium is <code>affiliate</code> or <code>audio</code>; source or medium is <code>sms</code>.</li>
+<li><b>Mobile Push Notifications.</b> Medium ends with <code>push</code> or contains <code>mobile</code> or <code>notification</code>, or source is exactly <code>firebase</code>.</li>
+<li><b>Unassigned.</b> Nothing above matched.</li>
+</ol>
+<p class="p">The search, social, video and shopping lists are Google&rsquo;s own, from the sources and categories spreadsheet linked on that page, and the checker holds all of them. The checker counts a source only when it is on a list as written, ignoring case: <code>google</code> is on the search list, <code>google.com</code> is not. Google also has rules for clicks it reads from its own ad platforms, such as auto-tagged Google Ads clicks with <code>gclid</code>, which use the ad network and campaign type instead of UTM tags. A URL does not carry that data, so the checker does not run those rules.</p>
+<h2>Why traffic is Unassigned in GA4</h2>
+<p class="p">Unassigned is not a source of traffic. It is the group GA4 uses when the source and medium arrived but no rule accepts them. The usual reasons are:</p>
+<ul class="post-list">
+<li><b>A misspelled medium.</b> <code>emial</code>, <code>refferal</code> or <code>afiliate</code> matches nothing. Case does not matter, spelling does.</li>
+<li><b>A medium of your own.</b> <code>newsletter</code>, <code>partner</code> or <code>print</code> are reasonable names, but no default rule knows them. Unless the source is on one of Google&rsquo;s lists, the visit is Unassigned.</li>
+<li><b>A source with no medium.</b> A link with <code>utm_source=newsletter</code> and nothing else leaves the medium <code>(not set)</code>, and only a listed source can rescue it.</li>
+<li><b>No session start.</b> If the tag loads late, a session can have no source at all. Tags cannot fix that; see <a href="/blog/ga4-unassigned-traffic-revenue">GA4 unassigned traffic and (not set)</a> for the setup causes and what those visits paid.</li>
+</ul>
+<p class="p">To stop new links from landing in Unassigned, pick the medium first and the source second. <a href="/blog/utm-source-vs-utm-medium">utm_source vs utm_medium</a> explains the split, the <a href="/tools/utm-builder">UTM builder</a> makes links with a consistent medium, and the <a href="/tools/utm-checker">UTM checker</a> finds missing tags, capitals and spaces in a whole list before it goes out.</p>
+<h2>Ten links and the group each one gets</h2>
+<p class="p">Each row is what the checker returns for that link. Paste any of them above to see the rule.</p>
+<table class="cmp" style="overflow-wrap: anywhere"><thead><tr><th style="width: 44%">UTM tags</th><th>GA4 group</th><th>Virling</th></tr></thead><tbody>
+<tr><td><code>utm_source=google&amp;utm_medium=cpc</code></td><td>Paid Search</td><td>Paid</td></tr>
+<tr><td><code>utm_source=facebook&amp;utm_medium=cpc</code></td><td>Paid Social</td><td>Paid</td></tr>
+<tr><td><code>utm_source=google.com&amp;utm_medium=cpc</code></td><td>Paid Other</td><td>Paid</td></tr>
+<tr><td><code>utm_source=partner&amp;utm_medium=cpc&amp;utm_campaign=summer-shop</code></td><td>Paid Shopping</td><td>Paid</td></tr>
+<tr><td><code>utm_source=partner&amp;utm_medium=banner</code></td><td>Display</td><td>Referral</td></tr>
+<tr><td><code>utm_source=newsletter</code> (no medium)</td><td>Unassigned</td><td>Referral</td></tr>
+<tr><td><code>utm_source=newsletter&amp;utm_medium=emial</code></td><td>Unassigned</td><td>Referral</td></tr>
+<tr><td><code>utm_source=newsletter&amp;utm_medium=email</code></td><td>Email</td><td>Email</td></tr>
+<tr><td><code>utm_source=youtube&amp;utm_medium=video</code></td><td>Organic Video</td><td>Social</td></tr>
+<tr><td><code>utm_source=chatgpt.com&amp;utm_medium=referral</code></td><td>Referral</td><td>AI</td></tr>
+</tbody></table>
+<h2>Why Virling&rsquo;s channel can differ</h2>
+<p class="p">Virling has fewer, broader channels: Paid, Email, AI, Organic search, Communities, Social, Referral and Direct. Its rules are in <code>src/channel.rs</code> and the <a href="https://docs.virling.com/attribution/channels">channels docs</a>. Three differences explain most rows above. Virling&rsquo;s Paid list is exact (<code>cpc</code>, <code>ppc</code>, <code>paid</code>, <code>paidsearch</code>, <code>paid_social</code>, <code>paidsocial</code>), where GA4 accepts any medium matching its pattern. Virling never leaves a tagged visit unassigned: a source it does not know is Referral. And it reads the source before the medium, so <code>chatgpt.com</code> is AI and <code>youtube</code> is Social whatever the medium says, unless the medium is paid or email.</p>
+<p class="p">This checker assumes the visit had no referrer, as with a link in an email or an app. With a referrer, both tools can credit the referring site instead; the <a href="/tools/traffic-source-checker">traffic source checker</a> takes a referrer and shows how Virling handles it.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Related tools and guides</h2>
+<ul class="post-list"><li><a href="/tools/utm-builder">UTM builder</a>: build tagged links with a medium GA4 recognises.</li><li><a href="/tools/utm-checker">UTM checker</a>: check a whole campaign list of tagged links before they go out.</li><li><a href="/tools/traffic-source-checker">Traffic source checker</a>: see the channel and source Virling credits for a URL and referrer.</li><li><a href="/blog/ga4-unassigned-traffic-revenue">GA4 unassigned traffic and (not set)</a>: what each label means and the revenue behind it.</li><li><a href="/blog/utm-source-vs-utm-medium">utm_source vs utm_medium</a>: the difference, with examples.</li></ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>GA4 channel group checker FAQ</h2>
+    <div class="faq-list">
+      <div><h3>What is the GA4 default channel grouping?</h3><p class="p">A fixed set of rules that sorts every session into a channel such as Organic Search, Paid Social or Email, using its source, medium and campaign name. Google publishes the rules and they cannot be edited, but you can build a custom channel group next to them.</p></div>
+      <div><h3>Why is my traffic Unassigned in GA4?</h3><p class="p">No default rule matched the source and medium. The usual causes are a misspelled medium, a medium of your own such as newsletter or partner, or a source with no medium, on a source that is not on one of Google&rsquo;s lists.</p></div>
+      <div><h3>Why is utm_source=google.com with utm_medium=cpc not Paid Search?</h3><p class="p">Paid Search needs a source on Google&rsquo;s search list, and the list has google but not google.com. The medium still matches the paid pattern, so the visit is Paid Other. Use utm_source=google.</p></div>
+      <div><h3>Does the checker cover auto-tagged Google Ads clicks?</h3><p class="p">No. Clicks with gclid are sorted by the ad network and campaign type GA4 reads from Google Ads, which a URL does not show. The checker runs the rules for manual UTM tags.</p></div>
+      <div><h3>Is anything I paste sent anywhere?</h3><p class="p">No. The rules and Google&rsquo;s source lists are in the page, and nothing you paste leaves your browser.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the GA4 default channel grouping?", "acceptedAnswer": {"@type": "Answer", "text": "A fixed set of rules that sorts every session into a channel such as Organic Search, Paid Social or Email, using its source, medium and campaign name. Google publishes the rules and they cannot be edited, but you can build a custom channel group next to them."}}, {"@type": "Question", "name": "Why is my traffic Unassigned in GA4?", "acceptedAnswer": {"@type": "Answer", "text": "No default rule matched the source and medium. The usual causes are a misspelled medium, a medium of your own such as newsletter or partner, or a source with no medium, on a source that is not on one of Google’s lists."}}, {"@type": "Question", "name": "Why is utm_source=google.com with utm_medium=cpc not Paid Search?", "acceptedAnswer": {"@type": "Answer", "text": "Paid Search needs a source on Google’s search list, and the list has google but not google.com. The medium still matches the paid pattern, so the visit is Paid Other. Use utm_source=google."}}, {"@type": "Question", "name": "Does the checker cover auto-tagged Google Ads clicks?", "acceptedAnswer": {"@type": "Answer", "text": "No. Clicks with gclid are sorted by the ad network and campaign type GA4 reads from Google Ads, which a URL does not show. The checker runs the rules for manual UTM tags."}}, {"@type": "Question", "name": "Is anything I paste sent anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "No. The rules and Google’s source lists are in the page, and nothing you paste leaves your browser."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the revenue behind every channel</h2>
+<p class="p">A channel name tells you where a visit came from. Virling links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const SEARCH = new Set("360.cn|alice|aol|ar.search.yahoo.com|ask|at.search.yahoo.com|au.search.yahoo.com|auone|avg|babylon|baidu|biglobe|biglobe.co.jp|biglobe.ne.jp|bing|br.search.yahoo.com|ca.search.yahoo.com|centrum.cz|ch.search.yahoo.com|cl.search.yahoo.com|cn.bing.com|cnn|co.search.yahoo.com|comcast|conduit|daum|daum.net|de.search.yahoo.com|dk.search.yahoo.com|dogpile|dogpile.com|duckduckgo|ecosia.org|email.seznam.cz|eniro|es.search.yahoo.com|espanol.search.yahoo.com|exalead.com|excite.com|fi.search.yahoo.com|firmy.cz|fr.search.yahoo.com|globo|go.mail.ru|google|google-play|hk.search.yahoo.com|id.search.yahoo.com|in.search.yahoo.com|incredimail|it.search.yahoo.com|kvasir|lens.google.com|lite.qwant.com|lycos|m.baidu.com|m.naver.com|m.search.naver.com|m.sogou.com|mail.rambler.ru|mail.yandex.ru|malaysia.search.yahoo.com|msn|msn.com|mx.search.yahoo.com|najdi|naver|naver.com|news.google.com|nl.search.yahoo.com|no.search.yahoo.com|ntp.msn.com|nz.search.yahoo.com|onet|onet.pl|pe.search.yahoo.com|ph.search.yahoo.com|pl.search.yahoo.com|play.google.com|qwant|qwant.com|rakuten|rakuten.co.jp|rambler|rambler.ru|se.search.yahoo.com|search-results|search.aol.co.uk|search.aol.com|search.google.com|search.smt.docomo.ne.jp|search.ukr.net|secureurl.ukr.net|seznam|seznam.cz|sg.search.yahoo.com|so.com|sogou|sogou.com|sp-web.search.auone.jp|startsiden|startsiden.no|suche.aol.de|terra|th.search.yahoo.com|tr.search.yahoo.com|tut.by|tw.search.yahoo.com|uk.search.yahoo.com|ukr|us.search.yahoo.com|virgilio|vn.search.yahoo.com|wap.sogou.com|webmaster.yandex.ru|websearch.rakuten.co.jp|yahoo|yahoo.co.jp|yahoo.com|yandex|yandex.by|yandex.com|yandex.com.tr|yandex.fr|yandex.kz|yandex.ru|yandex.ua|yandex.uz|zen.yandex.ru".split("|"));
+const SOCIAL = new Set("43things|43things.com|51.com|5ch.net|academia.edu|activerain|activerain.com|activeworlds|activeworlds.com|addthis|addthis.com|airg.ca|allnurses.com|allrecipes.com|alumniclass|alumniclass.com|ameba.jp|ameblo.jp|americantowns|americantowns.com|amp.reddit.com|ancestry.com|anobii|anobii.com|answerbag|answerbag.com|answers.yahoo.com|aolanswers|aolanswers.com|apps.facebook.com|ar.pinterest.com|artstation.com|askubuntu|askubuntu.com|asmallworld.com|athlinks|athlinks.com|away.vk.com|awe.sm|b.hatena.ne.jp|baby-gaga|baby-gaga.com|babyblog.ru|badoo|badoo.com|bebo|bebo.com|beforeitsnews|beforeitsnews.com|bharatstudent|bharatstudent.com|biip.no|biswap.org|bit.ly|blackcareernetwork.com|blackplanet|blackplanet.com|blip.fm|blog.com|blog.feedspot.com|blog.goo.ne.jp|blog.naver.com|blog.yahoo.co.jp|blogg.no|bloggang.com|blogger|blogger.com|blogher|blogher.com|bloglines|bloglines.com|blogs.com|blogsome|blogsome.com|blogspot|blogspot.com|blogster|blogster.com|blurtit|blurtit.com|bookmarks.yahoo.co.jp|bookmarks.yahoo.com|br.pinterest.com|brightkite|brightkite.com|brizzly|brizzly.com|business.facebook.com|buzzfeed|buzzfeed.com|buzznet|buzznet.com|cafe.naver.com|cafemom|cafemom.com|camospace|camospace.com|canalblog.com|care.com|care2|care2.com|caringbridge.org|catster|catster.com|cbnt.io|cellufun|cellufun.com|centerblog.net|chat.zalo.me|chegg.com|chicagonow|chicagonow.com|chiebukuro.yahoo.co.jp|classmates|classmates.com|classquest|classquest.com|co.pinterest.com|cocolog-nifty|cocolog-nifty.com|copainsdavant.linternaute.com|couchsurfing.org|cozycot|cozycot.com|cross.tv|crunchyroll|crunchyroll.com|cyworld|cyworld.com|cz.pinterest.com|d.hatena.ne.jp|dailystrength.org|deluxe.com|deviantart|deviantart.com|dianping|dianping.com|digg|digg.com|diigo|diigo.com|discover.hubpages.com|disqus|disqus.com|dogster|dogster.com|dol2day|dol2day.com|doostang|doostang.com|dopplr|dopplr.com|douban|douban.com|draft.blogger.com|draugiem.lv|drugs-forum|drugs-forum.com|dzone|dzone.com|edublogs.org|elftown|elftown.com|epicurious.com|everforo.com|exblog.jp|extole|extole.com|facebook|facebook.com|faceparty|faceparty.com|fandom.com|fanpop|fanpop.com|fark|fark.com|fb|fb.me|fc2|fc2.com|feedspot|feministing|feministing.com|filmaffinity|filmaffinity.com|flickr|flickr.com|flipboard|flipboard.com|folkdirect|folkdirect.com|foodservice|foodservice.com|forums.androidcentral.com|forums.crackberry.com|forums.imore.com|forums.nexopia.com|forums.webosnation.com|forums.wpcentral.com|fotki|fotki.com|fotolog|fotolog.com|foursquare|foursquare.com|free.facebook.com|friendfeed|friendfeed.com|fruehstueckstreff.org|fubar|fubar.com|gaiaonline|gaiaonline.com|gamerdna|gamerdna.com|gather.com|geni.com|getpocket.com|glassboard|glassboard.com|glassdoor|glassdoor.com|godtube|godtube.com|goldenline.pl|goldstar|goldstar.com|goo.gl|gooblog|goodreads|goodreads.com|google+|googlegroups.com|googleplus|govloop|govloop.com|gowalla|gowalla.com|gree.jp|groups.google.com|gulli.com|gutefrage.net|habbo|habbo.com|hatena|hi5|hi5.com|hootsuite|hootsuite.com|houzz|houzz.com|hoverspot|hoverspot.com|hr.com|hu.pinterest.com|hubculture|hubculture.com|hubpages.com|hyves.net|hyves.nl|ibibo|ibibo.com|id.pinterest.com|identi.ca|ig|imageshack|imageshack.com|imageshack.us|imvu|imvu.com|in.pinterest.com|insanejournal|insanejournal.com|instagram|instagram.com|instapaper|instapaper.com|internations.org|interpals.net|intherooms|intherooms.com|irc-galleria.net|is.gd|italki|italki.com|jammerdirect|jammerdirect.com|jappy.com|jappy.de|kaboodle.com|kakao|kakao.com|kakaocorp.com|kaneva|kaneva.com|kin.naver.com|l.facebook.com|l.instagram.com|l.messenger.com|last.fm|librarything|librarything.com|lifestream.aol.com|line|line.me|linkedin|linkedin.com|listal|listal.com|listography|listography.com|livedoor.com|livedoorblog|livejournal|livejournal.com|lm.facebook.com|lnkd.in|m.blog.naver.com|m.cafe.naver.com|m.facebook.com|m.kin.naver.com|m.vk.com|m.yelp.com|mbga.jp|medium.com|meetin.org|meetup|meetup.com|meinvz.net|meneame.net|menuism.com|messages.google.com|messages.yahoo.co.jp|messenger|messenger.com|mix.com|mixi.jp|mobile.facebook.com|mocospace|mocospace.com|mouthshut|mouthshut.com|movabletype|movabletype.com|mubi|mubi.com|my.opera.com|myanimelist.net|myheritage|myheritage.com|mylife|mylife.com|mymodernmet|mymodernmet.com|myspace|myspace.com|netvibes|netvibes.com|news.ycombinator.com|newsshowcase|nexopia|ngopost.org|niconico|nicovideo.jp|nightlifelink|nightlifelink.com|ning|ning.com|nl.pinterest.com|odnoklassniki.ru|odnoklassniki.ua|okwave.jp|old.reddit.com|oneworldgroup.org|onstartups|onstartups.com|opendiary|opendiary.com|oshiete.goo.ne.jp|out.reddit.com|over-blog.com|overblog.com|paper.li|partyflock.nl|photobucket|photobucket.com|pinboard|pinboard.in|pingsta|pingsta.com|pinterest|pinterest.at|pinterest.ca|pinterest.ch|pinterest.cl|pinterest.co.kr|pinterest.co.uk|pinterest.com|pinterest.com.au|pinterest.com.mx|pinterest.de|pinterest.es|pinterest.fr|pinterest.it|pinterest.jp|pinterest.nz|pinterest.ph|pinterest.pt|pinterest.ru|pinterest.se|pixiv.net|pl.pinterest.com|playahead.se|plurk|plurk.com|plus.google.com|plus.url.google.com|pocket.co|posterous|posterous.com|pro.homeadvisor.com|pulse.yahoo.com|qapacity|qapacity.com|quechup|quechup.com|quora|quora.com|qzone.qq.com|ravelry|ravelry.com|reddit|reddit.com|redux|redux.com|renren|renren.com|researchgate.net|reunion|reunion.com|reverbnation|reverbnation.com|rtl.de|ryze|ryze.com|salespider|salespider.com|scoop.it|screenrant|screenrant.com|scribd|scribd.com|scvngr|scvngr.com|secondlife|secondlife.com|serverfault|serverfault.com|shareit|sharethis|sharethis.com|shvoong.com|sites.google.com|skype|skyrock|skyrock.com|slashdot.org|slideshare.net|smartnews.com|snapchat|snapchat.com|social|sociallife.com.br|socialvibe|socialvibe.com|spaces.live.com|spoke|spoke.com|spruz|spruz.com|ssense.com|stackapps|stackapps.com|stackexchange|stackexchange.com|stackoverflow|stackoverflow.com|stardoll.com|stickam|stickam.com|studivz.net|suomi24.fi|superuser|superuser.com|sweeva|sweeva.com|t.co|t.me|tagged|tagged.com|taggedmail|taggedmail.com|talkbiznow|talkbiznow.com|taringa.net|techmeme|techmeme.com|tencent|tencent.com|tiktok|tiktok.com|tinyurl|tinyurl.com|toolbox|toolbox.com|touch.facebook.com|tr.pinterest.com|travellerspoint|travellerspoint.com|tripadvisor|tripadvisor.com|trombi|trombi.com|trustpilot|tudou|tudou.com|tuenti|tuenti.com|tumblr|tumblr.com|tweetdeck|tweetdeck.com|twitter|twitter.com|twoo.com|typepad|typepad.com|unblog.fr|urbanspoon.com|ushareit.com|ushi.cn|vampirefreaks|vampirefreaks.com|vampirerave|vampirerave.com|vg.no|video.ibm.com|vk.com|vkontakte.ru|wakoopa|wakoopa.com|wattpad|wattpad.com|web.facebook.com|web.skype.com|webshots|webshots.com|wechat|wechat.com|weebly|weebly.com|weibo|weibo.com|wer-weiss-was.de|weread|weread.com|whatsapp|whatsapp.com|wiki.answers.com|wikihow.com|wikitravel.org|woot.com|wordpress|wordpress.com|wordpress.org|xanga|xanga.com|xing|xing.com|yahoo-mbga.jp|yammer|yammer.com|yelp|yelp.co.uk|yelp.com|youroom.in|za.pinterest.com|zalo|zoo.gr|zooppa|zooppa.com".split("|"));
+const SHOP = new Set("aax-us-east.amazon-adsystem.com|aax.amazon-adsystem.com|alibaba|alibaba.com|amazon|amazon.co.uk|amazon.com|apps.shopify.com|checkout.shopify.com|checkout.stripe.com|cr.shopping.naver.com|cr2.shopping.naver.com|ebay|ebay.co.uk|ebay.com|ebay.com.au|ebay.de|etsy|etsy.com|google shopping|igshopping|m.alibaba.com|m.shopping.naver.com|mercadolibre|mercadolibre.com|mercadolibre.com.ar|mercadolibre.com.mx|message.alibaba.com|msearch.shopping.naver.com|nl.shopping.net|no.shopping.net|offer.alibaba.com|one.walmart.com|order.shopping.yahoo.co.jp|partners.shopify.com|s3.amazonaws.com|se.shopping.net|shop.app|shopify|shopify.com|shopping.naver.com|shopping.yahoo.co.jp|shopping.yahoo.com|shopzilla|shopzilla.com|simplycodes.com|store.shopping.yahoo.co.jp|stripe|stripe.com|uk.shopping.net|walmart|walmart.com".split("|"));
+const VIDEO = new Set("blog.twitch.tv|crackle|crackle.com|curiositystream|curiositystream.com|d.tube|dailymotion|dailymotion.com|dashboard.twitch.tv|disneyplus|disneyplus.com|fast.wistia.net|help.hulu.com|help.netflix.com|hulu|hulu.com|id.twitch.tv|iq.com|iqiyi|iqiyi.com|jobs.netflix.com|justin.tv|m.twitch.tv|m.youtube.com|music.youtube.com|netflix|netflix.com|player.twitch.tv|player.vimeo.com|ted|ted.com|twitch|twitch.tv|utreon|utreon.com|veoh|veoh.com|viadeo.journaldunet.com|vimeo|vimeo.com|wistia|wistia.com|youku|youku.com|youtube|youtube.com".split("|"));
+const PAIDRE = /^(.*cp.*|ppc|retargeting|paid.*)$/, SHOPRE = /^(.*(([^a-df-z]|^)shop|shopping).*)$/, MAIL = ["email", "e-mail", "e_mail", "e mail"];
+const RULES = [
+  ["Direct", "source is (direct) and medium is (none) or (not set)", (s, m) => s === "(direct)" && (m === "(not set)" || m === "(none)")],
+  ["Cross-network", "campaign contains cross-network", (s, m, c) => c.includes("cross-network")],
+  ["Paid Shopping", "source on the shopping list or campaign matches the shop pattern, and medium matches the paid pattern", (s, m, c) => (SHOP.has(s) || SHOPRE.test(c)) && PAIDRE.test(m)],
+  ["Paid Search", "source on the search list and medium matches the paid pattern", (s, m) => SEARCH.has(s) && PAIDRE.test(m)],
+  ["Paid Social", "source on the social list and medium matches the paid pattern", (s, m) => SOCIAL.has(s) && PAIDRE.test(m)],
+  ["Paid Video", "source on the video list and medium matches the paid pattern", (s, m) => VIDEO.has(s) && PAIDRE.test(m)],
+  ["Display", "medium is display, banner, expandable, interstitial or cpm", (s, m) => ["display", "banner", "expandable", "interstitial", "cpm"].includes(m)],
+  ["Paid Other", "medium matches the paid pattern", (s, m) => PAIDRE.test(m)],
+  ["Organic Shopping", "source on the shopping list or campaign matches the shop pattern", (s, m, c) => SHOP.has(s) || SHOPRE.test(c)],
+  ["Organic Social", "source on the social list or a social medium", (s, m) => SOCIAL.has(s) || ["social", "social-network", "social-media", "sm", "social network", "social media"].includes(m)],
+  ["Organic Video", "source on the video list or medium contains video", (s, m) => VIDEO.has(s) || /^(.*video.*)$/.test(m)],
+  ["Organic Search", "source on the search list or medium is organic", (s, m) => SEARCH.has(s) || m === "organic"],
+  ["AI Assistant", "medium is ai-assistant", (s, m) => m === "ai-assistant"],
+  ["Referral", "medium is referral, app or link", (s, m) => ["referral", "app", "link"].includes(m)],
+  ["Email", "source or medium is email, e-mail, e_mail or e mail", (s, m) => MAIL.includes(s) || MAIL.includes(m)],
+  ["Affiliates", "medium is affiliate", (s, m) => m === "affiliate"],
+  ["Audio", "medium is audio", (s, m) => m === "audio"],
+  ["SMS", "source or medium is sms", (s, m) => s === "sms" || m === "sms"],
+  ["Mobile Push Notifications", "medium ends with push or contains mobile or notification, or source is firebase", (s, m) => m.endsWith("push") || m.includes("mobile") || m.includes("notification") || s === "firebase"],
+];
+const VPAID = ["cpc", "ppc", "paid", "paidsearch", "paid_social", "paidsocial"], VEMAIL = ["email", "newsletter", "e-mail"];
+const VHOSTS = {
+  "AI": ["chatgpt.com", "chat.openai.com", "perplexity.ai", "claude.ai", "gemini.google.com", "copilot.microsoft.com", "chat.deepseek.com"],
+  "Organic search": ["google.", "bing.com", "duckduckgo.com", "search.yahoo.", "yahoo.", "ecosia.org", "yandex.", "baidu.com", "search.brave.com", "startpage.com", "kagi.com", "qwant.com"],
+  "Communities": ["news.ycombinator.com", "reddit.com", "producthunt.com", "indiehackers.com", "dev.to", "hashnode.com", "hashnode.dev", "lobste.rs"],
+  "Social": ["t.co", "x.com", "twitter.com", "facebook.com", "instagram.com", "linkedin.com", "lnkd.in", "youtube.com", "youtu.be", "threads.net", "threads.com", "bsky.app", "mastodon.social", "mastodon.online", "mstdn.social", "pinterest.com", "pin.it", "tiktok.com", "discord.com", "discordapp.com", "discord.gg", "slack.com", "t.me", "telegram.org", "whatsapp.com", "wa.me", "substack.com", "medium.com"],
+};
+const VNAMES = {
+  "AI": ["chatgpt", "openai", "perplexity", "claude", "gemini", "copilot"],
+  "Organic search": ["google", "bing", "duckduckgo", "yahoo", "ecosia", "brave", "yandex", "baidu"],
+  "Communities": ["hackernews", "hn", "ycombinator", "reddit", "producthunt", "indiehackers", "devto", "hashnode", "lobsters"],
+  "Social": ["twitter", "x", "facebook", "fb", "instagram", "ig", "linkedin", "youtube", "threads", "bluesky", "mastodon", "tiktok", "pinterest", "discord", "slack", "telegram", "whatsapp", "substack", "medium"],
+};
+const SAME = { "Paid Shopping": ["Paid"], "Paid Search": ["Paid"], "Paid Social": ["Paid"], "Paid Video": ["Paid"], "Display": ["Paid"], "Paid Other": ["Paid"], "Cross-network": ["Paid"], "Organic Search": ["Organic search"], "Organic Social": ["Social", "Communities"], "Organic Video": ["Social"], "AI Assistant": ["AI"], "Referral": ["Referral"], "Email": ["Email"], "Direct": ["Direct"] };
+const f = document.getElementById("ga"), sum = document.getElementById("ga-sum"), out = document.getElementById("ga-out"), why = document.getElementById("ga-why"), note = document.getElementById("ga-reason");
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const hostIn = (host, list) => { const h = host.replace(/^www\./, ""); return list.some((e) => e.endsWith(".") ? h.startsWith(e) || h.includes("." + e) : h === e || h.endsWith("." + e)); };
+const virling = (s, m) => {
+  if (VPAID.includes(m)) return ["Paid", `utm_medium=${m} is in the Paid list`];
+  if (VEMAIL.includes(m)) return ["Email", `utm_medium=${m} is in the Email list`];
+  if (s) { const c = Object.keys(VNAMES).find((k) => VNAMES[k].includes(s) || hostIn(s, VHOSTS[k])); return c ? [c, `utm_source=${s} is a known ${c} source`] : ["Referral", `utm_source=${s} is not a known source`]; }
+  if (m) return ["Referral", "a utm_medium with no source"];
+  return ["Direct", "no tags and no referrer"];
+};
+const reason = (g, v, s, m) => {
+  if ((SAME[g] || []).includes(v)) return g === v ? `Both call it ${g}.` : `GA4 calls it ${g}, Virling calls it ${v}.`;
+  if (PAIDRE.test(m) && v !== "Paid") return `GA4 counts any medium matching its paid pattern as paid; Virling's Paid list is exact, so ${m} falls through to the source.`;
+  if (v === "Email") return `Virling also counts ${m} as Email; GA4 accepts only email, e-mail, e_mail or e mail.`;
+  if (v === "AI") return `Virling reads the source first and knows ${s} as an AI assistant; GA4 uses AI Assistant only for the medium ai-assistant.`;
+  if (g === "Unassigned") return `No GA4 rule accepts this source and medium; Virling never leaves a tagged visit unassigned, and ${v === "Referral" ? "counts a source it does not know as Referral" : `knows ${s} as a ${v} source`}.`;
+  if (v === "Referral") return s ? `${s} is not on Virling's source list, so Virling counts it as Referral; GA4 matched its ${g} rule.` : `Virling counts a medium with no source as Referral; GA4 matched its ${g} rule.`;
+  return `Virling reads the source before the medium and knows ${s} as a ${v} source; GA4 matched its ${g} rule.`;
+};
+const fill = () => {
+  const raw = f.url.value.trim();
+  if (!raw) return;
+  let u;
+  try { u = new URL(/^[a-z]+:\/\//i.test(raw) ? raw : "https://" + raw); } catch { return; }
+  for (const k of ["source", "medium", "campaign"]) f[k].value = u.searchParams.get("utm_" + k) || "";
+};
+const run = () => {
+  const s = f.source.value.trim().toLowerCase(), m = f.medium.value.trim().toLowerCase(), c = f.campaign.value.trim().toLowerCase();
+  const gs = s || (m || c ? "(not set)" : "(direct)"), gm = m || (s || c ? "(not set)" : "(none)");
+  const steps = [];
+  let group = "Unassigned", rule = "no rule matched";
+  for (const [name, text, test] of RULES) { const hit = test(gs, gm, c); steps.push([name, text, hit]); if (hit) { group = name; rule = text; break; } }
+  if (group === "Unassigned") steps.push(["Unassigned", "nothing above matched", true]);
+  const [v, vrule] = virling(s, m);
+  sum.innerHTML = [["GA4 channel group", group], ["Virling channel", v], ["GA4 source / medium", `${gs} / ${gm}`]].map(([k, x]) => `<div><span class="dim">${k}</span><b style="word-break: break-all">${esc(x)}</b></div>`).join("");
+  out.innerHTML = `<div class="tr th"><span>GA4 rule</span><span>Condition</span><span>Result</span></div>` + steps.map(([n, t, h]) => `<div class="tr"><span>${esc(n)}</span><span>${esc(t)}</span><span>${h ? `<b class="yes">${esc(n)}</b>` : "<small>no match</small>"}</span></div>`).join("");
+  const same = (SAME[group] || []).includes(v);
+  why.innerHTML = `<div class="tr th"><span>Side by side</span><span>Rule that matched</span><span>Channel</span></div><div class="tr"><span>GA4</span><span>${esc(rule)}</span><span><b>${esc(group)}</b></span></div><div class="tr"><span>Virling</span><span>${esc(vrule)}</span><span><b>${esc(v)}</b></span></div>`;
+  note.innerHTML = `<b class="${same ? "yes" : "no"}">${same ? "Same channel." : "Different channel."}</b> ${esc(reason(group, v, s, m))}`;
+};
+f.url.addEventListener("input", fill);
+f.addEventListener("input", run);
+f.addEventListener("submit", (e) => e.preventDefault());
+fill();
+run();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
