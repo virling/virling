@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POAS calculator: profit on ad spend and break-even ROAS | Virling</title>
+<meta name="description" content="Work out profit on ad spend from ad spend, revenue, product cost, fees, shipping and refunds, with ROAS, gross profit and break-even ROAS beside it.">
+<link rel="canonical" href="https://virling.com/tools/poas-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/poas-calculator">
+<meta property="og:title" content="POAS calculator: profit on ad spend and break-even ROAS | Virling">
+<meta property="og:description" content="Work out profit on ad spend from ad spend, revenue, product cost, fees, shipping and refunds, with ROAS, gross profit and break-even ROAS beside it.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"POAS calculator","url":"https://virling.com/tools/poas-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"POAS calculator","item":"https://virling.com/tools/poas-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / poas calculator</span><h1>POAS calculator: profit on ad spend</h1><p class="lead">Enter what you spent on ads, the revenue those ads brought and what those sales cost you: product cost or gross margin, payment fees, shipping and refunds. You get your profit on ad spend (POAS), your ROAS beside it, the gross profit from the ads and the break-even ROAS, with the formula worked out. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="poas" autocomplete="off">
+  <label>Ad spend ($)<input name="spend" type="number" min="0" step="0.01" value="2000"></label>
+  <label>Revenue from those ads ($)<input name="rev" type="number" min="0" step="0.01" value="8000"></label>
+  <div class="tool-pick" data-select><span id="mode-label">Enter product cost as</span>
+    <button type="button" id="mode" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="mode-label mode-value" data-value="cost"><span id="mode-value">Dollar amount</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="mode-menu" role="listbox" aria-labelledby="mode-label" tabindex="-1" hidden><li role="option" data-value="cost" aria-selected="true">Dollar amount</li><li role="option" data-value="margin" aria-selected="false">Gross margin (%)</li></ul>
+  </div>
+  <label id="cost-field">Product cost of the orders kept ($)<input name="cost" type="number" min="0" step="0.01" value="3000"></label>
+  <label id="margin-field" style="display:none">Gross margin before fees and shipping (%)<input name="margin" type="number" min="0" max="100" step="0.1" value="60"></label>
+  <label>Payment fees (% of revenue)<input name="fees" type="number" min="0" max="100" step="0.1" value="3"></label>
+  <label>Shipping you paid ($)<input name="ship" type="number" min="0" step="0.01" value="400"></label>
+  <label>Refunds ($)<input name="refunds" type="number" min="0" step="0.01" value="300"></label>
+</form>
+<div class="tool-stats" id="poas-out"></div>
+<p class="fine-note" id="poas-read" aria-live="polite"></p>
+<p class="fine-note">The numbers filled in above are the made-up example store below. Replace them with your own. Fees are taken on all revenue, refunded or not, and the margin option applies to revenue after refunds.</p>
+<div class="txt post tool-cta">
+<p class="p">POAS is only as good as the revenue you match to each channel. Virling links every visit to the payment it led to, so it fills in the revenue for each channel from your real payments instead of a platform's estimate. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/roas-calculator">ROAS calculator</a>, <a href="/tools/break-even-cpa-calculator">break-even CPA calculator</a>, <a href="/tools/contribution-margin-calculator">contribution margin calculator</a>, <a href="/blog/profit-by-marketing-channel">profit by marketing channel</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The POAS formula</h2>
+<p class="p">Profit on ad spend is the gross profit your ads brought divided by what you spent on them:</p>
+<p class="p"><code>POAS = gross profit from ads / ad spend</code></p>
+<p class="p">Gross profit here is what is left of the revenue after the costs that come with each sale:</p>
+<p class="p"><code>gross profit = revenue - refunds - product cost - payment fees - shipping</code></p>
+<p class="p">A POAS of 1 means the ads paid for themselves and left nothing over. Above 1 they earned more gross profit than they cost; below 1 every dollar of ad spend brought back less than a dollar of profit. Because the costs are already inside the number, the break-even point for POAS is always 1, whatever you sell.</p>
+<h2>POAS and ROAS side by side</h2>
+<p class="p">Return on ad spend divides revenue, not profit, by ad spend:</p>
+<p class="p"><code>ROAS = revenue from ads / ad spend</code></p>
+<p class="p">ROAS is what ad platforms report, because revenue is what they can see. It hides the cost of each sale, so a ROAS of 3x can be a good month for a store with high margins and a loss for one that resells products with thin margins. POAS answers the question you actually have: did the ads make money? The calculator shows both so you can compare its answer with what your ad account says.</p>
+<p class="p">To turn POAS back into a ROAS target, the calculator works out the break-even ROAS for your costs:</p>
+<p class="p"><code>break-even ROAS = revenue / gross profit</code></p>
+<p class="p">This is the ROAS at which gross profit exactly equals ad spend, the same point as a POAS of 1. It assumes your costs grow in step with revenue, which holds for product cost, fees and shipping but not for fixed costs. Use it as the floor to set in your ad platform, not as a goal.</p>
+<h2>What goes into each input</h2>
+<ul class="post-list"><li>Ad spend: what you paid the platform for the period or campaign, including any platform fees or taxes you were charged.</li><li>Revenue from those ads: the sales tied to the ads, before refunds and without sales tax.</li><li>Product cost or gross margin: either the dollar cost of the goods in the orders you kept, or the share of revenue left after product cost. If returned goods go back on the shelf, leave them out of the dollar cost.</li><li>Payment fees: the processor's cut as a share of revenue. Processors often keep the fee on a refunded charge, so it is taken on all revenue.</li><li>Shipping you paid: postage and packing you covered, not the shipping the customer paid you.</li><li>Refunds: the money you gave back on those orders.</li></ul>
+<h2>A worked example</h2>
+<p class="p">Fernwood Candles is a made-up store, and its numbers are the defaults above. In one month it spent $2,000 on ads that brought $8,000 of revenue. It refunded $300, the candles in the orders it kept cost $3,000 to make, its payment processor took 3% of $8,000, which is $240, and it paid $400 for shipping.</p>
+<p class="p">Gross profit is $8,000 - $300 - $3,000 - $240 - $400 = $4,060. POAS is $4,060 / $2,000 = 2.03, so each dollar of ad spend brought back $2.03 of gross profit, and the ads made $4,060 - $2,000 = $2,060. ROAS is $8,000 / $2,000 = 4x. The break-even ROAS is $8,000 / $4,060 = 1.97x: below that, the same mix of costs would turn the ads into a loss.</p>
+<p class="p">Now say the store had spent $4,500 to get the same $8,000. ROAS would be $8,000 / $4,500 = 1.78x, which an ad account would show as nearly twice the money back. POAS would be $4,060 / $4,500 = 0.90, and the ads would have lost $4,500 - $4,060 = $440. ROAS alone would not have shown that loss.</p>
+<h2>When the calculator gives a message instead of a number</h2>
+<p class="p">Some inputs have no sensible answer, and a number would mislead you, so the calculator says so in words:</p>
+<ul class="post-list"><li>Zero ad spend: POAS and ROAS divide by spend, so with no spend there is nothing to divide. Gross profit is still shown.</li><li>A gross margin over 100%: that would mean the product costs less than nothing. Check whether you entered a markup instead of a margin.</li><li>Refunds larger than revenue: the refunds probably include orders from outside this period or campaign. Use the refunds on the orders the ads brought.</li><li>A loss: the calculator shows the amount and says it is a loss, and if the orders lose money even before ad spend, it says that no ROAS can break even.</li></ul>
+<h2>Which number to change first</h2>
+<ul class="post-list"><li>POAS below 1 on one campaign: move or cut its spend before anything else.</li><li>POAS below 1 everywhere: look at price, product cost and shipping, because no ad change fixes a margin problem.</li><li>Gross profit below zero before ads: the orders themselves lose money; stop paying to get more of them.</li><li>High refunds: find out which products or campaigns they come from, since the ad spend that won them is gone.</li><li>POAS well above 1: raise spend in steps and check the POAS of the added spend, which is usually lower than the average.</li></ul>
+<h2>POAS needs profit matched to the channel</h2>
+<p class="p">The division is easy; the hard part is knowing which revenue and which refunds belong to which ads. Ad platforms count the conversions they can see within their own attribution windows, and a sale that touched two platforms can be counted by both, so adding up platform revenue overstates what you made. To get a POAS you can trust per channel, each payment and each refund has to be tied to the visit that started it. See <a href="/blog/profit-by-marketing-channel">profit by marketing channel</a> for the full method, the <a href="/tools/contribution-margin-calculator">contribution margin calculator</a> for the profit on a single order, and the <a href="/tools/break-even-cpa-calculator">break-even CPA calculator</a> for the most you can pay per customer. Virling measures revenue per channel from your real payments, so the revenue you put into this calculator is what you collected.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>POAS calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>What is POAS?</h3><p class="p">POAS, or profit on ad spend, is the gross profit your ads brought divided by what you spent on them. Gross profit here is revenue after refunds, product cost, payment fees and shipping. A POAS of 1 means the ads paid for themselves and nothing more.</p></div>
+      <div><h3>How is POAS different from ROAS?</h3><p class="p">ROAS divides revenue by ad spend, so it ignores what each sale costs you. POAS divides gross profit by ad spend, so the costs are already inside it. Two campaigns with the same ROAS can have very different POAS if one sells products with lower margins.</p></div>
+      <div><h3>What is a good POAS?</h3><p class="p">Above 1 the ads earn more gross profit than they cost, and below 1 they lose money. How far above 1 you need to be depends on the costs this calculator leaves out, such as salaries, software and agency fees, so there is no single good number.</p></div>
+      <div><h3>How is break-even ROAS worked out here?</h3><p class="p">It is the ROAS at which gross profit exactly covers ad spend: revenue divided by gross profit. It assumes your costs grow in step with revenue. If your orders lose money before any ad spend, there is no ROAS at which the ads break even.</p></div>
+      <div><h3>Should refunds count in POAS?</h3><p class="p">Yes. A refunded order brings no profit but the ad spend that won it is still gone, and payment processors often keep the fee on a refunded charge. Leaving refunds out makes POAS look better than the money you kept.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is POAS?", "acceptedAnswer": {"@type": "Answer", "text": "POAS, or profit on ad spend, is the gross profit your ads brought divided by what you spent on them. Gross profit here is revenue after refunds, product cost, payment fees and shipping. A POAS of 1 means the ads paid for themselves and nothing more."}}, {"@type": "Question", "name": "How is POAS different from ROAS?", "acceptedAnswer": {"@type": "Answer", "text": "ROAS divides revenue by ad spend, so it ignores what each sale costs you. POAS divides gross profit by ad spend, so the costs are already inside it. Two campaigns with the same ROAS can have very different POAS if one sells products with lower margins."}}, {"@type": "Question", "name": "What is a good POAS?", "acceptedAnswer": {"@type": "Answer", "text": "Above 1 the ads earn more gross profit than they cost, and below 1 they lose money. How far above 1 you need to be depends on the costs this calculator leaves out, such as salaries, software and agency fees, so there is no single good number."}}, {"@type": "Question", "name": "How is break-even ROAS worked out here?", "acceptedAnswer": {"@type": "Answer", "text": "It is the ROAS at which gross profit exactly covers ad spend: revenue divided by gross profit. It assumes your costs grow in step with revenue. If your orders lose money before any ad spend, there is no ROAS at which the ads break even."}}, {"@type": "Question", "name": "Should refunds count in POAS?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. A refunded order brings no profit but the ad spend that won it is still gone, and payment processors often keep the fee on a refunded charge. Leaving refunds out makes POAS look better than the money you kept."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels actually pay back</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("poas"), out = document.getElementById("poas-out"), read = document.getElementById("poas-read"), mode = document.getElementById("mode");
+const usd = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const x = (n) => n.toFixed(2) + "x (" + Math.round(n * 100).toLocaleString("en-US") + "%)";
+const calc = () => {
+  const byM = mode.dataset.value === "margin";
+  document.getElementById("cost-field").style.display = byM ? "none" : "";
+  document.getElementById("margin-field").style.display = byM ? "" : "none";
+  const [s, r, c, mp, fp, sh, rf] = ["spend", "rev", "cost", "margin", "fees", "ship", "refunds"].map((k) => +f[k].value || 0);
+  const show = (rows, msg) => { out.innerHTML = rows.map(([k, v]) => `<div><span class="dim">${k}</span><b>${v}</b></div>`).join(""); read.textContent = msg; };
+  const none = (msg) => show([["POAS", "No result"], ["ROAS", "No result"], ["Gross profit from ads", "No result"], ["Break-even ROAS", "No result"]], msg);
+  if ([s, r, c, mp, fp, sh, rf].some((v) => v < 0)) return none("Use amounts of 0 or more.");
+  if (byM && mp > 100) return none("A gross margin cannot be over 100%. If you know the markup instead, convert it: margin = markup / (100 + markup) x 100.");
+  if (fp > 100) return none("Payment fees cannot be more than 100% of revenue.");
+  if (rf > r) return none("Refunds are larger than revenue. Use only the refunds on the orders these ads brought.");
+  if (r <= 0 && s <= 0) return none("Enter your ad spend and the revenue from those ads.");
+  const net = r - rf, cogs = byM ? net * (1 - mp / 100) : c, fee = r * fp / 100, gp = net - cogs - fee - sh, p = gp - s;
+  const parts = `Gross profit = ${usd(r)} revenue - ${usd(rf)} refunds - ${usd(cogs)} product cost - ${usd(fee)} fees - ${usd(sh)} shipping = ${usd(gp)}.`;
+  const be = gp > 0 && r > 0 ? x(r / gp) : "Never";
+  if (s <= 0) return show([["POAS", "Add ad spend"], ["ROAS", "Add ad spend"], ["Gross profit from ads", usd(gp)], ["Break-even ROAS", be]], `${parts} With no ad spend there is no POAS or ROAS to work out.`);
+  const rows = [["POAS", x(gp / s)], ["ROAS", x(r / s)], ["Gross profit from ads", usd(gp)], ["Break-even ROAS", be]];
+  let msg = `${parts} POAS = ${usd(gp)} / ${usd(s)} ad spend = ${(gp / s).toFixed(2)}.`;
+  if (gp < 0) msg += ` Loss: the orders lose ${usd(-gp)} before ad spend, so the ads lost ${usd(-p)} and no ROAS can break even.`;
+  else if (p < 0) msg += ` Loss: gross profit did not cover the ad spend, so the ads lost ${usd(-p)}. POAS has to reach 1.00 to break even.`;
+  else msg += ` The ads made ${usd(p)} after ad spend.`;
+  show(rows, msg);
+};
+for (const box of document.querySelectorAll("[data-select]")) {
+  const btn = box.querySelector("button"), menu = box.querySelector("ul"), items = [...menu.children];
+  const mark = (el) => { items.forEach((i) => i.classList.toggle("on", i === el)); menu.setAttribute("aria-activedescendant", el.id = btn.id + "-" + el.dataset.value); };
+  const show = (open) => {
+    menu.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+    if (open) { mark(items.find((i) => i.getAttribute("aria-selected") === "true")); menu.focus(); }
+  };
+  const pick = (el) => {
+    items.forEach((i) => i.setAttribute("aria-selected", String(i === el)));
+    btn.dataset.value = el.dataset.value;
+    btn.querySelector("span").textContent = el.textContent;
+    show(false);
+    btn.focus();
+    calc();
+  };
+  btn.addEventListener("click", () => show(menu.hidden));
+  btn.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); show(true); } });
+  items.forEach((i) => { i.addEventListener("click", () => pick(i)); i.addEventListener("mousemove", () => mark(i)); });
+  menu.addEventListener("keydown", (e) => {
+    const at = items.findIndex((i) => i.classList.contains("on"));
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); mark(items[(at + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]); }
+    else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(items[at]); }
+    else if (e.key === "Escape" || e.key === "Tab") { show(false); btn.focus(); }
+  });
+  document.addEventListener("click", (e) => { if (!menu.hidden && !box.contains(e.target)) show(false); });
+}
+f.addEventListener("input", calc);
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
