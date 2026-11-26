@@ -56,7 +56,7 @@
   items: [{ priceId: "pri_...", quantity: 1 }],
   customData: { virling_vid: window.virling?.vid?.() },
 });</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">If you also want the tags readable in Paddle, add them next to the ID, for example <code>utm_source</code> and <code>utm_campaign</code> from the values you stored on landing. Virling only needs <code>virling_vid</code>. For the App Router, see <a href="/blog/nextjs-paddle-utm-tracking">Next.js Paddle UTM tracking</a>.</p>
+<p class="p">If you also want the tags readable in Paddle, add them next to the ID, for example <code>utm_source</code> and <code>utm_campaign</code> from the values you stored on landing. Virling only needs <code>virling_vid</code>. For the App Router, see <a href="/blog/nextjs-paddle-utm-tracking">Next.js Paddle UTM tracking</a>. For a React app, see <a href="/blog/react-paddle-utm-tracking">React Paddle UTM tracking</a>, and for Django, <a href="/blog/django-paddle-utm-tracking">Django Paddle UTM tracking</a>.</p>
 <h2>Step 3: set custom_data on server-created transactions</h2>
 <p class="p">When your backend creates the transaction, read the cookie from the request and set <code>custom_data</code>:</p>
 <div class="code block"><pre data-snippet>const res = await fetch("https://api.paddle.com/transactions", {
