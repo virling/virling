@@ -1,6 +1,6 @@
 [book]
 title = "Virling docs"
-description = "How to run Virling, add the tracking script, connect payments and read attribution."
+description = "Set up Virling, the open-source revenue attribution tool: run it, add the tracking script, connect Stripe, Paddle or Shopify and see which channels bring paying customers."
 language = "en"
 src = "src"
 

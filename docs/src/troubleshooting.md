@@ -1,4 +1,4 @@
-# Troubleshooting
+# Troubleshooting: no visitors or payments
 
 The problems people hit most, with what to check first. On hosted Virling, still stuck? Open **Help and support** from the account menu in the app, or email help@virling.com. Self-hosted: open an issue on [GitHub](https://github.com/virling/virling/issues).
 

@@ -1,4 +1,4 @@
-# Introduction
+# What is Virling?
 
 Virling is open-source revenue analytics. It joins every visit to the payment that followed, so you can see which channels make you money, not just traffic.
 
