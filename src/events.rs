@@ -95,6 +95,13 @@ pub trait EventStore: Send + Sync {
     fn insert_events(&self, events: &[Event]) -> anyhow::Result<()>;
     /// Inserts or replaces payments keyed by (site_id, provider, provider_payment_id).
     fn upsert_payments(&self, payments: &[Payment]) -> anyhow::Result<()>;
+    /// Drops one provider's payments, trials and credits of a site from `since` on, before importing them again.
+    fn forget_payments(
+        &self,
+        site_id: &str,
+        provider: &str,
+        since: OffsetDateTime,
+    ) -> anyhow::Result<()>;
     /// Replaces the stored subscription states of one provider of a site.
     fn replace_subscriptions(
         &self,
@@ -1539,6 +1546,39 @@ impl EventStore for DuckStore {
             tx.execute(
                 &format!("DELETE FROM {table} WHERE site_id = $1 AND provider = $2"),
                 params![site_id, SAMPLE],
+            )?;
+        }
+        tx.commit()?;
+        self.index.forget(site_id);
+        Ok(())
+    }
+
+    fn forget_payments(
+        &self,
+        site_id: &str,
+        provider: &str,
+        since: OffsetDateTime,
+    ) -> anyhow::Result<()> {
+        let _gate = self.index.gate();
+        let mut conn = self.conn.lock().unwrap();
+        let tx = conn.transaction()?;
+        let since = Value::Timestamp(
+            TimeUnit::Microsecond,
+            (since.unix_timestamp_nanos() / 1000) as i64,
+        );
+        for table in ["attribution", "attribution_dirty"] {
+            tx.execute(
+                &format!(
+                    "DELETE FROM {table} WHERE site_id = $1 AND provider = $2 AND provider_payment_id IN (
+                       SELECT provider_payment_id FROM payments WHERE site_id = $1 AND provider = $2 AND ts >= $3)"
+                ),
+                params![site_id, provider, since.clone()],
+            )?;
+        }
+        for table in ["payments", "trials"] {
+            tx.execute(
+                &format!("DELETE FROM {table} WHERE site_id = $1 AND provider = $2 AND ts >= $3"),
+                params![site_id, provider, since.clone()],
             )?;
         }
         tx.commit()?;

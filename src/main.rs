@@ -2719,6 +2719,54 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn product_filter_clears_payments_it_will_reimport() {
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        connect_fake(&state, &site, "dodo", "fake_test_value_1234").await;
+        let now = time::OffsetDateTime::now_utc();
+        let pay = |id: &str, days: i64| Payment {
+            site_id: site.clone(),
+            provider: "dodo".into(),
+            provider_payment_id: id.into(),
+            ts: now - time::Duration::days(days),
+            amount: 2900,
+            currency: "usd".into(),
+            amount_usd: Some(29.0),
+            refunded: 0,
+            status: "paid".into(),
+            visitor_id: None,
+            customer_id: None,
+            is_renewal: false,
+        };
+        store
+            .upsert_payments(&[pay("pay_recent", 3), pay("pay_old", 200)])
+            .unwrap();
+        call(
+            &state,
+            form(
+                "/app/example.com/settings/products",
+                "provider=dodo&products=pdt_a".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        let period = Period {
+            from: (now - time::Duration::days(365)).date(),
+            to: now.date(),
+            tz: "UTC".into(),
+        };
+        let ids: Vec<String> = store
+            .payment_list(&site, &period, PaymentFilter::All, 10, 0)
+            .unwrap()
+            .rows
+            .into_iter()
+            .map(|p| p.provider_payment_id)
+            .collect();
+        assert_eq!(ids, ["pay_old"], "only the re-imported window is cleared");
+    }
+
+    #[tokio::test]
     async fn dodo_connection_keeps_a_product_list() {
         let (_dir, state, _store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;

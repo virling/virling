@@ -12,7 +12,7 @@ use crate::events::TRIAL;
 
 const LIVE_URL: &str = "https://live.dodopayments.com";
 const TEST_URL: &str = "https://test.dodopayments.com";
-const BACKFILL: Duration = Duration::days(90);
+pub(crate) const BACKFILL: Duration = Duration::days(90);
 /// Longest created_at window per listing, so offset pagination never goes deep.
 const WINDOW: Duration = Duration::days(1);
 /// Each incremental window re-reads this much so payments that succeed late are not missed.

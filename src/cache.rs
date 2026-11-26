@@ -107,6 +107,17 @@ impl<S: EventStore> EventStore for Cached<S> {
         result
     }
 
+    fn forget_payments(
+        &self,
+        site_id: &str,
+        provider: &str,
+        since: OffsetDateTime,
+    ) -> anyhow::Result<()> {
+        let result = self.inner.forget_payments(site_id, provider, since);
+        self.changed([site_id]);
+        result
+    }
+
     fn replace_subscriptions(
         &self,
         site_id: &str,
