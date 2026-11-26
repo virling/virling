@@ -719,6 +719,20 @@ async fn stats_page(req: Request, ctx: RouteContext<()>) -> Result<Response> {
     }
 }
 
+/// Pages merged into another, answered with a permanent redirect.
+const MOVED: &[(&str, &str)] = &[(
+    "/blog/facebook-revenue-tracking",
+    "/blog/instagram-revenue-tracking#facebook",
+)];
+
+fn moved(path: &str) -> Option<&'static str> {
+    let path = path.trim_end_matches('/').trim_end_matches(".html");
+    MOVED
+        .iter()
+        .find(|(from, _)| *from == path)
+        .map(|(_, to)| *to)
+}
+
 /// Markdown copy of a page, when the browser or agent asks for text/markdown.
 fn markdown_path(path: &str) -> Option<String> {
     let path = path.trim_end_matches('/');
@@ -734,6 +748,9 @@ fn markdown_path(path: &str) -> Option<String> {
 
 /// Serves the page's Markdown copy to `Accept: text/markdown`, and every other request from the static assets.
 async fn pages(req: Request, ctx: RouteContext<()>) -> Result<Response> {
+    if let Some(to) = moved(req.url()?.path()) {
+        return Response::redirect_with_status(req.url()?.join(to)?, 301);
+    }
     let assets = ctx.env.assets("ASSETS")?;
     let wants = req.method() == Method::Get
         && req
@@ -830,5 +847,14 @@ mod tests {
             Some(("agency", "a@b.co"))
         );
         assert_eq!(signup_of("leave:x"), None);
+    }
+
+    #[test]
+    fn merged_pages_redirect() {
+        let to = Some("/blog/instagram-revenue-tracking#facebook");
+        assert_eq!(moved("/blog/facebook-revenue-tracking"), to);
+        assert_eq!(moved("/blog/facebook-revenue-tracking/"), to);
+        assert_eq!(moved("/blog/facebook-revenue-tracking.html"), to);
+        assert_eq!(moved("/blog/instagram-revenue-tracking"), None);
     }
 }
