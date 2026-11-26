@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Facebook ads URL parameters builder for Meta Ads Manager</title>
+<meta name="description" content="Build the URL parameters string for Facebook and Instagram ads from Meta's campaign, ad set and ad parameters, with a paid utm_medium and a preview.">
+<link rel="canonical" href="https://virling.com/tools/meta-ads-url-parameters-builder">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/meta-ads-url-parameters-builder">
+<meta property="og:title" content="Facebook ads URL parameters builder for Meta Ads Manager">
+<meta property="og:description" content="Build the URL parameters string for Facebook and Instagram ads from Meta's campaign, ad set and ad parameters, with a paid utm_medium and a preview.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Meta ads URL parameters builder","url":"https://virling.com/tools/meta-ads-url-parameters-builder","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Meta ads URL parameters builder","item":"https://virling.com/tools/meta-ads-url-parameters-builder"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / meta ads url parameters builder</span><h1>Facebook ads URL parameters builder</h1><p class="lead">Pick which of Meta's campaign, ad set and ad parameters you want, keep a paid source and medium, and copy one URL parameters string to paste in Ads Manager. A preview shows the landing URL a click would open, with example values. Everything is built in your browser as you type.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="mp" autocomplete="off">
+  <label>Source <span class="dim">utm_source</span><input name="source" value="facebook" maxlength="100" aria-describedby="mp-msg"></label>
+  <label>Medium <span class="dim">utm_medium</span><input name="medium" value="paid_social" maxlength="100" aria-describedby="mp-msg"></label>
+  <fieldset style="grid-column:1/-1;min-width:0;margin:0;padding:0;border:0"><legend style="padding:0 0 10px;font-size:14px;font-weight:600">Meta parameters to include</legend><div class="tool-form">
+    <label class="check"><input type="checkbox" name="mc" value="campaign.id" checked><span>Campaign ID <span class="dim">{{campaign.id}}</span></span></label>
+    <label class="check"><input type="checkbox" name="mc" value="campaign.name"><span>Campaign name <span class="dim">{{campaign.name}}</span></span></label>
+    <label class="check"><input type="checkbox" name="mc" value="adset.id" checked><span>Ad set ID <span class="dim">{{adset.id}}</span></span></label>
+    <label class="check"><input type="checkbox" name="mc" value="adset.name"><span>Ad set name <span class="dim">{{adset.name}}</span></span></label>
+    <label class="check"><input type="checkbox" name="mc" value="ad.id" checked><span>Ad ID <span class="dim">{{ad.id}}</span></span></label>
+    <label class="check"><input type="checkbox" name="mc" value="ad.name"><span>Ad name <span class="dim">{{ad.name}}</span></span></label>
+  </div></fieldset>
+  <label class="wide">Landing page URL, for the preview only<input name="url" type="url" value="https://example.com/pricing" aria-describedby="mp-msg"></label>
+</form>
+<p class="p" id="mp-msg" role="status" aria-live="polite" style="margin:0"></p>
+<div class="tool-out"><span class="dim">URL parameters for Ads Manager</span><output id="mp-params"></output><button class="btn sm" type="button" data-copy="mp-params">Copy parameters</button></div>
+<div class="tool-out"><span class="dim">Landing URL preview, with example values</span><output id="mp-preview"></output></div>
+<p class="p dim">How it is built: the source and medium are lowercased with spaces turned into hyphens, and each parameter you tick goes to the UTM tag it fits. When you tick both the id and the name of one level, the id takes the UTM tag and the name is sent under its own key, such as <code>campaign_name</code>. The preview swaps in made-up names and IDs.</p>
+<div class="txt post tool-cta">
+<p class="p">These tags say which campaign, ad set and ad a click came from. Virling shows what it was worth: it links every visit to the payment it led to and credits each payment to the source, campaign and landing page of the visit that brought it. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/blog/meta-ads-revenue-tracking">Meta Ads revenue tracking</a>, <a href="/blog/facebook-revenue-tracking">Facebook revenue tracking</a>, <a href="/blog/instagram-revenue-tracking">Instagram revenue tracking</a>, <a href="/tools/utm-builder">UTM builder</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post" style="overflow-wrap:anywhere">
+<h2>Fixed values and dynamic parameters</h2>
+<p class="p">A Meta ad's URL parameters can carry two kinds of values. A key and its value are joined with an equals sign, and parameters are joined with an ampersand. The string goes in the ad's URL parameters, not in the landing page URL, so it has no question mark in front.</p>
+<table class="cmp" style="overflow-wrap:anywhere"><thead><tr><th></th><th>Fixed value</th><th>Dynamic parameter</th></tr></thead><tbody><tr><th scope="row">What it holds</th><td>Text you type, the same on every click</td><td>A value Meta fills in, such as a campaign ID</td></tr><tr><th scope="row">How it looks</th><td><code>utm_source=facebook</code></td><td><code>utm_campaign={{campaign.id}}</code></td></tr><tr><th scope="row">Use it for</th><td><code>utm_source</code> and <code>utm_medium</code></td><td><code>utm_campaign</code>, <code>utm_term</code> and <code>utm_content</code></td></tr></tbody></table>
+<p class="p">A dynamic parameter is written in double curly braces. Copy it as it is: a misspelled one is just text, and it shows up in your reports exactly as typed. The builder lowercases the source and medium so that <code>Facebook</code> and <code>facebook</code> never split into two rows.</p>
+<h2>The six parameters Meta documents</h2>
+<p class="p">The list below is from Meta's developer docs, <a href="https://developers.facebook.com/documentation/ads-commerce/instagram/ads-api/guides/url-tags-for-tracking">Use URL Tags for Tracking</a>, read on 2026-11-25. The last column is our mapping, and the one this builder uses.</p>
+<table class="cmp" style="overflow-wrap:anywhere"><thead><tr><th>Parameter</th><th>What it returns</th><th>UTM tag</th></tr></thead><tbody><tr><th scope="row"><code>{{campaign.id}}</code></th><td>The campaign ID</td><td><code>utm_campaign</code></td></tr><tr><th scope="row"><code>{{campaign.name}}</code></th><td>The campaign name</td><td><code>utm_campaign</code>, if the campaign ID is off</td></tr><tr><th scope="row"><code>{{adset.id}}</code></th><td>The ad set ID</td><td><code>utm_term</code></td></tr><tr><th scope="row"><code>{{adset.name}}</code></th><td>The ad set name</td><td><code>utm_term</code>, if the ad set ID is off</td></tr><tr><th scope="row"><code>{{ad.id}}</code></th><td>The ad ID</td><td><code>utm_content</code></td></tr><tr><th scope="row"><code>{{ad.name}}</code></th><td>The ad name</td><td><code>utm_content</code>, if the ad ID is off</td></tr></tbody></table>
+<p class="p">That page has no placement parameter, so this builder does not offer one. If you have read about other parameters elsewhere, check them against a Meta page before you rely on them.</p>
+<h2>Why the medium is paid_social and not social</h2>
+<p class="p">Virling gives every visit one channel, and <code>utm_medium</code> is the first rule it checks. Only <code>cpc</code>, <code>ppc</code>, <code>paid</code>, <code>paidsearch</code>, <code>paid_social</code> and <code>paidsocial</code>, in any case, make a visit Paid. That rule wins over the referrer, so an ad click with <code>utm_medium=paid_social</code> is Paid whether it arrives from <code>l.facebook.com</code>, from the Instagram app, or with no referrer at all.</p>
+<p class="p">With <code>utm_medium=social</code>, that first rule does not match and the visit falls through. A click with a Facebook or Instagram referrer is then Social, because those hosts are known social sites. A click with no referrer is decided by <code>utm_source</code>: <code>facebook</code>, <code>fb</code>, <code>instagram</code> and <code>ig</code> are Social, and a source Virling does not know, such as <code>meta</code>, is Referral. Either way the spend sits next to your unpaid posts, and the Paid channel looks smaller than it is. The full rules are in <a href="https://docs.virling.com/attribution/channels">how channels are decided</a>.</p>
+<h2>Names are saved at first publish</h2>
+<p class="p">Meta's developer docs say that names are stored in a snapshot when the ad is first published, and that the name parameters read that snapshot, not the live name. So if you rename a campaign, ad set or ad later, <code>{{campaign.name}}</code>, <code>{{adset.name}}</code> and <code>{{ad.name}}</code> keep sending the old name. Your reports then show a name you no longer see in Ads Manager.</p>
+<p class="p">Meta's docs also do not cover spaces or other special characters in names, so we cannot tell you how those arrive in the landing URL. For both reasons the builder starts with the three id parameters ticked. An id never changes and is only digits, and you can look it up in Ads Manager when you need the name behind it. If you prefer names, keep them short, lowercase and without spaces, and decide them before you publish.</p>
+<h2>A worked example</h2>
+<p class="p">With the defaults above, the string to paste is <code>utm_source=facebook&amp;utm_medium=paid_social&amp;utm_campaign={{campaign.id}}&amp;utm_term={{adset.id}}&amp;utm_content={{ad.id}}</code>. A click on an ad with the landing page <code>https://example.com/pricing</code> then opens a URL such as <code>https://example.com/pricing?utm_source=facebook&amp;utm_medium=paid_social&amp;utm_campaign=120000000000000001&amp;utm_term=120000000000000002&amp;utm_content=120000000000000003</code>. The numbers in that preview are made up.</p>
+<p class="p">If you tick Campaign name as well, the string gains <code>campaign_name={{campaign.name}}</code>. The id keeps <code>utm_campaign</code>, so your campaign reports stay grouped by a value that never changes. If your landing page URL already has a <code>?</code>, the preview adds the tags after it with an ampersand, and warns you when the URL already carries one of the same keys.</p>
+<h2>Check the tag works before you spend</h2>
+<ol class="post-list"><li>Paste the preview URL into the <a href="/tools/utm-checker">UTM checker</a>. It flags a missing medium, capitals, spaces and duplicate tags.</li><li>Paste it into the <a href="/tools/traffic-source-checker">traffic source checker</a> with the referrer empty, then again with <code>https://l.facebook.com/</code> as the referrer. Both should come out Paid. Neither tool opens the link.</li><li>Open the preview URL in a private window. The right page should load with every tag still in the address bar. If a redirect dropped them, link the ad to the final URL instead.</li><li>Once the ad is live, click it once from a phone and look at the address bar. If you see the braces as typed, check the spelling and that the string sits in the ad's URL parameters. <a href="https://docs.virling.com/guides/test-your-setup">Test your setup</a> covers a full test up to the payment.</li></ol>
+<h2>What these tags miss</h2>
+<p class="p">URL parameters tell you which campaign, ad set and ad a visit came from. They do not tell you whether that visit paid. An ad can win on clicks and lose on buyers, and another can bring a handful of visits that turn into your largest customers. Ranking ads by clicks or by the conversions an ad platform reports ranks them by what the platform can see, not by what landed in your bank account.</p>
+<p class="p">To compare ads you need revenue per campaign: each payment joined to the visit that led to it, then added up by source, campaign and content. Virling does that from your real payments, so the campaign, ad set and ad IDs you tag here show up next to the revenue they brought. The <a href="/blog/meta-ads-revenue-tracking">Meta Ads revenue tracking</a> guide walks through the whole setup, from these tags to passing the visitor into checkout.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Meta ads URL parameters FAQ</h2>
+    <div class="faq-list" style="overflow-wrap:anywhere">
+      <div><h3>What should I put in the URL parameters of a Facebook ad?</h3><p class="p">A fixed source and medium, such as utm_source=facebook and utm_medium=paid_social, plus Meta's dynamic parameters for the campaign, ad set and ad, such as utm_campaign={{campaign.id}}. Meta fills in the braces when someone clicks.</p></div>
+      <div><h3>Why not use utm_medium=social for Meta ads?</h3><p class="p">Virling counts only cpc, ppc, paid, paidsearch, paid_social and paidsocial as Paid. With social, the click falls through to the referrer or the source, so a Facebook ad click lands in Social next to your unpaid posts, or in Referral if the source is one Virling does not know.</p></div>
+      <div><h3>Should I use the id or the name parameters?</h3><p class="p">Ids, where you can. Meta's developer docs say name parameters read the name saved when the ad was first published, so a later rename does not change the tag, and the docs do not say how spaces in names are handled. An id never changes and has no spaces.</p></div>
+      <div><h3>Is there a placement parameter?</h3><p class="p">Not in the Meta developer docs page this builder follows. It lists six parameters: the id and the name of the campaign, the ad set and the ad. So the builder does not offer one.</p></div>
+      <div><h3>Do URL parameters show which Meta ad brought revenue?</h3><p class="p">Not on their own. They say which campaign, ad set and ad a click came from. To see revenue, a tool has to join each payment to the tagged visit that led to it, which is what Virling does.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What should I put in the URL parameters of a Facebook ad?", "acceptedAnswer": {"@type": "Answer", "text": "A fixed source and medium, such as utm_source=facebook and utm_medium=paid_social, plus Meta's dynamic parameters for the campaign, ad set and ad, such as utm_campaign={{campaign.id}}. Meta fills in the braces when someone clicks."}}, {"@type": "Question", "name": "Why not use utm_medium=social for Meta ads?", "acceptedAnswer": {"@type": "Answer", "text": "Virling counts only cpc, ppc, paid, paidsearch, paid_social and paidsocial as Paid. With social, the click falls through to the referrer or the source, so a Facebook ad click lands in Social next to your unpaid posts, or in Referral if the source is one Virling does not know."}}, {"@type": "Question", "name": "Should I use the id or the name parameters?", "acceptedAnswer": {"@type": "Answer", "text": "Ids, where you can. Meta's developer docs say name parameters read the name saved when the ad was first published, so a later rename does not change the tag, and the docs do not say how spaces in names are handled. An id never changes and has no spaces."}}, {"@type": "Question", "name": "Is there a placement parameter?", "acceptedAnswer": {"@type": "Answer", "text": "Not in the Meta developer docs page this builder follows. It lists six parameters: the id and the name of the campaign, the ad set and the ad. So the builder does not offer one."}}, {"@type": "Question", "name": "Do URL parameters show which Meta ad brought revenue?", "acceptedAnswer": {"@type": "Answer", "text": "Not on their own. They say which campaign, ad set and ad a click came from. To see revenue, a tool has to join each payment to the tagged visit that led to it, which is what Virling does."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which Meta ad brings paying customers</h2>
+<p class="p">These tags name the click. Virling measures what it was worth: it links every visit to the payment it led to, so you see the customers and revenue each campaign, ad set and ad brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("mp"), msg = document.getElementById("mp-msg"), paramsOut = document.getElementById("mp-params"), previewOut = document.getElementById("mp-preview"), copies = document.querySelectorAll("[data-copy]");
+const EX = { "campaign.id": "120000000000000001", "campaign.name": "spring-sale", "adset.id": "120000000000000002", "adset.name": "lookalike-us", "ad.id": "120000000000000003", "ad.name": "demo-video" };
+const FIT = { utm_campaign: ["campaign.id", "campaign.name"], utm_term: ["adset.id", "adset.name"], utm_content: ["ad.id", "ad.name"] };
+const PAID = ["cpc", "ppc", "paid", "paidsearch", "paid_social", "paidsocial"];
+const clean = (v) => v.trim().toLowerCase().replace(/\s+/g, "-");
+const read = () => {
+  const raw = f.url.value.trim(), source = clean(f.source.value), medium = clean(f.medium.value);
+  if (/[{}]/.test(source + medium)) return { err: "Leave {{ }} parameters out of the source and medium. Tick the parameter below instead." };
+  if (!source) return { err: "Fill in a source, such as facebook." };
+  if (!medium) return { err: "Fill in a medium, such as paid_social." };
+  if (![source, medium].every((v) => /^[a-z0-9_-]+$/.test(v))) return { err: "Use only letters, numbers, hyphens and underscores in the source and medium." };
+  let u;
+  try { u = new URL(raw); } catch { u = null; }
+  if (!u || !/^https?:$/.test(u.protocol) || !u.hostname.includes(".")) return { err: "Fill in a full landing page URL for the preview, starting with https://" };
+  if (/[{}]|%7b|%7d/i.test(raw)) return { err: "Remove the {{ }} parameters from the landing page URL. The builder adds them for you." };
+  const left = new Set([...f.querySelectorAll("[name=mc]:checked")].map((b) => b.value)), names = [...left].filter((p) => p.endsWith(".name")), tags = [["utm_source", source], ["utm_medium", medium]];
+  for (const [tag, list] of Object.entries(FIT)) {
+    const p = list.find((x) => left.has(x));
+    if (p) { tags.push([tag, `{{${p}}}`, EX[p]]); left.delete(p); }
+  }
+  for (const p of left) tags.push([p.replace(".", "_"), `{{${p}}}`, EX[p]]);
+  const params = tags.map((t) => t[0] + "=" + t[1]).join("&"), base = new URL(u);
+  base.hash = "";
+  const href = base.href.replace(/[?#]+$/, "");
+  const preview = href + (href.includes("?") ? "&" : "?") + tags.map((t) => t[0] + "=" + (t[2] || t[1])).join("&") + u.hash;
+  const twice = tags.map((t) => t[0]).filter((k) => u.searchParams.has(k)), notes = [];
+  if (twice.length) notes.push(`Your landing page URL already has ${twice.join(", ")}. Remove ${twice.length > 1 ? "them" : "it"} from the URL so nothing is sent twice.`);
+  if (!tags.some((t) => t[0] === "utm_campaign")) notes.push("There is no utm_campaign. Tick a campaign parameter to see which campaign a click came from.");
+  if (!PAID.includes(medium)) notes.push("Virling does not count this medium as Paid, so ad clicks would land in Social or Referral. Use paid_social for Meta ads.");
+  if (names.length) notes.push("Name parameters send the name saved when the ad was first published, even after a rename. Meta's docs do not say how spaces in names are handled, so the id parameters are safer.");
+  return { params, preview, notes };
+};
+const build = () => {
+  const r = read();
+  msg.textContent = r.err || r.notes.join(" ");
+  paramsOut.textContent = r.err ? "" : r.params;
+  previewOut.textContent = r.err ? "" : r.preview;
+  copies.forEach((b) => (b.disabled = !!r.err));
+};
+f.addEventListener("input", build);
+f.addEventListener("submit", (e) => e.preventDefault());
+copies.forEach((b) => {
+  const label = b.textContent;
+  b.addEventListener("click", async () => { try { await navigator.clipboard.writeText(document.getElementById(b.dataset.copy).textContent); b.textContent = "Copied"; } catch { b.textContent = "Copy blocked"; } setTimeout(() => (b.textContent = label), 1500); });
+});
+build();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
