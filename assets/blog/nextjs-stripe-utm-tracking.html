@@ -46,8 +46,6 @@
 <p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-19, updated 2026-11-25.</p>
 <p class="p">To tie a Stripe Checkout payment in a Next.js app to the visit that brought it, load the Virling script in your root layout, then read the <code>virling_vid</code> cookie in the route handler or server action that creates the Checkout Session and pass it as <code>client_reference_id</code>. Stripe keeps that one ID, and Virling joins the payment to every visit behind it, with the UTM tags of each. Two files change, and the rest of your checkout stays as it is.</p>
 <p class="p">This post covers the App Router. For Payment Links, metadata limits and where the values show up in Stripe, see the general guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>.</p>
-<h2>Why Stripe Checkout loses your UTM tags</h2>
-<p class="p">UTM tags live on the landing URL. Stripe Checkout runs on Stripe's domain and only stores what your server passes when it creates the session, so the tags of the visit are gone unless you carry them over. Passing one visitor ID instead of the tags keeps earlier visits and untagged ones, such as search and referrals, too.</p>
 <h2>Step 1: add the script to the root layout</h2>
 <p class="p">Use <code>next/script</code> with <code>strategy="afterInteractive"</code> in <code>app/layout.tsx</code>, so it loads once and runs on every route. Client-side navigation is counted too. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
 <div class="code block"><pre data-snippet>import Script from "next/script";
