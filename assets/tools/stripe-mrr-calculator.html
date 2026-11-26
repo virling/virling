@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stripe MRR calculator: MRR from a subscriptions CSV export | Virling</title>
+<meta name="description" content="Drop your Stripe subscriptions CSV export to get MRR, ARR, active subscriptions and ARPU. Yearly, monthly and weekly plans are normalised in your browser; nothing is uploaded.">
+<link rel="canonical" href="https://virling.com/tools/stripe-mrr-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/stripe-mrr-calculator">
+<meta property="og:title" content="Stripe MRR calculator: MRR from a subscriptions CSV export | Virling">
+<meta property="og:description" content="Drop your Stripe subscriptions CSV export to get MRR, ARR, active subscriptions and ARPU. Yearly, monthly and weekly plans are normalised in your browser; nothing is uploaded.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Stripe MRR calculator","url":"https://virling.com/tools/stripe-mrr-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Stripe MRR calculator","item":"https://virling.com/tools/stripe-mrr-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / stripe mrr calculator</span><h1>Stripe MRR calculator</h1><p class="lead">Drop the subscriptions CSV you exported from Stripe and this Stripe MRR calculator works out your monthly recurring revenue (MRR), ARR, active subscriptions and ARPU. Yearly, monthly and weekly plans are converted to a monthly amount, and canceled, incomplete and trialing subscriptions are left out. The file is read in your browser and is not uploaded.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="sm" autocomplete="off">
+  <label class="wide">Stripe subscriptions CSV <span class="dim">choose the file or drop it here, up to 50 MB, not uploaded</span><input type="file" name="file" accept=".csv,text/csv"></label>
+  <p class="wide" style="grid-column:1/-1;margin:0"><span class="dim">Amounts in the file are</span> <button class="btn sm light" type="button" data-unit="whole" aria-pressed="true">Whole units, like 49.00</button> <button class="btn sm light" type="button" data-unit="cents" aria-pressed="false">Cents, like 4900</button> <button class="btn sm light" type="button" id="sm-example">Show the made-up example</button></p>
+</form>
+<div class="tool-out"><output id="sm-msg"></output></div>
+<div class="tool-stats" id="sm-sum"></div>
+<div id="sm-out"></div>
+<p class="p"><b>What the export cannot tell you.</b> A Stripe subscriptions export lists who pays, how much and how often. It has no column for the visit, post, search or ad that brought each subscriber, so it cannot split this MRR by channel.</p>
+<div class="txt post tool-cta">
+<p class="p">Virling links every visit to the Stripe payment it led to, so it shows the subscribers and recurring revenue each channel brings, renewals included. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/mrr-calculator">MRR calculator</a> for plans you type in, <a href="/tools/arpu-calculator">ARPU calculator</a>, <a href="/tools/churn-rate-calculator">churn rate calculator</a>, <a href="/tools/mrr-waterfall-calculator">MRR waterfall calculator</a>, <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>How to export subscriptions from Stripe</h2>
+<p class="p">In the Stripe Dashboard, open Subscriptions, filter to the subscriptions you want and click Export. Pick the custom column set and include all columns rather than the default set, so the file has the billing interval, interval count and quantity as well as the amount. Then drop the CSV above.</p>
+<h2>How the calculator reads the file</h2>
+<p class="p">Stripe does not publish a fixed list of column names for this export, so columns are found by meaning. The header row is read without regard to case, spaces or underscores, and the page shows which column it used for each field:</p>
+<table class="cmp"><thead><tr><th style="width:30%">Field</th><th>Column it looks for</th></tr></thead><tbody><tr><th scope="row">Status</th><td>A header containing &ldquo;status&rdquo;. Required.</td></tr><tr><th scope="row">Amount</th><td>A header containing &ldquo;amount&rdquo;, skipping discount, tax, fee and balance amounts. The price of one unit. Required.</td></tr><tr><th scope="row">Interval</th><td>A header containing &ldquo;interval&rdquo; but not &ldquo;count&rdquo;: day, week, month or year. Required.</td></tr><tr><th scope="row">Interval count</th><td>A header containing &ldquo;interval&rdquo; and &ldquo;count&rdquo;, as in billed every 3 months. If missing, every row counts as 1.</td></tr><tr><th scope="row">Quantity</th><td>A header containing &ldquo;quantity&rdquo;, such as seats. If missing or blank, 1.</td></tr><tr><th scope="row">Currency</th><td>A header containing &ldquo;currency&rdquo;. If missing, all rows are read as one currency.</td></tr></tbody></table>
+<p class="p">If a required column is not found, the page names it and asks you to export again with all columns.</p>
+<h2>How MRR is counted</h2>
+<ol class="post-list"><li>Only rows with status <code>active</code> or <code>past_due</code> count. A past due subscription is one whose renewal failed while Stripe retries the card, so it stays in until it ends. Canceled, incomplete, incomplete expired, trialing, unpaid and paused rows are left out, and the page lists how many rows had each status.</li><li>Each row's charge is amount &times; quantity.</li><li>The charge is turned into a monthly amount: a yearly plan is divided by 12, a weekly plan is multiplied by 52 / 12 and a daily plan by 365 / 12, and the result is divided by the interval count. A $90 plan billed every 3 months adds $30 of MRR.</li><li>MRR is added up per currency, never converted between currencies. ARR is MRR &times; 12, and ARPU is MRR divided by the subscriptions counted.</li></ol>
+<p class="p">Amounts can be written in whole units (49.00) or in the smallest unit, as the Stripe API does (4900). The switch above picks one; it starts on whole units when the amounts have a decimal point and on cents when they do not. Currencies with no minor unit, such as JPY and KRW, are never divided by 100.</p>
+<p class="p">The amount column holds the list price, so discounts and coupons are not taken off, and a subscription with several prices may need to be checked by hand. Virling counts MRR at list price before discounts and tax too; see <a href="https://docs.virling.com/attribution/retention#mrr">how Virling counts MRR</a>.</p>
+<h2>A worked example</h2>
+<p class="p">The made-up example above is not data from a real business. Three subscribers pay $20 a month ($60), two pay $50 a month for 3 seats each ($300), one pays $480 a year ($40), one past due subscriber pays $50 a month ($50), one pays $90 every 3 months ($30) and one pays $10 a week ($10 &times; 52 / 12 = $43.33). That is $523.33 of MRR from 9 subscriptions, an ARPU of $58.15. The trialing, canceled and incomplete rows add nothing.</p>
+<h2>Add the channel behind each subscriber</h2>
+<p class="p">One MRR number says how big the business is, not which marketing built it. To find that out, each subscription has to be joined to the visit that came before the first payment, and each renewal has to keep that channel even when the customer never comes back to your site.</p>
+<p class="p">Virling does this with a read-only Stripe key and its script on your site. The first payment is credited to the visits before it, every renewal and upgrade copies the channel of the customer's first payment, and the Retention page groups customers by that channel with how many still pay. See <a href="/integrations/stripe-saas">Virling for SaaS on Stripe</a> for the setup, <a href="/blog/mrr-by-acquisition-channel">MRR by acquisition channel</a> for how to credit new, expansion and churned MRR to a channel, and the <a href="/tools/mrr-calculator">MRR calculator</a> to work out MRR and net new MRR by hand.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Stripe MRR calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>Is my Stripe export uploaded?</h3><p class="p">No. The CSV is read by JavaScript in your browser and nothing in it is sent anywhere. You can disconnect from the internet after the page loads and it still works.</p></div>
+      <div><h3>Which subscriptions count toward MRR?</h3><p class="p">Active and past due ones. Canceled, incomplete, incomplete expired, trialing, unpaid and paused subscriptions are left out, because they are not billing a recurring amount right now.</p></div>
+      <div><h3>How are yearly and weekly Stripe plans counted?</h3><p class="p">As a monthly amount. A yearly price is divided by 12, a weekly price is multiplied by 52 / 12, and if a plan bills every few intervals the result is divided by that count.</p></div>
+      <div><h3>Why does my MRR not match the Stripe Dashboard?</h3><p class="p">This page uses the list price times quantity, so discounts are not taken off, and it does not convert between currencies. Stripe's own figures can treat discounts, taxes and paused subscriptions differently.</p></div>
+      <div><h3>Can the export show which channel brought each subscriber?</h3><p class="p">No. The export has no record of the visit before the payment. Virling joins each Stripe payment to that visit and keeps the channel on every renewal, so you can see MRR by channel.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is my Stripe export uploaded?", "acceptedAnswer": {"@type": "Answer", "text": "No. The CSV is read by JavaScript in your browser and nothing in it is sent anywhere. You can disconnect from the internet after the page loads and it still works."}}, {"@type": "Question", "name": "Which subscriptions count toward MRR?", "acceptedAnswer": {"@type": "Answer", "text": "Active and past due ones. Canceled, incomplete, incomplete expired, trialing, unpaid and paused subscriptions are left out, because they are not billing a recurring amount right now."}}, {"@type": "Question", "name": "How are yearly and weekly Stripe plans counted?", "acceptedAnswer": {"@type": "Answer", "text": "As a monthly amount. A yearly price is divided by 12, a weekly price is multiplied by 52 / 12, and if a plan bills every few intervals the result is divided by that count."}}, {"@type": "Question", "name": "Why does my MRR not match the Stripe Dashboard?", "acceptedAnswer": {"@type": "Answer", "text": "This page uses the list price times quantity, so discounts are not taken off, and it does not convert between currencies. Stripe's own figures can treat discounts, taxes and paused subscriptions differently."}}, {"@type": "Question", "name": "Can the export show which channel brought each subscriber?", "acceptedAnswer": {"@type": "Answer", "text": "No. The export has no record of the visit before the payment. Virling joins each Stripe payment to that visit and keeps the channel on every renewal, so you can see MRR by channel."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring recurring revenue</h2>
+<p class="p">This tool reads one export. Virling measures continuously: it links every visit to the Stripe payment it led to, so you see the subscribers and MRR each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const EXAMPLE = `id,Status,Plan Amount,Plan Interval,Plan Interval Count,Quantity,Currency
+sub_example01,active,20.00,month,1,1,usd
+sub_example02,active,20.00,month,1,1,usd
+sub_example03,active,20.00,month,1,1,usd
+sub_example04,active,50.00,month,1,3,usd
+sub_example05,active,50.00,month,1,3,usd
+sub_example06,active,480.00,year,1,1,usd
+sub_example07,past_due,50.00,month,1,1,usd
+sub_example08,active,90.00,month,3,1,usd
+sub_example09,active,10.00,week,1,1,usd
+sub_example10,trialing,20.00,month,1,1,usd
+sub_example11,canceled,50.00,month,1,1,usd
+sub_example12,canceled,20.00,month,1,1,usd
+sub_example13,incomplete,20.00,month,1,1,usd`;
+const FIELDS = [
+  ["status", "subscription status", "status", (h) => h.includes("status")],
+  ["amount", "price amount", "amount", (h) => h.includes("amount") && !/discount|tax|fee|balance|credit|refund|paid|due|remaining|total/.test(h)],
+  ["interval", "billing interval (month, year, week or day)", "interval", (h) => h.includes("interval") && !h.includes("count")],
+  ["count", "interval count", "interval count", (h) => h.includes("interval") && h.includes("count")],
+  ["qty", "quantity", "quantity", (h) => h.includes("quantity") || h === "qty"],
+  ["cur", "currency", "currency", (h) => h.includes("currency")],
+];
+const COUNTED = new Set(["active", "past due"]);
+const ZERO = new Set(["bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga", "pyg", "rwf", "ugx", "vnd", "vuv", "xaf", "xof", "xpf"]);
+const BYTES = 50 * 1024 * 1024;
+const f = document.getElementById("sm"), msg = document.getElementById("sm-msg"), sum = document.getElementById("sm-sum"), out = document.getElementById("sm-out"), units = [...f.querySelectorAll("[data-unit]")];
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const num = (n) => n.toLocaleString("en-US");
+const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+const money = (n, cur) => {
+  try { if (cur) return n.toLocaleString("en-US", { style: "currency", currency: cur.toUpperCase() }); } catch {}
+  return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + (cur ? " " + cur.toUpperCase() : "");
+};
+const csv = (t) => {
+  const first = t.slice(0, t.indexOf("\n") >>> 0), d = (first.match(/;/g) || []).length > (first.match(/,/g) || []).length ? ";" : ",";
+  const rows = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (q) { if (c !== '"') cell += c; else if (t[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+    else if (c === '"') q = true;
+    else if (c === d) { row.push(cell); cell = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && t[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+    else cell += c;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter((r) => r.some((c) => c.trim()));
+};
+const pick = (heads) => {
+  const used = new Set(), cols = {};
+  for (const [key, , exact, test] of FIELDS) {
+    const hits = heads.map((h, i) => [norm(h), i]).filter(([h, i]) => !used.has(i) && test(h));
+    hits.sort((a, b) => (b[0] === exact) - (a[0] === exact) || a[0].length - b[0].length);
+    if (hits.length) { cols[key] = hits[0][1]; used.add(hits[0][1]); }
+  }
+  return cols;
+};
+const perMonth = (s) => {
+  const v = s.toLowerCase();
+  if (/year|annual/.test(v)) return 1 / 12;
+  if (/quarter/.test(v)) return 1 / 3;
+  if (/month/.test(v)) return 1;
+  if (/week/.test(v)) return 52 / 12;
+  if (/day|daily/.test(v)) return 365 / 12;
+  return 0;
+};
+let data = null, from = "";
+const setUnit = (u) => units.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.unit === u)));
+const fail = (text) => { data = null; msg.textContent = text; sum.innerHTML = out.innerHTML = ""; };
+const load = (text, label) => {
+  if (/^PK|\0/.test(text.slice(0, 4000))) return fail("That is not a CSV file. If it is a spreadsheet or zip, export or unzip it as CSV first.");
+  const rows = csv(text.charCodeAt(0) === 0xfeff ? text.slice(1) : text);
+  if (rows.length < 2) return fail(label + "The file needs a header row and at least one subscription.");
+  const heads = rows[0], cols = pick(heads), need = FIELDS.filter(([k], i) => i < 3 && cols[k] === undefined);
+  if (need.length) return fail(`${label}No column was found for the ${need.map((x) => x[1]).join(", the ")}. In Stripe, export the subscriptions again and choose all columns, then drop the new file.`);
+  const list = rows.slice(1).map((r, i) => ({ n: i + 2, cell: (k) => (cols[k] === undefined ? "" : (r[cols[k]] || "").trim()) }));
+  const dotted = list.some((r) => /\.\d/.test(r.cell("amount")));
+  data = { cols, heads, list }; from = label; setUnit(dotted ? "whole" : "cents");
+  show(dotted ? "whole" : "cents");
+};
+const show = (u) => {
+  const { cols, heads, list } = data, by = new Map(), statuses = new Map(), bad = [];
+  for (const r of list) {
+    const st = norm(r.cell("status")) || "(blank)";
+    statuses.set(st, (statuses.get(st) || 0) + 1);
+    if (!COUNTED.has(st)) continue;
+    const raw = r.cell("amount"), amt = Number(raw.replace(/[^\d.\-]/g, "")), iv = r.cell("interval");
+    const cnt = cols.count === undefined || !r.cell("count") ? +(iv.match(/\d+/) || [1])[0] : Number(r.cell("count"));
+    const qty = cols.qty === undefined || !r.cell("qty") ? 1 : Number(r.cell("qty").replace(/,/g, ""));
+    const pm = perMonth(iv), cur = r.cell("cur").toLowerCase();
+    if (!/\d/.test(raw) || !isFinite(amt) || !pm || !(cnt > 0) || !(qty >= 0)) { bad.push(r.n); continue; }
+    const m = ((u === "cents" && !ZERO.has(cur) ? amt / 100 : amt) * qty * pm) / cnt;
+    const c = by.get(cur) || { mrr: 0, subs: 0 };
+    c.mrr += m; c.subs++; by.set(cur, c);
+  }
+  const curs = [...by].sort((a, b) => b[1].subs - a[1].subs), subs = curs.reduce((s, [, c]) => s + c.subs, 0);
+  const missing = FIELDS.slice(3).filter(([k]) => cols[k] === undefined).map(([k, name]) => (k === "count" ? `No ${name} column, so each row is read as billed every 1 interval.` : k === "qty" ? `No ${name} column, so each row is read as 1 unit.` : `No ${name} column, so all rows are read as one currency.`));
+  msg.textContent = from + (subs ? `${num(subs)} of ${num(list.length)} subscription${list.length === 1 ? "" : "s"} counted.` : `None of the ${num(list.length)} rows is active or past due, so MRR is 0.`) +
+    (bad.length ? ` ${num(bad.length)} counted row${bad.length === 1 ? "" : "s"} had an amount, interval or quantity that could not be read (row ${bad.slice(0, 10).join(", ")}${bad.length > 10 ? " and more" : ""}).` : "") + (missing.length ? " " + missing.join(" ") : "") + (missing.length || bad.length ? " Exporting with all columns may fix this." : "");
+  const top = curs[0];
+  sum.innerHTML = top ? [[`MRR${curs.length > 1 ? ` (${top[0].toUpperCase()})` : ""}`, money(top[1].mrr, top[0])], ["ARR", money(top[1].mrr * 12, top[0])], ["Active subscriptions", num(curs.length > 1 ? top[1].subs : subs)], ["ARPU per subscription", money(top[1].mrr / top[1].subs, top[0])]].map(([k, x]) => `<div><span class="dim">${k}</span><b>${esc(x)}</b></div>`).join("") : "";
+  const used = FIELDS.filter(([k]) => cols[k] !== undefined).map(([k, name]) => `${name}: <code>${esc(heads[cols[k]])}</code>`).join(", ");
+  out.innerHTML = (curs.length > 1 ? `<h3>MRR by currency</h3><div style="overflow-x:auto"><table class="cmp"><thead><tr><th scope="col">Currency</th><th scope="col">MRR</th><th scope="col">ARR</th><th scope="col">Subscriptions</th><th scope="col">ARPU</th></tr></thead><tbody>${curs.map(([c, x]) => `<tr><th scope="row">${esc(c.toUpperCase() || "(blank)")}</th><td>${esc(money(x.mrr, c))}</td><td>${esc(money(x.mrr * 12, c))}</td><td>${num(x.subs)}</td><td>${esc(money(x.mrr / x.subs, c))}</td></tr>`).join("")}</tbody></table></div><p class="fine-note">Currencies are not converted, so they are not added together.</p>` : "") +
+    `<h3>Rows by status</h3><div style="overflow-x:auto"><table class="cmp"><thead><tr><th scope="col">Status</th><th scope="col">Rows</th><th scope="col">In MRR</th></tr></thead><tbody>${[...statuses].sort((a, b) => b[1] - a[1]).map(([s, n]) => `<tr><th scope="row">${esc(s)}</th><td>${num(n)}</td><td>${COUNTED.has(s) ? "Yes" : "No"}</td></tr>`).join("")}</tbody></table></div><p class="fine-note">Columns used: ${used}.</p>`;
+};
+const read = async (file) => {
+  if (!file) return;
+  if (file.size > BYTES) return fail("That file is over 50 MB. Filter the export in Stripe to fewer subscriptions and export again.");
+  msg.textContent = `Reading ${file.name}.`;
+  try { load(await file.text(), `${file.name}: `); } catch { fail("The file could not be read. Choose it again."); }
+};
+f.file.addEventListener("change", () => read(f.file.files[0]));
+f.addEventListener("dragover", (e) => e.preventDefault());
+f.addEventListener("drop", (e) => { e.preventDefault(); read(e.dataTransfer.files[0]); });
+f.addEventListener("submit", (e) => e.preventDefault());
+units.forEach((b) => b.addEventListener("click", () => { setUnit(b.dataset.unit); if (data) show(b.dataset.unit); }));
+document.getElementById("sm-example").addEventListener("click", () => { f.file.value = ""; load(EXAMPLE, "Made-up example: "); });
+load(EXAMPLE, "Made-up example: ");
+</script>
+</main>
+
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
