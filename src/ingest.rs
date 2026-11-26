@@ -12,12 +12,14 @@ use time::{Date, Duration, OffsetDateTime};
 use url::Url;
 
 use crate::app::AppState;
-use crate::events::{Event, Read};
+use crate::events::{Event, JsError, Read};
 use crate::ua::{browser, device, direct_kind, in_app_source, is_bot, is_spam_referrer};
 use crate::{channel, crawlers};
 
 const SESSION_IDLE: Duration = Duration::minutes(30);
 const MAX_BATCH: usize = 50;
+/// Most browser errors stored from one request.
+const MAX_ERRORS: usize = 5;
 
 #[derive(Debug, Deserialize)]
 pub struct Incoming {
@@ -35,7 +37,7 @@ pub struct Incoming {
     w: Option<u32>,
     /// window.devicePixelRatio
     d: Option<f64>,
-    /// goal name
+    /// goal name, exit link or error message
     g: Option<String>,
     /// navigator.language
     l: Option<String>,
@@ -47,12 +49,14 @@ pub struct Incoming {
     z: Option<String>,
     /// Seconds a page was visible, on a read.
     e: Option<u32>,
-    /// Furthest scroll in percent, on a read.
+    /// Furthest scroll in percent, on a read; source line, on an error.
     x: Option<u32>,
     /// Web vitals of the page load on its first read: LCP ms, slowest interaction ms, layout shift x1000.
     p: Option<Vec<Option<f64>>>,
     /// Email on an identify; only its salted hash is kept.
     m: Option<String>,
+    /// Script file of an error, without its query.
+    f: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -458,6 +462,19 @@ pub(crate) fn valid_visitor_id(v: &str) -> bool {
     (8..=64).contains(&v.len()) && v.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
 }
 
+/// Error text without URL queries or emails, so tokens and personal data are not kept.
+fn scrub(text: &str, max: usize) -> String {
+    let words: Vec<&str> = text
+        .split_whitespace()
+        .map(|w| match w.find("://") {
+            Some(_) => w.split(['?', '#']).next().unwrap_or(""),
+            None if w.contains('@') => "[email]",
+            None => w,
+        })
+        .collect();
+    clip(words.join(" "), max)
+}
+
 fn clip(s: String, max: usize) -> String {
     if s.len() <= max {
         return s;
@@ -525,6 +542,7 @@ pub async fn collect(
     let mut events = Vec::with_capacity(incoming.len());
     let mut bots = Vec::new();
     let mut reads = Vec::new();
+    let mut errors = Vec::new();
     for e in incoming {
         let Some(site) = state
             .sites
@@ -557,6 +575,7 @@ pub async fn collect(
             "ping" => "ping",
             "read" => "read",
             "identify" => "identify",
+            "error" => "error",
             _ => continue,
         };
         let name = match kind {
@@ -575,6 +594,10 @@ pub async fn collect(
             {
                 Some(link) => Some(link),
                 None => continue,
+            },
+            "error" => match e.g.as_deref().map(|g| scrub(g, 300)) {
+                Some(m) if !m.is_empty() => Some(m),
+                _ => continue,
             },
             _ => None,
         };
@@ -645,6 +668,20 @@ pub async fn collect(
                     crate::identify::save(&state.db, &site.id, &visitor_id, email).await
             {
                 tracing::error!(%err, "saving an identify failed");
+            }
+            continue;
+        }
+        if kind == "error" {
+            if bot.is_none() && errors.len() < MAX_ERRORS {
+                errors.push(JsError {
+                    site_id: site.id.clone(),
+                    ts: now,
+                    visitor_id,
+                    path,
+                    message: name.unwrap_or_default(),
+                    source: e.f.as_deref().map(|f| scrub(f, 300)).unwrap_or_default(),
+                    line: e.x.unwrap_or(0),
+                });
             }
             continue;
         }
@@ -763,11 +800,12 @@ pub async fn collect(
         events.push(event);
     }
 
-    if !events.is_empty() || !bots.is_empty() || !reads.is_empty() {
+    if !events.is_empty() || !bots.is_empty() || !reads.is_empty() || !errors.is_empty() {
         let store = state.events.clone();
         let result = tokio::task::spawn_blocking(move || {
             store.insert_bots(&bots)?;
             store.insert_reads(&reads)?;
+            store.insert_errors(&errors)?;
             if events.is_empty() {
                 return Ok(());
             }
