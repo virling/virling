@@ -69,6 +69,8 @@ pub struct Connection {
     status_class: &'static str,
     error: String,
     synced: String,
+    /// Synced without error but no payment has ever come in.
+    empty: bool,
     /// Product IDs the connection imports, comma separated; empty imports all.
     products: String,
 }
@@ -256,6 +258,12 @@ async fn show(
         Ok(n) => plural(n, "bot visitor"),
         Err(code) => return code.into_response(),
     };
+    let store = state.events.clone();
+    let id = ctx.site.id.clone();
+    let paid = match blocking(move || store.payment_providers(&id)).await {
+        Ok(p) => p,
+        Err(code) => return code.into_response(),
+    };
     let ai = match ai_settings(&state, &ctx.site.id, &ctx.site.domain, &q, typed.as_ref()).await {
         Ok(ai) => ai,
         Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
@@ -332,7 +340,9 @@ async fn show(
                     (None, None) => ("Syncing", "warn"),
                     (None, Some(_)) => ("Connected", "ok"),
                 };
+                let empty = error.is_none() && synced_at.is_some() && !paid.contains(&provider);
                 Connection {
+                    empty,
                     name: provider_name(&provider),
                     provider,
                     status,

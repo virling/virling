@@ -162,6 +162,8 @@ pub trait EventStore: Send + Sync {
     fn speed(&self, site_id: &str, period: &Period) -> anyhow::Result<crate::speed::Speed>;
     /// Bot visitors filtered in the last `days` days.
     fn bots_filtered(&self, site_id: &str, days: i64) -> anyhow::Result<u64>;
+    /// Providers with at least one stored payment for the site.
+    fn payment_providers(&self, site_id: &str) -> anyhow::Result<Vec<String>>;
     /// Goal completions after unix microsecond `after`, oldest first: microseconds, goal, page and visitor.
     fn goals_since(
         &self,
@@ -1737,6 +1739,13 @@ impl EventStore for DuckStore {
             |r| r.get(0),
         )?;
         Ok(n as u64)
+    }
+
+    fn payment_providers(&self, site_id: &str) -> anyhow::Result<Vec<String>> {
+        let conn = self.reader()?;
+        let mut stmt = conn.prepare("SELECT DISTINCT provider FROM payments WHERE site_id = ?")?;
+        let rows = stmt.query_map(params![site_id], |r| r.get(0))?;
+        Ok(rows.collect::<Result<_, _>>()?)
     }
 
     fn settled(&self, site_id: &str) -> bool {
