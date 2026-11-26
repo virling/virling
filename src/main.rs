@@ -2771,6 +2771,41 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn healthy_key_with_no_payments_is_flagged() {
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        connect_fake(&state, &site, "dodo", "fake_test_value_1234").await;
+        sqlx::query("UPDATE integrations SET last_error = NULL WHERE site_id = ?")
+            .bind(&site)
+            .execute(&state.db)
+            .await
+            .unwrap();
+        let settings = "/app/example.com/settings";
+        let warning = "No payments found with this key yet";
+        let body = body_text(call(&state, get(settings, Some(&cookie))).await).await;
+        assert!(body.contains(warning));
+        store
+            .upsert_payments(&[Payment {
+                site_id: site.clone(),
+                provider: "dodo".into(),
+                provider_payment_id: "pay_1".into(),
+                ts: time::OffsetDateTime::now_utc(),
+                amount: 2900,
+                currency: "usd".into(),
+                amount_usd: Some(29.0),
+                refunded: 0,
+                status: "paid".into(),
+                visitor_id: None,
+                customer_id: None,
+                is_renewal: false,
+            }])
+            .unwrap();
+        let body = body_text(call(&state, get(settings, Some(&cookie))).await).await;
+        assert!(!body.contains(warning));
+    }
+
+    #[tokio::test]
     async fn connected_provider_shows_a_row_not_a_key_field() {
         let (_dir, state, _store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;

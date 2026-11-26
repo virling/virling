@@ -241,6 +241,10 @@ impl<S: EventStore> EventStore for Cached<S> {
         self.inner.bots_filtered(site_id, days)
     }
 
+    fn payment_providers(&self, site_id: &str) -> anyhow::Result<Vec<String>> {
+        self.inner.payment_providers(site_id)
+    }
+
     fn goals_since(
         &self,
         site_id: &str,
