@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referral program ROI calculator: reward cost and break-even</title>
+<meta name="description" content="Plan a referral program: referred customers, reward cost, cost per referred customer, ROI and the highest reward that still breaks even.">
+<link rel="canonical" href="https://virling.com/tools/referral-program-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/referral-program-calculator">
+<meta property="og:title" content="Referral program ROI calculator: reward cost and break-even">
+<meta property="og:description" content="Plan a referral program: referred customers, reward cost, cost per referred customer, ROI and the highest reward that still breaks even.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Referral program ROI calculator","url":"https://virling.com/tools/referral-program-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Referral program ROI calculator","item":"https://virling.com/tools/referral-program-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / referral program calculator</span><h1>Referral program ROI calculator</h1><p class="lead">How much can you pay for a referral? Enter how many customers you win a month, how many of them refer friends, how many friends each one sends, how many of those friends buy, the rewards you pay on each side and what a customer is worth. You get the referred customers, the reward cost, the cost per referred customer, the ROI and the highest reward that still breaks even. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="ref" autocomplete="off">
+  <label>New customers per month<input name="cust" type="number" min="0" step="1" value="200"></label>
+  <label>Customers who refer (%)<input name="share" type="number" min="0" max="100" step="0.1" value="10"></label>
+  <label>Friends referred per referrer<input name="per" type="number" min="0" step="0.1" value="2"></label>
+  <label>Referral conversion rate (%)<input name="conv" type="number" min="0" max="100" step="0.1" value="25"></label>
+  <label>Reward to referrer per new customer ($)<input name="give" type="number" min="0" step="0.01" value="20"></label>
+  <label>Reward to the new customer ($)<input name="get" type="number" min="0" step="0.01" value="20"></label>
+  <label>Customer value ($) <span class="dim">gross profit per customer</span><input name="value" type="number" min="0" step="0.01" value="300"></label>
+</form>
+<div class="tool-stats" id="ref-out"></div>
+<div class="txt post tool-cta">
+<p class="p" id="ref-be"></p>
+<p class="p">The defaults are example numbers, not benchmarks. Use your own customer count, and the share who refer and convert from a past month of your program if you have one.</p>
+<p class="p">The estimate is only as good as the conversion rate and customer value you guess. Virling measures them from your real payments: it links every visit to the payment it led to, so each referral link gets its own paying customers, revenue and renewals. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/affiliate-commission-calculator">affiliate commission calculator</a>, <a href="/tools/ltv-calculator">customer lifetime value calculator</a>, <a href="/tools/cac-calculator">CAC calculator</a>, <a href="/tools/epc-calculator">earnings per click calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The referral program formula</h2>
+<p class="p">Start from the customers you already win each month and follow them through the program:</p>
+<p class="p"><code>referred customers = customers &times; share who refer &times; friends per referrer &times; referral conversion rate</code></p>
+<p class="p">This calculator assumes both rewards are paid only when a referred friend becomes a customer, the usual double-sided "give and get" setup. So each referred customer costs both rewards:</p>
+<p class="p"><code>cost per referred customer = reward to referrer + reward to new customer</code></p>
+<p class="p"><code>reward cost = referred customers &times; cost per referred customer</code></p>
+<p class="p"><code>ROI = (referred customers &times; customer value - reward cost) &divide; reward cost</code></p>
+<p class="p">The program breaks even when the rewards for one referred customer equal what that customer is worth. So the highest combined reward you can pay is the customer value itself, and anything below it is profit.</p>
+<h2>A worked example</h2>
+<p class="p">These are made-up numbers, the defaults above. A business wins 200 customers a month. 10% of them, 20 people, refer friends, 2 friends each, so 40 friends hear about it. 25% of those buy: 10 referred customers a month. The referrer gets $20 and the friend gets $20, so each referred customer costs $40 and the month's rewards cost $400. Each customer brings $300 of gross profit, $3,000 in total, so the ROI is ($3,000 - $400) &divide; $400 = 650%. The rewards could go as high as $300 per referred customer, for example $280 to the referrer while the friend keeps $20, before the program stopped paying back.</p>
+<h2>A subscription program, worked through</h2>
+<p class="p">Made-up numbers. A $25 monthly plan has an 80% margin and customers stay 12 months, so a customer is worth $25 &times; 0.80 &times; 12 = $240 of gross profit. It wins 150 customers a month, 8% of them refer 3 friends each, and 25% of those friends buy. The referrer gets $30 and the friend $15.</p>
+<h2>A store program, worked through</h2>
+<p class="p">Made-up numbers again. A store wins 800 customers a month, 5% of them refer 2 friends each, and 20% of those friends buy. An average order is $70 at a 40% margin, so a first order is worth $28. Both sides get $10. Enter either program above and the calculator shows:</p>
+<table class="cmp"><thead><tr><th style="width:36%">Result (made up)</th><th>Subscription</th><th>Store</th></tr></thead><tbody><tr><th scope="row">Referred customers per month</th><td>9</td><td>16</td></tr><tr><th scope="row">Cost per referred customer</th><td>$45.00</td><td>$20.00</td></tr><tr><th scope="row">Reward cost per month</th><td>$405.00</td><td>$320.00</td></tr><tr><th scope="row">Value of referred customers</th><td>$2,160.00</td><td>$448.00</td></tr><tr><th scope="row">ROI</th><td>433.3%</td><td>40%</td></tr><tr><th scope="row">Highest total reward</th><td>$240.00</td><td>$28.00</td></tr><tr><th scope="row">Highest referrer reward</th><td>$225.00</td><td>$18.00</td></tr><tr><th scope="row">Left per referred customer</th><td>$195.00</td><td>$8.00</td></tr></tbody></table>
+<p class="p">The store pays the smaller reward and runs the tighter program: $8 an order has to cover everything the calculator leaves out. The subscription has room, but only if friends really stay for the 12 months.</p>
+<h2>When a referral program loses money</h2>
+<p class="p">Four things turn a program that pays back on paper into one that does not. The figures continue the two made-up programs:</p>
+<table class="cmp"><thead><tr><th style="width:30%">Leak</th><th>What it costs, and how to see it in payments by source</th></tr></thead><tbody><tr><th scope="row">Refunds</th><td>If 3 of the store's 16 orders are refunded, the goods can be sold again and the rewards are kept, 13 orders bring $364 against $320 of rewards: the profit falls from $128 to $44 and the ROI to 13.8%. At 5 refunds it is a $12 loss. Filter payments to refunded ones and check which referral links they came from. Pay rewards after the refund window.</td></tr><tr><th scope="row">Coupon leakage</th><td>A friend code posted in public stops being a referral: each use costs the store $20, whoever typed it. One referrer with far more payments than friends, or codes redeemed without a visit through any referral link, is the sign. See <a href="/blog/coupon-site-revenue-tracking">how to check coupon site orders</a>.</td></tr><tr><th scope="row">Renewals that still pay</th><td>Suppose the subscription gives the referrer $5 for every month the friend pays, instead of $30 once. Over 12 months that is $60, the two rewards come to $75 and $165 is left. A friend who moves down to a $5 plan brings $4 of gross profit a month and still costs $5. Check that the renewals on the friend's timeline still cover the credit, and end it after a set number of months.</td></tr><tr><th scope="row">Would have bought anyway</th><td>Such a friend would have brought the store $28 without a reward, so it gives up $20 for nothing. Open the payment: a visit from search, email or an ad before the referral click is the sign. A friend who paid you before keeps the source of that first payment, so a reward for a friend missing from the referrer's payments is worth a check too. It is a hint and not proof, so pause the rewards for a few weeks and compare total new customers.</td></tr></tbody></table>
+<p class="p">How many friends who would have bought anyway a program can carry is a break-even too:</p>
+<p class="p"><code>break-even share = (customer value - cost per referred customer) &divide; customer value</code></p>
+<p class="p">For the subscription that is $195 &divide; $240 = 81.25%. For the store it is $8 &divide; $28 = 28.6%: with 4 of the 16 orders it still makes 12 &times; $8 - 4 &times; $20 = $16, and with 5 it loses 5 &times; $20 - 11 &times; $8 = $12.</p>
+<p class="p">In Virling, each tracked referral link has its own row in the Campaign tab with visitors and revenue net of refunds, <a href="https://docs.virling.com/guides/dashboard">the payments list</a> has a filter for refunded ones, and <a href="https://docs.virling.com/attribution/renewals">renewals</a> keep the source of the customer's first payment. It does not read codes or pay rewards, so match those against your store and your referral software.</p>
+<h2>Check which referred customers really paid</h2>
+<p class="p">The math only holds if the referred customers you count are the ones who actually paid and stayed. Signups and codes entered at checkout say little about refunds, cancellations or renewals, and a friend who would have bought anyway still costs a reward. Give each referrer their own link, tie each payment to the visit before it, and compare the revenue per referrer with what you paid out. <a href="/blog/referral-program-revenue-tracking">Referral program tracking</a> shows how to set that up, and the <a href="/tools/ltv-calculator">lifetime value calculator</a> helps you pick an honest customer value.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Referral program calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate the ROI of a referral program?</h3><p class="p">Multiply the referred customers by what a customer is worth, subtract the rewards you paid, and divide by the rewards. 10 referred customers worth $300 each, with $400 in rewards, give an ROI of ($3,000 - $400) &divide; $400 = 650%.</p></div>
+      <div><h3>How much should I pay for a referral?</h3><p class="p">Never more than a referred customer is worth in gross profit, counting both the referrer's and the friend's reward. Stay well below that to leave room for refunds, friends who would have bought anyway and the cost of running the program.</p></div>
+      <div><h3>Which customer value should I use?</h3><p class="p">Use gross profit, not revenue: the order value times your gross margin for one-off purchases, or the lifetime value times your margin for subscriptions. Referred customers may stay longer or shorter than others, so measure them separately once you have the data.</p></div>
+      <div><h3>What does this calculator leave out?</h3><p class="p">It assumes rewards are paid only on a successful referral and that every referred customer is new business. Rewards paid on signup, fraud, refunds, the referral software and customers who would have bought without the referral are not included.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate the ROI of a referral program?", "acceptedAnswer": {"@type": "Answer", "text": "Multiply the referred customers by what a customer is worth, subtract the rewards you paid, and divide by the rewards. 10 referred customers worth $300 each, with $400 in rewards, give an ROI of ($3,000 - $400) ÷ $400 = 650%."}}, {"@type": "Question", "name": "How much should I pay for a referral?", "acceptedAnswer": {"@type": "Answer", "text": "Never more than a referred customer is worth in gross profit, counting both the referrer's and the friend's reward. Stay well below that to leave room for refunds, friends who would have bought anyway and the cost of running the program."}}, {"@type": "Question", "name": "Which customer value should I use?", "acceptedAnswer": {"@type": "Answer", "text": "Use gross profit, not revenue: the order value times your gross margin for one-off purchases, or the lifetime value times your margin for subscriptions. Referred customers may stay longer or shorter than others, so measure them separately once you have the data."}}, {"@type": "Question", "name": "What does this calculator leave out?", "acceptedAnswer": {"@type": "Answer", "text": "It assumes rewards are paid only on a successful referral and that every referred customer is new business. Rewards paid on signup, fraud, refunds, the referral software and customers who would have bought without the referral are not included."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which referrals actually pay back</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each referrer and channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("ref"), out = document.getElementById("ref-out"), be = document.getElementById("ref-be");
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 1 }) + "%";
+const usd = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const num = (n) => n.toLocaleString("en-US", { maximumFractionDigits: 1 });
+const calc = () => {
+  const n = +f.cust.value, s = +f.share.value / 100, r = +f.per.value, c = +f.conv.value / 100, g = +f.give.value, h = +f.get.value, v = +f.value.value;
+  const ok = n >= 0 && s >= 0 && s <= 1 && r >= 0 && c >= 0 && c <= 1 && g >= 0 && h >= 0 && v >= 0;
+  const cust = n * s * r * c, each = g + h, cost = cust * each;
+  out.innerHTML = [
+    ["Referred customers per month", ok ? num(cust) : "No data"],
+    ["Reward cost per month", ok ? usd(cost) : "No data"],
+    ["Cost per referred customer", ok ? usd(each) : "No data"],
+    ["Value of referred customers", ok ? usd(cust * v) : "No data"],
+    ["ROI", ok && cost > 0 ? pct((cust * v - cost) / cost) : "No data"],
+  ].map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+  be.textContent = !ok ? "Enter numbers in every field to see the break-even reward."
+    : v <= 0 ? "Enter a customer value to see the highest reward that breaks even."
+    : `You can pay up to ${usd(v)} in rewards per referred customer, both sides together, before the program loses money. Keeping the ${usd(h)} reward to the new customer, the referrer reward can go up to ${usd(Math.max(v - h, 0))}. Your current ${usd(each)} in rewards ${each <= v ? "leaves " + usd(v - each) + " per referred customer" : "is " + usd(each - v) + " over break-even"}.`;
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

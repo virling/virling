@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stripe embedded checkout UTM tracking: keep the source</title>
+<meta name="description" content="Stripe embedded checkout does not copy UTM tags from your page URL. Pass a visitor ID when your server creates the session and see which source sold.">
+<link rel="canonical" href="https://virling.com/blog/stripe-embedded-checkout-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/stripe-embedded-checkout-utm-tracking">
+<meta property="og:title" content="Stripe embedded checkout UTM tracking: keep the source">
+<meta property="og:description" content="Stripe embedded checkout does not copy UTM tags from your page URL. Pass a visitor ID when your server creates the session and see which source sold.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Stripe embedded checkout UTM tracking: keep the source","item":"https://virling.com/blog/stripe-embedded-checkout-utm-tracking"}]},{"@type":"BlogPosting","headline":"Stripe embedded checkout UTM tracking: keep the source","description":"Stripe embedded checkout does not copy UTM tags from your page URL. Pass a visitor ID when your server creates the session and see which source sold.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/stripe-embedded-checkout-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does Stripe embedded checkout read UTM parameters from my page URL?","acceptedAnswer":{"@type":"Answer","text":"No. The form runs in an iframe and shows a Checkout Session that your server created. Only the values your server sends when it creates the session are on it, so send a visitor ID in client_reference_id."}},{"@type":"Question","name":"Is ui_mode embedded or embedded_page?","acceptedAnswer":{"@type":"Answer","text":"Stripe renamed embedded to embedded_page in API version 2026-03-25.dahlia, and setting the old value there fails. On an older API version, keep embedded."}},{"@type":"Question","name":"Should I use client_reference_id or metadata.virling_vid?","acceptedAnswer":{"@type":"Answer","text":"Use client_reference_id unless it already holds your own user or cart ID. In that case put the visitor ID in the session's metadata.virling_vid, which Virling checks first."}},{"@type":"Question","name":"Do I need a return page for the source to be recorded?","acceptedAnswer":{"@type":"Answer","text":"No. The visitor ID is on the session before the buyer pays, so it does not depend on the return page loading. The return page is for showing the buyer the result."}},{"@type":"Question","name":"Why does an embedded checkout sale show as Unattributed?","acceptedAnswer":{"@type":"Answer","text":"The session was created without the visitor ID: your page asked for it before the Virling script ran, the request went to another domain without the cookie, the script was blocked or runs in cookieless mode, or client_reference_id holds another value and metadata.virling_vid is empty."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>Stripe embedded checkout UTM tracking: keep the source</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p">To track UTM tags with Stripe embedded checkout, pass a visitor ID when your server creates the Checkout Session. Stripe does not copy the UTM tags in your page URL onto the payment, even though the form sits inside that page. Read the <code>virling_vid</code> cookie on your server, set it as <code>client_reference_id</code>, and join the payment to the visits behind that ID. The session carries the ID before the buyer pays, so the return page does not have to load for the source to be kept.</p>
+<h2>Why the tags on your page are not on the payment</h2>
+<ul class="post-list"><li><strong>Your server creates the session.</strong> Your page asks your server for a session, and your server calls Stripe. Stripe stores what that call contains, and the page URL is not part of it.</li><li><strong>The form is an iframe.</strong> Stripe renders embedded checkout in an iframe on your page (<a href="https://docs.stripe.com/checkout/embedded/quickstart">Stripe embedded checkout quickstart</a>). Your URL, with its tags, belongs to the page around it.</li><li><strong>The tags are often gone already.</strong> They are on the landing URL. By the time the buyer opens checkout, they are usually a few pages in.</li></ul>
+<p class="p">Stripe's API reference lists <code>client_reference_id</code>, up to 200 characters, and <code>metadata</code> on the session. It also lists <code>marketing_attributions</code>, with fields such as <code>utm_source</code>, but your server has to fill that too, and it supports one attribution per session (<a href="https://docs.stripe.com/api/checkout/sessions/create">Checkout Session API reference</a>). A visitor ID is the simpler choice: Stripe holds one short value, and your analytics holds every visit behind it. Virling reads <code>client_reference_id</code> and <code>metadata.virling_vid</code>, not <code>marketing_attributions</code>. The limits of the first field are in <a href="/blog/stripe-client-reference-id">Stripe client_reference_id</a>.</p>
+<h2>The names changed: embedded_page</h2>
+<p class="p">Stripe renamed the <code>ui_mode</code> values in API version <code>2026-03-25.dahlia</code>. Many older guides use the old names, and setting one of them on that version or a later one fails (<a href="https://docs.stripe.com/changelog/dahlia/2026-03-25/updates-available-checkout-session-ui-modes">Stripe changelog: ui_mode values</a>):</p>
+<ul class="post-list"><li><code>embedded_page</code> replaces <code>embedded</code>: the whole Checkout form inside your page. This post is about this one.</li><li><code>hosted_page</code> replaces <code>hosted</code>: the page on Stripe's domain, and the default.</li><li><code>elements</code> replaces <code>custom</code>: your own form built from Stripe's components. <code>client_reference_id</code> is set on the session in the same way.</li></ul>
+<p class="p">In Stripe.js, <code>initEmbeddedCheckout()</code> became <code>createEmbeddedCheckoutPage()</code> in the same release, and the old name throws an error there (<a href="https://docs.stripe.com/changelog/dahlia/2026-03-25/rename-init-embedded-checkout-to-create-embedded-checkout-page">Stripe changelog: the rename</a>). On older versions, keep the old names. The tracking below is the same.</p>
+<h2>Track the source of an embedded checkout sale</h2>
+<p class="p"><strong>Step 1: add the script to every page.</strong> Put one tag in the <code>&lt;head&gt;</code>, on your landing pages as well as the checkout page. The app shows the exact tag for your site:</p>
+<div class="code block"><pre data-snippet>&lt;script defer src="https://app.virling.com/v.js" data-site="yourdomain.com"&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script records the referrer and UTM tags of every visit against a visitor ID in the first-party <code>virling_vid</code> cookie. The cookie is on your domain, so your server receives it with the requests your page makes.</p>
+<p class="p"><strong>Step 2: create the session on your server.</strong> This is Express with <code>cookie-parser</code>:</p>
+<div class="code block"><pre data-snippet>app.post("/create-checkout-session", async (req, res) =&gt; {
+  const session = await stripe.checkout.sessions.create({
+    ui_mode: "embedded_page",
+    client_reference_id: req.cookies.virling_vid,
+    line_items: [{ price: "price_...", quantity: 1 }],
+    mode: "payment",
+    return_url: "https://yourdomain.com/return?session_id={CHECKOUT_SESSION_ID}",
+  });
+  res.json({ clientSecret: session.client_secret });
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p"><code>success_url</code> and <code>cancel_url</code> are not allowed with <code>embedded_page</code>; use <code>return_url</code>. If the cookie is missing, the value is <code>undefined</code> and the stripe library leaves the field out, so checkout still works. If <code>client_reference_id</code> already holds your own user or cart ID, set <code>metadata: { virling_vid: req.cookies.virling_vid }</code> instead.</p>
+<p class="p"><strong>Step 3: mount the form.</strong> Ask for the session after the Virling script has run, so a first-time visitor already has the cookie:</p>
+<div class="code block"><pre data-snippet>&lt;script src="https://js.stripe.com/endive/stripe.js"&gt;&lt;/script&gt;
+&lt;div id="checkout"&gt;&lt;/div&gt;
+&lt;script&gt;
+  addEventListener("DOMContentLoaded", async () =&gt; {
+    const stripe = Stripe("pk_live_...");
+    const checkout = await stripe.createEmbeddedCheckoutPage({
+      fetchClientSecret: async () =&gt; {
+        const res = await fetch("/create-checkout-session", { method: "POST" });
+        return (await res.json()).clientSecret;
+      },
+    });
+    checkout.mount("#checkout");
+  });
+&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">A <code>defer</code> script runs before <code>DOMContentLoaded</code>, so the cookie is set when the fetch goes out. A hosted checkout usually starts from a click, but an embedded one starts as the page loads, which is why the order matters. If you load Virling from a tag manager, wait until <code>window.virling?.vid</code> exists before mounting. If your API is on another registrable domain, the cookie does not reach it: send <code>window.virling?.vid?.()</code> in the request body and use that value instead.</p>
+<p class="p"><strong>Step 4: connect Stripe with a restricted key.</strong> Create a restricted key with Read on Charges, Checkout Sessions, Customers, Events, Invoices, Subscriptions and PaymentIntents, and paste it into Virling. Virling reads the visitor ID from the Checkout Session behind each charge and credits the payment to the visit, under the attribution model you pick: last non-direct by default, or first touch or last touch.</p>
+<p class="p">The <a href="/tools/checkout-snippet-generator">checkout snippet generator</a> writes the server call for other providers, and the full setup is on the <a href="/integrations/stripe">Stripe integration page</a>.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>The return page</h2>
+<p class="p">Stripe replaces <code>{CHECKOUT_SESSION_ID}</code> in <code>return_url</code> with the session's ID. On the return page, send that ID to your server, retrieve the session and read its status:</p>
+<div class="code block"><pre data-snippet>app.get("/session-status", async (req, res) =&gt; {
+  const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+  res.json({ status: session.status });
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The quickstart shows a success message for <code>complete</code>, and mounts checkout again for <code>open</code>, when the payment failed or was cancelled. Two things to know:</p>
+<ul class="post-list"><li><strong>The buyer may never see it.</strong> With <code>redirect_on_completion</code> set to <code>if_required</code>, Stripe only redirects for payment methods that need it, and with <code>never</code> it does not redirect at all. The default is <code>always</code>. Stripe's docs also say not to rely on the landing page alone to fulfil an order, because buyers are not guaranteed to visit it; use the <code>checkout.session.completed</code> webhook (<a href="https://docs.stripe.com/checkout/fulfillment">Stripe fulfillment docs</a>). The same goes for attribution: tags saved only when the return page loads are lost for buyers who never reach it.</li><li><strong>The return can look like a new source.</strong> A payment method that redirects sends the buyer through another site and back. Virling treats returns from Stripe's checkout pages as the same visit; for a bank or wallet domain, add it under Same-visit domains in Site settings. More on this in <a href="/blog/cross-domain-checkout-attribution">cross-domain checkout attribution</a>.</li></ul>
+<h2>Check that it worked</h2>
+<ol class="post-list"><li>Use test-mode keys: <code>pk_test_</code> in the page, <code>sk_test_</code> on your server, and an <code>rk_test_</code> restricted key in Virling. The Virling script stays quiet on <code>localhost</code>; add <code>data-dev</code> to its tag to test there.</li><li>Open your site in a private window from a tagged URL such as <code>?utm_source=test</code>, then go to the checkout page without the tag.</li><li>In the developer tools, check that the request to <code>/create-checkout-session</code> sends a <code>virling_vid</code> cookie.</li><li>Pay with Stripe's test card <code>4242 4242 4242 4242</code>, any future date and any CVC.</li><li>Retrieve the session with its <code>cs_test_</code> ID, for example with <code>stripe checkout sessions retrieve cs_test_...</code> in the Stripe CLI. Its <code>client_reference_id</code> should match the cookie.</li><li>Wait a minute for the next sync. The payment shows the <code>test</code> source instead of Unattributed.</li></ol>
+<p class="p">Use a redirect-based payment method as a second test if you accept any, so you see the return page path too. Each Virling step is in the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a>.</p>
+<p class="p">For the hosted page and Payment Links, see <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>. If you embed a pricing table instead, see <a href="/blog/stripe-pricing-table-utm-tracking">Stripe pricing table UTM tracking</a>. In React, the server call is the same; <a href="/blog/react-stripe-utm-tracking">React Stripe UTM tracking</a> covers reading the ID in the browser.</p>
+<h2>Frequently asked questions</h2>
+<h3>Does Stripe embedded checkout read UTM parameters from my page URL?</h3><p class="p">No. The form runs in an iframe and shows a Checkout Session that your server created. Only the values your server sends when it creates the session are on it, so send a visitor ID in client_reference_id.</p>
+<h3>Is ui_mode embedded or embedded_page?</h3><p class="p">Stripe renamed embedded to embedded_page in API version 2026-03-25.dahlia, and setting the old value there fails. On an older API version, keep embedded.</p>
+<h3>Should I use client_reference_id or metadata.virling_vid?</h3><p class="p">Use client_reference_id unless it already holds your own user or cart ID. In that case put the visitor ID in the session's metadata.virling_vid, which Virling checks first.</p>
+<h3>Do I need a return page for the source to be recorded?</h3><p class="p">No. The visitor ID is on the session before the buyer pays, so it does not depend on the return page loading. The return page is for showing the buyer the result.</p>
+<h3>Why does an embedded checkout sale show as Unattributed?</h3><p class="p">The session was created without the visitor ID: your page asked for it before the Virling script ran, the request went to another domain without the cookie, the script was blocked or runs in cookieless mode, or client_reference_id holds another value and metadata.virling_vid is empty.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring Stripe revenue</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

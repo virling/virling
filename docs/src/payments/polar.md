@@ -35,3 +35,45 @@ const checkout = await polar.checkouts.create({
 ## Checkout links
 
 Checkout links on `buy.polar.sh` need no code. Keep the link as a normal `<a href>` on a page that runs the script: the script adds `reference_id=<visitor ID>` to it, unless it is already there, and Polar stores it in the order's metadata, where Virling reads it. A `virling_vid` custom field on the link still works too.
+
+## Check that it works
+
+1. Connect a token from the Polar sandbox.
+2. Open a private window and visit a page that runs the script through a tagged link, such as `https://yourdomain.com/?utm_source=test&utm_medium=email`.
+3. In the same window, go to a sandbox checkout your server creates with `virling_vid` in `metadata`, and pay with a test card. The script does not add the visitor ID to sandbox links.
+4. Wait a minute for the next sync, then open the payments list at `/app/yourdomain.com/payments`. The payment shows the `test` source and the **Email** channel of your tagged visit instead of Unattributed.
+
+Use a new email address for each test: a later payment by the same customer is a renewal and keeps the first payment's channel. If a step fails, see [Test your setup](../guides/test-your-setup.md).
+
+## Common questions
+
+### Does the Polar sandbox work?
+
+Yes. Paste a sandbox token and Virling reads sandbox orders and refunds. A site has one Polar connection, and sandbox orders stay in your reports after you replace the token with a production one.
+
+### Why is a Polar payment Unattributed?
+
+Usually because neither the order nor its customer carries a visitor ID: the checkout was created without `metadata.virling_vid`, or a checkout link was opened from an email or another site. A `reference_id` you set on the link yourself is kept, so the script cannot add the visitor ID there. See [Unattributed revenue](../attribution/unattributed.md).
+
+### How are Polar refunds counted?
+
+A succeeded refund lowers the revenue of the order it belongs to, on that order's date. Refunds made after you connect count even when the order is older than 90 days. A pending refund counts once it succeeds, if it does so within 7 days.
+
+### How are Polar renewals credited?
+
+Orders with billing reason `subscription_cycle` or `subscription_update`, and any later order by the same customer, keep the channel of that customer's first order. If that order is older than the first import, its renewals are usually Unattributed. See [Renewals](../attribution/renewals.md).
+
+### How far back does Polar history go?
+
+The first import reads orders from the last 90 days. Orders from before the script was on your site count as revenue but are Unattributed.
+
+### Can I remove the Polar token?
+
+Yes. **Disconnect** under Payment connections in site settings deletes the stored token and stops syncing, and imported orders stay in your reports. Delete the token in Polar too to revoke access completely.
+
+## Guides
+
+- [Polar revenue attribution](https://virling.com/integrations/polar)
+- [How to track Polar revenue by traffic source](https://virling.com/blog/track-polar-revenue-by-traffic-source)
+- [Polar UTM tracking](https://virling.com/blog/polar-utm-tracking)
+- [Polar for developer tools: payments by traffic source](https://virling.com/integrations/polar-developer-tools)

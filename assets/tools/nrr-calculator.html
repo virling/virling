@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NRR calculator: net and gross revenue retention | Virling</title>
+<meta name="description" content="Turn starting, expansion, contraction and churned MRR into net and gross revenue retention for a period, with the formula shown.">
+<link rel="canonical" href="https://virling.com/tools/nrr-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/nrr-calculator">
+<meta property="og:title" content="NRR calculator: net and gross revenue retention | Virling">
+<meta property="og:description" content="Turn starting, expansion, contraction and churned MRR into net and gross revenue retention for a period, with the formula shown.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"NRR calculator","url":"https://virling.com/tools/nrr-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"NRR calculator","item":"https://virling.com/tools/nrr-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / nrr calculator</span><h1>Net revenue retention calculator</h1><p class="lead">Enter the MRR your existing customers paid at the start of a period, then what they added through upgrades, lost through downgrades and lost through cancellations. You get net revenue retention (NRR) and gross revenue retention (GRR), with the formula. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="nrr" autocomplete="off">
+  <label>MRR at start of period ($)<input name="start" type="number" min="0" step="0.01" value="20000"></label>
+  <label>Expansion MRR ($)<input name="exp" type="number" min="0" step="0.01" value="1500"></label>
+  <label>Contraction MRR ($)<input name="con" type="number" min="0" step="0.01" value="400"></label>
+  <label>Churned MRR ($)<input name="churn" type="number" min="0" step="0.01" value="600"></label>
+</form>
+<div class="tool-stats" id="nrr-out"></div>
+<div class="txt post"><p class="p" id="nrr-formula"></p></div>
+<div class="txt post tool-cta">
+<p class="p">This is one blended number. Virling shows retention per channel from your real payments: it links every visit to the payment it led to, then shows which channels bring customers who keep paying and what they pay per month now. See <a href="https://docs.virling.com/attribution/retention">retention by channel</a> in the docs. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/mrr-calculator">MRR calculator</a>, <a href="/tools/churn-rate-calculator">churn rate calculator</a>, <a href="/tools/ltv-cac-calculator">LTV to CAC calculator</a>, <a href="/tools/grr-calculator">gross revenue retention calculator</a>, <a href="/tools/quick-ratio-calculator">quick ratio of MRR gained to lost</a>, <a href="/tools/cohort-retention-template">cohort retention template</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The NRR formula</h2>
+<p class="p">Net revenue retention compares what a fixed group of customers pays at the end of a period with what they paid at the start:</p>
+<p class="p"><code>NRR = (starting MRR + expansion - contraction - churned MRR) / starting MRR</code></p>
+<p class="p">Gross revenue retention is the same without expansion, so it only counts losses and tops out at 100%:</p>
+<p class="p"><code>GRR = (starting MRR - contraction - churned MRR) / starting MRR</code></p>
+<p class="p">Expansion is extra MRR from upgrades, added seats or usage. Contraction is MRR lost to downgrades from customers who stayed. Churned MRR is what cancelled customers paid. Leave out customers who signed up during the period: their MRR is new business, not retention.</p>
+<h2>A worked example</h2>
+<p class="p">With the defaults above, your existing customers pay $20,000 MRR at the start of the period. Upgrades add $1,500, downgrades remove $400 and cancellations remove $600.</p>
+<p class="p">NRR is ($20,000 + $1,500 - $400 - $600) / $20,000 = $20,500 / $20,000 = 102.5%. The same customers pay more at the end than at the start, without counting any new sales.</p>
+<p class="p">GRR is ($20,000 - $400 - $600) / $20,000 = $19,000 / $20,000 = 95%. You kept 95% of the revenue you started with, and expansion more than covered the rest.</p>
+<h2>Edge cases in NRR</h2>
+<p class="p">Compare each customer's MRR at the start of the period with their MRR at the end, and count the difference once. Use the same treatment every period:</p>
+<table class="cmp"><thead><tr><th style="width:34%">Case</th><th>What to do</th></tr></thead><tbody><tr><th scope="row">Upgrades</th><td>Expansion, for the difference only: a move from $50 to $80 adds $30. Count it once the new price is billed.</td></tr><tr><th scope="row">Downgrades</th><td>Contraction, for the difference only. A customer who went from $50 to $80 and then to $40 within the period is $10 of contraction, not $30 of expansion and $40 of contraction.</td></tr><tr><th scope="row">Cancelled, still in the paid period</th><td>No change until the paid period ends. Then the whole amount is churned MRR.</td></tr><tr><th scope="row">Pauses</th><td>Churned MRR if billing is stopped at the end of the period. A pause that starts and ends within the period is no loss. A customer already paused at the start is not in starting MRR, so leave them out when they resume.</td></tr><tr><th scope="row">Annual plans</th><td>Count the yearly price divided by 12. These customers can rarely leave before their year ends, so they make a monthly NRR look better than it is: work it out apart from monthly plans, or measure NRR over a year.</td></tr><tr><th scope="row">Monthly to annual</th><td>Compare the monthly amounts. A move from $50 a month to $480 a year is $40 of MRR, so $10 of contraction, even though more cash came in that day.</td></tr><tr><th scope="row">Win-backs</th><td>A customer who left before the period started is not in starting MRR. Their return is neither expansion nor retention: leave it out, like a new customer. One who left and came back within the period counts at what they pay at the end.</td></tr><tr><th scope="row">Price increases and discounts that end</th><td>Expansion, because the same customer pays more. Note how much of it there was, since it is not a customer choosing to buy more.</td></tr><tr><th scope="row">Usage charges</th><td>Put them in expansion only if your starting MRR includes usage too, measured the same way. Otherwise count a higher fixed commitment and leave the rest out.</td></tr></tbody></table>
+<h2>Two channels, one NRR</h2>
+<p class="p">These numbers are made up, not data from a real business. They split one month of the example above over the two channels that brought the customers:</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:760px"><thead><tr><th>Channel (made up)</th><th>Starting MRR</th><th>Expansion</th><th>Contraction</th><th>Churned</th><th>MRR at end</th><th>NRR</th><th>GRR</th></tr></thead><tbody><tr><th scope="row">Communities</th><td>$12,000</td><td>$600</td><td>$300</td><td>$480</td><td>$11,820</td><td>98.5%</td><td>93.5%</td></tr><tr><th scope="row">Organic search</th><td>$8,000</td><td>$900</td><td>$100</td><td>$120</td><td>$8,680</td><td>108.5%</td><td>97.25%</td></tr><tr><th scope="row">Both</th><td>$20,000</td><td>$1,500</td><td>$400</td><td>$600</td><td>$20,500</td><td>102.5%</td><td>95%</td></tr></tbody></table></div>
+<p class="p">Communities pays more today, $11,820 against $8,680, but that group is shrinking: upgrades brought in $600 and $780 left. Organic search started with 40% of the MRR, brought 60% of the expansion and lost $220. The blended 102.5% hides that one group needs new customers to stand still and the other does not.</p>
+<p class="p">One month is a small sample, and a single large upgrade can make this gap. Read several months together, then see what the difference adds up to per customer in <a href="/blog/ltv-by-acquisition-channel">LTV by acquisition channel</a>.</p>
+<h2>Split retention by acquisition channel</h2>
+<p class="p">One NRR figure blends every customer together. Customers from a launch day or a discount listing may downgrade or cancel early, while customers from search or a referral may stay and upgrade, and the blended rate sits in between. Run the calculator once per channel with the MRR of the customers each channel brought, or let Virling do it from your payments: its <a href="https://docs.virling.com/attribution/retention">Retention page</a> groups customers by the channel of their first payment and shows how many are still paying and what they pay per month now. To get the starting MRR for each group, use the <a href="/tools/mrr-calculator">MRR calculator</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>NRR calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How is net revenue retention calculated?</h3><p class="p">Take the MRR your existing customers paid at the start of a period, add expansion, subtract contraction and churned MRR, and divide by the starting MRR. Revenue from customers who signed up during the period is left out, so new sales do not hide losses.</p></div>
+      <div><h3>What is the difference between NRR and GRR?</h3><p class="p">Net revenue retention counts expansion from upgrades, extra seats and usage. Gross revenue retention leaves expansion out and only counts what was lost, so it can never be above 100%. NRR shows whether existing customers grow on their own; GRR shows how well you keep the revenue you already have.</p></div>
+      <div><h3>What is a good NRR?</h3><p class="p">Above 100% means your existing customers pay more at the end of the period than at the start, even with no new sales. Below 100% means you need new customers to stand still. What is realistic depends on pricing: seat or usage based plans can expand, while a single flat plan mostly cannot. Compare against your own past periods first.</p></div>
+      <div><h3>Should I calculate NRR monthly or annually?</h3><p class="p">Either works if you are consistent. Annual NRR is usually measured on the customers you had twelve months ago, comparing what they paid then with what they pay now. Monthly NRR moves more from one month to the next, especially with few customers.</p></div>
+      <div><h3>Why does NRR differ by channel?</h3><p class="p">Customers from different channels arrive with different intent and budgets. A launch or a discount listing can bring customers who downgrade or leave, while search or referrals can bring customers who upgrade. Splitting retention by the channel that brought each customer shows which channels grow over time.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How is net revenue retention calculated?", "acceptedAnswer": {"@type": "Answer", "text": "Take the MRR your existing customers paid at the start of a period, add expansion, subtract contraction and churned MRR, and divide by the starting MRR. Revenue from customers who signed up during the period is left out, so new sales do not hide losses."}}, {"@type": "Question", "name": "What is the difference between NRR and GRR?", "acceptedAnswer": {"@type": "Answer", "text": "Net revenue retention counts expansion from upgrades, extra seats and usage. Gross revenue retention leaves expansion out and only counts what was lost, so it can never be above 100%. NRR shows whether existing customers grow on their own; GRR shows how well you keep the revenue you already have."}}, {"@type": "Question", "name": "What is a good NRR?", "acceptedAnswer": {"@type": "Answer", "text": "Above 100% means your existing customers pay more at the end of the period than at the start, even with no new sales. Below 100% means you need new customers to stand still. What is realistic depends on pricing: seat or usage based plans can expand, while a single flat plan mostly cannot. Compare against your own past periods first."}}, {"@type": "Question", "name": "Should I calculate NRR monthly or annually?", "acceptedAnswer": {"@type": "Answer", "text": "Either works if you are consistent. Annual NRR is usually measured on the customers you had twelve months ago, comparing what they paid then with what they pay now. Monthly NRR moves more from one month to the next, especially with few customers."}}, {"@type": "Question", "name": "Why does NRR differ by channel?", "acceptedAnswer": {"@type": "Answer", "text": "Customers from different channels arrive with different intent and budgets. A launch or a discount listing can bring customers who downgrade or leave, while search or referrals can bring customers who upgrade. Splitting retention by the channel that brought each customer shows which channels grow over time."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring customers who stay</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers, revenue and retention each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("nrr"), out = document.getElementById("nrr-out"), fx = document.getElementById("nrr-formula");
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 2 }) + "%";
+const usd = (n) => { const a = Math.abs(n), d = a < 100 ? 2 : 0; return (n < 0 ? "-$" : "$") + a.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); };
+const calc = () => {
+  const s = +f.start.value, e = +f.exp.value, c = +f.con.value, l = +f.churn.value;
+  const ok = s > 0 && e >= 0 && c >= 0 && l >= 0 && c + l <= s;
+  const end = s + e - c - l, kept = s - c - l;
+  const rows = [["Net revenue retention", ok ? pct(end / s) : "No data"], ["Gross revenue retention", ok ? pct(kept / s) : "No data"], ["MRR at end of period", ok ? usd(end) : "No data"]];
+  out.innerHTML = rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+  fx.innerHTML = ok ? `<code>NRR = (${usd(s)} + ${usd(e)} - ${usd(c)} - ${usd(l)}) / ${usd(s)} = ${pct(end / s)}</code><br><code>GRR = (${usd(s)} - ${usd(c)} - ${usd(l)}) / ${usd(s)} = ${pct(kept / s)}</code>` : "Enter a starting MRR above zero, with contraction and churned MRR no larger than it.";
+};
+f.addEventListener("input", calc);
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

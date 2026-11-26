@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer acquisition cost calculator by channel | Virling</title>
+<meta name="description" content="See what a new paying customer costs on each channel and overall, with shared costs like salaries and tools counted alongside ad spend.">
+<link rel="canonical" href="https://virling.com/tools/cac-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/cac-calculator">
+<meta property="og:title" content="Customer acquisition cost calculator by channel | Virling">
+<meta property="og:description" content="See what a new paying customer costs on each channel and overall, with shared costs like salaries and tools counted alongside ad spend.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Customer acquisition cost calculator","url":"https://virling.com/tools/cac-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Customer acquisition cost calculator","item":"https://virling.com/tools/cac-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / cac calculator</span><h1>Customer acquisition cost calculator</h1><p class="lead">Enter what each marketing channel cost and the new paying customers it brought, plus any shared costs like salaries and tools, to see blended and per-channel CAC. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="cac" autocomplete="off">
+  <div style="grid-column:1/-1;overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>Channel</th><th>Spend ($)</th><th>New paying customers</th><th>CAC</th><th>CAC with shared costs</th><th style="width:110px"></th></tr></thead><tbody id="cac-rows"></tbody><tfoot id="cac-total"></tfoot></table></div>
+  <p><button class="btn sm light" type="button" id="cac-add">Add channel</button></p>
+  <label>Shared costs ($)<input name="shared" type="number" min="0" step="0.01" value="4000"><span class="dim">Salaries, agencies and tools for the same period</span></label>
+</form>
+<div class="tool-stats" id="cac-sum"></div>
+<p class="fine-note">Shared costs are split evenly across all new customers. Use the same period, such as one month, for every number.</p>
+<div class="txt post tool-cta">
+<p class="p">Per-channel CAC is only as good as the customers you count for each channel. Virling links every visit to the payment it led to, so it fills in the new paying customers per channel from your real payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Next: <a href="/tools/cac-payback-calculator">CAC payback calculator</a>, <a href="/tools/ltv-cac-calculator">LTV to CAC ratio calculator</a>. Related: <a href="/tools/roas-calculator">ROAS calculator</a>, <a href="/blog/find-which-channel-pays">how to find which marketing channel pays</a>, <a href="/tools/cost-per-lead-calculator">cost per lead calculator</a>, <a href="/tools/saas-magic-number-calculator">SaaS magic number for sales efficiency</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The CAC formula</h2>
+<p class="p">Customer acquisition cost is what you spent to win customers divided by the new paying customers you won, over the same period:</p>
+<p class="p"><code>CAC = acquisition costs / new paying customers</code></p>
+<p class="p">Per channel, use that channel&rsquo;s spend and the customers it brought. Blended CAC uses the totals, and adding shared costs gives a fully loaded figure. This calculator spreads shared costs evenly over every new customer. For where blended and per-channel CAC each help, see <a href="/blog/cac-by-channel">how to calculate CAC by channel</a>.</p>
+<p class="p"><code>channel CAC = channel spend / channel customers</code><br><code>blended CAC = (total spend + shared costs) / total customers</code><br><code>channel CAC with shared costs = channel CAC + shared costs / total customers</code></p>
+<p class="p">Count only new paying customers, not trials or signups, and not renewals from customers you already had.</p>
+<h2>A worked example</h2>
+<p class="p">These numbers are made up, not data from a real business: one SaaS in one month, with $4,000 of shared salaries and tools. They are the defaults above.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:560px"><thead><tr><th>Channel (made up)</th><th>Spend</th><th>New paying customers</th><th>CAC</th><th>CAC with shared costs</th></tr></thead><tbody><tr><th scope="row">Paid search</th><td>$3,000</td><td>20</td><td>$150</td><td>$250</td></tr><tr><th scope="row">Paid social</th><td>$2,000</td><td>8</td><td>$250</td><td>$350</td></tr><tr><th scope="row">Content</th><td>$1,200</td><td>12</td><td>$100</td><td>$200</td></tr><tr><th scope="row">Total</th><td>$6,200</td><td>40</td><td>$155</td><td>$255</td></tr></tbody></table></div>
+<p class="p">The channel spend alone is $6,200 / 40, a blended CAC of $155. With shared costs it is $10,200 / 40 = $255. Split evenly, the shared costs add $4,000 / 40 = $100 to every customer. Content is the cheapest channel per customer, and on spend alone paid social costs more than twice as much.</p>
+<h2>What CAC misses: how fast it comes back</h2>
+<p class="p">CAC says what a customer costs and nothing about what they pay. In the made-up SaaS, content customers are the cheapest at $200 with shared costs, but they pay $25 a month where paid search customers pay $50. At an 80% gross margin that is $20 of gross profit a month against $40, so content takes 10 months to earn its CAC back and paid search, at $250, takes 6.3. The <a href="/tools/cac-payback-calculator">CAC payback calculator</a> goes through the same three channels.</p>
+<h2>Compare channels by paying customers, not clicks</h2>
+<p class="p">CAC needs the new paying customers each channel brought, and that is the hard input. Ad platforms count their own conversions, and web analytics count visits but stop before the payment, so per-channel customers need each payment tied to the visit that started it. Once you have CAC, check how fast each channel pays it back with the <a href="/tools/cac-payback-calculator">CAC payback calculator</a> and whether it is worth it with the <a href="/tools/ltv-cac-calculator">LTV to CAC ratio calculator</a>. See also <a href="/blog/trial-to-paid-conversion-by-traffic-source">trial-to-paid conversion by traffic source</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Customer acquisition cost calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate customer acquisition cost?</h3><p class="p">Divide what you spent to win customers in a period by the number of new paying customers in that period. $3,000 of ad spend that brought 20 new customers is a CAC of $150.</p></div>
+      <div><h3>What costs should go into CAC?</h3><p class="p">At least the direct spend on each channel: ads, sponsorships, affiliate payouts, freelance content. A fully loaded CAC also adds shared sales and marketing costs such as salaries, agencies and tools. Leave out costs that serve existing customers, like support and hosting.</p></div>
+      <div><h3>What is the difference between blended and per-channel CAC?</h3><p class="p">Blended CAC divides all acquisition costs by all new customers, so it describes the business as a whole. Per-channel CAC divides each channel&rsquo;s spend by the customers that channel brought, so it shows where the next dollar is best spent.</p></div>
+      <div><h3>How are shared costs split across channels here?</h3><p class="p">Evenly per customer. The calculator divides shared costs by all new customers and adds that amount to each channel&rsquo;s CAC. It is a simple, neutral split; if you know a cost serves one channel only, add it to that channel&rsquo;s spend instead.</p></div>
+      <div><h3>Where do I get new paying customers per channel?</h3><p class="p">From a tool that links each payment to the visit that brought the buyer. Ad platforms report their own conversions and web analytics count visits, but neither sees which channel each paying customer in your billing system came from.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate customer acquisition cost?", "acceptedAnswer": {"@type": "Answer", "text": "Divide what you spent to win customers in a period by the number of new paying customers in that period. $3,000 of ad spend that brought 20 new customers is a CAC of $150."}}, {"@type": "Question", "name": "What costs should go into CAC?", "acceptedAnswer": {"@type": "Answer", "text": "At least the direct spend on each channel: ads, sponsorships, affiliate payouts, freelance content. A fully loaded CAC also adds shared sales and marketing costs such as salaries, agencies and tools. Leave out costs that serve existing customers, like support and hosting."}}, {"@type": "Question", "name": "What is the difference between blended and per-channel CAC?", "acceptedAnswer": {"@type": "Answer", "text": "Blended CAC divides all acquisition costs by all new customers, so it describes the business as a whole. Per-channel CAC divides each channel’s spend by the customers that channel brought, so it shows where the next dollar is best spent."}}, {"@type": "Question", "name": "How are shared costs split across channels here?", "acceptedAnswer": {"@type": "Answer", "text": "Evenly per customer. The calculator divides shared costs by all new customers and adds that amount to each channel’s CAC. It is a simple, neutral split; if you know a cost serves one channel only, add it to that channel’s spend instead."}}, {"@type": "Question", "name": "Where do I get new paying customers per channel?", "acceptedAnswer": {"@type": "Answer", "text": "From a tool that links each payment to the visit that brought the buyer. Ad platforms report their own conversions and web analytics count visits, but neither sees which channel each paying customer in your billing system came from."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See what each channel really costs per customer</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the new paying customers each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("cac"), body = document.getElementById("cac-rows"), tot = document.getElementById("cac-total"), sum = document.getElementById("cac-sum");
+const usd = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: n < 100 ? 2 : 0, maximumFractionDigits: n < 100 ? 2 : 0 });
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const add = (name, s, c) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td><input name="name" type="text" aria-label="Channel" value="${esc(name)}"></td><td><input name="s" type="number" min="0" step="0.01" aria-label="Spend" value="${s}"></td><td><input name="c" type="number" min="0" step="1" aria-label="New paying customers" value="${c}"></td><td data-o></td><td data-o></td><td><button class="btn sm light" type="button" data-rm>Remove</button></td>`;
+  body.appendChild(tr);
+};
+const calc = () => {
+  const trs = [...body.rows], shared = Math.max(0, +f.shared.value || 0);
+  trs.forEach((tr) => (tr.querySelector("[data-rm]").disabled = trs.length < 2));
+  const rows = trs.map((tr, i) => {
+    const q = (n) => tr.querySelector(`[name=${n}]`);
+    return { tr, name: q("name").value.trim() || "Channel " + (i + 1), s: Math.max(0, +q("s").value || 0), c: Math.max(0, +q("c").value || 0) };
+  });
+  const t = rows.reduce((a, x) => ({ s: a.s + x.s, c: a.c + x.c }), { s: 0, c: 0 });
+  const per = t.c > 0 ? shared / t.c : 0;
+  let best = null;
+  rows.forEach((x) => { if (x.c > 0 && (!best || x.s / x.c < best.s / best.c)) best = x; });
+  rows.forEach((x) => {
+    const [a, b] = x.tr.querySelectorAll("[data-o]");
+    a.textContent = x.c > 0 ? usd(x.s / x.c) : "No customers";
+    b.innerHTML = x.c > 0 ? usd(x.s / x.c + per) + (x === best ? ' <span class="dim">lowest</span>' : "") : "No customers";
+    x.tr.style.background = x === best ? "var(--revenue-soft)" : "";
+  });
+  const paid = t.c > 0 ? usd(t.s / t.c) : "No data", full = t.c > 0 ? usd((t.s + shared) / t.c) : "No data";
+  tot.innerHTML = `<tr><th scope="row">Total</th><td><b>${usd(t.s)}</b></td><td><b>${t.c.toLocaleString("en-US")}</b></td><td><b>${paid}</b></td><td><b>${full}</b></td><td></td></tr>`;
+  sum.innerHTML = [["Blended CAC", full], ["Blended CAC, spend only", paid], ["Lowest CAC channel", best ? esc(best.name) : "No data"]].map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+body.addEventListener("click", (e) => { const b = e.target.closest("[data-rm]"); if (b && body.rows.length > 1) { b.closest("tr").remove(); calc(); } });
+document.getElementById("cac-add").addEventListener("click", () => { add("", 0, 0); calc(); body.lastElementChild.querySelector("input").focus(); });
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+add("Paid search", 3000, 20);
+add("Paid social", 2000, 8);
+add("Content", 1200, 12);
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

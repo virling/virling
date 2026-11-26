@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marketing mix modeling vs attribution for small budgets</title>
+<meta name="description" content="Marketing mix modeling vs attribution: what each needs, when a small SaaS or store should use which, and a made-up month of payments with a holdout.">
+<link rel="canonical" href="https://virling.com/blog/marketing-mix-modeling-vs-attribution">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/marketing-mix-modeling-vs-attribution">
+<meta property="og:title" content="Marketing mix modeling vs attribution for small budgets">
+<meta property="og:description" content="Marketing mix modeling vs attribution: what each needs, when a small SaaS or store should use which, and a made-up month of payments with a holdout.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Marketing mix modeling vs attribution for small budgets","item":"https://virling.com/blog/marketing-mix-modeling-vs-attribution"}]},{"@type":"BlogPosting","headline":"Marketing mix modeling vs attribution for small budgets","description":"Marketing mix modeling vs attribution: what each needs, when a small SaaS or store should use which, and a made-up month of payments with a holdout.","datePublished":"2026-11-26","dateModified":"2026-11-26","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/marketing-mix-modeling-vs-attribution"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the difference between marketing mix modeling and attribution?","acceptedAnswer":{"@type":"Answer","text":"Attribution credits each payment to a visit that came before it, so it works from the first day and needs no spend history. Marketing mix modeling fits a statistical model to weekly sales and spend over a long period, and estimates what each channel added, including channels that leave no click."}},{"@type":"Question","name":"How much data does marketing mix modeling need?","acceptedAnswer":{"@type":"Answer","text":"The analyst guide of Robyn, an open-source modeling package, asks for a minimum of two years of weekly data, and about 10 observations for each variable in the model. Each channel, price change or season you add is another variable."}},{"@type":"Question","name":"Is attribution or marketing mix modeling better for a small business?","acceptedAnswer":{"@type":"Answer","text":"With a few months of history, one or two paid channels and modest sales, attribution is the method you can actually run. It shows which channels buyers came through. A holdout test can then check whether one channel adds sales. Modeling becomes an option once you have years of weekly spend and sales."}},{"@type":"Question","name":"Can marketing mix modeling replace a holdout test?","acceptedAnswer":{"@type":"Answer","text":"No. A model infers effects from how sales moved when spend moved in the past. If spend never changed much, it has little to learn from. A holdout changes spend on purpose, and its result can be used to check or calibrate a model."}},{"@type":"Question","name":"Does Virling do marketing mix modeling?","acceptedAnswer":{"@type":"Answer","text":"No. Virling credits each payment to the visit before it and shows revenue and new customers by channel, campaign, country and date. It does not fit models, read ad spend or run holdout tests."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-26</span>
+      <h1>Marketing mix modeling vs attribution for small budgets</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-26.</p>
+<p class="p"><b>Marketing mix modeling</b> fits a statistical model to weekly sales and spend over a long period, then estimates what each channel added. <b>Attribution</b> credits each payment to a visit before it. Modeling can count channels that leave no click, but it needs years of weekly data and spend that moved. Attribution works from the first payment, but it cannot say who would have bought anyway. For a small SaaS or store with a few months of history, attribution is usually the method you can run today, a holdout test is how you check one channel, and modeling comes later, if at all.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>What each method needs</h2>
+<table class="cmp"><thead><tr><th>Needs</th><th>Marketing mix modeling</th><th>Per-payment attribution</th></tr></thead><tbody><tr><th scope="row">History</th><td>Robyn&rsquo;s guide asks for a minimum of two years of weekly data</td><td>None. It starts with the first tracked visit and payment</td></tr><tr><th scope="row">Spend</th><td>Spend per channel per week, and spend that changed over time</td><td>Not needed to credit payments. Add spend yourself to work out cost per customer</td></tr><tr><th scope="row">Outside factors</th><td>Season, holidays, price changes, launches and anything else that moved sales</td><td>Not modeled. You note them and read around them</td></tr><tr><th scope="row">Tracking</th><td>None on the site. It works from totals</td><td>A script on the site and the visitor ID passed into checkout</td></tr><tr><th scope="row">Skills</th><td>Statistics, and time to check that the model makes sense</td><td>Tagged links and a connected payment provider</td></tr><tr><th scope="row">Answers</th><td>What each channel added in total, including ads seen but not clicked</td><td>Which channel, campaign and page each paying customer came through</td></tr></tbody></table>
+<p class="p">The two years come from the <a href="https://facebookexperimental.github.io/Robyn/docs/analysts-guide-to-MMM/">Robyn analyst guide</a>, which also recommends about 10 observations for each variable in the model. Each channel, season or price change you add is a variable, so more channels need more weeks.</p>
+<p class="p">Three open-source projects are often used to build these models. Each describes itself differently:</p>
+<ul class="post-list"><li><b>Robyn</b> is an R package from Meta&rsquo;s marketing science team. It fits ridge regression and searches automatically for settings such as how long an ad&rsquo;s effect carries over and how quickly extra spend brings less.</li><li><b>Meridian</b> is a Python framework from Google for Bayesian marketing mix modeling, and can model data by region as well as nationally.</li><li><b>PyMC-Marketing</b> is a Python toolbox of Bayesian marketing models from PyMC Labs. It covers mix models, customer lifetime value and other marketing models.</li></ul>
+<p class="p">All three are free to use, and none removes the need for long, varied spend history.</p>
+<h2>When each one helps a small team</h2>
+<h3>Per-payment attribution</h3>
+<p class="p">It helps from the first week. You see which channels, campaigns, posts and pages your paying customers came through, and the amount each one brought, not only clicks. That is enough to spot a channel that sends visitors but no buyers, or a single post that sells. <a href="/blog/what-is-revenue-attribution">What is revenue attribution</a> covers how the credit works.</p>
+<p class="p">Its limit is that it only sees what happened. A buyer who would have paid anyway still credits the ad they last clicked. Splitting the credit across visits, as <a href="/blog/multi-touch-attribution">multi-touch attribution</a> does, divides the same sales in another way and does not fix this.</p>
+<h3>A holdout test</h3>
+<p class="p">It helps when one channel costs enough that you need to know whether it adds sales. You switch it off for some weeks or one region and count all new customers. <a href="/blog/incrementality-testing-small-budget">Incrementality testing on a small budget</a> walks through three versions.</p>
+<p class="p">Its limit is sales volume. That post shows that for two equal periods, a gap is outside chance at 95% only when it is larger than 1.96 times the square root of all sales in both. With few sales, only a large drop shows. The <a href="/tools/incrementality-calculator">incrementality calculator</a> works out the cost per extra customer once you have the counts.</p>
+<h3>Marketing mix modeling</h3>
+<p class="p">It starts to make sense when you meet the project&rsquo;s own data requirements: years of weekly sales, spend per channel that went up and down, and a record of outside factors. It also helps most when part of the spend leaves no click to attribute, such as podcasts, video or offline ads. If spend was flat, the model has little to learn from, whatever the length of history.</p>
+<p class="p">We do not know of a published sales or budget level at which modeling starts to pay for itself, so we will not give one. Use the data requirements above as the floor.</p>
+<h2>A made-up example: one month of payments</h2>
+<p class="p">These numbers are invented to show the reasoning. They are not from a real business. A small SaaS charges $40 a month. In November its new customers, credited by channel, were:</p>
+<table class="cmp"><thead><tr><th>Channel</th><th>New customers</th><th>First payments</th><th>What a holdout could add</th></tr></thead><tbody><tr><th scope="row">Organic search</th><td>34</td><td>$1,360</td><td>Little. You cannot switch it off cleanly</td></tr><tr><th scope="row">Paid search</th><td>22</td><td>$880</td><td>Whether these buyers would have found you anyway, for example by searching your name</td></tr><tr><th scope="row">Direct</th><td>18</td><td>$720</td><td>Nothing to switch off</td></tr><tr><th scope="row">Sponsorships</th><td>9</td><td>$360</td><td>Too few sales to show alone</td></tr><tr><th scope="row">Paid social</th><td>7</td><td>$280</td><td>Too few sales to show alone</td></tr><tr><th scope="row">Unattributed</th><td>6</td><td>$240</td><td>Nothing</td></tr><tr><th scope="row">Total</th><td>96</td><td>$3,840</td><td></td></tr></tbody></table>
+<p class="p">Attribution already says something useful: paid search brought 22 buyers who clicked its ads, and paid social brought 7. If paid social cost far more than $280 in the month, that is worth knowing now.</p>
+<p class="p">Now suppose the team pauses paid search for a month and compares it with a month of ads. With about 96 new customers a month, two months must differ by about 27 to be outside chance (1.96 &times; &radic;192). Only 22 buyers were credited to paid search, so even if every one of them would have been lost, a one-month test could not show it. With two months on and two off, about 192 customers per block, the limit is about 38 against 44 credited. The test shows an effect only if nearly all paid search buyers depend on the ads.</p>
+<p class="p">A mix model has even less to work with: one month is four or five weekly data points, against the two years Robyn&rsquo;s guide asks for.</p>
+<p class="p">What neither method can tell this team:</p>
+<ul class="post-list"><li><b>Why buyers chose them.</b> A friend&rsquo;s recommendation arrives as Direct or as a search for the name.</li><li><b>Spend they never tried.</b> Neither can say what doubling paid search would bring, because it never happened.</li><li><b>Effects slower than the test.</b> A sponsorship that buyers remember months later falls outside both.</li></ul>
+<p class="p">For this team, the honest plan is to read attribution every month, run a holdout once a channel brings enough sales to clear the limit, and keep a weekly log of spend and outside events in case modeling becomes possible later.</p>
+<h2>What Virling does and does not do</h2>
+<p class="p">Virling <b>does per-payment attribution</b>. It records visits and payments, credits each payment to a visit before it, and shows new customers and revenue by channel, campaign, country and date. Use <b>Compare to other dates</b> to read the periods of a holdout side by side, and log switch dates in <b>Launches</b> so they show on the chart.</p>
+<p class="p">It <b>does not fit mix models</b>, read ad spend or run holdout tests. You make the change in your ad platform and read the result in Virling.</p>
+<h2>Frequently asked questions</h2>
+<h3>What is the difference between marketing mix modeling and attribution?</h3><p class="p">Attribution credits each payment to a visit that came before it, so it works from the first day and needs no spend history. Marketing mix modeling fits a statistical model to weekly sales and spend over a long period, and estimates what each channel added, including channels that leave no click.</p>
+<h3>How much data does marketing mix modeling need?</h3><p class="p">The analyst guide of Robyn, an open-source modeling package, asks for a minimum of two years of weekly data, and about 10 observations for each variable in the model. Each channel, price change or season you add is another variable.</p>
+<h3>Is attribution or marketing mix modeling better for a small business?</h3><p class="p">With a few months of history, one or two paid channels and modest sales, attribution is the method you can actually run. It shows which channels buyers came through. A holdout test can then check whether one channel adds sales. Modeling becomes an option once you have years of weekly spend and sales.</p>
+<h3>Can marketing mix modeling replace a holdout test?</h3><p class="p">No. A model infers effects from how sales moved when spend moved in the past. If spend never changed much, it has little to learn from. A holdout changes spend on purpose, and its result can be used to check or calibrate a model.</p>
+<h3>Does Virling do marketing mix modeling?</h3><p class="p">No. Virling credits each payment to the visit before it and shows revenue and new customers by channel, campaign, country and date. It does not fit models, read ad spend or run holdout tests.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels your buyers came through</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

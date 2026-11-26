@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sales cycle length calculator: average and median days to close</title>
+<meta name="description" content="Find the average, median and longest time from first touch to close in days. Add your deals one by one or paste two columns of dates.">
+<link rel="canonical" href="https://virling.com/tools/sales-cycle-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/sales-cycle-calculator">
+<meta property="og:title" content="Sales cycle length calculator: average and median days to close">
+<meta property="og:description" content="Find the average, median and longest time from first touch to close in days. Add your deals one by one or paste two columns of dates.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Sales cycle length calculator","url":"https://virling.com/tools/sales-cycle-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Sales cycle length calculator","item":"https://virling.com/tools/sales-cycle-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<style>
+.sc .cmp td { vertical-align: middle; }
+.sc-date { position: relative; }
+.sc-date > button { width: 100%; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 10px; background: #fff; color: var(--ink); font: inherit; font-size: 15px; text-align: left; cursor: pointer; white-space: nowrap; }
+.sc-date > button.empty { color: var(--ink-3); }
+.sc-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; padding: 10px; background: #fff; border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 8px 24px rgba(14, 17, 22, .1); }
+.cal { width: 252px; display: flex; flex-direction: column; gap: 6px; }
+.cal-head { display: flex; align-items: center; justify-content: space-between; height: 32px; }
+.cal-head b { font-size: 14px; font-weight: 600; }
+.cal-head button { width: 32px; height: 32px; border: 0; border-radius: 8px; background: none; font-size: 20px; line-height: 1; color: var(--ink-2); cursor: pointer; }
+.cal-dow, .cal-grid { display: grid; grid-template-columns: repeat(7, 36px); }
+.cal-dow span { height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--ink-3); }
+.cal-grid button { height: 34px; border: 0; background: none; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ink); cursor: pointer; border-radius: 8px; }
+.cal-head button:hover, .cal-grid button:hover { background: var(--rule-2); }
+.cal-grid button.on { background: var(--ink); color: #fff; font-weight: 600; }
+.cal-grid button.today:not(.on) { box-shadow: inset 0 0 0 1px var(--field); }
+</style>
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / sales cycle calculator</span><h1>Sales cycle length calculator</h1><p class="lead">Add the first touch date and the close date of each deal, or paste them as two columns, to see your average, median and longest sales cycle in days. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool sc">
+<form class="tool-form" id="sc" autocomplete="off">
+  <table class="cmp" style="grid-column:1/-1"><thead><tr><th>Deal</th><th>First touch</th><th>Close date</th><th>Days</th><th style="width:110px"></th></tr></thead><tbody id="sc-rows"></tbody></table>
+  <p><button class="btn sm light" type="button" id="sc-add">Add deal</button></p>
+  <label class="wide">Or paste two columns <span class="dim">first touch date, then close date, one deal per line, as YYYY-MM-DD; tabs or commas between them</span><textarea id="sc-paste" rows="5" spellcheck="false" placeholder="2026-03-02	2026-04-13"></textarea></label>
+  <p><button class="btn sm light" type="button" id="sc-load">Replace deals with pasted rows</button> <span class="fine-note" id="sc-note"></span></p>
+</form>
+<div class="tool-stats" id="sc-sum"></div>
+<p class="fine-note">Cycle = close date &minus; first touch date, in days. The median is the middle cycle once deals are sorted, or the mean of the two middle ones. Deals with a missing date, or a close date before the first touch, are left out. Virling's lookback window can be 30, 60, 90 or 365 days.</p>
+<div class="txt post tool-cta">
+<p class="p">A long cycle hides where deals come from: by the time the invoice is paid, the visit that started it is weeks old and the payment never passed through your site. Virling credits each payment, invoices included, to the visit that brought the buyer, from your real payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="https://docs.virling.com/attribution/model">Model and lookback window</a></p>
+<p class="p">Related: <a href="/tools/trial-to-paid-calculator">trial to paid calculator</a>, <a href="/tools/attribution-model-calculator">attribution model calculator</a>, <a href="/blog/how-long-does-a-visitor-take-to-become-a-customer">how long a visitor takes to become a customer</a>, <a href="/tools/cac-payback-calculator">CAC payback calculator</a>, <a href="/tools/lead-value-calculator">what a lead is worth</a>, <a href="/tools/acv-calculator">ACV calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>How to calculate sales cycle length</h2>
+<p class="p">The sales cycle of one deal is the number of days from the first touch to the close:</p>
+<p class="p"><code>sales cycle = close date &minus; first touch date</code></p>
+<p class="p">The first touch is the first time the buyer reached you: a first website visit, a demo request or a first reply. Pick one definition and use it for every deal. Count only closed deals, and use the date the deal was won or the first payment arrived, again the same for every deal. The cycle is also one of the four numbers behind revenue per day: the <a href="/tools/sales-velocity-calculator">sales velocity calculator</a> combines it with your open opportunities, deal value and win rate.</p>
+<h2>A worked example</h2>
+<p class="p">The defaults above are made-up dates to show the method. Five deals took 42, 21, 79, 25 and 103 days. Sorted, that is 21, 25, 42, 79 and 103, so the median sales cycle is 42 days. The average is 270 days / 5 = 54 days, pulled up by the two slow deals. The longest took 103 days.</p>
+<h2>Why the attribution window should be longer than your sales cycle</h2>
+<p class="p">An <a href="/blog/attribution-window">attribution window</a> is how many days before a payment a visit can earn credit for it. Visits older than the window are ignored. If your median deal takes 42 days and the window is 30, the visit that started at least half of your deals has already dropped out when the payment arrives, and the credit goes to a later visit or to nobody.</p>
+<p class="p">So set the window longer than most of your deals take, not just the typical one, and add any wait between the signed deal and the paid invoice. In the example a 90-day window covers four of the five deals, and only a 365-day window covers the 103-day one. <a href="/blog/how-long-does-a-visitor-take-to-become-a-customer">How long a visitor takes to become a customer</a> shows how to measure this from the first visit, per channel.</p>
+<p class="p">For sales-led deals the payment is often an invoice paid days after a call, with no browser session attached. <a href="/blog/stripe-invoice-attribution">Stripe invoice attribution</a> covers how such a payment can still be tied back to the buyer's visits, and <a href="/blog/b2b-saas-attribution">B2B SaaS attribution for small teams</a> covers what to track when trials, invoices and sales calls stretch the cycle. If your deals start with a demo request, see <a href="/blog/demo-booking-revenue-tracking">how to track revenue from demo bookings</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Sales cycle calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate sales cycle length?</h3><p class="p">For each closed deal, count the days from the first touch, such as the first website visit or first contact, to the close date. The average sales cycle is the sum of those days divided by the number of deals; the median is the middle value once the deals are sorted.</p></div>
+      <div><h3>Should I use the average or the median sales cycle?</h3><p class="p">Look at both. One deal that took a year pulls the average up, while the median shows what a typical deal takes. If the average is far above the median, a few slow deals are stretching it.</p></div>
+      <div><h3>What is the average sales cycle for B2B SaaS?</h3><p class="p">It depends on your price, the size of the buyer and whether a sales call is involved, so a figure from another company says little about yours. Measure your own closed deals and compare channels and deal sizes with each other.</p></div>
+      <div><h3>How long should my attribution window be?</h3><p class="p">Longer than most of your deals take from first touch to payment, including any wait between the signed deal and the paid invoice. If the window is shorter than the cycle, the visit that started a slow deal falls outside it and another visit, or nothing, gets the credit.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate sales cycle length?", "acceptedAnswer": {"@type": "Answer", "text": "For each closed deal, count the days from the first touch, such as the first website visit or first contact, to the close date. The average sales cycle is the sum of those days divided by the number of deals; the median is the middle value once the deals are sorted."}}, {"@type": "Question", "name": "Should I use the average or the median sales cycle?", "acceptedAnswer": {"@type": "Answer", "text": "Look at both. One deal that took a year pulls the average up, while the median shows what a typical deal takes. If the average is far above the median, a few slow deals are stretching it."}}, {"@type": "Question", "name": "What is the average sales cycle for B2B SaaS?", "acceptedAnswer": {"@type": "Answer", "text": "It depends on your price, the size of the buyer and whether a sales call is involved, so a figure from another company says little about yours. Measure your own closed deals and compare channels and deal sizes with each other."}}, {"@type": "Question", "name": "How long should my attribution window be?", "acceptedAnswer": {"@type": "Answer", "text": "Longer than most of your deals take from first touch to payment, including any wait between the signed deal and the paid invoice. If the window is shorter than the cycle, the visit that started a slow deal falls outside it and another visit, or nothing, gets the credit."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>Credit slow deals to the channel that started them</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, with a lookback window of up to 365 days, so a deal that took months still shows the channel that brought the buyer. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("sc"), body = document.getElementById("sc-rows"), sum = document.getElementById("sc-sum"), note = document.getElementById("sc-note");
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const iso = (d) => d.toISOString().slice(0, 10);
+const parse = (s) => new Date(s + "T00:00:00Z");
+const fmt = (s) => parse(s).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+const now = new Date(), today = iso(new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())));
+const days = (n) => (n === 1 ? "1 day" : (Math.round(n * 10) / 10).toLocaleString("en-US") + " days");
+const dateCell = (name, label, v) => `<td><div class="sc-date" data-cal><input type="hidden" name="${name}" value="${v}"><button type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="${label}"${v ? "" : ' class="empty"'}>${v ? fmt(v) : "Pick a date"}</button></div></td>`;
+const add = (name, a, b) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td><input name="name" type="text" aria-label="Deal" value="${esc(name)}"></td>${dateCell("a", "First touch date", a)}${dateCell("b", "Close date", b)}<td data-days></td><td><button class="btn sm light" type="button" data-rm>Remove</button></td>`;
+  body.appendChild(tr);
+};
+const calc = () => {
+  const trs = [...body.rows];
+  const out = [];
+  trs.forEach((tr) => {
+    tr.querySelector("[data-rm]").disabled = trs.length < 2;
+    const a = tr.querySelector("[name=a]").value, b = tr.querySelector("[name=b]").value;
+    const n = a && b ? Math.round((parse(b) - parse(a)) / 864e5) : null;
+    tr.querySelector("[data-days]").textContent = n === null ? "" : n < 0 ? "Close before first touch" : n;
+    if (n !== null && n >= 0) out.push(n);
+  });
+  out.sort((x, y) => x - y);
+  const k = out.length, mid = k >> 1;
+  const avg = k ? out.reduce((s, x) => s + x, 0) / k : 0, med = k ? (k % 2 ? out[mid] : (out[mid - 1] + out[mid]) / 2) : 0, max = k ? out[k - 1] : 0;
+  const win = [30, 60, 90, 365].find((w) => w >= max);
+  sum.innerHTML = (k ? [["Average sales cycle", days(avg)], ["Median sales cycle", days(med)], ["Longest cycle", days(max)], ["Window that covers every deal", win ? win + " days" : "Over 365 days"], ["Deals counted", k.toLocaleString("en-US")]] : [["Deals counted", "0"], ["Add a deal", "with both dates"]]).map(([t, x]) => `<div><span class="dim">${t}</span><b>${x}</b></div>`).join("");
+};
+const pop = document.createElement("div");
+pop.className = "sc-pop";
+pop.setAttribute("role", "dialog");
+pop.setAttribute("aria-label", "Choose a date");
+pop.hidden = true;
+pop.innerHTML = '<div class="cal"></div>';
+const cal = pop.firstChild;
+let box = null, view = parse(today);
+const draw = (focus) => {
+  const sel = box.querySelector("input").value;
+  const y = view.getUTCFullYear(), m = view.getUTCMonth();
+  const first = (new Date(Date.UTC(y, m, 1)).getUTCDay() + 6) % 7;
+  const n = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  const title = view.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+  let cells = "<span></span>".repeat(first);
+  for (let d = 1; d <= n; d++) {
+    const s = iso(new Date(Date.UTC(y, m, d)));
+    const cls = [s === sel ? "on" : "", s === today ? "today" : ""].join(" ").trim();
+    cells += `<button type="button" data-d="${s}"${cls ? ` class="${cls}"` : ""}>${d}</button>`;
+  }
+  cal.innerHTML = `<div class="cal-head"><button type="button" data-step="-1" aria-label="Previous month">&#8249;</button><b>${title}</b><button type="button" data-step="1" aria-label="Next month">&#8250;</button></div><div class="cal-dow"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div><div class="cal-grid">${cells}</div>`;
+  if (focus) (cal.querySelector(`[data-d="${focus}"]`) || cal.querySelector("[data-d]")).focus();
+};
+const close = (refocus) => {
+  if (!box) return;
+  const t = box.querySelector("button");
+  t.setAttribute("aria-expanded", "false");
+  pop.hidden = true;
+  box = null;
+  if (refocus) t.focus();
+};
+const open = (b) => {
+  close();
+  box = b;
+  box.appendChild(pop);
+  box.querySelector("button").setAttribute("aria-expanded", "true");
+  const v = box.querySelector("input").value || today;
+  view = parse(v);
+  view.setUTCDate(1);
+  pop.hidden = false;
+  draw(v);
+};
+cal.addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  e.stopPropagation();
+  if (b.dataset.step) { view.setUTCMonth(view.getUTCMonth() + Number(b.dataset.step)); return draw(); }
+  const t = box.querySelector("button");
+  box.querySelector("input").value = b.dataset.d;
+  t.textContent = fmt(b.dataset.d);
+  t.classList.remove("empty");
+  close(true);
+  calc();
+});
+pop.addEventListener("keydown", (e) => {
+  const steps = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
+  const at = document.activeElement.dataset.d;
+  if (e.key === "Escape") { e.preventDefault(); close(true); }
+  else if (at && steps[e.key]) {
+    e.preventDefault();
+    const next = parse(at);
+    next.setUTCDate(next.getUTCDate() + steps[e.key]);
+    view = new Date(next);
+    view.setUTCDate(1);
+    draw(iso(next));
+  }
+});
+document.addEventListener("click", (e) => { if (box && !box.contains(e.target)) close(); });
+body.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-cal] > button");
+  if (t) return box === t.parentElement ? close() : open(t.parentElement);
+  const b = e.target.closest("[data-rm]");
+  if (b && body.rows.length > 1) { close(); b.closest("tr").remove(); calc(); }
+});
+document.getElementById("sc-add").addEventListener("click", () => { add("", "", ""); calc(); body.lastElementChild.querySelector("input").focus(); });
+document.getElementById("sc-load").addEventListener("click", () => {
+  const ok = [];
+  let bad = 0;
+  for (const line of document.getElementById("sc-paste").value.split(/\r?\n/)) {
+    if (ok.length >= 1000) break;
+    if (!line.trim()) continue;
+    const ds = [...line.matchAll(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/g)].slice(0, 2).map((m) => `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`);
+    if (ds.length === 2 && ds.every((s) => !isNaN(parse(s)) && iso(parse(s)) === s)) ok.push(ds);
+    else bad++;
+  }
+  if (!ok.length) { note.textContent = "No lines with two YYYY-MM-DD dates found."; return; }
+  close();
+  body.innerHTML = "";
+  ok.forEach(([a, b], i) => add("Deal " + (i + 1), a, b));
+  note.textContent = `Loaded ${ok.length} deal${ok.length === 1 ? "" : "s"}` + (bad ? `, skipped ${bad} line${bad === 1 ? "" : "s"} without two dates.` : ".");
+  calc();
+});
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+add("Deal A", "2026-03-02", "2026-04-13");
+add("Deal B", "2026-03-16", "2026-04-06");
+add("Deal C", "2026-04-01", "2026-06-19");
+add("Deal D", "2026-05-04", "2026-05-29");
+add("Deal E", "2026-05-20", "2026-08-31");
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

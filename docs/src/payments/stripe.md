@@ -60,3 +60,45 @@ Payment Links on `buy.stripe.com` need no code. When a visitor clicks one, the s
 The link must be a normal `<a href>` on a page that runs the script. Links opened from emails, QR codes or other sites carry no visitor ID and show as Unattributed.
 
 See [Link checkout to visits](checkout.md) for all providers.
+
+## Check that it works
+
+1. Connect a restricted key that starts with `rk_test_`.
+2. Open a private window and visit a page that runs the script through a tagged link, such as `https://yourdomain.com/?utm_source=test&utm_medium=email`.
+3. In the same window, go to a test Checkout Session your server creates with the visitor ID, or click a test Payment Link on `buy.stripe.com`, and pay with one of Stripe's test cards.
+4. Wait a minute for the next sync, then open the payments list at `/app/yourdomain.com/payments`. The payment shows the `test` source and the **Email** channel of your tagged visit instead of Unattributed.
+
+If your server sets `customer`, use a new customer for each test: a later payment by the same customer is a renewal and keeps the first payment's channel. If a step fails, see [Test your setup](../guides/test-your-setup.md).
+
+## Common questions
+
+### Does Stripe test mode work?
+
+Yes. With an `rk_test_` key, Virling reads test charges and refunds, and the script adds the visitor ID to test Payment Links on `buy.stripe.com` too. A site has one Stripe connection, and test payments stay in your reports after you replace the key with a live one.
+
+### Why is a Stripe payment Unattributed?
+
+Usually because the charge, its PaymentIntent and its Checkout Session carry no visitor ID, or a Payment Link was opened from an email, another site or a custom domain. A `client_reference_id` you set to your own ID is read as the visitor ID unless the session's `metadata.virling_vid` is set. See [Unattributed revenue](../attribution/unattributed.md).
+
+### Does Virling work with Stripe invoices?
+
+Yes, when the invoice is paid with a charge; one marked as paid outside Stripe has no charge and is not imported. The first invoice of a subscription finds its visitor through its Checkout Session. For an invoice without a subscription, Virling reads only the metadata of the charge and its PaymentIntent, so set `metadata.virling_vid` there or [match by email](../attribution/unattributed.md#recover-payments-by-email).
+
+### How are Stripe refunds and disputes counted?
+
+A refund lowers the revenue of its charge, on that charge's date, and one made after you connect counts even when the charge is older than 90 days. A dispute that closes as lost after you connect counts as refunded, and an open or won one changes nothing. **Replace key** reads the last 90 days again without lost disputes.
+
+### How are Stripe renewals credited?
+
+Charges with billing reason `subscription_cycle` or `subscription_update`, and any later charge of the same customer, keep the channel of that customer's first payment. If a free trial started through Checkout after you connected, its first charge is credited to the visit before the trial when it has no visitor ID of its own. If the first payment is older than the first import, renewals are usually Unattributed. See [Renewals](../attribution/renewals.md).
+
+### How far back does Stripe history go?
+
+The first import reads charges from the last 90 days. Charges from before the script was on your site count as revenue but are Unattributed.
+
+## Guides
+
+- [Stripe revenue attribution](https://virling.com/integrations/stripe)
+- [How to track Stripe revenue by traffic source](https://virling.com/blog/track-stripe-revenue-by-traffic-source)
+- [Stripe Checkout UTM parameters: how to pass them](https://virling.com/blog/stripe-checkout-utm-parameters)
+- [Stripe for SaaS: subscriptions by channel](https://virling.com/integrations/stripe-saas)

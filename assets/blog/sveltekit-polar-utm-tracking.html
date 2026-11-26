@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SvelteKit Polar UTM tracking: see the source of each order</title>
+<meta name="description" content="Add the script to app.html, read the virling_vid cookie with event.cookies and set it in Polar checkout metadata, so each order shows its source.">
+<link rel="canonical" href="https://virling.com/blog/sveltekit-polar-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/sveltekit-polar-utm-tracking">
+<meta property="og:title" content="SvelteKit Polar UTM tracking: see the source of each order">
+<meta property="og:description" content="Add the script to app.html, read the virling_vid cookie with event.cookies and set it in Polar checkout metadata, so each order shows its source.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"SvelteKit Polar UTM tracking: see the source of each order","item":"https://virling.com/blog/sveltekit-polar-utm-tracking"}]},{"@type":"BlogPosting","headline":"SvelteKit Polar UTM tracking: see the source of each order","description":"Add the script to app.html, read the virling_vid cookie with event.cookies and set it in Polar checkout metadata, so each order shows its source.","datePublished":"2026-11-25","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/sveltekit-polar-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to a Polar checkout in SvelteKit?","acceptedAnswer":{"@type":"Answer","text":"Pass the Virling visitor ID instead. In the +server.ts route that calls polar.checkouts.create, read it with event.cookies.get(\"virling_vid\") and set metadata: { virling_vid }. The Virling script records the UTM tags of every visit against that ID, so the order is joined to all of them."}},{"@type":"Question","name":"Do Polar checkout links in a SvelteKit app need code?","acceptedAnswer":{"@type":"Answer","text":"No. Keep the link to buy.polar.sh as a normal <a href> on a page that runs the script. The script adds reference_id=<visitor ID> to it, unless it is already there, and Polar stores it in the order's metadata, where Virling reads it."}},{"@type":"Question","name":"What happens if the virling_vid cookie is missing?","acceptedAnswer":{"@type":"Answer","text":"Create the checkout without it. The order still counts toward revenue, as Unattributed. Do not send an empty string: Polar requires metadata text values to have at least one character."}},{"@type":"Question","name":"Do I need a Polar webhook in my SvelteKit app?","acceptedAnswer":{"@type":"Answer","text":"Not for Virling. It reads orders from the Polar API with an organization access token and checks for new orders every minute. Your app may still want webhooks for its own work, such as granting access."}},{"@type":"Question","name":"Does this work with the Polar sandbox?","acceptedAnswer":{"@type":"Answer","text":"Yes, for checkouts your server creates. Set environment: \"sandbox\" on the Polar client and connect a sandbox token to Virling. The script does not add the visitor ID to sandbox links, so test with a session that has virling_vid in its metadata."}},{"@type":"Question","name":"Can I use Polar with a static SvelteKit site?","acceptedAnswer":{"@type":"Answer","text":"Yes, with checkout links. A site built with adapter-static has no server to run the checkout route, but links to buy.polar.sh need no server code."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-25</span>
+      <h1>SvelteKit Polar UTM tracking: see the source of each order</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-25.</p>
+<p class="p">For SvelteKit Polar UTM tracking, add the Virling script to <code>src/app.html</code>, then read the <code>virling_vid</code> cookie with <code>event.cookies</code> in the server route that creates the Polar checkout and set it in <code>metadata</code>. Checkout links on <code>buy.polar.sh</code> need no code: the script adds the ID as <code>reference_id</code>. Either way, Polar keeps one visitor ID on the order, and Virling joins the order to every visit behind it, with the UTM tags of each.</p>
+<p class="p">For the reasoning behind a visitor ID and what you see after setup, read the general guide to <a href="/blog/polar-utm-tracking">Polar UTM tracking</a> and the <a href="/integrations/polar">Polar integration page</a>. Using Stripe instead? See <a href="/blog/sveltekit-stripe-utm-tracking">SvelteKit Stripe UTM tracking</a>. On Next.js, see <a href="/blog/nextjs-polar-utm-tracking">the Next.js version of this post</a>. On Nuxt, see <a href="/blog/nuxt-polar-utm-tracking">Nuxt Polar UTM tracking</a>.</p>
+<h2>Why Polar checkout loses your UTM tags</h2>
+<p class="p">UTM tags live on the landing URL. By the time someone clicks Buy they have usually moved to another page, and Polar checkout runs on Polar's domain, which knows only what you pass into it. You could copy the tags into checkout metadata, but that records only the visit the buyer is on when they pay. A visitor ID keeps earlier visits and untagged ones, such as search and referrals, too.</p>
+<p class="p">A made-up example: someone finds you through a newsletter link tagged <code>utm_source=newsletter</code> on Monday, leaves, and comes back on Thursday by typing your address to buy a $49 plan. The URL on Thursday has no tags, so copying tags at checkout stores nothing. With the visitor ID, the order is joined to both visits, Monday's newsletter click included.</p>
+<h2>Step 1: add the script to src/app.html</h2>
+<p class="p">Paste the tag into <code>src/app.html</code>, before <code>%sveltekit.head%</code>. That file is the shell of every page, and client-side navigation is counted on its own. Use the domain you added in Virling as <code>data-site</code>. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<div class="code block"><pre data-snippet>&lt;!-- src/app.html --&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8" /&gt;
+  &lt;script defer src="https://app.virling.com/v.js"
+    data-site="yourdomain.com"&gt;&lt;/script&gt;
+  %sveltekit.head%
+&lt;/head&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain and records the UTM tags of each visit against it. Subdomains such as <code>app.yourdomain.com</code> share the cookie, so the marketing site and the app can be separate deployments.</p>
+<h2>Step 2a: checkout links, no code</h2>
+<p class="p">If you sell through Polar checkout links, there is no server route to write. Keep the link to <code>buy.polar.sh</code> as a normal <code>&lt;a href&gt;</code> in a Svelte component on a page that runs the script:</p>
+<div class="code block"><pre data-snippet>&lt;!-- src/routes/pricing/+page.svelte --&gt;
+&lt;a href="https://buy.polar.sh/YOUR_CHECKOUT_LINK"&gt;Buy now&lt;/a&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script adds <code>reference_id=&lt;visitor ID&gt;</code> to links when the page loads and again on click, so links rendered after a client-side navigation are covered. It never replaces a <code>reference_id</code> that is already there. Polar stores the value in the order's metadata, where Virling reads it. A <code>virling_vid</code> custom field on the link still works too. Opening the URL from code, for example with <code>window.location</code>, skips the link, so use an anchor.</p>
+<h2>Step 2b: create the checkout in a server route</h2>
+<p class="p">If your server creates the checkout, the browser sends the <code>virling_vid</code> cookie with the request. First declare the Polar token in <code>src/env.ts</code>, as SvelteKit 3 expects for private variables:</p>
+<div class="code block"><pre data-snippet>// src/env.ts
+import { defineEnvVars } from "@sveltejs/kit/env";
+
+export const variables = defineEnvVars({
+  POLAR_ACCESS_TOKEN: {},
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Put the value in your <code>.env.local</code> file or your host's settings. The token needs the <code>checkouts:write</code> scope, and is a different one from the token you give Virling. Then add the route with Polar's TypeScript SDK, <code>@polar-sh/sdk</code>:</p>
+<div class="code block"><pre data-snippet>// src/routes/api/checkout/+server.ts
+import { createPolar } from "@polar-sh/sdk/2026-10";
+import { POLAR_ACCESS_TOKEN } from "$app/env/private";
+import type { RequestHandler } from "./$types";
+
+const polar = createPolar({ accessToken: POLAR_ACCESS_TOKEN });
+
+export const POST: RequestHandler = async (event) =&gt; {
+  const vid = event.cookies.get("virling_vid");
+  const checkout = await polar.checkouts.create({
+    products: ["PRODUCT_ID"],
+    success_url: "https://yourdomain.com/thanks",
+    metadata: vid ? { virling_vid: vid } : {},
+  });
+  // Send the customer to checkout.url
+  return new Response(null, {
+    status: 303,
+    headers: { location: checkout.url },
+  });
+};</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">A plain form on any page posts to it, and the browser sends the cookie along:</p>
+<div class="code block"><pre data-snippet>&lt;form method="POST" action="/api/checkout"&gt;
+  &lt;button type="submit"&gt;Buy&lt;/button&gt;
+&lt;/form&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Four details matter here:</p>
+<ul class="post-list"><li><b>Plain 303 response.</b> SvelteKit 3 only lets <code>redirect()</code> go to another site when you pass <code>{ external: true }</code>. Returning a <code>Response</code> works on versions 2 and 3.</li><li><b>No <code>use:enhance</code>.</b> It is for form actions, not for a <code>+server.ts</code> route. Leave it off.</li><li><b>POST, not GET.</b> Crawlers and link previews that follow links then cannot create checkouts.</li><li><b>Same origin.</b> In production SvelteKit rejects form posts from another origin, so keep the form and the route on one domain. Behind a reverse proxy, make sure SvelteKit knows its public origin.</li></ul>
+<p class="p">On SvelteKit 2, skip <code>src/env.ts</code> and import the token from <code>$env/static/private</code>. On 0.x releases of the Polar SDK, use <code>new Polar({ accessToken })</code> from <code>@polar-sh/sdk</code> and write <code>successUrl</code> instead of <code>success_url</code>.</p>
+<p class="p">Virling reads <code>virling_vid</code> from, in order: the order's <code>metadata</code>, the order's custom field data, then the customer's <code>metadata</code>. A checkout link's <code>reference_id</code> is read after those. The full setup is in the <a href="https://docs.virling.com/payments/polar">Polar docs</a>, and the <a href="/tools/checkout-snippet-generator">checkout snippet generator</a> writes the call for other providers.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>What to do when the cookie is missing</h2>
+<p class="p"><code>event.cookies.get</code> returns <code>undefined</code> when there is no cookie. Never block the sale for it: the route above sends empty metadata, the customer pays as usual, and the order counts toward revenue as Unattributed. Do not fall back to an empty string, because Polar requires metadata text to have at least one character. Do not make up an ID or send your user ID either, since no visit carries it.</p>
+<p class="p">If it is missing often, look for the cause:</p>
+<ul class="post-list"><li><b>The script did not run.</b> It is blocked by the browser, or the buyer reached the route without opening a page that has it.</li><li><b>Cookieless mode.</b> With <code>data-cookieless</code> the cookie is never set. With Until consent, it is set only after the visitor accepts.</li><li><b>A second domain.</b> The cookie belongs to your registrable domain. If the page is on one domain and checkout on another, the cookie does not travel.</li><li><b>Localhost.</b> The script does nothing on <code>localhost</code> unless the tag has <code>data-dev</code>.</li></ul>
+<p class="p">Polar payments are not matched by email, so a missing ID cannot be filled in that way later. A later order by the same customer keeps the channel of their first order.</p>
+<h2>Step 3: connect Polar to Virling</h2>
+<p class="p">In Polar, create an Organization Access Token with the <code>orders:read</code> and <code>refunds:read</code> scopes, plus <code>subscriptions:read</code> so Retention can tell who still pays, and paste it into Virling. Virling imports orders from the last 90 days on the first run, then new orders every minute. There is no webhook to add to your SvelteKit app. Orders from before the script was on your site count as revenue but are Unattributed.</p>
+<h2>Check that it works in the Polar sandbox</h2>
+<p class="p">The sandbox is separate from production, with its own account, products and tokens.</p>
+<ol class="post-list"><li>In the sandbox, create a product and two tokens: one with <code>checkouts:write</code> for your app, one with the read scopes for Virling. Connect the second one.</li><li>Deploy a test version on your domain or a subdomain of it, with the sandbox app token, the sandbox product ID, and <code>createPolar({ accessToken: POLAR_ACCESS_TOKEN, environment: "sandbox" })</code> in the route. On SDK 0.x, the option is <code>server: "sandbox"</code>.</li><li>Open a private window and visit a page that runs the script through a tagged link, such as <code>https://yourdomain.com/?utm_source=test&amp;utm_medium=email</code>.</li><li>In the same window, press Buy and pay with the test card <code>4242 4242 4242 4242</code>, a future date and any CVC. Use a new email address for each test, because a later payment by the same customer is a renewal and keeps the first payment's channel.</li><li>Wait a minute for the next sync and open the payments list at <code>/app/yourdomain.com/payments</code>. The payment should show the <code>test</code> source and the <b>Email</b> channel instead of Unattributed. Open it to see its journey.</li></ol>
+<p class="p">Two limits to know. The script does not add the visitor ID to sandbox links, so test with a session your server creates, as above. And a site has one Polar connection: sandbox orders stay in your reports after you replace the token with a production one.</p>
+<p class="p">If the payment is Unattributed, open it and look for <b>Visitor</b> under <b>Details</b>. No visitor means the cookie did not reach your route or the metadata was not set. How the join works from visit to order is in <a href="/blog/track-polar-revenue-by-traffic-source">how to track Polar revenue by traffic source</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I pass UTM parameters to a Polar checkout in SvelteKit?</h3><p class="p">Pass the Virling visitor ID instead. In the +server.ts route that calls polar.checkouts.create, read it with event.cookies.get("virling_vid") and set metadata: { virling_vid }. The Virling script records the UTM tags of every visit against that ID, so the order is joined to all of them.</p>
+<h3>Do Polar checkout links in a SvelteKit app need code?</h3><p class="p">No. Keep the link to buy.polar.sh as a normal &lt;a href&gt; on a page that runs the script. The script adds reference_id=&lt;visitor ID&gt; to it, unless it is already there, and Polar stores it in the order's metadata, where Virling reads it.</p>
+<h3>What happens if the virling_vid cookie is missing?</h3><p class="p">Create the checkout without it. The order still counts toward revenue, as Unattributed. Do not send an empty string: Polar requires metadata text values to have at least one character.</p>
+<h3>Do I need a Polar webhook in my SvelteKit app?</h3><p class="p">Not for Virling. It reads orders from the Polar API with an organization access token and checks for new orders every minute. Your app may still want webhooks for its own work, such as granting access.</p>
+<h3>Does this work with the Polar sandbox?</h3><p class="p">Yes, for checkouts your server creates. Set environment: "sandbox" on the Polar client and connect a sandbox token to Virling. The script does not add the visitor ID to sandbox links, so test with a session that has virling_vid in its metadata.</p>
+<h3>Can I use Polar with a static SvelteKit site?</h3><p class="p">Yes, with checkout links. A site built with adapter-static has no server to run the checkout route, but links to buy.polar.sh need no server code.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring your Polar orders</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

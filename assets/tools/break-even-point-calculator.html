@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Break-even point calculator: units and revenue | Virling</title>
+<meta name="description" content="Enter fixed costs, price, variable cost and payment fees to see the units and revenue you need to break even, and the units for a target profit.">
+<link rel="canonical" href="https://virling.com/tools/break-even-point-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/break-even-point-calculator">
+<meta property="og:title" content="Break-even point calculator: units and revenue | Virling">
+<meta property="og:description" content="Enter fixed costs, price, variable cost and payment fees to see the units and revenue you need to break even, and the units for a target profit.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Break-even point calculator","url":"https://virling.com/tools/break-even-point-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Break-even point calculator","item":"https://virling.com/tools/break-even-point-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / break-even point calculator</span><h1>Break-even point calculator</h1><p class="lead">Your break-even point is the number of sales that covers your fixed costs: <code>units = fixed costs / (price &minus; variable cost &minus; payment fee)</code>. Enter your costs and price to get the units and revenue you need each month, and the units for a target profit. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="be" autocomplete="off">
+  <label>Fixed costs per month ($)<input name="fixed" type="number" min="0" step="any" value="6000"></label>
+  <label>Price ($)<input name="price" type="number" min="0" step="any" value="50"></label>
+  <label>Variable cost per sale ($)<input name="variable" type="number" min="0" step="any" value="18"></label>
+  <label>Payment fee (%, optional)<input name="feepct" type="number" min="0" max="100" step="any" value="2.9"></label>
+  <label>Payment fee per sale ($, optional)<input name="feefix" type="number" min="0" step="any" value="0.30"></label>
+  <label>Target profit per month ($, optional)<input name="target" type="number" min="0" step="any" value="3000"></label>
+</form>
+<div class="tool-stats" id="be-out"></div>
+<p class="fine-note" id="be-read" aria-live="polite"></p>
+<p class="fine-note">The numbers filled in above are an example. Replace them with your own. Price is what one sale brings in without sales tax, and units are rounded up to whole sales.</p>
+<div class="txt post tool-cta">
+<p class="p">Once you know how many sales you need, the next question is where they come from. Virling links every visit to the payment it led to, so you see the orders and revenue each channel brings from your real payments, and its Profit by channel card takes your spend and payment fees off each one. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/contribution-margin-calculator">contribution margin calculator</a>, <a href="/tools/break-even-cpa-calculator">break-even CPA calculator</a>, <a href="/tools/discount-break-even-calculator">discount break-even calculator</a>, <a href="/tools/markup-calculator">markup calculator</a>, <a href="/blog/profit-by-marketing-channel">profit by marketing channel</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The break-even point formula</h2>
+<p class="p">Each sale leaves a margin after the costs that come with it. You break even when the margins add up to your fixed costs:</p>
+<p class="p"><code>payment fee = price &times; fee percent + fixed fee</code></p>
+<p class="p"><code>margin per sale = price &minus; variable cost &minus; payment fee</code></p>
+<p class="p"><code>units to break even = fixed costs / margin per sale, rounded up</code></p>
+<p class="p"><code>revenue to break even = units to break even &times; price</code></p>
+<p class="p"><code>units for target profit = (fixed costs + target profit) / margin per sale, rounded up</code></p>
+<p class="p">If the margin per sale is zero or negative, there is no break-even point: no number of sales covers the fixed costs.</p>
+<h2>A worked example</h2>
+<p class="p">These are round example numbers, the same ones the calculator starts with, not data from a real business. A shop pays $6,000 a month in fixed costs and sells a product for $50. Each sale costs $18 for the product and shipping, plus a payment fee of 2.9% + $0.30, which is $1.75. The margin per sale is $50 - $18 - $1.75 = $30.25.</p>
+<p class="p">The shop breaks even at $6,000 / $30.25 = 198.35, rounded up to 199 sales, or $9,950 of revenue a month. For a $3,000 profit it needs $9,000 / $30.25 = 297.52, rounded up to 298 sales, or $14,900.</p>
+<p class="p">Now raise the price to $60 and keep the costs the same. The fee becomes $2.04 and the margin $39.96, so the break-even point falls to 151 sales. A 20% higher price takes 48 sales off the break-even point, as long as buyers accept it.</p>
+<h2>Break-even points for common changes</h2>
+<p class="p">Example figures, not benchmarks, worked out with the calculator's formulas. Every row keeps the default payment fee of 2.9% + $0.30 and the $3,000 target. The first three number columns are what you enter, the last four are what it shows:</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:960px"><thead><tr><th style="width:22%">Example</th><th>Fixed costs</th><th>Price</th><th>Variable cost</th><th>Margin per sale</th><th>Units to break even</th><th>Revenue to break even</th><th>Units for target profit</th></tr></thead><tbody><tr><th scope="row">The defaults above</th><td>$6,000</td><td>$50</td><td>$18</td><td>$30.25</td><td>199</td><td>$9,950</td><td>298</td></tr><tr><th scope="row">Higher price</th><td>$6,000</td><td>$60</td><td>$18</td><td>$39.96</td><td>151</td><td>$9,060</td><td>226</td></tr><tr><th scope="row">20% discount</th><td>$6,000</td><td>$40</td><td>$18</td><td>$20.54</td><td>293</td><td>$11,720</td><td>439</td></tr><tr><th scope="row">Cheaper to make</th><td>$6,000</td><td>$50</td><td>$14</td><td>$34.25</td><td>176</td><td>$8,800</td><td>263</td></tr><tr><th scope="row">Higher fixed costs</th><td>$8,000</td><td>$50</td><td>$18</td><td>$30.25</td><td>265</td><td>$13,250</td><td>364</td></tr><tr><th scope="row">Price near the cost</th><td>$6,000</td><td>$20</td><td>$18</td><td>$1.12</td><td>5,358</td><td>$107,160</td><td>8,036</td></tr></tbody></table></div>
+<p class="p">A 20% discount adds 94 sales to the break-even point, close to half as many again, because the costs of a sale barely move while the margin falls by about a third. In the last row the price is above the variable cost, but the payment fee takes nearly half of what is left.</p>
+<h2>Lower your break-even point</h2>
+<p class="p">There are three ways down: cut fixed costs, raise the price or cut the cost of each sale. A discount does the opposite; check it with the <a href="/tools/discount-break-even-calculator">discount break-even calculator</a>. For the margin on one order after marketing, use the <a href="/tools/contribution-margin-calculator">contribution margin calculator</a>, and for the most you can pay to win a customer, the <a href="/tools/break-even-cpa-calculator">break-even CPA calculator</a>.</p>
+<p class="p">One break-even point covers the whole business, but each channel brings sales of a different size at a different cost. Read <a href="/blog/profit-by-marketing-channel">profit by marketing channel</a> to see which ones leave money after spend and fees.</p>
+<h2>The channel decision this should change</h2>
+<p class="p">Use it to decide between a channel with a set monthly price and one you pay per sale. Say a sponsorship costs $1,200 a month. Added to the fixed costs, it moves the default break-even point from 199 sales to 239, so it has to bring 40 sales you would not have had otherwise. Fewer than that and the month is worse off with it.</p>
+<p class="p">Now say a partner asks for $10 per sale instead. Each of their sales leaves $30.25 - $10 = $20.25, so it helps from the first one. The flat $1,200 is cheaper only above $1,200 / $10 = 120 sales a month. Below that, take the deal that is paid per sale. Either way, count the paid orders each channel brought, not its clicks, before you renew.</p>
+<h2>Three mistakes with the break-even point</h2>
+<ul class="post-list">
+<li><b>Entering a price with sales tax in it.</b> If the $50 a buyer pays includes 20% tax, you keep $41.67 of it. With the $1.75 fee still charged on the full $50, the margin is $21.92 and break-even is 274 sales, not 199.</li>
+<li><b>Using the list price when many orders are discounted.</b> If half the sales go out at $40, the average margin is ($30.25 + $20.54) / 2 = $25.40 and break-even rises to 237 sales.</li>
+<li><b>Treating fixed costs as fixed at any volume.</b> If going past 250 sales takes $1,000 a month of extra help, the $3,000 target needs 331 sales instead of 298. Run the numbers again with the costs you would have at that volume.</li>
+</ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Break-even point calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate the break-even point?</h3><p class="p">Divide fixed costs by the margin per sale, which is the price minus the variable cost and the payment fee of one sale. With $6,000 of fixed costs a month and a margin of $30.25 per sale, $6,000 / $30.25 = 198.35, so you break even at 199 sales a month.</p></div>
+      <div><h3>What counts as a fixed cost and what counts as a variable cost?</h3><p class="p">Fixed costs stay the same whether you sell one more unit or not, such as rent, salaries and software. Variable costs come with each sale, such as the product, packaging, shipping and payment fees. If a cost has both parts, split it.</p></div>
+      <div><h3>How do I find the break-even point in revenue?</h3><p class="p">Multiply the units to break even by the price. You can also divide fixed costs by the margin per sale as a share of the price. The two differ by less than the price of one unit, because this calculator rounds up to whole units.</p></div>
+      <div><h3>What if the price is at or below the variable cost?</h3><p class="p">Then you never break even. Each sale adds nothing toward fixed costs or loses money, so selling more does not help. Raise the price or lower the variable cost and fees until each sale leaves a margin.</p></div>
+      <div><h3>How many units do I need for a target profit?</h3><p class="p">Add the target profit to fixed costs and divide by the margin per sale. With $6,000 of fixed costs, a $3,000 target and a margin of $30.25, that is $9,000 / $30.25 = 297.52, so 298 units. The result is profit before income tax.</p></div>
+      <div><h3>Should I include advertising in fixed or variable costs?</h3><p class="p">A set monthly budget belongs in fixed costs. If you pay an amount for each sale, such as a commission or a steady cost per order, add it to the variable cost. Do not count the same spend in both.</p></div>
+      <div><h3>How far can my sales fall before I lose money?</h3><p class="p">Subtract the break-even units from the sales you make now and divide by the sales you make now. This is called the margin of safety. At 298 sales a month and a break-even point of 199, it is 99 / 298 = 33.2%, so sales can drop by about a third before the month makes a loss.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate the break-even point?", "acceptedAnswer": {"@type": "Answer", "text": "Divide fixed costs by the margin per sale, which is the price minus the variable cost and the payment fee of one sale. With $6,000 of fixed costs a month and a margin of $30.25 per sale, $6,000 / $30.25 = 198.35, so you break even at 199 sales a month."}}, {"@type": "Question", "name": "What counts as a fixed cost and what counts as a variable cost?", "acceptedAnswer": {"@type": "Answer", "text": "Fixed costs stay the same whether you sell one more unit or not, such as rent, salaries and software. Variable costs come with each sale, such as the product, packaging, shipping and payment fees. If a cost has both parts, split it."}}, {"@type": "Question", "name": "How do I find the break-even point in revenue?", "acceptedAnswer": {"@type": "Answer", "text": "Multiply the units to break even by the price. You can also divide fixed costs by the margin per sale as a share of the price. The two differ by less than the price of one unit, because this calculator rounds up to whole units."}}, {"@type": "Question", "name": "What if the price is at or below the variable cost?", "acceptedAnswer": {"@type": "Answer", "text": "Then you never break even. Each sale adds nothing toward fixed costs or loses money, so selling more does not help. Raise the price or lower the variable cost and fees until each sale leaves a margin."}}, {"@type": "Question", "name": "How many units do I need for a target profit?", "acceptedAnswer": {"@type": "Answer", "text": "Add the target profit to fixed costs and divide by the margin per sale. With $6,000 of fixed costs, a $3,000 target and a margin of $30.25, that is $9,000 / $30.25 = 297.52, so 298 units. The result is profit before income tax."}}, {"@type": "Question", "name": "Should I include advertising in fixed or variable costs?", "acceptedAnswer": {"@type": "Answer", "text": "A set monthly budget belongs in fixed costs. If you pay an amount for each sale, such as a commission or a steady cost per order, add it to the variable cost. Do not count the same spend in both."}}, {"@type": "Question", "name": "How far can my sales fall before I lose money?", "acceptedAnswer": {"@type": "Answer", "text": "Subtract the break-even units from the sales you make now and divide by the sales you make now. This is called the margin of safety. At 298 sales a month and a break-even point of 199, it is 99 / 298 = 33.2%, so sales can drop by about a third before the month makes a loss."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring the sales you need</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the orders and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("be"), out = document.getElementById("be-out"), read = document.getElementById("be-read");
+const usd = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: n && Math.abs(n) < 0.01 ? 6 : 2 });
+const num = (n) => n.toLocaleString("en-US");
+const MAX = 1e9;
+const problem = (v) => {
+  if (Object.values(v).some((n) => n === null)) return "Enter numbers only. Fixed costs, price and variable cost are required; the fee and target profit fields can stay empty.";
+  if (Object.values(v).some((n) => n < 0)) return "Enter amounts of zero or more.";
+  if (v.fixed === 0) return "Enter fixed costs above zero. With none there is nothing to cover.";
+  if (v.price === 0) return "Enter a price above zero.";
+  if (v.feepct > 100) return "Enter a payment fee of at most 100%.";
+  if (Math.max(...Object.values(v)) > MAX) return "Enter amounts of at most $1 billion.";
+  return "";
+};
+const calc = () => {
+  const get = (k, optional) => { const i = f.elements[k]; return i.value === "" ? (optional && !i.validity.badInput ? 0 : null) : Number.isFinite(+i.value) ? +i.value : null; };
+  const v = { fixed: get("fixed"), price: get("price"), variable: get("variable"), feepct: get("feepct", true), feefix: get("feefix", true), target: get("target", true) };
+  const show = (be, rev, margin, goal) => { out.innerHTML = [["Units to break even", be], ["Revenue to break even", rev], ["Margin per sale", margin], ["Units for target profit", goal]].map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join(""); };
+  const msg = problem(v);
+  if (msg) {
+    show("No data", "No data", "No data", "No data");
+    read.textContent = msg;
+    return;
+  }
+  const margin = +(v.price - v.variable - v.price * v.feepct / 100 - v.feefix).toFixed(6) || 0;
+  if (margin <= 0) {
+    show("Never", "Never", usd(margin), "Never");
+    read.textContent = `This never breaks even: ${v.price <= v.variable ? "the price is at or below the variable cost" : "variable cost and payment fees take the whole price"}, so more sales do not cover the fixed costs.`;
+    return;
+  }
+  const units = (n) => Math.ceil(+(n / margin).toPrecision(12));
+  const be = units(v.fixed), goal = units(v.fixed + v.target);
+  const sales = (n) => `${num(n)} ${n === 1 ? "sale" : "sales"}`;
+  show(num(be), usd(be * v.price), usd(margin), v.target ? num(goal) : "No target");
+  read.textContent = `You break even at ${sales(be)} a month, ${usd(be * v.price)} of revenue.` + (v.target ? ` For ${usd(v.target)} of profit you need ${sales(goal)}, ${usd(goal * v.price)} of revenue.` : "");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

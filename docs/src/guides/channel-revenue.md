@@ -1,16 +1,20 @@
 # Find which channel brings paying customers
 
-Visitor counts tell you which channel is loud. This guide sets Virling up so every payment shows the channel that brought it, then shows how to read the numbers and act on them each week. With a server that already runs Docker it takes about 15 minutes.
+Visitor counts tell you which channel is loud. This guide sets Virling up so every payment shows the channel that brought it, then shows how to read the numbers and act on them each week. To start, sign in at [app.virling.com](https://app.virling.com/login) for the hosted plan, or [self-host it](../quickstart.md). With a server that already runs Docker, self-hosting takes about 15 minutes.
 
-It works with Stripe, Dodo Payments and Polar. LemonSqueezy payments import and count toward revenue, but linking them to visits is <span class="na">Not available yet</span>.
+It works with Stripe, Dodo Payments, Polar, LemonSqueezy, Creem, RevenueCat, Paddle, WooCommerce and Shopify. LemonSqueezy payments link to visits through a webhook, which needs Virling on a public `https://` address. The hosted plan already is.
 
 ## What you need
 
-- A Linux or macOS server with Docker, or one of the [release binaries](../install/binary.md), and a domain such as `stats.example.com` pointing at it.
+- A Virling account on the [hosted plan](../hosted.md), or your own Linux or macOS server with Docker or one of the [release binaries](../install/binary.md), and a domain such as `stats.example.com` pointing at it.
 - Your site, where you can add one tag to the `<head>`.
-- A payment account on Stripe, Dodo Payments or Polar.
+- A payment account on Stripe, Dodo Payments, Polar, LemonSqueezy, Creem, RevenueCat or Paddle, or a WooCommerce or Shopify store.
 
 ## 1. Start Virling and add your site
+
+**Hosted.** Sign in at [app.virling.com](https://app.virling.com/login), click **+ Add a site** in the sidebar, or open `/app/setup`, and enter your domain and its timezone.
+
+**Self-hosted.** Start the server and add the site from the command line:
 
 ```sh
 docker run -d --name virling \
@@ -29,31 +33,25 @@ Put HTTPS in front of it with your usual [reverse proxy](../self-host/reverse-pr
 Paste this before `</head>` on every page:
 
 ```html
-<script defer src="https://stats.example.com/v.js"
+<script defer src="https://app.virling.com/v.js"
   data-site="yourdomain.com"></script>
 ```
 
-It is about 1.4 KB gzipped and sets one first-party cookie, `virling_vid`, which is the visitor ID that checkout will carry. Do not turn on [cookieless mode](../track/cookieless.md) for this site: without the visitor ID, payments cannot be linked to visits.
+Self-hosted, the `src` is your own server's address. The script is about 1.4 KB gzipped and sets one first-party cookie, `virling_vid`, which is the visitor ID that checkout will carry. Do not turn on [cookieless mode](../track/cookieless.md) for this site: without the visitor ID, payments cannot be linked to visits.
 
 Tag the links you share with UTM parameters, or use [tracked links](../track/links.md), so each post and campaign shows up by name.
 
 ## 3. Connect payments with a read-only key
 
-In the app, open your site, then Setup, then Connect payments, and paste the key:
+In the app, open your site, then Setup, then Connect payments, pick your provider and paste its key. [Which key to create](../payments/index.md#which-key-to-create) lists the key and access for each one. LemonSqueezy keys cannot be limited, and the Creem and RevenueCat keys also need access to add a webhook.
 
-| Provider | Key |
-| --- | --- |
-| [Stripe](../payments/stripe.md) | Restricted key with read access, `rk_live_...` |
-| [Dodo Payments](../payments/dodo.md) | API key, live or test mode |
-| [Polar](../payments/polar.md) | Organization access token with `orders:read` and `refunds:read` |
-
-Virling imports the last 90 days, then checks for new payments every minute. It never creates, changes or refunds anything.
+Virling imports the last 90 days (60 for Shopify, and one-time purchases only for RevenueCat), then checks for new payments every minute, or receives them by webhook for RevenueCat. It never creates, changes or refunds a payment.
 
 ## 4. Pass the visitor ID into checkout
 
 This is the step that turns traffic numbers into revenue numbers.
 
-- **Payment links need nothing.** Stripe Payment Links, Polar checkout links (with a `virling_vid` custom field) and Dodo Payments links are tagged by the script on click.
+- **Checkout links need nothing.** Links on `buy.stripe.com`, `buy.polar.sh`, `checkout.dodopayments.com` and `*.lemonsqueezy.com` get the visitor ID from the script, when they are normal `<a href>` links on a page that runs it.
 - **Checkout you create on your server** needs one line. For Stripe Checkout:
 
 ```js
@@ -65,7 +63,21 @@ const session = await stripe.checkout.sessions.create({
 });
 ```
 
-For Dodo Payments and Polar, set `metadata.virling_vid` the same way. See [Link checkout to visits](../payments/checkout.md) for each provider.
+- **A store** needs one snippet, in the WooCommerce theme's `functions.php` or the Shopify theme's `theme.liquid`.
+
+| Provider | What carries the visitor ID | Details |
+| --- | --- | --- |
+| Stripe | `client_reference_id` or `metadata.virling_vid` on the Checkout Session, or `metadata.virling_vid` on the PaymentIntent | [Stripe](../payments/stripe.md) |
+| Dodo Payments | `metadata.virling_vid` on the payment | [Dodo Payments](../payments/dodo.md) |
+| Polar | `metadata.virling_vid` on the checkout, or `reference_id` on a checkout link | [Polar](../payments/polar.md) |
+| LemonSqueezy | `virling_vid` in the checkout custom data, returned by webhook | [LemonSqueezy](../payments/lemonsqueezy.md) |
+| Creem | `metadata.virling_vid` on the checkout, returned by webhook | [Creem](../payments/creem.md) |
+| RevenueCat | The customer attribute `virling_vid`, set before the purchase and returned by webhook | [RevenueCat](../payments/revenuecat.md) |
+| Paddle | `virling_vid` in `customData` with Paddle.js, or in `custom_data` on your server | [Paddle](../payments/paddle.md) |
+| WooCommerce | `virling_vid` in the order's meta data, saved by the snippet | [WooCommerce](../payments/woocommerce.md) |
+| Shopify | `virling_vid` in the order's note attributes, saved by the snippet as a cart attribute | [Shopify](../payments/shopify.md) |
+
+The LemonSqueezy, Creem and RevenueCat webhooks need Virling on a public `https://` address. Virling adds them when you connect. The code for every provider is in [Link checkout to visits](../payments/checkout.md#per-provider).
 
 Check it: make a test payment from a page that runs the script, wait a minute, and open the payments list. The payment should show a channel instead of Unattributed.
 
@@ -95,4 +107,4 @@ Renewals keep the channel of the customer's first payment, so a channel keeps it
 
 - **Most revenue is Unattributed.** Checkout is not carrying the visitor ID. See [Unattributed revenue](../attribution/unattributed.md).
 - **A channel is missing.** Check how the visit was classified in [Channels](../attribution/channels.md), and add UTM tags to links you control.
-- **Old payments have no channel.** Payments are backfilled 90 days, but visits only exist from when the script was added.
+- **Old payments have no channel.** Payments are backfilled 90 days (60 for Shopify, and one-time purchases only for RevenueCat), but visits only exist from when the script was added.

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Failed payment recovery calculator: involuntary churn | Virling</title>
+<meta name="description" content="Find out how much MRR failed renewals cost you each month and year, and how much you would save by recovering a larger share of them.">
+<link rel="canonical" href="https://virling.com/tools/failed-payment-recovery-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/failed-payment-recovery-calculator">
+<meta property="og:title" content="Failed payment recovery calculator: involuntary churn | Virling">
+<meta property="og:description" content="Find out how much MRR failed renewals cost you each month and year, and how much you would save by recovering a larger share of them.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Failed payment recovery calculator","url":"https://virling.com/tools/failed-payment-recovery-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Failed payment recovery calculator","item":"https://virling.com/tools/failed-payment-recovery-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / failed payment recovery calculator</span><h1>Failed payment recovery calculator</h1><p class="lead">Enter your MRR, the share of renewals whose payment fails, and the share of those you win back, to see how much MRR involuntary churn costs you each month and year. Add a better recovery rate to see what it would save. Everything runs in your browser and nothing is uploaded.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="fpr" autocomplete="off">
+  <label>MRR ($)<input name="mrr" type="number" min="0" step="0.01" value="20000"></label>
+  <label>Renewals that fail (% of MRR each month)<input name="fail" type="number" min="0" max="100" step="0.1" value="5"></label>
+  <label>Failed renewals recovered today (%)<input name="now" type="number" min="0" max="100" step="0.1" value="40"></label>
+  <label>Failed renewals recovered after improvements (%)<input name="better" type="number" min="0" max="100" step="0.1" value="60"></label>
+</form>
+<div class="tool-stats" id="fpr-out"></div>
+<div class="txt post"><p class="p" id="fpr-formula"></p></div>
+<div class="txt post tool-cta">
+<p class="p">Recovered renewals keep paying, lost ones show up as churn. Virling credits every renewal to the channel of the customer's first payment, so you see which channels bring customers who keep paying. See <a href="https://docs.virling.com/attribution/renewals">renewals</a> and <a href="https://docs.virling.com/attribution/retention">retention by channel</a> in the docs. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/churn-rate-calculator">churn rate calculator</a>, <a href="/tools/grr-calculator">GRR calculator</a>, <a href="/blog/subscription-renewal-attribution">subscription renewal attribution</a>, <a href="/tools/nrr-calculator">net revenue retention calculator</a>, <a href="/tools/annual-discount-calculator">annual plan discount calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The formulas in plain words</h2>
+<p class="p">Each month some renewals fail: the card expired, was declined or hit its limit. The MRR on those renewals is at risk:</p>
+<p class="p"><code>MRR at risk = MRR &times; share of renewals that fail</code></p>
+<p class="p">Some of it you win back with retries and reminder emails. What you do not win back is involuntary churn, MRR lost from customers who never chose to leave:</p>
+<p class="p"><code>MRR lost per month = MRR at risk &times; (1 - share recovered)</code></p>
+<p class="p">A year is twelve of those months. This keeps MRR flat, so it is a simple estimate rather than a forecast:</p>
+<p class="p"><code>MRR lost per year = MRR lost per month &times; 12</code></p>
+<p class="p">The saving from better recovery is the gap between the two loss figures:</p>
+<p class="p"><code>MRR saved = MRR lost today - MRR lost after improvements</code></p>
+<p class="p">Read your own numbers from your billing provider: the MRR on renewals that failed in a month, and how much of it was paid within the retry period. The defaults above are example inputs, not industry figures.</p>
+<h2>A worked example</h2>
+<p class="p">With the defaults above, you have $20,000 MRR and 5% of it fails to renew each month, so $1,000 is at risk. You recover 40% of it today, which leaves $600 lost every month, or $7,200 over a year.</p>
+<p class="p">If better retries and card update reminders lift recovery to 60%, only $400 is lost each month. That saves $200 of MRR a month, or $2,400 a year, without winning a single new customer.</p>
+<h2>Four businesses side by side</h2>
+<p class="p">Example inputs, worked out with the formulas above. They are made up, not benchmarks. The last column is what moving from the first recovery rate to the second saves.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:760px"><thead><tr><th style="width:17%">MRR (example)</th><th>Renewals that fail</th><th>Recovered, today to after</th><th>MRR at risk a month</th><th>MRR lost a month</th><th>MRR lost a year</th><th>MRR saved a year</th></tr></thead><tbody><tr><th scope="row">$5,000</th><td>4%</td><td>30% to 50%</td><td>$200</td><td>$140</td><td>$1,680</td><td>$480</td></tr><tr><th scope="row">$20,000</th><td>5%</td><td>40% to 60%</td><td>$1,000</td><td>$600</td><td>$7,200</td><td>$2,400</td></tr><tr><th scope="row">$50,000</th><td>6%</td><td>50% to 70%</td><td>$3,000</td><td>$1,500</td><td>$18,000</td><td>$7,200</td></tr><tr><th scope="row">$100,000</th><td>3%</td><td>60% to 75%</td><td>$3,000</td><td>$1,200</td><td>$14,400</td><td>$5,400</td></tr></tbody></table></div>
+<p class="p">The $20,000 row is the worked example. The last two rows have the same $3,000 at risk, although one has twice the MRR of the other, because half the share of its renewals fails. The gain in recovery counts in points of the MRR at risk: 20 points of $3,000 save $600 a month, 15 points save $450.</p>
+<h2>Where to find the inputs in Stripe, Paddle and Shopify</h2>
+<ul class="post-list"><li><b>Stripe.</b> The <a href="https://docs.stripe.com/billing/revenue-recovery/recovery-analytics">revenue recovery overview</a> has both rates. Failure rate is the percentage of subscription payment volume that failed on the first attempt, and Recovery rate is the percentage recovered by any means after a failure. It covers recurring payments and leaves out the first invoice after a trial. Stripe says the recovery rate can look low for the current and previous month while retries are still running, so read an older month. For MRR, the Billing overview page has <a href="https://docs.stripe.com/billing/subscriptions/analytics">report downloads</a> with the MRR of each subscriber at the end of each month (both read on 2026-11-25).</li><li><b>Paddle.</b> The <a href="https://developer.paddle.com/api-reference/metrics/get-metrics-monthly-recurring-revenue">MRR metric</a> in the API gives MRR before Paddle fees. We found no failure or recovery rate in the <a href="https://developer.paddle.com/api-reference/metrics">metrics it lists</a>, but you can count them. Take the <a href="https://developer.paddle.com/api-reference/transactions/get-transaction">transactions</a> with origin <code>subscription_recurring</code> in a month and look at the <code>payments</code> list, newest attempt first. If the oldest attempt has the status <code>error</code>, the renewal failed at first, and a later <code>captured</code> means it was recovered. A renewal still being retried has the status <code>past_due</code> (all read on 2026-11-25).</li><li><b>Shopify.</b> The Shopify Subscriptions app lists <a href="https://help.shopify.com/en/manual/products/purchase-options/subscriptions/shopify-subscriptions/analytics">four metrics</a>: subscriptions revenue, and active, new and canceled subscriptions. We found no failed or recovered renewals among them, and canceled subscriptions also include people who chose to leave. The app's <a href="https://help.shopify.com/en/manual/products/purchase-options/subscriptions/shopify-subscriptions/manage-subscriptions/manage-app-settings">billing attempts settings</a> hold the number of retries, the days between them and what happens when all of them fail (both read on 2026-11-25). With another subscription app, look for failed charges in that app.</li></ul>
+<p class="p">The calculator takes a share of MRR. A yearly renewal that fails puts the whole year's price into a payment volume, but only a twelfth of it into MRR, so work out the share from monthly plans alone if you sell both.</p>
+<h2>Recovered and lost renewals differ by channel</h2>
+<p class="p">A blended recovery rate hides where failed payments come from. Customers from different channels pay in different ways and stay for different lengths of time, so the renewals you lose, and the ones you win back, are not spread evenly across your channels. A channel that looks strong on first payments can lose more of its renewals than it seems.</p>
+<p class="p">Virling credits each renewal to the channel of the customer's first payment, as explained in <a href="/blog/subscription-renewal-attribution">subscription renewal attribution</a>. A recovered renewal keeps adding to that channel's revenue, and a customer whose payment is never recovered shows up as churn on the <a href="https://docs.virling.com/attribution/retention">Retention page</a> under the channel that brought them. To compare the result with all churn, use the <a href="/tools/churn-rate-calculator">churn rate calculator</a> and the <a href="/tools/grr-calculator">GRR calculator</a>.</p>
+<h2>What Virling shows per channel</h2>
+<p class="p">A renewal <a href="https://docs.virling.com/attribution/renewals">takes the credit of the customer's first payment</a>, whichever <a href="https://docs.virling.com/attribution/model">attribution model</a> you picked, so a recovered one adds to the channel that won the customer. A failed payment adds no revenue and is never used as the first payment. The Channels card shows revenue net of refunds, renewals included, and the Retention page shows customers acquired, still paying, net LTV and 30-day churn by channel.</p>
+<p class="p">Virling does not show a failure or recovery rate per channel, and it does not import failed payments from Paddle. Where the key can read subscriptions, one your provider still retries, <code>past_due</code> on Stripe and Paddle, counts as still paying until its status changes. Shopify subscription status is not read, so there Retention goes by how recent the last payment is. The first payment has to be in Virling: the first import reads 90 days of payments, 60 on Shopify, and renewals of older subscriptions are usually Unattributed. The details are in <a href="https://docs.virling.com/attribution/renewals">renewals</a> and <a href="https://docs.virling.com/attribution/retention">retention by channel</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Failed payment recovery calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate MRR lost to failed payments?</h3><p class="p">Multiply MRR by the share of renewals that fail to get the MRR at risk each month, then multiply that by the share you do not recover. Multiply by 12 for a rough yearly figure.</p></div>
+      <div><h3>What is involuntary churn?</h3><p class="p">Involuntary churn is revenue lost when a customer stops paying without choosing to cancel, usually because a card expired or was declined and the payment was never recovered. Voluntary churn is a customer cancelling on purpose.</p></div>
+      <div><h3>How do I find my failed payment and recovery rates?</h3><p class="p">Use your billing provider's data: the MRR on renewals whose first charge failed in a month, and how much of it was paid within the retry period. Recovered divided by failed is your recovery rate.</p></div>
+      <div><h3>How can I recover more failed payments?</h3><p class="p">Common steps are retrying the charge on a schedule, emailing the customer a link to update their card, and asking for a new card before the old one expires. Enter the recovery rate you expect after a change to see what it is worth.</p></div>
+      <div><h3>Why does failed payment recovery differ by channel?</h3><p class="p">Customers from different channels pay in different ways and stay for different lengths of time, so failed and recovered renewals are not spread evenly. Virling credits each renewal to the channel of the first payment, so lost renewals show up as churn under the channel that brought the customer.</p></div>
+      <div><h3>Does a recovered payment keep its channel in Virling?</h3><p class="p">Yes. A renewal takes the channel of the customer's first payment, so a renewal that fails and is paid later is credited to that channel. A failed payment adds no revenue. If the first payment is not in Virling or is Unattributed, the renewal is usually Unattributed too.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate MRR lost to failed payments?", "acceptedAnswer": {"@type": "Answer", "text": "Multiply MRR by the share of renewals that fail to get the MRR at risk each month, then multiply that by the share you do not recover. Multiply by 12 for a rough yearly figure."}}, {"@type": "Question", "name": "What is involuntary churn?", "acceptedAnswer": {"@type": "Answer", "text": "Involuntary churn is revenue lost when a customer stops paying without choosing to cancel, usually because a card expired or was declined and the payment was never recovered. Voluntary churn is a customer cancelling on purpose."}}, {"@type": "Question", "name": "How do I find my failed payment and recovery rates?", "acceptedAnswer": {"@type": "Answer", "text": "Use your billing provider's data: the MRR on renewals whose first charge failed in a month, and how much of it was paid within the retry period. Recovered divided by failed is your recovery rate."}}, {"@type": "Question", "name": "How can I recover more failed payments?", "acceptedAnswer": {"@type": "Answer", "text": "Common steps are retrying the charge on a schedule, emailing the customer a link to update their card, and asking for a new card before the old one expires. Enter the recovery rate you expect after a change to see what it is worth."}}, {"@type": "Question", "name": "Why does failed payment recovery differ by channel?", "acceptedAnswer": {"@type": "Answer", "text": "Customers from different channels pay in different ways and stay for different lengths of time, so failed and recovered renewals are not spread evenly. Virling credits each renewal to the channel of the first payment, so lost renewals show up as churn under the channel that brought the customer."}}, {"@type": "Question", "name": "Does a recovered payment keep its channel in Virling?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. A renewal takes the channel of the customer's first payment, so a renewal that fails and is paid later is credited to that channel. A failed payment adds no revenue. If the first payment is not in Virling or is Unattributed, the renewal is usually Unattributed too."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring customers who keep paying</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to and credits each renewal to the channel that won the customer, so you see the revenue and retention each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("fpr"), out = document.getElementById("fpr-out"), fx = document.getElementById("fpr-formula");
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 2 }) + "%";
+const usd = (n) => { const a = Math.abs(n), d = a < 100 ? 2 : 0; return (n < 0 ? "-$" : "$") + a.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); };
+const share = (el) => (el.value !== "" && +el.value >= 0 && +el.value <= 100 ? +el.value / 100 : NaN);
+const calc = () => {
+  const m = +f.mrr.value, fail = share(f.fail), now = share(f.now), better = share(f.better);
+  const ok = m > 0 && fail >= 0 && now >= 0, risk = m * fail, lost = risk * (1 - now);
+  const okb = ok && better >= 0, lostb = risk * (1 - better), saved = lost - lostb;
+  const rows = [["MRR at risk per month", ok ? usd(risk) : "No data"], ["MRR lost per month", ok ? usd(lost) : "No data"], ["MRR lost per year", ok ? usd(lost * 12) : "No data"], ["MRR saved per month", okb ? usd(saved) : "No data"], ["MRR saved per year", okb ? usd(saved * 12) : "No data"]];
+  out.innerHTML = rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+  fx.innerHTML = ok ? `<code>${usd(m)} &times; ${pct(fail)} &times; (1 - ${pct(now)}) = ${usd(lost)}</code> lost each month today` + (okb ? `, <code>${usd(lostb)}</code> after improvements.` : ".") : "Enter an MRR above zero and shares between 0 and 100.";
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

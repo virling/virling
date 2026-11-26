@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Do free tools bring paying customers? How to measure it</title>
+<meta name="description" content="Free tools and calculators bring traffic, but do they bring buyers? How to credit payments to the tool page that brought the visitor and track signups from it.">
+<link rel="canonical" href="https://virling.com/blog/free-tool-marketing-revenue">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/free-tool-marketing-revenue">
+<meta property="og:title" content="Do free tools bring paying customers? How to measure it">
+<meta property="og:description" content="Free tools and calculators bring traffic, but do they bring buyers? How to credit payments to the tool page that brought the visitor and track signups from it.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Do free tools bring paying customers? How to measure it","item":"https://virling.com/blog/free-tool-marketing-revenue"}]},{"@type":"BlogPosting","headline":"Do free tools bring paying customers? How to measure it","description":"Free tools and calculators bring traffic, but do they bring buyers? How to credit payments to the tool page that brought the visitor and track signups from it.","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/free-tool-marketing-revenue"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Do free tools bring paying customers?","acceptedAnswer":{"@type":"Answer","text":"Some do and some only bring traffic. You can only tell by crediting each payment to the landing page of the visit that brought the customer, then comparing tool pages by revenue per visitor, not by visitors."}},{"@type":"Question","name":"How do I track revenue from a free tool or calculator?","acceptedAnswer":{"@type":"Answer","text":"Connect your payment provider and pass the visitor ID into checkout. Each payment is then credited to the landing page of the session that gets the credit, which is the first pageview of that session. Every tool page people land on gets its own row on the Pages card, under Landing page, with visitors, revenue and revenue per visitor."}},{"@type":"Question","name":"How do I count signups that start on a tool page?","acceptedAnswer":{"@type":"Answer","text":"Put a data-goal attribute on the tool page's signup link and send it as a goal with virling(\"goal\", name) when the link is clicked. Filter the dashboard by the tool's landing page and the Goals card shows how many of its visitors clicked."}},{"@type":"Question","name":"Why does a tool with lots of traffic show little revenue?","acceptedAnswer":{"@type":"Answer","text":"A tool often answers a question for people who will never need your product. It can also introduce buyers who pay later through another visit, which the default model credits to that later visit. Switch the attribution model to first touch to see which tools introduce buyers, and give a tool time before you judge it."}},{"@type":"Question","name":"Is engineering as marketing worth it for SaaS?","acceptedAnswer":{"@type":"Answer","text":"It is worth it when the tool reaches the people who buy your product. Measure it per tool: visitors, signups, revenue and revenue per visitor. Improve the tools whose visitors pay, and stop investing in the ones that only bring traffic."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-17</span>
+      <h1>Do free tools bring paying customers? How to measure it</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-17.</p>
+<p class="p"><b>Free tools bring paying customers when the people who use them are the people who buy your product</b>, and you only find out by crediting each payment to the tool page that brought the visitor. Visitor counts cannot show this. A calculator can rank well and send thousands of people who never pay, while a small tool brings the few who do.</p>
+<p class="p">&ldquo;Engineering as marketing&rdquo; advice says to build free tools, calculators and generators. It rarely says how to tell whether a tool earns its upkeep. This guide shows how to read revenue by tool page, how to count signups that start on a tool, and how to read the result without over-trusting it.</p>
+<h2>Why tool traffic misleads</h2>
+<ul class="post-list"><li><b>A tool answers a question, not a need.</b> Many people want a quick number and leave. A popular calculator can reach students, consultants and readers of other blogs who will never need your product.</li><li><b>Signups and payments happen later.</b> Most people use the tool, leave, and come back days later by typing your address or clicking another link. Without a record that ties the payment to the first visit, that sale lands in Direct.</li><li><b>Tools pile up.</b> Each one needs fixes and updates. Without revenue per tool, you keep paying for the ones that only bring traffic.</li></ul>
+<p class="p">In Virling you can click a tool's row on the Landing page tab to filter the dashboard to visits that started there, and see which channels sent them and the revenue credited to each.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+<h2>What you need first</h2>
+<p class="p">Two links must exist before any tool report means something. The payment provider must be connected, and the visitor ID must reach checkout, so a payment can be joined to the visit before it. See <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a> and <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</p>
+<h2>How landing page attribution works</h2>
+<p class="p">Virling groups a visitor&rsquo;s pageviews and goals into sessions, and describes each session by its first pageview: its channel, referrer, campaign and landing page. When someone opens your UTM builder from a search result, that session&rsquo;s landing page is the UTM builder.</p>
+<p class="p">When a payment is matched, Virling finds that visitor&rsquo;s sessions in the 90 days before it and picks one: by default the latest that was not Direct. The whole payment, after refunds, is credited to that session&rsquo;s channel, referrer, campaign and landing page. So a tool page gets the credit when the session that gets the credit started on it. See <a href="https://docs.virling.com/attribution/">how attribution works</a> and <a href="https://docs.virling.com/attribution/model">the attribution model</a>.</p>
+<h2>How to read revenue by tool page</h2>
+<h3>1. Open the Pages card, under Landing page</h3>
+<p class="p">The Pages card on the dashboard has two tabs. <b>Landing page</b> lists the first page of the visit, so each tool you have under <code>/tools/</code> gets its own row. Each row shows visitors, revenue and revenue per visitor, with a chip that compares the row with your site average: green above it, red below. Pick a long range, such as Last 90 days, so tools have time to collect payments.</p>
+<h3>2. Compare tools by revenue per visitor</h3>
+<p class="p">Look at the <code>/tools/</code> rows side by side. A tool with many visitors and a red chip is loud but does not pay. A small tool with a green chip is worth more of your time. See <a href="/blog/what-is-revenue-per-visitor">what revenue per visitor is</a>. Wait until a tool has a few hundred visitors before you trust its chip: one sale on 40 visitors makes a tool look better than it is.</p>
+<h3>3. Filter by the tool, then read where its visitors come from</h3>
+<p class="p">Click a tool&rsquo;s row and the whole page filters to it. The Channels card then shows which channels send that tool&rsquo;s visitors and which of them pay. Click <b>See visitors</b> to open the people behind the number, and open a payment to read its journey: the sessions before it and which one got the credit.</p>
+<h3>4. Check the tool against first touch</h3>
+<p class="p">Tools are often the first thing a buyer finds. If that buyer comes back a week later through a blog post or an email, the default model credits the later visit. Switch the attribution model to first touch in Site settings to see which tools introduce buyers, then compare the two views. A tool that does well on first touch and poorly on the default is doing its job at the start of the journey.</p>
+<h2>Track signups from a tool with a goal</h2>
+<p class="p">Payments take time. Signups come sooner, so count them as a goal from the tool page. Put a <code>data-goal</code> attribute on the tool&rsquo;s signup link, and send it with <code>virling("goal", name)</code> when the link is clicked:</p>
+<div class="code block"><pre>&lt;a href="https://yourdomain.com/signup" data-goal="signup_mrr_calculator"&gt;Try it free&lt;/a&gt;
+
+&lt;script&gt;
+  window.virling = window.virling || function () {
+    (window.virling.q = window.virling.q || []).push(arguments);
+  };
+  document.addEventListener("click", (e) =&gt; {
+    const el = e.target.closest("[data-goal]");
+    if (el) virling("goal", el.dataset.goal);
+  });
+&lt;/script&gt;</pre></div>
+<p class="p">The Virling script reads goals only through <code>virling("goal", name)</code>; the attribute is a plain label that the few lines above turn into that call. The stub queues calls made before the script loads and replays them in order. Goal names are trimmed and cut to 64 bytes, and a goal with no name is dropped. See <a href="https://docs.virling.com/track/goals">goals</a>.</p>
+<p class="p">Goals are stored with the page they happened on, the session and the visitor. A name per tool, as above, lets you read each tool&rsquo;s signups straight from the <b>Goals</b> tab of the Goals card. With one shared name, filter by the tool&rsquo;s landing page first. A goal does not carry a money value; revenue comes from your payment provider.</p>
+<p class="p">Virling&rsquo;s own free tools work this way. The <a href="/tools/utm-builder">UTM builder</a> and the <a href="/tools/revenue-per-visitor">revenue per visitor calculator</a> carry a <code>data-goal</code> on each signup link, and the click handler on the page sends it as a goal.</p>
+<h2>A worked example</h2>
+<p class="p">Made-up numbers to show the method. Over 90 days:</p>
+<ul class="post-list"><li>A pricing calculator: 1,200 visitors, 30 signup clicks, 5 sales, high revenue per visitor.</li><li>A generic text generator: 16,000 visitors, 40 signup clicks, 2 sales, low revenue per visitor.</li><li>A niche checker: 300 visitors, 6 signup clicks, no sales yet. Too early to judge.</li></ul>
+<p class="p">The generator wins on traffic and loses on pay: its visitors want the output, not the product. The calculator reaches buyers and deserves a sister tool for the next question they ask. The checker needs more time. Before cutting the generator, switch to first touch and check its <a href="/blog/how-long-does-a-visitor-take-to-become-a-customer">time to pay</a>, since it may be where some buyers first meet you.</p>
+<h2>What to check if the numbers look off</h2>
+<ul class="post-list"><li><b>Most revenue has no landing page.</b> The payment was not matched to a visit. The Matched revenue line under the Overview numbers gives the share matched and why the rest was not. See <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</li><li><b>A tool has signup clicks but no revenue.</b> Check that checkout carries the visitor ID, and widen the date range: a sale counts on the day of the payment, which can be weeks after the signup.</li><li><b>The goal never shows.</b> Make sure the Virling script runs on the tool page and the click handler is on the page too. A goal sent with an empty name is dropped.</li></ul>
+<p class="p">The same method works for content. See <a href="/blog/which-blog-posts-bring-paying-customers">which blog posts bring paying customers</a>, and <a href="/blog/find-which-channel-pays">how to find which marketing channel pays</a> for the general setup. If the free thing is a checklist or an email course, see <a href="/blog/lead-magnet-revenue-tracking">which lead magnets bring buyers</a>, and if you promote a tool with articles on other sites, see <a href="/blog/guest-post-revenue-tracking">revenue from guest posts</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>Do free tools bring paying customers?</h3><p class="p">Some do and some only bring traffic. You can only tell by crediting each payment to the landing page of the visit that brought the customer, then comparing tool pages by revenue per visitor, not by visitors.</p>
+<h3>How do I track revenue from a free tool or calculator?</h3><p class="p">Connect your payment provider and pass the visitor ID into checkout. Each payment is then credited to the landing page of the session that gets the credit, which is the first pageview of that session. Every tool page people land on gets its own row on the Pages card, under Landing page, with visitors, revenue and revenue per visitor.</p>
+<h3>How do I count signups that start on a tool page?</h3><p class="p">Put a data-goal attribute on the tool page&#39;s signup link and send it as a goal with virling("goal", name) when the link is clicked. Filter the dashboard by the tool&#39;s landing page and the Goals card shows how many of its visitors clicked.</p>
+<h3>Why does a tool with lots of traffic show little revenue?</h3><p class="p">A tool often answers a question for people who will never need your product. It can also introduce buyers who pay later through another visit, which the default model credits to that later visit. Switch the attribution model to first touch to see which tools introduce buyers, and give a tool time before you judge it.</p>
+<h3>Is engineering as marketing worth it for SaaS?</h3><p class="p">It is worth it when the tool reaches the people who buy your product. Measure it per tool: visitors, signups, revenue and revenue per visitor. Improve the tools whose visitors pay, and stop investing in the ones that only bring traffic.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which of your free tools pays</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

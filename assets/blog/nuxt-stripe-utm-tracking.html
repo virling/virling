@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuxt Stripe UTM tracking: tie each payment to its source</title>
+<meta name="description" content="How to see which traffic source each Stripe Checkout payment came from in a Nuxt 3 app, with a server/api route that passes the visitor ID to the session.">
+<link rel="canonical" href="https://virling.com/blog/nuxt-stripe-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/nuxt-stripe-utm-tracking">
+<meta property="og:title" content="Nuxt Stripe UTM tracking: tie each payment to its source">
+<meta property="og:description" content="How to see which traffic source each Stripe Checkout payment came from in a Nuxt 3 app, with a server/api route that passes the visitor ID to the session.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Nuxt Stripe UTM tracking: tie each payment to its source","item":"https://virling.com/blog/nuxt-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"Nuxt Stripe UTM tracking: tie each payment to its source","description":"How to see which traffic source each Stripe Checkout payment came from in a Nuxt 3 app, with a server/api route that passes the visitor ID to the session.","datePublished":"2026-11-22","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/nuxt-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to a Stripe Checkout Session in Nuxt?","acceptedAnswer":{"@type":"Answer","text":"Read the visitor ID from the virling_vid cookie with getCookie in a server/api route, and pass it as client_reference_id when you create the session. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them."}},{"@type":"Question","name":"How do I read the virling_vid cookie in a Nuxt server route?","acceptedAnswer":{"@type":"Answer","text":"Call getCookie(event, \"virling_vid\") inside defineEventHandler. Both are auto-imported in the server directory. It is a first-party cookie on your domain, so the browser sends it with every request to your app, including $fetch calls from the page."}},{"@type":"Question","name":"Should I use client_reference_id or metadata.virling_vid?","acceptedAnswer":{"@type":"Answer","text":"Use client_reference_id unless it already holds your own user or cart ID. In that case put the visitor ID in the session's metadata.virling_vid. Virling reads either."}},{"@type":"Question","name":"What happens if the cookie is missing?","acceptedAnswer":{"@type":"Answer","text":"The session is created without a visitor ID, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed."}},{"@type":"Question","name":"Do Stripe Payment Links in a Nuxt app need code?","acceptedAnswer":{"@type":"Answer","text":"No. Use a normal link to buy.stripe.com on a page that runs the script. The script adds client_reference_id to the link when the page loads and again on click, unless the link already has one."}},{"@type":"Question","name":"Is client-side navigation in Nuxt counted?","acceptedAnswer":{"@type":"Answer","text":"Yes. With the script in app.head of nuxt.config.ts it is rendered into every page, and route changes made by the Nuxt router are tracked through history.pushState."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-22</span>
+      <h1>Nuxt Stripe UTM tracking: tie each payment to its source</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-22, updated 2026-11-25.</p>
+<p class="p">To see which traffic source each Stripe payment came from in a Nuxt app, add the Virling script to <code>app.head</code> in <code>nuxt.config.ts</code>, then read the <code>virling_vid</code> cookie in the <code>server/api</code> route that creates the Checkout Session and pass it as <code>client_reference_id</code>. Stripe keeps that one ID, and Virling joins the payment to every visit behind it, with the UTM tags of each. Two files change, and the rest of your checkout stays as it is.</p>
+<p class="p">This post covers Nuxt 3. Using Polar instead? See <a href="/blog/nuxt-polar-utm-tracking">Nuxt Polar UTM tracking</a>. For Payment Links, metadata limits and where the values show up in Stripe, see the general guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>.</p>
+<h2>Why Stripe Checkout loses your UTM tags</h2>
+<p class="p">UTM tags live on the landing URL. Stripe Checkout runs on Stripe's domain and only stores what your server passes when it creates the session, so the tags of the visit are gone unless you carry them over. Passing one visitor ID instead of the tags keeps earlier visits and untagged ones, such as search and referrals, too. If the tags never reach your landing page at all, a redirect is usually dropping them; see <a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a>.</p>
+<h2>Step 1: add the script to nuxt.config.ts</h2>
+<p class="p">Add the tag to the app head in the Nuxt config. Nuxt renders it into the HTML of every page, and route changes are tracked through <code>history.pushState</code>, so client-side navigation is counted. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<div class="code block"><pre data-snippet>// nuxt.config.ts
+export default defineNuxtConfig({
+  app: {
+    head: {
+      script: [
+        { src: "https://app.virling.com/v.js", defer: true,
+          "data-site": "yourdomain.com" },
+      ],
+    },
+  },
+  runtimeConfig: {
+    stripeSecretKey: "", // set NUXT_STRIPE_SECRET_KEY
+  },
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain and records the UTM tags of each visit against it. The <code>runtimeConfig</code> entry keeps your Stripe secret key on the server.</p>
+<h2>Step 2: create the Checkout Session in a server/api route</h2>
+<p class="p">Your server receives the <code>virling_vid</code> cookie with every request from the browser, and <code>getCookie</code> reads it from the event. Read it in the route that creates the session and pass it as <code>client_reference_id</code>:</p>
+<div class="code block"><pre data-snippet>// server/api/checkout.post.ts
+import Stripe from "stripe";
+
+export default defineEventHandler(async (event) =&gt; {
+  const stripe = new Stripe(useRuntimeConfig(event).stripeSecretKey);
+  const session = await stripe.checkout.sessions.create({
+    client_reference_id: getCookie(event, "virling_vid"),
+    line_items: [{ price: "price_...", quantity: 1 }],
+    mode: "subscription",
+    success_url: "https://yourdomain.com/thanks",
+  });
+  return sendRedirect(event, session.url!, 303);
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">A plain form posts to it, and the browser sends the cookie along:</p>
+<div class="code block"><pre data-snippet>&lt;!-- pages/pricing.vue --&gt;
+&lt;template&gt;
+  &lt;form method="POST" action="/api/checkout"&gt;
+    &lt;button type="submit"&gt;Buy&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/template&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>Or return the URL to the page, with metadata</h2>
+<p class="p">If you would rather start checkout from a click handler, return the session URL as JSON and navigate to it. If <code>client_reference_id</code> already holds your own user or cart ID, put the visitor ID in the session's <code>metadata.virling_vid</code> instead. Virling reads either:</p>
+<div class="code block"><pre data-snippet>// server/api/checkout-url.post.ts
+import Stripe from "stripe";
+
+export default defineEventHandler(async (event) =&gt; {
+  const stripe = new Stripe(useRuntimeConfig(event).stripeSecretKey);
+  const vid = getCookie(event, "virling_vid");
+  const session = await stripe.checkout.sessions.create({
+    // client_reference_id stays free for your own ID
+    metadata: vid ? { virling_vid: vid } : {},
+    line_items: [{ price: "price_...", quantity: 1 }],
+    mode: "subscription",
+    success_url: "https://yourdomain.com/thanks",
+  });
+  return { url: session.url };
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Call it from the page. <code>$fetch</code> runs in the browser here, so the cookie goes with the request:</p>
+<div class="code block"><pre data-snippet>&lt;!-- pages/pricing.vue --&gt;
+&lt;script setup lang="ts"&gt;
+async function buy() {
+  const { url } = await $fetch("/api/checkout-url", { method: "POST" });
+  await navigateTo(url!, { external: true });
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;button type="button" @click="buy"&gt;Buy&lt;/button&gt;
+&lt;/template&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The full lookup order, including PaymentIntents you create for Elements, is in the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a> and on the <a href="/integrations/stripe">Stripe integration page</a>. The <a href="/tools/checkout-snippet-generator">checkout snippet generator</a> writes the same call for other providers.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Prerendered, server rendered and cached pages</h2>
+<p class="p">The script runs in the browser, so it works the same on every kind of page: it creates the cookie and reads the UTM tags from the address there, never from your HTML. What changes is when your own code runs, and so whether it can see the cookie.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>Page</th><th>What changes</th><th>Where the cookie is read</th></tr></thead><tbody><tr><th scope="row">Prerendered, with <code>routeRules</code> or <code>nuxt generate</code></th><td>The HTML is made once at build time, and <code>useCookie</code> finds nothing there</td><td>In the <code>server/api</code> route. A form on the prerendered page posts to it</td></tr><tr><th scope="row">Server rendered, the default</th><td>Each request renders the page, and <code>useCookie</code> can read the cookie once the browser has it</td><td>In the <code>server/api</code> route</td></tr><tr><th scope="row">Browser only, with <code>ssr: false</code></th><td>The server sends a shell, and <code>app.head</code> puts the tag in it</td><td>In the <code>server/api</code> route, which still runs on the server</td></tr><tr><th scope="row">Cached, with <code>swr</code> or <code>isr</code></th><td>One copy of the HTML serves many visitors. It is not rendered for this visitor, so the page itself never sees the ID</td><td>In a <code>POST</code> route. Nitro caches <code>GET</code> and <code>HEAD</code> only</td></tr><tr><th scope="row">Static site, with <code>nuxt generate</code> for the whole app</th><td>There is no server, so no <code>server/api</code> routes</td><td>By the script in the browser, which adds the ID to Payment Links</td></tr></tbody></table></div>
+<p class="p">One rule covers every row: read the cookie in the request that creates the session, not when the page is rendered to be viewed. On a first visit the server renders the page before the script has set the cookie, and in a prerendered or cached page there is no cookie of this visitor at all. The same goes for a hidden field filled in while the page renders: from a shared copy, every buyer would send the same value.</p>
+<p class="p">Vue Router navigates with the History API, so route changes are counted on their own. Each change of path or query is one pageview, and a change of only the <code>#hash</code> is none. Later routes carry no referrer, so they stay in the channel of the landing page. The cookie stays in the browser through all of it, so it is sent from whichever page the buyer presses Buy on. Payment Links that appear after a route change get the visitor ID when they are clicked.</p>
+<h2>Check that it works</h2>
+<p class="p">Run one test payment through the whole path, from your own dev server:</p>
+<ol class="post-list"><li>In Virling, connect a <a href="https://docs.virling.com/payments/stripe">restricted Stripe key</a> that starts with <code>rk_test_</code>. Your app keeps its own test secret key in <code>NUXT_STRIPE_SECRET_KEY</code>, for example in <code>.env</code>, and uses a price created in test mode.</li><li>Add the line <code>127.0.0.1 dev.yourdomain.com</code> to your hosts file and start the dev server on that name with <code>npm run dev -- --host dev.yourdomain.com</code>. The script does nothing on <code>localhost</code>, and Virling keeps a visit only when the page's host is your site's domain or one of its subdomains.</li><li>Open a private window and visit the dev server through a tagged link, such as <code>http://dev.yourdomain.com:3000/?utm_source=test&amp;utm_medium=email</code>. Run <code>window.virling.vid()</code> in the browser console and note the ID. Click through to the pricing page, so a client-side navigation is part of the test.</li><li>In the same window, press Buy. Pay with the card <code>4242 4242 4242 4242</code>, any future date and any three-digit CVC (<a href="https://docs.stripe.com/testing">Stripe testing</a>).</li><li>Check the Checkout Session with the log line below, in the terminal that runs the dev server. <code>client_reference_id</code>, or <code>virling_vid</code> in the session's metadata if you use that, should be the ID from step 3. The charge and PaymentIntent do not need it: Stripe does not copy session metadata to them.</li><li>Wait a minute for the next sync, then open the payments list at <code>/app/yourdomain.com/payments</code>. The payment shows the <code>test</code> source and the <b>Email</b> channel of your tagged visit instead of Unattributed. Open it to see its journey.</li></ol>
+<p class="p">For step 5, add this right after <code>stripe.checkout.sessions.create()</code> and remove it afterwards:</p>
+<div class="code block"><pre data-snippet>console.log(session.id, session.client_reference_id, session.metadata);</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The dev server renders prerendered pages on request and has no CDN in front of it, so it cannot show a page that was baked or cached wrongly. Repeat steps 3 to 6 once on a deployed subdomain, such as <code>staging.yourdomain.com</code>. Go straight there if your browser insists on <code>https</code> for the dev address, as it does for domains that end in <code>.dev</code> or <code>.app</code>.</p>
+<p class="p">If your code passes <code>customer</code>, use a new customer for each test: a later payment by the same customer is a renewal and keeps the first payment's channel. A site has one Stripe connection, and test payments stay in your reports after you replace the key with a live one. If you want only real payments in your numbers, make one small live payment instead and refund it. If a step fails, see <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>.</p>
+<p class="p">Payments without a visitor ID still count toward revenue, as Unattributed. How the join works from visit to payment is in <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>, and the <a href="/integrations/saas">SaaS page</a> shows what you get per channel. On other frameworks, see <a href="/blog/nextjs-stripe-utm-tracking">Next.js</a>, <a href="/blog/sveltekit-stripe-utm-tracking">SvelteKit</a> and <a href="/blog/astro-stripe-utm-tracking">Astro</a>. For a Vue app without Nuxt, see <a href="/blog/vue-stripe-utm-tracking">Vue Stripe UTM tracking</a>.</p>
+<h2>Common mistakes</h2>
+<p class="p">Open an Unattributed payment and look for <b>Visitor</b> under <b>Details</b>. If there is none, checkout did not carry the ID.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>What you see</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">No visitor ID, though the browser has the cookie</th><td>Checkout is a <code>GET</code> route under a <code>swr</code> or <code>cache</code> rule, which Nitro runs without cookies</td><td>Use a <code>POST</code> route, such as <code>checkout.post.ts</code>, and keep it out of the cached patterns</td></tr><tr><th scope="row">Several buyers are sent to the same Checkout Session</th><td>The same rule keeps the response of that <code>GET</code> route, session URL included</td><td>Create the session in a <code>POST</code> route, once per click</td></tr><tr><th scope="row">No visitor ID when <code>$fetch</code> is called in <code>setup</code></th><td>During server rendering <code>$fetch</code> does not pass on the browser's cookies</td><td>Call it from a click handler, as above</td></tr><tr><th scope="row">The same or no ID in a hidden field</th><td><code>useCookie</code> is read on a prerendered or cached page</td><td>Read the cookie in the <code>server/api</code> route</td></tr><tr><th scope="row">404 on <code>/api/checkout</code> after deploy</th><td>The site was built with <code>nuxt generate</code>, which includes no server</td><td>Deploy with <code>nuxt build</code>, or use Payment Links</td></tr><tr><th scope="row">Sessions in Stripe that nobody asked for</th><td>The session is created with <code>useFetch</code> in a page, so on every render of it, crawlers included</td><td>Create it when the buyer presses Buy</td></tr><tr><th scope="row">The payment has a visitor ID but is Unattributed after a local test</th><td>The visit was on <code>localhost</code> with <code>data-dev</code>. Virling drops it, because the host is not your site's domain or a subdomain of it</td><td>Test on <code>dev.yourdomain.com</code>, as in step 2 of the test</td></tr><tr><th scope="row">Two pageviews for each route</th><td>The script is loaded twice, such as in <code>nuxt.config.ts</code> and in a tag manager</td><td>Keep only the entry in <code>app.head</code></td></tr><tr><th scope="row">UTM tags are gone once the page loads</th><td>A redirect, such as to <code>www.</code> or to a URL with a trailing slash, drops the query string</td><td>Keep the query string in the redirect, and link to the final address in campaigns</td></tr><tr><th scope="row">The visitor ID on the payment is your own user or order ID</th><td><code>client_reference_id</code> holds your ID and is read as the visitor ID</td><td>Put the visitor ID in the session's <code>metadata.virling_vid</code>, which is read first</td></tr><tr><th scope="row">A second test keeps the channel of the first</th><td>Any later payment by the same Stripe customer is a renewal</td><td>Use a new customer for each test</td></tr><tr><th scope="row">Some payments are Unattributed</th><td>The visitor had no cookie: the script was blocked, or the site is in cookieless mode or still waiting for consent</td><td>Nothing to fix in the code. Create the session without the ID; the payment still counts toward revenue</td></tr></tbody></table></div>
+<p class="p">Script settings on a CDN, such as combining or delaying scripts, are covered in <a href="https://docs.virling.com/track/caching">page caching and CDNs</a>, and route changes in <a href="https://docs.virling.com/track/spa">single-page apps</a>. Every other cause is in <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>. A payment made before a fix usually stays Unattributed, so make a new one to check.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I pass UTM parameters to a Stripe Checkout Session in Nuxt?</h3><p class="p">Read the visitor ID from the virling_vid cookie with getCookie in a server/api route, and pass it as client_reference_id when you create the session. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them.</p>
+<h3>How do I read the virling_vid cookie in a Nuxt server route?</h3><p class="p">Call getCookie(event, "virling_vid") inside defineEventHandler. Both are auto-imported in the server directory. It is a first-party cookie on your domain, so the browser sends it with every request to your app, including $fetch calls from the page.</p>
+<h3>Should I use client_reference_id or metadata.virling_vid?</h3><p class="p">Use client_reference_id unless it already holds your own user or cart ID. In that case put the visitor ID in the session's metadata.virling_vid. Virling reads either.</p>
+<h3>What happens if the cookie is missing?</h3><p class="p">The session is created without a visitor ID, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed.</p>
+<h3>Do Stripe Payment Links in a Nuxt app need code?</h3><p class="p">No. Use a normal link to buy.stripe.com on a page that runs the script. The script adds client_reference_id to the link when the page loads and again on click, unless the link already has one.</p>
+<h3>Is client-side navigation in Nuxt counted?</h3><p class="p">Yes. With the script in app.head of nuxt.config.ts it is rendered into every page, and route changes made by the Nuxt router are tracked through history.pushState.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring Stripe revenue</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

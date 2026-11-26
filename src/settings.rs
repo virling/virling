@@ -69,6 +69,8 @@ pub struct Connection {
     status_class: &'static str,
     error: String,
     synced: String,
+    /// Synced without error but no payment has ever come in.
+    empty: bool,
     /// Product IDs the connection imports, comma separated; empty imports all.
     products: String,
 }
@@ -256,6 +258,12 @@ async fn show(
         Ok(n) => plural(n, "bot visitor"),
         Err(code) => return code.into_response(),
     };
+    let store = state.events.clone();
+    let id = ctx.site.id.clone();
+    let paid = match blocking(move || store.payment_providers(&id)).await {
+        Ok(p) => p,
+        Err(code) => return code.into_response(),
+    };
     let ai = match ai_settings(&state, &ctx.site.id, &ctx.site.domain, &q, typed.as_ref()).await {
         Ok(ai) => ai,
         Err(_) => return StatusCode::SERVICE_UNAVAILABLE.into_response(),
@@ -272,7 +280,13 @@ async fn show(
         (_, Some("telegram")) => "Telegram did not accept that bot token and chat ID.",
         _ => "",
     };
-    let webhook = crate::webhooks::view(&state, &ctx.site.id).await;
+    let webhook =
+        crate::webhooks::view(&state, &ctx.site.id)
+            .await
+            .map(|(host, secret, slack, error)| {
+                let secret = if account.owner { secret } else { String::new() };
+                (host, secret, slack, error)
+            });
     let webhook_note = match (q.saved.as_deref(), q.error.as_deref()) {
         (Some("webhook"), _) => ("Saved. A test event was sent to the URL.", false),
         (_, Some("webhook")) => (
@@ -326,7 +340,9 @@ async fn show(
                     (None, None) => ("Syncing", "warn"),
                     (None, Some(_)) => ("Connected", "ok"),
                 };
+                let empty = error.is_none() && synced_at.is_some() && !paid.contains(&provider);
                 Connection {
+                    empty,
                     name: provider_name(&provider),
                     provider,
                     status,
@@ -1062,6 +1078,12 @@ pub async fn products(
     if let Err(err) = saved {
         tracing::error!(%err, "saving connection products failed");
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
+    }
+    let store = state.events.clone();
+    let (site, provider) = (ctx.site.id.clone(), input.provider.clone());
+    let since = OffsetDateTime::now_utc() - crate::providers::DODO_BACKFILL;
+    if let Err(code) = blocking(move || store.forget_payments(&site, &provider, since)).await {
+        return code.into_response();
     }
     Redirect::to(&app_path(&ctx.site.domain, "settings#payments")).into_response()
 }

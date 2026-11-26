@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Next.js Creem UTM tracking: pass the visit into checkout</title>
+<meta name="description" content="Put the visitor ID in Creem checkout metadata from a Next.js route handler or server action, so each payment shows the visit and UTM tags behind it.">
+<link rel="canonical" href="https://virling.com/blog/nextjs-creem-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/nextjs-creem-utm-tracking">
+<meta property="og:title" content="Next.js Creem UTM tracking: pass the visit into checkout">
+<meta property="og:description" content="Put the visitor ID in Creem checkout metadata from a Next.js route handler or server action, so each payment shows the visit and UTM tags behind it.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Next.js Creem UTM tracking: pass the visit into checkout","item":"https://virling.com/blog/nextjs-creem-utm-tracking"}]},{"@type":"BlogPosting","headline":"Next.js Creem UTM tracking: pass the visit into checkout","description":"Put the visitor ID in Creem checkout metadata from a Next.js route handler or server action, so each payment shows the visit and UTM tags behind it.","datePublished":"2026-11-23","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/nextjs-creem-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Creem checkout in Next.js?","acceptedAnswer":{"@type":"Answer","text":"Pass the Virling visitor ID instead. Read the virling_vid cookie in the route handler or server action that creates the checkout and set metadata: { virling_vid } in POST /v1/checkouts. The script records the UTM tags of every visit against that ID, so the payment is joined to all of them."}},{"@type":"Question","name":"Do hosted Creem product links get the visitor ID by themselves?","acceptedAnswer":{"@type":"Answer","text":"No. The Virling script adds the ID on its own only to some providers' checkout links, and Creem is not one of them. Send the Buy button to a route handler or server action that creates the checkout instead."}},{"@type":"Question","name":"How do I read the virling_vid cookie in the App Router?","acceptedAnswer":{"@type":"Answer","text":"In a route handler, use req.cookies.get(\"virling_vid\")?.value on the NextRequest. In a server action, use cookies() from next/headers. In a Pages Router API route, use req.cookies.virling_vid."}},{"@type":"Question","name":"Do UTM parameters survive the redirect to Creem?","acceptedAnswer":{"@type":"Answer","text":"They do not need to. The redirect to Creem carries only the checkout_url Creem returns. The UTM tags were already recorded against the visitor ID when the visitor landed, and the ID travels in the checkout metadata."}},{"@type":"Question","name":"Why can I not see virling_vid on my Creem transactions?","acceptedAnswer":{"@type":"Answer","text":"Creem returns checkout metadata only in webhooks, not on transactions. Virling adds one checkout.completed webhook when you connect, so it needs to be reachable over https."}},{"@type":"Question","name":"What happens to payments with no visitor ID?","acceptedAnswer":{"@type":"Answer","text":"They have no visit to join, so Virling shows them as Unattributed. They still count toward revenue."}},{"@type":"Question","name":"Does Creem test mode work with Virling?","acceptedAnswer":{"@type":"Answer","text":"Yes. Connect a key that starts with creem_test_ and point your Next.js code at https://test-api.creem.io. Virling reads test transactions and adds its webhook in test mode. Test payments stay in your reports after you replace the key with a live one."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-23</span>
+      <h1>Next.js Creem UTM tracking: pass the visit into checkout</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-23.</p>
+<p class="p">To tie a Creem payment from a Next.js app to the visit that brought it, load the Virling script once with <code>next/script</code>, then create the Creem checkout on your server with the visitor ID in its <code>metadata</code> as <code>virling_vid</code>. A route handler or a server action reads it from the <code>virling_vid</code> cookie in one line. Creem returns that metadata in its <code>checkout.completed</code> webhook, and Virling joins the payment to every visit behind that ID, with the UTM tags of each.</p>
+<p class="p">This post covers the App Router, with notes for the Pages Router. For what Creem does with metadata outside Next.js, see the general guide to <a href="/blog/creem-utm-tracking">Creem UTM tracking</a>. Using Stripe instead? See <a href="/blog/nextjs-stripe-utm-tracking">Next.js Stripe UTM tracking</a>. Comparing providers? The steps for Dodo are in <a href="/blog/nextjs-dodo-payments-utm-tracking">Next.js Dodo Payments UTM tracking</a>.</p>
+<h2>What happens to UTM tags on the way to Creem</h2>
+<p class="p">UTM tags live on the landing URL. By the time a visitor clicks Buy they are usually a few pages in, and your app then redirects them to the <code>checkout_url</code> Creem returned, on Creem's own site. That redirect carries only Creem's URL, so nothing from your page travels with the buyer unless you put it in the checkout. The tags do not need to travel, though: the script records them against the visitor ID when the visitor lands, and the ID goes into the checkout's metadata. Passing one ID instead of the tags keeps earlier visits and untagged ones, such as search and referrals, too.</p>
+<h2>Step 1: add the script once</h2>
+<p class="p">Use <code>next/script</code> with <code>strategy="afterInteractive"</code> and load it once, so it runs on every route. <code>defer</code> does nothing on <code>next/script</code>, so leave it out. Client-side navigation is counted too. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<p class="p">App Router, in <code>app/layout.tsx</code>:</p>
+<div class="code block"><pre data-snippet>import Script from "next/script";
+
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+        {children}
+        &lt;Script src="https://app.virling.com/v.js"
+          data-site="yourdomain.com" strategy="afterInteractive" /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Pages Router, in <code>pages/_app.tsx</code>:</p>
+<div class="code block"><pre data-snippet>import Script from "next/script";
+
+export default function App({ Component, pageProps }) {
+  return (
+    &lt;&gt;
+      &lt;Script src="https://app.virling.com/v.js"
+        data-site="yourdomain.com" strategy="afterInteractive" /&gt;
+      &lt;Component {...pageProps} /&gt;
+    &lt;/&gt;
+  );
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain and records the UTM tags of each visit against it. Because the cookie is on your own domain, your server receives it with every request from the browser.</p>
+<h2>Step 2: create the checkout in a route handler</h2>
+<p class="p">The script does not add the visitor ID to Creem links on its own, so send your Buy button to your server rather than to a fixed Creem product link. Read the cookie where you create the checkout and set it in <code>metadata</code>:</p>
+<div class="code block"><pre data-snippet>// app/api/checkout/route.ts
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(req: NextRequest) {
+  const res = await fetch("https://api.creem.io/v1/checkouts", {
+    method: "POST",
+    headers: { "x-api-key": process.env.CREEM_API_KEY!, "content-type": "application/json" },
+    body: JSON.stringify({
+      product_id: "prod_...",
+      success_url: "https://yourdomain.com/thanks",
+      metadata: { virling_vid: req.cookies.get("virling_vid")?.value },
+    }),
+  });
+  const { checkout_url } = await res.json();
+  return NextResponse.redirect(checkout_url, 303);
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">A plain form posts to it, and the browser sends the cookie along:</p>
+<div class="code block"><pre data-snippet>&lt;form action="/api/checkout" method="POST"&gt;
+  &lt;button type="submit"&gt;Buy&lt;/button&gt;
+&lt;/form&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Use <code>https://test-api.creem.io</code> with a test mode key. In the Pages Router, do the same in an API route under <code>pages/api/</code> and read the cookie as <code>req.cookies.virling_vid</code>.</p>
+<h2>Or in a server action</h2>
+<p class="p">In a server action, <code>cookies()</code> from <code>next/headers</code> gives you the cookie, and <code>redirect</code> sends the buyer to Creem:</p>
+<div class="code block"><pre data-snippet>// app/actions.ts
+"use server";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
+export async function checkout() {
+  const vid = (await cookies()).get("virling_vid")?.value;
+  const res = await fetch("https://api.creem.io/v1/checkouts", {
+    method: "POST",
+    headers: { "x-api-key": process.env.CREEM_API_KEY!, "content-type": "application/json" },
+    body: JSON.stringify({
+      product_id: "prod_...",
+      success_url: "https://yourdomain.com/thanks",
+      metadata: { virling_vid: vid },
+    }),
+  });
+  const { checkout_url } = await res.json();
+  redirect(checkout_url);
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Call it from a form with <code>&lt;form action={checkout}&gt;</code>. Virling reads <code>virling_vid</code> from the checkout's <code>metadata</code> first, then the subscription's <code>metadata</code>, then the customer's <code>metadata</code>.</p>
+<h2>Step 3: connect Creem</h2>
+<p class="p">In Creem, open Developers, then API keys, and create a key with the <code>transactions:read</code> scope, plus <code>subscriptions:read</code> so Retention can tell who still pays, and <code>webhooks:write</code> so Virling can add its webhook. No other scopes are needed. Paste it into Virling. Live and test mode keys both work.</p>
+<p class="p">Creem returns checkout metadata only in webhooks, not on transactions. So when you connect, Virling adds one webhook for <code>checkout.completed</code> and checks each delivery against the <code>creem-signature</code> header. You do not write a webhook handler. The webhook needs Virling to be reachable over https; on plain http, payments still import but stay Unattributed. The full setup is in the <a href="https://docs.virling.com/payments/creem">Creem docs</a> and on the <a href="/integrations/creem">Creem integration page</a>.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free</a></p>
+<h2>Step 4: make a test purchase</h2>
+<ol class="post-list"><li>Connect a key that starts with <code>creem_test_</code> to Virling. Virling must be reachable over https, so that Creem can reach the webhook.</li><li>In your app, put a test mode key in <code>CREEM_API_KEY</code>, use a product from test mode, and point the checkout code at <code>https://test-api.creem.io</code>. Creem keeps test data <a href="https://docs.creem.io/getting-started/test-mode">separate from production</a>.</li><li>Open a private window and visit a page that runs the script through a tagged link, such as <code>https://yourdomain.com/?utm_source=test&amp;utm_medium=email</code>. Run <code>window.virling.vid()</code> in the browser console and note the ID. The script does nothing on <code>localhost</code>, so use your domain or a subdomain such as <code>staging.yourdomain.com</code>.</li><li>In the same window, go to checkout through your route handler or server action and pay with one of the <a href="https://docs.creem.io/getting-started/test-mode">test cards</a> Creem lists.</li><li>Wait a minute for the next sync, then open the payments list at <code>/app/yourdomain.com/payments</code>.</li></ol>
+<p class="p">What the payment looks like: in the list it shows the <code>test</code> source and the <b>Email</b> channel of your tagged visit instead of Unattributed. Open it and <b>Credited to</b> shows the same, <b>Journey</b> starts at the tagged visit and ends with the Creem payment, and <b>Details</b> lists the ID from your browser console as <b>Visitor</b>.</p>
+<p class="p">Use a new email address for each test, because a later payment by the same customer is a renewal and keeps the first payment's channel. A site has one Creem connection, and test payments stay in your reports after you replace the key with a live one. If the payment lists no visitor ID, the checkout did not carry <code>virling_vid</code>: check that your server reads the cookie on the request that creates the checkout, and that Virling is on https so the webhook arrives. The full checklist is in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>.</p>
+<h2>When the payment still shows as Unattributed</h2>
+<p class="p">Three things break this most often in a Next.js app.</p>
+<ul class="post-list"><li><strong>The tags are gone before the script runs.</strong> A redirect that rebuilds the URL from the path alone, such as a middleware locale redirect or a <code>redirects</code> rule from <code>/</code> to <code>/home</code>, drops <code>?utm_source=...</code> and the visit arrives as Direct. Carry the query string through every redirect; the causes and fixes are in <a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a>.</li><li><strong>The Buy button links straight to Creem.</strong> A fixed Creem product link has no metadata, and the script does not add the ID to it. Point the button at your route handler or server action instead.</li><li><strong>The checkout request has no cookie.</strong> If the checkout is created from another domain, or by a job with no browser request behind it, there is no <code>virling_vid</code> cookie to read. Create it from a request the buyer's browser makes to your app.</li></ul>
+<p class="p">Payments without a visitor ID still count toward revenue, as Unattributed. How the join works from visit to payment is in <a href="/blog/track-creem-revenue-by-traffic-source">how to track Creem revenue by traffic source</a>.</p>
+<h2>Common mistakes</h2>
+<p class="p">If none of those three is the cause, start from an Unattributed payment. Open it from <code>/app/yourdomain.com/payments</code> and look for <b>Visitor</b> under <b>Details</b>. If there is none, checkout did not carry the ID. The table lists what usually goes wrong in an App Router app.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">Creem answers <code>403</code></th><td>A test mode key is sent to <code>api.creem.io</code>, or a production key to the test API. Each key <a href="https://docs.creem.io/api-reference/error-codes">works in its own environment</a></td><td>Use <code>https://test-api.creem.io</code> with test mode keys only</td></tr><tr><th scope="row">The redirect fails because <code>checkout_url</code> is undefined</th><td>Creem returned an error, and the code read the body without checking the status</td><td>Check <code>res.ok</code> before you read <code>checkout_url</code>, and log the <a href="https://docs.creem.io/api-reference/error-codes">error body</a></td></tr><tr><th scope="row">The server action fails with <code>cookies(...).get is not a function</code></th><td><code>cookies()</code> is async, and Next.js 16 <a href="https://nextjs.org/docs/app/guides/upgrading/version-16">removed synchronous access</a></td><td>Write <code>(await cookies()).get("virling_vid")?.value</code></td></tr><tr><th scope="row">A server action creates the checkout, but the buyer stays on the page</th><td><code>redirect()</code> is inside a <code>try</code> block. It <a href="https://nextjs.org/docs/app/api-reference/functions/redirect">works by throwing an error</a>, which your <code>catch</code> swallows</td><td>Create the checkout inside <code>try</code> and call <code>redirect()</code> after it, as the last line</td></tr><tr><th scope="row">No payment has a visitor ID, and every buyer gets the same checkout</th><td>The request to Creem runs in a <code>GET</code> handler with <code>dynamic = "force-static"</code>, where <a href="https://nextjs.org/docs/app/guides/caching-without-cache-components">cookies are empty</a> and the response is cached</td><td>Create it in a <code>POST</code> handler. Only <code>GET</code> handlers <a href="https://nextjs.org/docs/app/getting-started/route-handlers">can be cached</a></td></tr><tr><th scope="row">An error about <code>cookies()</code> inside <code>use cache</code></th><td>Cached functions <a href="https://nextjs.org/docs/app/api-reference/directives/use-cache">cannot read cookies</a></td><td>Read the cookie outside the cached function, and do not cache the one that creates the checkout</td></tr><tr><th scope="row">Several buyers share one visitor ID, or have none</th><td>The checkout is created while a page renders, and a prerendered or cached page gives its URL to everyone</td><td>Create it in the route handler or server action, when the buyer presses Buy</td></tr><tr><th scope="row">The browser blocks the request to <code>/api/checkout</code> with a CORS error</th><td>A client component calls <code>fetch()</code>, which follows the redirect to Creem's site as a cross-origin request</td><td>Post a form as in step 2, or return <code>checkout_url</code> as JSON and set <code>location.href</code></td></tr><tr><th scope="row">Payments through <code>&lt;CreemCheckout&gt;</code> are Unattributed</th><td>The component <a href="https://docs.creem.io/code/sdks/nextjs">builds a link from its props</a> and does not read the <code>virling_vid</code> cookie</td><td>Replace it with the form and route handler from step 2</td></tr><tr><th scope="row">The checkout route or server action fails in a static export</th><td>With <code>output: "export"</code>, server actions, cookies and handlers that read the request are <a href="https://nextjs.org/docs/app/guides/static-exports">not supported</a></td><td>Create the checkout on a server that receives the cookie, such as one on a subdomain</td></tr><tr><th scope="row">Every payment is Unattributed, though the checkouts carry the ID</th><td>Virling was not reachable over https when you connected, so the webhook is missing</td><td>Set <code>VIRLING_BASE_URL</code> to an https address, restart Virling, then use <b>Replace key</b></td></tr><tr><th scope="row">A test on <code>localhost</code> carries no visitor ID</th><td>The script does nothing on <code>localhost</code>, so there is no cookie to read</td><td>Test on your domain or a subdomain of it</td></tr><tr><th scope="row">A second test keeps the first test's channel</th><td>Any later payment by the same customer is a renewal</td><td>Use a new email address for each test</td></tr></tbody></table></div>
+<p class="p">Every other cause is in <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>. A payment made before a fix usually stays Unattributed, so make a new one to check.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I pass UTM parameters to Creem checkout in Next.js?</h3><p class="p">Pass the Virling visitor ID instead. Read the virling_vid cookie in the route handler or server action that creates the checkout and set metadata: { virling_vid } in POST /v1/checkouts. The script records the UTM tags of every visit against that ID, so the payment is joined to all of them.</p>
+<h3>Do hosted Creem product links get the visitor ID by themselves?</h3><p class="p">No. The Virling script adds the ID on its own only to some providers' checkout links, and Creem is not one of them. Send the Buy button to a route handler or server action that creates the checkout instead.</p>
+<h3>How do I read the virling_vid cookie in the App Router?</h3><p class="p">In a route handler, use req.cookies.get("virling_vid")?.value on the NextRequest. In a server action, use cookies() from next/headers. In a Pages Router API route, use req.cookies.virling_vid.</p>
+<h3>Do UTM parameters survive the redirect to Creem?</h3><p class="p">They do not need to. The redirect to Creem carries only the checkout_url Creem returns. The UTM tags were already recorded against the visitor ID when the visitor landed, and the ID travels in the checkout metadata.</p>
+<h3>Why can I not see virling_vid on my Creem transactions?</h3><p class="p">Creem returns checkout metadata only in webhooks, not on transactions. Virling adds one checkout.completed webhook when you connect, so it needs to be reachable over https.</p>
+<h3>What happens to payments with no visitor ID?</h3><p class="p">They have no visit to join, so Virling shows them as Unattributed. They still count toward revenue.</p>
+<h3>Does Creem test mode work with Virling?</h3><p class="p">Yes. Connect a key that starts with creem_test_ and point your Next.js code at https://test-api.creem.io. Virling reads test transactions and adds its webhook in test mode. Test payments stay in your reports after you replace the key with a live one.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring Creem payments</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

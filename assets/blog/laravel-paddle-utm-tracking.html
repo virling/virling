@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laravel Paddle UTM tracking: Cashier Paddle checkout</title>
+<meta name="description" content="How to tie a Paddle Billing payment in a Laravel app to the visit and UTM tags that brought it, with Laravel Cashier Paddle or the Paddle API.">
+<link rel="canonical" href="https://virling.com/blog/laravel-paddle-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/laravel-paddle-utm-tracking">
+<meta property="og:title" content="Laravel Paddle UTM tracking: Cashier Paddle checkout">
+<meta property="og:description" content="How to tie a Paddle Billing payment in a Laravel app to the visit and UTM tags that brought it, with Laravel Cashier Paddle or the Paddle API.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Laravel Paddle UTM tracking: Cashier Paddle checkout","item":"https://virling.com/blog/laravel-paddle-utm-tracking"}]},{"@type":"BlogPosting","headline":"Laravel Paddle UTM tracking: Cashier Paddle checkout","description":"How to tie a Paddle Billing payment in a Laravel app to the visit and UTM tags that brought it, with Laravel Cashier Paddle or the Paddle API.","datePublished":"2026-11-23","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/laravel-paddle-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Paddle checkout in Laravel?","acceptedAnswer":{"@type":"Answer","text":"Pass the Virling visitor ID instead. Read it with $request->cookie('virling_vid') in the controller that builds the checkout and add it with Cashier's customData(['virling_vid' => $vid]). Paddle stores it in the transaction's custom_data, and the Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them."}},{"@type":"Question","name":"Why does $request->cookie('virling_vid') return null?","acceptedAnswer":{"@type":"Answer","text":"Laravel encrypts cookies by default and returns nothing for a cookie it did not set. Leave virling_vid out of encryption: in Laravel 11 and later with $middleware->encryptCookies(except: ['virling_vid']) in bootstrap/app.php, in older versions by adding it to $except in app/Http/Middleware/EncryptCookies.php."}},{"@type":"Question","name":"Where does Virling read the visitor ID on a Paddle transaction?","acceptedAnswer":{"@type":"Answer","text":"From virling_vid in the transaction's custom_data. Cashier Paddle passes the custom data you set on the checkout to Paddle.js, which saves it on the transaction."}},{"@type":"Question","name":"What about transactions I create on my server?","acceptedAnswer":{"@type":"Answer","text":"Set custom_data: { virling_vid: ... } when you create the transaction through the Paddle API, with the value read from the virling_vid cookie, then open checkout with that transaction ID."}},{"@type":"Question","name":"Which channel do Paddle renewals get?","acceptedAnswer":{"@type":"Answer","text":"Renewals carry no custom data of their own. Virling credits them to the channel of the subscription's first payment, so there is nothing to add for them."}},{"@type":"Question","name":"What happens if the cookie is missing?","acceptedAnswer":{"@type":"Answer","text":"The checkout opens without a visitor ID, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed."}},{"@type":"Question","name":"Does customData() keep the Cashier subscription type?","acceptedAnswer":{"@type":"Answer","text":"No. subscribe() stores the type as subscription_type in the custom data, and customData() replaces that data, so Cashier saves the subscription with the type default. For another type, call checkout('pri_...')->customData(['subscription_type' => 'team', 'virling_vid' => $vid]) instead of subscribe()."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-23</span>
+      <h1>Laravel Paddle UTM tracking: Cashier Paddle checkout</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-23, updated 2026-11-25.</p>
+<p class="p">Laravel Paddle UTM tracking comes down to one value. Load the Virling script in your Blade layout, leave the <code>virling_vid</code> cookie out of Laravel's cookie encryption, then read it with <code>$request-&gt;cookie('virling_vid')</code> in the controller that builds the Cashier Paddle checkout and add it with <code>customData(['virling_vid' =&gt; $vid])</code>. Paddle stores it in the transaction's <code>custom_data</code>, and Virling joins the payment to every visit behind that visitor ID, with the UTM tags of each.</p>
+<p class="p">This post covers Laravel with Cashier Paddle for Paddle Billing, and with the Paddle API directly. The same steps for other stacks are in <a href="/blog/nextjs-paddle-utm-tracking">Next.js Paddle UTM tracking</a> and <a href="/blog/rails-paddle-utm-tracking">Rails Paddle UTM tracking</a>, and with other providers in <a href="/blog/laravel-stripe-utm-tracking">Laravel Stripe UTM tracking</a> and <a href="/blog/laravel-lemonsqueezy-utm-tracking">Laravel LemonSqueezy UTM tracking</a>. For hosted checkout and where the values show up in Paddle, see the general guide to <a href="/blog/paddle-checkout-utm-parameters">Paddle checkout UTM parameters</a>.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Why Paddle checkout loses your UTM tags</h2>
+<p class="p">UTM tags live on the landing URL. Paddle only stores what you pass when checkout opens, and by then the visitor is usually a few pages past the landing page. Passing one visitor ID instead of the tags keeps earlier visits and untagged ones, such as search and referrals, too.</p>
+<h2>Step 1: add the script to the Blade layout</h2>
+<p class="p">Paste the tag before <code>&lt;/head&gt;</code> in the layout every page extends, usually <code>resources/views/layouts/app.blade.php</code>, next to Cashier's <code>@paddleJS</code> directive. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<div class="code block"><pre data-snippet>&lt;!-- resources/views/layouts/app.blade.php --&gt;
+&lt;script defer src="https://app.virling.com/v.js"
+  data-site="yourdomain.com"&gt;&lt;/script&gt;
+@paddleJS</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain and records the UTM tags of each visit against it.</p>
+<h2>Step 2: leave the cookie out of encryption</h2>
+<p class="p">Laravel encrypts cookies by default, and <code>$request-&gt;cookie()</code> returns nothing for a cookie it did not set itself. The script sets <code>virling_vid</code> in the browser, so exclude it. In Laravel 11 and later, in <code>bootstrap/app.php</code>:</p>
+<div class="code block"><pre data-snippet>-&gt;withMiddleware(function (Middleware $middleware) {
+    $middleware-&gt;encryptCookies(except: ['virling_vid']);
+})</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">In older versions, add it to <code>$except</code> in <code>app/Http/Middleware/EncryptCookies.php</code>:</p>
+<div class="code block"><pre data-snippet>protected $except = [
+    'virling_vid',
+];</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>Step 3: add the visitor ID to the Cashier checkout</h2>
+<p class="p">Cashier Paddle builds the checkout on the server and hands it to Paddle.js in the browser. Read the cookie in the controller and pass it with <code>customData()</code>:</p>
+<div class="code block"><pre data-snippet>// app/Http/Controllers/BillingController.php
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class BillingController extends Controller
+{
+    public function show(Request $request)
+    {
+        $checkout = $request-&gt;user()
+            -&gt;subscribe('pri_...', 'default')
+            -&gt;customData(['virling_vid' =&gt; $request-&gt;cookie('virling_vid')])
+            -&gt;returnTo(route('dashboard'));
+
+        return view('billing', ['checkout' =&gt; $checkout]);
+    }
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Then render Cashier's checkout button in the Blade view. Paddle saves the custom data on the transaction when the buyer pays:</p>
+<div class="code block"><pre data-snippet>&lt;!-- resources/views/billing.blade.php --&gt;
+&lt;x-paddle-button :checkout="$checkout"&gt;
+    Subscribe
+&lt;/x-paddle-button&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">For a one-off purchase, <code>$request-&gt;user()-&gt;checkout('pri_...')</code> returns the same checkout object, so <code>customData()</code> works there too. The inline <code>&lt;x-paddle-checkout&gt;</code> component takes the same <code>$checkout</code>.</p>
+<h2>Or create the transaction with the Paddle API</h2>
+<p class="p">If your server creates the transaction itself, set <code>custom_data</code> on it and open checkout with its ID:</p>
+<div class="code block"><pre data-snippet>use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+
+Route::post('/checkout', function (Request $request) {
+    $transaction = Http::withToken(config('services.paddle.key'))
+        -&gt;post('https://api.paddle.com/transactions', [
+            'items' =&gt; [['price_id' =&gt; 'pri_...', 'quantity' =&gt; 1]],
+            'custom_data' =&gt; ['virling_vid' =&gt; $request-&gt;cookie('virling_vid')],
+        ])-&gt;json('data');
+
+    return ['transactionId' =&gt; $transaction['id']];
+})-&gt;name('checkout');</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The browser then calls <code>Paddle.Checkout.open({ transactionId })</code>. The full setup is in the <a href="https://docs.virling.com/payments/paddle">Paddle docs</a>, and the <a href="/integrations/paddle">Paddle integration page</a> shows what Virling imports.</p>
+<h2>Subscriptions and renewals</h2>
+<p class="p">Only the first payment needs the visitor ID. Renewals carry no custom data of their own; Virling marks them as renewals and credits them to the channel of the subscription's first payment, with no code on your side. Plan changes with Cashier's <code>swap()</code> count as renewals too.</p>
+<h2>Check that it works</h2>
+<p class="p">Run one sandbox payment through the whole path:</p>
+<ol class="post-list"><li>In Virling, connect a read-only <a href="https://docs.virling.com/payments/paddle">Paddle API key</a> from the sandbox, which starts with <code>pdl_sdbx_</code>.</li><li>In <code>.env</code>, set <code>PADDLE_SANDBOX=true</code> and your app's own sandbox API key, client-side token and webhook secret, and use a sandbox price ID (<a href="https://laravel.com/docs/cashier-paddle#paddle-sandbox">Cashier sandbox</a>). <code>@paddleJS</code> then switches Paddle.js to the sandbox. In the API example, change the host to <code>sandbox-api.paddle.com</code>.</li><li>Run the app on your domain or a subdomain of it, such as <code>staging.yourdomain.com</code>. Visits on <code>localhost</code> or a <code>.test</code> address are not recorded for your site.</li><li>Open a private window and visit a page that runs the script through a tagged link, such as <code>https://staging.yourdomain.com/?utm_source=test&amp;utm_medium=email</code>. Run <code>window.virling.vid()</code> in the browser console and note the ID.</li><li>In the same window, sign in as a new user with a new email address, open the billing page and press the Subscribe button. Before you pay, the button's <code>data-custom-data</code> attribute should hold the ID from step 4. Pay with one of <a href="https://developer.paddle.com/concepts/payment-methods/card">Paddle's test cards</a>.</li><li>In the Paddle sandbox, open the transaction. Its <a href="https://developer.paddle.com/build/transactions/custom-data">custom data</a> should list <code>virling_vid</code> with the same ID.</li><li>Wait a minute for the next sync, then open the payments list at <code>/app/yourdomain.com/payments</code>. The payment shows the <code>test</code> source and the <b>Email</b> channel of your tagged visit instead of Unattributed. Open it to see its journey.</li></ol>
+<p class="p">Use a new email address for each test: a later payment by the same customer is a renewal and keeps the first payment's channel. A site has one Paddle connection, and test payments stay in your reports after you replace the key with a live one. If a step fails, see <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>.</p>
+<p class="p">Payments without a visitor ID still count toward revenue, as Unattributed. How the join works from visit to payment is in <a href="/blog/track-paddle-revenue-by-traffic-source">how to track Paddle revenue by traffic source</a>.</p>
+<h2>Common mistakes</h2>
+<p class="p">Open an Unattributed payment and look for <b>Visitor</b> under <b>Details</b>. If there is none, checkout did not carry the ID.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>What you see</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row"><code>$request-&gt;cookie('virling_vid')</code> is null, so the custom data holds no ID</th><td>The cookie is still encrypted as far as Laravel knows: <code>EncryptCookies</code> sets a value it cannot decrypt to null</td><td>Add it to the encryption exceptions from step 2 (<a href="https://laravel.com/docs/responses#cookies-and-encryption">cookies and encryption</a>)</td></tr><tr><th scope="row">Null only when the billing page is the first page of the visit</th><td>Cashier writes the custom data into the HTML on the server, before the script has set the cookie</td><td>Link to the billing page from another page, or open checkout in the browser with <code>window.virling?.vid?.()</code> in <code>customData</code> (<a href="https://docs.virling.com/payments/paddle">Paddle docs</a>)</td></tr><tr><th scope="row">A subscription is saved as <code>default</code> instead of its own type</th><td><code>subscribe()</code> sets <code>subscription_type</code> as custom data, and <code>customData()</code> replaces it (<a href="https://github.com/laravel/cashier-paddle/blob/2.x/src/Checkout.php">Cashier source</a>)</td><td>Use <code>checkout('pri_...')-&gt;customData(['subscription_type' =&gt; 'team', 'virling_vid' =&gt; $vid])</code></td></tr><tr><th scope="row">Many payments carry the same visitor ID</th><td>The page with the Paddle button is cached, for example with a public <code>cache.headers</code> rule or at a CDN, and the ID is in its HTML</td><td>Keep that page out of shared caches (<a href="https://laravel.com/docs/responses#cache-control-middleware">cache control middleware</a>)</td></tr><tr><th scope="row"><code>Trying to access array offset on null</code> in the API route</th><td>Paddle refused the request, for example a sandbox key sent to <code>api.paddle.com</code>, so there is no <code>data</code></td><td>Match key and host: sandbox keys work only on <code>sandbox-api.paddle.com</code> (<a href="https://developer.paddle.com/sdks/sandbox">Paddle sandbox</a>)</td></tr><tr><th scope="row"><code>PADDLE_SANDBOX=true</code> has no effect</th><td>The configuration is cached, so <code>.env</code> is not loaded</td><td>Run <code>php artisan config:clear</code> (<a href="https://laravel.com/docs/configuration#configuration-caching">configuration caching</a>)</td></tr><tr><th scope="row">The visit has no UTM tags</th><td>The ad lands on a URL that redirects, for example to add a locale or a trailing slash, and the redirect does not keep the query string</td><td>Keep the query string. See <a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a></td></tr><tr><th scope="row">No visitor ID when checkout runs on another domain</th><td>The cookie is first-party, so a page on another domain does not receive it</td><td>Put the page with the checkout button on the domain the script runs on, or a subdomain (<a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>)</td></tr><tr><th scope="row">The payment has a visitor ID but is Unattributed after a test on a <code>.test</code> address</th><td><a href="https://laravel.com/docs/valet">Valet</a> serves apps on <code>.test</code>, and visits are kept only when the page's host is your site's domain or one of its subdomains</td><td>Test on a subdomain of the domain in <code>data-site</code> (<a href="https://docs.virling.com/track/script">script docs</a>)</td></tr><tr><th scope="row">You look for a place to add the ID to renewals</th><td>Virling credits renewals through the customer's first payment</td><td>Nothing to add. Do not try to set it on each renewal (<a href="https://docs.virling.com/attribution/renewals">renewals</a>)</td></tr></tbody></table></div>
+<p class="p">Every other cause is in <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>. A payment made before a fix usually stays Unattributed, so make a new one to check.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I pass UTM parameters to Paddle checkout in Laravel?</h3><p class="p">Pass the Virling visitor ID instead. Read it with $request-&gt;cookie('virling_vid') in the controller that builds the checkout and add it with Cashier's customData(['virling_vid' =&gt; $vid]). Paddle stores it in the transaction's custom_data, and the Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them.</p>
+<h3>Why does $request-&gt;cookie('virling_vid') return null?</h3><p class="p">Laravel encrypts cookies by default and returns nothing for a cookie it did not set. Leave virling_vid out of encryption: in Laravel 11 and later with $middleware-&gt;encryptCookies(except: ['virling_vid']) in bootstrap/app.php, in older versions by adding it to $except in app/Http/Middleware/EncryptCookies.php.</p>
+<h3>Where does Virling read the visitor ID on a Paddle transaction?</h3><p class="p">From virling_vid in the transaction's custom_data. Cashier Paddle passes the custom data you set on the checkout to Paddle.js, which saves it on the transaction.</p>
+<h3>What about transactions I create on my server?</h3><p class="p">Set custom_data: { virling_vid: ... } when you create the transaction through the Paddle API, with the value read from the virling_vid cookie, then open checkout with that transaction ID.</p>
+<h3>Which channel do Paddle renewals get?</h3><p class="p">Renewals carry no custom data of their own. Virling credits them to the channel of the subscription's first payment, so there is nothing to add for them.</p>
+<h3>What happens if the cookie is missing?</h3><p class="p">The checkout opens without a visitor ID, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed.</p>
+<h3>Does customData() keep the Cashier subscription type?</h3><p class="p">No. subscribe() stores the type as subscription_type in the custom data, and customData() replaces that data, so Cashier saves the subscription with the type default. For another type, call checkout('pri_...')-&gt;customData(['subscription_type' =&gt; 'team', 'virling_vid' =&gt; $vid]) instead of subscribe().</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring Paddle revenue</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

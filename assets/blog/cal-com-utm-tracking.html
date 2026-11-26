@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cal.com UTM tracking: which channel books calls that pay</title>
+<meta name="description" content="Cal.com UTM tracking step by step: tag a booking link or embed, pass the visitor ID, and join each booked call to the invoice that is paid weeks later.">
+<link rel="canonical" href="https://virling.com/blog/cal-com-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/cal-com-utm-tracking">
+<meta property="og:title" content="Cal.com UTM tracking: which channel books calls that pay">
+<meta property="og:description" content="Cal.com UTM tracking step by step: tag a booking link or embed, pass the visitor ID, and join each booked call to the invoice that is paid weeks later.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Cal.com UTM tracking: which channel books calls that pay","item":"https://virling.com/blog/cal-com-utm-tracking"}]},{"@type":"BlogPosting","headline":"Cal.com UTM tracking: which channel books calls that pay","description":"Cal.com UTM tracking step by step: tag a booking link or embed, pass the visitor ID, and join each booked call to the invoice that is paid weeks later.","datePublished":"2026-11-25","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/cal-com-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I add UTM parameters to a Cal.com link?","acceptedAnswer":{"@type":"Answer","text":"Put a question mark after the booking link, then the tags joined with an ampersand, such as ?utm_source=newsletter&utm_medium=email&utm_campaign=october-launch. Cal.com stores the five standard tags with the booking, with no setup."}},{"@type":"Question","name":"Where do I see UTM data in Cal.com?","acceptedAnswer":{"@type":"Answer","text":"On the booking details page, when you are logged in. Cal.com says only the hosts of the booking can view the UTM parameters and the answers to hidden booking questions."}},{"@type":"Question","name":"Do UTM tags work in a Cal.com embed?","acceptedAnswer":{"@type":"Answer","text":"Yes, but not by default. Pass them in the config of the embed code, or set Cal.config.forwardQueryParams to true, which forwards every parameter in the address of the page, not only the UTM tags."}},{"@type":"Question","name":"Does Virling connect to Cal.com?","acceptedAnswer":{"@type":"Answer","text":"No. Virling never sees your calendar or your bookings. It sees the visit to your page, the goal your page sends, the email your server sends in an identify event, and the payment from your provider."}},{"@type":"Question","name":"How do I join a Cal.com booking to a Stripe invoice?","acceptedAnswer":{"@type":"Answer","text":"Pass the Virling visitor ID with the booking. When the Cal.com webhook arrives, your server sends that ID and the email to Virling in an identify event. A later Stripe invoice paid with the same email is credited to that visitor."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-25</span>
+      <h1>Cal.com UTM tracking: which channel books calls that pay</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post" style="overflow-wrap:anywhere">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-25.</p>
+<p class="p">For <b>Cal.com UTM tracking</b>, add the tags to your booking link after a <code>?</code>, or pass them in the embed code. Cal.com stores them with the booking. It does not say which calls became paid invoices. For that, the booking has to be joined to the payment.</p>
+<p class="p">Cal.com facts here come from its help pages, linked below and read on 2026-11-25. Steps they do not cover are left out. <b>Virling does not connect to Cal.com.</b> The join below uses your own page and server.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Step 1: tag a Cal.com booking link</h2>
+<p class="p">Cal.com tracks <code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code>, <code>utm_term</code> and <code>utm_content</code> with no setup (source: <a href="https://cal.com/help/bookings/utm-tracking">Cal.com, UTM parameter tracking</a>):</p>
+<div class="code block"><pre data-snippet>https://cal.com/YOUR_NAME/30min?utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=october-launch</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Any other name needs a hidden booking question of type Short Text, not required, with the name as its identifier. The free <a href="/tools/utm-builder">UTM builder</a> makes tags you can reuse.</p>
+<p class="p">A direct link has one cost: the page is on cal.com, so your script does not run there. A person who goes from your email straight to Cal.com makes no visit to your site. If you want revenue per channel, send them to a page of yours first.</p>
+<h2>Step 2: add the visitor ID to links on your site</h2>
+<p class="p">Put the <a href="https://docs.virling.com/track/script">Virling script</a> on every page of your site and leave cookieless mode off, or there is no visitor ID to pass. Then add a hidden Short Text question with the identifier <code>virling_vid</code> to the booking form. Cal.com prefills a question from a URL parameter with the same identifier (source: <a href="https://cal.com/help/bookings/prefill-fields">Cal.com, pre-fill fields</a>). This code adds the ID and the tags to each Cal.com link on the page:</p>
+<div class="code block"><pre data-snippet>&lt;script&gt;
+addEventListener("load", function () {
+  var query = new URLSearchParams(location.search);
+  var vid = window.virling?.vid?.();
+  document.querySelectorAll('a[href^="https://cal.com/"]').forEach(function (a) {
+    var link = new URL(a.href);
+    ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"].forEach(function (k) {
+      var value = window.leadUtm ? leadUtm.tags[k] : query.get(k);
+      if (value) link.searchParams.set(k, value);
+    });
+    if (vid) link.searchParams.set("virling_vid", vid);
+    a.href = link.href;
+  });
+});
+&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p"><code>leadUtm</code> comes from the snippet in <a href="/blog/utm-parameters-hidden-form-fields">UTM parameters in hidden form fields</a>, which goes on every page and remembers the tags. Without it, the code reads only the address of the current page, so a visitor who lands on one page and books on another loses them.</p>
+<h2>Step 3: tag an embed</h2>
+<p class="p">Cal.com gives two ways. You can pass the tags in the <code>config</code> of an inline, popup or floating button embed (source: <a href="https://cal.com/help/embedding/utm-tracking-embed">Cal.com, UTM tracking in embeds</a>). Or you can turn on forwarding, right after the code from the embed snippet generator (source: <a href="https://cal.com/help/embedding/embed-auto-forward-query-params">Cal.com, auto-forwarding query parameters</a>):</p>
+<div class="code block"><pre data-snippet>&lt;script&gt;
+  Cal.config = Cal.config || {};
+  Cal.config.forwardQueryParams = true;
+&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Forwarding is off by default and sends every parameter in the page address as it is, so do not use it on pages whose addresses hold anything private. Cal.com says it does not work on Framer. It also sees only the booking page&rsquo;s own address. The <code>config</code> way can use remembered tags, and can carry the visitor ID as metadata.</p>
+<p class="p">Cal.com documents <code>metadata[myKey]</code> in the embed <code>config</code>: the value arrives in the webhook as <code>payload.metadata["myKey"]</code> and is not shown on the booking details page (source: <a href="https://cal.com/help/embedding/prefill-booking-form-embed">Cal.com, prefill booking form in embed</a>). Keep the loader and <code>init</code> lines of your own snippet, and replace its <code>inline</code> call with this. <code>30min</code> stands for your namespace, which the generator derives from the event type:</p>
+<div class="code block"><pre data-snippet>&lt;div id="my-cal-inline"&gt;&lt;/div&gt;
+&lt;script&gt;
+addEventListener("load", function () {
+  var query = new URLSearchParams(location.search), config = {};
+  ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"].forEach(function (k) {
+    var value = window.leadUtm ? leadUtm.tags[k] : query.get(k);
+    if (value) config[k] = value;
+  });
+  var vid = window.virling?.vid?.();
+  if (vid) config["metadata[virling_vid]"] = vid;
+  Cal.ns["30min"]("inline", {
+    elementOrSelector: "#my-cal-inline",
+    calLink: "YOUR_NAME/30min",
+    config: config
+  });
+});
+&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">An embed is a frame from another domain, so it cannot read the <code>virling_vid</code> cookie. Cal.com knows the visitor ID only if you pass it. Cal.com documents metadata for embeds, not for plain links, which is why step 2 uses a hidden question.</p>
+<h2>Step 4: see the tags and record a goal</h2>
+<p class="p">Make a test booking from a tagged link, then open its booking details page while logged in. Only the hosts of the booking can see the tags and the hidden answers (source: <a href="https://cal.com/help/bookings/utm-tracking">Cal.com, UTM parameter tracking</a>).</p>
+<p class="p">To count bookings in Virling, send a goal when the embed reports one. <code>bookingSuccessfulV2</code> fires on a fresh booking, which might not be confirmed yet (source: <a href="https://cal.com/help/embedding/embed-events">Cal.com, embed events</a>). Put this in the same <code>load</code> function:</p>
+<div class="code block"><pre data-snippet>Cal.ns["30min"]("on", {
+  action: "bookingSuccessfulV2",
+  callback: function () { window.virling?.("goal", "booking"); }
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The properties listed for that event include no email, so the goal cannot do the join. A redirect after booking does carry the email in the address, because <b>Forward parameters</b> is on by default (source: <a href="https://cal.com/help/event-types/booking-success-page-query-params">Cal.com, booking success redirect parameters</a>). Addresses stay in browser history and server logs, so turn it off if your page does not need it.</p>
+<h2>Step 5: join the booked call to the payment</h2>
+<p class="p">A booked call is not a sale. The call and the contract leave no visit, and an invoice you send from Stripe carries no visitor ID. Virling matches that invoice by email, so it needs the email and the visitor ID together, before the payment.</p>
+<h3>With a webhook</h3>
+<p class="p">In Cal.com, open <code>/settings/developer/webhooks</code>, subscribe your server to <b>Booking Created</b> and set a secret. Check the <code>X-Cal-Signature-256</code> header, an SHA-256 HMAC of the body made with that secret (source: <a href="https://cal.com/help/webhooks">Cal.com, webhooks</a>). Then send one <code>identify</code> event. Here <code>body</code> is the parsed webhook. An embed booking has the ID in <code>metadata</code>, and a link booking has it under the question&rsquo;s identifier, which Cal.com uses in webhook payloads (source: <a href="https://cal.com/help/event-types/booking-questions">Cal.com, booking questions</a>):</p>
+<div class="code block"><pre data-snippet>const p = body.payload;
+const vid = p?.metadata?.virling_vid || p?.responses?.virling_vid?.value;
+const email = p?.responses?.email?.value;
+if (body.triggerEvent === "BOOKING_CREATED" &amp;&amp; vid &amp;&amp; email) {
+  await fetch("https://app.virling.com/api/event", {
+    method: "POST",
+    headers: { "User-Agent": "booking-webhook/1.0" },
+    body: JSON.stringify({ n: "identify", u: "https://yourproduct.com/", s: "yourproduct.com", v: vid, m: email }),
+  });
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The webhook examples show no UTM fields, so read the tags on the booking details page.</p>
+<h3>Without a server</h3>
+<p class="p">Ask for the work email in a short form on your own page, send the <code>identify</code> event from there, then show the calendar. The code is in <a href="/blog/demo-booking-revenue-tracking">demo booking revenue tracking</a>.</p>
+<h3>When the invoice is paid</h3>
+<p class="p">Virling keeps only a SHA-256 hash of the trimmed, lowercased email with a salt of your site. A later Stripe payment with no visitor ID and the same payer email, from the billing details or the receipt, is credited to that visitor and shows <b>Matched by email</b>. If the deal closes in a Checkout Session your server creates instead, pass the ID as <code>client_reference_id</code> or <code>metadata.virling_vid</code>, and no email is needed. Renewals follow the channel of the customer&rsquo;s first payment.</p>
+<p class="p">Set the lookback window longer than your sales cycle: 30, 60, 90 or 365 days, with 90 as the default. Name the email and the visitor ID in your privacy policy. The full setup is in the <a href="https://docs.virling.com/guides/b2b-sales">sales-led B2B guide</a>, and the matching is explained in <a href="/blog/stripe-invoice-attribution">Stripe invoice attribution</a>.</p>
+<h2>A made-up example: bookings, calls held and revenue</h2>
+<p class="p">These numbers are invented to show the method. One quarter of booked calls, and the invoices those calls led to:</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:560px"><thead><tr><th>Made up</th><th>Bookings</th><th>Calls held</th><th>Paid revenue</th><th>Revenue per call held</th></tr></thead><tbody><tr><th scope="row">Paid</th><td>50</td><td>25</td><td>$3,000</td><td>$120</td></tr><tr><th scope="row">Organic search</th><td>20</td><td>16</td><td>$9,600</td><td>$600</td></tr><tr><th scope="row">Email</th><td>15</td><td>12</td><td>$4,800</td><td>$400</td></tr><tr><th scope="row">All</th><td>85</td><td>53</td><td>$17,400</td><td>about $328</td></tr></tbody></table></div>
+<p class="p">Paid brought 50 of the 85 bookings, but half were not held, and the calls that were held brought $3,000. Organic search brought 20 bookings, 16 were held, and they brought $9,600. Counted by bookings, Paid looks best. Counted by money it is last, at $60 per booking against $480 for Organic search and $320 for Email. Two things went wrong for Paid: people did not turn up, and the calls that were held brought less each. The first may be worth fixing before the campaign is cut.</p>
+<p class="p">Calls held come from your calendar, not from Virling. Cal.com sends <b>Booking No-show Updated</b> when someone is marked on the <code>/bookings/past</code> page. Do not use <b>Meeting Ended</b> for this: it fires at the scheduled end time (source: <a href="https://cal.com/help/webhooks">Cal.com, webhooks</a>). Few deals make a shaky ranking, so wait until most have had time to close. To turn a close rate and a deal size into what one booking is worth, use the <a href="/tools/lead-value-calculator">lead value calculator</a>.</p>
+<h2>Read it in Virling</h2>
+<p class="p">Click a channel on the Channels card, read its revenue, then open the Goals tab for its <code>booking</code> count. Divide one by the other yourself. A goal belongs to the visit it happened in, while revenue follows your attribution model, so the two can sit in different channels for one buyer.</p>
+<h2>What still cannot be joined</h2>
+<ul class="post-list"><li><b>A booking from a link outside your site.</b> No visit, so no visitor ID.</li><li><b>A different payer.</b> Email matching is exact. An accounts team paying from its own address does not match.</li><li><b>A payment synced before the identify.</b> Send it at the booking, not after the deal closes.</li><li><b>Blocked scripts.</b> With no visitor ID, the booking still goes through, but nothing is joined.</li></ul>
+<p class="p">Those payments still count toward revenue, as <b>Unattributed</b>. If you use Calendly, the same join is in <a href="/blog/calendly-utm-tracking">Calendly UTM tracking</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I add UTM parameters to a Cal.com link?</h3><p class="p">Put a question mark after the booking link, then the tags joined with an ampersand, such as ?utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=october-launch. Cal.com stores the five standard tags with the booking, with no setup.</p>
+<h3>Where do I see UTM data in Cal.com?</h3><p class="p">On the booking details page, when you are logged in. Cal.com says only the hosts of the booking can view the UTM parameters and the answers to hidden booking questions.</p>
+<h3>Do UTM tags work in a Cal.com embed?</h3><p class="p">Yes, but not by default. Pass them in the config of the embed code, or set Cal.config.forwardQueryParams to true, which forwards every parameter in the address of the page, not only the UTM tags.</p>
+<h3>Does Virling connect to Cal.com?</h3><p class="p">No. Virling never sees your calendar or your bookings. It sees the visit to your page, the goal your page sends, the email your server sends in an identify event, and the payment from your provider.</p>
+<h3>How do I join a Cal.com booking to a Stripe invoice?</h3><p class="p">Pass the Virling visitor ID with the booking. When the Cal.com webhook arrives, your server sends that ID and the email to Virling in an identify event. A later Stripe invoice paid with the same email is credited to that visitor.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which booked calls turn into paid invoices</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

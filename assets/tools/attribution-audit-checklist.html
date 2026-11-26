@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revenue attribution audit checklist | Virling</title>
+<meta name="description" content="Find out why revenue shows up as Direct or unattributed. Check the script, UTM tags, redirects, cross-domain checkout and payment connection.">
+<link rel="canonical" href="https://virling.com/tools/attribution-audit-checklist">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/attribution-audit-checklist">
+<meta property="og:title" content="Revenue attribution audit checklist | Virling">
+<meta property="og:description" content="Find out why revenue shows up as Direct or unattributed. Check the script, UTM tags, redirects, cross-domain checkout and payment connection.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Revenue attribution audit checklist","url":"https://virling.com/tools/attribution-audit-checklist","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Revenue attribution audit checklist","item":"https://virling.com/tools/attribution-audit-checklist"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+<style>
+.ck h2 { margin: 8px 0 0; font-size: 22px; }
+.ck-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.ck-list label { display: flex; align-items: flex-start; gap: 10px; font-size: 15px; line-height: 1.5; cursor: pointer; }
+.ck-list input { flex: none; width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--ink); }
+.ck-list input:checked + span { color: var(--ink-3); }
+@media print {
+  @page { margin: 12mm; }
+  body { background: #fff; }
+  .wrap:has(> .top), .foot, .hero, main > .band:not(.ck-band), .tool-out, .tool-cta { display: none !important; }
+  .band { padding: 0 !important; border: 0 !important; background: #fff !important; }
+  .ck-list { gap: 4px; }
+  .ck-list label { font-size: 12px; }
+  .ck h2 { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / attribution audit checklist</span><h1>Revenue attribution audit checklist</h1><p class="lead">A printable checklist for when revenue shows up as Direct or unattributed and you want to know why: check the tracking script, your links and UTM tags, redirects and cross-domain checkout, the payment connection, and finish with a test purchase. Each item links to the fix. Tick items as you go; your progress stays in this browser. Print it or copy it as Markdown.</p></div></div></section>
+  <section class="band ck-band"><div class="wrap"><div class="tool ck">
+<h2>Tracking script</h2>
+<ul class="ck-list">
+<li><label><input type="checkbox" id="script-1"><span>The script is on every page, including landing pages, the blog, the pricing page and the page that opens checkout. A visit from a page without it is never recorded.</span></label></li>
+<li><label><input type="checkbox" id="script-2"><span>It loads: in the browser network tab, <code>v.js</code> loads and a request to <code>/api/event</code> is answered with <code>202</code>. See <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>.</span></label></li>
+<li><label><input type="checkbox" id="script-3"><span>Subdomains such as <code>app.yourdomain.com</code> run the same script, so the visitor keeps the same ID across them.</span></label></li>
+<li><label><input type="checkbox" id="script-4"><span>You test from a browser that is not opted out with <code>#virling-ignore</code>, from an address not under Ignored IP addresses, and not on <code>localhost</code> unless the tag has <code>data-dev</code>.</span></label></li>
+</ul>
+<h2>Links and UTM tags</h2>
+<ul class="ck-list">
+<li><label><input type="checkbox" id="links-1"><span>Every link you control carries <code>utm_source</code>, <code>utm_medium</code> and <code>utm_campaign</code>: emails, newsletters, bios, chat and PDF links. Untagged links from apps and email often arrive with no referrer and land in Direct. See <a href="/blog/why-is-direct-my-biggest-traffic-source">why Direct is your biggest traffic source</a>.</span></label></li>
+<li><label><input type="checkbox" id="links-2"><span>Each link passes the <a href="/tools/utm-checker">UTM checker</a>: no missing source or medium, no capitals or spaces, no duplicate parameters and no tags after the <code>#</code>.</span></label></li>
+<li><label><input type="checkbox" id="links-3"><span>Links between your own pages carry no UTM tags. A page that loads with different tags starts a new session and overwrites the source the visitor arrived with.</span></label></li>
+<li><label><input type="checkbox" id="links-4"><span>Short links point to the full tagged address. Tags added to the short link itself may be dropped.</span></label></li>
+</ul>
+<h2>Redirects and cross-domain checkout</h2>
+<ul class="ck-list">
+<li><label><input type="checkbox" id="redirect-1"><span>Every redirect keeps the query string: http to https, www to the bare domain and the trailing slash. Run <code>curl -sIL</code> on a tagged link and read each <code>Location</code> header. See <a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a>.</span></label></li>
+<li><label><input type="checkbox" id="redirect-2"><span>Consent banners, login pages and single-page app routers send the visitor back to the full address, tags included. Run <code>location.search</code> in the console on a tagged landing page before clicking anything.</span></label></li>
+<li><label><input type="checkbox" id="redirect-3"><span>Checkout on another domain gets the visitor ID. Cookies stay on your domain, so pass <code>virling_vid</code> into checkout. See <a href="/blog/cross-domain-checkout-attribution">cross-domain checkout attribution</a>.</span></label></li>
+<li><label><input type="checkbox" id="redirect-4"><span>A second domain you own carries the visitor ID in the link into it, and is listed under Same-visit domains in Site settings.</span></label></li>
+</ul>
+<h2>Payment connection</h2>
+<ul class="ck-list">
+<li><label><input type="checkbox" id="pay-1"><span>Your payment provider is connected with a live key, so real payments are read and matched to visits.</span></label></li>
+<li><label><input type="checkbox" id="pay-2"><span>Checkouts you create on your server include the visitor ID in the field your provider uses, such as <code>client_reference_id</code> or <code>metadata</code> on Stripe and custom data on Paddle. The <a href="/tools/checkout-snippet-generator">checkout snippet generator</a> writes the code.</span></label></li>
+<li><label><input type="checkbox" id="pay-3"><span>The Matched revenue line on the dashboard is checked. It gives the share of revenue matched to a visit and why the rest was not, such as payments with no visitor ID.</span></label></li>
+<li><label><input type="checkbox" id="pay-4"><span>The lookback window is longer than your trial plus the time customers take to decide. It is 90 days by default, and a payment with no visit inside it is not matched.</span></label></li>
+</ul>
+<h2>Test purchase</h2>
+<ul class="ck-list">
+<li><label><input type="checkbox" id="test-1"><span>In a private window, open your site from a tagged link such as <code>?utm_source=test&amp;utm_medium=test</code> and check that the <code>test</code> source shows on the dashboard.</span></label></li>
+<li><label><input type="checkbox" id="test-2"><span>In the same window, go from a page that runs the script to checkout and pay in your provider&rsquo;s test mode with a test key connected for the test, or make one small live payment and refund it.</span></label></li>
+<li><label><input type="checkbox" id="test-3"><span>The payment shows the <code>test</code> source in the payments list, not Unattributed, and its journey starts at the tagged visit, not at the checkout page.</span></label></li>
+<li><label><input type="checkbox" id="test-4"><span>If it does not, follow the steps for your provider in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>.</span></label></li>
+</ul>
+<div class="tool-out"><span class="dim">Ticks are saved in this browser only.</span><output id="ck-status"></output><button class="btn sm" type="button" id="ck-copy">Copy as Markdown</button><button class="btn sm" type="button" id="ck-print">Print</button><button class="btn sm" type="button" id="ck-reset">Clear ticks</button></div>
+<div class="txt post tool-cta">
+<p class="p">The checklist finds where the source gets lost. Virling does the counting: it links every visit to the payment it led to, so each channel shows the customers and revenue it brought from real payments, and the Matched revenue line shows what is still missing. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free</a></p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Why revenue shows up as Direct</h2>
+<p class="p">Direct is not a channel. It is what is left when a visit carries no referrer and no UTM tag, or when a payment cannot be tied to the visit that came before it. Most of it comes from a few places: links you did not tag, redirects that drop the tags, and checkouts on another domain that never receive the visitor ID. Each section of this checklist covers one of them, and the test purchase at the end shows whether the whole path works.</p>
+<p class="p">A payment with no visitor ID cannot be credited after the fact, so fix the path first and judge channels on the payments that come after.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Related tools and guides</h2>
+<ul class="post-list"><li><a href="/tools/utm-checker">UTM checker</a>: find mistakes in tagged links.</li><li><a href="/tools/checkout-snippet-generator">Checkout snippet generator</a>: pass the visitor ID into checkout.</li><li><a href="/blog/why-is-direct-my-biggest-traffic-source">Why Direct is your biggest traffic source</a>: what lands in Direct and how to shrink it.</li><li><a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a>: find the hop that drops the tags.</li><li><a href="/blog/cross-domain-checkout-attribution">Cross-domain checkout attribution</a>: keep the source of every sale.</li><li><a href="https://docs.virling.com/guides/test-your-setup">Test your setup</a>: one test visit and one test payment, provider by provider.</li><li><a href="/tools/attribution-setup-generator">Attribution setup generator</a>: the exact steps for your site builder and payment provider.</li><li><a href="/tools/attribution-model-calculator">Compare attribution models</a>: see how five models split one payment.</li><li><a href="/tools/bulk-utm-builder">Bulk UTM builder</a>: tag a whole list of links with the same names.</li><li><a href="/blog/revenue-attribution-glossary">Revenue attribution glossary</a>: what Direct, unattributed and visitor ID mean.</li></ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Attribution audit checklist FAQ</h2>
+    <div class="faq-list">
+      <div><h3>Why is my revenue showing as Direct?</h3><p class="p">Because the visit before the payment had no referrer and no UTM tag, or the payment never got the visitor ID and could not be tied to a visit. Untagged links, redirects that drop the query string and checkout on another domain are the usual causes.</p></div>
+      <div><h3>What should an attribution audit check?</h3><p class="p">That the tracking script runs on every page, that your links are tagged and keep their tags through redirects, that checkout receives the visitor ID, that the payment provider is connected, and that a test purchase shows the source you tagged.</p></div>
+      <div><h3>Can I fix attribution for past payments?</h3><p class="p">No. A payment that arrived without a visitor ID has no link to a visit. Fix the path, run a test purchase, and judge channels on the payments that come after.</p></div>
+      <div><h3>Where is my progress saved?</h3><p class="p">In your browser's local storage on this device. Nothing is sent anywhere. Copy it as Markdown to keep it in a doc or an issue, or print the page.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Why is my revenue showing as Direct?", "acceptedAnswer": {"@type": "Answer", "text": "Because the visit before the payment had no referrer and no UTM tag, or the payment never got the visitor ID and could not be tied to a visit. Untagged links, redirects that drop the query string and checkout on another domain are the usual causes."}}, {"@type": "Question", "name": "What should an attribution audit check?", "acceptedAnswer": {"@type": "Answer", "text": "That the tracking script runs on every page, that your links are tagged and keep their tags through redirects, that checkout receives the visitor ID, that the payment provider is connected, and that a test purchase shows the source you tagged."}}, {"@type": "Question", "name": "Can I fix attribution for past payments?", "acceptedAnswer": {"@type": "Answer", "text": "No. A payment that arrived without a visitor ID has no link to a visit. Fix the path, run a test purchase, and judge channels on the payments that come after."}}, {"@type": "Question", "name": "Where is my progress saved?", "acceptedAnswer": {"@type": "Answer", "text": "In your browser's local storage on this device. Nothing is sent anywhere. Copy it as Markdown to keep it in a doc or an issue, or print the page."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channel is behind your Direct revenue</h2>
+<p class="p">Virling links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers, and how much is still unmatched. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const KEY = "virling-attribution-checklist", boxes = [...document.querySelectorAll(".ck-list input")], status = document.getElementById("ck-status"), copy = document.getElementById("ck-copy");
+let saved = [];
+try { saved = JSON.parse(localStorage.getItem(KEY)) || []; } catch {}
+boxes.forEach((b) => (b.checked = saved.includes(b.id)));
+const save = () => {
+  const on = boxes.filter((b) => b.checked).map((b) => b.id);
+  try { localStorage.setItem(KEY, JSON.stringify(on)); } catch {}
+  status.textContent = on.length + " of " + boxes.length + " done";
+};
+document.querySelector(".ck").addEventListener("change", save);
+const md = () => ["# Revenue attribution audit checklist", ...[...document.querySelectorAll(".ck h2")].map((h) => "\n## " + h.textContent + "\n\n" + [...h.nextElementSibling.querySelectorAll("input")].map((b) => "- [" + (b.checked ? "x" : " ") + "] " + b.nextElementSibling.textContent.replace(/\s+/g, " ").trim()).join("\n"))].join("\n") + "\n";
+copy.addEventListener("click", async () => { await navigator.clipboard.writeText(md()); copy.textContent = "Copied"; setTimeout(() => (copy.textContent = "Copy as Markdown"), 1500); });
+document.getElementById("ck-print").addEventListener("click", () => window.print());
+document.getElementById("ck-reset").addEventListener("click", () => { boxes.forEach((b) => (b.checked = false)); save(); });
+save();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

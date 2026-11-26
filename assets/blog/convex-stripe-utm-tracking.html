@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convex Stripe UTM tracking: Checkout from a Convex action</title>
+<meta name="description" content="How to tie a Stripe Checkout payment created in a Convex action to the visit and UTM tags that brought it, with code for the browser and the action.">
+<link rel="canonical" href="https://virling.com/blog/convex-stripe-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/convex-stripe-utm-tracking">
+<meta property="og:title" content="Convex Stripe UTM tracking: Checkout from a Convex action">
+<meta property="og:description" content="How to tie a Stripe Checkout payment created in a Convex action to the visit and UTM tags that brought it, with code for the browser and the action.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Convex Stripe UTM tracking: Checkout from a Convex action","item":"https://virling.com/blog/convex-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"Convex Stripe UTM tracking: Checkout from a Convex action","description":"How to tie a Stripe Checkout payment created in a Convex action to the visit and UTM tags that brought it, with code for the browser and the action.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/convex-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does the virling_vid cookie reach a Convex action?","acceptedAnswer":{"@type":"Answer","text":"No. The cookie is set on your domain, and the action runs on your Convex deployment, so the browser does not send it there. Read the ID in the browser with window.virling?.vid?.() and pass it as an argument."}},{"@type":"Question","name":"Should I use metadata.virling_vid or client_reference_id?","acceptedAnswer":{"@type":"Answer","text":"Either works. This page uses metadata.virling_vid so client_reference_id stays free for your own user or order ID. If both hold a value, Virling uses metadata.virling_vid first."}},{"@type":"Question","name":"Do I need to pass the UTM tags to Stripe?","acceptedAnswer":{"@type":"Answer","text":"No. The Virling script records the UTM tags of every visit against the visitor ID, so passing the ID is enough. Virling joins the payment to all the visits behind it, including untagged ones such as search and referrals."}},{"@type":"Question","name":"Do I need a Stripe webhook in Convex for this?","acceptedAnswer":{"@type":"Answer","text":"Not for attribution. Virling reads charges and Checkout Sessions from Stripe with a restricted read-only key. Your app may still need a webhook to unlock the product after payment."}},{"@type":"Question","name":"What happens if the visitor ID is missing?","acceptedAnswer":{"@type":"Answer","text":"The session is created without one, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>Convex Stripe UTM tracking: Checkout from a Convex action</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p">Convex Stripe UTM tracking needs one value carried through checkout. Read the visitor ID in the browser with <code>window.virling?.vid?.()</code>, pass it as an argument to the Convex action that creates the Stripe Checkout Session, and set it there as <code>metadata.virling_vid</code>. The <code>virling_vid</code> cookie cannot do this alone: it belongs to your domain, and the action runs on your Convex deployment. Stripe keeps the ID, and Virling joins the payment to every visit behind it, with the UTM tags of each.</p>
+<p class="p">The same idea with an Edge Function is in <a href="/blog/supabase-stripe-utm-tracking">Supabase and Stripe UTM tracking</a>. For Payment Links and where the values show up in Stripe, see the general guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>. For other payment providers, the <a href="/tools/checkout-snippet-generator">checkout snippet generator</a> writes the code.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Why Stripe Checkout loses your UTM tags</h2>
+<p class="p">UTM tags live on the landing URL. Stripe Checkout runs on Stripe's domain and only stores what your action passes when it creates the session, so the tags of the visit are gone unless you carry them over. Passing one visitor ID instead of the tags keeps earlier visits and untagged ones, such as search and referrals, too.</p>
+<h2>Step 1: add the script to every page</h2>
+<p class="p">Paste the tag before <code>&lt;/head&gt;</code> in your app's <code>index.html</code>, or in the layout every route uses. Keep <code>defer</code>. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<div class="code block"><pre data-snippet>&lt;script defer src="https://app.virling.com/v.js"
+  data-site="yourdomain.com"&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain and records the UTM tags of each visit against it.</p>
+<h2>Step 2: send the visitor ID from the browser</h2>
+<p class="p"><code>window.virling?.vid?.()</code> returns the same ID as the cookie. The script loads with <code>defer</code>, so wait briefly for it, and leave the argument out if the ID is still missing. In React, call the action with <code>useAction</code>:</p>
+<div class="code block"><pre data-snippet>// src/CheckoutButton.jsx
+import { useAction } from "convex/react";
+import { api } from "../convex/_generated/api";
+
+async function visitorId() {
+  for (let i = 0; i &lt; 20 &amp;&amp; !window.virling?.vid; i++) {
+    await new Promise((r) =&gt; setTimeout(r, 100));
+  }
+  return window.virling?.vid?.() || null;
+}
+
+export function CheckoutButton() {
+  const createCheckout = useAction(api.checkout.create);
+
+  async function checkout() {
+    const vid = await visitorId();
+    const url = await createCheckout(vid ? { vid } : {});
+    if (url) window.location.href = url;
+  }
+
+  return &lt;button onClick={checkout}&gt;Subscribe&lt;/button&gt;;
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Convex advises against calling actions straight from the client in most cases, in favor of a mutation that schedules the action. Here the browser needs the Checkout URL back, so this example calls the action directly. See the <a href="https://docs.convex.dev/functions/actions">Convex actions docs</a>.</p>
+<h2>Step 3: create the Checkout Session in a Convex action</h2>
+<p class="p">Install the library with <code>npm install stripe</code> and put the action in <code>convex/checkout.ts</code>. The file name and the export name make up <code>api.checkout.create</code>. The <code>"use node"</code> line runs it in the Convex Node.js runtime, so keep queries and mutations in other files:</p>
+<div class="code block"><pre data-snippet>"use node";
+
+import Stripe from "stripe";
+import { v } from "convex/values";
+import { action } from "./_generated/server";
+
+export const create = action({
+  args: { vid: v.optional(v.string()) },
+  handler: async (_ctx, { vid }) =&gt; {
+    const visitor = vid &amp;&amp; /^[A-Za-z0-9-]{8,64}$/.test(vid) ? vid : undefined;
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const session = await stripe.checkout.sessions.create({
+      metadata: visitor ? { virling_vid: visitor } : {},
+      line_items: [{ price: "price_...", quantity: 1 }],
+      mode: "subscription",
+      success_url: "https://yourdomain.com/thanks",
+    });
+
+    return session.url;
+  },
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Set the key with <code>npx convex env set STRIPE_SECRET_KEY</code>, which asks for the value. The check on <code>vid</code> keeps anything that is not a visitor ID out of Stripe. A public action can be called by anyone who has your deployment URL, so choose the price in the action and check the user there if checkout needs a signed-in one.</p>
+<h2>Metadata or client_reference_id</h2>
+<p class="p">Virling reads <code>metadata.virling_vid</code> or <code>client_reference_id</code> on the Checkout Session. The key name must be exactly <code>virling_vid</code>. Stripe allows 50 metadata keys per object, with names up to 40 characters and values up to 500, and a <code>client_reference_id</code> of up to 200 characters. A visitor ID has 8 to 64 letters, digits and hyphens, so it fits either. If you have no other use for <code>client_reference_id</code>, this works too:</p>
+<div class="code block"><pre data-snippet>const session = await stripe.checkout.sessions.create({
+  client_reference_id: visitor,
+  line_items: [{ price: "price_...", quantity: 1 }],
+  mode: "subscription",
+  success_url: "https://yourdomain.com/thanks",
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">All the fields are in the <a href="https://docs.stripe.com/api/checkout/sessions/create">Stripe Checkout Session reference</a>. If you use the <code>@convex-dev/stripe</code> component, pass <code>metadata: { virling_vid: visitor }</code> to <code>createCheckoutSession</code>. Its <code>subscriptionMetadata</code> goes to the Subscription, which Virling does not read.</p>
+<p class="p">You do not need to send the UTM tags themselves: the script has already recorded them against the visitor ID. The full lookup order is in the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a>, and the <a href="/integrations/stripe">Stripe integration page</a> shows what Virling imports.</p>
+<h2>Test it locally</h2>
+<p class="p">Run <code>npx convex dev</code>, which pushes the action to your dev deployment, and set that deployment's <code>STRIPE_SECRET_KEY</code> to a Stripe test key and <code>price_...</code> to a test price. You can call the action without the browser:</p>
+<div class="code block"><pre data-snippet>npx convex run checkout:create '{"vid":"vtest12345678"}'</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">It prints a Checkout URL. Open that session in the Stripe Dashboard and look for <code>virling_vid</code> in its metadata. The ID in this command is made up, so it only shows that the value reaches Stripe.</p>
+<p class="p">To try the button as well, add <code>data-dev</code> to the script tag, because the script skips <code>localhost</code> without it. Virling still does not count <code>localhost</code> visits toward <code>yourdomain.com</code>, so this checks the ID, not the channel. Remove <code>data-dev</code> before you deploy.</p>
+<h2>Check that it works on your site</h2>
+<p class="p">Set the key on production with <code>npx convex env set STRIPE_SECRET_KEY --prod</code> and deploy with <code>npx convex deploy</code>. Open your site from a tagged link such as <code>https://yourdomain.com/?utm_source=test&amp;utm_medium=test</code>, pay, wait for the next sync, and open the payments list at <code>/app/yourdomain.com/payments</code>. The payment should show the <code>test</code> source instead of Unattributed. Open it to see its journey.</p>
+<p class="p">Virling only sees payments made in the mode of the key you connected: a restricted <code>rk_test_</code> key for test payments, <code>rk_live_</code> for live ones. Payments imported with a test key stay in your reports, so if you want only real ones, make a small live payment and refund it.</p>
+<h2>Usual mistakes</h2>
+<ul class="post-list"><li>Reading the <code>virling_vid</code> cookie in the action. It is not there: send the ID as an argument.</li><li>Sending <code>null</code>. <code>v.optional(v.string())</code> takes a string or no value, so leave the argument out when there is no ID.</li><li>Making the argument required. Checkout then fails for visitors who block the script.</li><li>Reading the ID as soon as the page renders. The script loads with <code>defer</code>, so read it on click and wait for it.</li><li>Setting <code>STRIPE_SECRET_KEY</code> on the dev deployment only. Dev and production keep separate environment variables.</li><li>Putting the ID in <code>subscription_data.metadata</code>, or on the customer or product. Virling does not read those.</li><li>Pasting the Stripe secret key into Virling. The action needs a key that can create sessions, while Virling refuses <code>sk_</code> keys and asks for a restricted read-only one.</li></ul>
+<p class="p">If a payment still shows as Unattributed, open its Checkout Session in the Stripe Dashboard. If <code>virling_vid</code> is missing there, check the argument your browser sends to the action. Payments without a visitor ID still count toward revenue, as Unattributed.</p>
+<h2 id="other-frameworks">Other frameworks</h2>
+<p class="p">The same steps for other stacks:</p>
+<ul class="post-list"><li><a href="/blog/nextjs-stripe-utm-tracking">Next.js Stripe UTM tracking</a></li><li><a href="/blog/react-stripe-utm-tracking">React Stripe UTM tracking</a></li><li><a href="/blog/firebase-stripe-utm-tracking">Firebase Stripe UTM tracking</a></li><li><a href="/blog/cloudflare-workers-stripe-utm-tracking">Cloudflare Workers Stripe UTM tracking</a></li><li><a href="/blog/express-stripe-utm-tracking">Express Stripe UTM tracking</a></li><li><a href="/blog/sveltekit-stripe-utm-tracking">SvelteKit Stripe UTM tracking</a></li><li><a href="/blog/remix-stripe-utm-tracking">Remix Stripe UTM tracking</a></li><li><a href="/blog/nuxt-stripe-utm-tracking">Nuxt Stripe UTM tracking</a></li></ul>
+<h2>Frequently asked questions</h2>
+<h3>Does the virling_vid cookie reach a Convex action?</h3><p class="p">No. The cookie is set on your domain, and the action runs on your Convex deployment, so the browser does not send it there. Read the ID in the browser with window.virling?.vid?.() and pass it as an argument.</p>
+<h3>Should I use metadata.virling_vid or client_reference_id?</h3><p class="p">Either works. This page uses metadata.virling_vid so client_reference_id stays free for your own user or order ID. If both hold a value, Virling uses metadata.virling_vid first.</p>
+<h3>Do I need to pass the UTM tags to Stripe?</h3><p class="p">No. The Virling script records the UTM tags of every visit against the visitor ID, so passing the ID is enough. Virling joins the payment to all the visits behind it, including untagged ones such as search and referrals.</p>
+<h3>Do I need a Stripe webhook in Convex for this?</h3><p class="p">Not for attribution. Virling reads charges and Checkout Sessions from Stripe with a restricted read-only key. Your app may still need a webhook to unlock the product after payment.</p>
+<h3>What happens if the visitor ID is missing?</h3><p class="p">The session is created without one, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring Stripe revenue</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

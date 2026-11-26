@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revenue by country: which countries your customers pay from</title>
+<meta name="description" content="How to see revenue by country next to visitors by country, why the two differ, how currencies are converted and how to act on it.">
+<link rel="canonical" href="https://virling.com/blog/revenue-by-country">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/revenue-by-country">
+<meta property="og:title" content="Revenue by country: which countries your customers pay from">
+<meta property="og:description" content="How to see revenue by country next to visitors by country, why the two differ, how currencies are converted and how to act on it.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Revenue by country: which countries your customers pay from","item":"https://virling.com/blog/revenue-by-country"}]},{"@type":"BlogPosting","headline":"Revenue by country: which countries your customers pay from","description":"How to see revenue by country next to visitors by country, why the two differ, how currencies are converted and how to act on it.","datePublished":"2026-11-20","dateModified":"2026-11-20","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/revenue-by-country"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I see revenue by country?","acceptedAnswer":{"@type":"Answer","text":"Join each payment to the visit before it, then group visitors and revenue by the visit's country. In Virling, the Country tab of the Location card shows visitors, revenue and revenue per visitor for each country."}},{"@type":"Question","name":"Which countries do my customers come from?","acceptedAnswer":{"@type":"Answer","text":"Look at revenue by country rather than visitors by country. Virling credits each payment to the country of the visit that led to it, and the live globe shows each new payment at the payer's country as it syncs."}},{"@type":"Question","name":"Does Virling use the billing address to find the country?","acceptedAnswer":{"@type":"Answer","text":"No. The country comes from the visit: your proxy's country header, or the browser's time zone when there is none. A payment that is not matched to a visit has no country."}},{"@type":"Question","name":"How are payments in different currencies compared?","acceptedAnswer":{"@type":"Answer","text":"Each payment keeps its original amount and currency and is also converted to USD at European Central Bank rates current when it is imported. Refunds are taken off the same way. Reports are in USD."}},{"@type":"Question","name":"Why do my top traffic countries not bring the most revenue?","acceptedAnswer":{"@type":"Answer","text":"Price against local income, missing payment methods, language and the kind of traffic a country sends all change how often visitors pay. Compare revenue per visitor by country with your site average to see which countries are worth more than their traffic."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-20</span>
+      <h1>Revenue by country: which countries your customers pay from</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-20.</p>
+<p class="p">To see revenue by country, you need each payment joined to the visit that came before it, because the visit knows the country and the payment knows the amount. Once they are joined, put visitors, revenue and revenue per visitor side by side for every country. In Virling this is the Country tab of the Location card on the dashboard: each country gets its visitors, the revenue credited to its visits and its revenue per visitor, with a chip that is green above your site average and red below it. The countries that send the most visitors are often not the ones that pay the most.</p>
+<h2>Why visit share and revenue share by country differ</h2>
+<p class="p">Traffic reports answer which countries visit. That is a different question from which countries pay, and the two lists rarely match. A few reasons:</p>
+<ul class="post-list"><li><b>Price against local income.</b> One price in one currency is cheap in some countries and a lot of money in others, so the same interest turns into very different conversion rates.</li><li><b>Payment methods.</b> A checkout that only takes cards loses buyers in countries where people mostly pay another way.</li><li><b>Language.</b> Visitors who read your pages in a second language may browse but hesitate to buy.</li><li><b>Where the traffic comes from.</b> A post that spreads in one country can send many readers who were never looking for your product. Search and AI answers tend to send people who were.</li><li><b>Plan mix.</b> Buyers in some countries may lean toward annual plans or higher tiers, which moves revenue without moving the number of customers.</li></ul>
+<p class="p">That is why the useful number is <a href="/blog/what-is-revenue-per-visitor">revenue per visitor</a> by country, not visitors or revenue alone. A country with modest traffic and a high revenue per visitor deserves more attention than its visitor count suggests. The <a href="/tools/revenue-per-visitor">revenue per visitor calculator</a> works the same way for a country as for a channel.</p>
+<p class="p">Virling's Country tab lists your top countries by revenue next to their visitors, and clicking one filters the Channels and Pages cards to that country.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+<h2>How to see revenue by country in Virling</h2>
+<ul class="post-list"><li><b>Location card.</b> The Country tab lists visitors, revenue and revenue per visitor for each country. Click a country to filter the whole dashboard by it, so every channel, page and goal shows only that country. Open a country to see its cities. The City and Language tabs work the same way. To compare phones with computers instead, see <a href="/blog/revenue-by-device">revenue by device</a>.</li><li><b>Live globe.</b> The globe page colours each country by visits or by revenue per visitor for the date range you pick. When a payment syncs, a ring pulses at the payer's country with the amount and the channel that brought them.</li><li><b>API and AI assistants.</b> The Read API returns the country of each visitor, and the MCP server's breakdown tool takes country as a dimension, so you can ask an assistant which countries pay.</li></ul>
+<p class="p">You can click through the Location card and the globe on sample data in the <a href="/demo">demo</a>.</p>
+<h2>Where the country comes from</h2>
+<p class="p">The country belongs to the visit, not the payment. Virling reads it from the country header your proxy or CDN adds, such as <code>cf-ipcountry</code> from Cloudflare, and falls back to the browser's time zone when there is no header. Visitors are not stored with their IP address.</p>
+<p class="p">A payment is placed in a country through its visitor: the revenue in the Location card is credited to the country of the visit your attribution model picks, and the globe uses the country the payer browsed from. Virling does not read billing addresses from your payment provider. Someone on a VPN or travelling counts in the country they appeared to browse from, and a payment that could not be matched to any visit has no country at all. The <a href="https://docs.virling.com/attribution/unattributed">unattributed payments</a> guide explains why some payments are not matched.</p>
+<h2>How currencies are handled</h2>
+<p class="p">Buyers in different countries often pay in different currencies, so revenue by country only works if every amount is on one scale. Virling keeps each payment's original amount and currency, and also converts it to USD for reports. Rates come from the European Central Bank, refreshed every 12 hours, and a payment is converted at the rate current when it is imported, not the rate on the day it was paid. Refunds are taken off in the payment's currency and converted the same way, so revenue is shown after refunds.</p>
+<p class="p">Two limits matter here. A payment in a currency that is not on the European Central Bank's list is imported without a USD amount and left out of USD totals. And reports are in USD only for now. The details are in <a href="https://docs.virling.com/attribution/currencies">Currencies</a>.</p>
+<h2>How to act on revenue by country</h2>
+<ul class="post-list"><li><b>Pricing page language.</b> If a country brings many visitors and a low revenue per visitor, and the Language tab shows most of them browse in another language, a translated pricing page or checkout is a reasonable test.</li><li><b>Prices and currencies.</b> Showing prices in the local currency, or a regional price, can turn interest into payments where your current price is a barrier. Check the country's revenue per visitor before and after on the same date range length.</li><li><b>Payment methods.</b> Filter the dashboard by the country and open the Goals card. If many visitors start checkout and few pay, the checkout itself may not offer the way people there like to pay.</li><li><b>Ad targeting.</b> Move ad spend toward countries whose revenue per visitor is above your average, and narrow or exclude the ones that bring clicks and no payments. Filter by country and then look at the Channels card to see which channel pays in each one.</li><li><b>Content and outreach.</b> A country that pays well but sends little traffic is a hint about where communities, newsletters or partners are worth finding.</li></ul>
+<h2>Small countries are noisy</h2>
+<p class="p">A country with a handful of visitors can show a very high or very low revenue per visitor from a single payment. Use a longer date range, or wait until a country has a few hundred visitors, before you change prices or ads because of it.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I see revenue by country?</h3><p class="p">Join each payment to the visit before it, then group visitors and revenue by the visit's country. In Virling, the Country tab of the Location card shows visitors, revenue and revenue per visitor for each country.</p>
+<h3>Which countries do my customers come from?</h3><p class="p">Look at revenue by country rather than visitors by country. Virling credits each payment to the country of the visit that led to it, and the live globe shows each new payment at the payer's country as it syncs.</p>
+<h3>Does Virling use the billing address to find the country?</h3><p class="p">No. The country comes from the visit: your proxy's country header, or the browser's time zone when there is none. A payment that is not matched to a visit has no country.</p>
+<h3>How are payments in different currencies compared?</h3><p class="p">Each payment keeps its original amount and currency and is also converted to USD at European Central Bank rates current when it is imported. Refunds are taken off the same way. Reports are in USD.</p>
+<h3>Why do my top traffic countries not bring the most revenue?</h3><p class="p">Price against local income, missing payment methods, language and the kind of traffic a country sends all change how often visitors pay. Compare revenue per visitor by country with your site average to see which countries are worth more than their traffic.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which countries pay, not just visit</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

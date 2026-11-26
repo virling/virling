@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Run rate calculator: annual revenue run rate | Virling</title>
+<meta name="description" content="Annualize a week, month or quarter of revenue, then separate the recurring run rate and see how much one-time revenue inflates it.">
+<link rel="canonical" href="https://virling.com/tools/run-rate-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/run-rate-calculator">
+<meta property="og:title" content="Run rate calculator: annual revenue run rate | Virling">
+<meta property="og:description" content="Annualize a week, month or quarter of revenue, then separate the recurring run rate and see how much one-time revenue inflates it.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Revenue run rate calculator","url":"https://virling.com/tools/run-rate-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Revenue run rate calculator","item":"https://virling.com/tools/run-rate-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / run rate calculator</span><h1>Revenue run rate calculator</h1><p class="lead">Enter revenue for a week, a month or a quarter to get your annual run rate. Add the share of that revenue that was one-time to see the recurring run rate and how much one-off sales inflate the headline number. Everything runs in your browser; nothing is uploaded.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="rr" autocomplete="off">
+  <div class="tool-pick" data-select><span id="p-label">Period</span>
+    <button type="button" id="p" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="p-label p-value" data-value="12"><span id="p-value">Month</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="p-menu" role="listbox" aria-labelledby="p-label" tabindex="-1" hidden><li role="option" data-value="52" aria-selected="false">Week</li><li role="option" data-value="12" aria-selected="true">Month</li><li role="option" data-value="4" aria-selected="false">Quarter</li></ul>
+  </div>
+  <label><span id="rev-label">Revenue this month ($)</span><span class="dim">All revenue in the period, after refunds and discounts</span><input name="rev" type="number" min="0" step="0.01" value="25000"></label>
+  <label>One-time share (%)<span class="dim">Optional. Setup fees, one-off orders, lifetime deals</span><input name="once" type="number" min="0" max="100" step="0.1" value="20"></label>
+</form>
+<div class="tool-stats" id="rr-out"></div>
+<p class="fine-note" id="rr-warn"></p>
+<p class="fine-note" id="rr-how"></p>
+<div class="txt post tool-cta">
+<p class="p">This is one blended number. Virling shows which channels bring the revenue behind it: it links every visit to the payment it led to and credits one-time sales, subscriptions and renewals to the channel that first brought each customer, from your real payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/arr-calculator">ARR calculator</a>, <a href="/tools/mrr-calculator">MRR calculator</a>, <a href="/blog/mrr-by-acquisition-channel">MRR by acquisition channel</a>, <a href="/tools/saas-revenue-forecast-calculator">SaaS revenue forecast calculator</a>, <a href="/tools/saas-valuation-calculator">what a SaaS is worth at a given multiple</a>, <a href="/tools/burn-multiple-calculator">burn multiple calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The run rate formula</h2>
+<p class="p">Annual run rate is the revenue from one period times the number of those periods in a year:</p>
+<p class="p"><code>annual run rate = period revenue &times; periods per year</code></p>
+<p class="p">That is 52 for a week, 12 for a month and 4 for a quarter. The recurring run rate does the same with only the revenue that will come back next period:</p>
+<p class="p"><code>recurring run rate = period revenue &times; (1 - one-time share) &times; periods per year</code></p>
+<p class="p">The gap between the two is the one-time revenue scaled to a year, which is the part of the headline number that assumes a one-off sale happens again every period.</p>
+<h2>A worked example</h2>
+<p class="p">With the defaults above, a month brought in $25,000, so the annual run rate is $25,000 &times; 12 = $300,000.</p>
+<p class="p">20% of that month, $5,000, was one-time: setup fees and a few one-off orders. The recurring part is $20,000, so the recurring run rate is $20,000 &times; 12 = $240,000. One-time revenue adds $60,000 to the headline, which puts it 25% above what recurs.</p>
+<p class="p">The same business measured by the week might see $6,000 in a normal week, a run rate of $6,000 &times; 52 = $312,000. A week with one large one-off order of $4,000 would show $10,000 &times; 52 = $520,000, which is why a short period with one-time revenue in it can overstate run rate a lot.</p>
+<h2>The same year annualized from a week, a month, a quarter and a peak</h2>
+<p class="p">An example with made-up numbers, not data from a real business. A seasonal shop earns $300,000 in a calendar year. In thousands of dollars, January to December bring 20, 20, 21, 21, 22, 22, 20, 20, 23, 24, 48 and 39. Each row annualizes one part of that same year.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:660px"><thead><tr><th style="width:24%">Period measured</th><th>Revenue</th><th>Times</th><th>Annual run rate</th><th>Against the actual $300,000</th></tr></thead><tbody><tr><th scope="row">Quiet month (January)</th><td>$20,000</td><td>12</td><td>$240,000</td><td>20% below</td></tr><tr><th scope="row">Ordinary month (June)</th><td>$22,000</td><td>12</td><td>$264,000</td><td>12% below</td></tr><tr><th scope="row">First quarter</th><td>$61,000</td><td>4</td><td>$244,000</td><td>18.7% below</td></tr><tr><th scope="row">Second quarter</th><td>$65,000</td><td>4</td><td>$260,000</td><td>13.3% below</td></tr><tr><th scope="row">Fourth quarter, with the peak</th><td>$111,000</td><td>4</td><td>$444,000</td><td>48% above</td></tr><tr><th scope="row">Peak month (November)</th><td>$48,000</td><td>12</td><td>$576,000</td><td>92% above</td></tr><tr><th scope="row">Peak week in November</th><td>$15,000</td><td>52</td><td>$780,000</td><td>160% above</td></tr></tbody></table></div>
+<p class="p">No row gives $300,000, because no single period looks like the whole year. The ordinary periods miss the peak and come out low. The peak periods assume the peak never ends, and the shorter the period, the further off they are. A business with a season should quote the last 12 months next to its run rate.</p>
+<h2>When run rate misleads</h2>
+<p class="p">Besides seasons and one-time sales, run rate misleads when customers pay for a year at once, when the period is not over yet, and when revenue is growing or shrinking fast. The yearly plan is the easiest to miss. Here is a made-up example, step by step: a software company has a $30,000 month, and this is the first month anyone has bought a yearly plan.</p>
+<ol class="post-list"><li><b>Split the month.</b> $14,000 is monthly subscriptions, $12,000 is ten yearly plans at $1,200 paid up front, and $4,000 is setup fees. Together that is $30,000.</li><li><b>Annualize all of it.</b> $30,000 &times; 12 = $360,000. This is the headline run rate.</li><li><b>Take out the setup fees.</b> $26,000 &times; 12 = $312,000. It still counts each yearly payment twelve times.</li><li><b>Spread the yearly plans.</b> Ten plans at $1,200 / 12 = $100 a month are $1,000 a month, so the recurring month is $14,000 + $1,000 = $15,000.</li><li><b>Annualize what recurs.</b> $15,000 &times; 12 = $180,000, half of the headline. To get it from the calculator, enter $15,000 and a one-time share of 0%.</li></ol>
+<p class="p">When everything that recurs is a subscription and yearly plans are spread like this, the recurring run rate is ARR, and you can take it further. Enter it as yearly revenue in the <a href="/tools/saas-valuation-calculator">SaaS valuation calculator</a>, where the same example shows what the wrong figure does to a price. Work it out at the start and the end of a quarter, and the difference is the net new ARR for the <a href="/tools/burn-multiple-calculator">burn multiple calculator</a>.</p>
+<h2>Why run rate by acquisition channel matters</h2>
+<p class="p">Run rate is one total. It does not say which marketing brought the revenue, or whether the channels behind it bring customers who pay again or customers who buy once. Two businesses with the same run rate can be in very different places: one whose best channel brings subscribers who renew, the other whose best channel brings one-off buyers whose revenue will not recur. Split run rate by the channel that first brought each customer and you can see which channels build recurring revenue and which only lift a single period. To get it, each payment has to be joined to the visit that brought the customer. See <a href="/blog/mrr-by-acquisition-channel">MRR by acquisition channel</a> for how, the <a href="/tools/mrr-calculator">MRR calculator</a> to work out recurring revenue from your plans, and the <a href="/tools/arr-calculator">ARR calculator</a> to project it a year out.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Run rate calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate revenue run rate?</h3><p class="p">Take the revenue from one period and multiply it by the number of those periods in a year: weekly revenue times 52, monthly revenue times 12 or quarterly revenue times 4.</p></div>
+      <div><h3>What is the difference between run rate and ARR?</h3><p class="p">ARR counts only recurring subscription revenue, so it is MRR times 12. Run rate annualizes all revenue in a period, one-time sales included. For a business whose revenue is all subscriptions the two match; the more one-time revenue a period has, the further run rate sits above ARR.</p></div>
+      <div><h3>Why does one-time revenue inflate run rate?</h3><p class="p">Run rate assumes every period repeats. A setup fee, a large one-off order or a lifetime deal in the period you measure gets multiplied as if it will come in again every week, month or quarter, which it may not. The recurring run rate leaves it out.</p></div>
+      <div><h3>Which period should I use?</h3><p class="p">The most recent full period that looks normal. A week reacts fastest but swings with launches and holidays; a quarter is steadier but older. A month is the usual middle ground.</p></div>
+      <div><h3>Is run rate a forecast?</h3><p class="p">No. It is the current period scaled to a year, with no growth, churn or seasonality. Treat it as a size check, not a prediction of next year's revenue.</p></div>
+      <div><h3>Can I annualize a seasonal peak?</h3><p class="p">You can, but the result describes a year made only of peaks. In the made-up example on this page, a $48,000 November gives a run rate of $576,000 while the whole year brings $300,000. For a seasonal business, quote the last 12 months, or compare the peak with the same period a year earlier.</p></div>
+      <div><h3>Can I use run rate as ARR?</h3><p class="p">Only the recurring part, and only if it is subscription revenue with yearly plans spread over 12 months. In the made-up example on this page, a $30,000 month gives a run rate of $360,000, but ARR is $180,000 once setup fees are left out and yearly plans are spread.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate revenue run rate?", "acceptedAnswer": {"@type": "Answer", "text": "Take the revenue from one period and multiply it by the number of those periods in a year: weekly revenue times 52, monthly revenue times 12 or quarterly revenue times 4."}}, {"@type": "Question", "name": "What is the difference between run rate and ARR?", "acceptedAnswer": {"@type": "Answer", "text": "ARR counts only recurring subscription revenue, so it is MRR times 12. Run rate annualizes all revenue in a period, one-time sales included. For a business whose revenue is all subscriptions the two match; the more one-time revenue a period has, the further run rate sits above ARR."}}, {"@type": "Question", "name": "Why does one-time revenue inflate run rate?", "acceptedAnswer": {"@type": "Answer", "text": "Run rate assumes every period repeats. A setup fee, a large one-off order or a lifetime deal in the period you measure gets multiplied as if it will come in again every week, month or quarter, which it may not. The recurring run rate leaves it out."}}, {"@type": "Question", "name": "Which period should I use?", "acceptedAnswer": {"@type": "Answer", "text": "The most recent full period that looks normal. A week reacts fastest but swings with launches and holidays; a quarter is steadier but older. A month is the usual middle ground."}}, {"@type": "Question", "name": "Is run rate a forecast?", "acceptedAnswer": {"@type": "Answer", "text": "No. It is the current period scaled to a year, with no growth, churn or seasonality. Treat it as a size check, not a prediction of next year's revenue."}}, {"@type": "Question", "name": "Can I annualize a seasonal peak?", "acceptedAnswer": {"@type": "Answer", "text": "You can, but the result describes a year made only of peaks. In the made-up example on this page, a $48,000 November gives a run rate of $576,000 while the whole year brings $300,000. For a seasonal business, quote the last 12 months, or compare the peak with the same period a year earlier."}}, {"@type": "Question", "name": "Can I use run rate as ARR?", "acceptedAnswer": {"@type": "Answer", "text": "Only the recurring part, and only if it is subscription revenue with yearly plans spread over 12 months. In the made-up example on this page, a $30,000 month gives a run rate of $360,000, but ARR is $180,000 once setup fees are left out and yearly plans are spread."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring recurring revenue</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("rr"), out = document.getElementById("rr-out"), warn = document.getElementById("rr-warn"), how = document.getElementById("rr-how");
+const m = document.getElementById("p"), menu = document.getElementById("p-menu"), items = [...menu.children];
+const usd = (n) => { const a = Math.abs(n), d = a < 100 ? 2 : 0; return (n < 0 ? "-$" : "$") + a.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); };
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 1 }) + "%";
+const calc = () => {
+  const k = +m.dataset.value, per = m.textContent.trim().toLowerCase(), rev = Math.max(0, +f.elements.rev.value), s = Math.min(100, Math.max(0, +f.elements.once.value)) / 100;
+  const all = rev * k, rec = rev * (1 - s) * k, once = all - rec;
+  out.innerHTML = [["Annual run rate", usd(all)], ["Recurring run rate", usd(rec)], ["One-time revenue per year", usd(once)], ["Recurring revenue this " + per, usd(rev * (1 - s))]].map(([a, x]) => `<div><span class="dim">${a}</span><b>${x}</b></div>`).join("");
+  warn.textContent = once > 0
+    ? (rec > 0 ? `One-time revenue inflates run rate by ${usd(once)}, ${pct(once / rec)} above what recurs. Run rate assumes every ${per} repeats, one-off sales included; quote the recurring run rate when you mean revenue you can count on.` : "All of this revenue is one-time, so none of the run rate is expected to recur.")
+    : "";
+  warn.hidden = !warn.textContent;
+  how.textContent = `Annual run rate is ${usd(rev)} of revenue this ${per} times ${k}. Recurring run rate leaves out the ${pct(s)} that was one-time: ${usd(rev * (1 - s))} times ${k}.`;
+};
+const mark = (el) => { items.forEach((i) => i.classList.toggle("on", i === el)); menu.setAttribute("aria-activedescendant", el.id = "p-" + el.dataset.value); };
+const show = (open) => {
+  menu.hidden = !open;
+  m.setAttribute("aria-expanded", String(open));
+  if (open) { mark(items.find((i) => i.getAttribute("aria-selected") === "true")); menu.focus(); }
+};
+const pick = (el) => {
+  items.forEach((i) => i.setAttribute("aria-selected", String(i === el)));
+  m.dataset.value = el.dataset.value;
+  document.getElementById("p-value").textContent = el.textContent;
+  document.getElementById("rev-label").textContent = `Revenue this ${el.textContent.toLowerCase()} ($)`;
+  show(false);
+  m.focus();
+  calc();
+};
+m.addEventListener("click", () => show(menu.hidden));
+m.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); show(true); } });
+items.forEach((i) => { i.addEventListener("click", () => pick(i)); i.addEventListener("mousemove", () => mark(i)); });
+menu.addEventListener("keydown", (e) => {
+  const at = items.findIndex((i) => i.classList.contains("on"));
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); mark(items[(at + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]); }
+  else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(items[at]); }
+  else if (e.key === "Escape" || e.key === "Tab") { show(false); m.focus(); }
+});
+document.addEventListener("click", (e) => { if (!menu.hidden && !e.target.closest(".tool-pick")) show(false); });
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

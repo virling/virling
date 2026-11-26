@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Do your docs bring paying customers? How to find out</title>
+<meta name="description" content="How to see whether people who land on your docs, or read them before buying, go on to pay, including docs on a subdomain or a separate domain.">
+<link rel="canonical" href="https://virling.com/blog/docs-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/docs-revenue-tracking">
+<meta property="og:title" content="Do your docs bring paying customers? How to find out">
+<meta property="og:description" content="How to see whether people who land on your docs, or read them before buying, go on to pay, including docs on a subdomain or a separate domain.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Do your docs bring paying customers? How to find out","item":"https://virling.com/blog/docs-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Do your docs bring paying customers? How to find out","description":"How to see whether people who land on your docs, or read them before buying, go on to pay, including docs on a subdomain or a separate domain.","datePublished":"2026-11-21","dateModified":"2026-11-21","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/docs-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Do docs bring paying customers?","acceptedAnswer":{"@type":"Answer","text":"Sometimes, and you can check. Credit each payment to the landing page of the visit that brought the customer, then compare docs pages with the rest of the site by revenue per visitor. Docs pages that show up as landing pages with paying visitors are bringing customers."}},{"@type":"Question","name":"How do I see if people who read the docs went on to pay?","acceptedAnswer":{"@type":"Answer","text":"Open the Visitors page, search pages for your docs path, and filter to visitors who paid. Open a visitor to see every visit, the time on each page, and the payment where it happened. The Before paying tab on the Pages card shows whether a docs page was the last page viewed before paying."}},{"@type":"Question","name":"Are visits to docs.example.com part of the same visit?","acceptedAnswer":{"@type":"Answer","text":"Yes. With data-site set to example.com, pages on docs.example.com count for the same site and share the visitor ID cookie. Referrers from your own domain and its subdomains are ignored, so reading the docs never changes the channel the visit came from."}},{"@type":"Question","name":"What if my docs are on a separate domain?","acceptedAnswer":{"@type":"Answer","text":"Events are kept only for the site's domain and its subdomains, so docs pages on another domain, such as example.dev, do not appear on the site's Pages card. Add that domain under Same-visit domains in Site settings so clicks to it are not exits and a return from it continues the visit. To measure docs pages themselves, serve them on a subdomain."}},{"@type":"Question","name":"Should I cut docs that bring no revenue?","acceptedAnswer":{"@type":"Answer","text":"No. Docs also keep paying customers and save support time, which revenue attribution does not measure. Use the result to decide which docs pages to link to the product and pricing more clearly, not which ones to delete."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-21</span>
+      <h1>Do your docs bring paying customers? How to find out</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-21.</p>
+<p class="p"><b>Your docs bring paying customers</b> when the people who land on them, or read them before buying, go on to pay. Page views and time on page cannot tell you that. To see it, each payment has to be joined to the visit before it, and the visit has to keep its pages, including the docs, in one record.</p>
+<p class="p">This guide is for developer-tool and B2B SaaS founders who write docs and want to know whether they earn their keep. It covers two questions, which need two different views: do docs pages <i>find</i> customers, and do customers <i>read</i> the docs before they pay. Both rest on <a href="/blog/track-stripe-revenue-by-traffic-source">tracking revenue by traffic source</a>.</p>
+<h2>What you need first</h2>
+<p class="p">Two links must exist before any page report means something. The payment provider must be connected, and the visitor ID must reach checkout, so a payment can be joined to the visit before it. See <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</p>
+<p class="p">Then it is a matter of which visit gets the credit. Virling describes a session by its first pageview: its channel, referrer, campaign and landing page. When a payment is matched, the whole payment, after refunds, is credited to one session in the lookback window, 90 days by default. The default model picks the latest session that was not Direct. See <a href="https://docs.virling.com/attribution/model">the attribution model</a>.</p>
+<h2>Where your docs live matters</h2>
+<h3>Docs on a path or a subdomain</h3>
+<p class="p">Put the same script tag on your docs as on the rest of the site. With <code>data-site="example.com"</code>, pages on <code>example.com/docs</code>, <code>docs.example.com</code> and <code>app.example.com</code> all count for the same site and share the <code>virling_vid</code> cookie, which is set on your registrable domain. Links between them are not exits, and referrers from your own domain and its subdomains are ignored, so moving from the homepage to the docs never changes the channel the visit came from. This is the setup that measures docs best.</p>
+<h3>Docs on a separate domain</h3>
+<p class="p">Events are kept only when the page&rsquo;s host is the site&rsquo;s domain or one of its subdomains. Docs on another domain, such as <code>example.dev</code>, do not show up on the site&rsquo;s Pages card. Add that domain under <b>Same-visit domains</b> in Site settings: clicks to it are no longer counted as exits, and a return from it continues the visit instead of starting a new one, so the channel that brought the reader keeps the credit. What you will not see is which docs pages were read. If that matters to you, serving the docs on a subdomain is the fix. See <a href="https://docs.virling.com/track/script">Add the script</a>.</p>
+<h2>How to read it in Virling</h2>
+<h3>1. Do docs pages find customers? Use Landing page</h3>
+<p class="p">The Pages card on the dashboard has two tabs. <b>Landing page</b> lists the first page of the visit that was credited with the payment. Each row shows visitors, revenue and revenue per visitor, with a chip that compares the row with your site average: green above it, red below. A docs page with paying visitors here is a page that found customers, for example through organic search or an AI assistant answering a &ldquo;how do I&rdquo; question.</p>
+<p class="p">Sort by revenue per visitor, not by visitors. A popular reference page with a red chip is loud but does not pay. A small integration guide with a green chip is worth more of your time. Wait until a page has a few hundred visitors before you trust its chip.</p>
+<h3>2. Do docs close customers? Use Before paying</h3>
+<p class="p">The <b>Before paying</b> tab lists the last page viewed before the payment. If a quickstart or a pricing-limits page keeps showing up here, the docs are doing closing work, even when the visit landed somewhere else.</p>
+<h3>3. Did paying customers read the docs at all? Use Visitors</h3>
+<p class="p">The two tabs only see the first and last page. For everything in between, open the <b>Visitors</b> page, search pages for your docs path, and use <b>Filters</b> to pick visitors who paid, then visitors who did not. Open a visitor to see their timeline: every visit, the time on each page, and each payment where it happened with the source it was credited to. The <b>Recent customers</b> card shows the same thing for your last 10 customers, with visits before paying and a short path.</p>
+<h3>4. Check whether the docs are read by buyers</h3>
+<p class="p">The <b>Reading</b> card shows, for each page, how long it stays visible and how far it is scrolled, for every visitor or only for buyers. If buyers read your quickstart to the end and everyone else leaves at the top, the end of the quickstart is doing the work.</p>
+<p class="p">For the same method applied to the blog, see <a href="/blog/which-blog-posts-bring-paying-customers">which blog posts bring paying customers</a>. For docs as part of a wider content budget, see <a href="/blog/content-marketing-roi">content marketing ROI</a>.</p>
+<h2>A worked example</h2>
+<p class="p">This is a hypothetical example with made-up numbers, to show the method. A developer tool with docs on <code>docs.example.com</code>, over 90 days:</p>
+<ul class="post-list"><li>An integration guide for a popular framework lands 1,200 visitors and 8 credited payments. Its chip is green.</li><li>The API reference lands 9,000 visitors and 2 credited payments. Its chip is red.</li><li>The quickstart lands few visitors but is the Before paying page for 11 payments.</li><li>On the Visitors page, most paying visitors viewed at least one docs page; among visitors who did not pay, far fewer did.</li></ul>
+<p class="p">What to change: the integration guide finds buyers, so write the guide for the next framework your users ask about, and link the signup from it. The API reference is read by people who already use the product, so it is not failing; do not judge it by new revenue. The quickstart closes, so link it from pricing and the homepage. And because paying visitors read the docs more often than others, a docs link on the landing pages that bring the most visitors is worth testing.</p>
+<p class="p">Do not read the last bullet as proof that docs cause payment. People who are about to buy read docs because they are about to buy. Treat it as a reason to make the docs easy to find, and compare the next 90 days against this one.</p>
+<h2>What to check if the numbers look off</h2>
+<ul class="post-list"><li><b>Most revenue has no landing page.</b> The payment was not matched to a visit. The Matched revenue line under the Overview numbers gives the share matched and why the rest was not. See <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</li><li><b>No docs pages show up at all.</b> Check that the docs run the script with the same <code>data-site</code>, and that they are on the site&rsquo;s domain or a subdomain.</li><li><b>Docs pages you expected to win are missing from Landing page.</b> By default the payment goes to the latest visit that was not Direct, which can be a later visit than the docs visit that found the customer. Switch the model to first touch in Site settings to credit the earliest session, and compare. See <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch or last touch</a>.</li></ul>
+<p class="p">For how developers arrive from GitHub, package registries and communities, see <a href="/integrations/developer-tools">revenue attribution for developer tools</a>.</p>
+<p class="p">Want to run this on your own docs? <a href="https://app.virling.com/login" data-goal="join_click">Start a free trial</a> and add the script to your site and docs.</p>
+<h2>Frequently asked questions</h2>
+<h3>Do docs bring paying customers?</h3><p class="p">Sometimes, and you can check. Credit each payment to the landing page of the visit that brought the customer, then compare docs pages with the rest of the site by revenue per visitor. Docs pages that show up as landing pages with paying visitors are bringing customers.</p>
+<h3>How do I see if people who read the docs went on to pay?</h3><p class="p">Open the Visitors page, search pages for your docs path, and filter to visitors who paid. Open a visitor to see every visit, the time on each page, and the payment where it happened. The Before paying tab on the Pages card shows whether a docs page was the last page viewed before paying.</p>
+<h3>Are visits to docs.example.com part of the same visit?</h3><p class="p">Yes. With <code>data-site</code> set to example.com, pages on docs.example.com count for the same site and share the visitor ID cookie. Referrers from your own domain and its subdomains are ignored, so reading the docs never changes the channel the visit came from.</p>
+<h3>What if my docs are on a separate domain?</h3><p class="p">Events are kept only for the site's domain and its subdomains, so docs pages on another domain, such as example.dev, do not appear on the site's Pages card. Add that domain under Same-visit domains in Site settings so clicks to it are not exits and a return from it continues the visit. To measure docs pages themselves, serve them on a subdomain.</p>
+<h3>Should I cut docs that bring no revenue?</h3><p class="p">No. Docs also keep paying customers and save support time, which revenue attribution does not measure. Use the result to decide which docs pages to link to the product and pricing more clearly, not which ones to delete.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See whether your docs bring paying customers</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

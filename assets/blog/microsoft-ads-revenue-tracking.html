@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Microsoft Ads revenue tracking: which campaign brings customers</title>
+<meta name="description" content="Microsoft Ads revenue tracking: tag your ads with utm_medium=cpc so Bing clicks count as Paid, link checkout, and see payments and revenue per campaign.">
+<link rel="canonical" href="https://virling.com/blog/microsoft-ads-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/microsoft-ads-revenue-tracking">
+<meta property="og:title" content="Microsoft Ads revenue tracking: which campaign brings customers">
+<meta property="og:description" content="Microsoft Ads revenue tracking: tag your ads with utm_medium=cpc so Bing clicks count as Paid, link checkout, and see payments and revenue per campaign.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Microsoft Ads revenue tracking: which campaign brings customers","item":"https://virling.com/blog/microsoft-ads-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Microsoft Ads revenue tracking: which campaign brings customers","description":"Microsoft Ads revenue tracking: tag your ads with utm_medium=cpc so Bing clicks count as Paid, link checkout, and see payments and revenue per campaign.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/microsoft-ads-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I track revenue from Microsoft Ads?","acceptedAnswer":{"@type":"Answer","text":"Add utm_source=bing, utm_medium=cpc and a utm_campaign to the final URL of your ads, add the tracking script to your site and pass the visitor ID into checkout. Each payment is then credited to a visit, and the Campaign tab shows revenue per campaign."}},{"@type":"Question","name":"What is the msclkid?","acceptedAnswer":{"@type":"Answer","text":"It is the Microsoft Click ID. Microsoft's documentation describes it as a 32-character GUID that is unique for each ad click, appended to the landing page URL when auto-tagging of the MSCLKID is enabled."}},{"@type":"Question","name":"Does Virling read the msclkid?","acceptedAnswer":{"@type":"Answer","text":"No. The channel rules use utm_medium, the referrer, utm_source and ref. Leave auto-tagging on for Microsoft's own conversion tracking, and add UTM tags so the visit is counted as Paid with a campaign name."}},{"@type":"Question","name":"Why do my Microsoft Ads clicks show as Organic search?","acceptedAnswer":{"@type":"Answer","text":"The landing URL has no paid utm_medium, so the click is sorted by its referrer, and bing.com is a known search host. Add utm_medium=cpc to the final URL or the final URL suffix. The medium is checked before the referrer, so the next click counts as Paid."}},{"@type":"Question","name":"Should I use Microsoft's automatic UTM tags or my own?","acceptedAnswer":{"@type":"Answer","text":"Either works if the click lands with utm_medium=cpc and a utm_campaign you recognise. If you use your own, make sure automatic tagging is off or set to keep existing tags, because the replace option overwrites the UTM tags on your final URL."}},{"@type":"Question","name":"Do I need to connect my Microsoft Ads account?","acceptedAnswer":{"@type":"Answer","text":"No. The setup in this post uses the tags on the landing URL and your payment provider. Read what each campaign cost in Microsoft Advertising and compare it with the revenue per campaign."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>Microsoft Ads revenue tracking: which campaign brings customers</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p"><b>Microsoft Ads revenue tracking</b> means joining each payment on your site to the Microsoft Advertising click that brought the buyer. Add <code>utm_source=bing</code>, <code>utm_medium=cpc</code> and a <code>utm_campaign</code> to the final URL of your ads, add the Virling script to your site, and pass the visitor ID into checkout. Virling counts the click as <b>Paid</b> instead of organic Bing and credits the payment to it, so the Campaign tab shows revenue per campaign.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">This post is about paid clicks. For free clicks from Bing results, see <a href="/blog/bing-revenue-tracking">Bing revenue tracking</a>.</p>
+<h2>What the msclkid is, and what auto-tagging does</h2>
+<p class="p">Microsoft&rsquo;s documentation describes the MSCLKID as &ldquo;a 32-character GUID that is unique for each ad click&rdquo;. When auto-tagging of it is enabled, it is appended to the landing page URL on the click, as in <code>www.contoso.com/?msclkid={msclkid}</code>. The setting is on by default when a new account is created, and you can turn it off. Adding or updating a conversion goal of one of the types the page lists, such as a destination URL or an event goal, turns it on again (source: <a href="https://learn.microsoft.com/en-us/advertising/campaign-management-service/accountproperty?view=bingads-13">Microsoft, AccountProperty</a>). For how a click ID differs from a tag, see <a href="/blog/gclid-fbclid-msclkid-vs-utm">msclkid and other click IDs vs UTM tags</a>.</p>
+<p class="p">The ID is there for Microsoft&rsquo;s own conversion tracking. It does not name your campaign in a form you can read, and Virling&rsquo;s channel rules do not use it. Leave it on for Microsoft and add UTM tags for Virling. The two sit side by side in the same URL.</p>
+<h2>Tag the final URL</h2>
+<p class="p">Put the tags on the final URL of each ad, or in the final URL suffix so every ad below that level gets them:</p>
+<p class="p"><code>utm_source=bing&amp;utm_medium=cpc&amp;utm_campaign={CampaignID}</code></p>
+<p class="p">Microsoft says the suffix holds parameters that are appended to the end of your landing page URL, that it cannot start with <code>?</code>, <code>&amp;</code> or <code>#</code>, and that a suffix on a lower level, such as an ad, overrides one set higher up, such as a campaign. Its example tracking template uses the <code>{CampaignID}</code> parameter (source: <a href="https://learn.microsoft.com/en-us/advertising/guides/url-tracking-upgraded-urls?view=bingads-13">Microsoft, URL tracking with Upgraded URLs</a>). A typed name such as <code>brand-search</code> is easier to read in a report. Pick one style and keep it, because a campaign tagged two ways becomes two rows. The free <a href="/tools/utm-builder">UTM builder</a> makes the tagged URLs for you, and the <a href="/tools/microsoft-ads-utm-builder">Microsoft Ads tracking template and UTM builder</a> writes the suffix.</p>
+<h3>Check Microsoft&rsquo;s automatic UTM tags</h3>
+<p class="p">Separately from the msclkid, Microsoft Advertising can add UTM tags by itself. The account setting has three states: off, add tags and keep the ones you wrote, or add tags and replace the ones you wrote (source: <a href="https://learn.microsoft.com/en-us/advertising/customer-management-service/autotagtype?view=bingads-13">Microsoft, AutoTagType</a>). If you write your own tags, keep it off or on the keep option. If you rely on the automatic ones, click a live ad of each campaign type and read <code>utm_medium</code> in the address bar, because only the values in the next section count as Paid.</p>
+<h2>Why utm_medium=cpc decides the channel</h2>
+<p class="p">Every session gets one channel from its first pageview, and the first matching rule wins:</p>
+<ol class="post-list"><li><b>The medium.</b> <code>cpc</code>, <code>ppc</code>, <code>paid</code>, <code>paidsearch</code>, <code>paid_social</code> or <code>paidsocial</code>, in any case, is <b>Paid</b>.</li><li><b>The referrer.</b> bing.com is a known search host, so a click from it without a paid or email medium is <b>Organic search</b>.</li><li><b>The source tag, when there is no referrer.</b> <code>utm_source=bing</code> alone is also <b>Organic search</b>.</li></ol>
+<p class="p">So an ad click that arrives from bing.com with no tags is counted with your free Bing traffic, and adding only <code>utm_source=bing</code> does not move it. <code>utm_medium=cpc</code> does, because the medium is checked before the referrer. Other mediums, such as <code>cpm</code>, are not on the list. See <a href="https://docs.virling.com/attribution/channels">how channels are decided</a>.</p>
+<h2>Link checkout to the visit</h2>
+<p class="p">The click is half of the join. Your payment provider must also receive the visitor ID, so the payment can be matched to the visit. The steps differ per provider; see <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>, or find yours under <a href="/integrations">integrations</a>.</p>
+<p class="p">Under the default model the whole payment is credited to the latest visit in the last 90 days that was not Direct. A buyer who clicks your ad on Monday and types your address on Thursday is still credited to the ad. A buyer who comes back on Thursday through a tagged newsletter is credited to Email. See <a href="https://docs.virling.com/attribution/model">the attribution model</a>.</p>
+<h2>Read payments per campaign</h2>
+<ol class="post-list"><li>On the Channels card, click <b>Paid</b>. The page filters to visits with a paid medium, from Microsoft Ads and any other platform you tag the same way.</li><li>Open the <b>Campaign</b> tab. Each <code>utm_campaign</code> is a row with visitors, revenue and revenue per visitor. Starting typed names with <code>bing-</code> keeps them apart from your other ads.</li><li>Open a payment from the Payments page to see the visits before it, with the credited one marked.</li><li>Check <b>Time to pay</b> before you pause a campaign, since buyers often pay days after the click.</li></ol>
+<h3>An example with made-up numbers</h3>
+<p class="p">These numbers are invented to show the arithmetic. Campaign A costs $600 and brings 400 visitors and 6 customers who pay $150 each: $900 of revenue, $2.25 per visitor and $100 of spend per customer. Campaign B costs $300 and brings 150 visitors and 5 customers who pay $150 each: $750 of revenue, $5.00 per visitor and $60 per customer. At a 60% margin and one payment per customer, the most you can spend per customer without losing money is $150 &times; 0.60 = $90. A is $10 over that line and B is $30 under it, although A has more clicks and more revenue. Put your own figures in the <a href="/tools/break-even-cpa-calculator">break-even CPA calculator</a>.</p>
+<p class="p">If you run the same ads on Google, tag them with <code>utm_source=google</code> and compare the two by revenue per visitor. <a href="/blog/google-ads-revenue-tracking">Google Ads revenue tracking</a> has that setup.</p>
+<h2>What to check if the numbers look off</h2>
+<ul class="post-list"><li><b>Ad revenue shows as Organic search.</b> The landing URL has no <code>utm_medium=cpc</code>. Click your own ad and read the address bar.</li><li><b>Ad revenue shows as Direct.</b> A redirect dropped the tags before your page; see <a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a>.</li><li><b>Your campaign names are missing.</b> Automatic UTM tagging is set to replace, or a suffix on a lower level overrides yours.</li><li><b>Revenue shows as Unattributed.</b> The visitor ID did not reach checkout. See <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>How do I track revenue from Microsoft Ads?</h3><p class="p">Add <code>utm_source=bing</code>, <code>utm_medium=cpc</code> and a <code>utm_campaign</code> to the final URL of your ads, add the tracking script to your site and pass the visitor ID into checkout. Each payment is then credited to a visit, and the Campaign tab shows revenue per campaign.</p>
+<h3>What is the msclkid?</h3><p class="p">It is the Microsoft Click ID. Microsoft&rsquo;s documentation describes it as a 32-character GUID that is unique for each ad click, appended to the landing page URL when auto-tagging of the MSCLKID is enabled.</p>
+<h3>Does Virling read the msclkid?</h3><p class="p">No. The channel rules use <code>utm_medium</code>, the referrer, <code>utm_source</code> and ref. Leave auto-tagging on for Microsoft&rsquo;s own conversion tracking, and add UTM tags so the visit is counted as Paid with a campaign name.</p>
+<h3>Why do my Microsoft Ads clicks show as Organic search?</h3><p class="p">The landing URL has no paid <code>utm_medium</code>, so the click is sorted by its referrer, and bing.com is a known search host. Add <code>utm_medium=cpc</code> to the final URL or the final URL suffix. The medium is checked before the referrer, so the next click counts as Paid.</p>
+<h3>Should I use Microsoft&rsquo;s automatic UTM tags or my own?</h3><p class="p">Either works if the click lands with <code>utm_medium=cpc</code> and a <code>utm_campaign</code> you recognise. If you use your own, make sure automatic tagging is off or set to keep existing tags, because the replace option overwrites the UTM tags on your final URL.</p>
+<h3>Do I need to connect my Microsoft Ads account?</h3><p class="p">No. The setup in this post uses the tags on the landing URL and your payment provider. Read what each campaign cost in Microsoft Advertising and compare it with the revenue per campaign.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which Microsoft Ads campaign pays</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

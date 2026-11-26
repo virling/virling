@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SvelteKit LemonSqueezy UTM tracking: the source of each order</title>
+<meta name="description" content="Add the script to app.html, read the virling_vid cookie in a SvelteKit form action and pass it as LemonSqueezy custom data, so each order shows its source.">
+<link rel="canonical" href="https://virling.com/blog/sveltekit-lemonsqueezy-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/sveltekit-lemonsqueezy-utm-tracking">
+<meta property="og:title" content="SvelteKit LemonSqueezy UTM tracking: the source of each order">
+<meta property="og:description" content="Add the script to app.html, read the virling_vid cookie in a SvelteKit form action and pass it as LemonSqueezy custom data, so each order shows its source.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"SvelteKit LemonSqueezy UTM tracking: the source of each order","item":"https://virling.com/blog/sveltekit-lemonsqueezy-utm-tracking"}]},{"@type":"BlogPosting","headline":"SvelteKit LemonSqueezy UTM tracking: the source of each order","description":"Add the script to app.html, read the virling_vid cookie in a SvelteKit form action and pass it as LemonSqueezy custom data, so each order shows its source.","datePublished":"2026-11-26","dateModified":"2026-11-26","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/sveltekit-lemonsqueezy-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to LemonSqueezy checkout in SvelteKit?","acceptedAnswer":{"@type":"Answer","text":"Pass the Virling visitor ID instead. In the form action that calls POST /v1/checkouts, read it with cookies.get(\"virling_vid\") and set checkout_data.custom to { virling_vid }. The Virling script records the UTM tags of every visit against that ID, so the order is joined to all of them."}},{"@type":"Question","name":"Do LemonSqueezy checkout links in a SvelteKit app need code?","acceptedAnswer":{"@type":"Answer","text":"No. Keep the link to STORE.lemonsqueezy.com as a normal link on a page that runs the script. The script adds checkout[custom][virling_vid] to it, unless it is already there, and LemonSqueezy returns it in the order webhook."}},{"@type":"Question","name":"Do I need a LemonSqueezy webhook in my SvelteKit app?","acceptedAnswer":{"@type":"Answer","text":"Not for Virling. When you connect your API key, Virling registers its own webhook for order_created and subscription_payment_success on each store, which needs a public https address. Your app may still want webhooks for its own work, such as granting access."}},{"@type":"Question","name":"Are LemonSqueezy renewals credited to the first source?","acceptedAnswer":{"@type":"Answer","text":"Yes. Subscription invoices with billing reason renewal or updated, and any later order by the same customer, keep the channel of that customer's first order. You pass the visitor ID only at the first checkout."}},{"@type":"Question","name":"Can I use LemonSqueezy with a static SvelteKit site?","acceptedAnswer":{"@type":"Answer","text":"Yes, with checkout links. A site built with adapter-static has no server to run a form action, but links to STORE.lemonsqueezy.com need no server code."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-26</span>
+      <h1>SvelteKit LemonSqueezy UTM tracking: the source of each order</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-26.</p>
+<p class="p">For SvelteKit LemonSqueezy UTM tracking, add the Virling script to <code>src/app.html</code>, then read the <code>virling_vid</code> cookie in the form action that creates the LemonSqueezy checkout and pass it as custom data. Checkout links on <code>STORE.lemonsqueezy.com</code> need no code: the script adds <code>checkout[custom][virling_vid]</code> to them. Either way, LemonSqueezy returns the visitor ID in its webhook, and Virling joins the order to every visit behind it, with the UTM tags of each.</p>
+<p class="p">For what LemonSqueezy does with custom data outside SvelteKit, read the general guide to <a href="/blog/lemonsqueezy-utm-tracking">LemonSqueezy UTM tracking</a> and the <a href="/integrations/lemonsqueezy">LemonSqueezy integration page</a>. Using Stripe instead? See <a href="/blog/sveltekit-stripe-utm-tracking">SvelteKit Stripe UTM tracking</a>. On Next.js, see <a href="/blog/nextjs-lemonsqueezy-utm-tracking">the Next.js version of this post</a>.</p>
+<p class="p">One thing to know first: as of November 2026, LemonSqueezy's docs say it no longer accepts new sign-ups and will shut down on March 31, 2027 (<a href="https://www.lemonsqueezy.com/blog/saying-goodbye-to-lemon-squeezy">their announcement</a>). This post is for stores that already sell through it.</p>
+<h2>Why LemonSqueezy checkout loses your UTM tags</h2>
+<p class="p">UTM tags live on the landing URL. By the time someone clicks Buy they have usually moved to another page, and checkout runs on your store's <code>lemonsqueezy.com</code> address, which knows only what you put in the checkout URL or request. You could copy the tags into custom data, but that records only the visit the buyer is on when they pay. A visitor ID keeps earlier visits and untagged ones, such as search and referrals, too.</p>
+<p class="p">A made-up example: someone finds you through a newsletter link tagged <code>utm_source=newsletter</code> on Monday, leaves, and comes back on Thursday by typing your address to buy a $29 license. The URL on Thursday has no tags, so copying tags at checkout stores nothing. With the visitor ID, the order is joined to both visits, Monday's newsletter click included.</p>
+<h2>Step 1: add the script to src/app.html</h2>
+<p class="p">Paste the tag into <code>src/app.html</code>, before <code>%sveltekit.head%</code>. That file is the shell of every page, and client-side navigation is counted on its own. Use the domain you added in Virling as <code>data-site</code>. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<div class="code block"><pre data-snippet>&lt;!-- src/app.html --&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8" /&gt;
+  &lt;script defer src="https://app.virling.com/v.js"
+    data-site="yourdomain.com"&gt;&lt;/script&gt;
+  %sveltekit.head%
+&lt;/head&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain, records the UTM tags of each visit against it, and <code>window.virling?.vid?.()</code> returns the same ID in the browser.</p>
+<h2>Step 2a: checkout links, no code</h2>
+<p class="p">If your Buy button is a link to <code>STORE.lemonsqueezy.com/checkout/buy/VARIANT_ID</code>, there is no server code to write. Keep it as a normal <code>&lt;a href&gt;</code> in a Svelte component on a page that runs the script:</p>
+<div class="code block"><pre data-snippet>&lt;!-- src/routes/pricing/+page.svelte --&gt;
+&lt;a href="https://STORE.lemonsqueezy.com/checkout/buy/VARIANT_ID"&gt;Buy now&lt;/a&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script adds <code>checkout[custom][virling_vid]</code> to every link on a <code>lemonsqueezy.com</code> address when the page loads, and again on click, so links rendered after a client-side navigation are covered. It never replaces a value that is already there. This is the same <a href="https://docs.lemonsqueezy.com/help/checkout/passing-custom-data">custom data query parameter</a> LemonSqueezy documents for checkout links. A Lemon.js overlay opened from a link with the <code>lemonsqueezy-button</code> class works too, since it is still a link.</p>
+<p class="p">If you build the URL in code, for example to pick a variant, or open it with <code>LemonSqueezy.Url.Open</code>, the script never sees a link. Add the ID yourself in the click handler, since <code>window.virling</code> only exists in the browser:</p>
+<div class="code block"><pre data-snippet>&lt;!-- src/lib/BuyButton.svelte --&gt;
+&lt;script&gt;
+  function buy() {
+    const url = new URL("https://STORE.lemonsqueezy.com/checkout/buy/VARIANT_ID");
+    const vid = window.virling?.vid?.();
+    if (vid) url.searchParams.set("checkout[custom][virling_vid]", vid);
+    location.href = url.href;
+  }
+&lt;/script&gt;
+
+&lt;button onclick={buy}&gt;Buy now&lt;/button&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>Step 2b: create the checkout in a form action</h2>
+<p class="p">If your server creates the checkout with <code>POST /v1/checkouts</code>, the browser sends the <code>virling_vid</code> cookie with the form post, and SvelteKit hands it to you on <code>cookies</code>. First declare the API key in <code>src/env.ts</code>, as SvelteKit 3 expects for private variables:</p>
+<div class="code block"><pre data-snippet>// src/env.ts
+import { defineEnvVars } from "@sveltejs/kit/env";
+
+export const variables = defineEnvVars({
+  LEMONSQUEEZY_API_KEY: {},
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Then read the cookie in the action and set it in <code>data.attributes.checkout_data.custom</code>, as LemonSqueezy's reference for <a href="https://docs.lemonsqueezy.com/api/checkouts/create-checkout">create a checkout</a> describes:</p>
+<div class="code block"><pre data-snippet>// src/routes/pricing/+page.server.ts
+import { error, redirect } from "@sveltejs/kit";
+import { LEMONSQUEEZY_API_KEY } from "$app/env/private";
+import type { Actions } from "./$types";
+
+export const actions = {
+  checkout: async ({ cookies }) =&gt; {
+    const vid = cookies.get("virling_vid");
+    const res = await fetch("https://api.lemonsqueezy.com/v1/checkouts", {
+      method: "POST",
+      headers: {
+        accept: "application/vnd.api+json",
+        "content-type": "application/vnd.api+json",
+        authorization: `Bearer ${LEMONSQUEEZY_API_KEY}`,
+      },
+      body: JSON.stringify({
+        data: {
+          type: "checkouts",
+          attributes: {
+            checkout_data: { custom: vid ? { virling_vid: vid } : {} },
+          },
+          relationships: {
+            store: { data: { type: "stores", id: "STORE_ID" } },
+            variant: { data: { type: "variants", id: "VARIANT_ID" } },
+          },
+        },
+      }),
+    });
+    if (!res.ok) error(502, "Could not create the checkout");
+    const { data } = await res.json();
+    redirect(303, data.attributes.url, { external: true });
+  },
+} satisfies Actions;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">A plain form on the same page posts to it:</p>
+<div class="code block"><pre data-snippet>&lt;!-- src/routes/pricing/+page.svelte --&gt;
+&lt;form method="POST" action="?/checkout"&gt;
+  &lt;button type="submit"&gt;Buy&lt;/button&gt;
+&lt;/form&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Four details matter here:</p>
+<ul class="post-list"><li><b>External redirect.</b> SvelteKit 3 only lets <code>redirect()</code> go to another site when you pass <code>{ external: true }</code>. On SvelteKit 2, leave it out, skip <code>src/env.ts</code> and import the key from <code>$env/static/private</code>.</li><li><b>No <code>use:enhance</code>.</b> Leave it off this form, so the browser itself follows the redirect to LemonSqueezy.</li><li><b>An action, not <code>load</code>.</b> A <code>load</code> function runs on every page view, and in a prerendered or cached page it has no cookie of this visitor. Create the checkout when the buyer presses Buy.</li><li><b>Same origin.</b> In production SvelteKit rejects form posts from another origin, so keep the form and the action on one domain.</li></ul>
+<p class="p"><code>cookies.get</code> returns <code>undefined</code> when there is no cookie, for example when the script was blocked or the site is in cookieless mode. Never block the sale for it: the action sends empty custom data, the customer pays as usual, and the order counts toward revenue as Unattributed. Do not send your own user ID as <code>virling_vid</code>, since no visit carries it.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Step 3: connect LemonSqueezy to Virling</h2>
+<p class="p">Create an API key in LemonSqueezy under Settings, API, and paste it into Virling. LemonSqueezy only returns checkout custom data in webhooks, so Virling registers a webhook on each of your stores for <code>order_created</code> and <code>subscription_payment_success</code> and checks each request's <code>X-Signature</code>. There is no webhook to add to your SvelteKit app. The webhook needs <code>VIRLING_BASE_URL</code> to be a public <code>https://</code> address; without one, LemonSqueezy payments show as Unattributed. The full setup is in the <a href="https://docs.virling.com/payments/lemonsqueezy">LemonSqueezy docs</a>.</p>
+<h2>How renewals keep the first source</h2>
+<p class="p">You pass the visitor ID once, at the first checkout. Subscription invoices with billing reason <code>renewal</code> or <code>updated</code>, and any later order by the same customer, keep the channel of that customer's first order. So a subscriber who first came from a tagged newsletter link stays credited to it every month, without any code on renewal. If the first order is older than Virling's first import, which reads the last 90 days, its renewals are usually Unattributed. The details are in <a href="https://docs.virling.com/attribution/renewals">renewals</a>.</p>
+<h2>Check that it works in test mode</h2>
+<p class="p">One visit with a UTM tag and one test order run the whole path:</p>
+<ol class="post-list"><li>Switch your LemonSqueezy store to test mode, create an API key there and connect it to Virling, so Virling reads test orders and registers its webhook in test mode. Virling must be on a public <code>https://</code> address.</li><li>In your app, use a test mode checkout link. For the form action, put a test mode key in <code>LEMONSQUEEZY_API_KEY</code> too: test and live keys <a href="https://docs.lemonsqueezy.com/guides/developer-guide/testing-going-live">only work on their own side</a> of the store. Deploy it to your domain or a subdomain such as <code>staging.yourdomain.com</code>, because the script does nothing on <code>localhost</code>.</li><li>Open a private window and visit a page that runs the script through a tagged link, such as <code>https://staging.yourdomain.com/?utm_source=test&amp;utm_medium=email</code>. Run <code>window.virling.vid()</code> in the browser console and note the ID.</li><li>In the same window, press Buy and pay with one of the <a href="https://docs.lemonsqueezy.com/help/getting-started/test-mode">test cards</a> LemonSqueezy lists.</li><li>Wait a minute for the next sync, then open the payments list at <code>/app/yourdomain.com/payments</code>.</li></ol>
+<p class="p">The order shows the <code>test</code> source and the <b>Email</b> channel of your tagged visit instead of Unattributed. Open it: <b>Journey</b> starts at the tagged visit and ends with the LemonSqueezy order, and <b>Details</b> lists the ID from your console as <b>Visitor</b>. If there is no visitor, checkout did not carry <code>virling_vid</code>: check that the page with the button loads the script.</p>
+<p class="p">Use a new email address for each test, because a later payment by the same customer is a renewal and keeps the first payment's channel. A site has one LemonSqueezy connection, and test orders stay in your reports after you replace the key with a live one. A product copied to live mode gets a new ID and checkout URL, so change your links and <code>VARIANT_ID</code> when you go live. The full checklist is in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>, and how the join works from visit to order is in <a href="/blog/track-lemonsqueezy-revenue-by-traffic-source">how to track LemonSqueezy revenue by traffic source</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I pass UTM parameters to LemonSqueezy checkout in SvelteKit?</h3><p class="p">Pass the Virling visitor ID instead. In the form action that calls POST /v1/checkouts, read it with cookies.get("virling_vid") and set checkout_data.custom to { virling_vid }. The Virling script records the UTM tags of every visit against that ID, so the order is joined to all of them.</p>
+<h3>Do LemonSqueezy checkout links in a SvelteKit app need code?</h3><p class="p">No. Keep the link to STORE.lemonsqueezy.com as a normal link on a page that runs the script. The script adds checkout[custom][virling_vid] to it, unless it is already there, and LemonSqueezy returns it in the order webhook.</p>
+<h3>Do I need a LemonSqueezy webhook in my SvelteKit app?</h3><p class="p">Not for Virling. When you connect your API key, Virling registers its own webhook for order_created and subscription_payment_success on each store, which needs a public https address. Your app may still want webhooks for its own work, such as granting access.</p>
+<h3>Are LemonSqueezy renewals credited to the first source?</h3><p class="p">Yes. Subscription invoices with billing reason renewal or updated, and any later order by the same customer, keep the channel of that customer's first order. You pass the visitor ID only at the first checkout.</p>
+<h3>Can I use LemonSqueezy with a static SvelteKit site?</h3><p class="p">Yes, with checkout links. A site built with adapter-static has no server to run a form action, but links to STORE.lemonsqueezy.com need no server code.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring your LemonSqueezy orders</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

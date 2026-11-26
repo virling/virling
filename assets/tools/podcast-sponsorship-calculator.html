@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Podcast sponsorship calculator: CPM and ROI | Virling</title>
+<meta name="description" content="Check a podcast ad before you book it: CPM, cost per visit, expected customers and revenue, ROI and the conversion rate you need to break even.">
+<link rel="canonical" href="https://virling.com/tools/podcast-sponsorship-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/podcast-sponsorship-calculator">
+<meta property="og:title" content="Podcast sponsorship calculator: CPM and ROI | Virling">
+<meta property="og:description" content="Check a podcast ad before you book it: CPM, cost per visit, expected customers and revenue, ROI and the conversion rate you need to break even.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Podcast sponsorship calculator","url":"https://virling.com/tools/podcast-sponsorship-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Podcast sponsorship calculator","item":"https://virling.com/tools/podcast-sponsorship-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / podcast sponsorship calculator</span><h1>Podcast sponsorship ROI calculator</h1><p class="lead">Is a podcast ad worth it? Enter the sponsorship price, the downloads per episode, how many episodes it runs, how many listeners you expect to visit and buy, and what a customer is worth, to see the CPM, cost per visit, expected customers, revenue and ROI, plus the conversion rate you need to break even. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="pc" autocomplete="off">
+  <label>Sponsorship price, all episodes ($)<input name="price" type="number" min="0" step="0.01" value="1000"></label>
+  <label>Downloads per episode<input name="dl" type="number" min="0" step="1" value="5000"></label>
+  <label>Number of episodes<input name="eps" type="number" min="0" step="1" value="4"></label>
+  <label>Visit rate (% of downloads)<input name="visit" type="number" min="0" max="100" step="0.01" value="0.5"></label>
+  <label>Visit to paid conversion rate (%)<input name="conv" type="number" min="0" max="100" step="0.01" value="5"></label>
+  <label>Order value or first-year customer value ($)<input name="value" type="number" min="0" step="0.01" value="250"></label>
+</form>
+<div class="tool-stats" id="pc-out"></div>
+<div class="txt post tool-cta">
+<p class="p" id="pc-be"></p>
+<p class="p">The defaults are editable example numbers, not benchmarks. Use the downloads the show reports, and your own site's conversion rate.</p>
+<p class="p">The estimate is only as good as the visit and conversion rates you guess. Virling measures them from your real payments: it links every visit to the payment it led to and credits each payment to the source and campaign of the visit that brought it, so each show gets its own customers and revenue. See <a href="https://docs.virling.com/attribution/">how attribution works</a> in the docs. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/blog/podcast-revenue-tracking">podcast revenue tracking</a>, <a href="/tools/newsletter-sponsorship-calculator">newsletter sponsorship calculator</a>, <a href="/tools/cpm-calculator">CPM calculator</a>, <a href="/tools/utm-builder">UTM builder</a>, <a href="/tools/youtube-sponsorship-calculator">YouTube sponsorship ROI</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>How the calculator works</h2>
+<p class="p">Podcast ads are usually priced per thousand downloads, so the calculator starts with total downloads and the CPM:</p>
+<p class="p"><code>downloads = downloads per episode &times; episodes</code> and <code>CPM = price / downloads &times; 1,000</code></p>
+<p class="p">Visits are the listeners who come to your site, customers are the visits that buy, and revenue is what those customers pay:</p>
+<p class="p"><code>visits = downloads &times; visit rate</code>, <code>customers = visits &times; conversion rate</code> and <code>revenue = customers &times; customer value</code></p>
+<p class="p">Cost per visit is the price divided by visits, cost per customer is the price divided by customers, and ROI compares revenue with the price:</p>
+<p class="p"><code>ROI = (revenue - price) / price</code></p>
+<p class="p">The break-even conversion rate is the share of visitors who must buy for revenue to equal the price:</p>
+<p class="p"><code>break-even conversion rate = price / (visits &times; customer value)</code></p>
+<h2>A worked example</h2>
+<p class="p">With the defaults above, a sponsorship costs $1,000 for 4 episodes of a show with 5,000 downloads each, so 20,000 downloads and a CPM of $1,000 / 20,000 &times; 1,000 = $50. If 0.5% of downloads lead to a visit, 100 listeners reach your site and each visit costs $10. These are example numbers, not a benchmark.</p>
+<p class="p">If 5% of them buy, that is 5 customers. At $250 each, they bring $1,250. Cost per customer is $1,000 / 5 = $200, and the ROI is ($1,250 - $1,000) / $1,000 = 25% on revenue.</p>
+<p class="p">The break-even conversion rate is $1,000 / (100 &times; $250) = 4%. Above that, the sponsorship pays back on revenue; below it, it does not. To judge profit, enter the customer value after your gross margin: at a 60% margin, $150 per customer, the same sponsorship needs 6.67% to pay back.</p>
+<h2>Podcast price against sales needed</h2>
+<p class="p">Example figures, not benchmarks, worked out with the calculator's formulas. Price, downloads, episodes and visit rate are what you enter. Each break-even cell shows the sales that cover the price, rounded up to a whole sale, then the break-even conversion rate, price / (visits &times; order value):</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:1180px"><thead><tr><th style="width:13%">Example</th><th>Price</th><th>Downloads per episode</th><th>Episodes</th><th>Visit rate</th><th>CPM</th><th>Visits</th><th>Break-even at $50 an order</th><th>Break-even at $100 an order</th><th>Break-even at $250 an order</th></tr></thead><tbody><tr><th scope="row">The defaults above</th><td>$1,000</td><td>5,000</td><td>4</td><td>0.5%</td><td>$50</td><td>100</td><td>20 sales, 20%</td><td>10 sales, 10%</td><td>4 sales, 4%</td></tr><tr><th scope="row">One episode</th><td>$250</td><td>5,000</td><td>1</td><td>0.5%</td><td>$50</td><td>25</td><td>5 sales, 20%</td><td>3 sales, 10%</td><td>1 sale, 4%</td></tr><tr><th scope="row">Cheaper CPM</th><td>$500</td><td>5,000</td><td>4</td><td>0.5%</td><td>$25</td><td>100</td><td>10 sales, 10%</td><td>5 sales, 5%</td><td>2 sales, 2%</td></tr><tr><th scope="row">Higher CPM</th><td>$1,600</td><td>5,000</td><td>4</td><td>0.5%</td><td>$80</td><td>100</td><td>32 sales, 32%</td><td>16 sales, 16%</td><td>7 sales, 6.4%</td></tr><tr><th scope="row">Larger show</th><td>$3,000</td><td>20,000</td><td>3</td><td>0.5%</td><td>$50</td><td>300</td><td>60 sales, 20%</td><td>30 sales, 10%</td><td>12 sales, 4%</td></tr><tr><th scope="row">Fewer visits</th><td>$1,000</td><td>5,000</td><td>4</td><td>0.2%</td><td>$50</td><td>40</td><td>20 sales, 50%</td><td>10 sales, 25%</td><td>4 sales, 10%</td></tr><tr><th scope="row">More visits</th><td>$1,000</td><td>5,000</td><td>4</td><td>1%</td><td>$50</td><td>200</td><td>20 sales, 10%</td><td>10 sales, 5%</td><td>4 sales, 2%</td></tr></tbody></table></div>
+<p class="p">The first two rows need the same conversion rate, since one episode costs a quarter of four. But one episode at $250 an order is decided by a single sale from 25 visits, so one lucky or unlucky buyer changes the result. Four episodes give you a steadier reading of the same show.</p>
+<h2>Track the real result with a unique link or code</h2>
+<p class="p">The visit rate is the hardest number to guess, because a podcast ad is heard, not clicked. Listeners type the URL they heard days later, open show notes links that arrive with no referrer, or search your name, so podcast revenue tends to land in Direct or Organic search.</p>
+<p class="p">Give each show its own UTM link, with <code>utm_source</code> set to the show and <code>utm_campaign</code> set to the episode or sponsorship, and say a short vanity URL on air that redirects to it; the <a href="/tools/utm-builder">UTM builder</a> makes the link in seconds. A unique promo code per show catches buyers who never use the link, and your payment provider counts its redemptions. <a href="/blog/podcast-revenue-tracking">Podcast revenue tracking</a> covers the setup step by step, and <a href="/blog/sponsorship-revenue-tracking">how to track sponsorship ROI</a> covers joining payments to those visits. Then put the real visit rate, conversion rate and revenue back into this calculator before you renew.</p>
+<h2>What the link, the code and the answer each miss</h2>
+<p class="p">A podcast ad is the case where no single method is enough, so run all three for each show:</p>
+<ul class="post-list">
+<li><b>The tagged link or vanity URL.</b> It counts visits, buyers and revenue per show. It misses listeners who type your plain address or search your name, and those who visit on a phone and pay on another device.</li>
+<li><b>The discount code.</b> It catches listeners however they reached checkout. It misses those who forget it or pay without it, cannot show how many came and did not buy, and credits the show for strangers if it leaks to a <a href="/blog/coupon-site-revenue-tracking">coupon site</a>.</li>
+<li><b>The how-did-you-hear answer.</b> It can name a show that left no click and no code. It misses everyone who skips the question, and &ldquo;a podcast&rdquo; does not say which one, so ask for the name. The <a href="/tools/how-did-you-hear-about-us-template">how did you hear about us template</a> has a list to copy.</li>
+</ul>
+<p class="p">One listener can appear in all three, so never add the counts. Use the link as the figure you can check, and the code and the answers to judge how much it missed. Virling measures the link: it credits each payment to a visit, and does not read discount codes or collect answers, so those stay with your store or payment provider and in your own records. <a href="/blog/discount-code-attribution">What discount codes miss</a> and <a href="/blog/self-reported-attribution">self-reported attribution</a> show how to compare them.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Podcast sponsorship calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate the ROI of a podcast sponsorship?</h3><p class="p">Multiply downloads per episode by the number of episodes, then by the share of downloads that visit your site and the share of visitors who buy, to get customers. Multiply customers by what a customer is worth to get revenue. ROI is revenue minus the price, divided by the price. A $1,000 sponsorship that brings $1,250 has an ROI of 25%.</p></div>
+      <div><h3>How do you calculate podcast ad cost per download?</h3><p class="p">Divide the price by the total downloads across the episodes you bought. Podcast ads are usually quoted as CPM, the cost per thousand downloads: $1,000 for 20,000 downloads is $0.05 per download, or a $50 CPM.</p></div>
+      <div><h3>What conversion rate do I need for a podcast ad to pay back?</h3><p class="p">Divide the price by the expected visits times your customer value. With 100 expected visits and a $250 customer, a $1,000 sponsorship needs 1,000 / (100 &times; 250) = 4% of visitors to buy to break even on revenue.</p></div>
+      <div><h3>Which customer value should I use?</h3><p class="p">Use the average order value for one-off purchases, or the revenue a customer brings in their first year for subscriptions and repeat buyers. To judge profit instead of revenue, multiply the value by your gross margin first.</p></div>
+      <div><h3>How do I measure the real result of a podcast sponsorship?</h3><p class="p">Give each show its own UTM link, say a vanity URL on air that redirects to it, and use a unique promo code as a cross-check. Then join the payments that follow to the visits from that link. Without it, listeners who type your URL arrive with no referrer and the revenue lands in Direct.</p></div>
+      <div><h3>Why does my podcast promo code show more sales than the tracked link?</h3><p class="p">Usually because listeners reached you another way: they typed your plain URL or searched your name, then used the code they heard. The code can also have leaked to a coupon site, where strangers use it. Search for the code online, and ask new customers which podcast they heard.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate the ROI of a podcast sponsorship?", "acceptedAnswer": {"@type": "Answer", "text": "Multiply downloads per episode by the number of episodes, then by the share of downloads that visit your site and the share of visitors who buy, to get customers. Multiply customers by what a customer is worth to get revenue. ROI is revenue minus the price, divided by the price. A $1,000 sponsorship that brings $1,250 has an ROI of 25%."}}, {"@type": "Question", "name": "How do you calculate podcast ad cost per download?", "acceptedAnswer": {"@type": "Answer", "text": "Divide the price by the total downloads across the episodes you bought. Podcast ads are usually quoted as CPM, the cost per thousand downloads: $1,000 for 20,000 downloads is $0.05 per download, or a $50 CPM."}}, {"@type": "Question", "name": "What conversion rate do I need for a podcast ad to pay back?", "acceptedAnswer": {"@type": "Answer", "text": "Divide the price by the expected visits times your customer value. With 100 expected visits and a $250 customer, a $1,000 sponsorship needs 1,000 / (100 × 250) = 4% of visitors to buy to break even on revenue."}}, {"@type": "Question", "name": "Which customer value should I use?", "acceptedAnswer": {"@type": "Answer", "text": "Use the average order value for one-off purchases, or the revenue a customer brings in their first year for subscriptions and repeat buyers. To judge profit instead of revenue, multiply the value by your gross margin first."}}, {"@type": "Question", "name": "How do I measure the real result of a podcast sponsorship?", "acceptedAnswer": {"@type": "Answer", "text": "Give each show its own UTM link, say a vanity URL on air that redirects to it, and use a unique promo code as a cross-check. Then join the payments that follow to the visits from that link. Without it, listeners who type your URL arrive with no referrer and the revenue lands in Direct."}}, {"@type": "Question", "name": "Why does my podcast promo code show more sales than the tracked link?", "acceptedAnswer": {"@type": "Answer", "text": "Usually because listeners reached you another way: they typed your plain URL or searched your name, then used the code they heard. The code can also have leaked to a coupon site, where strangers use it. Search for the code online, and ask new customers which podcast they heard."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which podcasts paid back</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each podcast, newsletter and creator brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("pc"), out = document.getElementById("pc-out"), be = document.getElementById("pc-be");
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 2 }) + "%";
+const usd = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const num = (n) => n.toLocaleString("en-US", { maximumFractionDigits: 1 });
+const calc = () => {
+  const p = +f.price.value, d = +f.dl.value, e = +f.eps.value, r = +f.visit.value / 100, c = +f.conv.value / 100, v = +f.value.value;
+  const ok = p >= 0 && d >= 0 && e >= 0 && r >= 0 && r <= 1 && c >= 0 && c <= 1 && v >= 0;
+  const dls = d * e, visits = dls * r, cust = visits * c, rev = cust * v;
+  const rows = [
+    ["CPM", ok && dls > 0 ? usd(p / dls * 1000) : "No data"],
+    ["Expected visits", ok ? num(visits) : "No data"],
+    ["Cost per visit", ok && visits > 0 ? usd(p / visits) : "No data"],
+    ["Expected customers", ok ? num(cust) : "No data"],
+    ["Expected revenue", ok ? usd(rev) : "No data"],
+    ["ROI", ok && p > 0 ? pct((rev - p) / p) : "No data"],
+  ];
+  out.innerHTML = rows.map(([n, x]) => `<div><span class="dim">${n}</span><b>${x}</b></div>`).join("");
+  const need = ok && visits > 0 && v > 0 ? p / (visits * v) : NaN;
+  be.textContent = !ok || isNaN(need) ? "Enter downloads, episodes, a visit rate and customer value to see the break-even conversion rate."
+    : need > 1 ? `Even if every visitor bought, ${num(visits)} visits at ${usd(v)} each would not cover the ${usd(p)} price, so this sponsorship cannot pay back on revenue.`
+    : `To break even, ${pct(need)} of the ${num(visits)} expected visitors need to buy. At your ${pct(c)} conversion rate, this sponsorship ${c >= need ? "pays back" : "does not pay back"} on revenue.`;
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shopify Hydrogen UTM tracking: setup for headless stores</title>
+<meta name="description" content="Set up Shopify Hydrogen UTM tracking: add the script and CSP, store a visitor ID as a cart attribute, and check the order's note attributes.">
+<link rel="canonical" href="https://virling.com/blog/shopify-hydrogen-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/shopify-hydrogen-utm-tracking">
+<meta property="og:title" content="Shopify Hydrogen UTM tracking: setup for headless stores">
+<meta property="og:description" content="Set up Shopify Hydrogen UTM tracking: add the script and CSP, store a visitor ID as a cart attribute, and check the order's note attributes.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Shopify Hydrogen UTM tracking: setup for headless stores","item":"https://virling.com/blog/shopify-hydrogen-utm-tracking"}]},{"@type":"BlogPosting","headline":"Shopify Hydrogen UTM tracking: setup for headless stores","description":"Set up Shopify Hydrogen UTM tracking: add the script and CSP, store a visitor ID as a cart attribute, and check the order's note attributes.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/shopify-hydrogen-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does Shopify Hydrogen track UTM parameters?","acceptedAnswer":{"@type":"Answer","text":"With the setup on this page, yes. The script records the UTM tags of each landing on your Hydrogen storefront, and the visitor ID on the cart joins that visit to the order, so revenue can be grouped by UTM campaign."}},{"@type":"Question","name":"Can I use a theme.liquid tracking snippet on a Hydrogen store?","acceptedAnswer":{"@type":"Answer","text":"No. A Hydrogen storefront has no theme.liquid, and /cart/update.js only exists on the Online Store. Set the cart attribute from your own cart code through the Storefront API instead."}},{"@type":"Question","name":"How do cart attributes get to a Shopify order?","acceptedAnswer":{"@type":"Answer","text":"Attributes set on a cart through the Storefront API are copied onto the order as note attributes, the same as on theme carts. Virling reads virling_vid from there."}},{"@type":"Question","name":"Does Shopify checkout on another domain break the tracking?","acceptedAnswer":{"@type":"Answer","text":"No. The visitor ID travels on the cart, not in the browser, so checkout can stay on Shopify's checkout domain. Keep the storefront on your own domain, where the script runs."}},{"@type":"Question","name":"Why is my Hydrogen order Unattributed?","acceptedAnswer":{"@type":"Answer","text":"Usually its note attributes have no virling_vid: the script was blocked or cookieless, or the cart was made outside your storefront. An order with a visitor ID is also Unattributed when no visit of that visitor falls inside the lookback window."}},{"@type":"Question","name":"Does this work without Hydrogen?","acceptedAnswer":{"@type":"Answer","text":"Yes. Any storefront built on the Storefront API can pass the attribute to cartCreate or call cartAttributesUpdate on an existing cart. Virling reads the finished order through the Admin API either way."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>Shopify Hydrogen UTM tracking: setup for headless stores</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p">Shopify Hydrogen UTM tracking takes three pieces. Load a tracking script in <code>app/root.tsx</code> and allow its host in your content security policy, so the UTM tags of each landing are stored. Write the visitor ID to the cart as an attribute, named <code>virling_vid</code>, from your cart code. Shopify then copies cart attributes onto the order as note attributes, where Virling reads the ID and credits the order to that visitor's tagged visit. Theme snippets do not work on a headless store. Orders with no visitor ID and no email match stay Unattributed.</p>
+<h2>Why theme snippets do not apply</h2>
+<p class="p">The usual Shopify setup pastes a snippet into <code>theme.liquid</code> that posts the visitor ID to <code>/cart/update.js</code>, part of the <a href="https://shopify.dev/docs/api/ajax/reference/cart">Ajax Cart API</a>. A Hydrogen storefront, or any custom storefront on the Storefront API, has no <code>theme.liquid</code>, and <code>/cart/update.js</code> only exists on the Online Store. You set the attribute from your own cart code instead. The order is read the same way in both cases. For a theme store, see <a href="/blog/shopify-utm-tracking">Shopify UTM tracking</a>.</p>
+<h2>Which Hydrogen version the code is for</h2>
+<p class="p">The script, policy and cart route code below is for Hydrogen 2026-04 and earlier. Version 2026-10 replaced <code>CartForm</code> and the cart action route, and Shopify's <a href="https://shopify.dev/docs/storefronts/hydrogen/migrate">migration guide</a> moves the content security policy into your own code. The idea does not change: load the script, allow its host, and set the cart attribute. Each step says what to do on 2026-10.</p>
+<h2>Step 1: add the script</h2>
+<p class="p">Put the tag in the <code>&lt;head&gt;</code> of <code>app/root.tsx</code>, with the nonce from <a href="https://shopify.dev/docs/api/hydrogen/2026-04/hooks/usenonce"><code>useNonce</code></a>:</p>
+<div class="code block"><pre data-snippet>// app/root.tsx, inside &lt;head&gt;; nonce comes from useNonce() in @shopify/hydrogen.
+&lt;script defer src="https://app.virling.com/v.js"
+  data-site="yourstore.com" nonce={nonce}&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Hydrogen navigates with the History API, so route changes are tracked with no extra code. On 2026-10, use the nonce from your own policy code, or leave the attribute out if you have none.</p>
+<h2>Step 2: allow the host in the content security policy</h2>
+<p class="p">Without this the browser blocks the script and its events. In <code>app/entry.server.tsx</code>, add your Virling host to <a href="https://shopify.dev/docs/api/hydrogen/2026-04/utilities/createcontentsecuritypolicy"><code>createContentSecurityPolicy</code></a>:</p>
+<div class="code block"><pre data-snippet>const { nonce, header, NonceProvider } = createContentSecurityPolicy({
+  shop: { checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN, storeDomain: context.env.PUBLIC_STORE_DOMAIN },
+  scriptSrc: ["'self'", "https://cdn.shopify.com", "https://app.virling.com"],
+  connectSrc: ["'self'", "https://app.virling.com"],
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Keep <code>https://cdn.shopify.com</code> in <code>scriptSrc</code>: once you set that directive, the default script sources no longer apply, and Shopify loads its own scripts from there. Self-hosting, use your own Virling address in place of <code>app.virling.com</code> here and in the script tag. On 2026-10, add the same hosts to <code>script-src</code> and <code>connect-src</code> in your own policy.</p>
+<h2>Step 3: put the visitor ID on the cart</h2>
+<p class="p">The script stores the visitor ID in the <code>virling_vid</code> cookie on your storefront's domain, so the Hydrogen server receives it with every cart request. In the action of <code>app/routes/cart.tsx</code>, set it after lines are added, with <code>updateAttributes</code> from the <a href="https://shopify.dev/docs/api/hydrogen/2026-04/utilities/cart/createcarthandler">cart handler</a>:</p>
+<div class="code block"><pre data-snippet>case CartForm.ACTIONS.LinesAdd: {
+  result = await cart.addLines(inputs.lines);
+  // Store the Virling visitor ID on the cart; Shopify copies it onto the order.
+  const vid = request.headers.get("Cookie")?.match(/(?:^|;\s*)virling_vid=([^;]+)/)?.[1];
+  const cartId = result.cart?.id;
+  if (vid &amp;&amp; cartId) {
+    result = await cart.updateAttributes([{ key: "virling_vid", value: vid }], { cartId });
+  }
+  break;
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">If you set other cart attributes, pass them in the same call. On Hydrogen 2026-10, or on a custom storefront without Hydrogen, use the Storefront API: pass <code>attributes</code> in the input of <a href="https://shopify.dev/docs/api/storefront/latest/mutations/cartCreate"><code>cartCreate</code></a>, or call <a href="https://shopify.dev/docs/api/storefront/latest/mutations/cartAttributesUpdate"><code>cartAttributesUpdate</code></a> on an existing cart:</p>
+<div class="code block"><pre data-snippet>mutation SetVisitor($cartId: ID!, $attributes: [AttributeInput!]!) {
+  cartAttributesUpdate(cartId: $cartId, attributes: $attributes) {
+    cart { id }
+    userErrors { field message }
+  }
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Send <code>attributes: [{ key: "virling_vid", value: vid }]</code>, with the ID from the cookie on your server or from <code>window.virling?.vid?.()</code> in the browser.</p>
+<h2>Step 4: read the order's note attributes</h2>
+<p class="p">Shopify copies the cart attribute onto the order. No checkout script is involved; see <a href="/blog/shopify-checkout-extensibility-tracking">what still works for tracking under Shopify checkout extensibility</a>. In the Admin API's <a href="https://shopify.dev/docs/api/admin-rest/latest/resources/order">order resource</a> it looks like this, with a made-up visitor ID:</p>
+<div class="code block"><pre data-snippet>"note_attributes": [
+  { "name": "virling_vid", "value": "vexample123" }
+]</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Connect the store to Virling with an Admin API token that has only the <code>read_orders</code> scope, as described on the <a href="/integrations/shopify">Shopify integration page</a>. Virling imports the last 60 days of orders on the first run, then new orders and refunds every minute. It looks for <code>virling_vid</code> first. For an order without one, it compares the order's email with emails your site sent as identify events, and an exact match shows as <b>Matched by email</b>. UTM tags that Shopify stores on the order, and the landing page, are not read. The method is explained in <a href="/blog/track-shopify-revenue-by-traffic-source">how to track Shopify revenue by traffic source</a>.</p>
+<h2>What stays Unattributed</h2>
+<p class="p">These orders still count toward revenue, but with no visitor ID they are credited to a visit only if the email matches:</p>
+<ul class="post-list"><li><b>Carts made outside your storefront</b>, such as cart permalinks, Buy Button embeds and other sales channels, have no <code>virling_vid</code></li><li><b>Cookieless mode</b> has no cookie and no visitor ID to store, so leave <code>data-cookieless</code> off for a store</li><li><b>A blocked script</b>, by a browser or an ad blocker, leaves no visitor ID</li><li><b>A cart created before the script loaded</b>, on a visitor's first page, has no attribute until the next line is added</li><li><b>Orders from before the setup</b> carry no visitor ID, and a visitor ID with no visit inside the lookback window is not credited either</li></ul>
+<p class="p">For orders with no source in Shopify's own reports, see <a href="/blog/shopify-orders-show-as-direct">why Shopify orders show up as Direct</a>.</p>
+<h2>Test one order</h2>
+<ul class="post-list"><li>Turn on Shopify Payments test mode or the Bogus Gateway. For local development, add <code>data-dev</code> to the script tag</li><li>Open a private window and visit the storefront through a tagged link, such as <code>https://yourstore.com/?utm_source=test&amp;utm_medium=email</code></li><li>Add a product in the same window and check the cart's attributes, for example with <code>cart { attributes { key value } }</code> on the Storefront API's <a href="https://shopify.dev/docs/api/storefront/latest/objects/Cart"><code>Cart</code></a> object</li><li>Go to checkout from that cart and place a test order with a new customer email, since a later order by the same customer keeps the first order's channel</li><li>Open the order in the Shopify admin and check that its note attributes, shown as additional details, include <code>virling_vid</code></li><li>Wait a minute or two for the next sync, then open the payments list in Virling: the order shows the <code>test</code> source and the <b>Email</b> channel instead of Unattributed</li></ul>
+<p class="p">Cancel and refund the test order afterwards. The full setup is in <a href="https://docs.virling.com/payments/shopify">the Shopify docs</a>.</p>
+<p class="p">Virling is open source. Self-host it free, or start the hosted version with a 14-day free trial.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Frequently asked questions</h2>
+<h3>Does Shopify Hydrogen track UTM parameters?</h3><p class="p">With the setup on this page, yes. The script records the UTM tags of each landing on your Hydrogen storefront, and the visitor ID on the cart joins that visit to the order, so revenue can be grouped by UTM campaign.</p>
+<h3>Can I use a theme.liquid tracking snippet on a Hydrogen store?</h3><p class="p">No. A Hydrogen storefront has no theme.liquid, and /cart/update.js only exists on the Online Store. Set the cart attribute from your own cart code through the Storefront API instead.</p>
+<h3>How do cart attributes get to a Shopify order?</h3><p class="p">Attributes set on a cart through the Storefront API are copied onto the order as note attributes, the same as on theme carts. Virling reads virling_vid from there.</p>
+<h3>Does Shopify checkout on another domain break the tracking?</h3><p class="p">No. The visitor ID travels on the cart, not in the browser, so checkout can stay on Shopify's checkout domain. Keep the storefront on your own domain, where the script runs.</p>
+<h3>Why is my Hydrogen order Unattributed?</h3><p class="p">Usually its note attributes have no virling_vid: the script was blocked or cookieless, or the cart was made outside your storefront. An order with a visitor ID is also Unattributed when no visit of that visitor falls inside the lookback window.</p>
+<h3>Does this work without Hydrogen?</h3><p class="p">Yes. Any storefront built on the Storefront API can pass the attribute to cartCreate or call cartAttributesUpdate on an existing cart. Virling reads the finished order through the Admin API either way.</p>
+</div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See revenue per UTM campaign for your Hydrogen store</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

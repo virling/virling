@@ -107,6 +107,17 @@ impl<S: EventStore> EventStore for Cached<S> {
         result
     }
 
+    fn forget_payments(
+        &self,
+        site_id: &str,
+        provider: &str,
+        since: OffsetDateTime,
+    ) -> anyhow::Result<()> {
+        let result = self.inner.forget_payments(site_id, provider, since);
+        self.changed([site_id]);
+        result
+    }
+
     fn replace_subscriptions(
         &self,
         site_id: &str,
@@ -243,6 +254,10 @@ impl<S: EventStore> EventStore for Cached<S> {
 
     fn bots_filtered(&self, site_id: &str, days: i64) -> anyhow::Result<u64> {
         self.inner.bots_filtered(site_id, days)
+    }
+
+    fn payment_providers(&self, site_id: &str) -> anyhow::Result<Vec<String>> {
+        self.inner.payment_providers(site_id)
     }
 
     fn goals_since(

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Net revenue calculator: gross vs net revenue | Virling</title>
+<meta name="description" content="Go from gross sales to net revenue: each discount, refund, chargeback and fee as its own line, plus the share of gross you keep.">
+<link rel="canonical" href="https://virling.com/tools/net-revenue-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/net-revenue-calculator">
+<meta property="og:title" content="Net revenue calculator: gross vs net revenue | Virling">
+<meta property="og:description" content="Go from gross sales to net revenue: each discount, refund, chargeback and fee as its own line, plus the share of gross you keep.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Net revenue calculator","url":"https://virling.com/tools/net-revenue-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Net revenue calculator","item":"https://virling.com/tools/net-revenue-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / net revenue calculator</span><h1>Net revenue calculator</h1><p class="lead">Enter your gross sales for a period and what came off them: discounts, refunds, chargebacks and payment or platform fees. See your net revenue, the share of gross you keep and each deduction as its own line. Works for stores and SaaS. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="net" autocomplete="off">
+  <label>Gross sales at list price ($)<input name="gross" type="number" min="0" step="0.01" value="50000"></label>
+  <label>Discounts given ($)<input name="disc" type="number" min="0" step="0.01" value="2500"></label>
+  <label>Refunds ($)<input name="refunds" type="number" min="0" step="0.01" value="1500"></label>
+  <label>Chargebacks lost, with dispute fees ($)<input name="cb" type="number" min="0" step="0.01" value="300"></label>
+  <label>Orders or payments<input name="orders" type="number" min="0" step="1" value="800"></label>
+  <label>Payment and platform fee (%)<input name="pct" type="number" min="0" max="100" step="0.01" value="2.9"></label>
+  <label>Fixed fee per order ($)<input name="fixed" type="number" min="0" step="0.01" value="0.30"></label>
+</form>
+<div class="tool-stats" id="net-out"></div>
+<div class="txt post tool-cta">
+<p class="p">This is one blended number. Virling splits it by channel from your real payments: it links every visit to the payment it led to and credits each payment, after refunds, to the channel that brought it. The Channels card shows each channel's revenue net of refunds and lost disputes next to the share of its payments that were refunded, so you can see which channels bring refund-heavy buyers. See <a href="https://docs.virling.com/attribution/">how attribution works</a> in the docs. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/payment-fee-calculator">Stripe fee calculator</a>, <a href="/tools/refund-rate-calculator">refund rate calculator</a>, <a href="/tools/chargeback-rate-calculator">chargeback rate calculator</a>, <a href="/tools/discount-break-even-calculator">discount break-even calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Gross vs net revenue</h2>
+<p class="p">Gross revenue is the full value of what you sold at list price. Net revenue is what you keep after everything that comes off it before the money reaches your bank:</p>
+<p class="p"><code>net revenue = gross sales - discounts - refunds - chargebacks - fees</code></p>
+<p class="p">Payment and platform fees are usually a percent of what the buyer paid plus a fixed amount per order. Many providers keep their fee when you refund, so fees here are charged on gross sales after discounts, before refunds:</p>
+<p class="p"><code>fees = (gross sales - discounts) &times; fee % + orders &times; fixed fee</code></p>
+<p class="p">The share of gross you keep is the headline:</p>
+<p class="p"><code>share kept = net revenue / gross sales</code></p>
+<p class="p">Net revenue is not profit. Product cost, shipping, ad spend, salaries and tax all still come out of it.</p>
+<h2>A worked example</h2>
+<p class="p">The defaults above are made-up sample numbers. A store sells $50,000 at list price in a month across 800 orders. It gives $2,500 in discount codes, refunds $1,500, and loses $300 to chargebacks and dispute fees. Its payment provider charges 2.9% + $0.30.</p>
+<p class="p">Buyers paid $50,000 - $2,500 = $47,500, so fees are $47,500 &times; 0.029 = $1,377.50 plus 800 &times; $0.30 = $240, or $1,617.50 in all. Net revenue is $50,000 - $2,500 - $1,500 - $300 - $1,617.50 = $44,082.50.</p>
+<p class="p">The store keeps 88.17% of gross. Discounts are the biggest deduction at 5% of gross, then fees at 3.24%, refunds at 3% and chargebacks at 0.6%. Together $5,917.50, or 11.83% of gross, never reaches the bank.</p>
+<h2>Four businesses side by side</h2>
+<p class="p">Example inputs, worked out with the formulas above. They are made up, fee rates included, and are not benchmarks or any provider's quote.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:860px"><thead><tr><th style="width:18%">Example</th><th>Gross sales</th><th>Discounts</th><th>Refunds</th><th>Chargebacks</th><th>Orders</th><th>Fee rate</th><th>Fees</th><th>Net revenue</th><th>Share kept</th></tr></thead><tbody><tr><th scope="row">Store</th><td>$50,000</td><td>$2,500</td><td>$1,500</td><td>$300</td><td>800</td><td>2.9% + $0.30</td><td>$1,617.50</td><td>$44,082.50</td><td>88.17%</td></tr><tr><th scope="row">SaaS with coupons</th><td>$20,000</td><td>$2,000</td><td>$400</td><td>$100</td><td>400</td><td>2.9% + $0.30</td><td>$642.00</td><td>$16,858.00</td><td>84.29%</td></tr><tr><th scope="row">SaaS, higher fee</th><td>$30,000</td><td>$0</td><td>$900</td><td>$0</td><td>600</td><td>5% + $0.50</td><td>$1,800.00</td><td>$27,300.00</td><td>91%</td></tr><tr><th scope="row">Store, small orders</th><td>$12,000</td><td>$1,500</td><td>$500</td><td>$50</td><td>1,000</td><td>2.9% + $0.30</td><td>$604.50</td><td>$9,345.50</td><td>77.88%</td></tr></tbody></table></div>
+<p class="p">The first row is the worked example. The third pays the highest fee rate and still keeps the most, mainly because it gives no discounts. The last one keeps the least: discounts take 12.5% of gross, and at $10.50 an order the fixed $0.30 costs $300, about as much as the 2.9%.</p>
+<h2>Where to find the inputs in Stripe, Paddle and Shopify</h2>
+<ul class="post-list"><li><b>Stripe.</b> <a href="https://docs.stripe.com/reports/balance">Balance change from activity</a> breaks charges, refunds, disputes and fees down for a period, and the <a href="https://docs.stripe.com/reports/all-fees">Fees report</a> lists the fees. A charge is what the buyer paid, so discounts are already off it. For payments with an invoice, read them from the <a href="https://docs.stripe.com/api/invoices/object">invoice</a>, where <code>total_discount_amounts</code> is per discount, and add them back for gross at list price. Stripe says its <a href="https://docs.stripe.com/refunds">processing fees are not returned</a> when you refund (all read on 2026-11-25).</li><li><b>Paddle.</b> The totals of each <a href="https://developer.paddle.com/api-reference/transactions/get-transaction">transaction</a> have a <code>subtotal</code> before discount and tax, a <code>discount</code> and a <code>fee</code>, the amount Paddle took. Refunds and chargebacks are in an <a href="https://developer.paddle.com/api-reference/reports/create-report">adjustments report</a>. The <a href="https://developer.paddle.com/api-reference/metrics/get-metrics-revenue">net revenue metric</a> is already after tax and fees but before refunds and chargebacks, so do not take fees off it twice (all read on 2026-11-25).</li><li><b>Shopify.</b> The <a href="https://help.shopify.com/en/manual/reports-and-analytics/shopify-reports/report-types/default-reports/finances-report">Total sales breakdown</a> has gross sales, discounts and sales reversals, without tax and shipping. Sales reports say <a href="https://help.shopify.com/en/manual/reports-and-analytics/shopify-reports/report-types/default-reports/sales-report">gross sales include</a> pending, canceled and unpaid orders. With Shopify Payments, the <a href="https://help.shopify.com/en/manual/payments/shopify-payments/payouts/payouts-activity-report">activity report</a> groups charges, refunds and disputes with their fees. It leaves out Shopify billing fees and other payment providers, so add theirs (all read on 2026-11-25).</li></ul>
+<p class="p">If you have the fees as one amount, enter it in place of the rate: divide it by gross sales after discounts, type that percent and set the fixed fee to 0. Leave sales tax out of every input, because it was never yours to keep.</p>
+<h2>Why net revenue by channel matters</h2>
+<p class="p">A blended net revenue hides where the deductions come from. A deal site or a discount code shared far beyond its audience can bring orders that arrive discounted and come back as refunds, while buyers from search or a referral who knew what they wanted keep what they bought. A channel can lead on gross sales and fall behind once its refunds come off. Run the calculator per channel with each channel's numbers, or let Virling do it from your payments: it <a href="https://docs.virling.com/attribution/">credits each payment, after refunds</a>, to the channel, referrer, campaign and landing page of the visit that brought it. Add your fee rate to the Profit by channel card and it takes fees off each channel too; <a href="/blog/profit-by-marketing-channel">profit by marketing channel</a> has the formula. To compare channels on refunds alone, see <a href="/blog/refund-rate-by-traffic-source">refund rate by traffic source</a>.</p>
+<h2>What Virling shows per channel</h2>
+<p class="p">Virling starts from what the buyer paid, so discounts are already off and any tax or shipping charged is included, and takes refunds off each payment. The Channels card shows that revenue for each channel. Every renewal <a href="https://docs.virling.com/attribution/renewals">is credited to the channel of the customer's first payment</a>, so a subscription's later payments add to the channel that won it, and the <a href="https://docs.virling.com/attribution/model">attribution model and lookback window</a> decide which visit gets the first one. A lost dispute on Stripe and a chargeback on Paddle count as refunds. Shopify chargebacks are not read, so take those off yourself.</p>
+<p class="p">Payment fees come off only where you ask for it: add a line such as <code>Fees 2.9% + 0.30</code> to the monthly spend in Site settings, and the <a href="https://docs.virling.com/guides/dashboard">Profit by channel</a> card takes the percent of each channel's revenue and the fixed amount for each of its payments. That percent is on revenue after refunds, while this calculator charges it before them, so the two differ a little when you refund.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Net revenue calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>What is the difference between gross and net revenue?</h3><p class="p">Gross revenue is the full value of what you sold, at list price, before anything comes off. Net revenue is what is left after discounts, refunds, chargebacks and payment or platform fees. Net revenue is the money you actually keep to pay for products, staff and marketing.</p></div>
+      <div><h3>How do you calculate net revenue?</h3><p class="p">Start with gross sales and subtract discounts, refunds, chargebacks and fees: net revenue = gross sales - discounts - refunds - chargebacks - fees. Fees are usually a percent of the amount charged plus a fixed amount per order.</p></div>
+      <div><h3>Are payment fees refunded when I refund an order?</h3><p class="p">Often not. Many payment providers keep their fee on a refunded payment, so this calculator charges fees on everything you charged, after discounts and before refunds. Check your provider's terms and set the fee inputs to match.</p></div>
+      <div><h3>Is net revenue the same as profit?</h3><p class="p">No. Net revenue comes before product cost, shipping, ad spend, salaries and tax. For what is left after product cost, use a gross margin or contribution margin calculation on top of net revenue.</p></div>
+      <div><h3>Why does net revenue differ by channel?</h3><p class="p">Buyers from different channels refund and dispute at different rates, and some channels lean on discount codes. Two channels with the same gross sales can keep very different amounts once those come off.</p></div>
+      <div><h3>Does Virling show net revenue by channel?</h3><p class="p">Yes, after refunds. The Channels card shows each channel's revenue net of refunds, and renewals count for the channel of the customer's first payment. To take payment fees off too, add a fee line in Site settings and read the Profit by channel card. Shopify chargebacks are not read.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the difference between gross and net revenue?", "acceptedAnswer": {"@type": "Answer", "text": "Gross revenue is the full value of what you sold, at list price, before anything comes off. Net revenue is what is left after discounts, refunds, chargebacks and payment or platform fees. Net revenue is the money you actually keep to pay for products, staff and marketing."}}, {"@type": "Question", "name": "How do you calculate net revenue?", "acceptedAnswer": {"@type": "Answer", "text": "Start with gross sales and subtract discounts, refunds, chargebacks and fees: net revenue = gross sales - discounts - refunds - chargebacks - fees. Fees are usually a percent of the amount charged plus a fixed amount per order."}}, {"@type": "Question", "name": "Are payment fees refunded when I refund an order?", "acceptedAnswer": {"@type": "Answer", "text": "Often not. Many payment providers keep their fee on a refunded payment, so this calculator charges fees on everything you charged, after discounts and before refunds. Check your provider's terms and set the fee inputs to match."}}, {"@type": "Question", "name": "Is net revenue the same as profit?", "acceptedAnswer": {"@type": "Answer", "text": "No. Net revenue comes before product cost, shipping, ad spend, salaries and tax. For what is left after product cost, use a gross margin or contribution margin calculation on top of net revenue."}}, {"@type": "Question", "name": "Why does net revenue differ by channel?", "acceptedAnswer": {"@type": "Answer", "text": "Buyers from different channels refund and dispute at different rates, and some channels lean on discount codes. Two channels with the same gross sales can keep very different amounts once those come off."}}, {"@type": "Question", "name": "Does Virling show net revenue by channel?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, after refunds. The Channels card shows each channel's revenue net of refunds, and renewals count for the channel of the customer's first payment. To take payment fees off too, add a fee line in Site settings and read the Profit by channel card. Shopify chargebacks are not read."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring the revenue you keep</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue after refunds that each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("net"), out = document.getElementById("net-out");
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 2 }) + "%";
+const usd = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const calc = () => {
+  const g = +f.gross.value, d = +f.disc.value, r = +f.refunds.value, c = +f.cb.value, o = +f.orders.value, p = +f.pct.value / 100, x = +f.fixed.value;
+  const ok = g > 0 && d >= 0 && d <= g && r >= 0 && c >= 0 && o >= 0 && p >= 0 && p <= 1 && x >= 0;
+  const fees = (g - d) * p + o * x, net = g - d - r - c - fees;
+  const line = (v) => (ok ? "-" + usd(v) + " (" + pct(v / g) + " of gross)" : "No data");
+  const rows = [
+    ["Gross sales", g > 0 ? usd(g) : "No data"],
+    ["Discounts", line(d)],
+    ["Refunds", line(r)],
+    ["Chargebacks", line(c)],
+    ["Payment and platform fees", line(fees)],
+    ["Net revenue", ok ? usd(net) : "No data"],
+    ["Share of gross kept", ok ? pct(net / g) : "No data"],
+  ];
+  out.innerHTML = rows.map(([k, v]) => `<div><span class="dim">${k}</span><b>${v}</b></div>`).join("");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Next.js Dodo Payments UTM tracking: pass the visit to checkout</title>
+<meta name="description" content="Use payment links or a Next.js route handler that sets virling_vid in Dodo checkout session metadata to see the channel behind each sale.">
+<link rel="canonical" href="https://virling.com/blog/nextjs-dodo-payments-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/nextjs-dodo-payments-utm-tracking">
+<meta property="og:title" content="Next.js Dodo Payments UTM tracking: pass the visit to checkout">
+<meta property="og:description" content="Use payment links or a Next.js route handler that sets virling_vid in Dodo checkout session metadata to see the channel behind each sale.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Next.js Dodo Payments UTM tracking: carry the visitor into checkout","item":"https://virling.com/blog/nextjs-dodo-payments-utm-tracking"}]},{"@type":"BlogPosting","headline":"Next.js Dodo Payments UTM tracking: pass the visit to checkout","description":"Use payment links or a Next.js route handler that sets virling_vid in Dodo checkout session metadata to see the channel behind each sale.","datePublished":"2026-11-23","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/nextjs-dodo-payments-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Dodo Payments checkout in Next.js?","acceptedAnswer":{"@type":"Answer","text":"Pass the Virling visitor ID instead. In the route handler that calls client.checkoutSessions.create, read the virling_vid cookie and set metadata: { virling_vid }. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them."}},{"@type":"Question","name":"Do Dodo payment links in a Next.js app need code?","acceptedAnswer":{"@type":"Answer","text":"No. Keep the link to checkout.dodopayments.com/buy as a normal <a href> on a page that runs the script. The script adds metadata_virling_vid=<visitor ID> to it, unless it is already there, and Dodo stores it as the payment's metadata.virling_vid."}},{"@type":"Question","name":"How do I add the visitor ID to a payment link I build in a client component?","acceptedAnswer":{"@type":"Answer","text":"Read it on click with window.virling?.vid?.() and, when there is a value, set metadata_virling_vid on the URL before you send the buyer to it. window.virling only exists in the browser, so the file needs \"use client\"."}},{"@type":"Question","name":"What happens if the cookie is missing?","acceptedAnswer":{"@type":"Answer","text":"The checkout is created without a visitor ID, for example when the script is blocked. The payment still counts toward revenue, as Unattributed."}},{"@type":"Question","name":"Do I need a Dodo Payments webhook in my Next.js app?","acceptedAnswer":{"@type":"Answer","text":"No. Virling reads payments, refunds and subscriptions from the Dodo Payments API with an API key and checks for new payments every minute."}},{"@type":"Question","name":"Can a server action create the Dodo checkout session?","acceptedAnswer":{"@type":"Answer","text":"Yes. Read the cookie with (await cookies()).get(\"virling_vid\")?.value from next/headers, set it in metadata as virling_vid, and call redirect(session.checkout_url) outside any try block, because redirect works by throwing an error."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-23</span>
+      <h1>Next.js Dodo Payments UTM tracking: carry the visitor into checkout</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-23.</p>
+<p class="p">To tie each Dodo Payments sale from a Next.js app to the channel that brought the buyer, load the Virling script once with <code>next/script</code> and carry its visitor ID into checkout. Static payment links on <code>checkout.dodopayments.com/buy/...</code> need no code: the script adds the ID as <code>metadata_virling_vid</code>. If you create checkout sessions, read the <code>virling_vid</code> cookie in the route handler that calls <code>client.checkoutSessions.create</code> and set it in <code>metadata</code>. Virling reads <code>metadata.virling_vid</code> back from the payment and joins it to every visit behind it, with the UTM tags of each.</p>
+<p class="p">This post covers the App Router and the Pages Router. For what Dodo does with metadata outside Next.js, see the general guide to <a href="/blog/dodo-payments-utm-tracking">Dodo Payments UTM tracking</a>. Using Stripe instead? See <a href="/blog/nextjs-stripe-utm-tracking">Next.js Stripe UTM tracking</a>. Comparing providers? The steps for Creem are in <a href="/blog/nextjs-creem-utm-tracking">Next.js Creem UTM tracking</a>.</p>
+<h2>Why Dodo checkout loses your UTM tags</h2>
+<p class="p">UTM tags live on the landing URL. By the time a visitor clicks Buy they are usually a few pages in, and checkout runs on Dodo's domain, which only stores the metadata you hand it. Passing one visitor ID instead of the tags keeps earlier visits and untagged ones, such as search and referrals, too.</p>
+<h2>Step 1: add the script once</h2>
+<p class="p">Use <code>next/script</code> with <code>strategy="afterInteractive"</code> and load it once, so it runs on every route. <code>defer</code> does nothing on <code>next/script</code>, so leave it out. Client-side navigation is counted too. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<p class="p">App Router, in <code>app/layout.tsx</code>:</p>
+<div class="code block"><pre data-snippet>import Script from "next/script";
+
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+        {children}
+        &lt;Script src="https://app.virling.com/v.js"
+          data-site="yourdomain.com" strategy="afterInteractive" /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Pages Router, in <code>pages/_app.tsx</code>:</p>
+<div class="code block"><pre data-snippet>import Script from "next/script";
+
+export default function App({ Component, pageProps }) {
+  return (
+    &lt;&gt;
+      &lt;Script src="https://app.virling.com/v.js"
+        data-site="yourdomain.com" strategy="afterInteractive" /&gt;
+      &lt;Component {...pageProps} /&gt;
+    &lt;/&gt;
+  );
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain, records the UTM tags of each visit against it, and <code>window.virling?.vid?.()</code> returns the same ID in the browser.</p>
+<h2>Step 2a: payment links, no code</h2>
+<p class="p">Keep the link to <code>checkout.dodopayments.com/buy/...</code> as a normal <code>&lt;a href&gt;</code> on a page that runs the script. When a visitor clicks it, the script adds <code>metadata_virling_vid=&lt;visitor ID&gt;</code> to the link, unless it is already there, and Dodo stores it as the payment's <code>metadata.virling_vid</code>. A plain <code>&lt;a href&gt;</code> or <code>next/link</code> both render a normal link:</p>
+<div class="code block"><pre data-snippet>&lt;a href="https://checkout.dodopayments.com/buy/pdt_..."&gt;Buy now&lt;/a&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">If you build the payment link URL in your own code instead, for example to pick a product, do it in a client component, since <code>window.virling</code> only exists in the browser, and add the parameter yourself on click:</p>
+<div class="code block"><pre data-snippet>// app/buy-button.jsx
+"use client";
+
+export default function BuyButton() {
+  function buy() {
+    const url = new URL("https://checkout.dodopayments.com/buy/pdt_...");
+    const vid = window.virling?.vid?.();
+    if (vid) url.searchParams.set("metadata_virling_vid", vid);
+    location.href = url.href;
+  }
+  return &lt;button onClick={buy}&gt;Buy now&lt;/button&gt;;
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The same component works in the Pages Router without the <code>"use client"</code> line.</p>
+<h2>Step 2b: checkout sessions in a route handler</h2>
+<p class="p">If your server creates the checkout session, the browser sends the <code>virling_vid</code> cookie with the request. Read it where you call <code>client.checkoutSessions.create</code> and set it in <code>metadata</code>:</p>
+<div class="code block"><pre data-snippet>// app/api/checkout/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import DodoPayments from "dodopayments";
+
+const client = new DodoPayments({ bearerToken: process.env.DODO_PAYMENTS_API_KEY });
+
+export async function POST(req: NextRequest) {
+  const session = await client.checkoutSessions.create({
+    product_cart: [{ product_id: "pdt_...", quantity: 1 }],
+    return_url: "https://yourdomain.com/thanks",
+    metadata: { virling_vid: req.cookies.get("virling_vid")?.value },
+  });
+  // Send the customer to session.checkout_url
+  return NextResponse.redirect(session.checkout_url, 303);
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">A plain form posts to it, and the browser sends the cookie along:</p>
+<div class="code block"><pre data-snippet>&lt;form action="/api/checkout" method="POST"&gt;
+  &lt;button type="submit"&gt;Buy&lt;/button&gt;
+&lt;/form&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">In the Pages Router, do the same in an API route under <code>pages/api/</code>, where the cookie is <code>req.cookies.virling_vid</code>, as in the <a href="https://docs.virling.com/payments/dodo">Dodo Payments docs</a>. If the cookie is missing, for example when the script is blocked, the session is created without a visitor ID and the payment counts as Unattributed.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free</a></p>
+<h2>Step 3: connect Dodo Payments</h2>
+<p class="p">Create an API key in the Dodo Payments dashboard and paste it into Virling. Live mode and test mode keys both work: Virling tries the key against live mode first and test mode second, and remembers which one accepted it. It imports payments from the last 90 days on the first run, then new ones every minute. Refunds update the payment they belong to, and for subscriptions every paid payment after the first paid one is marked as a renewal. There is no webhook to add to your Next.js app. The full setup is on the <a href="/integrations/dodo-payments">Dodo Payments integration page</a>.</p>
+<h2>Check that it works</h2>
+<ol class="post-list"><li>Connect a test mode key to Virling.</li><li>In your app, put a test mode key in <code>DODO_PAYMENTS_API_KEY</code>, use a test mode product ID, and set <code>environment: "test_mode"</code> on the client. The SDK <a href="https://docs.dodopayments.com/developer-resources/sdks/typescript">defaults to live mode</a>, and API keys and products <a href="https://docs.dodopayments.com/miscellaneous/test-mode-vs-live-mode">belong to one mode</a>.</li><li>Open a private window and visit a page that runs the script through a tagged link, such as <code>https://yourdomain.com/?utm_source=test&amp;utm_medium=email</code>. Run <code>window.virling.vid()</code> in the browser console and note the ID. The script does nothing on <code>localhost</code>, so use your domain or a subdomain such as <code>staging.yourdomain.com</code>.</li><li>In the same window, press Buy on the form that posts to your route handler and pay with one of <a href="https://docs.dodopayments.com/miscellaneous/testing-process">Dodo's test cards</a>.</li><li>Wait a minute for the next sync, then open the payments list at <code>/app/yourdomain.com/payments</code>.</li></ol>
+<p class="p">What the payment looks like: in the list it shows the <code>test</code> source and the <b>Email</b> channel of your tagged visit instead of Unattributed. Open it and <b>Credited to</b> shows the same, <b>Journey</b> starts at the tagged visit and ends with the Dodo Payments payment, and <b>Details</b> lists the ID from your browser console as <b>Visitor</b>.</p>
+<p class="p">The script adds the visitor ID by itself only to links on <code>checkout.dodopayments.com</code>, not to test links, so test through a checkout session or add <code>metadata_virling_vid</code> in your own code. Use a new email address for each test, because a later payment by the same customer is a renewal and keeps the first payment's channel. A site has one Dodo Payments connection, and test payments stay in your reports after you replace the key with a live one. The full checklist is in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>.</p>
+<p class="p">If the payment lists no visitor ID, checkout did not carry <code>virling_vid</code>: check that the page you bought from loads the script and, for checkout sessions, that the request to your route handler comes from the same domain, so the cookie is sent. Payments without a visitor ID still count toward revenue, as Unattributed. How the join works from visit to payment is in <a href="/blog/track-dodo-payments-revenue-by-traffic-source">how to track Dodo Payments revenue by traffic source</a>.</p>
+<h2>Common mistakes</h2>
+<p class="p">Start from an Unattributed payment. Open it from <code>/app/yourdomain.com/payments</code> and look for <b>Visitor</b> under <b>Details</b>. If there is none, checkout did not carry the ID. The table lists what usually goes wrong in an App Router app.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">No payment has a visitor ID, and every buyer gets the same checkout</th><td><code>client.checkoutSessions.create</code> runs in a <code>GET</code> handler with <code>dynamic = "force-static"</code>, where <a href="https://nextjs.org/docs/app/guides/caching-without-cache-components">cookies are empty</a> and the response is cached</td><td>Create it in a <code>POST</code> handler. Only <code>GET</code> handlers <a href="https://nextjs.org/docs/app/getting-started/route-handlers">can be cached</a></td></tr><tr><th scope="row">Several buyers get the same Dodo checkout</th><td>The session is created while a page renders, and a prerendered or cached page gives its <code>checkout_url</code> to everyone</td><td>Create it in the <code>POST</code> handler from step 2b. Each <code>checkout_url</code> <a href="https://docs.dodopayments.com/developer-resources/integration-guide">works once</a></td></tr><tr><th scope="row">The server action fails with <code>cookies(...).get is not a function</code></th><td><code>cookies()</code> is async, and Next.js 16 <a href="https://nextjs.org/docs/app/guides/upgrading/version-16">removed synchronous access</a></td><td>Write <code>(await cookies()).get("virling_vid")?.value</code></td></tr><tr><th scope="row">An error about <code>cookies()</code> inside <code>use cache</code></th><td>Cached functions <a href="https://nextjs.org/docs/app/api-reference/directives/use-cache">cannot read cookies</a></td><td>Read the cookie outside the cached function, and do not cache the one that creates the checkout</td></tr><tr><th scope="row">A server action creates the checkout, but the buyer stays on the page</th><td><code>redirect()</code> is inside a <code>try</code> block. It <a href="https://nextjs.org/docs/app/api-reference/functions/redirect">works by throwing an error</a>, which your <code>catch</code> swallows</td><td>Create the checkout inside <code>try</code> and call <code>redirect()</code> after it</td></tr><tr><th scope="row">The browser blocks the request to <code>/api/checkout</code> with a CORS error</th><td>A client component calls <code>fetch()</code>, which follows the redirect to Dodo's domain as a cross-origin request</td><td>Post a form as in step 2b, or return <code>session.checkout_url</code> as JSON and set <code>location.href</code></td></tr><tr><th scope="row"><code>window is not defined</code> during the build</th><td>A client component reads <code>window.virling</code> while it renders. Client components are <a href="https://nextjs.org/docs/app/guides/static-exports">prerendered on the server</a> too</td><td>Read it in the click handler, as in step 2a</td></tr><tr><th scope="row">Dodo answers <code>401</code> in a test</th><td>A test mode key is used with a client that connects to live mode, <a href="https://docs.dodopayments.com/miscellaneous/test-mode-vs-live-mode">or the reverse</a></td><td>Set <code>environment: "test_mode"</code> for test keys and remove it for live ones</td></tr><tr><th scope="row">TypeScript rejects <code>session.checkout_url</code> in the redirect</th><td>The field <a href="https://docs.dodopayments.com/developer-resources/checkout-session">can be <code>null</code></a></td><td>Return an error response when it is missing, then redirect</td></tr><tr><th scope="row">The checkout route or server action fails in a static export</th><td>With <code>output: "export"</code>, server actions, cookies and handlers that read the request are <a href="https://nextjs.org/docs/app/guides/static-exports">not supported</a></td><td>Use payment links, as in step 2a</td></tr><tr><th scope="row">A test payment link is Unattributed</th><td>The script adds the ID to links on <code>checkout.dodopayments.com</code>, not to test links</td><td>Add <code>metadata_virling_vid</code> in your own code, or test with a checkout session</td></tr><tr><th scope="row">A second test keeps the first test's channel</th><td>Any later payment by the same customer is a renewal</td><td>Use a new email address for each test</td></tr></tbody></table></div>
+<p class="p">Every other cause is in <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>. A payment made before a fix usually stays Unattributed, so make a new one to check.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I pass UTM parameters to Dodo Payments checkout in Next.js?</h3><p class="p">Pass the Virling visitor ID instead. In the route handler that calls client.checkoutSessions.create, read the virling_vid cookie and set metadata: { virling_vid }. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them.</p>
+<h3>Do Dodo payment links in a Next.js app need code?</h3><p class="p">No. Keep the link to checkout.dodopayments.com/buy as a normal &lt;a href&gt; on a page that runs the script. The script adds metadata_virling_vid=&lt;visitor ID&gt; to it, unless it is already there, and Dodo stores it as the payment's metadata.virling_vid.</p>
+<h3>How do I add the visitor ID to a payment link I build in a client component?</h3><p class="p">Read it on click with window.virling?.vid?.() and, when there is a value, set metadata_virling_vid on the URL before you send the buyer to it. window.virling only exists in the browser, so the file needs "use client".</p>
+<h3>What happens if the cookie is missing?</h3><p class="p">The checkout is created without a visitor ID, for example when the script is blocked. The payment still counts toward revenue, as Unattributed.</p>
+<h3>Do I need a Dodo Payments webhook in my Next.js app?</h3><p class="p">No. Virling reads payments, refunds and subscriptions from the Dodo Payments API with an API key and checks for new payments every minute.</p>
+<h3>Can a server action create the Dodo checkout session?</h3><p class="p">Yes. Read the cookie with (await cookies()).get("virling_vid")?.value from next/headers, set it in metadata as virling_vid, and call redirect(session.checkout_url) outside any try block, because redirect works by throwing an error.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring Dodo Payments revenue</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

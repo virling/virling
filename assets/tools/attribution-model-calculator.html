@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attribution model calculator: compare how channels get credit</title>
+<meta name="description" content="Enter one customer journey and a payment to see how last non-direct, first touch, last touch, linear and position-based models split the revenue.">
+<link rel="canonical" href="https://virling.com/tools/attribution-model-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/attribution-model-calculator">
+<meta property="og:title" content="Attribution model calculator: compare how channels get credit">
+<meta property="og:description" content="Enter one customer journey and a payment to see how last non-direct, first touch, last touch, linear and position-based models split the revenue.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Attribution model calculator","url":"https://virling.com/tools/attribution-model-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Attribution model calculator","item":"https://virling.com/tools/attribution-model-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / attribution model calculator</span><h1>Attribution model calculator</h1><p class="lead">Enter the channels a customer came through before paying, in order, and the payment amount. See how five attribution models split the same revenue between those channels, side by side. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="am" autocomplete="off">
+  <div class="tool-pick" data-select><span id="n-label">Touchpoints in the journey</span>
+    <button type="button" id="n" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="n-label n-value" data-value="4"><span id="n-value">4</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="n-menu" role="listbox" aria-labelledby="n-label" tabindex="-1" hidden><li role="option" data-value="2" aria-selected="false">2</li><li role="option" data-value="3" aria-selected="false">3</li><li role="option" data-value="4" aria-selected="true">4</li><li role="option" data-value="5" aria-selected="false">5</li><li role="option" data-value="6" aria-selected="false">6</li></ul>
+  </div>
+  <label>Payment amount ($)<input name="amount" type="number" min="0" step="0.01" value="100"></label>
+  <label>Touchpoint 1 (first visit)<input name="t1" value="Hacker News"></label>
+  <label>Touchpoint 2<input name="t2" value="Google"></label>
+  <label>Touchpoint 3<input name="t3" value="Newsletter"></label>
+  <label>Touchpoint 4<input name="t4" value="Direct"></label>
+  <label style="display:none">Touchpoint 5<input name="t5" value="LinkedIn"></label>
+  <label style="display:none">Touchpoint 6<input name="t6" value="Direct"></label>
+  <span class="dim wide" style="grid-column:1/-1;font-size:13px">The last touchpoint is the visit right before the payment. Type Direct for visits with no referrer, such as a typed URL or a bookmark.</span>
+</form>
+<div style="overflow-x:auto"><table class="cmp" id="am-out" style="min-width:620px"></table></div>
+<div class="txt post tool-cta">
+<p class="p">Virling credits each payment with last non-direct (the default), first touch or last touch, chosen per site. Linear and position-based are shown here for comparison only. Instead of one journey you type in, Virling fills in these numbers per channel from your real payments, joining each payment to the visits before it. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/blog/first-touch-vs-last-touch-attribution-saas">first-touch vs last-touch attribution for SaaS</a>, <a href="/blog/what-is-revenue-attribution">what revenue attribution is</a>, the <a href="/tools/roas-calculator">ROAS calculator</a>, the <a href="/tools/attribution-setup-generator">attribution setup generator</a> and the <a href="/tools/attribution-audit-checklist">attribution audit checklist</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>How each attribution model splits the revenue</h2>
+<p class="p">Every model starts from the same journey: the visits a customer made, oldest first, ending with the payment. They differ only in which visits get credit and how much.</p>
+<ul class="post-list">
+<li><b>Last non-direct</b> gives all the revenue to the latest touchpoint that was not Direct. If every touchpoint was Direct, the latest Direct one gets it.</li>
+<li><b>First touch</b> gives all the revenue to the first touchpoint, Direct or not.</li>
+<li><b>Last touch</b> gives all the revenue to the touchpoint right before the payment, Direct included.</li>
+<li><b>Linear</b> splits the revenue equally: <code>credit per touchpoint = payment / number of touchpoints</code>.</li>
+<li><b>Position-based (40/20/40)</b> gives 40% to the first touchpoint, 40% to the last, and splits the remaining 20% equally between the ones in the middle. With only two touchpoints, each gets 50%.</li>
+</ul>
+<p class="p">Linear and position-based count Direct like any other touchpoint. When a channel appears more than once in a journey, the calculator adds its shares together.</p>
+<h2>A worked example</h2>
+<p class="p">The defaults above describe a customer who found you on Hacker News, came back from a Google search, clicked a link in your newsletter, then typed your URL and paid $100.</p>
+<ul class="post-list">
+<li><b>Last non-direct</b> skips the final Direct visit and gives $100 to Newsletter.</li>
+<li><b>First touch</b> gives $100 to Hacker News.</li>
+<li><b>Last touch</b> gives $100 to Direct.</li>
+<li><b>Linear</b> gives $25 to each of the four touchpoints.</li>
+<li><b>Position-based</b> gives $40 to Hacker News, $40 to Direct, and $10 each to Google and Newsletter.</li>
+</ul>
+<p class="p">Three channels can each claim the whole payment depending on the model. That is why a report should always say which model it uses, and why Direct almost never deserves full credit: people type a URL they already learned about somewhere else.</p>
+<h2>Three journeys under every model</h2>
+<p class="p">These journeys are made up, not real customers, and every number is what the calculator above shows when you enter the same touchpoints and amount.</p>
+<ul class="post-list">
+<li><b>SaaS trial.</b> Someone finds a product in an AI assistant answer, searches for it on Google, returns from a LinkedIn post and then a newsletter link, and finally types the URL to start a free trial. With no more visits before it ends, the first charge is $90.</li>
+<li><b>Store order.</b> A shopper clicks an Instagram post, finds the store again through a Google search, and orders for $120 after clicking an email.</li>
+<li><b>Agency client.</b> An agency runs ads for a training company that sells a $600 course. One buyer first types the URL from a flyer, later clicks a Google ad, returns from a Facebook post, and buys after a Google search.</li>
+</ul>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:700px"><thead><tr><th>Touchpoint</th><th>Last non-direct</th><th>First touch</th><th>Last touch</th><th>Linear</th><th>Position-based</th></tr></thead><tbody><tr><th scope="rowgroup" colspan="6">SaaS trial, $90.00 first charge</th></tr><tr><th scope="row">1. AI assistant</th><td>$0.00</td><td>$90.00</td><td>$0.00</td><td>$18.00</td><td>$36.00</td></tr><tr><th scope="row">2. Google search</th><td>$0.00</td><td>$0.00</td><td>$0.00</td><td>$18.00</td><td>$6.00</td></tr><tr><th scope="row">3. LinkedIn</th><td>$0.00</td><td>$0.00</td><td>$0.00</td><td>$18.00</td><td>$6.00</td></tr><tr><th scope="row">4. Newsletter</th><td>$90.00</td><td>$0.00</td><td>$0.00</td><td>$18.00</td><td>$6.00</td></tr><tr><th scope="row">5. Direct</th><td>$0.00</td><td>$0.00</td><td>$90.00</td><td>$18.00</td><td>$36.00</td></tr><tr><th scope="row">Total</th><td><b>$90.00</b></td><td><b>$90.00</b></td><td><b>$90.00</b></td><td><b>$90.00</b></td><td><b>$90.00</b></td></tr><tr><th scope="rowgroup" colspan="6">Store order, $120.00</th></tr><tr><th scope="row">1. Instagram</th><td>$0.00</td><td>$120.00</td><td>$0.00</td><td>$40.00</td><td>$48.00</td></tr><tr><th scope="row">2. Google search</th><td>$0.00</td><td>$0.00</td><td>$0.00</td><td>$40.00</td><td>$24.00</td></tr><tr><th scope="row">3. Email</th><td>$120.00</td><td>$0.00</td><td>$120.00</td><td>$40.00</td><td>$48.00</td></tr><tr><th scope="row">Total</th><td><b>$120.00</b></td><td><b>$120.00</b></td><td><b>$120.00</b></td><td><b>$120.00</b></td><td><b>$120.00</b></td></tr><tr><th scope="rowgroup" colspan="6">Agency client, $600.00 sale</th></tr><tr><th scope="row">1. Direct</th><td>$0.00</td><td>$600.00</td><td>$0.00</td><td>$150.00</td><td>$240.00</td></tr><tr><th scope="row">2. Google Ads</th><td>$0.00</td><td>$0.00</td><td>$0.00</td><td>$150.00</td><td>$60.00</td></tr><tr><th scope="row">3. Facebook</th><td>$0.00</td><td>$0.00</td><td>$0.00</td><td>$150.00</td><td>$60.00</td></tr><tr><th scope="row">4. Google search</th><td>$600.00</td><td>$0.00</td><td>$600.00</td><td>$150.00</td><td>$240.00</td></tr><tr><th scope="row">Total</th><td><b>$600.00</b></td><td><b>$600.00</b></td><td><b>$600.00</b></td><td><b>$600.00</b></td><td><b>$600.00</b></td></tr></tbody></table></div>
+<ul class="post-list">
+<li><b>SaaS trial:</b> last non-direct skips the typed URL and credits the newsletter. First touch credits the AI assistant, the only single-touch model here that gives it anything.</li>
+<li><b>Store order:</b> the last visit came from a real source, so last touch and last non-direct agree on the email. Only first touch gives Instagram the whole order.</li>
+<li><b>Agency client:</b> the ad the agency paid for sits in the middle, so it gets $0.00 under all three single-touch models, $150.00 under linear and $60.00 under position-based. First touch credits Direct, because nothing recorded the flyer. Reading the visits before the payment shows the ad without any split.</li>
+</ul>
+<p class="p">The calculator has no time limit: every touchpoint you type counts. In Virling only visits inside the lookback window do, so an early visit can drop out before any model runs. See <a href="/blog/attribution-window">how long a visit gets credit</a>. For more on linear and position-based splits, read <a href="/blog/multi-touch-attribution">multi-touch attribution for a small business</a>.</p>
+<h2>How to choose an attribution model</h2>
+<p class="p">These are starting points, the same as in <a href="https://docs.virling.com/attribution/model">the model docs</a>. If you are unsure, keep the defaults: last non-direct with a 90-day window.</p>
+<ul class="post-list">
+<li><b>SaaS with a trial:</b> last non-direct with a 90-day window, so a trial user who comes back by typing your URL is still credited to the channel that brought them. The window should be longer than the time from first visit to first charge, trial included.</li>
+<li><b>Store:</b> last non-direct with a 30-day window when most orders follow within days of the first visit, or 60 or 90 days for expensive or seasonal products.</li>
+<li><b>Agency reporting to clients:</b> last non-direct with a 90-day window on every client's site, so reports are comparable between clients.</li>
+<li><b>Sales-led B2B:</b> first touch with a 365-day window, so the visit that introduced the buyer still counts after months of calls and demos.</li>
+</ul>
+<h2>Which model Virling uses</h2>
+<p class="p">Virling offers last non-direct, first touch and last touch, set per site in the site settings, with last non-direct as the default. The lookback window is 30, 60, 90 or 365 days, 90 by default, and a payment with no visit left inside it is Unattributed. Changing the model or the window rebuilds attribution for every past payment of the site. Linear and position-based are not available in Virling yet; they appear in this calculator so you can compare. For when to pick first touch over last touch, read <a href="/blog/first-touch-vs-last-touch-attribution-saas">first-touch vs last-touch attribution for SaaS</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Attribution model calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>What is the difference between last touch and last non-direct?</h3><p class="p">Last touch credits the visit right before the payment, even when it was Direct. Last non-direct skips Direct visits and credits the latest visit that came from a real source, falling back to Direct only when every visit was Direct.</p></div>
+      <div><h3>Why is Direct handled differently?</h3><p class="p">A Direct visit has no referrer: a typed URL, a bookmark, or a link from an app that hides where it came from. People rarely type a URL they have never seen, so crediting Direct usually hides the channel that actually introduced them.</p></div>
+      <div><h3>How does position-based attribution work?</h3><p class="p">It gives 40% of the revenue to the first touchpoint, 40% to the last, and splits the other 20% equally between the touchpoints in between. With two touchpoints, each gets half.</p></div>
+      <div><h3>Which attribution model should I use?</h3><p class="p">Last non-direct suits most products, since it credits the channel that brought the customer back to buy. First touch shows which channels introduce people who later pay and fits longer buying cycles. Compare both before moving budget.</p></div>
+      <div><h3>Can I use linear or position-based attribution in Virling?</h3><p class="p">Not yet. Virling credits each payment to one visit, using last non-direct, first touch or last touch. Linear and position-based are in this calculator for comparison only.</p></div>
+      <div><h3>Does changing the attribution model change total revenue?</h3><p class="p">No. Every model divides the same payment, so the totals match and only the channels that get the credit change. In Virling, saving another model recomputes every payment of the site, and renewals follow the new credit of the customer's first payment.</p></div>
+      <div><h3>Does the calculator use an attribution window?</h3><p class="p">No. It counts every touchpoint you type, however old. Virling only considers visits inside the lookback window, so leave out visits older than your window to compare the two.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the difference between last touch and last non-direct?", "acceptedAnswer": {"@type": "Answer", "text": "Last touch credits the visit right before the payment, even when it was Direct. Last non-direct skips Direct visits and credits the latest visit that came from a real source, falling back to Direct only when every visit was Direct."}}, {"@type": "Question", "name": "Why is Direct handled differently?", "acceptedAnswer": {"@type": "Answer", "text": "A Direct visit has no referrer: a typed URL, a bookmark, or a link from an app that hides where it came from. People rarely type a URL they have never seen, so crediting Direct usually hides the channel that actually introduced them."}}, {"@type": "Question", "name": "How does position-based attribution work?", "acceptedAnswer": {"@type": "Answer", "text": "It gives 40% of the revenue to the first touchpoint, 40% to the last, and splits the other 20% equally between the touchpoints in between. With two touchpoints, each gets half."}}, {"@type": "Question", "name": "Which attribution model should I use?", "acceptedAnswer": {"@type": "Answer", "text": "Last non-direct suits most products, since it credits the channel that brought the customer back to buy. First touch shows which channels introduce people who later pay and fits longer buying cycles. Compare both before moving budget."}}, {"@type": "Question", "name": "Can I use linear or position-based attribution in Virling?", "acceptedAnswer": {"@type": "Answer", "text": "Not yet. Virling credits each payment to one visit, using last non-direct, first touch or last touch. Linear and position-based are in this calculator for comparison only."}}, {"@type": "Question", "name": "Does changing the attribution model change total revenue?", "acceptedAnswer": {"@type": "Answer", "text": "No. Every model divides the same payment, so the totals match and only the channels that get the credit change. In Virling, saving another model recomputes every payment of the site, and renewals follow the new credit of the customer's first payment."}}, {"@type": "Question", "name": "Does the calculator use an attribution window?", "acceptedAnswer": {"@type": "Answer", "text": "No. It counts every touchpoint you type, however old. Virling only considers visits inside the lookback window, so leave out visits older than your window to compare the two."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels actually bring revenue</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a> <a class="lk" href="/tools/utm-builder">UTM builder</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("am"), out = document.getElementById("am-out");
+const n = document.getElementById("n"), menu = document.getElementById("n-menu"), items = [...menu.children];
+const usd = (x) => "$" + x.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const esc = (s) => s.replace(/[&<>"]/g, (c) => "&#" + c.charCodeAt(0) + ";");
+const models = [["Last non-direct", "Virling default"], ["First touch", "in Virling"], ["Last touch", "in Virling"], ["Linear", "comparison only"], ["Position-based", "comparison only"]];
+const shares = (t) => {
+  const k = t.length, last = k - 1, direct = t.map((c) => c === "Direct");
+  const lnd = direct.lastIndexOf(false), one = (i) => t.map((_, j) => (j === i ? 1 : 0));
+  return [
+    one(lnd < 0 ? last : lnd),
+    one(0),
+    one(last),
+    t.map(() => 1 / k),
+    t.map((_, j) => (k === 2 ? 0.5 : j === 0 || j === last ? 0.4 : 0.2 / (k - 2))),
+  ];
+};
+const calc = () => {
+  const k = +n.dataset.value, amount = Math.max(+f.amount.value || 0, 0);
+  const t = [];
+  for (let i = 1; i <= 6; i++) {
+    f["t" + i].parentElement.style.display = i > k ? "none" : "";
+    const c = f["t" + i].value.trim() || "Touchpoint " + i;
+    if (i <= k) t.push(c.toLowerCase() === "direct" ? "Direct" : c);
+  }
+  const s = shares(t), names = [...new Set(t)];
+  const credit = (m, c) => t.reduce((a, x, j) => a + (x === c ? s[m][j] : 0), 0) * amount;
+  out.innerHTML = "<thead><tr><th>Channel</th>" + models.map(([m, d]) => `<th>${m}<br><small class="dim">${d}</small></th>`).join("") + "</tr></thead><tbody>"
+    + names.map((c) => `<tr><th>${esc(c)}</th>` + models.map((_, m) => `<td>${usd(credit(m, c))}</td>`).join("") + "</tr>").join("")
+    + "<tr><th>Total</th>" + models.map(() => `<td><b>${usd(amount)}</b></td>`).join("") + "</tr></tbody>";
+};
+const mark = (el) => { items.forEach((i) => i.classList.toggle("on", i === el)); menu.setAttribute("aria-activedescendant", el.id = "n-" + el.dataset.value); };
+const show = (open) => {
+  menu.hidden = !open;
+  n.setAttribute("aria-expanded", String(open));
+  if (open) { mark(items.find((i) => i.getAttribute("aria-selected") === "true")); menu.focus(); }
+};
+const pick = (el) => {
+  items.forEach((i) => i.setAttribute("aria-selected", String(i === el)));
+  n.dataset.value = el.dataset.value;
+  document.getElementById("n-value").textContent = el.textContent;
+  show(false);
+  n.focus();
+  calc();
+};
+n.addEventListener("click", () => show(menu.hidden));
+n.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); show(true); } });
+items.forEach((i) => { i.addEventListener("click", () => pick(i)); i.addEventListener("mousemove", () => mark(i)); });
+menu.addEventListener("keydown", (e) => {
+  const at = items.findIndex((i) => i.classList.contains("on"));
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); mark(items[(at + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]); }
+  else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(items[at]); }
+  else if (e.key === "Escape" || e.key === "Tab") { show(false); n.focus(); }
+});
+document.addEventListener("click", (e) => { if (!menu.hidden && !e.target.closest(".tool-pick")) show(false); });
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # virling
 
-Run [Virling](https://virling.com), open-source revenue attribution, without installing anything else. It links website visits to payments from Stripe, Dodo Payments, Polar, LemonSqueezy, Creem and RevenueCat, so you see which post, search or AI answer brought each payment.
+Run [Virling](https://virling.com), open-source revenue attribution, without installing anything else. It links website visits to payments from Stripe, Dodo Payments, Polar, LemonSqueezy, Creem, RevenueCat, Paddle, WooCommerce and Shopify, so you see which post, search or AI answer brought each payment.
 
 ```sh
 npx virling serve --app      # start a server

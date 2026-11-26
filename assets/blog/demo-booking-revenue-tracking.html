@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Track revenue from demo bookings: booked call to paid invoice</title>
+<meta name="description" content="Track revenue from demo bookings: a goal on the booking, the buyer's email sent with it, and the invoice joined weeks later, with a worked example.">
+<link rel="canonical" href="https://virling.com/blog/demo-booking-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/demo-booking-revenue-tracking">
+<meta property="og:title" content="Track revenue from demo bookings: booked call to paid invoice">
+<meta property="og:description" content="Track revenue from demo bookings: a goal on the booking, the buyer's email sent with it, and the invoice joined weeks later, with a worked example.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Track revenue from demo bookings: booked call to paid invoice","item":"https://virling.com/blog/demo-booking-revenue-tracking"}]},{"@type":"BlogPosting","headline":"Track revenue from demo bookings: booked call to paid invoice","description":"Track revenue from demo bookings: a goal on the booking, the buyer's email sent with it, and the invoice joined weeks later, with a worked example.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/demo-booking-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I track revenue from demo bookings?","acceptedAnswer":{"@type":"Answer","text":"Send a goal when the booking is accepted, and send the buyer's email with the visitor ID in an identify event at the same moment. When the invoice is paid in Stripe with the same email, Virling credits the payment to that visitor's visits, so you can compare bookings with paid revenue per channel."}},{"@type":"Question","name":"Can I track bookings made in an embedded calendar?","acceptedAnswer":{"@type":"Answer","text":"Sometimes. A calendar embedded from another domain is closed to the script on your page, so it depends on what the tool offers: a redirect to a confirmation page on your site, or an event it sends to your page. If it offers neither, ask for the email in a form of your own before you show the calendar."}},{"@type":"Question","name":"Does Virling read my calendar or CRM?","acceptedAnswer":{"@type":"Answer","text":"No. Virling reads visits and goals from your site and payments from your payment provider. Whether a call took place, and what was said on it, is not visible to it."}},{"@type":"Question","name":"Why is an invoice unattributed when the buyer booked a demo?","acceptedAnswer":{"@type":"Answer","text":"The usual causes are an email that differs between the booking and the invoice, an identify event that was never sent or came after the payment was synced, or visits older than the lookback window. The payment still counts toward revenue, as Unattributed."}},{"@type":"Question","name":"Which lookback window fits demo bookings?","acceptedAnswer":{"@type":"Answer","text":"One longer than most of your deals take from the first visit to the paid invoice, including the wait between a signed deal and the payment. Virling offers 30, 60, 90 or 365 days, with 90 as the default."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>Track revenue from demo bookings: booked call to paid invoice</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p">To <b>track revenue from demo bookings</b>, record the booking as a goal on your site, send the buyer's email with their visitor ID at the same moment, and join the invoice to that visitor by email when it is paid. The booking alone tells you who asked for a call. The join tells you which channel brought the calls that became money. It works best when the booking form is on your own pages. A calendar embedded from another site may not give your page the email, and then the join needs a step of its own.</p>
+<p class="p">This is for teams that sell on a call: sales-led SaaS, consultancies and other services where the buyer books, talks to you and later pays an invoice. For the wider picture of trials, renewals and several visits, read <a href="/blog/b2b-saas-attribution">B2B SaaS attribution for small teams</a>.</p>
+<h2>Why bookings and revenue come apart</h2>
+<ul class="post-list"><li><b>The booking is not the sale.</b> Some people do not turn up, some are not a fit, and some pay much later. Counting bookings treats them all alike.</li><li><b>The sale happens off your site.</b> The call, the proposal and the invoice leave no visit behind.</li><li><b>The invoice carries no visitor ID.</b> An invoice you send from Stripe does not pass through a checkout on your site, so nothing on it says where the buyer came from.</li><li><b>The booking tool is often a third site.</b> The one moment you learn the email may happen where your script cannot run.</li></ul>
+<h2>Set it up on a booking form you own</h2>
+<h3>1. Add the script</h3>
+<p class="p">Put the Virling script in the head of every page, the booking page included. Leave cookieless mode off: without the <code>virling_vid</code> cookie there is no visitor ID to join an invoice to. See <a href="https://docs.virling.com/track/script">add the script</a>.</p>
+<h3>2. Send a goal and the email when the booking is accepted</h3>
+<p class="p">Do both in the code that runs after your server says yes, so a failed form is not counted. <code>/api/book-demo</code> and <code>yourproduct.com</code> stand for your own:</p>
+<div class="code block"><pre>const res = await fetch("/api/book-demo", { method: "POST", body: new FormData(form) });
+if (res.ok) {
+  window.virling?.("goal", "demo request");
+  const vid = window.virling?.vid?.();
+  if (vid) {
+    fetch("https://app.virling.com/api/event", {
+      method: "POST",
+      body: JSON.stringify({
+        n: "identify",
+        u: location.href,
+        s: "yourproduct.com",
+        v: vid,
+        m: form.email.value,
+      }),
+    });
+  }
+}</pre></div>
+<p class="p">The goal puts <code>demo request</code> next to the pageviews in the buyer's journey. Goal names are compared exactly, so pick one lowercase name and keep it, and leave names and emails out of it. If you also want to count confirmed calls apart from requests, use a second name, such as <code>booking</code>. The rules are in <a href="https://docs.virling.com/track/goals">goals</a>. To save the campaign with the booking itself, see <a href="/blog/utm-parameters-hidden-form-fields">UTM parameters in hidden form fields</a>.</p>
+<p class="p">The <code>identify</code> event is what the invoice is matched on later. Virling keeps only a salted SHA-256 hash of the trimmed, lowercased email, and matching never crosses sites. If one email identifies from two browsers, the first one keeps it. Mention this in your privacy policy as you would any use of the form's email.</p>
+<h3>3. Connect Stripe</h3>
+<p class="p">Connect Stripe with a restricted key that can only read. Virling imports the last 90 days of charges, then checks for new ones every minute. A charge with no visitor ID whose billing or receipt email matches an identified visitor is credited to that visitor and shows <b>Matched by email</b> on the Payments page. The whole path is in the <a href="https://docs.virling.com/guides/b2b-sales">sales-led B2B guide</a>, and product-led setups are on the <a href="/integrations/saas">SaaS integration page</a>.</p>
+<h2>When the booking is embedded from another site</h2>
+<p class="p">Many teams paste a scheduling widget into the page. It looks like part of your site, but it is a frame from another domain, and browsers keep the two apart. Your page's script cannot read what is typed in the frame, and the frame cannot read the <code>virling_vid</code> cookie on your domain. The event API also only accepts pages on your domain or a subdomain of it, so an event sent as the scheduling tool's page is dropped. For one tool step by step, see <a href="/blog/calendly-utm-tracking">Calendly UTM tracking</a> or <a href="/blog/cal-com-utm-tracking">Cal.com UTM tracking</a>. What you can still record depends on what the tool offers, so check its documentation:</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:560px"><thead><tr><th>Where the booking happens</th><th>Goal</th><th>Email for the invoice match</th></tr></thead><tbody><tr><th scope="row">Your own form</th><td>When your server accepts it</td><td>Yes, in the same code</td></tr><tr><th scope="row">Your own short form, then the calendar</th><td>When the form is accepted</td><td>Yes, before the calendar is shown</td></tr><tr><th scope="row">Embedded, the tool sends your page an event</th><td>When the event says booked</td><td>Only if the event includes it</td></tr><tr><th scope="row">Embedded, the tool redirects to your site</th><td>On your confirmation page</td><td>Only if you ask for it on your site</td></tr><tr><th scope="row">Embedded, neither is offered</th><td>Not from the booking itself</td><td>No</td></tr><tr><th scope="row">A link to the tool's own page</th><td>On the click, which is not yet a booking</td><td>No</td></tr></tbody></table></div>
+<ul class="post-list"><li><b>The short form first is the safest.</b> Ask for the work email on your page, send the goal and the identify event, then show the calendar. Some people will stop between the two, so call the goal a request, not a booking.</li><li><b>Redirects should open in the whole page.</b> If the buyer is sent away to the tool and back, add the tool's domain to Same-visit domains in Site settings. Otherwise the return can start a new visit with the scheduling tool as its source.</li><li><b>Do not ask for the email in the redirect's address.</b> Addresses end up in browser history, server logs and other scripts on the page.</li><li><b>A webhook alone is not enough.</b> It tells your server the email, but not which visitor on your site it belongs to.</li></ul>
+<h2>How the invoice is joined weeks later</h2>
+<ol class="post-list"><li>The buyer arrives from a search, reads two pages and books. The visit has a channel, the goal is stored, and the email's hash is tied to the visitor ID.</li><li>The call happens. Virling sees nothing of it.</li><li>Weeks later the invoice is paid in Stripe, with no visitor ID and the same email. Virling reads the charge on the next sync and finds the visitor.</li><li>It looks at that visitor's visits inside the lookback window before the payment and credits one, by the site's model: last non-direct by default, first touch or last touch.</li><li>If it was the first invoice of a subscription, the renewals and upgrades of that Stripe customer keep the same channel.</li></ol>
+<p class="p">Two settings matter more here than for self-serve sales. The lookback window must be longer than the deal: work out yours with the <a href="/tools/sales-cycle-calculator">sales cycle calculator</a>, then choose 30, 60, 90 or 365 days. And if buyers come back by email before they pay, first touch shows what brought them in the first place. Changing either rebuilds attribution for past payments too. <a href="/blog/stripe-invoice-attribution">Stripe invoice attribution</a> goes through the matching in detail.</p>
+<h2>A worked example: bookings against paid revenue</h2>
+<p class="p">These numbers are made up to show the method. One quarter of demo bookings, with every invoice those deals paid by the time you look:</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:560px"><thead><tr><th>Example only</th><th>Bookings</th><th>Paying customers</th><th>Paid revenue</th><th>Revenue per booking</th></tr></thead><tbody><tr><th scope="row">Paid</th><td>40</td><td>4</td><td>$6,000</td><td>$150</td></tr><tr><th scope="row">Organic search</th><td>25</td><td>6</td><td>$15,000</td><td>$600</td></tr><tr><th scope="row">Email</th><td>15</td><td>3</td><td>$5,250</td><td>$350</td></tr><tr><th scope="row">Referral</th><td>10</td><td>5</td><td>$14,000</td><td>$1,400</td></tr><tr><th scope="row">Unattributed</th><td>counted above</td><td>2</td><td>$4,000</td><td>unknown</td></tr><tr><th scope="row">All</th><td>90</td><td>20</td><td>$44,250</td><td>about $492</td></tr></tbody></table></div>
+<p class="p">By bookings, Paid is the best channel, with 40 of 90. By money it is third of the four: one booking in ten paid, and a booking was worth $150. Referral brought the fewest bookings, and half of them paid, for $1,400 a booking. Anyone who cut Referral for its small count would have cut the second largest revenue line. The two unattributed customers booked too, so their bookings are in the rows above, but they paid with an email that matches none of them. Their revenue stays on its own line instead of being spread over the channels.</p>
+<p class="p">Ten or twenty deals are few, and one large invoice can move a row. Read the table as a question to look into, not as a ranking, and wait until most deals of the period have had time to close. To compare channels by deal size, win rate and time to close together, use the <a href="/tools/sales-velocity-calculator">sales velocity calculator</a>.</p>
+<h2>Read it in Virling</h2>
+<ol class="post-list"><li>Pick a range that starts before the bookings and is long enough for invoices to be paid. The Time to pay card shows the median time from first visit to first payment per channel.</li><li>On the Channels card, read revenue per channel. Click a channel to filter the page, then open the Goals tab of the Goals card for the number of <code>demo request</code> goals from its visits.</li><li>On the Visitors page, filter by the goal to see who booked, and use Filters to pick those who paid or did not.</li><li>Open a payment on the Payments page to see the journey, with the goal in it and the credited visit marked.</li></ol>
+<p class="p">One thing to know when you put the two side by side: a goal belongs to the visit it happened in, while revenue follows the attribution model. A buyer who first came from a referral and booked on a later visit from an email counts as an Email booking, and first touch credits the invoice to Referral.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>What stays out of reach</h2>
+<ul class="post-list"><li><b>A different payer.</b> Matching is exact. If an accounts team pays with its own address, the invoice does not match the person who booked.</li><li><b>Money outside Stripe.</b> Virling imports charges from the payment provider you connect. A bank transfer that never goes through it is not in the numbers. Email matching for invoices is on Stripe.</li><li><b>Payments synced before the identify.</b> Send the email at the booking, not after the deal is signed.</li><li><b>Bookings from a phone call or an introduction.</b> With no visit there is nothing to credit. Asking helps; see <a href="/blog/self-reported-attribution">self-reported attribution</a>.</li><li><b>Blocked scripts and other devices.</b> A visit that was not recorded, or was made in another browser, is not joined.</li></ul>
+<p class="p">To check the setup, open your site from a tagged link in a private window, book with an email you can pay with, and pay a Stripe test invoice to that address. The steps are in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I track revenue from demo bookings?</h3><p class="p">Send a goal when the booking is accepted, and send the buyer's email with the visitor ID in an identify event at the same moment. When the invoice is paid in Stripe with the same email, Virling credits the payment to that visitor's visits, so you can compare bookings with paid revenue per channel.</p>
+<h3>Can I track bookings made in an embedded calendar?</h3><p class="p">Sometimes. A calendar embedded from another domain is closed to the script on your page, so it depends on what the tool offers: a redirect to a confirmation page on your site, or an event it sends to your page. If it offers neither, ask for the email in a form of your own before you show the calendar.</p>
+<h3>Does Virling read my calendar or CRM?</h3><p class="p">No. Virling reads visits and goals from your site and payments from your payment provider. Whether a call took place, and what was said on it, is not visible to it.</p>
+<h3>Why is an invoice unattributed when the buyer booked a demo?</h3><p class="p">The usual causes are an email that differs between the booking and the invoice, an identify event that was never sent or came after the payment was synced, or visits older than the lookback window. The payment still counts toward revenue, as Unattributed.</p>
+<h3>Which lookback window fits demo bookings?</h3><p class="p">One longer than most of your deals take from the first visit to the paid invoice, including the wait between a signed deal and the payment. Virling offers 30, 60, 90 or 365 days, with 90 as the default.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which demo bookings turn into paid invoices</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

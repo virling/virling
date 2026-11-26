@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lead value calculator: how much is a lead worth | Virling</title>
+<meta name="description" content="Calculate what a B2B SaaS lead is worth and the most you can pay for one, from leads per month, lead to paid rate and first-year revenue.">
+<link rel="canonical" href="https://virling.com/tools/lead-value-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/lead-value-calculator">
+<meta property="og:title" content="Lead value calculator: how much is a lead worth | Virling">
+<meta property="og:description" content="Calculate what a B2B SaaS lead is worth and the most you can pay for one, from leads per month, lead to paid rate and first-year revenue.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Lead value calculator","url":"https://virling.com/tools/lead-value-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Lead value calculator","item":"https://virling.com/tools/lead-value-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / lead value calculator</span><h1>Lead value calculator</h1><p class="lead">Enter how many leads you get a month, how many of them become paying customers and what a customer pays in the first year to see how much a lead is worth and the most you can pay for one. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="lvc" autocomplete="off">
+  <label>Leads per month (signups or demo requests)<input name="leads" type="number" min="0" step="1" value="200"></label>
+  <label>Lead to paid rate (%)<input name="rate" type="number" min="0" max="100" step="0.1" value="5"></label>
+  <label>Average first-year revenue per customer ($)<input name="rev" type="number" min="0" step="0.01" value="1200"></label>
+  <div class="tool-stats" id="lvc-out" style="grid-column:1/-1"></div>
+</form>
+<p class="fine-note">Lead to paid rate is the share of leads that become paying customers. First-year revenue is what one customer pays you in their first 12 months.</p>
+<div class="txt post tool-cta">
+<p class="p">This is an estimate from rates you type in. Virling fills these numbers in for each channel from your real payments: it links every signup and demo request to the visit that brought it and to the payment that followed, including Stripe, Paddle and Lemon Squeezy. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/conversion-rate-calculator">conversion rate calculator</a>, <a href="/tools/cac-calculator">CAC calculator</a>, <a href="/tools/break-even-cpa-calculator">break-even CPA calculator</a>, <a href="/tools/cost-per-lead-calculator">cost per lead by channel</a>, <a href="/tools/trial-to-paid-calculator">trial to paid rate calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The lead value formula</h2>
+<p class="p">A lead is worth the revenue it brings on average, which is the chance it becomes a customer times what a customer pays:</p>
+<p class="p"><code>value per lead = lead to paid rate &times; first-year revenue per customer</code></p>
+<p class="p"><code>new customers per month = leads per month &times; lead to paid rate</code></p>
+<p class="p">The most you can pay per lead and still break even on first-year revenue is the value per lead itself. Paying more loses money in the first year; paying less leaves room for the cost of serving the customer and for profit.</p>
+<h2>A worked example</h2>
+<p class="p">These are round illustrative numbers, the same ones the calculator starts with, not data from a real company or a benchmark. A product gets 200 leads a month and 5% of them become paying customers, so 200 &times; 0.05 = 10 new customers. Each pays $1,200 in the first year, so a month of leads brings 10 &times; $1,200 = $12,000 of first-year revenue.</p>
+<p class="p">Each lead is worth 0.05 &times; $1,200 = $60, the same as $12,000 / 200. So $60 is the most this product could pay for a lead and break even on first-year revenue.</p>
+<h2>Inputs people get wrong</h2>
+<p class="p">Each row changes one thing in the worked example above, where a lead is worth $60:</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th style="width:30%">What was typed</th><th>Effect on the result</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">0.05 for a 5% rate</th><td>The field is a percentage, so 0.05 means 0.05%. The value per lead shows $0.60.</td><td>Type 5.</td></tr><tr><th scope="row">The share of leads that take a call, 20%</th><td>The value per lead shows $240, four times too high if a quarter of those calls end in a payment.</td><td>Multiply the steps: 20% &times; 25% = 5%.</td></tr><tr><th scope="row">A monthly price, $100, as first-year revenue</th><td>The value per lead shows $5.00.</td><td>Use what a customer pays in 12 months: 12 &times; $100 = $1,200 if they stay the year, less if many leave sooner.</td></tr><tr><th scope="row">The rate of leads too new to have paid, 2% so far</th><td>The value per lead shows $24.00, so a channel with slow deals looks poor.</td><td>Use a month of leads old enough to have closed. The <a href="/tools/sales-cycle-calculator">sales cycle calculator</a> shows how old that is.</td></tr><tr><th scope="row">All 200 form fills, with a rate measured on 160 real leads, 10 / 160 = 6.25%</th><td>12.5 customers instead of 10, and a value per lead of $75.00.</td><td>Use one definition for both: 200 and 5%, or 160 and 6.25%.</td></tr><tr><th scope="row">A quarter of leads, 600, as leads per month</th><td>Customers and revenue triple to 30 and $36,000. The value per lead stays at $60.00, since it does not depend on the count.</td><td>Enter one month of leads.</td></tr></tbody></table></div>
+<h2>Two channels compared</h2>
+<p class="p">Made-up numbers, not data from a real company. A B2B SaaS product buys leads from two channels and runs the calculator once for each. Customers pay $1,200 in the first year on both:</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:440px"><thead><tr><th style="width:44%">Made up</th><th>Paid social</th><th>Paid search</th></tr></thead><tbody><tr><th scope="row">Leads per month</th><td>200</td><td>50</td></tr><tr><th scope="row">Lead to paid rate</th><td>1%</td><td>10%</td></tr><tr><th scope="row">New customers per month</th><td>2</td><td>5</td></tr><tr><th scope="row">First-year revenue from a month of leads</th><td>$2,400.00</td><td>$6,000.00</td></tr><tr><th scope="row">Value per lead</th><td>$12.00</td><td>$120.00</td></tr><tr><th scope="row">Cost per lead, from the ad accounts</th><td>$20</td><td>$70</td></tr><tr><th scope="row">Monthly spend</th><td>$4,000</td><td>$3,500</td></tr><tr><th scope="row">First-year revenue less spend</th><td>-$1,600</td><td>$2,500</td></tr></tbody></table></div>
+<p class="p">Paid social leads cost less than a third as much, and four times as many arrive, but each is bought for $8 more than it is worth. Paid search pays $70 for a lead worth $120. Two and five customers are few, so read several months together before you move budget.</p>
+<h2>What to do with the number: B2B SaaS</h2>
+<ol class="post-list">
+<li><b>Turn it into a ceiling you can keep.</b> Multiply the value per lead by your gross margin, then take off the sales time a lead uses. In a made-up case, $60 &times; 80% = $48, less $10 of sales time, leaves $38 as the most to pay.</li>
+<li><b>Split signups from demo requests.</b> Run the calculator once for each kind and give each its own ceiling.</li>
+<li><b>Run it per channel.</b> Put each result next to what the lead cost, from the <a href="/tools/cost-per-lead-calculator">cost per lead calculator</a>. Hold spend where the cost is above the ceiling, and raise it in small steps where it is well below.</li>
+<li><b>Pick the weaker half to fix.</b> Doubling the rate and doubling the revenue per customer raise the value equally. If many leads never take a call, work on the follow-up. If they buy the smallest plan, work on the offer.</li>
+<li><b>Check the rate against paid invoices.</b> A booked call is not a sale. <a href="/blog/demo-booking-revenue-tracking">Track revenue from demo bookings</a> shows how to join each invoice to the booking and the channel that brought it.</li>
+</ol>
+<h2>Why lead value differs by channel</h2>
+<p class="p">One average hides big differences. A lead who found you by searching for the problem you solve, and a lead from a broad giveaway, can both fill in the same form and convert to paid at very different rates. To know which campaign each lead came from, <a href="/blog/utm-parameters-hidden-form-fields">capture UTM parameters in hidden form fields</a>. Channels also bring different plan sizes, so the first-year revenue per customer moves too. Work out the lead to paid rate for each channel with the <a href="/tools/conversion-rate-calculator">conversion rate calculator</a>, and see <a href="/blog/trial-to-paid-conversion-by-traffic-source">trial-to-paid conversion by traffic source</a> for how to credit each first charge to the visit that brought it.</p>
+<p class="p">Once you know the value of a lead from each channel, compare it with what each channel costs per lead. Spend more where a lead is worth more than it costs, and less where it is not.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Lead value calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate the value of a lead?</h3><p class="p">Multiply your lead to paid rate by the revenue a new customer brings. If 5% of leads become customers and each customer pays $1,200 in the first year, a lead is worth 0.05 &times; $1,200 = $60 in first-year revenue.</p></div>
+      <div><h3>How much should I pay per lead?</h3><p class="p">To break even on first-year revenue, pay no more than the value per lead. That figure ignores the cost of serving the customer and of sales time, so if you want to keep a margin, multiply it by your gross margin and pay less than that.</p></div>
+      <div><h3>Why use first-year revenue instead of lifetime value?</h3><p class="p">First-year revenue is known sooner and needs no guess about churn, so it is a cautious ceiling. If you trust your retention figures, enter customer lifetime value instead and the result becomes the most a lead is worth over the whole relationship.</p></div>
+      <div><h3>Should a signup and a demo request count as the same lead?</h3><p class="p">Usually not. A demo request often converts at a different rate than a free signup, so work out the value of each kind separately rather than averaging them together.</p></div>
+      <div><h3>Why is the same lead worth more from one channel than another?</h3><p class="p">Leads from different channels convert to paid at different rates and buy different plans. Measure the lead to paid rate and the revenue per customer for each channel from real payments to see what a lead from each one is really worth.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate the value of a lead?", "acceptedAnswer": {"@type": "Answer", "text": "Multiply your lead to paid rate by the revenue a new customer brings. If 5% of leads become customers and each customer pays $1,200 in the first year, a lead is worth 0.05 × $1,200 = $60 in first-year revenue."}}, {"@type": "Question", "name": "How much should I pay per lead?", "acceptedAnswer": {"@type": "Answer", "text": "To break even on first-year revenue, pay no more than the value per lead. That figure ignores the cost of serving the customer and of sales time, so if you want to keep a margin, multiply it by your gross margin and pay less than that."}}, {"@type": "Question", "name": "Why use first-year revenue instead of lifetime value?", "acceptedAnswer": {"@type": "Answer", "text": "First-year revenue is known sooner and needs no guess about churn, so it is a cautious ceiling. If you trust your retention figures, enter customer lifetime value instead and the result becomes the most a lead is worth over the whole relationship."}}, {"@type": "Question", "name": "Should a signup and a demo request count as the same lead?", "acceptedAnswer": {"@type": "Answer", "text": "Usually not. A demo request often converts at a different rate than a free signup, so work out the value of each kind separately rather than averaging them together."}}, {"@type": "Question", "name": "Why is the same lead worth more from one channel than another?", "acceptedAnswer": {"@type": "Answer", "text": "Leads from different channels convert to paid at different rates and buy different plans. Measure the lead to paid rate and the revenue per customer for each channel from real payments to see what a lead from each one is really worth."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See what a lead from each channel is worth</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the signup and the payment it led to, so you see the lead to paid rate and revenue for each channel from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("lvc"), out = document.getElementById("lvc-out");
+const usd = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const calc = () => {
+  const l = +f.elements.leads.value, r = +f.elements.rate.value / 100, v = +f.elements.rev.value;
+  const per = r * v, cust = l * r;
+  const rows = [
+    ["New customers per month", cust.toLocaleString("en-US", { maximumFractionDigits: 1 })],
+    ["First-year revenue from a month of leads", usd(cust * v)],
+    ["Value per lead", usd(per)],
+    ["Most you can pay per lead to break even", usd(per)],
+  ];
+  out.innerHTML = rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

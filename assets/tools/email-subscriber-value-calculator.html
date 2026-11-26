@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Email subscriber value calculator: revenue per subscriber</title>
+<meta name="description" content="Learn what a new email subscriber is worth, and the revenue each one brings per month and year, from your sends, clicks, conversions and order value.">
+<link rel="canonical" href="https://virling.com/tools/email-subscriber-value-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/email-subscriber-value-calculator">
+<meta property="og:title" content="Email subscriber value calculator: revenue per subscriber">
+<meta property="og:description" content="Learn what a new email subscriber is worth, and the revenue each one brings per month and year, from your sends, clicks, conversions and order value.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Email subscriber value calculator","url":"https://virling.com/tools/email-subscriber-value-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Email subscriber value calculator","item":"https://virling.com/tools/email-subscriber-value-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / email subscriber value calculator</span><h1>Email subscriber value calculator</h1><p class="lead">Enter your list size, how often you send, your click and conversion rates and your order value or plan price to get revenue per subscriber per month and per year, and what a new subscriber is worth. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="esv" autocomplete="off">
+  <label>Subscribers on the list<input name="list" type="number" min="0" step="1" value="5000"></label>
+  <label>Emails sent per month<input name="sends" type="number" min="0" step="1" value="4"></label>
+  <label>Click rate per email (%)<input name="ctr" type="number" min="0" max="100" step="0.1" value="2"></label>
+  <label>Conversion rate of clicks (%)<input name="cvr" type="number" min="0" max="100" step="0.1" value="3"></label>
+  <label>Average order value or plan price ($)<input name="aov" type="number" min="0" step="0.01" value="50"></label>
+  <label>Months a subscriber stays on the list<input name="months" type="number" min="0" step="1" value="12"></label>
+  <div class="tool-stats" id="esv-out" style="grid-column:1/-1"></div>
+</form>
+<p class="fine-note">Click rate is clicks divided by emails delivered. Conversion rate is the share of those clicks that end in a purchase.</p>
+<div class="txt post tool-cta">
+<p class="p">This is an estimate from rates you type in. Virling links every email click to the payment it led to, so it shows the revenue your newsletter really brought from your real payments, including Stripe, Shopify and WooCommerce. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/conversion-rate-calculator">conversion rate calculator</a>, <a href="/tools/ltv-calculator">customer lifetime value calculator</a>, <a href="/tools/utm-builder">UTM builder</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The email subscriber value formula</h2>
+<p class="p">Revenue per subscriber is the revenue your emails bring in a month, divided by the people on the list:</p>
+<p class="p"><code>monthly revenue = subscribers &times; emails per month &times; click rate &times; conversion rate &times; order value</code></p>
+<p class="p"><code>revenue per subscriber per month = monthly revenue / subscribers</code></p>
+<p class="p">Revenue per subscriber per year is the monthly figure times 12. What a new subscriber is worth is the monthly figure times the number of months a subscriber stays on the list before unsubscribing or going quiet. Use rates from the same period and the same kind of emails; a launch email and a weekly digest rarely click or convert alike.</p>
+<h2>A worked example</h2>
+<p class="p">These are round illustrative numbers, the same ones the calculator starts with, not data from a real list or a benchmark. A list has 5,000 subscribers and gets 4 emails a month, so 5,000 &times; 4 = 20,000 emails are delivered. At a 2% click rate that is 20,000 &times; 0.02 = 400 clicks. At a 3% conversion rate, 400 &times; 0.03 = 12 orders, and at $50 each that is 12 &times; $50 = $600 a month.</p>
+<p class="p">Revenue per subscriber per month is $600 / 5,000 = $0.12. Per year it is $0.12 &times; 12 = $1.44. If a subscriber stays on the list for 12 months, a new subscriber is worth $0.12 &times; 12 = $1.44, which is the most you could spend to win one and still break even on email revenue alone.</p>
+<h2>Subscriber value by list size and monthly revenue</h2>
+<p class="p">If you already know what your emails bring in a month, skip the rates. Each cell divides the monthly email revenue by the subscribers, as in the formula above. The figure in brackets is what a new subscriber is worth if they stay for 12 months. These are made-up list sizes and revenues, not benchmarks.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:720px"><thead><tr><th style="width:18%">Subscribers</th><th>$200 a month</th><th>$600 a month</th><th>$1,000 a month</th><th>$3,000 a month</th><th>$5,000 a month</th></tr></thead><tbody><tr><th scope="row">500</th><td>$0.40 ($4.80)</td><td>$1.20 ($14.40)</td><td>$2.00 ($24.00)</td><td>$6.00 ($72.00)</td><td>$10.00 ($120.00)</td></tr><tr><th scope="row">1,000</th><td>$0.20 ($2.40)</td><td>$0.60 ($7.20)</td><td>$1.00 ($12.00)</td><td>$3.00 ($36.00)</td><td>$5.00 ($60.00)</td></tr><tr><th scope="row">5,000</th><td>$0.04 ($0.48)</td><td>$0.12 ($1.44)</td><td>$0.20 ($2.40)</td><td>$0.60 ($7.20)</td><td>$1.00 ($12.00)</td></tr><tr><th scope="row">10,000</th><td>$0.02 ($0.24)</td><td>$0.06 ($0.72)</td><td>$0.10 ($1.20)</td><td>$0.30 ($3.60)</td><td>$0.50 ($6.00)</td></tr><tr><th scope="row">20,000</th><td>$0.01 ($0.12)</td><td>$0.03 ($0.36)</td><td>$0.05 ($0.60)</td><td>$0.15 ($1.80)</td><td>$0.25 ($3.00)</td></tr></tbody></table></div>
+<p class="p">The worked example is the 5,000 row under $600. Read a row to see what more revenue from the same list does, and a column to see what a bigger list does when revenue stays flat: $1,000 a month is $2.00 per subscriber from 500 people and $0.10 from 10,000. The second list is not worse at earning, it earns the same, but another subscriber there adds far less on average, so there is less to spend on winning one.</p>
+<p class="p">For another length of stay, multiply the monthly figure by your own number of months. At $0.12 a month, 6 months is $0.72 and 24 months is $2.88.</p>
+<h2>Measure it from real payments with tagged links</h2>
+<p class="p">Every rate above is a guess until you measure it. Email tools often count opens and clicks well but credit revenue by their own rules, and most email clients send no referrer, so without UTM tags a click from your newsletter lands as Direct and so does the payment that follows. Tag every link with the same source and medium, and one campaign per issue:</p>
+<div class="code block"><pre>https://example.com/pricing?utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=issue-42</pre></div>
+<p class="p">In Virling, <code>utm_medium=email</code> puts the visit in the Email channel, and each payment is credited to the visit that led to it. Click Email in the Channels card, take the revenue for a month, net of refunds, and divide it by the subscribers you had in that month. That is your column and row in the table, with no estimated rates in between. If other links use the same medium, such as trial reminders or paid placements in other newsletters, add up only the campaigns of your issues.</p>
+<p class="p">Use several months, because readers often pay days after the click and one large payment can move a small list. For subscriptions, a renewal is credited like the customer's first payment, so the month's revenue also includes renewals from readers who bought earlier.</p>
+<p class="p">For a creator newsletter, see <a href="/blog/newsletter-revenue-tracking">newsletter revenue tracking: see which issue brings sales</a>. For an online store, see <a href="/blog/email-marketing-revenue-tracking-ecommerce">email marketing revenue tracking for online stores</a>. To compare a campaign with its cost, use the <a href="/tools/email-marketing-roi-calculator">email marketing ROI calculator</a>.</p>
+<p class="p">Paying for a place in someone else's newsletter is a different sum: the list is theirs, and you pay per issue. Check the price first with the <a href="/tools/newsletter-sponsorship-calculator">newsletter sponsorship calculator</a>, then measure the result as in <a href="/blog/sponsorship-revenue-tracking">how to track sponsorship ROI</a>. If some of those readers join your list instead of buying, the value on this page is what each of them is worth.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Email subscriber value calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate revenue per subscriber?</h3><p class="p">Divide the revenue your emails brought in a period by the number of subscribers on the list. $600 of email revenue in a month from a list of 5,000 is $0.12 per subscriber per month.</p></div>
+      <div><h3>How much is an email subscriber worth?</h3><p class="p">Multiply revenue per subscriber per month by the number of months a subscriber stays on the list. At $0.12 a month for 12 months, a new subscriber is worth $1.44. It depends entirely on your own list, so measure it rather than borrow someone else's figure.</p></div>
+      <div><h3>Should I use average order value or plan price?</h3><p class="p">Use average order value for a store and the first payment for a subscription. A subscriber who buys a plan may keep paying for months, so for subscriptions this calculator undercounts; enter customer lifetime value instead of the plan price if you know it.</p></div>
+      <div><h3>Should I count opens or clicks?</h3><p class="p">Clicks. An open does not take anyone to your site, and many email apps load images automatically, so open counts are unreliable. Revenue follows clicks that lead to a visit and then a payment.</p></div>
+      <div><h3>Why does my email tool show different revenue?</h3><p class="p">Email tools often credit a sale to any email that was opened or clicked within a window before it, so the same order can be counted by several emails and by other channels too. Click-based attribution credits each payment once, which lets you compare email fairly against search, social and ads.</p></div>
+      <div><h3>How much can I spend to get a subscriber?</h3><p class="p">To break even on revenue, no more than a new subscriber is worth. To break even on profit, multiply that by your gross margin first: $1.44 at a 60% margin is $0.86. Use the value of subscribers from the same source if you can, because readers who came for a giveaway may not buy like readers who came from a product page.</p></div>
+      <div><h3>Does removing inactive subscribers raise subscriber value?</h3><p class="p">It raises the average, but not your revenue. If 1,000 of 5,000 subscribers never buy and you remove them, $600 a month is now split between 4,000 people, so the figure goes from $0.12 to $0.15 while your emails still bring $600. Compare total email revenue as well as revenue per subscriber when you clean a list.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate revenue per subscriber?", "acceptedAnswer": {"@type": "Answer", "text": "Divide the revenue your emails brought in a period by the number of subscribers on the list. $600 of email revenue in a month from a list of 5,000 is $0.12 per subscriber per month."}}, {"@type": "Question", "name": "How much is an email subscriber worth?", "acceptedAnswer": {"@type": "Answer", "text": "Multiply revenue per subscriber per month by the number of months a subscriber stays on the list. At $0.12 a month for 12 months, a new subscriber is worth $1.44. It depends entirely on your own list, so measure it rather than borrow someone else's figure."}}, {"@type": "Question", "name": "Should I use average order value or plan price?", "acceptedAnswer": {"@type": "Answer", "text": "Use average order value for a store and the first payment for a subscription. A subscriber who buys a plan may keep paying for months, so for subscriptions this calculator undercounts; enter customer lifetime value instead of the plan price if you know it."}}, {"@type": "Question", "name": "Should I count opens or clicks?", "acceptedAnswer": {"@type": "Answer", "text": "Clicks. An open does not take anyone to your site, and many email apps load images automatically, so open counts are unreliable. Revenue follows clicks that lead to a visit and then a payment."}}, {"@type": "Question", "name": "Why does my email tool show different revenue?", "acceptedAnswer": {"@type": "Answer", "text": "Email tools often credit a sale to any email that was opened or clicked within a window before it, so the same order can be counted by several emails and by other channels too. Click-based attribution credits each payment once, which lets you compare email fairly against search, social and ads."}}, {"@type": "Question", "name": "How much can I spend to get a subscriber?", "acceptedAnswer": {"@type": "Answer", "text": "To break even on revenue, no more than a new subscriber is worth. To break even on profit, multiply that by your gross margin first: $1.44 at a 60% margin is $0.86. Use the value of subscribers from the same source if you can, because readers who came for a giveaway may not buy like readers who came from a product page."}}, {"@type": "Question", "name": "Does removing inactive subscribers raise subscriber value?", "acceptedAnswer": {"@type": "Answer", "text": "It raises the average, but not your revenue. If 1,000 of 5,000 subscribers never buy and you remove them, $600 a month is now split between 4,000 people, so the figure goes from $0.12 to $0.15 while your emails still bring $600. Compare total email revenue as well as revenue per subscriber when you clean a list."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the revenue behind every email</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the revenue each newsletter and campaign brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("esv"), out = document.getElementById("esv-out");
+const usd = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const calc = () => {
+  const n = +f.elements.list.value, s = +f.elements.sends.value, c = +f.elements.ctr.value / 100, v = +f.elements.cvr.value / 100, a = +f.elements.aov.value, m = +f.elements.months.value;
+  const monthly = n * s * c * v * a, per = n > 0 ? monthly / n : 0;
+  const rows = [
+    ["Email revenue per month", usd(monthly)],
+    ["Revenue per subscriber per month", n > 0 ? usd(per) : "No data"],
+    ["Revenue per subscriber per year", n > 0 ? usd(per * 12) : "No data"],
+    ["What a new subscriber is worth", n > 0 ? usd(per * m) : "No data"],
+  ];
+  out.innerHTML = rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

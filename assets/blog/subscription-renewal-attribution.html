@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subscription renewal attribution: which channel gets the MRR</title>
+<meta name="description" content="How to attribute subscription renewals to a marketing channel: a renewal has no visit, so credit it to the channel of the customer's first payment.">
+<link rel="canonical" href="https://virling.com/blog/subscription-renewal-attribution">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/subscription-renewal-attribution">
+<meta property="og:title" content="Subscription renewal attribution: which channel gets the MRR">
+<meta property="og:description" content="How to attribute subscription renewals to a marketing channel: a renewal has no visit, so credit it to the channel of the customer's first payment.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Subscription renewal attribution: which channel gets the MRR","item":"https://virling.com/blog/subscription-renewal-attribution"}]},{"@type":"BlogPosting","headline":"Subscription renewal attribution: which channel gets the MRR","description":"How to attribute subscription renewals to a marketing channel: a renewal has no visit, so credit it to the channel of the customer's first payment.","datePublished":"2026-11-20","dateModified":"2026-11-20","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/subscription-renewal-attribution"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I attribute subscription renewals to a channel?","acceptedAnswer":{"@type":"Answer","text":"Credit each renewal to the channel of the customer's first payment. A renewal has no visit of its own, so Virling matches it to the first payment by the provider's customer ID and copies that payment's channel, referrer, campaign, landing page, country and device."}},{"@type":"Question","name":"Why do renewals show up as Direct or Unattributed in most tools?","acceptedAnswer":{"@type":"Answer","text":"A renewal is charged by the billing provider without anyone visiting your site. A tool that credits each payment to the visit before it finds no visit, so the renewal lands in Direct or Unattributed and the channel that won the customer looks smaller every month."}},{"@type":"Question","name":"Which channel gets an upgrade?","acceptedAnswer":{"@type":"Answer","text":"The channel of the first payment. Upgrades and other plan changes count as renewals, so expansion revenue stays with the channel that brought the customer."}},{"@type":"Question","name":"Why is a renewal still Unattributed in Virling?","acceptedAnswer":{"@type":"Answer","text":"The first payment was not attributed, it is older than the 90-day import, or the payment has no customer ID to link it to a first payment. Customers are also matched per provider, so a customer who moved providers starts over."}},{"@type":"Question","name":"Does this work for free trials?","acceptedAnswer":{"@type":"Answer","text":"Yes. A trial start is never counted as revenue, a payment or a customer. Virling uses it only for credit: a later payment of that customer with no visitor ID of its own is credited from the visits before the trial started."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-20</span>
+      <h1>Subscription renewal attribution: which channel gets the MRR</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-20.</p>
+<p class="p">A subscription renewal has no visit. The billing provider charges the card in month two, month six and month twenty without anyone landing on your site, so most analytics tools either drop renewals or file them under Direct or Unattributed. The channel that won the customer gets credit for one month and none of the rest. The fix for <b>subscription renewal attribution</b> is one rule: a renewal takes the attribution of the customer's first payment. If someone subscribed after a visit from Reddit, every renewal is credited to that Reddit visit, even years later.</p>
+<p class="p">That rule is how Virling credits renewal revenue by channel. This post covers why renewals go missing, how each billing provider's renewals are detected, and what the rule changes in your numbers.</p>
+<h2>Why renewals go missing from channel reports</h2>
+<ul class="post-list"><li><b>No visit, no channel.</b> Attribution joins a payment to the visits before it. A renewal is charged by Stripe or Paddle on a schedule, so there is no visit before it and no visitor ID on it.</li><li><b>Unattributed grows every month.</b> Each month more of your revenue is renewals, so a report that credits payments to visits shows a shrinking share for every channel and a growing pile of Direct or Unattributed.</li><li><b>Channels with loyal customers look worst.</b> A channel whose customers stay for a year has most of its revenue in renewals. If renewals are dropped, it looks no better than a channel whose customers cancel after one month.</li></ul>
+<h2>The rule: a renewal takes the first payment's attribution</h2>
+<p class="p">Virling finds the customer's first payment: their earliest payment that did not fail, from the same provider, matched by the provider's customer ID. If that first payment was attributed, the renewal copies its channel, referrer, campaign, landing page, country and device. If it was not, the renewal falls back to its own visitor ID, which renewals rarely carry, so it is usually Unattributed too.</p>
+<p class="p">The first payment is credited the usual way, from the visits before checkout, so pass the visitor ID into checkout. See <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a> and <a href="https://docs.virling.com/attribution/renewals">renewals</a> in the docs.</p>
+<h2>How each provider's renewals are detected</h2>
+<table class="cmp"><thead><tr><th>Provider</th><th>A payment is a renewal when</th></tr></thead><tbody><tr><th scope="row">Stripe</th><td>Its invoice's billing reason is <code>subscription_cycle</code>.</td></tr><tr><th scope="row">Dodo Payments</th><td>It belongs to a subscription that already had a paid payment before it.</td></tr><tr><th scope="row">Polar</th><td>The order's billing reason is <code>subscription_cycle</code>.</td></tr><tr><th scope="row">LemonSqueezy</th><td>It is a subscription invoice with billing reason <code>renewal</code>.</td></tr><tr><th scope="row">Creem</th><td>The customer already had a payment before it.</td></tr><tr><th scope="row">RevenueCat</th><td>It arrives as a <code>RENEWAL</code> webhook event.</td></tr><tr><th scope="row">Paddle</th><td>Its origin is <code>subscription_recurring</code>, <code>subscription_update</code> or <code>subscription_charge</code>.</td></tr><tr><th scope="row">WooCommerce</th><td>It is a WooCommerce Subscriptions renewal order.</td></tr><tr><th scope="row">Shopify</th><td>Its source is <code>subscription_contract</code>, a Shopify Subscriptions renewal.</td></tr></tbody></table>
+<p class="p"><b>Upgrades and plan changes</b> count as renewals too, so they keep the first payment's channel: Stripe and Polar <code>subscription_update</code>, LemonSqueezy <code>updated</code>, and any later Dodo subscription payment. Expansion revenue stays with the channel that brought the customer.</p>
+<p class="p"><b>Free trials</b> start with nothing charged. Virling keeps the trial start apart from payments, never counting it as revenue, a payment or a customer, and uses it only for credit: a later payment of that customer with no visitor ID of its own is credited from the visits before the trial started.</p>
+<h2>A worked example</h2>
+<p class="p">Example only: made-up numbers for an imaginary product with one plan at $30 a month.</p>
+<ul class="post-list"><li><b>Organic search</b> brings 10 customers. 8 stay all 12 months, 2 cancel after 3.</li><li><b>Communities</b> bring 20 customers. 5 stay all 12 months, 15 cancel after 2.</li><li><b>Newsletter sponsorship</b> brings 6 customers. All 6 stay all 12 months.</li></ul>
+<table class="cmp"><thead><tr><th>Channel</th><th>Customers</th><th>First-month revenue</th><th>12-month revenue</th></tr></thead><tbody><tr><th scope="row">Organic search</th><td>10</td><td>$300</td><td>$3,060</td></tr><tr><th scope="row">Communities</th><td>20</td><td>$600</td><td>$2,700</td></tr><tr><th scope="row">Newsletter sponsorship</th><td>6</td><td>$180</td><td>$2,160</td></tr></tbody></table>
+<p class="p">By first-month revenue, communities bring twice as much as organic search. Over 12 months, organic search brings more, and the newsletter, smallest in month one, ends up at 12 times its first month. A tool that drops renewals sees only the first column, and the other $6,840 lands in Unattributed. To run the numbers for your own plans, use the free <a href="/tools/ltv-calculator">LTV calculator</a>.</p>
+<h2>Where to read renewal revenue by channel in Virling</h2>
+<ul class="post-list"><li><b>Channels</b> card: revenue per channel, with renewals credited to the channel of the first payment.</li><li><b>Customers who stay</b> (the Retention page): customers grouped by the channel of their first payment, with how many still pay, net LTV and 30-day churn. It uses the same rule, so a customer's whole lifetime value counts toward the channel of their first payment. To split first payments from later ones, see <a href="/blog/new-vs-returning-customer-revenue">new vs returning customer revenue</a>.</li></ul>
+<p class="p">For new and churned MRR per channel, see <a href="/blog/mrr-by-acquisition-channel">MRR by acquisition channel</a>. For lifetime value per channel, see <a href="/blog/ltv-by-acquisition-channel">LTV by acquisition channel</a>.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>What to check if renewals look off</h2>
+<ul class="post-list"><li><b>Renewals show as Unattributed.</b> The first payment was not attributed. Check that checkout carries the visitor ID. See <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</li><li><b>Old subscriptions are Unattributed.</b> The first payment must be in Virling. Payments older than the 90-day backfill are not imported, so renewals of subscriptions that started before that are Unattributed. Channel numbers fill in as new customers arrive.</li><li><b>Payments without a customer ID.</b> They cannot be linked to a first payment.</li><li><b>A customer counts twice.</b> Customers are matched per provider, so a customer who moved from one provider to another counts as two.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>How do I attribute subscription renewals to a channel?</h3><p class="p">Credit each renewal to the channel of the customer's first payment. A renewal has no visit of its own, so Virling matches it to the first payment by the provider's customer ID and copies that payment's channel, referrer, campaign, landing page, country and device.</p>
+<h3>Why do renewals show up as Direct or Unattributed in most tools?</h3><p class="p">A renewal is charged by the billing provider without anyone visiting your site. A tool that credits each payment to the visit before it finds no visit, so the renewal lands in Direct or Unattributed and the channel that won the customer looks smaller every month.</p>
+<h3>Which channel gets an upgrade?</h3><p class="p">The channel of the first payment. Upgrades and other plan changes count as renewals, so expansion revenue stays with the channel that brought the customer.</p>
+<h3>Why is a renewal still Unattributed in Virling?</h3><p class="p">The first payment was not attributed, it is older than the 90-day import, or the payment has no customer ID to link it to a first payment. Customers are also matched per provider, so a customer who moved providers starts over.</p>
+<h3>Does this work for free trials?</h3><p class="p">Yes. A trial start is never counted as revenue, a payment or a customer. Virling uses it only for credit: a later payment of that customer with no visitor ID of its own is credited from the visits before the trial started.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>Credit every renewal to the channel that won it</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

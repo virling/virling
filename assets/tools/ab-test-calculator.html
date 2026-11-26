@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A/B test calculator: significance and revenue per visitor</title>
+<meta name="description" content="See whether variant B really beat A: conversion rate, lift and two-sided z-test significance from your visitor counts, plus revenue per visitor.">
+<link rel="canonical" href="https://virling.com/tools/ab-test-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/ab-test-calculator">
+<meta property="og:title" content="A/B test calculator: significance and revenue per visitor">
+<meta property="og:description" content="See whether variant B really beat A: conversion rate, lift and two-sided z-test significance from your visitor counts, plus revenue per visitor.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"A/B test calculator","url":"https://virling.com/tools/ab-test-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"A/B test calculator","item":"https://virling.com/tools/ab-test-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / a/b test calculator</span><h1>A/B test calculator with revenue per visitor</h1><p class="lead">Enter the visitors and conversions for each variant of your test to see its conversion rate, the lift of B over A and whether the difference is statistically significant. Add the revenue from each variant to compare revenue per visitor too. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="ab" autocomplete="off">
+  <label>Visitors to A<input name="va" type="number" min="0" step="1" value="10000"></label>
+  <label>Visitors to B<input name="vb" type="number" min="0" step="1" value="10000"></label>
+  <label>Conversions in A<input name="ca" type="number" min="0" step="1" value="200"></label>
+  <label>Conversions in B<input name="cb" type="number" min="0" step="1" value="250"></label>
+  <label>Revenue from A ($) <span class="dim">optional</span><input name="ra" type="number" min="0" step="0.01" value="10000"></label>
+  <label>Revenue from B ($) <span class="dim">optional</span><input name="rb" type="number" min="0" step="0.01" value="9500"></label>
+</form>
+<table class="cmp"><thead><tr><th>Variant</th><th>Conversion rate</th><th>Revenue per visitor</th><th>Average order value</th></tr></thead><tbody id="ab-rows"></tbody></table>
+<div class="tool-stats" id="ab-out"></div>
+<p class="p" id="ab-note"></p>
+<p class="fine-note">Significance uses a two-sided two-proportion z-test on conversion rate with a pooled standard error. Revenue per visitor is shown for comparison but not tested for significance, since that needs the revenue of every single order.</p>
+<div class="txt post tool-cta">
+<p class="p">A test that lifts conversions can still lose money if the extra buyers spend less. Virling links every visit to the payment it led to, so you see the real revenue behind each page and channel from your payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/revenue-per-visitor">revenue per visitor calculator</a>, <a href="/tools/conversion-rate-calculator">conversion rate calculator</a>, <a href="/blog/what-is-revenue-per-visitor">what revenue per visitor is</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>How the significance is calculated</h2>
+<p class="p">Each variant's conversion rate is its conversions divided by its visitors. Lift is how much higher or lower B converts than A, relative to A:</p>
+<p class="p"><code>conversion rate = conversions / visitors</code><br><code>lift = (rate B - rate A) / rate A</code></p>
+<p class="p">To judge whether the difference is real or chance, the calculator pools both variants into one conversion rate, works out how much the difference between two samples of this size would vary if the variants were identical, and measures the observed difference in those units:</p>
+<p class="p"><code>pooled rate = (conversions A + conversions B) / (visitors A + visitors B)</code><br><code>standard error = &radic;(pooled rate &times; (1 - pooled rate) &times; (1 / visitors A + 1 / visitors B))</code><br><code>z = (rate B - rate A) / standard error</code></p>
+<p class="p">The p-value is the chance of seeing a difference at least this large, in either direction, if A and B really convert the same. Below 0.05 the result is significant at 95% confidence.</p>
+<h2>A worked example</h2>
+<p class="p">With the defaults above, A got 10,000 visitors and 200 conversions, a 2.00% conversion rate. B got 10,000 visitors and 250 conversions, 2.50%. The lift is (2.50% - 2.00%) / 2.00% = 25%.</p>
+<p class="p">The pooled rate is 450 / 20,000 = 2.25%. The standard error is &radic;(0.0225 &times; 0.9775 &times; (1 / 10,000 + 1 / 10,000)) = &radic;0.0000043988 = 0.002097. So z = 0.005 / 0.002097 = 2.38, which gives a two-sided p-value of 0.017, or 98.3% confidence. B's higher conversion rate is significant at 95%.</p>
+<p class="p">Now the revenue. A's 200 orders brought $10,000, an average order of $50 and $1.00 per visitor. B's 250 orders brought only $9,500, an average order of $38 and $0.95 per visitor. B wins more orders but each visitor is worth 5% less, so B made less money.</p>
+<h2>When a result is not significant yet</h2>
+<p class="p">A p-value above 0.05 does not mean A and B are the same. It means the test has not collected enough visitors to tell a real difference apart from chance. Small differences and low conversion rates need many more visitors before they show up clearly. Keep the test running for the number of visitors or full weeks you planned before it started, and do not stop the moment the p-value dips below 0.05: checking every day and stopping at the first good reading makes chance results look significant far more often than 5% of the time.</p>
+<h2>Why revenue per visitor can disagree with conversion rate</h2>
+<p class="p">Conversion rate counts orders, not money. A variant with a discount, a cheaper default plan or a less prominent upsell can turn more visitors into buyers while each buyer spends less. Revenue per visitor is conversion rate times average order value, so it is the number that tells you which variant earns more from the same traffic. When the two disagree, as in the example above, the winner on conversion rate is not the winner on revenue. See <a href="/blog/what-is-revenue-per-visitor">what revenue per visitor is and how to calculate it</a>, or work it out per channel with the <a href="/tools/revenue-per-visitor">revenue per visitor calculator</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>A/B test calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you know if an A/B test is significant?</h3><p class="p">Compare the conversion rates with a two-proportion z-test and look at the p-value. If it is below 0.05, a difference this large would happen by chance less than 5% of the time when the variants convert the same, so the result is significant at 95% confidence.</p></div>
+      <div><h3>How is lift calculated in an A/B test?</h3><p class="p">Subtract A's conversion rate from B's and divide by A's. A going from 2.00% to 2.50% is a 25% lift, even though the rate rose by only half a percentage point.</p></div>
+      <div><h3>What should I do if my A/B test is not significant?</h3><p class="p">Keep it running until it reaches the number of visitors you planned. A result that is not significant means there is not enough data yet to tell the difference from chance, not that the variants are equal.</p></div>
+      <div><h3>Why look at revenue per visitor in an A/B test?</h3><p class="p">Because a variant can win more orders with smaller baskets. Revenue per visitor is conversion rate times average order value, so it shows which variant earns more from the same traffic, not only which one converts more often.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you know if an A/B test is significant?", "acceptedAnswer": {"@type": "Answer", "text": "Compare the conversion rates with a two-proportion z-test and look at the p-value. If it is below 0.05, a difference this large would happen by chance less than 5% of the time when the variants convert the same, so the result is significant at 95% confidence."}}, {"@type": "Question", "name": "How is lift calculated in an A/B test?", "acceptedAnswer": {"@type": "Answer", "text": "Subtract A's conversion rate from B's and divide by A's. A going from 2.00% to 2.50% is a 25% lift, even though the rate rose by only half a percentage point."}}, {"@type": "Question", "name": "What should I do if my A/B test is not significant?", "acceptedAnswer": {"@type": "Answer", "text": "Keep it running until it reaches the number of visitors you planned. A result that is not significant means there is not enough data yet to tell the difference from chance, not that the variants are equal."}}, {"@type": "Question", "name": "Why look at revenue per visitor in an A/B test?", "acceptedAnswer": {"@type": "Answer", "text": "Because a variant can win more orders with smaller baskets. Revenue per visitor is conversion rate times average order value, so it shows which variant earns more from the same traffic, not only which one converts more often."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>Test against revenue, not just clicks</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel and page brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("ab"), rows = document.getElementById("ab-rows"), out = document.getElementById("ab-out"), note = document.getElementById("ab-note");
+const usd = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: n < 100 ? 2 : 0, maximumFractionDigits: n < 100 ? 2 : 0 });
+const pct = (n) => (n * 100).toFixed(2) + "%";
+const sgn = (n) => (n > 0 ? "+" : "") + (n * 100).toFixed(1) + "%";
+// Normal CDF via the Abramowitz and Stegun 7.1.26 erf approximation.
+const phi = (z) => { const x = Math.abs(z) / Math.SQRT2, t = 1 / (1 + 0.3275911 * x), e = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x); return z < 0 ? (1 - e) / 2 : (1 + e) / 2; };
+const calc = () => {
+  const va = +f.va.value, vb = +f.vb.value, ca = Math.min(+f.ca.value, va), cb = Math.min(+f.cb.value, vb);
+  const hasR = f.ra.value.trim() !== "" && f.rb.value.trim() !== "", ra = +f.ra.value, rb = +f.rb.value;
+  const a = va > 0 ? ca / va : null, b = vb > 0 ? cb / vb : null;
+  const cell = (v, c, r) => [v > 0 ? pct(c / v) : "No data", hasR && v > 0 ? usd(r / v) : hasR ? "No data" : "Add revenue", hasR && c > 0 ? usd(r / c) : hasR ? "No data" : "Add revenue"];
+  rows.innerHTML = [["A", va, ca, ra], ["B", vb, cb, rb]].map(([k, v, c, r]) => `<tr><th scope="row">${k}</th>${cell(v, c, r).map((s) => `<td>${s}</td>`).join("")}</tr>`).join("");
+  const p = va + vb > 0 ? (ca + cb) / (va + vb) : 0, se = va > 0 && vb > 0 ? Math.sqrt(p * (1 - p) * (1 / va + 1 / vb)) : 0;
+  const z = se > 0 ? (b - a) / se : null, pv = z === null ? null : 2 * (1 - phi(Math.abs(z)));
+  const rpvLift = hasR && va > 0 && vb > 0 && ra > 0 ? (rb / vb) / (ra / va) - 1 : null;
+  out.innerHTML = [
+    ["Lift in conversion rate", a > 0 && b !== null ? sgn(b / a - 1) : "No data"],
+    ["z-score", z === null ? "No data" : z.toFixed(2)],
+    ["p-value (two-sided)", pv === null ? "No data" : pv < 0.001 ? "< 0.001" : pv.toFixed(3)],
+    ["Confidence", pv === null ? "No data" : ((1 - pv) * 100).toFixed(1) + "%"],
+    ["Lift in revenue per visitor", rpvLift === null ? (hasR ? "No data" : "Add revenue") : sgn(rpvLift)],
+  ].map(([k, v]) => `<div><span class="dim">${k}</span><b>${v}</b></div>`).join("");
+  const msg = [];
+  if (pv === null) msg.push("Enter visitors for both variants and at least one conversion to test the difference.");
+  else if (pv < 0.05) msg.push(`Significant at 95%: B converts ${b > a ? "better" : "worse"} than A, and a difference this large would happen by chance only ${(pv * 100).toFixed(1)}% of the time if they converted the same.`);
+  else msg.push(`Not significant yet: a difference this large would happen by chance ${(pv * 100).toFixed(0)}% of the time even if A and B converted the same. That does not mean they are equal, only that there are not enough visitors yet to tell. Keep the test running to the size you planned rather than stopping early.`);
+  if (rpvLift !== null && b !== null && a !== null && b !== a && rpvLift !== 0 && (b > a) !== (rpvLift > 0)) msg.push(`Revenue per visitor points the other way: ${rpvLift > 0 ? "B" : "A"} earns more per visitor, because its buyers spend more per order. Pick the winner on revenue, not orders.`);
+  note.textContent = msg.join(" ");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

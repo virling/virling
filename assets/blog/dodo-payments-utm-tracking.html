@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dodo Payments UTM tracking: pass source data through checkout</title>
+<meta name="description" content="How to tie a Dodo Payments payment to the visit and channel that brought it: payment links, checkout sessions and links built in code.">
+<link rel="canonical" href="https://virling.com/blog/dodo-payments-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/dodo-payments-utm-tracking">
+<meta property="og:title" content="Dodo Payments UTM tracking: pass source data through checkout">
+<meta property="og:description" content="How to tie a Dodo Payments payment to the visit and channel that brought it: payment links, checkout sessions and links built in code.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Dodo Payments UTM tracking: pass source data through checkout","item":"https://virling.com/blog/dodo-payments-utm-tracking"}]},{"@type":"BlogPosting","headline":"Dodo Payments UTM tracking: pass source data through checkout","description":"How to tie a Dodo Payments payment to the visit and channel that brought it: payment links, checkout sessions and links built in code.","datePublished":"2026-11-18","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/dodo-payments-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does Dodo Payments record UTM parameters on its own?","acceptedAnswer":{"@type":"Answer","text":"Not as attribution. Dodo Payments records the payment, not the visit that led to it. To tie a payment to its source, pass a visitor ID in the payment's metadata and join it to your analytics."}},{"@type":"Question","name":"How do I pass metadata through a Dodo payment link?","acceptedAnswer":{"@type":"Answer","text":"Add metadata_virling_vid as a query parameter on the checkout.dodopayments.com/buy link. Dodo stores it as the payment's metadata.virling_vid."}},{"@type":"Question","name":"How do I add metadata to a Dodo checkout session?","acceptedAnswer":{"@type":"Answer","text":"Set metadata when your server creates the checkout session, for example metadata: { virling_vid: req.cookies.virling_vid }, then send the customer to the session's checkout_url."}},{"@type":"Question","name":"Do Dodo payment links need code to carry the visitor ID?","acceptedAnswer":{"@type":"Answer","text":"No. When a visitor clicks a normal link to checkout.dodopayments.com/buy on a page that runs the Virling script, the script adds metadata_virling_vid with the visitor ID, unless it is already there."}},{"@type":"Question","name":"Should I put UTM tags or a visitor ID in metadata?","acceptedAnswer":{"@type":"Answer","text":"A visitor ID. UTM tags in metadata record one visit, and only when it was tagged. A visitor ID points back to every visit before the sale, tagged or not."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-18</span>
+      <h1>Dodo Payments UTM tracking: pass source data through checkout</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-18, updated 2026-11-25.</p>
+<p class="p">Dodo Payments checkout does not carry the UTM parameters on your page into the payment. To tie a Dodo payment to the visit and channel that brought it, pass a visitor ID in the payment's metadata: as a <code>metadata_virling_vid</code> parameter on a payment link, or in <code>metadata</code> when your server creates a checkout session. Your analytics keeps the visits behind that ID, including their UTM tags, so each sale joins back to the channel. A visitor ID beats copying UTM tags, because it keeps every visit, not just one.</p>
+<h2>Where UTM tags get lost on Dodo checkout</h2>
+<p class="p">UTM tags live in the landing page URL. Dodo Payments records who paid, for which product and how much, plus whatever metadata you hand it. Here is where the tags drop off:</p>
+<ul class="post-list"><li><b>Payment links.</b> The buyer leaves your site for <code>checkout.dodopayments.com/buy/...</code>, usually a few pages past the landing URL, and the link carries nothing about the visit unless you add it.</li><li><b>Checkout sessions.</b> Your server creates the session, and it only knows about the visit if you read it from the request and set it in <code>metadata</code>.</li><li><b>Visits without tags.</b> Search, referrals and AI answers carry no UTM at all, so UTM-only tracking marks those sales as untagged.</li><li><b>Buyers who come back later.</b> Someone who lands from a newsletter and buys a week later from a bookmark has no tags on the visit that checks out.</li></ul>
+<h2>Step 1: keep a visitor ID until checkout</h2>
+<p class="p">Store one ID per visitor when they land, and record the UTM tags and referrer of every visit against it. With the Virling script, the ID is in the first-party <code>virling_vid</code> cookie, and <code>window.virling?.vid?.()</code> returns it in the browser. Put the script on every page that links to checkout, not only on your landing page.</p>
+<h2>Step 2: static payment links need no code</h2>
+<p class="p">A static payment link on <code>checkout.dodopayments.com/buy/...</code> can carry the visitor ID as a query parameter. Dodo stores <code>metadata_virling_vid</code> as the payment's <code>metadata.virling_vid</code>.</p>
+<p class="p">With Virling you do not add it by hand. Keep the link as a normal <code>&lt;a href&gt;</code> on a page that runs the script, and when a visitor clicks it, the script adds <code>metadata_virling_vid=&lt;visitor ID&gt;</code> to the link, unless it is already there:</p>
+<div class="code block"><pre data-snippet>&lt;a href="https://checkout.dodopayments.com/buy/pdt_..."&gt;Buy now&lt;/a&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>Step 3: set metadata on checkout sessions</h2>
+<p class="p">For a checkout session you create on your server, read the <code>virling_vid</code> cookie from the request and set it in <code>metadata</code>:</p>
+<div class="code block"><pre data-snippet>const session = await client.checkoutSessions.create({
+  product_cart: [{ product_id: "pdt_...", quantity: 1 }],
+  return_url: "https://yourdomain.com/thanks",
+  metadata: { virling_vid: req.cookies.virling_vid },
+});
+// Send the customer to session.checkout_url</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">If you also want the tags readable in Dodo, add them next to the ID, for example <code>utm_source</code> and <code>utm_campaign</code> from the values you stored on landing. Virling only needs <code>virling_vid</code>.</p>
+<h2>Step 4: links built in your own code</h2>
+<p class="p">If you build a payment link URL in your own code instead of an <code>&lt;a href&gt;</code>, add the parameter yourself, and only when there is a value:</p>
+<div class="code block"><pre data-snippet>const url = new URL("https://checkout.dodopayments.com/buy/pdt_...");
+const vid = window.virling?.vid?.();
+if (vid) url.searchParams.set("metadata_virling_vid", vid);
+location.href = url.href;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">If that code can run before the script has loaded, the value will be empty, so wait for the script first.</p>
+<h2>Step 5: Virling reads it back</h2>
+<p class="p">Connect Dodo Payments with an API key and Virling reads <code>metadata.virling_vid</code> on each payment, then joins it to that visitor's visits. Refunds update the payment they belong to, and lost or accepted disputes count as refunded. For subscriptions, every paid payment after the first paid one is marked as a renewal, so a channel is not credited with a new customer each month. Payments with no ID show as Unattributed.</p>
+<p class="p">The full setup is in <a href="https://docs.virling.com/payments/dodo">the Dodo Payments docs page</a> and on the <a href="/integrations/dodo-payments">Dodo Payments integration page</a>.</p>
+<h2>Check that it works in test mode</h2>
+<ol class="post-list"><li>Connect a test mode key.</li><li>Open a private window and visit a page that runs the script through a tagged link, such as <code>https://yourdomain.com/?utm_source=test&amp;utm_medium=email</code>.</li><li>In the same window, go to a test checkout your server creates with <code>metadata.virling_vid</code>, or a test link with <code>metadata_virling_vid</code> added in your own code, and pay with a test card. The script does not add the visitor ID to test links.</li><li>Wait a minute for the next sync, then open the payments list at <code>/app/yourdomain.com/payments</code>. The payment shows the <code>test</code> source and the <b>Email</b> channel of your tagged visit instead of Unattributed.</li></ol>
+<p class="p">Use a new email address for each test, because a later payment by the same customer is a renewal and keeps the first payment's channel. A site has one Dodo Payments connection, and test payments stay in your reports after you replace the key with a live one. If a step fails, see <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>.</p>
+<h2>Common mistakes</h2>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>What you see</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">A test link payment is Unattributed</th><td>The script adds the visitor ID to links on <code>checkout.dodopayments.com</code>, not to test links</td><td>Add <code>metadata_virling_vid</code> in your own code, or test with a checkout session</td></tr><tr><th scope="row">Checkout session payments are Unattributed</th><td>The session was created without <code>metadata.virling_vid</code></td><td>Read the <code>virling_vid</code> cookie on the request that creates the session, as in step 3</td></tr><tr><th scope="row">Payments from a link in an email or on another site are Unattributed</th><td>The payment link was opened without a visit to your site, so it carries no visitor ID</td><td>Send people to a page that runs the script, and put the payment link there</td></tr><tr><th scope="row">Payments from a link built in code are Unattributed</th><td>The URL has no <code>metadata_virling_vid</code></td><td>Add the parameter yourself, as in step 4</td></tr><tr><th scope="row">A second test payment shows the first test's channel</th><td>Same customer, so it counts as a renewal</td><td>Pay with a new email address</td></tr><tr><th scope="row">Payments for another product show up</th><td>One Dodo account sells more than this site's products</td><td>List this site's product IDs under <b>Only these product IDs</b> in site settings. Payments already imported stay</td></tr><tr><th scope="row">A dispute lost after the import does not lower revenue</th><td>Virling counts a lost dispute when it reads the payment</td><td>Use <b>Replace key</b> to read the last 90 days again</td></tr><tr><th scope="row">Older payments are Unattributed</th><td>They are from before the script was on your site</td><td>Nothing to fix: they count as revenue, and new payments can be credited</td></tr></tbody></table></div>
+<p class="p">Every other cause is in <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</p>
+<h2>Example: three tagged posts</h2>
+<p class="p">Example only: the product, its $29 one-time price and every number below are made up. The seller shares three posts in November, each with its own <code>utm_campaign</code>, named with the <a href="/tools/utm-naming-template">UTM naming template</a>. There are no refunds, and Unattributed payments are left out.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>Post</th><th>Campaign tag</th><th>Visitors</th><th>Sales</th><th>Revenue</th><th>Revenue per visitor</th></tr></thead><tbody><tr><th scope="row">LinkedIn post</th><td><code>price-guide-2026-11</code></td><td>900</td><td>6</td><td>$174</td><td>$0.19</td></tr><tr><th scope="row">X post</th><td><code>demo-clip-2026-11</code></td><td>2,400</td><td>4</td><td>$116</td><td>$0.05</td></tr><tr><th scope="row">Reddit post</th><td><code>build-story-2026-11</code></td><td>500</td><td>8</td><td>$232</td><td>$0.46</td></tr></tbody></table></div>
+<p class="p">Repeat the Reddit post: it brought the fewest visitors and the most sales. The LinkedIn post is worth a second try, since it earned about four times as much per visitor as the X post. The X post had the most visitors and the fewest sales, so change it before you post it again. These are small samples, so look at the next few posts before you drop a channel. In Virling, this is the Campaign tab of the Channels card, covered in <a href="/blog/revenue-by-campaign">revenue by campaign</a>.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Why UTM tags in metadata are not attribution</h2>
+<p class="p">UTM tags in metadata record one visit, the one that ended in checkout, and only if it was tagged. A visitor ID in metadata keeps one short value on the payment while your analytics holds every visit behind it, so you can pick <a href="/blog/first-touch-vs-last-touch-attribution-saas">first touch or last touch</a> later without changing checkout. The whole join, step by step, is in <a href="/blog/track-dodo-payments-revenue-by-traffic-source">how to track Dodo Payments revenue by traffic source</a>. For naming the tags themselves, see <a href="/blog/utm-parameters-for-revenue-tracking">which UTM parameters to use</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>Does Dodo Payments record UTM parameters on its own?</h3><p class="p">Not as attribution. Dodo Payments records the payment, not the visit that led to it. To tie a payment to its source, pass a visitor ID in the payment's metadata and join it to your analytics.</p>
+<h3>How do I pass metadata through a Dodo payment link?</h3><p class="p">Add metadata_virling_vid as a query parameter on the checkout.dodopayments.com/buy link. Dodo stores it as the payment's metadata.virling_vid.</p>
+<h3>How do I add metadata to a Dodo checkout session?</h3><p class="p">Set metadata when your server creates the checkout session, for example metadata: { virling_vid: req.cookies.virling_vid }, then send the customer to the session's checkout_url.</p>
+<h3>Do Dodo payment links need code to carry the visitor ID?</h3><p class="p">No. When a visitor clicks a normal link to checkout.dodopayments.com/buy on a page that runs the Virling script, the script adds metadata_virling_vid with the visitor ID, unless it is already there.</p>
+<h3>Should I put UTM tags or a visitor ID in metadata?</h3><p class="p">A visitor ID. UTM tags in metadata record one visit, and only when it was tagged. A visitor ID points back to every visit before the sale, tagged or not.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring Dodo Payments revenue</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

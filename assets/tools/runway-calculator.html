@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Startup runway calculator: months of cash left and break-even</title>
+<meta name="description" content="Enter cash, monthly costs, revenue and growth to see net burn, months of runway, and the month your startup runs out of cash or breaks even.">
+<link rel="canonical" href="https://virling.com/tools/runway-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/runway-calculator">
+<meta property="og:title" content="Startup runway calculator: months of cash left and break-even">
+<meta property="og:description" content="Enter cash, monthly costs, revenue and growth to see net burn, months of runway, and the month your startup runs out of cash or breaks even.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Startup runway calculator","url":"https://virling.com/tools/runway-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Startup runway calculator","item":"https://virling.com/tools/runway-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / runway calculator</span><h1>Startup runway calculator</h1><p class="lead">Runway is how many months your cash lasts: <code>runway = cash / net burn</code>, where net burn is monthly costs minus monthly revenue. If revenue is growing or shrinking, net burn changes every month, so this calculator works it out month by month. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="run" autocomplete="off">
+  <label>Cash in the bank ($)<span class="dim">What you have today</span><input name="cash" type="number" min="0" step="any" value="300000"></label>
+  <label>Monthly costs ($)<span class="dim">Everything you pay in a month</span><input name="costs" type="number" min="0" step="any" value="50000"></label>
+  <label>Monthly revenue ($)<span class="dim">What you collect in a month, 0 if none yet</span><input name="revenue" type="number" min="0" step="any" value="20000"></label>
+  <label>Monthly revenue growth (%)<span class="dim">0 if flat, negative if it is shrinking</span><input name="growth" type="number" min="-100" step="any" value="5"></label>
+</form>
+<div class="tool-stats" id="run-out"></div>
+<p class="fine-note" id="run-read" aria-live="polite"></p>
+<p class="fine-note">The numbers filled in above are an example. Replace them with your own. Next month counts as month 1, costs stay the same, and the calculation stops after 10 years.</p>
+<div class="txt post tool-cta">
+<h2>See which channels bring the revenue that extends your runway</h2>
+<p class="p">Enter what you spend on each channel and Virling shows the revenue credited to it, the profit and the return per dollar, from your real payments. Virling is open source under AGPLv3: self-host it free, or start a 14-day hosted trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/integrations/saas">Virling for SaaS</a> &middot; <a class="lk" href="/demo">See the demo</a></p>
+<p class="p">Related: <a href="/tools/burn-multiple-calculator">burn multiple calculator</a>, <a href="/tools/mrr-goal-calculator">MRR goal calculator</a>, <a href="/tools/investor-update-template">monthly investor update template</a>, <a href="/blog/mrr-by-acquisition-channel">MRR by acquisition channel</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The runway formula</h2>
+<p class="p">With flat revenue, runway is one division:</p>
+<p class="p"><code>net burn = monthly costs &minus; monthly revenue</code></p>
+<p class="p"><code>runway in months = cash / net burn</code></p>
+<p class="p">With growing or shrinking revenue, the calculator repeats two steps for each month m until the cash is gone or 10 years have passed:</p>
+<p class="p"><code>revenue in month m = monthly revenue &times; (1 + growth)<sup>m &minus; 1</sup></code></p>
+<p class="p"><code>cash after month m = cash before &minus; (monthly costs &minus; revenue in month m)</code></p>
+<p class="p">The business breaks even in the first month when revenue is at least as high as costs. If that happens before the cash is gone and revenue is not shrinking, the cash never runs out.</p>
+<h2>A worked example</h2>
+<p class="p">This is an example with made-up numbers, the same as the defaults above. A startup has $300,000 in the bank, pays $50,000 a month and collects $20,000 a month, so net burn in month 1 is $30,000. With flat revenue, runway is $300,000 / $30,000 = 10 months.</p>
+<p class="p">With revenue growing 5% a month, month 2 brings in $21,000 and burns $29,000, month 3 brings in $22,050 and burns $27,950, and so on. After month 13 about $4,260 is left. Month 14 would burn about $12,287, so the cash runs out in that month and the runway is 13.3 months. Revenue would only pass costs in month 20.</p>
+<p class="p">Now change the cash to $500,000. The startup reaches month 20 with money left: revenue is then about $50,539 against $50,000 of costs, so it breaks even. The lowest cash balance on the way is about $160,780, after month 19. If growth holds until then and revenue does not shrink afterwards, the cash never runs out.</p>
+<h2>Runway for common inputs</h2>
+<p class="p">Example figures, not benchmarks, worked out with the calculator's month-by-month formula. The first four number columns are what you enter, the last three are what it shows:</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:960px"><thead><tr><th style="width:22%">Example</th><th>Cash</th><th>Monthly costs</th><th>Monthly revenue</th><th>Growth</th><th>Runway</th><th>Cash runs out or breaks even</th><th>Lowest cash balance</th></tr></thead><tbody><tr><th scope="row">The defaults above</th><td>$300,000</td><td>$50,000</td><td>$20,000</td><td>5%</td><td>13.3 months</td><td>Runs out in month 14</td><td>$0</td></tr><tr><th scope="row">No revenue yet</th><td>$300,000</td><td>$50,000</td><td>$0</td><td>0%</td><td>6 months</td><td>Runs out in month 6</td><td>$0</td></tr><tr><th scope="row">Flat revenue</th><td>$300,000</td><td>$50,000</td><td>$20,000</td><td>0%</td><td>10 months</td><td>Runs out in month 10</td><td>$0</td></tr><tr><th scope="row">Shrinking revenue</th><td>$300,000</td><td>$50,000</td><td>$20,000</td><td>-5%</td><td>8.9 months</td><td>Runs out in month 9</td><td>$0</td></tr><tr><th scope="row">Faster growth</th><td>$300,000</td><td>$50,000</td><td>$20,000</td><td>10%</td><td>No end</td><td>Breaks even in month 11</td><td>$118,748</td></tr><tr><th scope="row">Less cash</th><td>$200,000</td><td>$50,000</td><td>$20,000</td><td>5%</td><td>7.6 months</td><td>Runs out in month 8</td><td>$0</td></tr><tr><th scope="row">Lower costs</th><td>$300,000</td><td>$45,000</td><td>$20,000</td><td>5%</td><td>No end</td><td>Breaks even in month 18</td><td>$51,807</td></tr></tbody></table></div>
+<p class="p">Every row except the second and the last starts at the same $30,000 net burn. Growth and cash alone move the result from 7.6 months to no end, so a net burn figure on its own says little about how long you have.</p>
+<h2>What moves the runway</h2>
+<p class="p">There are three levers: more cash, lower costs and more revenue. Cutting costs works from the first month. Growth works slowly at first and then faster, because each month builds on the one before. If you spend to grow, check what the spend buys with the <a href="/tools/burn-multiple-calculator">burn multiple calculator</a>, and work out how many customers a revenue target takes with the <a href="/tools/mrr-goal-calculator">MRR goal calculator</a>. When you report the result, the <a href="/tools/investor-update-template">monthly investor update template</a> has a place for cash and runway.</p>
+<h2>Find the spend that pays for itself</h2>
+<p class="p">A runway number covers the whole company, so it cannot say which costs bring revenue back. Marketing channels differ a lot in what they cost and what they bring in, and comparing them needs each payment tied to the visit that started it. See <a href="/blog/mrr-by-acquisition-channel">MRR by acquisition channel</a> for how to split recurring revenue by where customers came from. In Virling, the Profit by channel card shows spend, revenue and return per dollar for any range.</p>
+<h2>The channel decision this should change</h2>
+<p class="p">Use it to decide which channel to cut, and whether to pay for more growth. Say $5,000 of the $50,000 monthly costs goes to one channel, and revenue is flat, so runway is 10 months. If the channel brings $4,000 a month that would stop with the spend, cutting it leaves $45,000 of costs and $16,000 of revenue, and runway goes up to 10.3 months. If it brings $9,000, cutting it leaves $11,000 of revenue, and runway falls to 8.8 months. Only take off revenue that would really stop: subscribers a channel already won keep paying until they cancel.</p>
+<p class="p">Adding spend has to pass the same test. From the defaults, $5,000 more a month with growth up from 5% to 7% shortens runway from 13.3 months to 11.8. At 8% the startup breaks even in month 15, with as little as $14,298 left on the way. Raise a budget only if the channel's own payments show it can bring that growth before the cash is gone.</p>
+<h2>Three mistakes with runway</h2>
+<ul class="post-list">
+<li><b>Counting a yearly payment as monthly revenue.</b> With flat revenue, a customer who prepays $12,000 for a year makes one month look like $32,000, which gives 16.7 months. Added to cash instead, it gives $312,000 / $30,000 = 10.4 months.</li>
+<li><b>Leaving out bills that come once a year.</b> $24,000 of tax and insurance a year is $2,000 a month. With it, flat runway drops from 10 months to 9.4.</li>
+<li><b>Trusting one good month of growth.</b> At 10% growth the default startup never runs out of cash, and at 5% it does in month 14. Use an average over several months, then run a lower rate too.</li>
+</ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Startup runway calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How is startup runway calculated?</h3><p class="p">Divide the cash in the bank by the monthly net burn, which is monthly costs minus monthly revenue. If revenue is changing, work through it one month at a time instead: update revenue, subtract that month's net burn from cash, and stop when the cash is gone.</p></div>
+      <div><h3>What is the difference between gross burn and net burn?</h3><p class="p">Gross burn is everything you spend in a month. Net burn is what you spend minus the revenue you collect, so it is the amount your cash falls by. Runway uses net burn.</p></div>
+      <div><h3>What does it mean if cash never runs out?</h3><p class="p">If revenue reaches costs before the cash is gone and does not shrink after that, the business pays for itself and there is no month when cash runs out. The calculator then shows the month it breaks even and the lowest cash balance on the way.</p></div>
+      <div><h3>Should I include money I expect to raise?</h3><p class="p">No. Count only cash you already have and revenue you expect to collect. A round that has not closed can be late or fall through, so run the numbers without it first.</p></div>
+      <div><h3>Why does the calculator stop at 10 years?</h3><p class="p">It adds up one month at a time for 120 months. Costs and growth that stay the same for that long are unlikely, so beyond that point it only says that cash lasts more than 10 years.</p></div>
+      <div><h3>Does the calculator store my numbers?</h3><p class="p">No. The calculation runs in your browser and nothing is uploaded or saved.</p></div>
+      <div><h3>How much does cutting costs extend runway?</h3><p class="p">With flat revenue, divide cash by the new net burn. In the example on this page, cutting costs 10%, from $50,000 to $45,000 a month, lowers net burn from $30,000 to $25,000 and extends runway from 10 months to 12. With revenue growing 5% a month the same cut lets the startup break even in month 18 instead of running out of cash in month 14.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How is startup runway calculated?", "acceptedAnswer": {"@type": "Answer", "text": "Divide the cash in the bank by the monthly net burn, which is monthly costs minus monthly revenue. If revenue is changing, work through it one month at a time instead: update revenue, subtract that month's net burn from cash, and stop when the cash is gone."}}, {"@type": "Question", "name": "What is the difference between gross burn and net burn?", "acceptedAnswer": {"@type": "Answer", "text": "Gross burn is everything you spend in a month. Net burn is what you spend minus the revenue you collect, so it is the amount your cash falls by. Runway uses net burn."}}, {"@type": "Question", "name": "What does it mean if cash never runs out?", "acceptedAnswer": {"@type": "Answer", "text": "If revenue reaches costs before the cash is gone and does not shrink after that, the business pays for itself and there is no month when cash runs out. The calculator then shows the month it breaks even and the lowest cash balance on the way."}}, {"@type": "Question", "name": "Should I include money I expect to raise?", "acceptedAnswer": {"@type": "Answer", "text": "No. Count only cash you already have and revenue you expect to collect. A round that has not closed can be late or fall through, so run the numbers without it first."}}, {"@type": "Question", "name": "Why does the calculator stop at 10 years?", "acceptedAnswer": {"@type": "Answer", "text": "It adds up one month at a time for 120 months. Costs and growth that stay the same for that long are unlikely, so beyond that point it only says that cash lasts more than 10 years."}}, {"@type": "Question", "name": "Does the calculator store my numbers?", "acceptedAnswer": {"@type": "Answer", "text": "No. The calculation runs in your browser and nothing is uploaded or saved."}}, {"@type": "Question", "name": "How much does cutting costs extend runway?", "acceptedAnswer": {"@type": "Answer", "text": "With flat revenue, divide cash by the new net burn. In the example on this page, cutting costs 10%, from $50,000 to $45,000 a month, lowers net burn from $30,000 to $25,000 and extends runway from 10 months to 12. With revenue growing 5% a month the same cut lets the startup break even in month 18 instead of running out of cash in month 14."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring new revenue</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("run"), out = document.getElementById("run-out"), read = document.getElementById("run-read");
+const usd = (n) => { const a = Math.abs(n), d = a < 100 && a % 1 ? 2 : 0; return (n < 0 ? "-$" : "$") + a.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); };
+const day = new Date();
+const when = (m) => `month ${m} (${new Date(day.getFullYear(), day.getMonth() + m, 1).toLocaleDateString("en-US", { month: "short", year: "numeric" })})`;
+const cap = (s) => s[0].toUpperCase() + s.slice(1);
+const MAX = 120;
+const problem = (v) => {
+  const bad = Object.values(v).some((n) => n === null);
+  if (bad) return "Enter a number in all four fields to see your runway. Use 0 for revenue or growth if there is none.";
+  if (v.cash <= 0) return "Enter cash above zero to see how long it lasts.";
+  if (v.costs <= 0) return "Enter monthly costs above zero. With no costs there is nothing to use up the cash.";
+  if (v.revenue < 0) return "Monthly revenue cannot be negative. Use 0 if there is none yet.";
+  if (v.growth < -100 || v.growth > 1000) return "Enter monthly growth between -100% and 1000%.";
+  if (Math.max(v.cash, v.costs, v.revenue) > 1e12) return "Enter amounts of at most $1 trillion.";
+  return "";
+};
+const walk = ({ cash, costs, revenue, growth }) => {
+  const r = { even: 0, dip: 0, end: 0, runway: 0, low: cash };
+  let left = cash, rev = revenue;
+  for (let m = 1; m <= MAX; m++) {
+    const burn = costs - rev;
+    if (burn <= 0 && !r.even) r.even = m;
+    if (burn > 0 && r.even && !r.dip) r.dip = m;
+    if (burn > 0 && left - burn <= 1e-6) { r.end = m; r.runway = m - 1 + left / burn; r.low = 0; break; }
+    left -= burn;
+    r.low = Math.min(r.low, left);
+    if (r.even && growth >= 0) break;
+    rev *= 1 + growth / 100;
+  }
+  return r;
+};
+const calc = () => {
+  const num = (n) => { const i = f.elements[n]; return i.value === "" || !Number.isFinite(+i.value) ? null : +i.value; };
+  const v = { cash: num("cash"), costs: num("costs"), revenue: num("revenue"), growth: num("growth") };
+  const msg = problem(v), show = (rows) => { out.innerHTML = rows.map(([n, x]) => `<div><span class="dim">${n}</span><b>${x}</b></div>`).join(""); };
+  if (msg) {
+    show([["Net burn in month 1", "No data"], ["Runway", "No data"], ["Cash runs out", "No data"]]);
+    read.textContent = msg;
+    return;
+  }
+  const r = walk(v), burn = v.costs - v.revenue, safe = r.even && v.growth >= 0;
+  const gap = v.growth < 0 ? ", and revenue is shrinking" : ", before revenue reaches costs";
+  const long = Math.min(+r.runway.toFixed(1), r.end);
+  show([
+    ["Net burn in month 1", burn > 0 ? usd(burn) : "None"],
+    ["Runway", r.end ? (long ? `${long} ${long === 1 ? "month" : "months"}` : "Under 0.1 months") : safe ? "No end" : "Over 10 years"],
+    r.end ? ["Cash runs out", cap(when(r.end))] : safe ? ["Breaks even", r.even === 1 ? "Already" : cap(when(r.even))] : ["Cash runs out", "Not within 10 years"],
+    ["Lowest cash balance", usd(r.low)],
+  ]);
+  const profit = r.even === 1 ? (burn < 0 ? `Revenue is ${usd(-burn)} a month above costs today` : "Revenue covers costs exactly today") : "";
+  const falls = r.dip ? `, but it is shrinking and falls below costs in ${when(r.dip)}` : "";
+  read.textContent = r.end ? `${profit ? profit + falls + ". " : ""}Cash runs out in ${when(r.end)}${profit ? "" : v.growth === 0 || v.revenue === 0 ? `: ${usd(v.cash)} / ${usd(burn)} of net burn a month` : gap}.`
+    : safe && profit ? `${profit} and is not shrinking, so the cash never runs out.`
+    : safe ? `Revenue reaches costs in ${when(r.even)}, before the cash is gone. If growth holds until then, the cash never runs out.`
+    : profit ? `${profit}${falls}. The cash still lasts more than 10 years.`
+    : "The cash lasts more than 10 years, which is as far as this calculator looks.";
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

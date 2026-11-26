@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer retention rate calculator: formula and example | Virling</title>
+<meta name="description" content="Work out the share of customers you kept over a period from start, end and new customer counts, with the formula and a worked example.">
+<link rel="canonical" href="https://virling.com/tools/customer-retention-rate-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/customer-retention-rate-calculator">
+<meta property="og:title" content="Customer retention rate calculator: formula and example | Virling">
+<meta property="og:description" content="Work out the share of customers you kept over a period from start, end and new customer counts, with the formula and a worked example.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Customer retention rate calculator","url":"https://virling.com/tools/customer-retention-rate-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Customer retention rate calculator","item":"https://virling.com/tools/customer-retention-rate-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / customer retention rate calculator</span><h1>Customer retention rate calculator</h1><p class="lead">Enter how many customers you had at the start of a period, how many you had at the end, and how many of those were new. The calculator shows what share of your existing customers stayed, with the formula worked through. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="crr" autocomplete="off">
+  <label>Customers at start of period<input name="start" type="number" min="0" step="1" value="400"></label>
+  <label>Customers at end of period<input name="end" type="number" min="0" step="1" value="430"></label>
+  <label>New customers during the period<input name="new" type="number" min="0" step="1" value="60"></label>
+</form>
+<div class="tool-stats" id="crr-out"></div>
+<p class="p" id="crr-formula"></p>
+<div class="txt post tool-cta">
+<p class="p">This is one blended number. Virling shows retention per first channel from your real payments: it links every visit to the payment it led to, groups customers by the channel of their first payment, and shows how many are still paying. See <a href="https://docs.virling.com/attribution/retention">retention by channel</a> in the docs. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/churn-rate-calculator">churn rate calculator</a>, <a href="/tools/repeat-purchase-rate-calculator">repeat purchase rate calculator</a>, <a href="/tools/nrr-calculator">NRR calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>How to calculate retention rate</h2>
+<p class="p">Customer retention rate is the share of the customers you had at the start of a period who are still customers at the end of it. New customers are taken out of the end count, so growth does not hide the ones who left:</p>
+<p class="p"><code>retention rate = (customers at end &minus; new customers) / customers at start &times; 100</code></p>
+<p class="p">Churn is the other side of the same number: <code>churn rate = 100% &minus; retention rate</code>.</p>
+<h2>A subscription example</h2>
+<p class="p">These are made-up numbers, the defaults above, for a subscription. You start the quarter with 400 customers and end it with 430, of which 60 are new. 430 &minus; 60 = 370 of the original customers stayed, so 370 / 400 = 92.5% retention and 7.5% churn. The customer count grew by 30, yet 30 existing customers left.</p>
+<h2>A store example</h2>
+<p class="p">A store has no cancellations, so you decide what counts as a customer first. Here it is anyone who ordered in the last 12 months, and the numbers are made up too. 1,000 people ordered in the 12 months before this year and 1,150 ordered this year. Of those 1,150, 870 were not among the 1,000: they ordered for the first time, or came back after a longer gap. Both groups count as new. That leaves 1,150 &minus; 870 = 280 of the original customers, so 280 / 1,000 = 28.0% retention and 72.0% churn.</p>
+<table class="cmp"><thead><tr><th></th><th>Subscription</th><th>Store</th></tr></thead><tbody><tr><th scope="row">Period</th><td>Quarter</td><td>Year</td></tr><tr><th scope="row">Start</th><td>400</td><td>1,000</td></tr><tr><th scope="row">End</th><td>430</td><td>1,150</td></tr><tr><th scope="row">New</th><td>60</td><td>870</td></tr><tr><th scope="row">Kept</th><td>370</td><td>280</td></tr><tr><th scope="row">Lost</th><td>30</td><td>720</td></tr><tr><th scope="row">Rate</th><td>92.5%</td><td>28.0%</td></tr></tbody></table>
+<p class="p">Do not read 92.5% against 28.0%: the periods differ, and a subscriber stays until they cancel while a store buyer has to choose to order again. Compare each rate with your own earlier periods.</p>
+<h2>Monthly and yearly retention compared</h2>
+<p class="p">A monthly rate compounds. If the same share of customers stays every month, the share of them left after a year is:</p>
+<p class="p"><code>yearly retention = monthly retention ^ 12</code></p>
+<p class="p">At 95% a month that is 0.95 ^ 12 = 0.540, or 54.0% a year. The table is this formula worked out, not a benchmark:</p>
+<table class="cmp"><thead><tr><th>Monthly</th><th>Yearly</th><th>Left of 1,000 after a year</th></tr></thead><tbody><tr><th scope="row">99%</th><td>88.6%</td><td>886</td></tr><tr><th scope="row">98%</th><td>78.5%</td><td>785</td></tr><tr><th scope="row">97%</th><td>69.4%</td><td>694</td></tr><tr><th scope="row">95%</th><td>54.0%</td><td>540</td></tr><tr><th scope="row">90%</th><td>28.2%</td><td>282</td></tr><tr><th scope="row">85%</th><td>14.2%</td><td>142</td></tr><tr><th scope="row">80%</th><td>6.9%</td><td>69</td></tr></tbody></table>
+<p class="p">For a quarterly rate the power is 4: the 92.5% above, held for four quarters, is 0.925 ^ 4 = 73.2% a year. To go from yearly to monthly, take the 12th root. Real customers rarely leave at the same rate each month, so measure the yearly rate once you have a year of data.</p>
+<h2>Find the inputs in Virling</h2>
+<ul class="post-list"><li><b>New customers.</b> It is one of the five numbers at the top of the <b>Overview</b>, for the range you pick. It counts everyone with a payment in the range that is not a subscription renewal, so in a store that can include buyers who had ordered before. There, take new customers from your order history instead.</li><li><b>Customers at start and end.</b> Virling does not show a customer count for a past date. Take both from your payment provider or store.</li><li><b>Retention without the counts.</b> Open the <b>Retention</b> page, shown as Customers who stay. It takes the customers who first paid in the range and shows the share of them still paying today, by the channel of their first payment. It needs 60 days of payments. Subscriptions go by their status at the provider, and one-off buyers by how recently they paid.</li></ul>
+<p class="p">Each card is described in <a href="https://docs.virling.com/guides/dashboard">read your dashboard</a>. The Retention share follows one group from its first payment to today, so it can differ from the rate the calculator gives.</p>
+<h2>Why retention differs by acquisition channel</h2>
+<p class="p">A single retention rate hides where it comes from. Customers arrive with different intent depending on how they found you: a launch day or a discount listing can bring many buyers who leave after the first month, while search or a referral can bring customers who stay, and the blended rate sits somewhere in between. A channel that looks best on first-month revenue can be worth less than a smaller one whose customers keep paying.</p>
+<p class="p">To compare, run the calculator once per channel with the customers each channel brought. For subscriptions, the <a href="/tools/churn-rate-calculator">churn rate calculator</a> gives the monthly loss and the implied customer lifetime, and the <a href="/tools/nrr-calculator">NRR calculator</a> adds expansion and downgrades in revenue. For a store with one-off orders, the <a href="/tools/repeat-purchase-rate-calculator">repeat purchase rate calculator</a> measures how many buyers come back.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Customer retention rate calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate customer retention rate?</h3><p class="p">Subtract the new customers gained during the period from the customers at the end, then divide by the customers at the start. 400 at the start, 430 at the end and 60 new gives (430 - 60) / 400 = 92.5%.</p></div>
+      <div><h3>Why are new customers subtracted?</h3><p class="p">Retention asks how many of the customers you already had stayed. New customers were not there at the start, so counting them would let growth hide cancellations and could push the rate above 100%.</p></div>
+      <div><h3>What is the difference between retention rate and churn rate?</h3><p class="p">They add up to 100%. Retention is the share of starting customers who stayed, churn is the share who left. A 92.5% retention rate is a 7.5% churn rate for the same period.</p></div>
+      <div><h3>What period should I use?</h3><p class="p">Use a period that matches how often customers pay or buy: a month for monthly plans, a quarter or a year for annual plans or occasional purchases. Compare rates only across periods of the same length.</p></div>
+      <div><h3>How do I turn monthly retention into yearly retention?</h3><p class="p">Raise the monthly rate to the power of 12. 95% a month is 0.95 ^ 12, or 54.0% a year, if the same share stays every month. Multiplying monthly churn by 12 overstates the loss: 5% times 12 says 60%, but the loss is 46.0%.</p></div>
+      <div><h3>How do I calculate retention for a store without subscriptions?</h3><p class="p">Pick a window that fits how often people buy, such as 12 months, and count everyone who ordered in it as a customer. Then compare two windows in a row and count anyone in the second who was not in the first as new. In a made-up example, 1,000 buyers last year, 1,150 this year and 870 of them new gives (1,150 - 870) / 1,000 = 28.0%.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate customer retention rate?", "acceptedAnswer": {"@type": "Answer", "text": "Subtract the new customers gained during the period from the customers at the end, then divide by the customers at the start. 400 at the start, 430 at the end and 60 new gives (430 - 60) / 400 = 92.5%."}}, {"@type": "Question", "name": "Why are new customers subtracted?", "acceptedAnswer": {"@type": "Answer", "text": "Retention asks how many of the customers you already had stayed. New customers were not there at the start, so counting them would let growth hide cancellations and could push the rate above 100%."}}, {"@type": "Question", "name": "What is the difference between retention rate and churn rate?", "acceptedAnswer": {"@type": "Answer", "text": "They add up to 100%. Retention is the share of starting customers who stayed, churn is the share who left. A 92.5% retention rate is a 7.5% churn rate for the same period."}}, {"@type": "Question", "name": "What period should I use?", "acceptedAnswer": {"@type": "Answer", "text": "Use a period that matches how often customers pay or buy: a month for monthly plans, a quarter or a year for annual plans or occasional purchases. Compare rates only across periods of the same length."}}, {"@type": "Question", "name": "How do I turn monthly retention into yearly retention?", "acceptedAnswer": {"@type": "Answer", "text": "Raise the monthly rate to the power of 12. 95% a month is 0.95 ^ 12, or 54.0% a year, if the same share stays every month. Multiplying monthly churn by 12 overstates the loss: 5% times 12 says 60%, but the loss is 46.0%."}}, {"@type": "Question", "name": "How do I calculate retention for a store without subscriptions?", "acceptedAnswer": {"@type": "Answer", "text": "Pick a window that fits how often people buy, such as 12 months, and count everyone who ordered in it as a customer. Then compare two windows in a row and count anyone in the second who was not in the first as new. In a made-up example, 1,000 buyers last year, 1,150 this year and 870 of them new gives (1,150 - 870) / 1,000 = 28.0%."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring customers who stay</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers, revenue and retention each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("crr"), out = document.getElementById("crr-out"), fx = document.getElementById("crr-formula");
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 2 }) + "%";
+const num = (n) => n.toLocaleString("en-US");
+const calc = () => {
+  const s = +f.start.value, e = +f.end.value, n = +f.new.value, kept = e - n;
+  const ok = s > 0 && n <= e && kept <= s, r = ok ? kept / s : NaN;
+  const rows = [];
+  rows.push(["Customer retention rate", ok ? pct(r) : "Check inputs"]);
+  rows.push(["Customer churn rate", ok ? pct(1 - r) : "Check inputs"]);
+  rows.push(["Existing customers kept", ok ? num(kept) : "Check inputs"]);
+  rows.push(["Existing customers lost", ok ? num(s - kept) : "Check inputs"]);
+  out.innerHTML = rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+  fx.textContent = ok ? `(${num(e)} - ${num(n)}) / ${num(s)} = ${pct(r)}` : "Customers at start must be above 0, new customers at most the end count, and end minus new at most the start count.";
+};
+f.addEventListener("input", calc);
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>React Paddle UTM tracking: pass the visitor ID to Paddle.js</title>
+<meta name="description" content="React Paddle UTM tracking: open overlay or inline checkout with @paddle/paddle-js, pass the visitor ID as customData, and see which channel brought each sale.">
+<link rel="canonical" href="https://virling.com/blog/react-paddle-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/react-paddle-utm-tracking">
+<meta property="og:title" content="React Paddle UTM tracking: pass the visitor ID to Paddle.js">
+<meta property="og:description" content="React Paddle UTM tracking: open overlay or inline checkout with @paddle/paddle-js, pass the visitor ID as customData, and see which channel brought each sale.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"React Paddle UTM tracking: pass the visitor ID to Paddle.js","item":"https://virling.com/blog/react-paddle-utm-tracking"}]},{"@type":"BlogPosting","headline":"React Paddle UTM tracking: pass the visitor ID to Paddle.js","description":"React Paddle UTM tracking: open overlay or inline checkout with @paddle/paddle-js, pass the visitor ID as customData, and see which channel brought each sale.","datePublished":"2026-11-25","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/react-paddle-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Paddle checkout in React?","acceptedAnswer":{"@type":"Answer","text":"Pass the Virling visitor ID instead. Call Paddle.Checkout.open with customData: { virling_vid: window.virling?.vid?.() } once the ID is there. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them."}},{"@type":"Question","name":"Does it work with inline checkout as well as overlay?","acceptedAnswer":{"@type":"Answer","text":"Yes. Both open with Paddle.Checkout.open and take the same customData. Inline checkout often opens on page load, so wait for the visitor ID before you open it."}},{"@type":"Question","name":"What happens if the Virling script has not loaded when the buyer clicks?","acceptedAnswer":{"@type":"Answer","text":"The visitor ID is missing at that moment, so wait for it for up to two seconds and then open checkout anyway. A payment without the ID still counts toward revenue, as Unattributed."}},{"@type":"Question","name":"Do React Router navigations lose the campaign?","acceptedAnswer":{"@type":"Answer","text":"No. The landing pageview records the tags, and later route changes stay in the same channel as the landing. Checkout carries the visitor ID, so the address bar does not need the tags. Hash routes are the exception: their route changes are not counted as pageviews, though the landing still is."}},{"@type":"Question","name":"Which channel does a Paddle renewal get?","acceptedAnswer":{"@type":"Answer","text":"The channel of the customer's first payment, when that payment was credited. It does not matter whether the renewal carries a visitor ID of its own in that case."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-25</span>
+      <h1>React Paddle UTM tracking: pass the visitor ID to Paddle.js</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-25.</p>
+<p class="p"><b>React Paddle UTM tracking</b> takes one value: the visitor ID. Add the Virling script to <code>index.html</code>, load Paddle.js with <code>@paddle/paddle-js</code>, and open checkout with <code>customData: { virling_vid: window.virling?.vid?.() }</code>. Paddle keeps it on the transaction, and Virling joins the payment to every visit behind that ID, with the UTM tags of each. Overlay and inline checkout work the same way, and no server code is needed.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">This post is for a Vite single-page app on Paddle Billing. For server-created transactions and hosted checkout, see <a href="/blog/paddle-checkout-utm-parameters">Paddle checkout UTM parameters</a>. With the App Router, see <a href="/blog/nextjs-paddle-utm-tracking">Next.js Paddle UTM tracking</a>. On Stripe, see <a href="/blog/react-stripe-utm-tracking">React Stripe UTM tracking</a>.</p>
+<h2>Why the tags are gone at checkout</h2>
+<p class="p">A visitor lands on <code>/?utm_source=newsletter&amp;utm_campaign=launch</code> and clicks through to <code>/pricing</code>. A route link usually leaves the query string behind, so <code>location.search</code> is empty when they click Buy. Paddle stores only what you pass when checkout opens.</p>
+<p class="p">The Virling script hooks into <code>history.pushState</code>, <code>replaceState</code> and the back and forward buttons, so React Router navigations are counted without extra code. The landing pageview carries the tags and the referrer. Later route changes carry no referrer and stay in the same channel as the landing. Routes kept in the hash, such as <code>/#/pricing</code>, send no pageview. See <a href="https://docs.virling.com/track/spa">single-page apps</a> in the docs.</p>
+<h2>Step 1: add the script to index.html</h2>
+<p class="p">Paste the tag before <code>&lt;/head&gt;</code> in the <code>index.html</code> at the project root. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<div class="code block"><pre data-snippet>&lt;!-- index.html --&gt;
+&lt;script defer src="https://app.virling.com/v.js"
+  data-site="yourdomain.com"&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Load it once, here, not from a component. It must stay a plain external script: bundled, or with <code>type="module"</code>, it cannot find its own <code>data-site</code>.</p>
+<h2>Step 2: load Paddle.js and wait for the ID</h2>
+<p class="p">Install the wrapper with <code>npm install @paddle/paddle-js</code>. It downloads Paddle.js from Paddle&rsquo;s CDN and initializes it (source: <a href="https://github.com/PaddleHQ/paddle-js-wrapper">Paddle, paddle-js-wrapper</a>). Put both helpers in one file:</p>
+<div class="code block"><pre data-snippet>// src/paddle.js
+import { initializePaddle } from "@paddle/paddle-js";
+
+export function loadPaddle() {
+  return initializePaddle({
+    environment: import.meta.env.VITE_PADDLE_ENV,
+    token: import.meta.env.VITE_PADDLE_TOKEN,
+  });
+}
+
+// Waits up to two seconds; without an ID, checkout opens with no customData.
+export async function visitorData() {
+  for (let i = 0; i &lt; 20 &amp;&amp; !window.virling?.vid; i++) {
+    await new Promise((r) =&gt; setTimeout(r, 100));
+  }
+  const vid = window.virling?.vid?.();
+  return vid ? { customData: { virling_vid: vid } } : {};
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p"><code>VITE_PADDLE_ENV</code> is <code>sandbox</code> or <code>production</code>, and <code>VITE_PADDLE_TOKEN</code> is the client-side token for it. Never put an API key in a <code>VITE_</code> variable, because those end up in the browser bundle. Paddle says <code>Paddle.Initialize()</code> can be called only once on a page (source: <a href="https://developer.paddle.com/paddle-js/methods/paddle-initialize">Paddle, Paddle.Initialize</a>). The wrapper loads the script once and switches to <code>Paddle.Update()</code> when Paddle.js is already initialized, so React&rsquo;s double effects in Strict Mode are safe.</p>
+<p class="p"><b>When the script has not loaded yet.</b> It loads with <code>defer</code>, so an early click can come before it, or an ad blocker can stop it. Then <code>window.virling</code> has no <code>vid</code>, and the loop waits for it. <code>vid()</code> also returns <code>null</code> in cookieless mode and before a visitor accepts under <b>Until consent</b>. The helper leaves <code>customData</code> out in those cases, because Paddle asks for valid JSON with at least one key (source: <a href="https://developer.paddle.com/paddle-js/methods/paddle-checkout-open">Paddle, Paddle.Checkout.open</a>). The sale goes through either way.</p>
+<h2>Step 3: open overlay checkout</h2>
+<div class="code block"><pre data-snippet>// src/BuyButton.jsx
+import { useEffect } from "react";
+import { loadPaddle, visitorData } from "./paddle";
+
+export default function BuyButton({ priceId }) {
+  useEffect(() =&gt; {
+    loadPaddle().catch(console.error);
+  }, []);
+
+  async function buy() {
+    const [paddle, data] = await Promise.all([loadPaddle(), visitorData()]);
+    paddle?.Checkout.open({
+      items: [{ priceId, quantity: 1 }],
+      ...data,
+    });
+  }
+
+  return &lt;button onClick={buy}&gt;Buy&lt;/button&gt;;
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Overlay is the default display mode. The effect starts the download early, so the click does not wait for it. The ID is read on click, not on first render, because that is when it has had the most time to arrive. If your own code already passes <code>customData</code>, merge <code>virling_vid</code> into that object.</p>
+<h2>Step 4: or open inline checkout</h2>
+<p class="p">Inline checkout renders a frame inside your page and usually opens on mount, so the wait matters more here. Paddle finds the container by its class name, without a dot (source: <a href="https://developer.paddle.com/build/checkout/build-branded-inline-checkout">Paddle, inline checkout</a>).</p>
+<div class="code block"><pre data-snippet>// src/InlineCheckout.jsx
+import { useEffect } from "react";
+import { loadPaddle, visitorData } from "./paddle";
+
+export default function InlineCheckout({ priceId }) {
+  useEffect(() =&gt; {
+    let paddle;
+    let gone = false;
+    Promise.all([loadPaddle(), visitorData()])
+      .then(([p, data]) =&gt; {
+        if (gone || !p) return;
+        paddle = p;
+        p.Checkout.open({
+          settings: {
+            displayMode: "inline",
+            frameTarget: "checkout-container",
+            frameInitialHeight: 450,
+            frameStyle: "width: 100%; min-width: 312px; background: transparent; border: none;",
+          },
+          items: [{ priceId, quantity: 1 }],
+          ...data,
+        });
+      })
+      .catch(console.error);
+    return () =&gt; {
+      gone = true;
+      paddle?.Checkout.close();
+    };
+  }, [priceId]);
+
+  return &lt;div className="checkout-container" /&gt;;
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Paddle asks for a <code>min-width</code> of at least 312 pixels with checkout padding on, which still fits a narrow phone if the container has little padding of its own. The cleanup calls <code>Paddle.Checkout.close()</code>, which removes the inline frame, when the route changes (source: <a href="https://developer.paddle.com/paddle-js/methods/paddle-checkout-close">Paddle, Paddle.Checkout.close</a>). Paddle says settings can be set for each checkout, as here, or as defaults under <code>checkout.settings</code> when you initialize. Its <code>displayMode</code> note mentions <code>frameTarget</code> in Initialize, so if the frame does not appear, set it there too.</p>
+<p class="p">If your server creates the transaction and you open it with <code>transactionId</code>, set <code>custom_data.virling_vid</code> on the server from the <code>virling_vid</code> cookie instead. The <a href="https://docs.virling.com/payments/paddle">Paddle docs page</a> covers it.</p>
+<h2>Step 5: test in the sandbox</h2>
+<ol class="post-list"><li>In Virling, connect a sandbox API key that starts with <code>pdl_sdbx_</code>.</li><li>Set <code>VITE_PADDLE_ENV=sandbox</code>, a client-side token that starts with <code>test_</code>, and a sandbox price ID. Build again and publish to your domain or a subdomain of it, such as <code>staging.yourdomain.com</code> (source: <a href="https://developer.paddle.com/sdks/sandbox">Paddle, sandbox</a>).</li><li>Open a private window on a tagged link, such as <code>https://yourdomain.com/?utm_source=test&amp;utm_medium=email</code>, then click through to another route.</li><li>In the same window, open checkout and pay with one of Paddle&rsquo;s test cards.</li><li>Wait a minute for the next sync, then open the payments list at <code>/app/yourdomain.com/payments</code>. The payment shows the <code>test</code> source and the <b>Email</b> channel instead of Unattributed.</li></ol>
+<p class="p">The script is silent on <code>localhost</code>, and visits are kept only from the site&rsquo;s domain and its subdomains, so a preview on another domain is not recorded. Use a new email address for each test, because a later payment by the same customer is a renewal. A site has one Paddle connection, and sandbox payments stay in your reports after you switch to a live key.</p>
+<h2>What a renewal is credited to</h2>
+<p class="p">A renewal never opens your app. Paddle says a transaction&rsquo;s custom data is copied to the subscription, and from there to the transactions it creates, such as renewals and upgrades (source: <a href="https://developer.paddle.com/build/transactions/custom-data">Paddle, custom data</a>). Virling does not need that copy. A transaction with origin <code>subscription_recurring</code>, <code>subscription_update</code> or <code>subscription_charge</code> is a renewal and keeps the channel of the customer&rsquo;s first payment, matched by Paddle customer ID. Only when that first payment was not credited does a renewal&rsquo;s own ID count.</p>
+<p class="p">For example, with made-up numbers: a buyer lands from a newsletter link tagged <code>utm_medium=email</code>, pays $30 in May and renews at $30 in June and July. All $90 is credited to Email, even if they came back from a search in June. See <a href="https://docs.virling.com/attribution/renewals">renewals</a> in the docs and <a href="/integrations/paddle-saas">Paddle for SaaS</a> for retention by channel.</p>
+<h2>Symptoms, causes and fixes</h2>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">Every payment from the app is Unattributed</th><td><code>Paddle.Checkout.open</code> is called without <code>customData</code></td><td>Spread the result of <code>visitorData()</code> into the call, as in steps 3 and 4</td></tr><tr><th scope="row">Only early clicks are Unattributed</th><td>The ID was read on first render, before the script loaded</td><td>Read it when checkout opens, after the wait</td></tr><tr><th scope="row">Payments opened with <code>transactionId</code> are Unattributed</th><td>Your server created the transaction without the ID</td><td>Set <code>custom_data.virling_vid</code> on the server</td></tr><tr><th scope="row">Paddle holds the ID, yet the payment is Unattributed</th><td>It is on a customer, product or price, or that visitor has no session inside the lookback window before the payment</td><td>Set it on the transaction, and check the window</td></tr><tr><th scope="row">Only the first page of the app is counted</th><td>The router keeps its route in the hash</td><td>Switch to History API routes with real paths</td></tr><tr><th scope="row">Two pageviews per route</th><td>The script is loaded twice, such as in <code>index.html</code> and a tag manager</td><td>Load it once</td></tr><tr><th scope="row">Nothing is recorded while developing</th><td>The script skips <code>localhost</code>, and visits from other domains are dropped</td><td>Test on your domain or a subdomain of it</td></tr><tr><th scope="row">A second test shows the first test&rsquo;s channel</th><td>Same customer, so it is a renewal</td><td>Pay with a new email address</td></tr></tbody></table></div>
+<p class="p">To see whether the ID reached Paddle, open the payment in Virling: if it lists no visitor ID, checkout did not carry one. Every other cause is in <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I pass UTM parameters to Paddle checkout in React?</h3><p class="p">Pass the Virling visitor ID instead. Call Paddle.Checkout.open with customData: { virling_vid: window.virling?.vid?.() } once the ID is there. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them.</p>
+<h3>Does it work with inline checkout as well as overlay?</h3><p class="p">Yes. Both open with Paddle.Checkout.open and take the same customData. Inline checkout often opens on page load, so wait for the visitor ID before you open it.</p>
+<h3>What happens if the Virling script has not loaded when the buyer clicks?</h3><p class="p">The visitor ID is missing at that moment, so wait for it for up to two seconds and then open checkout anyway. A payment without the ID still counts toward revenue, as Unattributed.</p>
+<h3>Do React Router navigations lose the campaign?</h3><p class="p">No. The landing pageview records the tags, and later route changes stay in the same channel as the landing. Checkout carries the visitor ID, so the address bar does not need the tags. Hash routes are the exception: their route changes are not counted as pageviews, though the landing still is.</p>
+<h3>Which channel does a Paddle renewal get?</h3><p class="p">The channel of the customer's first payment, when that payment was credited. It does not matter whether the renewal carries a visitor ID of its own in that case.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring Paddle revenue</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

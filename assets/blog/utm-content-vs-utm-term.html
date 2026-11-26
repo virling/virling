@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>utm_content vs utm_term: what each one is for</title>
+<meta name="description" content="utm_content names the link or ad that was clicked; utm_term names the paid search keyword. Examples for ads, email and social, and when to leave them out.">
+<link rel="canonical" href="https://virling.com/blog/utm-content-vs-utm-term">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/utm-content-vs-utm-term">
+<meta property="og:title" content="utm_content vs utm_term: what each one is for">
+<meta property="og:description" content="utm_content names the link or ad that was clicked; utm_term names the paid search keyword. Examples for ads, email and social, and when to leave them out.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"utm_content vs utm_term: what each one is for","item":"https://virling.com/blog/utm-content-vs-utm-term"}]},{"@type":"BlogPosting","headline":"utm_content vs utm_term: what each one is for","description":"utm_content names the link or ad that was clicked; utm_term names the paid search keyword. Examples for ads, email and social, and when to leave them out.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/utm-content-vs-utm-term"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the difference between utm_content and utm_term?","acceptedAnswer":{"@type":"Answer","text":"utm_content says which link, button or ad was clicked when several share the same source, medium and campaign. utm_term says which paid search keyword triggered the ad. Use utm_content on any kind of link and utm_term only on search ads."}},{"@type":"Question","name":"Are utm_content and utm_term required?","acceptedAnswer":{"@type":"Answer","text":"No. Both are optional. A link with utm_source, utm_medium and utm_campaign is complete, and you add utm_content or utm_term only when you want to tell links or keywords apart."}},{"@type":"Question","name":"Can I use both on the same link?","acceptedAnswer":{"@type":"Answer","text":"Yes. A search ad is the usual case: utm_term carries the keyword and utm_content carries the ad, so you can tell two ads for the same keyword apart."}},{"@type":"Question","name":"Is utm_term the search query a visitor typed?","acceptedAnswer":{"@type":"Answer","text":"Not when the ad platform fills it in with Google's {keyword}. That is the keyword from your account that matched the search, which can differ from the words typed. It comes back blank when an ad matches without keywords, as in Performance Max or Dynamic Search Ads."}},{"@type":"Question","name":"Should I put an A/B test variant in utm_content?","acceptedAnswer":{"@type":"Answer","text":"Yes, if the two links share a campaign and you only need to tell them apart. If you want a separate row with its own visitors and revenue in Virling, put the variant in utm_campaign, because utm_content is stored but is not a report row."}},{"@type":"Question","name":"Do utm_content and utm_term change the channel in Virling?","acceptedAnswer":{"@type":"Answer","text":"No. The channel comes from utm_medium, the referrer and utm_source or ref. utm_term fills the Keyword tab, and utm_content is stored with the pageview."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>utm_content vs utm_term: what each one is for</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p"><b>utm_content</b> says which link or ad was clicked. <b>utm_term</b> says which paid search keyword the ad was bought on. Use <code>utm_content</code> to tell apart links that share a source, medium and campaign, such as two buttons in one email or two versions of an ad. Use <code>utm_term</code> only on search ads, where the ad platform can fill it in. Both are optional: if a campaign has one link and no keyword, leave both out.</p>
+<h2>utm_content and utm_term side by side</h2>
+<table class="cmp"><thead><tr><th></th><th>utm_content</th><th>utm_term</th></tr></thead><tbody><tr><th scope="row">Question it answers</th><td>Which link, button or ad?</td><td>Which paid keyword?</td></tr><tr><th scope="row">Where it belongs</th><td>Any link with a sibling in the same campaign</td><td>Search ads</td></tr><tr><th scope="row">Who fills it in</th><td>Usually you, or the ad platform with an ad ID</td><td>Usually the ad platform</td></tr><tr><th scope="row">Example value</th><td><code>header-button</code></td><td><code>invoicing software</code></td></tr><tr><th scope="row">In Virling</th><td>Stored with the pageview, no report row</td><td>The Keyword tab, with visitors and revenue</td></tr></tbody></table>
+<p class="p">This page is only about these two. For the tags that come before them, see <a href="/blog/utm-parameters-for-revenue-tracking">which UTM parameters to use to trace revenue</a>, and <a href="/blog/utm-source-vs-utm-medium">utm_source vs utm_medium</a> for the two that set the source and channel. For <code>utm_id</code> and the tags added since, see <a href="/blog/utm-id-and-newer-utm-parameters">utm_id and the newer UTM parameters</a>.</p>
+<h2>Ads: the keyword in one, the creative in the other</h2>
+<p class="p">A search ad is the one place where both tags have a job. In Google Ads, put this in the final URL suffix:</p>
+<pre>utm_source=google&amp;utm_medium=cpc&amp;utm_campaign=brand-search&amp;utm_term={keyword}&amp;utm_content={creative}</pre>
+<p class="p">Google replaces <code>{keyword}</code> with the keyword from your account that matched the search, and <code>{creative}</code> with the ID of the ad. It is the keyword you bid on, not the exact words the person typed. When an ad matches without keywords, as in Performance Max or Dynamic Search Ads, <code>{keyword}</code> is blank; Google lists this under <a href="https://support.google.com/google-ads/answer/6305348">ValueTrack parameters</a>. Type the braces straight into the ad platform, because a URL builder may encode them. The rest of the setup is in <a href="/blog/google-ads-revenue-tracking">Google Ads revenue tracking</a>.</p>
+<p class="p">A social ad has no search keyword, so leave <code>utm_term</code> out and use <code>utm_content</code> for the creative:</p>
+<pre>utm_source=linkedin&amp;utm_medium=paidsocial&amp;utm_campaign=spring-launch&amp;utm_content=video-demo
+utm_source=linkedin&amp;utm_medium=paidsocial&amp;utm_campaign=spring-launch&amp;utm_content=customer-story</pre>
+<h2>Email: the position of the link</h2>
+<p class="p">One email often links to the same page several times. Source, medium and campaign are identical, so <code>utm_content</code> is what separates the links. There is no keyword, so there is no <code>utm_term</code>.</p>
+<pre>https://example.com/pricing?utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=issue-42&amp;utm_content=header-button
+https://example.com/pricing?utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=issue-42&amp;utm_content=footer-link</pre>
+<h2>Social: the place on the profile or the version of the post</h2>
+<p class="p">Use <code>utm_content</code> when the same campaign is linked from more than one spot on one platform, such as a post and its first comment. Hashtags and topics are not keywords: keep them out of <code>utm_term</code>.</p>
+<pre>https://example.com/?utm_source=linkedin&amp;utm_medium=social&amp;utm_campaign=spring-launch&amp;utm_content=post
+https://example.com/?utm_source=linkedin&amp;utm_medium=social&amp;utm_campaign=spring-launch&amp;utm_content=first-comment</pre>
+<h2>When to leave them out</h2>
+<ul class="post-list"><li><b>The campaign has one link.</b> There is nothing to tell apart, so <code>utm_content</code> adds nothing.</li><li><b>The link is not a search ad.</b> Leave <code>utm_term</code> out of email, social, partner and podcast links, so your keyword report holds only keywords.</li><li><b>You would repeat another tag.</b> <code>utm_content=newsletter</code> next to <code>utm_source=newsletter</code> says the same thing twice.</li><li><b>The value would identify a person.</b> Never put an email address, name or customer ID in either tag. URLs end up in logs, browser history and shared links.</li><li><b>The link goes between your own pages.</b> Do not use any UTM tag there. To compare two buttons on your own site, send a <a href="https://docs.virling.com/track/goals">goal</a> for each instead.</li></ul>
+<h2>Naming rules for both</h2>
+<ul class="post-list"><li><b>Lowercase, with hyphens.</b> <code>header-button</code>, not <code>Header Button</code>. Keywords that the ad platform fills in keep their spaces, and that is fine.</li><li><b>Content names a thing you can point at.</b> A position (<code>footer-link</code>), a format (<code>video-demo</code>) or a message (<code>save-time</code>). <code>v2</code> means nothing three months later.</li><li><b>Reuse the same short list.</b> If one email says <code>header-button</code>, the next should not say <code>top-cta</code>.</li><li><b>One idea per value.</b> Choose position or message for a campaign, and do not mix them.</li><li><b>Let the platform fill in the keyword.</b> Typing keywords by hand into <code>utm_term</code> goes wrong as soon as an ad group has two.</li></ul>
+<p class="p">Keep the list next to your sources and mediums in the <a href="/tools/utm-naming-template">UTM naming template</a>, make typed links with the <a href="/tools/utm-builder">UTM builder</a>, which has a field for each tag, and paste finished links into the <a href="/tools/utm-checker">UTM checker</a> to catch capitals, spaces, empty values and duplicates.</p>
+<h2>Where Virling stores and shows each one</h2>
+<p class="p">The <a href="https://docs.virling.com/track/script">Virling script</a> sends the landing URL, and <code>utm_content</code> and <code>utm_term</code> are read from its query string and stored with the pageview. Each value is trimmed and cut to 200 characters. Neither one decides the channel.</p>
+<ul class="post-list"><li><b>utm_term</b> is the <b>Keyword</b> tab of the Channels card, with visitors, revenue and revenue per visitor for each value. Click a keyword to filter the whole dashboard by it. The value comes from the first page of the visit. Visits without the tag share one row, No search term. The same rows are the <code>keyword</code> dimension of the <a href="https://docs.virling.com/reference/api">read API</a>: <code>GET /api/v1/sites/{domain}/breakdown/keyword</code>.</li><li><b>utm_content</b> is stored, but it has no dashboard tab and no API dimension. On a self-hosted server you can read it from a copy of the DuckDB file.</li></ul>
+<p class="p">So if you want revenue for each link, put the difference in <code>utm_campaign</code>, such as <code>issue-42-header</code> and <code>issue-42-footer</code>, and each gets its own row in the Campaign tab. The other way is a <a href="https://docs.virling.com/track/links">tracked link</a> per place, which gets a campaign of its own.</p>
+<h2>What the Keyword tab tells you</h2>
+<p class="p">These numbers are made up to show the reading:</p>
+<table class="cmp"><thead><tr><th>Keyword</th><th>Visitors</th><th>Revenue</th><th>Revenue per visitor</th></tr></thead><tbody><tr><th scope="row">invoice template</th><td>400</td><td>$116</td><td>$0.29</td></tr><tr><th scope="row">invoicing software</th><td>90</td><td>$245</td><td>$2.72</td></tr></tbody></table>
+<p class="p">In this example the first keyword brings more than four times the visitors, and the second brings more than nine times the revenue per visitor. Clicks alone would point you to the wrong one. To see this with your own payments, connect your payment provider and <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+<h2>Frequently asked questions</h2>
+<h3>What is the difference between utm_content and utm_term?</h3><p class="p">utm_content says which link, button or ad was clicked when several share the same source, medium and campaign. utm_term says which paid search keyword triggered the ad. Use utm_content on any kind of link and utm_term only on search ads.</p>
+<h3>Are utm_content and utm_term required?</h3><p class="p">No. Both are optional. A link with utm_source, utm_medium and utm_campaign is complete, and you add utm_content or utm_term only when you want to tell links or keywords apart.</p>
+<h3>Can I use both on the same link?</h3><p class="p">Yes. A search ad is the usual case: utm_term carries the keyword and utm_content carries the ad, so you can tell two ads for the same keyword apart.</p>
+<h3>Is utm_term the search query a visitor typed?</h3><p class="p">Not when the ad platform fills it in with Google's {keyword}. That is the keyword from your account that matched the search, which can differ from the words typed. It comes back blank when an ad matches without keywords, as in Performance Max or Dynamic Search Ads.</p>
+<h3>Should I put an A/B test variant in utm_content?</h3><p class="p">Yes, if the two links share a campaign and you only need to tell them apart. If you want a separate row with its own visitors and revenue in Virling, put the variant in utm_campaign, because utm_content is stored but is not a report row.</p>
+<h3>Do utm_content and utm_term change the channel in Virling?</h3><p class="p">No. The channel comes from utm_medium, the referrer and utm_source or ref. utm_term fills the Keyword tab, and utm_content is stored with the pageview.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the revenue behind every keyword and campaign</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

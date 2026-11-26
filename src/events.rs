@@ -110,6 +110,13 @@ pub trait EventStore: Send + Sync {
     fn insert_events(&self, events: &[Event]) -> anyhow::Result<()>;
     /// Inserts or replaces payments keyed by (site_id, provider, provider_payment_id).
     fn upsert_payments(&self, payments: &[Payment]) -> anyhow::Result<()>;
+    /// Drops one provider's payments, trials and credits of a site from `since` on, before importing them again.
+    fn forget_payments(
+        &self,
+        site_id: &str,
+        provider: &str,
+        since: OffsetDateTime,
+    ) -> anyhow::Result<()>;
     /// Replaces the stored subscription states of one provider of a site.
     fn replace_subscriptions(
         &self,
@@ -172,6 +179,8 @@ pub trait EventStore: Send + Sync {
     fn speed(&self, site_id: &str, period: &Period) -> anyhow::Result<crate::speed::Speed>;
     /// Bot visitors filtered in the last `days` days.
     fn bots_filtered(&self, site_id: &str, days: i64) -> anyhow::Result<u64>;
+    /// Providers with at least one stored payment for the site.
+    fn payment_providers(&self, site_id: &str) -> anyhow::Result<Vec<String>>;
     /// Goal completions after unix microsecond `after`, oldest first: microseconds, goal, page and visitor.
     fn goals_since(
         &self,
@@ -1572,6 +1581,39 @@ impl EventStore for DuckStore {
         Ok(())
     }
 
+    fn forget_payments(
+        &self,
+        site_id: &str,
+        provider: &str,
+        since: OffsetDateTime,
+    ) -> anyhow::Result<()> {
+        let _gate = self.index.gate();
+        let mut conn = self.conn.lock().unwrap();
+        let tx = conn.transaction()?;
+        let since = Value::Timestamp(
+            TimeUnit::Microsecond,
+            (since.unix_timestamp_nanos() / 1000) as i64,
+        );
+        for table in ["attribution", "attribution_dirty"] {
+            tx.execute(
+                &format!(
+                    "DELETE FROM {table} WHERE site_id = $1 AND provider = $2 AND provider_payment_id IN (
+                       SELECT provider_payment_id FROM payments WHERE site_id = $1 AND provider = $2 AND ts >= $3)"
+                ),
+                params![site_id, provider, since.clone()],
+            )?;
+        }
+        for table in ["payments", "trials"] {
+            tx.execute(
+                &format!("DELETE FROM {table} WHERE site_id = $1 AND provider = $2 AND ts >= $3"),
+                params![site_id, provider, since.clone()],
+            )?;
+        }
+        tx.commit()?;
+        self.index.forget(site_id);
+        Ok(())
+    }
+
     fn latest_pageview(&self, site_id: &str) -> anyhow::Result<Option<LatestPageview>> {
         let conn = self.read()?;
         let mut stmt = conn.prepare(
@@ -1750,6 +1792,13 @@ impl EventStore for DuckStore {
             |r| r.get(0),
         )?;
         Ok(n as u64)
+    }
+
+    fn payment_providers(&self, site_id: &str) -> anyhow::Result<Vec<String>> {
+        let conn = self.reader()?;
+        let mut stmt = conn.prepare("SELECT DISTINCT provider FROM payments WHERE site_id = ?")?;
+        let rows = stmt.query_map(params![site_id], |r| r.get(0))?;
+        Ok(rows.collect::<Result<_, _>>()?)
     }
 
     fn settled(&self, site_id: &str) -> bool {

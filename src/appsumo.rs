@@ -101,12 +101,17 @@ pub async fn webhook(State(state): State<AppState>, headers: HeaderMap, body: By
             .and_then(|v| v.to_str().ok())
             .unwrap_or("")
     };
-    if !verify(
-        &sumo.api_key,
-        header("x-appsumo-timestamp"),
-        &body,
-        header("x-appsumo-signature"),
-    ) {
+    let fresh = header("x-appsumo-timestamp")
+        .parse::<i64>()
+        .is_ok_and(|ms| (now() * 1000 - ms).abs() <= 5 * 60 * 1000);
+    if !fresh
+        || !verify(
+            &sumo.api_key,
+            header("x-appsumo-timestamp"),
+            &body,
+            header("x-appsumo-signature"),
+        )
+    {
         return StatusCode::UNAUTHORIZED.into_response();
     }
     let Ok(hook) = serde_json::from_slice::<Hook>(&body) else {
@@ -654,7 +659,7 @@ mod tests {
 
     async fn hook(t: &T, body: Value) -> (StatusCode, String) {
         let body = body.to_string();
-        let ts = "1671586387628";
+        let ts = &(now() * 1000).to_string();
         let res = crate::app::router(t.f.state.clone())
             .oneshot(
                 Request::post("/api/webhooks/appsumo")
@@ -732,12 +737,28 @@ mod tests {
                 Request::post("/api/webhooks/appsumo")
                     .header("x-appsumo-timestamp", "1")
                     .header("x-appsumo-signature", sign(&body, "2"))
-                    .body(Body::from(body))
+                    .body(Body::from(body.clone()))
                     .unwrap(),
             )
             .await
             .unwrap();
         assert_eq!(res.status(), StatusCode::UNAUTHORIZED);
+        let stale = ((now() - 600) * 1000).to_string();
+        let res = crate::app::router(t.f.state.clone())
+            .oneshot(
+                Request::post("/api/webhooks/appsumo")
+                    .header("x-appsumo-timestamp", &stale)
+                    .header("x-appsumo-signature", sign(&body, &stale))
+                    .body(Body::from(body))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            res.status(),
+            StatusCode::UNAUTHORIZED,
+            "replayed old events"
+        );
         let n: i64 = sqlx::query_scalar("SELECT count(*) FROM appsumo_licenses")
             .fetch_one(&t.f.state.db)
             .await

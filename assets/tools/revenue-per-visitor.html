@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Revenue per visitor calculator: RPV, ROAS and break-even | Virling</title>
+<title>Revenue per visitor calculator: RPV, ROAS and break-even</title>
 <meta name="description" content="Free calculator for revenue per visitor, return on ad spend and the break-even revenue per visitor of a marketing channel. Runs in your browser.">
 <link rel="canonical" href="https://virling.com/tools/revenue-per-visitor">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Virling">
 <meta property="og:url" content="https://virling.com/tools/revenue-per-visitor">
-<meta property="og:title" content="Revenue per visitor calculator: RPV, ROAS and break-even | Virling">
+<meta property="og:title" content="Revenue per visitor calculator: RPV, ROAS and break-even">
 <meta property="og:description" content="Free calculator for revenue per visitor, return on ad spend and the break-even revenue per visitor of a marketing channel. Runs in your browser.">
 <meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -45,6 +45,11 @@
   <label>Your site's revenue per visitor ($) <span class="dim">optional</span><input name="avg" type="number" min="0" step="0.01" placeholder="1.20"></label>
 </form>
 <div class="tool-stats" id="roi-out"></div>
+<div class="txt post tool-cta">
+<h2>See revenue per visitor for every channel, page and AI assistant</h2>
+<p class="p">Virling links each visit to the payment it led to, so the dashboard shows revenue per visitor for every channel, referrer and landing page from your real payments. Virling is open source under AGPLv3: self-host it free, or start a 14-day hosted trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="https://docs.virling.com/guides/channel-revenue">Find which channel pays</a> &middot; <a class="lk" href="/demo">See the demo</a></p>
+</div>
   </div></div></section>
   <section class="band"><div class="wrap"><div class="txt post">
 <h2>The revenue per visitor formula</h2>
@@ -60,19 +65,43 @@
 <li><b>Against your site average</b> divides the channel's revenue per visitor by your whole site's. 2.0x means each visitor from the channel is worth twice a typical visitor.</li>
 </ul>
 <h2>How to use it to compare channels</h2>
-<p class="p">Run the calculator once per channel with the same date range, then rank channels by revenue per visitor rather than by traffic. A channel with few visitors and a high figure often deserves more time than a loud one. Wait for a few hundred visitors before trusting a result, since one payment moves a small channel a lot. For benchmarks, the worked example by channel and ways to raise the number, read <a href="/blog/what-is-revenue-per-visitor">what revenue per visitor is and how to calculate it</a>. To get the revenue per channel in the first place, see <a href="/blog/find-which-channel-pays">how to find which marketing channel pays</a>.</p>
+<p class="p">Run the calculator once per channel with the same date range, then rank channels by revenue per visitor rather than by traffic. A channel with few visitors and a high figure often deserves more time than a loud one. Count payments before trusting a result, since one payment moves a small channel a lot. For a step by step method and ways to raise the number, read <a href="/blog/what-is-revenue-per-visitor">what revenue per visitor is and how to calculate it</a>. To get the revenue per channel in the first place, see <a href="/blog/find-which-channel-pays">how to find which marketing channel pays</a>. The same division works per country; see <a href="/blog/revenue-by-country">how to see revenue by country next to visitors</a>.</p>
+<h2>Example: revenue per visitor for four channels</h2>
+<p class="p">These numbers are made up, not data from a real store. One store in one month, with each payment credited to one channel:</p>
+<table class="cmp"><thead><tr><th>Channel</th><th>Visitors</th><th>Revenue</th><th>Revenue per visitor</th></tr></thead><tbody><tr><th scope="row">Organic search</th><td>2,000</td><td>$1,600</td><td>$0.80</td></tr><tr><th scope="row">Paid search</th><td>1,200</td><td>$1,800</td><td>$1.50</td></tr><tr><th scope="row">Email</th><td>750</td><td>$900</td><td>$1.20</td></tr><tr><th scope="row">Referral</th><td>50</td><td>$300</td><td>$6.00</td></tr><tr><th scope="row">All</th><td>4,000</td><td>$4,600</td><td>$1.15</td></tr></tbody></table>
+<p class="p">Paid search is the row the calculator starts with. The last row divides the sums, $4,600 / 4,000, so it is the site average to put in the optional field. Paid search is then 1.3x the average and referral 5.2x.</p>
+<h2>A high figure from a few buyers</h2>
+<p class="p">Referral looks like the best channel, but its $300 came from two payments, one of $50 and one of $250. Take the larger one out and it is $50 / 50 = $1.00, below the site average. The money is real. It does not tell you what the next 50 visitors will bring.</p>
+<p class="p">So count payments, not only visitors, before you act. The number of payments a channel brings goes up and down by chance, typically by about its square root: 4 payments by 2, which is half, 16 by 4, which is a quarter, and 64 by 8, which is an eighth. To be fairly sure of a gap, let it be at least twice that swing:</p>
+<ul class="post-list">
+<li><b>A channel at double your average</b> would have to lose half its payments to be ordinary. Wait for about 16.</li>
+<li><b>A channel a third above your average</b> would have to lose only a quarter. Wait for about 64.</li>
+<li><b>Payments of very different sizes</b> need more than that. Take the largest out and divide again: if the ranking changes, use a longer date range.</li>
+</ul>
+<p class="p">This is arithmetic for payments of similar size, not a benchmark. Until a channel gets there, repeat what brought it at a small cost and leave the other channels as they are.</p>
+<h2>When revenue per visitor and average order value disagree</h2>
+<p class="p">Revenue per visitor is the conversion rate times the average order value, so a channel can be ahead on one and behind on the other. In the made-up store, email brought 30 orders from 750 visitors and organic search 40 orders from 2,000:</p>
+<ul class="post-list">
+<li><b>Email:</b> 4% &times; $30 = $1.20 per visitor.</li>
+<li><b>Organic search:</b> 2% &times; $40 = $0.80 per visitor.</li>
+</ul>
+<p class="p">Organic search has the larger orders and email the more valuable visitors. Use revenue per visitor to decide where to look for more traffic, and average order value to decide what to change for the people who already buy. The <a href="/tools/aov-calculator">average order value calculator</a> has the same store by orders, and <a href="/blog/aov-by-traffic-source">average order value by traffic source</a> goes through what makes orders differ.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Related calculators</h2>
+<ul class="post-list"><li><a href="/tools/traffic-value-calculator">Website traffic value calculator</a>: what a month of your visitors is worth, by channel.</li><li><a href="/tools/conversion-rate-calculator">Conversion rate calculator</a>: conversion rate and average order value for each channel.</li><li><a href="/tools/ab-test-calculator">A/B test calculator</a>: compare revenue per visitor between two variants.</li><li><a href="/tools/roas-calculator">ROAS calculator</a>: return on ad spend and break-even ROAS for a paid channel.</li></ul>
   </div></div></section>
   <section class="band" id="faq"><div class="wrap"><div class="faq">
     <span class="kicker">questions</span>
     <h2>Revenue per visitor calculator FAQ</h2>
     <div class="faq-list">
       <div><h3>How is revenue per visitor calculated?</h3><p class="p">Revenue from the channel's visitors divided by the number of visitors. It is the fairest way to compare a channel that sends many cheap visits with one that sends a few that buy.</p></div>
-      <div><h3>What is a good return on spend?</h3><p class="p">Above 1x the channel earns back what it costs. Most teams want 3x or more, because revenue also has to pay for the product and fees.</p></div>
+      <div><h3>What is a good return on spend?</h3><p class="p">Above 1x the channel earns back what it costs. Revenue also has to pay for the product and fees, so the return you need depends on your margin.</p></div>
       <div><h3>What is break-even revenue per visitor?</h3><p class="p">What each visitor must bring for the channel to pay for itself: cost divided by visitors. If your site's revenue per visitor is below it, the channel loses money at that price.</p></div>
       <div><h3>Where do I get revenue per channel?</h3><p class="p">From an analytics tool that links visits to payments. Most web analytics stop at visits, so revenue per channel needs payment data joined to the visit that brought each customer.</p></div>
     </div>
   </div></div></section>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How is revenue per visitor calculated?", "acceptedAnswer": {"@type": "Answer", "text": "Revenue from the channel's visitors divided by the number of visitors. It is the fairest way to compare a channel that sends many cheap visits with one that sends a few that buy."}}, {"@type": "Question", "name": "What is a good return on spend?", "acceptedAnswer": {"@type": "Answer", "text": "Above 1x the channel earns back what it costs. Most teams want 3x or more, because revenue also has to pay for the product and fees."}}, {"@type": "Question", "name": "What is break-even revenue per visitor?", "acceptedAnswer": {"@type": "Answer", "text": "What each visitor must bring for the channel to pay for itself: cost divided by visitors. If your site's revenue per visitor is below it, the channel loses money at that price."}}, {"@type": "Question", "name": "Where do I get revenue per channel?", "acceptedAnswer": {"@type": "Answer", "text": "From an analytics tool that links visits to payments. Most web analytics stop at visits, so revenue per channel needs payment data joined to the visit that brought each customer."}}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How is revenue per visitor calculated?", "acceptedAnswer": {"@type": "Answer", "text": "Revenue from the channel's visitors divided by the number of visitors. It is the fairest way to compare a channel that sends many cheap visits with one that sends a few that buy."}}, {"@type": "Question", "name": "What is a good return on spend?", "acceptedAnswer": {"@type": "Answer", "text": "Above 1x the channel earns back what it costs. Revenue also has to pay for the product and fees, so the return you need depends on your margin."}}, {"@type": "Question", "name": "What is break-even revenue per visitor?", "acceptedAnswer": {"@type": "Answer", "text": "What each visitor must bring for the channel to pay for itself: cost divided by visitors. If your site's revenue per visitor is below it, the channel loses money at that price."}}, {"@type": "Question", "name": "Where do I get revenue per channel?", "acceptedAnswer": {"@type": "Answer", "text": "From an analytics tool that links visits to payments. Most web analytics stop at visits, so revenue per channel needs payment data joined to the visit that brought each customer."}}]}</script>
   <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
 <h2>See which channels actually pay</h2>
 <p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so revenue per visitor and return come from your real numbers. 14 days free.</p>

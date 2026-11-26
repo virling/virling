@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repeat purchase rate calculator for online stores | Virling</title>
+<meta name="description" content="Learn how many store customers buy again, how often and how many days apart on average, overall and by the channel that first brought them.">
+<link rel="canonical" href="https://virling.com/tools/repeat-purchase-rate-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/repeat-purchase-rate-calculator">
+<meta property="og:title" content="Repeat purchase rate calculator for online stores | Virling">
+<meta property="og:description" content="Learn how many store customers buy again, how often and how many days apart on average, overall and by the channel that first brought them.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Repeat purchase rate calculator","url":"https://virling.com/tools/repeat-purchase-rate-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Repeat purchase rate calculator","item":"https://virling.com/tools/repeat-purchase-rate-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / repeat purchase rate calculator</span><h1>Repeat purchase rate calculator</h1><p class="lead">Your repeat purchase rate is the share of your customers who bought from you two or more times. Enter how many customers ordered in a period, how many of them ordered at least twice and the total orders, and this calculator returns the repeat purchase rate, the purchase frequency and the average days between orders. Add the first channel of each customer to see which channel brings buyers who come back. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="rp" autocomplete="off">
+  <label>Customers in the period<input name="cust" type="number" min="0" step="1" value="1000"></label>
+  <label>Customers with 2 or more orders<input name="rep" type="number" min="0" step="1" value="250"></label>
+  <label>Total orders<input name="orders" type="number" min="0" step="1" value="1400"></label>
+  <div class="tool-pick" data-select><span id="d-label">Length of the period</span>
+    <button type="button" id="d" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="d-label d-value" data-value="365"><span id="d-value">365 days</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="d-menu" role="listbox" aria-labelledby="d-label" tabindex="-1" hidden><li role="option" data-value="30" aria-selected="false">30 days</li><li role="option" data-value="90" aria-selected="false">90 days</li><li role="option" data-value="180" aria-selected="false">180 days</li><li role="option" data-value="365" aria-selected="true">365 days</li></ul>
+  </div>
+  <div class="tool-stats" id="rp-sum" style="grid-column:1/-1"></div>
+  <table class="cmp" style="grid-column:1/-1"><thead><tr><th>First channel <span class="dim">optional</span></th><th>Customers</th><th>With 2+ orders</th><th>Repeat purchase rate</th></tr></thead><tbody id="rp-rows"></tbody></table>
+</form>
+<p class="fine-note">Count each customer once, under the channel of their first order. Leave a channel at 0 to skip it.</p>
+<div class="txt post tool-cta">
+<p class="p">A repeat rate per first channel needs every first order tied to the visit that brought the buyer. Virling links each visit to the payment it led to, and its Retention page groups customers by the channel, referrer and campaign of their first order, including Shopify and WooCommerce orders. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/aov-calculator">average order value calculator</a>, <a href="/tools/ltv-cac-calculator">LTV to CAC calculator</a>, <a href="/blog/email-marketing-revenue-tracking-ecommerce">email marketing revenue tracking for ecommerce</a>, <a href="/tools/store-revenue-goal-calculator">store revenue goal calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The repeat purchase rate formula</h2>
+<p class="p">Repeat purchase rate is the share of customers who ordered more than once in a period:</p>
+<p class="p"><code>repeat purchase rate = customers with 2 or more orders / all customers &times; 100</code></p>
+<p class="p">Two numbers go with it. Purchase frequency is how many orders an average customer placed, and the average days between orders turns that into time:</p>
+<p class="p"><code>purchase frequency = total orders / all customers</code><br><code>average days between orders = days in the period / purchase frequency</code></p>
+<p class="p">Use the same period for all three inputs and count each customer once, by email or customer ID, not by order. Guest checkouts with a new email each time look like new customers, so the real rate can be higher than the one your store reports.</p>
+<h2>A worked example</h2>
+<p class="p">These are round illustrative numbers, the same ones the calculator starts with, not data from a real store. In a year, 1,000 customers placed 1,400 orders, and 250 of those customers ordered at least twice. The repeat purchase rate is 250 / 1,000 = 25%. The purchase frequency is 1,400 / 1,000 = 1.4 orders per customer, and the average days between orders is 365 / 1.4, about 261 days.</p>
+<p class="p">By first channel, organic search brought 400 customers and 100 came back (25%), paid social 300 with 45 (15%), email 150 with 60 (40%), referral 100 with 30 (30%) and other sources 50 with 15 (30%).</p>
+<h2>Why the first channel of repeat buyers matters</h2>
+<p class="p">A channel is often judged on its first order alone. If one channel brings customers who come back and another brings one-time buyers, the first order makes them look alike while the revenue over a year does not. Grouping customers by the channel of their first order shows which channels are worth paying more to acquire a customer from, and which ones only bring a discount hunter. Read every later order back to that first channel, not to the email or bookmark that brought the repeat order, or the repeat revenue piles up under email and direct. <a href="/blog/new-vs-returning-customer-revenue">New vs returning customer revenue by channel</a> works through both ways of counting.</p>
+<p class="p">To see this from real orders, see <a href="/integrations/ecommerce">Virling for ecommerce stores</a>. Pair the rate with the size of each order in the <a href="/tools/aov-calculator">average order value calculator</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Repeat purchase rate calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate repeat purchase rate?</h3><p class="p">Divide the number of customers who placed 2 or more orders by the number of all customers in the same period, and multiply by 100. 250 repeat customers out of 1,000 is a repeat purchase rate of 25%.</p></div>
+      <div><h3>Is repeat purchase rate the same as purchase frequency?</h3><p class="p">No. Repeat purchase rate counts customers: what share ordered more than once. Purchase frequency counts orders: total orders divided by customers. A store where a few customers order very often can have a high frequency and a low repeat rate.</p></div>
+      <div><h3>What period should I use?</h3><p class="p">One long enough for a customer to need your product again. For things bought every few weeks, 90 days can work; for most stores a full year is safer, and a short period will understate the rate.</p></div>
+      <div><h3>How is average days between orders calculated here?</h3><p class="p">The days in the period divided by the purchase frequency. It is an average over all customers, including those who ordered once, so it is a rough guide. For the gap between orders of repeat buyers alone, measure the dates of their orders directly.</p></div>
+      <div><h3>Where do I get repeat customers per first channel?</h3><p class="p">From a tool that links each customer's first order to the visit that brought them. Store reports often file many orders under direct or unknown, so the first channel needs every order joined to its traffic source.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate repeat purchase rate?", "acceptedAnswer": {"@type": "Answer", "text": "Divide the number of customers who placed 2 or more orders by the number of all customers in the same period, and multiply by 100. 250 repeat customers out of 1,000 is a repeat purchase rate of 25%."}}, {"@type": "Question", "name": "Is repeat purchase rate the same as purchase frequency?", "acceptedAnswer": {"@type": "Answer", "text": "No. Repeat purchase rate counts customers: what share ordered more than once. Purchase frequency counts orders: total orders divided by customers. A store where a few customers order very often can have a high frequency and a low repeat rate."}}, {"@type": "Question", "name": "What period should I use?", "acceptedAnswer": {"@type": "Answer", "text": "One long enough for a customer to need your product again. For things bought every few weeks, 90 days can work; for most stores a full year is safer, and a short period will understate the rate."}}, {"@type": "Question", "name": "How is average days between orders calculated here?", "acceptedAnswer": {"@type": "Answer", "text": "The days in the period divided by the purchase frequency. It is an average over all customers, including those who ordered once, so it is a rough guide. For the gap between orders of repeat buyers alone, measure the dates of their orders directly."}}, {"@type": "Question", "name": "Where do I get repeat customers per first channel?", "acceptedAnswer": {"@type": "Answer", "text": "From a tool that links each customer's first order to the visit that brought them. Store reports often file many orders under direct or unknown, so the first channel needs every order joined to its traffic source."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring buyers who come back</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers, orders and repeat revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("rp"), body = document.getElementById("rp-rows"), sum = document.getElementById("rp-sum");
+const d = document.getElementById("d"), menu = document.getElementById("d-menu"), items = [...menu.children];
+const pct = (a, b) => (b > 0 ? (a / b * 100).toLocaleString("en-US", { maximumFractionDigits: 1 }) + "%" : "No data");
+const num = (n) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
+[["Organic search", 400, 100], ["Paid social", 300, 45], ["Email", 150, 60], ["Referral", 100, 30], ["Other", 50, 15]].forEach(([name, c, r]) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<th scope="row">${name}</th><td><input name="c" type="number" min="0" step="1" aria-label="${name} customers" value="${c}"></td><td><input name="r" type="number" min="0" step="1" aria-label="${name} customers with 2 or more orders" value="${r}"></td><td data-out></td>`;
+  tr.dataset.name = name;
+  body.appendChild(tr);
+});
+const total = document.createElement("tr");
+body.appendChild(total);
+const calc = () => {
+  const rows = [...body.rows].slice(0, -1).map((tr) => ({ tr, name: tr.dataset.name, c: +tr.querySelector("[name=c]").value, r: +tr.querySelector("[name=r]").value }));
+  const t = rows.reduce((a, x) => ({ c: a.c + x.c, r: a.r + x.r }), { c: 0, r: 0 });
+  let best = null;
+  rows.forEach((x) => { if (x.c > 0 && x.r > 0 && (!best || x.r / x.c > best.r / best.c)) best = x; });
+  rows.forEach((x) => {
+    x.tr.style.background = x === best ? "var(--revenue-soft)" : "";
+    x.tr.querySelector("[data-out]").innerHTML = pct(x.r, x.c) + (x === best ? ' <span class="dim">highest</span>' : "");
+  });
+  total.innerHTML = `<th scope="row">Sum of channels</th><td><b>${t.c.toLocaleString("en-US")}</b></td><td><b>${t.r.toLocaleString("en-US")}</b></td><td><b>${pct(t.r, t.c)}</b></td>`;
+  const cust = +f.elements.cust.value, rep = +f.elements.rep.value, orders = +f.elements.orders.value, days = +d.dataset.value;
+  const freq = cust > 0 && orders > 0 ? orders / cust : 0;
+  sum.innerHTML = [["Repeat purchase rate", pct(rep, cust)], ["Purchase frequency", freq ? num(freq) + " orders" : "No data"], ["Average days between orders", freq ? Math.round(days / freq).toLocaleString("en-US") + " days" : "No data"], ["Best first channel", best ? best.name : "No data"]].map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+const mark = (el) => { items.forEach((i) => i.classList.toggle("on", i === el)); menu.setAttribute("aria-activedescendant", el.id = "d-" + el.dataset.value); };
+const show = (open) => {
+  menu.hidden = !open;
+  d.setAttribute("aria-expanded", String(open));
+  if (open) { mark(items.find((i) => i.getAttribute("aria-selected") === "true")); menu.focus(); }
+};
+const pick = (el) => {
+  items.forEach((i) => i.setAttribute("aria-selected", String(i === el)));
+  d.dataset.value = el.dataset.value;
+  document.getElementById("d-value").textContent = el.textContent;
+  show(false);
+  d.focus();
+  calc();
+};
+d.addEventListener("click", () => show(menu.hidden));
+d.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); show(true); } });
+items.forEach((i) => { i.addEventListener("click", () => pick(i)); i.addEventListener("mousemove", () => mark(i)); });
+menu.addEventListener("keydown", (e) => {
+  const at = items.findIndex((i) => i.classList.contains("on"));
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); mark(items[(at + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]); }
+  else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(items[at]); }
+  else if (e.key === "Escape" || e.key === "Tab") { show(false); d.focus(); }
+});
+document.addEventListener("click", (e) => { if (!menu.hidden && !e.target.closest(".tool-pick")) show(false); });
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

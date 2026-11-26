@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stripe for AI apps: see which channel brings paying users</title>
+<meta name="description" content="For founders of AI apps billing on Stripe: tie each subscription, credit purchase and top-up to the post, search or AI answer that brought the user.">
+<link rel="canonical" href="https://virling.com/integrations/stripe-ai-apps">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/stripe-ai-apps">
+<meta property="og:title" content="Stripe for AI apps: see which channel brings paying users">
+<meta property="og:description" content="For founders of AI apps billing on Stripe: tie each subscription, credit purchase and top-up to the post, search or AI answer that brought the user.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"Stripe","item":"https://virling.com/integrations/stripe"},{"@type":"ListItem","position":4,"name":"Stripe for AI apps","item":"https://virling.com/integrations/stripe-ai-apps"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Which channel brings my paying users on Stripe?","acceptedAnswer":{"@type":"Answer","text":"Connect Stripe to Virling with a read-only restricted key and pass the virling_vid visitor ID into Checkout as client_reference_id or metadata.virling_vid. Each customer's first payment is credited to the visits before it, so the Channels card shows whether a post, a search or an AI answer brought the users who pay."}},{"@type":"Question","name":"Which channel gets credit for a credit top-up on Stripe?","acceptedAnswer":{"@type":"Answer","text":"A one-off credit pack bought through Checkout is a payment like any other, credited to the visit before it under the site's attribution model. The Retention page still groups each customer by the channel of their first payment and counts every later payment, top-ups included, in that channel's net LTV."}},{"@type":"Question","name":"How are Stripe subscription renewals attributed?","acceptedAnswer":{"@type":"Answer","text":"A charge whose invoice has billing reason subscription_cycle is a renewal. It takes the channel, referrer, campaign, landing page, country and device of the customer's first payment, matched by Stripe customer ID. Upgrades and plan changes (subscription_update) keep that channel too."}},{"@type":"Question","name":"Do free credits count as revenue?","acceptedAnswer":{"@type":"Answer","text":"No. Virling counts only payments from Stripe. A user who only spends free credits is a visitor, not a customer. A Stripe trial start, a checkout.session.completed event with a total of 0, is never counted as revenue, a payment or a customer."}},{"@type":"Question","name":"Are visits from ChatGPT and Perplexity tracked?","acceptedAnswer":{"@type":"Answer","text":"Yes. Visits referred by chatgpt.com, chat.openai.com, perplexity.ai, claude.ai, gemini.google.com, copilot.microsoft.com and chat.deepseek.com get the AI channel, so revenue from AI answers shows on its own rows."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / stripe for ai apps</span>
+      <h1>See which post, search or AI answer brings your paying users on Stripe.</h1>
+      <p class="lead">For founders of AI apps and AI wrappers that bill through Stripe with subscriptions, credit packs or top-ups. Virling ties each subscription, credit purchase and top-up to the channel that brought the user, so you see whether X, Reddit, Google or ChatGPT brings the users who pay, not only the ones who sign up and spend free credits. Open source under AGPL, hosted or <a href="/self-host">self-hosted</a>.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">An AI app often gives new users free credits, then charges for a plan or a credit pack. A launch post can bring hundreds of signups who spend the free credits and leave, while an answer in ChatGPT may send a few users who keep paying. Stripe knows who paid, but not the visit that brought them. Virling joins the two with a read-only key.</p>
+<h2>What you get</h2>
+<ul class="post-list"><li><b>Each paying user credited to a channel.</b> A payment is joined to the visits before it. By default it goes to the latest visit in the last 90 days that was not Direct, so a user who found you on Reddit and came back later by typing your address is credited to Reddit.</li><li><b>Credit purchases and top-ups tied to their visit.</b> A credit pack bought through Stripe Checkout, a Payment Link or your own PaymentIntent is a payment like any other. Pass the visitor ID and it is credited to the visit that led to it, under the site&#x27;s attribution model.</li><li><b>Renewals that keep the first channel.</b> A charge whose invoice has billing reason <code>subscription_cycle</code> is a renewal. It copies the channel, referrer, campaign, landing page, country and device of the customer&#x27;s first payment, matched by Stripe customer ID, even though the renewal itself has no visit. Upgrades and plan changes (<code>subscription_update</code>) count as renewals too.</li><li><b>Repeat buyers counted toward the first channel.</b> The Retention page groups each customer by the channel, referrer and campaign of their first payment, and counts every later payment, top-ups included, in that channel&#x27;s net LTV. So you see both the visit behind each purchase and which channel brought the users who keep buying credits.</li><li><b>AI answers on their own rows.</b> Visits from ChatGPT, Perplexity, Claude, Gemini, Copilot and DeepSeek get the AI channel, search engines get Organic search, and X, Reddit, Product Hunt and YouTube keep their own referrer rows. The AI card also shows, per assistant, the visitors and revenue it sent you.</li><li><b>Free credits and trials kept out of revenue.</b> Virling counts payments, not signups or usage. A Stripe trial start, a <code>checkout.session.completed</code> event with a total of 0, is never counted as revenue, a payment or a customer, and the customer&#x27;s later payment is credited to the visits before the trial started.</li><li><b>Refunds and disputes taken off.</b> Stripe events for refunds, lost disputes and late settlements update payments that were already imported.</li></ul>
+<h2>Set it up</h2>
+<ol class="post-list"><li><b>Add the site.</b> Click <b>+ Add a site</b> and enter your domain, such as <code>yourapp.com</code>, and its timezone.</li><li><b>Install the script.</b> Paste the tag before <code>&lt;/head&gt;</code> on your landing page and your app. The <code>virling_vid</code> cookie is set on your registrable domain, so <code>yourapp.com</code> and <code>app.yourapp.com</code> share one visitor ID. Leave cookieless mode off.</li><li><b>Connect Stripe.</b> Create a restricted key with <b>Read</b> on Charges, Checkout Sessions, Customers, Events, Invoices, Subscriptions and PaymentIntents, and paste it under payments. Secret keys are refused. The last 90 days are imported, then new payments every minute.</li><li><b>Pass the visitor ID to checkout.</b> Set <code>client_reference_id</code> to the <code>virling_vid</code> cookie, or use <code>metadata.virling_vid</code> on the Checkout Session or PaymentIntent. Payment Links on <code>buy.stripe.com</code> need no code: the script adds the ID when a visitor clicks one.</li></ol>
+<div class="code block"><pre>// A credit pack through Stripe Checkout
+await stripe.checkout.sessions.create({
+  mode: &quot;payment&quot;,
+  line_items: [{ price: &quot;price_...&quot;, quantity: 1 }],
+  client_reference_id: req.cookies.virling_vid,
+  // ...
+});</pre></div>
+<p class="p">The full walkthrough is in <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>, and <a href="/blog/chatgpt-revenue-tracking">ChatGPT revenue tracking</a> covers which visits from AI assistants pay. To store UTM tags or the visitor ID on a Checkout Session or Payment Link, see <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>. Every setting is on the <a href="/integrations/stripe">Stripe integration page</a>, and <a href="/integrations/ai-apps">Virling for AI apps</a> covers other payment providers.</p>
+<h2>What to know</h2>
+<ul class="post-list"><li>On Stripe, only invoice charges with billing reason <code>subscription_cycle</code> or <code>subscription_update</code> copy the first channel. A one-off top-up is credited to its own visit, so pass the visitor ID on every checkout, not only the first.</li><li>Payments older than the 90-day backfill are not imported, so renewals of subscriptions that started before that are Unattributed. Channel numbers fill in as new customers arrive.</li><li>Stripe trial starts are read from the time you connect, so trials that started before that are not seen.</li><li>Payments without a visitor ID still count toward revenue as Unattributed.</li></ul>
+<h2>Open source</h2>
+<p class="p">Virling is open source under AGPLv3, and the code is on <a href="https://github.com/virling/virling">GitHub</a>. Use the hosted service, or <a href="/self-host">self-host it</a> as one binary with every feature. In a load test on 2026-10-31, in a container limited to one vCPU and 1 GB of RAM, it ingested 100,000 pageviews at 2,829 a second with none failed and a p99 of 34 ms, and used 157 MB of memory after the ingest.</p>
+<h2>Frequently asked questions</h2>
+<h3>Which channel brings my paying users on Stripe?</h3><p class="p">Connect Stripe to Virling with a read-only restricted key and pass the virling_vid visitor ID into Checkout as client_reference_id or metadata.virling_vid. Each customer&#x27;s first payment is credited to the visits before it, so the Channels card shows whether a post, a search or an AI answer brought the users who pay.</p>
+<h3>Which channel gets credit for a credit top-up on Stripe?</h3><p class="p">A one-off credit pack bought through Checkout is a payment like any other, credited to the visit before it under the site&#x27;s attribution model. The Retention page still groups each customer by the channel of their first payment and counts every later payment, top-ups included, in that channel&#x27;s net LTV.</p>
+<h3>How are Stripe subscription renewals attributed?</h3><p class="p">A charge whose invoice has billing reason subscription_cycle is a renewal. It takes the channel, referrer, campaign, landing page, country and device of the customer&#x27;s first payment, matched by Stripe customer ID. Upgrades and plan changes (subscription_update) keep that channel too.</p>
+<h3>Do free credits count as revenue?</h3><p class="p">No. Virling counts only payments from Stripe. A user who only spends free credits is a visitor, not a customer. A Stripe trial start, a checkout.session.completed event with a total of 0, is never counted as revenue, a payment or a customer.</p>
+<h3>Are visits from ChatGPT and Perplexity tracked?</h3><p class="p">Yes. Visits referred by chatgpt.com, chat.openai.com, perplexity.ai, claude.ai, gemini.google.com, copilot.microsoft.com and chat.deepseek.com get the AI channel, so revenue from AI answers shows on its own rows.</p>
+      <p class="p">Full guides: <a href="https://docs.virling.com/payments/stripe">Stripe in the docs</a>, <a href="https://docs.virling.com/attribution/renewals">Renewals</a> and <a href="https://docs.virling.com/track/ai-answers">AI answers</a>.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post"><h2>Related reading</h2><ul class="post-list"><li><a href="/integrations/stripe">Stripe revenue attribution</a></li><li><a href="/integrations/ai-apps">Revenue attribution for AI apps</a></li><li><a href="/blog/track-stripe-revenue-by-traffic-source">How to track Stripe revenue by traffic source</a></li><li><a href="/blog/chatgpt-revenue-tracking">ChatGPT revenue tracking: which ChatGPT visits pay</a></li><li><a href="/integrations/stripe-saas">Stripe for SaaS</a></li></ul></div></div></section>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

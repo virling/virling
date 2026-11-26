@@ -28,22 +28,37 @@ Virling joins every visit to the payment that followed. It answers the questions
 
 It runs as one Rust binary with embedded storage. No Postgres, no ClickHouse, no Redis.
 
-> **Status:** early development. Releases are on the [releases page](https://github.com/virling/virling/releases) and run on your own server today. Expect breaking changes until a stable release. Hosted plans start with a 14-day free trial at [app.virling.com](https://app.virling.com/login).
+## Who it is for
+
+- **[SaaS](https://virling.com/integrations/saas):** which channel brings customers who convert from trial and keep paying.
+- **[Online stores](https://virling.com/integrations/ecommerce):** which channel brings orders and revenue to a Shopify or WooCommerce store.
+- **[Agencies](https://virling.com/agency):** one account for every client, with white-label weekly reports on which channels brought paying customers.
+- **[AI apps](https://virling.com/integrations/ai-apps):** which posts, communities and AI assistants bring users who pay.
+
+## Get started
+
+| [Start a 14-day free trial](https://app.virling.com/login) | [Self-host](#run-it) |
+| --- | --- |
+| Hosted at app.virling.com, with no server to run. Add a card, cancel before day 15 and nothing is charged. See [Hosted plan](https://docs.virling.com/hosted). | Free, with every feature, on your own server. Run the Docker image or a Linux or macOS binary. See [Install](https://docs.virling.com/install/). |
+
+> **Status:** early development. Expect breaking changes until a stable release. The list below describes the main branch; the [latest release](https://github.com/virling/virling/releases) can be behind it.
 
 ## What works today
 
-- **Tracking script** (`/v.js`, about 1.4 KB gzipped, source in `assets/v.src.js`): pageviews, UTM tags, referrers, single-page-app route changes, custom goals, and a first-party visitor ID. Stripe Payment Links, Polar checkout links and Dodo payment links get the visitor ID added automatically.
-- **Cookieless mode**: a daily-rotating salted hash instead of a cookie, for sites that want no consent banner, at the cost of payment attribution.
+- **Tracking script** (`/v.js`, source in `assets/v.src.js`): pageviews, UTM tags, referrers, single-page-app route changes, custom goals, and a first-party visitor ID. Stripe Payment Links, Polar checkout links, Dodo payment links and LemonSqueezy checkout links get the visitor ID added automatically.
+- **Cookieless mode**: a daily-rotating salted hash instead of a cookie, for sites that want no consent banner, at the cost of payment attribution. It can also start cookieless and switch to the cookie on consent.
 - **Event ingest** into embedded DuckDB, with bot filtering, per-site rate limits and channel rules (Paid, Email, AI, Organic search, Communities, Social, Referral, Direct). Visitor IPs are never stored.
-- **Payment sync** from Stripe, Dodo Payments, Polar and LemonSqueezy with a read-only key (LemonSqueezy keys cannot be limited): a 90-day backfill, then a poll every minute. Virling never creates, changes or refunds anything. LemonSqueezy payments count toward revenue, but linking them to visits waits on webhook support.
-- **Attribution**: last non-direct or first touch, with a 30, 60, 90 or 365 day lookback. Renewals keep the channel of the customer's first payment. Payments without a visitor ID count as Unattributed.
+- **Payment sync** from [nine providers](https://docs.virling.com/payments/): Stripe, Dodo Payments, Polar, LemonSqueezy, Creem, RevenueCat, Paddle, WooCommerce and Shopify. [Which key to create](https://docs.virling.com/payments/#which-key-to-create) lists the access each one needs; LemonSqueezy keys cannot be limited. Virling backfills 90 days (60 for Shopify, one-time purchases only for RevenueCat), then picks up new payments every minute, or by webhook for RevenueCat. It never creates, changes or refunds a payment. [LemonSqueezy payments](https://docs.virling.com/payments/lemonsqueezy) link to visits through a webhook, which needs a public `https` address.
+- **Imports** of daily traffic history from [Plausible](https://docs.virling.com/track/import-plausible) and [Google Analytics 4](https://docs.virling.com/track/import-google-analytics) CSV exports, from the command line. Payments are only credited to tracked visits.
+- **Attribution**: last non-direct, first or last touch, with a 30, 60, 90 or 365 day lookback. Renewals keep the channel of the customer's first payment. Payments with no visitor ID and no email match count as Unattributed.
 - **Revenue dashboard**: revenue, revenue per visitor and conversion by channel, referrer, campaign, page and country, payment journeys, a Visitors page, retention by first channel, tracked short links, and AI assistant visits next to AI crawler hits.
-- **Reports and sharing**: weekly email reports with agency branding, and an optional public dashboard.
-- **Read API, MCP server and CLI**: read-only access with API keys or OAuth sign-in, so `virling query` and AI assistants such as Claude and ChatGPT can answer revenue questions. Hosted Virling is in the [Claude directory](https://claude.ai/directory/virling). An agent skill is in `plugins/virling/skills/virling`, and `claude plugin marketplace add virling/virling` installs it with the MCP server as a Claude Code plugin.
+- **Reports and sharing**: weekly email reports with agency branding, client report links, and an optional public dashboard.
+- **Team members** on Agency accounts, up to 3 users when self-hosting.
+- **Read API, MCP server and CLI**: API keys that read your numbers and can only add chart notes, and read-only MCP with OAuth sign-in, so `virling query` and AI assistants such as Claude and ChatGPT can answer revenue questions. Hosted Virling is in the [Claude directory](https://claude.ai/directory/virling). An agent skill is in `plugins/virling/skills/virling`, and `claude plugin marketplace add virling/virling` installs it with the MCP server as a Claude Code plugin.
 - **WordPress plugin** in `integrations/wordpress`.
 - **Magic-link sign-in and onboarding** (behind `--app`).
 
-Not available yet: the hosted plan, team members, imports from other tools, other attribution models and Windows builds.
+Not available yet: other attribution models such as linear or position-based, custom channel rules, a reporting currency other than USD, uploading an import in site settings, and Windows builds.
 
 ## Run it
 

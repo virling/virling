@@ -139,6 +139,8 @@ addEventListener("load", function () {
 </script>
 ```
 
+The [checkout snippet generator](https://virling.com/tools/checkout-snippet-generator) writes this code for your provider. For the Next.js App Router with Stripe, see [Next.js Stripe Checkout UTM tracking](https://virling.com/blog/nextjs-stripe-utm-tracking).
+
 ## Stripe
 
 Virling reads `metadata.virling_vid` on the charge or its PaymentIntent, then `metadata.virling_vid` or `client_reference_id` on the Checkout Session. See [Stripe](stripe.md).

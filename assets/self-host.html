@@ -44,6 +44,20 @@
     </div>
   </div></section>
 
+  <section class="band alt"><div class="wrap">
+    <div class="txt">
+      <h2>Measured on a small server</h2>
+      <p class="p">In a load test on 2026-10-31, Virling ran in a container limited to one vCPU and 1 GB of RAM:</p>
+      <ul class="facts">
+          <li><i></i><span>100,000 pageviews ingested at 2,829 a second, with none failed and a p99 of 34 ms</span></li>
+          <li><i></i><span>157 MB of memory after the ingest</span></li>
+          <li><i></i><span>Dashboard queries at 0.6 to 7.6 ms median on the demo data</span></li>
+      </ul>
+      <p class="p">Open source under AGPLv3, source on <a href="https://github.com/virling/virling">GitHub</a>, one binary with embedded storage. Read the <a href="/blog/self-hosted-analytics-what-it-takes">full write-up</a>, or rerun the test yourself with <a href="https://github.com/virling/virling/blob/main/scripts/load-1cpu.sh">scripts/load-1cpu.sh</a>.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="https://docs.virling.com/install/">Download and self-host</a></p>
+    </div>
+  </div></section>
+
   <section class="band"><div class="wrap">
     <div class="split even">
       <div class="txt">
@@ -80,6 +94,20 @@
       <p class="p">The <a href="https://docs.virling.com/quickstart">quickstart</a> walks through adding your site, the script and a payment provider.</p>
     </div>
   </div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Questions about self-hosting.</h2>
+    <div class="faq-list">
+      <div><h3>Is it really free, and what does AGPL-3.0 mean for my business?</h3><p class="p">Yes. Self-hosting is free, with every feature, and you can use it for your business. If you run a modified version as a service, AGPL-3.0 asks you to share your changes.</p></div>
+      <div><h3>What server do I need?</h3><p class="p">One vCPU and 1 GB of RAM is enough for 100,000 pageviews a month. Run it on Linux or macOS, or anywhere Docker runs, including Windows. You also need a domain and a reverse proxy for HTTPS.</p></div>
+      <div><h3>How do I back up and upgrade?</h3><p class="p">To back up, stop the server, copy the data folder with its secret.key, and start it again; events sent while it is stopped are lost, so keep the stop short. To upgrade, read the changelog, take a backup, then replace the binary or change the image tag. Migrations run on start, and going back means restoring the backup.</p></div>
+      <div><h3>What connections leave my server?</h3><p class="p">Only to the payment and AI providers you connect, your SMTP server, Slack and webhooks if you set them, an exchange rate service for payments not in USD, and the homepages of your sites and their referrers for icons. On first start it also downloads one DuckDB extension. There is no telemetry, no update check and no license check.</p></div>
+      <div><h3>Can I run several client sites?</h3><p class="p">Yes. Add each domain as its own site, with its own script tag, payment connections and reports, and group sites by client name. Clients can open a branded report through a link without a Virling login.</p></div>
+      <div><h3>Do I need an email server?</h3><p class="p">No, not to start. Without SMTP, sign-in links are written to the server log, which is fine for one person. Set an SMTP server to email sign-in links, invites and weekly reports.</p></div>
+    </div>
+    <p class="p">Rather not run a server? <a href="https://app.virling.com/login" data-goal="join_click">Let us host it for you</a>.</p>
+  </div></div></section>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is it really free, and what does AGPL-3.0 mean for my business?","acceptedAnswer":{"@type":"Answer","text":"Yes. Self-hosting is free, with every feature, and you can use it for your business. If you run a modified version as a service, AGPL-3.0 asks you to share your changes."}},{"@type":"Question","name":"What server do I need?","acceptedAnswer":{"@type":"Answer","text":"One vCPU and 1 GB of RAM is enough for 100,000 pageviews a month. Run it on Linux or macOS, or anywhere Docker runs, including Windows. You also need a domain and a reverse proxy for HTTPS."}},{"@type":"Question","name":"How do I back up and upgrade?","acceptedAnswer":{"@type":"Answer","text":"To back up, stop the server, copy the data folder with its secret.key, and start it again; events sent while it is stopped are lost, so keep the stop short. To upgrade, read the changelog, take a backup, then replace the binary or change the image tag. Migrations run on start, and going back means restoring the backup."}},{"@type":"Question","name":"What connections leave my server?","acceptedAnswer":{"@type":"Answer","text":"Only to the payment and AI providers you connect, your SMTP server, Slack and webhooks if you set them, an exchange rate service for payments not in USD, and the homepages of your sites and their referrers for icons. On first start it also downloads one DuckDB extension. There is no telemetry, no update check and no license check."}},{"@type":"Question","name":"Can I run several client sites?","acceptedAnswer":{"@type":"Answer","text":"Yes. Add each domain as its own site, with its own script tag, payment connections and reports, and group sites by client name. Clients can open a branded report through a link without a Virling login."}},{"@type":"Question","name":"Do I need an email server?","acceptedAnswer":{"@type":"Answer","text":"No, not to start. Without SMTP, sign-in links are written to the server log, which is fine for one person. Set an SMTP server to email sign-in links, invites and weekly reports."}}]}</script>
   <section class="band"><div class="wrap"><div class="txt post"><h2>Related reading</h2><ul class="post-list"><li><a href="/blog/self-hosted-analytics-what-it-takes">Self-hosted analytics: server size, cost and upkeep</a></li><li><a href="/blog/cookieless-analytics-and-revenue">Cookieless analytics and revenue: what you lose and keep</a></li><li><a href="/blog/find-which-channel-pays">How to find which marketing channel pays for your SaaS</a></li></ul></div></div></section>
 </main>
 

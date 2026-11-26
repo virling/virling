@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Burn multiple calculator: cash burned per dollar of new ARR</title>
+<meta name="description" content="Divide net burn by net new ARR for the same period to see how much cash your startup spends to add each dollar of annual recurring revenue.">
+<link rel="canonical" href="https://virling.com/tools/burn-multiple-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/burn-multiple-calculator">
+<meta property="og:title" content="Burn multiple calculator: cash burned per dollar of new ARR">
+<meta property="og:description" content="Divide net burn by net new ARR for the same period to see how much cash your startup spends to add each dollar of annual recurring revenue.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Burn multiple calculator","url":"https://virling.com/tools/burn-multiple-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Burn multiple calculator","item":"https://virling.com/tools/burn-multiple-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / burn multiple calculator</span><h1>Burn multiple calculator</h1><p class="lead">The burn multiple measures capital efficiency: how many dollars of cash a company burns to add one dollar of annual recurring revenue. Enter net burn and net new ARR for the same period, and the result updates as you type. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="burn" autocomplete="off">
+  <label>Net burn in the period ($)<span class="dim">Cash out minus cash in, before any funding</span><input name="burn" type="number" step="0.01" value="600000"></label>
+  <label>Net new ARR in the same period ($)<span class="dim">ARR at the end minus ARR at the start</span><input name="arr" type="number" step="0.01" value="400000"></label>
+</form>
+<div class="tool-stats" id="burn-out"></div>
+<p class="fine-note" id="burn-read"></p>
+<div class="txt post tool-cta">
+<h2>See which channels add ARR for the least spend</h2>
+<p class="p">Enter what you spend on each channel and Virling shows the revenue credited to it, the profit and the return per dollar, from your real payments. The Retention page shows first-payment revenue by the channel that brought each customer. Virling is open source under AGPLv3: self-host it free, or start a 14-day hosted trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/integrations/saas">Virling for SaaS</a> &middot; <a class="lk" href="/demo">See the demo</a></p>
+<p class="p">Related: <a href="/tools/cac-payback-calculator">CAC payback calculator</a>, <a href="/tools/mrr-calculator">MRR calculator</a>, <a href="/tools/rule-of-40-calculator">Rule of 40 calculator</a>, <a href="/tools/saas-magic-number-calculator">SaaS magic number calculator</a>, <a href="/tools/investor-update-template">monthly investor update template</a>, <a href="/tools/runway-calculator">startup runway calculator</a>, <a href="/tools/run-rate-calculator">run rate calculator</a>, <a href="/tools/saas-valuation-calculator">SaaS valuation calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The burn multiple formula</h2>
+<p class="p">The burn multiple divides the cash a company burned in a period by the annual recurring revenue it added in that same period:</p>
+<p class="p"><code>burn multiple = net burn / net new ARR</code></p>
+<p class="p">Net burn is cash going out minus cash coming in, not counting money raised. Net new ARR is ARR at the end of the period minus ARR at the start, so it already includes new customers, upgrades, downgrades and cancellations. The metric was introduced by David Sacks in <a href="https://sacks.substack.com/p/the-burn-multiple-51a7e43cb200">The Burn Multiple</a> (2020). The higher the multiple, the more the company burns for each unit of growth.</p>
+<h2>A worked example</h2>
+<p class="p">This is an example with made-up numbers, the same as the defaults above. A company burned $600,000 over a quarter, and its ARR went from $2,000,000 to $2,400,000, so net new ARR is $400,000. The burn multiple is $600,000 / $400,000 = 1.5: it burned $1.50 of cash for each dollar of new ARR. Put the other way, each dollar burned added about 67 cents of ARR.</p>
+<h2>How to read the result</h2>
+<p class="p">Lower is better. In the original article, Sacks calls a burn multiple of 2 reasonable for an early-stage startup and says that needing 3x burn or more to deliver growth suggests product-market fit is not what it appears to be. A result of zero or below means the company was cash flow positive in the period. If net new ARR is zero or negative, the multiple has no meaning: cash went out and ARR did not grow.</p>
+<h2>Burn multiple by net burn and net new ARR</h2>
+<p class="p">Each cell is net burn divided by net new ARR for the same period, worked out with the formula above. The amounts are made up, not benchmarks.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:620px"><thead><tr><th style="width:24%">Net burn</th><th>$100,000 net new ARR</th><th>$200,000 net new ARR</th><th>$400,000 net new ARR</th><th>$600,000 net new ARR</th></tr></thead><tbody><tr><th scope="row">$150,000</th><td>1.50x</td><td>0.75x</td><td>0.38x</td><td>0.25x</td></tr><tr><th scope="row">$300,000</th><td>3.00x</td><td>1.50x</td><td>0.75x</td><td>0.50x</td></tr><tr><th scope="row">$600,000</th><td>6.00x</td><td>3.00x</td><td>1.50x</td><td>1.00x</td></tr><tr><th scope="row">$900,000</th><td>9.00x</td><td>4.50x</td><td>2.25x</td><td>1.50x</td></tr></tbody></table></div>
+<p class="p">The worked example is the $600,000 row under $400,000. Halving the burn and doubling the net new ARR do the same to the multiple: $300,000 for $400,000 and $600,000 for $800,000 are both 0.75x. The multiple does not show size, so $150,000 for $100,000 and $900,000 for $600,000 are both 1.50x, although the second company spends six times the cash.</p>
+<h2>When the burn multiple misleads</h2>
+<p class="p">It compares cash with ARR, and the two do not always move in the same period. Yearly payments bring in cash before it is earned, sales hired this quarter add ARR in a later one, and one large contract can make a period look better than the next. Here is a made-up example, step by step, on the quarter from the worked example above.</p>
+<ol class="post-list"><li><b>Start with the headline.</b> $600,000 of net burn for $400,000 of net new ARR is 1.50x.</li><li><b>Find cash collected early.</b> On the first day of the quarter, customers paid $200,000 to renew yearly plans. Renewals at the same price add no ARR. Three of the twelve months, $50,000, belong to this quarter, and $150,000 pays for later months.</li><li><b>Put that cash back.</b> Without the $150,000, net burn is $600,000 + $150,000 = $750,000, and $750,000 / $400,000 = 1.875, shown as 1.88x.</li><li><b>Find ARR that may not repeat.</b> One contract brought $100,000 of the net new ARR. Without it, the quarter added $300,000.</li><li><b>Work it out again.</b> $750,000 / $300,000 = 2.50x. The same quarter reads as 1.50x or 2.50x, depending on one batch of renewals and one contract.</li></ol>
+<p class="p">The burn multiple as defined is still 1.50x, so quote that one. The adjusted figures show how much of it depends on timing. A full year of burn and ARR smooths out most of this.</p>
+<h2>Where the ARR comes from, and where it goes next</h2>
+<p class="p">Net new ARR needs ARR at two dates. If you do not track it, the <a href="/tools/run-rate-calculator">run rate calculator</a> gives the recurring run rate, which is ARR when all of it is subscriptions and yearly plans are spread over 12 months. For example, $200,000 of recurring revenue in one month is $2,400,000 a year. ARR at the end of the period then goes into the <a href="/tools/saas-valuation-calculator">SaaS valuation calculator</a>. Its growth rate is per year, so do not enter the quarter: $2,000,000 to $2,400,000 is 20% in three months, and the yearly rate needs ARR from 12 months ago.</p>
+<h2>Why the burn multiple is more useful per channel</h2>
+<p class="p">The burn multiple covers the whole company, so it cannot say which part of the spend is working. Marketing is usually the part that is easiest to change: paid search, sponsorships and content cost very different amounts and bring very different revenue. Comparing them needs each payment tied to the visit that started it. See <a href="/blog/mrr-by-acquisition-channel">MRR by acquisition channel</a> for how to find which channels bring ARR for less spend. In Virling, the Retention page groups customers by the channel of their first payment, and the Profit by channel card shows spend, revenue and return per dollar for any range.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Burn multiple calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How is the burn multiple calculated?</h3><p class="p">Divide net burn by net new ARR for the same period. Net burn is the cash the company lost in the period; net new ARR is the change in annual recurring revenue over that period, after churn and downgrades.</p></div>
+      <div><h3>What is a good burn multiple?</h3><p class="p">Lower is better: a lower multiple means less cash burned for each dollar of new ARR. David Sacks, who introduced the metric in The Burn Multiple (2020), calls 2x reasonable for an early-stage startup and treats 3x or more as a sign that growth is costing too much.</p></div>
+      <div><h3>What if net new ARR is zero or negative?</h3><p class="p">Then the burn multiple has no meaningful value: the company spent cash and its ARR did not grow. The calculator shows no result in that case instead of a negative number.</p></div>
+      <div><h3>What if the company is not burning cash?</h3><p class="p">If net burn is zero or negative, the company is cash flow positive for the period and the burn multiple is zero or below. Growth is not costing outside capital, which is the best case.</p></div>
+      <div><h3>Should I use a month, a quarter or a year?</h3><p class="p">Any period works as long as net burn and net new ARR cover the same one. A quarter or a trailing twelve months smooths out a single large deal or a one-off expense.</p></div>
+      <div><h3>How do I find net new ARR if I only track revenue?</h3><p class="p">Work out the recurring run rate at the start and at the end of the period and subtract. Leave out one-time sales and spread yearly plans over 12 months: a recurring month of $200,000 is $2,400,000 of ARR, and if it was $2,000,000 at the start, net new ARR is $400,000.</p></div>
+      <div><h3>Can a low burn multiple be misleading?</h3><p class="p">Yes. Yearly payments collected up front lower net burn now for months you have yet to serve. In the made-up example on this page, $150,000 of cash collected early turns 1.88x into 1.50x. Compare several periods, or use a full year.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How is the burn multiple calculated?", "acceptedAnswer": {"@type": "Answer", "text": "Divide net burn by net new ARR for the same period. Net burn is the cash the company lost in the period; net new ARR is the change in annual recurring revenue over that period, after churn and downgrades."}}, {"@type": "Question", "name": "What is a good burn multiple?", "acceptedAnswer": {"@type": "Answer", "text": "Lower is better: a lower multiple means less cash burned for each dollar of new ARR. David Sacks, who introduced the metric in The Burn Multiple (2020), calls 2x reasonable for an early-stage startup and treats 3x or more as a sign that growth is costing too much."}}, {"@type": "Question", "name": "What if net new ARR is zero or negative?", "acceptedAnswer": {"@type": "Answer", "text": "Then the burn multiple has no meaningful value: the company spent cash and its ARR did not grow. The calculator shows no result in that case instead of a negative number."}}, {"@type": "Question", "name": "What if the company is not burning cash?", "acceptedAnswer": {"@type": "Answer", "text": "If net burn is zero or negative, the company is cash flow positive for the period and the burn multiple is zero or below. Growth is not costing outside capital, which is the best case."}}, {"@type": "Question", "name": "Should I use a month, a quarter or a year?", "acceptedAnswer": {"@type": "Answer", "text": "Any period works as long as net burn and net new ARR cover the same one. A quarter or a trailing twelve months smooths out a single large deal or a one-off expense."}}, {"@type": "Question", "name": "How do I find net new ARR if I only track revenue?", "acceptedAnswer": {"@type": "Answer", "text": "Work out the recurring run rate at the start and at the end of the period and subtract. Leave out one-time sales and spread yearly plans over 12 months: a recurring month of $200,000 is $2,400,000 of ARR, and if it was $2,000,000 at the start, net new ARR is $400,000."}}, {"@type": "Question", "name": "Can a low burn multiple be misleading?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Yearly payments collected up front lower net burn now for months you have yet to serve. In the made-up example on this page, $150,000 of cash collected early turns 1.88x into 1.50x. Compare several periods, or use a full year."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring new revenue</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("burn"), out = document.getElementById("burn-out"), read = document.getElementById("burn-read");
+const usd = (n) => { const a = Math.abs(n), d = a < 100 ? 2 : 0; return (n < 0 ? "-$" : "$") + a.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); };
+const calc = () => {
+  const b = +f.burn.value, a = +f.arr.value, ok = a > 0 && f.burn.value !== "", m = b / a;
+  const rows = [];
+  rows.push(["Burn multiple", ok ? m.toFixed(2) + "x" : "No data"]);
+  rows.push(["Net new ARR per $1 burned", ok && b > 0 ? usd(a / b) : "No data"]);
+  rows.push(["Cash burned to add $100,000 of ARR", ok ? usd(m * 100000) : "No data"]);
+  out.innerHTML = rows.map(([n, x]) => `<div><span class="dim">${n}</span><b>${x}</b></div>`).join("");
+  read.textContent = f.burn.value === "" || f.arr.value === "" ? "Enter net burn and net new ARR for the same period to see the burn multiple."
+    : a <= 0 ? "ARR did not grow in this period, so the cash burned bought no net new ARR."
+    : b <= 0 ? "The company was cash flow positive in this period, so ARR grew without burning cash."
+    : `The company burned ${usd(m)} of cash for each $1 of net new ARR.`;
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

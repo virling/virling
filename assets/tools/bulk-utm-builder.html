@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bulk UTM builder: tag many links at once from a list or CSV</title>
+<meta name="description" content="Paste a list of URLs or a CSV, add source, medium and campaign tags to every link in one go, then copy the results or download them as CSV.">
+<link rel="canonical" href="https://virling.com/tools/bulk-utm-builder">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/bulk-utm-builder">
+<meta property="og:title" content="Bulk UTM builder: tag many links at once from a list or CSV">
+<meta property="og:description" content="Paste a list of URLs or a CSV, add source, medium and campaign tags to every link in one go, then copy the results or download them as CSV.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Bulk UTM builder","url":"https://virling.com/tools/bulk-utm-builder","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Bulk UTM builder","item":"https://virling.com/tools/bulk-utm-builder"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / bulk utm builder</span><h1>Bulk UTM builder</h1><p class="lead">Paste a list of URLs, one per line, and fill in <code>utm_source</code>, <code>utm_medium</code> and <code>utm_campaign</code> once to tag every link. Or paste a CSV with <code>url</code>, <code>source</code>, <code>medium</code>, <code>campaign</code>, <code>content</code> and <code>term</code> columns to give each row its own tags. Copy all the links or download them as a CSV. Nothing leaves your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="bulk" autocomplete="off">
+  <label class="wide">Links <span class="dim">one URL per line, or a CSV with a header row</span><textarea name="links" rows="8" spellcheck="false">https://example.com/pricing
+https://example.com/blog/launch?ref=footer
+https://example.com/#features
+example.com/signup</textarea></label>
+  <label>Source <span class="dim">utm_source</span><input name="utm_source" value="newsletter"></label>
+  <label>Medium <span class="dim">utm_medium</span><input name="utm_medium" value="email"></label>
+  <label>Campaign <span class="dim">utm_campaign</span><input name="utm_campaign" value="october-launch"></label>
+  <label>Content <span class="dim">utm_content</span><input name="utm_content" placeholder="optional"></label>
+  <label>Term <span class="dim">utm_term</span><input name="utm_term" placeholder="optional"></label>
+  <label class="check"><input type="checkbox" name="lower" checked>Lowercase the values</label>
+</form>
+<p class="p">A value in a CSV cell wins over the field above; an empty cell uses the field. Tags already on a URL stay unless a value replaces them.</p>
+<div class="tool-stats" id="bulk-sum"></div>
+<div class="tool-table" id="bulk-out"></div>
+<div class="tool-out"><span class="dim">Tagged links</span><output id="bulk-status"></output><button class="btn sm" type="button" id="bulk-copy" disabled>Copy all links</button><a class="lk" id="bulk-csv" download="utm-links.csv" href="#">Download CSV</a></div>
+<div class="txt post tool-cta">
+<h2>See the revenue each tagged link brings</h2>
+<p class="p">Virling reads your UTM tags and links each visit to the payment that followed, so each campaign shows the visitors and revenue it brought. Virling is open source under AGPLv3: self-host it free, or start a 14-day hosted trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>How the bulk UTM builder works</h2>
+<ol class="post-list"><li>Paste your links, one per line. Each line must be a full URL starting with <code>https://</code>.</li><li>Fill in the source, medium and campaign once. They are added to every link, the same way the <a href="/tools/utm-builder">UTM builder</a> does for one link: spaces become hyphens and values are lowercased unless you untick the box.</li><li>To tag rows differently, paste a CSV instead. The first line names the columns: <code>url</code> is required, and <code>source</code>, <code>medium</code>, <code>campaign</code>, <code>content</code> and <code>term</code> (or <code>utm_source</code> and so on) are optional.</li><li>Copy all the tagged links, or download a CSV with the original URL, the tagged URL and the result for each row.</li></ol>
+<p class="p" style="overflow-wrap:anywhere">Query strings already on a link are kept, and the tags go before any <code>#fragment</code>, so <code>https://example.com/#features</code> becomes <code>https://example.com/?utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=october-launch#features</code>. A line that is not a full URL, or a row left without a source, is flagged in the results and left out of the copied links, not dropped silently.</p>
+<h2>A sample CSV to copy</h2>
+<p class="p">Five links of one made-up launch. Copy it, paste it over the list in the tool, and all five rows are tagged. Then replace the links and names with yours.</p>
+<div class="code block"><pre data-snippet>url,source,medium,campaign,content
+https://example.com/pricing,newsletter,email,october-launch,header-button
+https://example.com/pricing,newsletter,email,october-launch,footer-link
+https://example.com/pricing,linkedin,social,october-launch,
+https://example.com/pricing,linkedin,paidsocial,october-launch,video-ad
+https://example.com/,google,cpc,october-launch,</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The source stays the same for the LinkedIn post and the LinkedIn ad, and the medium tells them apart: see <a href="/blog/utm-source-vs-utm-medium">utm_source vs utm_medium</a>. The campaign is the same on every row, so the launch is one row when you read <a href="/blog/revenue-by-campaign">revenue by campaign</a>.</p>
+<h2>Common input problems</h2>
+<table class="cmp" style="overflow-wrap:anywhere"><thead><tr><th style="width:38%">Input</th><th>What the tool does</th></tr></thead><tbody>
+<tr><th scope="row">A link without <code>https://</code>, such as <code>example.com/signup</code></th><td>Flags it as not a full URL and leaves it out of the copied links. The CSV download keeps the row with its error.</td></tr>
+<tr><th scope="row"><code>mailto:</code> and other links that are not web pages</th><td>Flags them the same way. Only <code>http</code> and <code>https</code> links are tagged.</td></tr>
+<tr><th scope="row">No <code>url</code> column, a title row above the header, or no header</th><td>Does not read the text as a CSV. A header line is flagged, and in each row the commas and the cells after them become part of the link. Make the header the first line and call the link column <code>url</code>.</td></tr>
+<tr><th scope="row">Semicolons or tabs between columns</th><td>Also not read as a CSV, so the values end up inside the link. Cells copied straight from a spreadsheet are separated by tabs: save the sheet as a comma-separated CSV and paste that.</td></tr>
+<tr><th scope="row">A comma inside a cell</th><td>Starts a new cell, so the values after it move one column to the right. Wrap the cell in double quotes.</td></tr>
+<tr><th scope="row">A column it does not know, such as <code>owner</code> or <code>campaign name</code></th><td>Ignores the column. With no <code>campaign</code> column, the Campaign field above the list is used.</td></tr>
+<tr><th scope="row">An empty cell</th><td>Uses the field with the same name above the list. If that is empty too, the tag is not added.</td></tr>
+<tr><th scope="row">No source in the row, the field or the link</th><td>Flags the row with <code>No utm_source: add a source</code> and leaves it out of the copied links.</td></tr>
+<tr><th scope="row">A link that already has UTM tags</th><td>Replaces each tag that has a new value and keeps the others.</td></tr>
+<tr><th scope="row">Capitals and spaces in a value</th><td>Turns spaces into hyphens, and lowercases unless you untick the box. <code>Paid Social</code> becomes <code>paid-social</code>, which Virling does not count as Paid. Write <code>paidsocial</code>.</td></tr>
+<tr><th scope="row">Two links on one line</th><td>Usually reads them as one link and tags it without a flag. Put each link on its own line.</td></tr>
+<tr><th scope="row">The same link twice</th><td>Keeps and tags both rows.</td></tr>
+<tr><th scope="row">Blank rows</th><td>Skips them.</td></tr>
+</tbody></table>
+<h2>Name tags consistently and check the results</h2>
+<ul class="post-list"><li><b>Agree the names before you tag.</b> Pick one source per platform and a short, fixed list of mediums. The <a href="/tools/utm-naming-template">UTM naming template</a> gives you a table to fill in and share.</li><li><b>Lowercase with hyphens.</b> <code>Newsletter</code> and <code>news letter</code> become separate rows in most reports; this builder writes <code>newsletter</code> and <code>news-letter</code>. TikTok macros such as <code>__CAMPAIGN_ID__</code> must stay in capitals, so make those links with the <a href="/tools/tiktok-ads-utm-builder">TikTok ads UTM builder</a>.</li><li><b>Use <code>utm_content</code> to tell links apart.</b> When one email or page has several links, give each a content value such as <code>header-button</code> or <code>footer-link</code>.</li><li><b>Do not tag links between your own pages.</b> The tag replaces the visitor's real source.</li><li><b>Start from clean links.</b> Remove old tags and click IDs with the <a href="/tools/url-cleaner">URL cleaner</a> before you paste your list.</li><li><b>Printing a link instead?</b> The <a href="/tools/qr-code-utm-generator">QR code generator with UTM tags</a> makes one tagged code per placement.</li><li><b>Check the list before it goes out.</b> Paste the tagged links into the <a href="/tools/utm-checker">UTM checker</a> to catch capitals, spaces, missing mediums and tags after the <code>#</code>. To read the tags back into columns, use the <a href="/tools/bulk-utm-parser">bulk UTM parser</a>.</li></ul>
+<p class="p">For which parameters to use and why, read <a href="/blog/utm-parameters-for-revenue-tracking">which UTM parameters to use to trace revenue</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Bulk UTM builder FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do I add UTM tags to many links at once?</h3><p class="p">Paste the links one per line, fill in the source, medium and campaign, and copy all the tagged links. For different tags per link, paste a CSV with a <code>url</code> column and a column for each tag.</p></div>
+      <div><h3>What CSV format does it accept?</h3><p class="p">A header row with a <code>url</code> column, plus any of <code>source</code>, <code>medium</code>, <code>campaign</code>, <code>content</code> and <code>term</code>, separated by commas. Cells with commas can be wrapped in double quotes, as spreadsheet exports do.</p></div>
+      <div><h3>What happens to links that already have a query string or a #fragment?</h3><p class="p">The existing parameters are kept and the UTM tags are added after them. A fragment stays at the end of the link, after the tags, so analytics tools still read them.</p></div>
+      <div><h3>What if a line is not a valid URL?</h3><p class="p">It stays in the results, marked as not a full URL, and is left out of the copied links. The CSV download keeps it with its error so you can fix it.</p></div>
+      <div><h3>Are my links sent anywhere?</h3><p class="p">No. The links are built in your browser with plain JavaScript, and the CSV is created on your device.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I add UTM tags to many links at once?", "acceptedAnswer": {"@type": "Answer", "text": "Paste the links one per line, fill in the source, medium and campaign, and copy all the tagged links. For different tags per link, paste a CSV with a url column and a column for each tag."}}, {"@type": "Question", "name": "What CSV format does it accept?", "acceptedAnswer": {"@type": "Answer", "text": "A header row with a url column, plus any of source, medium, campaign, content and term, separated by commas. Cells with commas can be wrapped in double quotes, as spreadsheet exports do."}}, {"@type": "Question", "name": "What happens to links that already have a query string or a #fragment?", "acceptedAnswer": {"@type": "Answer", "text": "The existing parameters are kept and the UTM tags are added after them. A fragment stays at the end of the link, after the tags, so analytics tools still read them."}}, {"@type": "Question", "name": "What if a line is not a valid URL?", "acceptedAnswer": {"@type": "Answer", "text": "It stays in the results, marked as not a full URL, and is left out of the copied links. The CSV download keeps it with its error so you can fix it."}}, {"@type": "Question", "name": "Are my links sent anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "No. The links are built in your browser with plain JavaScript, and the CSV is created on your device."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the revenue behind every tagged link</h2>
+<p class="p">Tags tell you where a visit came from. Virling follows it to the payment: it links every visit to the payment it led to, so each campaign shows the customers and revenue it brought from real payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
+const f = document.getElementById("bulk"), sum = document.getElementById("bulk-sum"), out = document.getElementById("bulk-out"), msg = document.getElementById("bulk-status"), copy = document.getElementById("bulk-copy"), dl = document.getElementById("bulk-csv");
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const cell = (s) => (/[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s);
+const parseCsv = (text) => {
+  const rows = [];
+  let row = [], v = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"' && text[i + 1] === '"') { v += '"'; i++; } else if (c === '"') q = false; else v += c; }
+    else if (c === '"') q = true;
+    else if (c === ",") { row.push(v); v = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(v); rows.push(row); row = []; v = ""; }
+    else v += c;
+  }
+  row.push(v); rows.push(row);
+  return rows.filter((r) => r.some((x) => x.trim()));
+};
+const clean = (v) => { v = (v || "").trim().replace(/\s+/g, "-"); return f.lower.checked ? v.toLowerCase() : v; };
+let links = [];
+const run = () => {
+  const text = f.links.value.replace(/^\ufeff/, ""), first = (text.split(/\r?\n/).find((l) => l.trim()) || "").toLowerCase();
+  const head = first.includes(",") || first.trim() === "url" ? parseCsv(first)[0].map((h) => h.trim().replace(/^utm_/, "")) : null;
+  let items;
+  if (head && head.includes("url")) {
+    items = parseCsv(text).slice(1).map((r) => { const o = {}; head.forEach((h, i) => (o[h] = r[i] || "")); return o; });
+  } else items = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map((url) => ({ url }));
+  const rows = items.map((o) => {
+    const url = (o.url || "").trim();
+    let u;
+    try { u = new URL(url); if (!/^https?:$/.test(u.protocol)) throw 0; } catch { return { url, tagged: "", issue: "Not a full URL: start it with https://" }; }
+    for (const k of KEYS) { const v = clean(o[k.slice(4)]) || clean(f[k].value); if (v) u.searchParams.set(k, v); }
+    if (!u.searchParams.get("utm_source")) return { url, tagged: "", issue: "No utm_source: add a source" };
+    return { url, tagged: u.href, issue: "" };
+  });
+  links = rows.filter((r) => r.tagged).map((r) => r.tagged);
+  const bad = rows.length - links.length;
+  sum.innerHTML = [["Links", rows.length], ["Tagged", links.length], ["Flagged", bad]].map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+  out.innerHTML = `<div class="tr th"><span>Tagged link</span><span>Original</span><span>Result</span></div>` + rows.map((r) =>
+    `<div class="tr"><span style="word-break: break-all">${r.tagged ? esc(r.tagged) : "<small>none</small>"}</span><span style="word-break: break-all">${esc(r.url) || "<small>empty</small>"}</span><span>${r.issue ? `<b class="no">Flagged</b><small>${esc(r.issue)}</small>` : `<b class="yes">Tagged</b>`}</span></div>`).join("");
+  msg.textContent = rows.length ? `${links.length} of ${rows.length} links tagged${bad ? `, ${bad} flagged above` : ""}.` : "Paste at least one URL.";
+  copy.disabled = !links.length;
+  const csv = [["url", "tagged_url", "result"]].concat(rows.map((r) => [r.url, r.tagged, r.issue || "tagged"])).map((r) => r.map(cell).join(",")).join("\r\n");
+  dl.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+};
+f.addEventListener("input", run);
+copy.addEventListener("click", async () => { await navigator.clipboard.writeText(links.join("\n")); copy.textContent = "Copied"; setTimeout(() => (copy.textContent = "Copy all links"), 1500); });
+run();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

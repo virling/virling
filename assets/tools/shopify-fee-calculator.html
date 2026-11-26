@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shopify fee calculator: plan, card and transaction fees</title>
+<meta name="description" content="See what Shopify takes per order and per month on each plan, with Shopify Payments or a third-party gateway, and the revenue you keep.">
+<link rel="canonical" href="https://virling.com/tools/shopify-fee-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/shopify-fee-calculator">
+<meta property="og:title" content="Shopify fee calculator: plan, card and transaction fees">
+<meta property="og:description" content="See what Shopify takes per order and per month on each plan, with Shopify Payments or a third-party gateway, and the revenue you keep.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Shopify fee calculator","url":"https://virling.com/tools/shopify-fee-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Shopify fee calculator","item":"https://virling.com/tools/shopify-fee-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / shopify fee calculator</span><h1>Shopify fee calculator.</h1><p class="lead">See what Shopify takes from each order and each month: the plan, the card rate with Shopify Payments, or the transaction fee Shopify adds when you use a third-party gateway. Enter your order value and orders per month to see the revenue you keep. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="fees" autocomplete="off">
+  <label>Order value ($)<input name="price" type="number" min="0" step="0.01" value="50"></label>
+  <label>Orders per month<input name="orders" type="number" min="0" step="1" value="200"></label>
+  <label>International cards (%)<input name="intl" type="number" min="0" max="100" step="1" value="10"></label>
+  <div class="tool-pick" data-select><span id="plan-label">Shopify plan</span>
+    <button type="button" id="plan" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="plan-label plan-value" data-value="basic"><span id="plan-value">Basic, $39 a month</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="plan-menu" role="listbox" aria-labelledby="plan-label" tabindex="-1" hidden><li role="option" data-value="basic" aria-selected="true">Basic, $39 a month</li><li role="option" data-value="grow" aria-selected="false">Grow, $105 a month</li><li role="option" data-value="advanced" aria-selected="false">Advanced, $399 a month</li><li role="option" data-value="plus" aria-selected="false">Plus, from $2,300 a month</li></ul>
+  </div>
+  <div class="tool-pick" data-select><span id="pay-label">Payments</span>
+    <button type="button" id="pay" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="pay-label pay-value" data-value="sp"><span id="pay-value">Shopify Payments</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="pay-menu" role="listbox" aria-labelledby="pay-label" tabindex="-1" hidden><li role="option" data-value="sp" aria-selected="true">Shopify Payments</li><li role="option" data-value="tp" aria-selected="false">Third-party gateway</li></ul>
+  </div>
+  <label>Gateway rate (%)<input name="gwpct" type="number" min="0" step="0.01" value="2.9"></label>
+  <label>Gateway fee per order ($)<input name="gwfix" type="number" min="0" step="0.01" value="0.30"></label>
+</form>
+<div class="tool-stats" id="fees-out"></div>
+<p class="fine-note">US rates for online card payments, checked on 2026-11-17 on <a href="https://www.shopify.com/pricing">Shopify's pricing page</a>: Basic 2.9% + 30&cent;, Grow 2.7% + 30&cent;, Advanced 2.5% + 30&cent;, Plus 2.25% + 30&cent;, plus 1% for international cards. With a third-party gateway Shopify adds 2%, 1%, 0.6% or 0.2% per order, and your gateway charges its own rate (the gateway fields are used only then; the default 2.9% + 30&cent; is Stripe's US card rate). Plan prices are for monthly billing. Rates and prices vary by country and plan, and change, so check the page for your store.</p>
+<div class="txt post tool-cta">
+<h2>See which channels bring the orders that pay those fees</h2>
+<p class="p">Virling reads your Shopify orders with a read-only token and credits each one to the visit that led to it, so you see sales by channel, campaign and landing page. Virling is open source under AGPLv3: self-host it free, or start a 14-day hosted trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/integrations/shopify">Shopify integration</a> &middot; <a class="lk" href="/demo">See the demo</a></p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Shopify fees: a worked example</h2>
+<p class="p">A $50 online order from a US card, at the rates on <a href="https://www.shopify.com/pricing">Shopify's US pricing page</a>. With a third-party gateway, the example assumes the gateway charges 2.9% + 30 cents.</p>
+<table class="cmp"><thead><tr><th>Plan</th><th>Shopify Payments</th><th>Third-party gateway</th><th>Plan a month</th></tr></thead><tbody><tr><th scope="row">Basic</th><td>$1.75</td><td>$2.75</td><td>$39</td></tr><tr><th scope="row">Grow</th><td>$1.65</td><td>$2.25</td><td>$105</td></tr><tr><th scope="row">Advanced</th><td>$1.55</td><td>$2.05</td><td>$399</td></tr><tr><th scope="row">Plus</th><td>$1.43</td><td>$1.85</td><td>from $2,300</td></tr></tbody></table>
+<p class="p">An international card adds 1% with Shopify Payments, 50 cents on this order. Premium cards, PayPal and in-person sales have their own rates on the same page.</p>
+<h2>Fee and amount kept by order value</h2>
+<p class="p">One online order paid with a standard US card through Shopify Payments, at the calculator's rates. They match the US version of <a href="https://www.shopify.com/pricing">Shopify's pricing page</a>, read on 2026-11-25 in <a href="https://web.archive.org/web/20261124160038/https://www.shopify.com/pricing">the copy the Internet Archive saved on 2026-11-24</a>. Fees are rounded to the cent, and the monthly plan is not included.</p>
+<table class="cmp"><thead><tr><th>Plan</th><th>Order</th><th>Fee</th><th>Kept</th></tr></thead><tbody><tr><th scope="row">Basic</th><td>$20</td><td>$0.88</td><td>$19.12</td></tr><tr><th scope="row">Grow</th><td>$20</td><td>$0.84</td><td>$19.16</td></tr><tr><th scope="row">Advanced</th><td>$20</td><td>$0.80</td><td>$19.20</td></tr><tr><th scope="row">Plus</th><td>$20</td><td>$0.75</td><td>$19.25</td></tr><tr><th scope="row">Basic</th><td>$50</td><td>$1.75</td><td>$48.25</td></tr><tr><th scope="row">Grow</th><td>$50</td><td>$1.65</td><td>$48.35</td></tr><tr><th scope="row">Advanced</th><td>$50</td><td>$1.55</td><td>$48.45</td></tr><tr><th scope="row">Plus</th><td>$50</td><td>$1.43</td><td>$48.57</td></tr><tr><th scope="row">Basic</th><td>$100</td><td>$3.20</td><td>$96.80</td></tr><tr><th scope="row">Grow</th><td>$100</td><td>$3.00</td><td>$97.00</td></tr><tr><th scope="row">Advanced</th><td>$100</td><td>$2.80</td><td>$97.20</td></tr><tr><th scope="row">Plus</th><td>$100</td><td>$2.55</td><td>$97.45</td></tr><tr><th scope="row">Basic</th><td>$250</td><td>$7.55</td><td>$242.45</td></tr><tr><th scope="row">Grow</th><td>$250</td><td>$7.05</td><td>$242.95</td></tr><tr><th scope="row">Advanced</th><td>$250</td><td>$6.55</td><td>$243.45</td></tr><tr><th scope="row">Plus</th><td>$250</td><td>$5.93</td><td>$244.07</td></tr></tbody></table>
+<p class="p">The fixed 30 cents weighs more on small orders: on Basic, the fee is 4.4% of a $20 order and about 3% of a $250 one. To use your own figure, find your average order with the <a href="/tools/aov-calculator">average order value calculator</a>. It can differ by channel, so tag your links as in <a href="/blog/shopify-utm-tracking">Shopify UTM tracking</a>, and connect the <a href="/integrations/shopify">Shopify integration</a> to credit each order to the visit that led to it.</p>
+<h2>When a higher plan pays for itself</h2>
+<p class="p">A higher plan costs more a month and takes a smaller percentage of each order. The 30 cents and the extra 1% for international cards are the same on every plan, so they cancel out. Only the difference in price and the difference in rate matter:</p>
+<p class="p"><code>break-even sales a month = difference in plan price / difference in rate</code></p>
+<table class="cmp"><thead><tr><th>Move</th><th>Extra a month</th><th>Shopify Payments</th><th>Third-party gateway</th></tr></thead><tbody><tr><th scope="row">Basic to Grow</th><td>$66</td><td>$33,000</td><td>$6,600</td></tr><tr><th scope="row">Grow to Advanced</th><td>$294</td><td>$147,000</td><td>$73,500</td></tr><tr><th scope="row">Advanced to Plus</th><td>$1,901</td><td>$760,400</td><td>$475,250</td></tr></tbody></table>
+<p class="p">The last two columns are the sales a month where the move breaks even at monthly billing prices. With Shopify Payments the difference in rate is in the card rate; with a third-party gateway it is in Shopify's transaction fee, and the gateway's own rate stays the same. Plus starts at $2,300, so its break-even rises if your price is higher. If you pay yearly, use those prices instead. This counts fees only, not the other features of a plan. To see what is left after products, shipping, refunds and ads as well, use the <a href="/tools/shopify-profit-calculator">Shopify profit calculator</a>.</p>
+<p class="p">A made-up example: a store on Basic takes 900 orders of $50 a month with Shopify Payments, $45,000 in sales, all from US cards. Basic costs 900 x $1.75 + $39 = $1,614. Grow costs 900 x $1.65 + $105 = $1,590, so Grow saves $24 a month. The break-even is $66 / (2.9% - 2.7%) = $33,000, or 660 orders of $50. Below that, Basic is cheaper.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Guides on Shopify revenue</h2>
+<ul class="post-list"><li><a href="/blog/track-shopify-revenue-by-traffic-source">How to track Shopify revenue by traffic source</a>: join each order to the visit that brought the buyer.</li><li><a href="/integrations/shopify">Shopify integration</a>: the read-only token and theme snippet Virling needs.</li><li><a href="/tools/payment-fee-calculator">Stripe fee calculator</a>: compare payment provider fees outside Shopify.</li><li><a href="/tools/merchant-of-record-fee-calculator">Merchant of record fee calculator</a>: fees on providers that sell digital products on your behalf.</li><li><a href="/tools/net-revenue-calculator">Net revenue for a store</a>: your sales after Shopify fees, discounts, refunds and chargebacks.</li></ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Shopify fee FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How much does Shopify take per sale?</h3><p class="p">On Shopify's US pricing page, Shopify Payments charges 2.9% + 30 cents per online card payment on Basic, 2.7% + 30 cents on Grow, 2.5% + 30 cents on Advanced and 2.25% + 30 cents on Plus, plus 1% for international cards. On a $50 order on Basic from a US card that is $1.75. The monthly plan is charged separately.</p></div>
+      <div><h3>What does Shopify charge with a third-party payment gateway?</h3><p class="p">A transaction fee of 2% of each order on Basic, 1% on Grow, 0.6% on Advanced and 0.2% on Plus. That fee is charged by Shopify on top of whatever your gateway charges for processing the card.</p></div>
+      <div><h3>Do Shopify fees vary by country?</h3><p class="p">Yes. Card rates, plan prices and whether Shopify Payments is available at all depend on the country your store is based in, and on your plan. This calculator uses the US rates; check Shopify's pricing page for your country.</p></div>
+      <div><h3>What does this calculator leave out?</h3><p class="p">Premium card rates, PayPal and other wallets, in-person sales, currency conversion, refunds, chargebacks, apps, themes and taxes. Plan prices are the monthly billing prices; yearly billing is cheaper.</p></div>
+      <div><h3>Is it cheaper to use Shopify Payments?</h3><p class="p">Usually, because Shopify charges no transaction fee and the card rate already covers processing. A third-party gateway pays off only if its own rate is low enough to cover Shopify's extra fee. Enter your gateway's rate to compare.</p></div>
+      <div><h3>Does Shopify refund its fees when you refund an order?</h3><p class="p">Not with Shopify Payments: <a href="https://help.shopify.com/en/manual/fulfillment/managing-orders/refunding-orders">Shopify's help page on refunds</a> says you don't get any credit card fees refunded. With a third-party gateway, you don't get Shopify's transaction fee refunded if Shopify Payments is available in your store's country. If it isn't available there, Shopify credits the transaction fee in proportion to the amount refunded, but only when you refund the order through your Shopify admin. Any card fees on those orders are set by your gateway.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How much does Shopify take per sale?", "acceptedAnswer": {"@type": "Answer", "text": "On Shopify's US pricing page, Shopify Payments charges 2.9% + 30 cents per online card payment on Basic, 2.7% + 30 cents on Grow, 2.5% + 30 cents on Advanced and 2.25% + 30 cents on Plus, plus 1% for international cards. On a $50 order on Basic from a US card that is $1.75. The monthly plan is charged separately."}}, {"@type": "Question", "name": "What does Shopify charge with a third-party payment gateway?", "acceptedAnswer": {"@type": "Answer", "text": "A transaction fee of 2% of each order on Basic, 1% on Grow, 0.6% on Advanced and 0.2% on Plus. That fee is charged by Shopify on top of whatever your gateway charges for processing the card."}}, {"@type": "Question", "name": "Do Shopify fees vary by country?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Card rates, plan prices and whether Shopify Payments is available at all depend on the country your store is based in, and on your plan. This calculator uses the US rates; check Shopify's pricing page for your country."}}, {"@type": "Question", "name": "What does this calculator leave out?", "acceptedAnswer": {"@type": "Answer", "text": "Premium card rates, PayPal and other wallets, in-person sales, currency conversion, refunds, chargebacks, apps, themes and taxes. Plan prices are the monthly billing prices; yearly billing is cheaper."}}, {"@type": "Question", "name": "Is it cheaper to use Shopify Payments?", "acceptedAnswer": {"@type": "Answer", "text": "Usually, because Shopify charges no transaction fee and the card rate already covers processing. A third-party gateway pays off only if its own rate is low enough to cover Shopify's extra fee. Enter your gateway's rate to compare."}}, {"@type": "Question", "name": "Does Shopify refund its fees when you refund an order?", "acceptedAnswer": {"@type": "Answer", "text": "Not with Shopify Payments: Shopify's help page on refunds says you don't get any credit card fees refunded. With a third-party gateway, you don't get Shopify's transaction fee refunded if Shopify Payments is available in your store's country. If it isn't available there, Shopify credits the transaction fee in proportion to the amount refunded, but only when you refund the order through your Shopify admin. Any card fees on those orders are set by your gateway."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>Know which channels your Shopify sales come from</h2>
+<p class="p">Fees are one side of the sum. Virling links every visit to the order it led to, so you see which channels bring the revenue you keep. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("fees"), out = document.getElementById("fees-out");
+const PLAN = { basic: [39, 2.9, 2], grow: [105, 2.7, 1], advanced: [399, 2.5, 0.6], plus: [2300, 2.25, 0.2] };
+const usd = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const calc = () => {
+  const price = +f.price.value, orders = +f.orders.value, intl = Math.min(+f.intl.value, 100) / 100;
+  const [plan, card, tx] = PLAN[document.getElementById("plan").dataset.value], sp = document.getElementById("pay").dataset.value === "sp";
+  const fee = price > 0 ? (sp ? price * (card + intl) / 100 + 0.3 : price * (tx + +f.gwpct.value) / 100 + +f.gwfix.value) : 0;
+  const month = fee * orders + plan, sales = price * orders;
+  const rows = [["Fees per order", usd(fee)], ["Fees per month, with the plan", usd(month)], ["Net revenue per month", usd(sales - month)], ["Share of sales", sales > 0 ? (month / sales * 100).toFixed(1) + "%" : "No data"]];
+  out.innerHTML = rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+for (const box of document.querySelectorAll("[data-select]")) {
+  const btn = box.querySelector("button"), menu = box.querySelector("ul"), items = [...menu.children];
+  const mark = (el) => { items.forEach((i) => i.classList.toggle("on", i === el)); menu.setAttribute("aria-activedescendant", el.id = btn.id + "-" + el.dataset.value); };
+  const show = (open) => {
+    menu.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+    if (open) { mark(items.find((i) => i.getAttribute("aria-selected") === "true")); menu.focus(); }
+  };
+  const pick = (el) => {
+    items.forEach((i) => i.setAttribute("aria-selected", String(i === el)));
+    btn.dataset.value = el.dataset.value;
+    btn.querySelector("span").textContent = el.textContent;
+    show(false);
+    btn.focus();
+    calc();
+  };
+  btn.addEventListener("click", () => show(menu.hidden));
+  btn.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); show(true); } });
+  items.forEach((i) => { i.addEventListener("click", () => pick(i)); i.addEventListener("mousemove", () => mark(i)); });
+  menu.addEventListener("keydown", (e) => {
+    const at = items.findIndex((i) => i.classList.contains("on"));
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); mark(items[(at + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]); }
+    else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(items[at]); }
+    else if (e.key === "Escape" || e.key === "Tab") { show(false); btn.focus(); }
+  });
+  document.addEventListener("click", (e) => { if (!menu.hidden && !box.contains(e.target)) show(false); });
+}
+f.addEventListener("input", calc);
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

@@ -27,6 +27,8 @@ a.brand:hover{color:var(--fg)}
 .hd-r{display:flex;align-items:center;gap:4px}
 .hd-link{height:32px;padding:0 10px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--fg2);white-space:nowrap}
 .hd-link:hover{background:var(--hover);color:var(--fg)}
+.hd-cta{height:32px;padding:0 12px;margin-left:4px;border-radius:8px;background:var(--fg);color:var(--bg);display:inline-flex;align-items:center;font-size:14px;font-weight:600;white-space:nowrap;flex:none}
+.hd-cta:hover{color:var(--bg);opacity:.9}
 .ver{font:500 12px 'Geist Mono',ui-monospace,Menlo,monospace;color:var(--fg3);height:24px;padding:0 8px;border:1px solid var(--line);border-radius:999px;display:inline-flex;align-items:center;margin-right:6px}
 .ibtn{all:unset;box-sizing:border-box;cursor:pointer;width:34px;height:34px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:var(--fg2);flex:none}
 .ibtn:hover{background:var(--hover);color:var(--fg)}
@@ -316,6 +318,10 @@ mark{background:var(--mark);color:var(--markfg);border-radius:3px;padding:0 2px}
   .cards{grid-template-columns:minmax(0,1fr)}
   .band-g{grid-template-columns:minmax(0,1fr);gap:28px;padding-top:36px;padding-bottom:36px}
   .sec{padding-top:40px}
+}
+@media (max-width:400px){
+  .hd .docs-tag{display:none}
+  .hd-cta{padding:0 10px;font-size:13px}
 }
 .mtoc{margin-top:20px;border:1px solid var(--line);border-radius:12px;background:var(--soft)}
 .mtoc button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;height:44px;padding:0 14px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--fg)}

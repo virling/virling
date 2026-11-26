@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Influencer ROI calculator: revenue per post and break-even</title>
+<meta name="description" content="Know if a creator post paid off: its ROI, the revenue it brought and the conversion rate it needs to break even after fee and product cost.">
+<link rel="canonical" href="https://virling.com/tools/influencer-roi-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/influencer-roi-calculator">
+<meta property="og:title" content="Influencer ROI calculator: revenue per post and break-even">
+<meta property="og:description" content="Know if a creator post paid off: its ROI, the revenue it brought and the conversion rate it needs to break even after fee and product cost.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Influencer ROI calculator","url":"https://virling.com/tools/influencer-roi-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Influencer ROI calculator","item":"https://virling.com/tools/influencer-roi-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / influencer roi calculator</span><h1>Influencer ROI calculator</h1><p class="lead">Enter what a creator post cost you and the traffic it sent to see its return on investment, the revenue it brought and the conversion rate it needs to break even. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="iroi" autocomplete="off">
+  <label>Fee per creator ($)<input name="fee" type="number" min="0" step="0.01" value="500"></label>
+  <label>Product cost if gifted ($) <span class="dim">optional</span><input name="product" type="number" min="0" step="0.01" value="50" placeholder="0"></label>
+  <label>Clicks or visits from the post<input name="visits" type="number" min="0" step="1" value="1200"></label>
+  <label>Conversion rate (%)<input name="cr" type="number" min="0" max="100" step="0.01" value="2"></label>
+  <label>Average order value or first payment ($)<input name="aov" type="number" min="0" step="0.01" value="60"></label>
+</form>
+<div class="tool-stats" id="iroi-out"></div>
+<div class="txt post tool-cta">
+<p class="p">These inputs are guesses until you know which payments each creator brought. Virling links every visit to the payment it led to, so it fills in visitors, paying customers and revenue for each channel and creator from your real payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/roas-calculator">ROAS calculator</a>, <a href="/tools/conversion-rate-calculator">conversion rate calculator</a>, <a href="/blog/influencer-revenue-tracking">how to track influencer sales</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The influencer ROI formula</h2>
+<p class="p">The cost of a post is the creator fee plus what the product you sent cost you. The revenue it brought is the visits it sent, times the share of those visitors who paid, times what they paid:</p>
+<p class="p"><code>revenue per post = visits &times; conversion rate &times; average order value</code></p>
+<p class="p"><code>ROI = (revenue per post - cost of the post) / cost of the post</code></p>
+<p class="p">The conversion rate at which the post exactly pays for itself is:</p>
+<p class="p"><code>break-even conversion rate = cost of the post / (visits &times; average order value)</code></p>
+<p class="p">This ROI uses revenue, not profit. To see whether a post paid off after product and delivery costs, put its cost and revenue with your gross margin into the <a href="/tools/roas-calculator">ROAS calculator</a>.</p>
+<h2>A worked example</h2>
+<p class="p">These are made-up numbers, the defaults above. A creator charged $500 and you sent product that cost $50, so the post cost $550. It sent 1,200 visits and 2% of them paid, which is 24 orders. At $60 each that is $1,440 of revenue. ROI is ($1,440 - $550) / $550 = 162%. The break-even conversion rate is $550 / (1,200 &times; $60) = 0.76%, so the post would still have paid for itself if fewer than 1 in 100 visitors had bought.</p>
+<h2>Two creators: fewer clicks, better return</h2>
+<p class="p">These are made-up numbers for two creators who promote the same $60 product. Each was also sent one that cost $50.</p>
+<table class="cmp"><thead><tr><th></th><th>Creator A</th><th>Creator B</th></tr></thead><tbody><tr><th scope="row">Fee</th><td>$900</td><td>$300</td></tr><tr><th scope="row">Product</th><td>$50</td><td>$50</td></tr><tr><th scope="row">Cost</th><td>$950</td><td>$350</td></tr><tr><th scope="row">Clicks</th><td>3,000</td><td>600</td></tr><tr><th scope="row">Orders</th><td>15 (0.5%)</td><td>12 (2%)</td></tr><tr><th scope="row">Revenue</th><td>$900</td><td>$720</td></tr><tr><th scope="row">ROI</th><td>-5.26%</td><td>106%</td></tr><tr><th scope="row">Break-even rate</th><td>0.53%</td><td>0.97%</td></tr></tbody></table>
+<p class="p">Creator A sent five times the clicks, at $950 / 3,000 = $0.32 each against $350 / 600 = $0.58 for creator B, and brought more revenue. But 15 &times; $60 = $900 does not cover $950: ROI is ($900 - $950) / $950 = -5.26%. Creator B brought 12 &times; $60 = $720 for $350: ($720 - $350) / $350 = 106%. Revenue per click shows why: $900 / 3,000 = $0.30 for A and $720 / 600 = $1.20 for B.</p>
+<p class="p">12 to 15 orders each is a small sample, so run more than one post before you drop a creator.</p>
+<h2>Give each creator their own link or code</h2>
+<p class="p">Creator reports show views and clicks, not payments. To fill in this calculator with real numbers, each creator needs something that only they share:</p>
+<ul class="post-list"><li><b>A tagged link.</b> Put the platform in utm_source, influencer in utm_medium and the creator in utm_campaign. The <a href="/tools/utm-builder">UTM builder</a> makes these links, and the <a href="/tools/influencer-utm-link-generator">influencer UTM link generator</a> makes one per creator from a list of names. A link counts every visit and which of those visitors paid, but misses people who never click it.</li><li><b>A discount code.</b> Your store counts it at checkout, even when the buyer typed your plain URL. It misses buyers who do not enter it, and a code that leaks credits the creator for sales they did not bring. Add the discount to your costs, or enter the order value after it.</li></ul>
+<p class="p">Use both and compare them: <a href="/blog/discount-code-attribution">discount code attribution</a> explains what each gap means. The full setup, including sharing results with creators, is in <a href="/blog/influencer-revenue-tracking">how to track influencer sales</a>.</p>
+<h2>Find the inputs in Virling</h2>
+<p class="p">Virling joins each payment to the visit that led to it, when your checkout passes the visitor ID. Pick a range that starts on the day of the post, then:</p>
+<ul class="post-list"><li><b>Tagged links.</b> Open the Campaign tab of the <b>Channels</b> card. The creator's row has their visitors and revenue. Click the row to filter the page, and New customers at the top shows how many were credited to them.</li><li><b>Partner links.</b> If you made the creator's link under <b>Partners</b>, that page lists their visitors, paying customers and revenue.</li></ul>
+<p class="p">Enter visitors as visits, customers / visitors as the conversion rate, and revenue / customers as the order value. Revenue is net of refunds and includes renewals credited to the creator. Fees and product costs come from your own records, and Virling does not read discount codes. Each card is described in <a href="https://docs.virling.com/guides/dashboard">read your dashboard</a>.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Influencer ROI calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate influencer ROI?</h3><p class="p">Add up what the post cost you: the creator fee plus the cost of any product you sent. Work out the revenue it brought, which is visits times conversion rate times average order value. ROI is revenue minus cost, divided by cost. A $550 post that brings $1,440 of revenue has an ROI of about 162%.</p></div>
+      <div><h3>Should gifted product count as a cost?</h3><p class="p">Yes. Product you send a creator costs you what it took to make and ship, even if no fee changes hands. Enter that cost so a gifted post is compared fairly with a paid one.</p></div>
+      <div><h3>What is the break-even conversion rate?</h3><p class="p">The conversion rate at which the post brings in exactly as much revenue as it cost. It is the cost of the post divided by visits times average order value. If the visitors a creator sends convert below it, the post lost money on a revenue basis.</p></div>
+      <div><h3>Why compare creators by revenue instead of clicks?</h3><p class="p">Clicks do not pay for the post. Two creators with the same clicks can bring very different revenue, so compare them by the payments their visitors made. That needs one tagged link per creator and each payment joined to the visit that led to it.</p></div>
+      <div><h3>Can a creator with fewer clicks have a better ROI?</h3><p class="p">Yes. In a made-up example, a creator who cost $950 sent 3,000 clicks and $900 of revenue, an ROI of -5.26%. Another cost $350 and sent 600 clicks and $720 of revenue, an ROI of 106%. The second audience was more likely to buy, and the post cost less.</p></div>
+      <div><h3>Should I give each creator a link or a discount code?</h3><p class="p">Both, and never share either between creators. A tagged link counts the visits and which of those visitors paid. A code catches buyers who never clicked the link, but misses those who do not enter it and can leak to people the creator never reached.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate influencer ROI?", "acceptedAnswer": {"@type": "Answer", "text": "Add up what the post cost you: the creator fee plus the cost of any product you sent. Work out the revenue it brought, which is visits times conversion rate times average order value. ROI is revenue minus cost, divided by cost. A $550 post that brings $1,440 of revenue has an ROI of about 162%."}}, {"@type": "Question", "name": "Should gifted product count as a cost?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Product you send a creator costs you what it took to make and ship, even if no fee changes hands. Enter that cost so a gifted post is compared fairly with a paid one."}}, {"@type": "Question", "name": "What is the break-even conversion rate?", "acceptedAnswer": {"@type": "Answer", "text": "The conversion rate at which the post brings in exactly as much revenue as it cost. It is the cost of the post divided by visits times average order value. If the visitors a creator sends convert below it, the post lost money on a revenue basis."}}, {"@type": "Question", "name": "Why compare creators by revenue instead of clicks?", "acceptedAnswer": {"@type": "Answer", "text": "Clicks do not pay for the post. Two creators with the same clicks can bring very different revenue, so compare them by the payments their visitors made. That needs one tagged link per creator and each payment joined to the visit that led to it."}}, {"@type": "Question", "name": "Can a creator with fewer clicks have a better ROI?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. In a made-up example, a creator who cost $950 sent 3,000 clicks and $900 of revenue, an ROI of -5.26%. Another cost $350 and sent 600 clicks and $720 of revenue, an ROI of 106%. The second audience was more likely to buy, and the post cost less."}}, {"@type": "Question", "name": "Should I give each creator a link or a discount code?", "acceptedAnswer": {"@type": "Answer", "text": "Both, and never share either between creators. A tagged link counts the visits and which of those visitors paid. A code catches buyers who never clicked the link, but misses those who do not enter it and can leak to people the creator never reached."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which creators actually pay back</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("iroi"), out = document.getElementById("iroi-out");
+const usd = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: Math.abs(n) < 100 ? 2 : 0, maximumFractionDigits: Math.abs(n) < 100 ? 2 : 0 });
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: n !== 0 && Math.abs(n) < 0.1 ? 2 : 0 }) + "%";
+const calc = () => {
+  const cost = +f.fee.value + +f.product.value, v = +f.visits.value, cr = Math.min(+f.cr.value, 100) / 100, aov = +f.aov.value;
+  const rev = v * cr * aov, be = cost / (v * aov);
+  const rows = [];
+  rows.push(["ROI", cost > 0 ? pct((rev - cost) / cost) : "Add a cost"]);
+  rows.push(["Revenue per post", usd(rev)]);
+  rows.push(["Break-even conversion rate", v > 0 && aov > 0 ? (be > 1 ? "Above 100%" : pct(be)) : "Add visits and order value"]);
+  out.innerHTML = rows.map(([k, val]) => `<div><span class="dim">${k}</span><b>${val}</b></div>`).join("");
+};
+f.addEventListener("input", calc);
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firebase and Stripe UTM tracking: Cloud Functions and extension</title>
+<meta name="description" content="How to see which channel brought each paying customer when Stripe Checkout runs through a Firebase Cloud Function or the Stripe Firebase extension.">
+<link rel="canonical" href="https://virling.com/blog/firebase-stripe-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/firebase-stripe-utm-tracking">
+<meta property="og:title" content="Firebase and Stripe UTM tracking: Cloud Functions and extension">
+<meta property="og:description" content="How to see which channel brought each paying customer when Stripe Checkout runs through a Firebase Cloud Function or the Stripe Firebase extension.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Firebase and Stripe UTM tracking: Cloud Functions and the extension","item":"https://virling.com/blog/firebase-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"Firebase and Stripe UTM tracking: Cloud Functions and extension","description":"How to see which channel brought each paying customer when Stripe Checkout runs through a Firebase Cloud Function or the Stripe Firebase extension.","datePublished":"2026-11-23","dateModified":"2026-11-23","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/firebase-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does the virling_vid cookie reach a Firebase Cloud Function?","acceptedAnswer":{"@type":"Answer","text":"No. Called directly, the function runs on its own Google domain, so the browser does not send your cookie. Behind a Firebase Hosting rewrite, Hosting strips every cookie except __session. Read the ID in the browser with window.virling?.vid?.() and send it in the request."}},{"@type":"Question","name":"Does the Stripe Firebase extension pass the visitor ID to Stripe?","acceptedAnswer":{"@type":"Answer","text":"Yes, if you write it as client_reference_id on the checkout_sessions document. The extension copies that field onto the Checkout Session, where Virling reads it."}},{"@type":"Question","name":"Can I use metadata.virling_vid with the extension?","acceptedAnswer":{"@type":"Answer","text":"Only in payment mode. The extension puts the document's metadata on the PaymentIntent in payment mode, which Virling reads, but on the Subscription in subscription mode, which Virling does not read. It never sets metadata on the Checkout Session itself. Use client_reference_id instead."}},{"@type":"Question","name":"Do I need to pass the UTM tags to Stripe?","acceptedAnswer":{"@type":"Answer","text":"No. The Virling script records the UTM tags of every visit against the visitor ID, so passing the ID is enough. Virling joins the payment to all the visits behind it, including untagged ones such as search and referrals."}},{"@type":"Question","name":"What happens if the visitor ID is missing?","acceptedAnswer":{"@type":"Answer","text":"The session is created without one, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-23</span>
+      <h1>Firebase and Stripe UTM tracking: Cloud Functions and the extension</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-23.</p>
+<p class="p">To see which channel brought each paying customer when checkout runs through Firebase, carry one visitor ID from the browser to Stripe. The <code>virling_vid</code> cookie does not reach a Cloud Function, so read the ID in the browser with <code>window.virling?.vid?.()</code>. With your own Cloud Function, send it in the request and pass it to the Checkout Session as <code>client_reference_id</code>. With the Stripe Firebase extension, write it as <code>client_reference_id</code> on the <code>checkout_sessions</code> document. Virling then joins the payment to every visit behind it, with the UTM tags of each.</p>
+<p class="p">The same idea on Supabase is in <a href="/blog/supabase-stripe-utm-tracking">Supabase and Stripe UTM tracking</a>. For Payment Links, metadata limits and where the values show up in Stripe, see the general guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>. For what you get once payments carry the ID, see <a href="/blog/track-stripe-revenue-by-traffic-source">track Stripe revenue by traffic source</a>.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Why Stripe Checkout loses your UTM tags</h2>
+<p class="p">UTM tags live on the landing URL. Stripe Checkout runs on Stripe's domain and only stores what your server passes when it creates the session, so the tags of the visit are gone unless you carry them over. Passing one visitor ID instead of the tags keeps earlier visits and untagged ones, such as search and referrals, too.</p>
+<p class="p">On Firebase the cookie does not help either. A function called directly runs on its own Google domain, so the browser does not send cookies set on yours. Behind a Firebase Hosting rewrite, Hosting strips every cookie except one named <code>__session</code>. Either way, the browser has to send the ID itself.</p>
+<h2>Step 1: add the script to every page</h2>
+<p class="p">Paste the tag before <code>&lt;/head&gt;</code> in your app's <code>index.html</code>, or in the layout every route uses. Keep <code>defer</code>. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<div class="code block"><pre data-snippet>&lt;script defer src="https://app.virling.com/v.js"
+  data-site="yourdomain.com"&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain and records the UTM tags of each visit against it.</p>
+<h2>Step 2: read the visitor ID in the browser</h2>
+<p class="p"><code>window.virling?.vid?.()</code> returns the same ID as the cookie. The script loads with <code>defer</code>, so wait briefly for it before reading, and send nothing if it is still missing, for example when the script is blocked or runs in cookieless mode:</p>
+<div class="code block"><pre data-snippet>async function visitorId() {
+  for (let i = 0; i &lt; 20 &amp;&amp; !window.virling?.vid; i++) {
+    await new Promise((r) =&gt; setTimeout(r, 100));
+  }
+  return window.virling?.vid?.() || null;
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>Step 3a: your own Cloud Function</h2>
+<p class="p">A callable function handles the cross-origin request for you. Read the ID from the request data and pass it as <code>client_reference_id</code>:</p>
+<div class="code block"><pre data-snippet>// functions/index.js
+const { onCall } = require("firebase-functions/v2/https");
+const { defineSecret } = require("firebase-functions/params");
+const Stripe = require("stripe");
+
+const stripeKey = defineSecret("STRIPE_SECRET_KEY");
+
+exports.createCheckout = onCall({ secrets: [stripeKey] }, async (request) =&gt; {
+  const stripe = new Stripe(stripeKey.value());
+  const vid = request.data?.vid;
+  const visitor = typeof vid === "string" &amp;&amp; /^[A-Za-z0-9-]{8,64}$/.test(vid)
+    ? vid
+    : undefined;
+
+  const session = await stripe.checkout.sessions.create({
+    client_reference_id: visitor,
+    line_items: [{ price: "price_...", quantity: 1 }],
+    mode: "subscription",
+    success_url: "https://yourdomain.com/thanks",
+  });
+
+  return { url: session.url };
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Set the key with <code>firebase functions:secrets:set STRIPE_SECRET_KEY</code> and deploy with <code>firebase deploy --only functions</code>. The check on <code>vid</code> keeps anything that is not a visitor ID out of Stripe. In the browser, call it and send the visitor to Stripe:</p>
+<div class="code block"><pre data-snippet>import { getFunctions, httpsCallable } from "firebase/functions";
+
+const createCheckout = httpsCallable(getFunctions(), "createCheckout");
+
+async function checkout() {
+  const { data } = await createCheckout({ vid: await visitorId() });
+  window.location.href = data.url;
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">If <code>client_reference_id</code> already holds your Firebase user ID, keep it there and put the visitor ID in the session's <code>metadata</code> instead, as <code>metadata: visitor ? { virling_vid: visitor } : {}</code>. Virling reads either.</p>
+<h2>Step 3b: the Stripe Firebase extension</h2>
+<p class="p">The extension creates the Checkout Session when you add a document to <code>customers/{uid}/checkout_sessions</code>, and it copies a <code>client_reference_id</code> field from that document onto the session. So add the visitor ID there. Firestore refuses <code>undefined</code> values, so leave the field out when there is no ID:</p>
+<div class="code block"><pre data-snippet>import { getFirestore, collection, addDoc, onSnapshot } from "firebase/firestore";
+
+async function checkout(uid) {
+  const vid = await visitorId();
+  const ref = await addDoc(
+    collection(getFirestore(), "customers", uid, "checkout_sessions"),
+    {
+      price: "price_...",
+      success_url: window.location.origin + "/thanks",
+      cancel_url: window.location.href,
+      ...(vid &amp;&amp; { client_reference_id: vid }),
+    },
+  );
+  onSnapshot(ref, (snap) =&gt; {
+    const { url, error } = snap.data();
+    if (error) showError(error.message);
+    if (url) window.location.assign(url);
+  });
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Use the collection path you chose when you installed the extension if it is not <code>customers</code>. Replace <code>showError</code> with however your app shows errors.</p>
+<p class="p">What the extension cannot pass through: it never sets <code>metadata</code> on the Checkout Session itself. The <code>metadata</code> field of the document goes to the PaymentIntent in payment mode, which Virling reads, and to the Subscription in subscription mode, which Virling does not read. So with the extension, use <code>client_reference_id</code>. If your app already stores something there, the extension gives you no other field on the session for the visitor ID; create that checkout in your own Cloud Function instead.</p>
+<p class="p">You do not need to send the UTM tags themselves: the script has already recorded them against the visitor ID. The full lookup order is in the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a>, and the setup for subscription apps is on the <a href="/integrations/stripe-saas">Stripe for SaaS page</a>.</p>
+<h2>Check that it works</h2>
+<p class="p">Make a test payment from a page on your deployed site that runs the script, wait for the next sync, and open the payments list at <code>/app/yourdomain.com/payments</code>. The payment should show a channel instead of Unattributed. Open it to see its journey. The script does not track on <code>localhost</code> or on a host other than your domain, so test on your live site, not on a preview channel.</p>
+<p class="p">If it still shows Unattributed, open the Checkout Session in the Stripe Dashboard and look for the visitor ID in <code>client_reference_id</code> or the metadata. If it is empty, check the data your browser sends to the function or writes to Firestore. Payments without a visitor ID still count toward revenue, as Unattributed.</p>
+<h2 id="other-frameworks">Other frameworks</h2>
+<p class="p">The same steps for other stacks:</p>
+<ul class="post-list"><li><a href="/blog/supabase-stripe-utm-tracking">Supabase Stripe UTM tracking</a></li><li><a href="/blog/convex-stripe-utm-tracking">Convex Stripe UTM tracking</a></li><li><a href="/blog/nextjs-stripe-utm-tracking">Next.js Stripe UTM tracking</a></li><li><a href="/blog/react-stripe-utm-tracking">React Stripe UTM tracking</a></li><li><a href="/blog/express-stripe-utm-tracking">Express Stripe UTM tracking</a></li><li><a href="/blog/cloudflare-workers-stripe-utm-tracking">Cloudflare Workers Stripe UTM tracking</a></li><li><a href="/blog/sveltekit-stripe-utm-tracking">SvelteKit Stripe UTM tracking</a></li><li><a href="/blog/nuxt-stripe-utm-tracking">Nuxt Stripe UTM tracking</a></li></ul>
+<h2>Frequently asked questions</h2>
+<h3>Does the virling_vid cookie reach a Firebase Cloud Function?</h3><p class="p">No. Called directly, the function runs on its own Google domain, so the browser does not send your cookie. Behind a Firebase Hosting rewrite, Hosting strips every cookie except __session. Read the ID in the browser with window.virling?.vid?.() and send it in the request.</p>
+<h3>Does the Stripe Firebase extension pass the visitor ID to Stripe?</h3><p class="p">Yes, if you write it as client_reference_id on the checkout_sessions document. The extension copies that field onto the Checkout Session, where Virling reads it.</p>
+<h3>Can I use metadata.virling_vid with the extension?</h3><p class="p">Only in payment mode. The extension puts the document's metadata on the PaymentIntent in payment mode, which Virling reads, but on the Subscription in subscription mode, which Virling does not read. It never sets metadata on the Checkout Session itself. Use client_reference_id instead.</p>
+<h3>Do I need to pass the UTM tags to Stripe?</h3><p class="p">No. The Virling script records the UTM tags of every visit against the visitor ID, so passing the ID is enough. Virling joins the payment to all the visits behind it, including untagged ones such as search and referrals.</p>
+<h3>What happens if the visitor ID is missing?</h3><p class="p">The session is created without one, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring Stripe revenue</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

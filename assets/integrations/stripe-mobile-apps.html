@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web to app revenue attribution: Stripe for mobile apps</title>
+<meta name="description" content="For apps that sell on the web with Stripe before the install: tie each payment and renewal to its channel, trials included, and see what stays Unattributed.">
+<link rel="canonical" href="https://virling.com/integrations/stripe-mobile-apps">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/integrations/stripe-mobile-apps">
+<meta property="og:title" content="Web to app revenue attribution: Stripe for mobile apps">
+<meta property="og:description" content="For apps that sell on the web with Stripe before the install: tie each payment and renewal to its channel, trials included, and see what stays Unattributed.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Integrations","item":"https://virling.com/integrations"},{"@type":"ListItem","position":3,"name":"Stripe","item":"https://virling.com/integrations/stripe"},{"@type":"ListItem","position":4,"name":"Stripe for mobile apps","item":"https://virling.com/integrations/stripe-mobile-apps"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How does web to app revenue attribution work with Stripe?","acceptedAnswer":{"@type":"Answer","text":"A visitor lands on your site and buys through Stripe Checkout or a Payment Link before they install the app. The Virling script stores a visitor ID in the virling_vid cookie, and that ID travels to Stripe on the checkout. Virling reads the payment with a read-only restricted key and credits it to the visits before it."}},{"@type":"Question","name":"Where do I put the visitor ID in Stripe?","acceptedAnswer":{"@type":"Answer","text":"On a Checkout Session you create, set client_reference_id to the virling_vid cookie, or metadata.virling_vid if you already use client_reference_id. With your own PaymentIntent, use metadata.virling_vid. Payment Links on buy.stripe.com need no code when they are normal links on a page that runs the script."}},{"@type":"Question","name":"How are free trials and renewals credited?","acceptedAnswer":{"@type":"Answer","text":"A trial start, a Checkout Session with a total of 0, is kept apart from payments and never counted as revenue. The customer's later payment is credited to the visits before the trial started, as long as Stripe was connected by then. Renewals take the channel of the customer's first payment, matched by Stripe customer ID."}},{"@type":"Question","name":"Can Virling track app installs or in-app purchases?","acceptedAnswer":{"@type":"Answer","text":"It does not track installs. Virling reads Stripe, and with RevenueCat connected, RevenueCat purchases too. A store purchase is credited to a visit only when the customer's virling_vid attribute was set from a web visit before it. Purchases that never touch the web count toward revenue as Unattributed."}},{"@type":"Question","name":"Does Virling need write access to Stripe?","acceptedAnswer":{"@type":"Answer","text":"No. It asks for a restricted key with Read on Charges, Checkout Sessions, Customers, Events, Invoices, Subscriptions and PaymentIntents, and refuses secret keys."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">integrations / stripe for mobile apps</span>
+      <h1>Web to app revenue attribution: Stripe sales by channel.</h1>
+      <p class="lead">For apps that sell on the web through Stripe Checkout or Payment Links before the install. Virling puts the visitor ID on the Stripe checkout and credits each payment and renewal to the ad, post or search that brought the buyer. Open source under AGPL, hosted or <a href="/self-host">self-hosted</a>.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="btn light" href="/demo">See the demo</a></p>
+    </div>
+  </div></section>
+
+  <section class="band alt"><div class="wrap">
+    <div class="txt post">
+<p class="p">A web to app buyer pays on your site first and opens the app after. Stripe knows who paid, but not the visit that came before. Virling joins the two with a read-only key. Store installs and in-app purchases that never touch the web have no visit to credit.</p>
+<h2>What you get</h2>
+<ul class="post-list"><li><b>Each web sale credited to a channel.</b> The payment is joined to the visits before it. By default it goes to the latest visit in the last 90 days that was not Direct.</li><li><b>Trials that convert.</b> A trial start, a <code>checkout.session.completed</code> event with a total of 0, is never counted as revenue, a payment or a customer. The customer&#x27;s later payment is credited to the visits before the trial started. A paid trial is a payment like any other.</li><li><b>Renewals that keep the first channel.</b> A charge whose invoice has billing reason <code>subscription_cycle</code> is a renewal. It copies the channel, referrer, campaign, landing page, country and device of the customer&#x27;s first payment, matched by Stripe customer ID, even though the renewal happens long after the install and has no visit.</li><li><b>Refunds and disputes.</b> Refunds and lost disputes update payments that were already imported.</li><li><b>MRR.</b> The list price of live subscriptions per month in USD, past any trial, shows on Latest payments.</li></ul>
+<h2>Where the visitor ID goes</h2>
+<p class="p">The script sets the <code>virling_vid</code> cookie on your registrable domain, so a site on <code>yourapp.com</code> and a paywall on <code>pay.yourapp.com</code> share one visitor ID. It has to reach Stripe on the checkout:</p>
+<table class="cmp"><thead><tr><th>How you sell</th><th>Where the ID goes</th></tr></thead><tbody><tr><th scope="row">Checkout Session</th><td><code>client_reference_id</code>, or <code>metadata.virling_vid</code> if you already use that field</td></tr><tr><th scope="row">Payment Link on <code>buy.stripe.com</code></th><td>No code: the script adds <code>client_reference_id</code> when it is a normal link on a page that runs the script</td></tr><tr><th scope="row">Your own PaymentIntent (Elements)</th><td><code>metadata.virling_vid</code></td></tr></tbody></table>
+<div class="code block"><pre>await stripe.checkout.sessions.create({
+  mode: &quot;subscription&quot;,
+  client_reference_id: req.cookies.virling_vid,
+  // ...
+});</pre></div>
+<h2>Set it up</h2>
+<ol class="post-list"><li><b>Add the site.</b> Click <b>+ Add a site</b> and enter your domain, such as <code>yourapp.com</code>, and its timezone.</li><li><b>Install the script.</b> Paste the tag before <code>&lt;/head&gt;</code> on every page of your marketing site and web paywall. Leave cookieless mode off: without the cookie there is no visitor ID to pass on.</li><li><b>Pass the visitor ID.</b> Use the table above. Create the Checkout Session from a request the browser makes, so your server receives the cookie.</li><li><b>Connect Stripe.</b> Create a restricted key with <b>Read</b> on Charges, Checkout Sessions, Customers, Events, Invoices, Subscriptions and PaymentIntents, and paste it under payments. Secret keys are refused. The last 90 days are imported, then new payments every minute.</li><li><b>Test it.</b> Open your site in a private window from <code>https://yourapp.com/?utm_source=test&amp;utm_medium=test</code>, buy, wait for the next sync and open the payments list. The payment should show the <code>test</code> source instead of Unattributed.</li></ol>
+<p class="p">If you also sell in the app through the stores, connect <a href="/integrations/revenuecat">RevenueCat</a> and set <code>virling_vid</code> on its customer before the purchase; <a href="/blog/revenuecat-web-paywall-attribution">RevenueCat web paywall attribution</a> shows how. Every setting for the web side is on the <a href="/integrations/stripe">Stripe integration page</a>, and <a href="/integrations/mobile-apps">Virling for mobile apps</a> covers RevenueCat apps.</p>
+<h2>A worked example</h2>
+<p class="p">These numbers are made up, to show how to read the report. They are not from a real app and not a benchmark.</p>
+<table class="cmp"><thead><tr><th>Channel</th><th>Visitors</th><th>Web revenue</th><th>Revenue per visitor</th></tr></thead><tbody><tr><th scope="row">Paid</th><td>2,000</td><td>$400</td><td>$0.20</td></tr><tr><th scope="row">Email</th><td>500</td><td>$500</td><td>$1.00</td></tr><tr><th scope="row">Unattributed</th><td>-</td><td>$300</td><td>-</td></tr></tbody></table>
+<p class="p">Paid sent four times the visitors and less revenue. To weigh a web sale against a store sale, put your price in the <a href="/tools/app-store-fee-calculator">App Store fee calculator</a>.</p>
+<h2>What stays Unattributed</h2>
+<ul class="post-list"><li><b>In-app purchases that never touch the web.</b> Someone who finds the app in the store and buys there has no visit to credit. With RevenueCat connected, the purchase counts toward revenue as Unattributed. With only Stripe connected, Virling does not see it at all.</li><li><b>Links opened outside your site.</b> A Payment Link opened from the app, an email, a QR code or another site carries no visitor ID. Send people to a page on your site that runs the script.</li><li><b>Another browser or device.</b> The visitor ID lives in one browser. Someone who sees your page on a laptop and pays on a phone is credited to the phone&#x27;s visits. When checkout cannot carry the ID, Stripe payments can be <a href="https://docs.virling.com/attribution/unattributed">matched by email</a>.</li><li><b>Older subscriptions and trials.</b> Payments older than the 90-day backfill are not imported, so renewals of subscriptions that started before that are Unattributed. Trials that started before you connected are not seen.</li></ul>
+<h2>What to know</h2>
+<ul class="post-list"><li>Virling does not track installs, only web visits and payments.</li><li>The first charge after a free trial already has billing reason <code>subscription_cycle</code>, so it is marked as a renewal. It is still credited to the visits before the trial, but Retention leaves out customers whose earliest payment is a renewal.</li><li>Customers are matched per provider. Someone who pays on Stripe and later buys in the app through RevenueCat counts as two customers.</li><li>Connecting Stripe and RevenueCat on one site counts a sale twice if RevenueCat also reports your Stripe purchases. Connect one of them for those sales.</li></ul>
+<h2>Open source</h2>
+<p class="p">Virling is open source under AGPLv3, and the code is on <a href="https://github.com/virling/virling">GitHub</a>. Use the hosted service, or <a href="/self-host">self-host it</a> as one binary with every feature.</p>
+<h2>Frequently asked questions</h2>
+<h3>How does web to app revenue attribution work with Stripe?</h3><p class="p">A visitor lands on your site and buys through Stripe Checkout or a Payment Link before they install the app. The Virling script stores a visitor ID in the virling_vid cookie, and that ID travels to Stripe on the checkout. Virling reads the payment with a read-only restricted key and credits it to the visits before it.</p>
+<h3>Where do I put the visitor ID in Stripe?</h3><p class="p">On a Checkout Session you create, set client_reference_id to the virling_vid cookie, or metadata.virling_vid if you already use client_reference_id. With your own PaymentIntent, use metadata.virling_vid. Payment Links on buy.stripe.com need no code when they are normal links on a page that runs the script.</p>
+<h3>How are free trials and renewals credited?</h3><p class="p">A trial start, a Checkout Session with a total of 0, is kept apart from payments and never counted as revenue. The customer's later payment is credited to the visits before the trial started, as long as Stripe was connected by then. Renewals take the channel of the customer's first payment, matched by Stripe customer ID.</p>
+<h3>Can Virling track app installs or in-app purchases?</h3><p class="p">It does not track installs. Virling reads Stripe, and with RevenueCat connected, RevenueCat purchases too. A store purchase is credited to a visit only when the customer's virling_vid attribute was set from a web visit before it. Purchases that never touch the web count toward revenue as Unattributed.</p>
+<h3>Does Virling need write access to Stripe?</h3><p class="p">No. It asks for a restricted key with Read on Charges, Checkout Sessions, Customers, Events, Invoices, Subscriptions and PaymentIntents, and refuses secret keys.</p>
+      <p class="p">Full guides: <a href="https://docs.virling.com/guides/mobile-apps">Set up a mobile app</a>, <a href="https://docs.virling.com/payments/stripe">Stripe in the docs</a> and <a href="https://docs.virling.com/attribution/renewals">Renewals</a>.</p>
+      <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post"><h2>Related reading</h2><ul class="post-list"><li><a href="/integrations/mobile-apps">Revenue attribution for mobile apps</a></li><li><a href="/integrations/stripe">Stripe revenue attribution</a></li><li><a href="/integrations/revenuecat">RevenueCat revenue attribution</a></li><li><a href="/blog/revenuecat-web-paywall-attribution">RevenueCat web paywall attribution</a></li><li><a href="/tools/app-store-fee-calculator">App Store fee calculator</a></li><li><a href="/demo">See the demo</a></li></ul></div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

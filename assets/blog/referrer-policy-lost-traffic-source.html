@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why is document.referrer empty? Causes and fixes</title>
+<meta name="description" content="document.referrer is empty when no page passed it on: noreferrer links, a strict referrer policy, HTTPS to HTTP, apps or a redirect. How to check and fix it.">
+<link rel="canonical" href="https://virling.com/blog/referrer-policy-lost-traffic-source">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/referrer-policy-lost-traffic-source">
+<meta property="og:title" content="Why is document.referrer empty? Causes and fixes">
+<meta property="og:description" content="document.referrer is empty when no page passed it on: noreferrer links, a strict referrer policy, HTTPS to HTTP, apps or a redirect. How to check and fix it.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Why is document.referrer empty? Causes and fixes","item":"https://virling.com/blog/referrer-policy-lost-traffic-source"}]},{"@type":"BlogPosting","headline":"Why is document.referrer empty? Causes and fixes","description":"document.referrer is empty when no page passed it on: noreferrer links, a strict referrer policy, HTTPS to HTTP, apps or a redirect. How to check and fix it.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/referrer-policy-lost-traffic-source"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why is document.referrer empty?","acceptedAnswer":{"@type":"Answer","text":"Because the browser had no linking page to report, or was told not to report it. The common cases are a typed address or bookmark, a link opened from an app or mail client, a rel=noreferrer link, a no-referrer policy on the linking page, a link from an HTTPS page to an HTTP address, and a redirect that sets a stricter policy."}},{"@type":"Question","name":"Why does document.referrer show only the domain?","acceptedAnswer":{"@type":"Answer","text":"Because the default browser policy, strict-origin-when-cross-origin, sends only the origin to another site. The path and query string of the linking page are removed. The domain is enough to name the site that sent the visit."}},{"@type":"Question","name":"Can I make other sites send me a referrer?","acceptedAnswer":{"@type":"Answer","text":"No. The linking page, the link itself and the browser decide. Your own Referrer-Policy header covers the requests your pages make, and your own redirects. For links you place yourself, add UTM tags."}},{"@type":"Question","name":"Does rel=noopener remove the referrer?","acceptedAnswer":{"@type":"Answer","text":"No. noopener only stops the new page from reaching the page that opened it. noreferrer removes the referrer, and it also behaves as noopener."}},{"@type":"Question","name":"Do redirects remove the referrer?","acceptedAnswer":{"@type":"Answer","text":"An ordinary server redirect keeps the referrer of the page the visitor clicked on. It is lost when a redirect response sends Referrer-Policy: no-referrer or same-origin, or when the link goes from an HTTPS page to an HTTP address first."}},{"@type":"Question","name":"Do UTM tags work when the referrer is empty?","acceptedAnswer":{"@type":"Answer","text":"Yes. UTM tags are part of your page address, so no referrer policy removes them. They are lost only if something rewrites the address before your analytics reads it."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>Why is document.referrer empty? Causes and fixes</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p"><code>document.referrer</code> is empty when the browser had no linking page to report, or was told not to report it. The usual reasons are a typed address or bookmark, a link opened from an app or mail client, a <code>rel="noreferrer"</code> link, a <code>no-referrer</code> policy on the linking page, a link from HTTPS to HTTP, or a redirect that sets a stricter policy. You cannot force another site to send a referrer. You can fix your own redirects and headers, and put UTM tags on every link you control.</p>
+<h2>The causes at a glance</h2>
+<table class="cmp"><thead><tr><th>Cause</th><th>What reaches your page</th><th>Who can fix it</th></tr></thead><tbody><tr><th scope="row">Typed address or bookmark</th><td>Nothing</td><td>Nobody, it is real Direct</td></tr><tr><th scope="row">Default browser policy</th><td>The domain of the other site, without the path</td><td>Nothing to fix, the source is there</td></tr><tr><th scope="row"><code>rel="noreferrer"</code> on the link</th><td>Nothing</td><td>The site with the link</td></tr><tr><th scope="row">Meta referrer or <code>Referrer-Policy</code> set to <code>no-referrer</code> or <code>same-origin</code></th><td>Nothing on another site</td><td>The site with the link</td></tr><tr><th scope="row">Link from HTTPS to HTTP</th><td>Nothing</td><td>Whoever wrote the <code>http://</code> link, then your server</td></tr><tr><th scope="row">App or desktop mail client</th><td>Often nothing</td><td>You, with tags on the link</td></tr><tr><th scope="row">Redirect with a strict policy</th><td>Nothing</td><td>Whoever runs the redirect, often you</td></tr></tbody></table>
+<p class="p">Each cause below links to its source. This post is about the referrer itself. For everything else that ends up in the same bucket, and how to read it, see <a href="/blog/why-is-direct-my-biggest-traffic-source">why Direct is your biggest traffic source</a>. For a referrer that is there but wrong, such as buyers coming back from paying, see <a href="/blog/stripe-checkout-referral-traffic">checkout.stripe.com referral traffic</a>.</p>
+<h2>The browser default sends only the domain</h2>
+<p class="p">When nobody sets a policy, browsers follow <code>strict-origin-when-cross-origin</code>. A click within one site sends the full address. A click to another site sends only the origin, so a visitor from <code>https://blog.example/best-tools?page=2</code> arrives with <code>https://blog.example/</code>. The <a href="https://w3c.github.io/webappsec-referrer-policy/">Referrer Policy specification</a> names it as the default, and Chrome announced the change <a href="https://developer.chrome.com/blog/referrer-policy-new-chrome-default">starting in version 85</a>. A missing path is therefore normal and no sign of a problem. An empty value needs one of the causes below.</p>
+<p class="p">A typed address or a bookmark has no linking page at all. <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/referrer">MDN</a> documents the value as an empty string in that case.</p>
+<h2>rel="noreferrer" on the link</h2>
+<p class="p">A link with <code>rel="noreferrer"</code> sends no referrer, whatever the page policy is. <a href="https://html.spec.whatwg.org/multipage/links.html#link-type-noreferrer">The HTML standard</a> says no referrer information is leaked when the link is followed, and that the keyword implies <code>noopener</code>. The reverse is not true: <code>noopener</code> alone keeps the referrer. It is easy to copy <code>rel="noopener noreferrer"</code> onto every external link, including links between two domains you own.</p>
+<pre>&lt;!-- Sends no referrer --&gt;
+&lt;a href="https://shop.example.com" rel="noopener noreferrer"&gt;Shop&lt;/a&gt;
+
+&lt;!-- Keeps the referrer --&gt;
+&lt;a href="https://shop.example.com" rel="noopener"&gt;Shop&lt;/a&gt;</pre>
+<h2>Meta referrer and the Referrer-Policy header</h2>
+<p class="p">The linking site can set a policy for a whole page, with a <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/name/referrer">meta referrer tag</a> or with the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy">Referrer-Policy header</a>. A <code>referrerpolicy</code> attribute on one link takes priority over both, in the <a href="https://web.dev/articles/referrer-best-practices">order web.dev gives</a>: element, page, browser default.</p>
+<pre>&lt;meta name="referrer" content="no-referrer"&gt;
+
+Referrer-Policy: no-referrer</pre>
+<p class="p">Two values hide the source from every other site: <code>no-referrer</code> sends nothing anywhere, and <code>same-origin</code> sends the address only within the same origin. All the other values send at least the domain from one HTTPS site to another.</p>
+<p class="p">Read the direction carefully. The header on your site covers the requests your pages make. It does not change what other sites send to you.</p>
+<h2>HTTPS to HTTP</h2>
+<p class="p">With the default policy, a click from an HTTPS page to an <code>http://</code> address sends no referrer. The <a href="https://w3c.github.io/webappsec-referrer-policy/#referrer-policy-strict-origin-when-cross-origin">specification</a> gives that exact case, and <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-referer">RFC 9110</a> forbids the header on an unsecured request from a secure page. By the <a href="https://fetch.spec.whatwg.org/#main-fetch">Fetch standard</a>, a referrer set to none is not worked out again later, so your redirect from http to https does not bring it back. Old links in directories and profiles that still say <code>http://</code> are worth updating.</p>
+<h2>Apps and mail clients</h2>
+<p class="p">A link in a phone app, a desktop mail client or a document is not on a web page. <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-referer">RFC 9110</a> says that when the source has no address of its own, the browser must leave the header out or send <code>about:blank</code>. Android lets an app name itself with an <code>android-app:</code> address, but <a href="https://developer.android.com/reference/android/app/Activity#getReferrer()">its documentation</a> says the value may be null.</p>
+<p class="p">Webmail runs in a browser and can still hide the source. Roundcube, an open-source webmail, <a href="https://github.com/roundcube/roundcubemail/blob/master/program/actions/mail/index.php">adds noreferrer</a> to the links in a message. Chats and private shares are a large topic of their own, covered in <a href="/blog/dark-social-revenue-tracking">dark social traffic and what revenue it brings</a>.</p>
+<h2>Redirects</h2>
+<p class="p">An ordinary 301 or 302 keeps the referrer of the page the visitor clicked on. The redirect itself never becomes the referrer. Two things change that:</p>
+<ul class="post-list"><li><b>A policy on the redirect response.</b> The browser applies the <code>Referrer-Policy</code> of the redirect to the next hop, as the <a href="https://w3c.github.io/webappsec-referrer-policy/#set-requests-referrer-policy-on-redirect">specification</a> describes. <code>no-referrer</code> removes the source. So does <code>same-origin</code>, because the page with the link is on another origin.</li><li><b>A page in between.</b> A redirect made with JavaScript or a meta refresh is a page that loads and then navigates, so that page is the new source. It shows up as the referrer, or hides it if its own policy says so.</li></ul>
+<p class="p">If the tags disappear as well as the referrer, the redirect is dropping the query string. That is a separate fault, covered in <a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a>.</p>
+<h2>How to check your own site</h2>
+<ol class="post-list"><li>Put a plain link to your site on a page at another domain, over HTTPS. Click it. A pasted address always gives an empty value, so it proves nothing.</li><li>On your page, run <code>document.referrer</code> in the browser console. You should see the other domain.</li><li>In the Network panel of the browser tools, select the document request and look at the <code>Referer</code> request header. The name is spelled with one r in HTTP.</li><li>List the policy on every hop of your own redirects, from each address people might link to:</li></ol>
+<pre>curl -sIL http://example.com | grep -iE '^(HTTP|location|referrer-policy)'
+curl -sIL https://www.example.com | grep -iE '^(HTTP|location|referrer-policy)'</pre>
+<p class="p">A <code>referrer-policy: no-referrer</code> or <code>same-origin</code> line next to a 301 or 302 means that redirect hides the source of visits that pass through it. Then search your templates for <code>noreferrer</code> and for <code>name="referrer"</code>, and look for a security plugin or CDN setting that adds the header for you.</p>
+<p class="p">To see how a visit would be classified with and without a referrer, paste its landing address into the <a href="/tools/traffic-source-checker">traffic source checker</a> and leave the referrer blank.</p>
+<h2>What to set</h2>
+<p class="p">Set <code>strict-origin-when-cross-origin</code> yourself, on pages and on redirects. It matches the default, it is the value <a href="https://web.dev/articles/referrer-best-practices">web.dev suggests considering</a>, and an explicit header does not depend on the browser.</p>
+<pre># Nginx
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+# Caddy
+header Referrer-Policy "strict-origin-when-cross-origin"</pre>
+<p class="p">In Nginx, a block with its own <code>add_header</code> does not inherit the ones above it by default, as <a href="https://nginx.org/en/docs/http/ngx_http_headers_module.html#add_header">its documentation</a> says, so check the redirect block too. A page with private data in its address can keep a stricter policy. Between your own domains, use <code>rel="noopener"</code> without <code>noreferrer</code>. Redirect http to https on the server, and link to the <code>https://</code> address everywhere you can edit.</p>
+<h2>Why UTM tags still work</h2>
+<p class="p">A referrer is something the browser chooses to send about the last page. A UTM tag is part of the address of your own page. No referrer policy touches it, so a tagged link in an app, an email or a <code>noreferrer</code> page still says where it was placed. Build the links with the <a href="/tools/utm-builder">UTM builder</a>.</p>
+<p class="p">Virling decides the channel of a session from its first pageview, in a fixed order: a paid or email <code>utm_medium</code>, then the referrer host, then <code>utm_source</code> (or <code>ref</code>) when there is no referrer. Some made-up examples:</p>
+<table class="cmp"><thead><tr><th>Made-up landing</th><th>Referrer</th><th>Channel</th></tr></thead><tbody><tr><th scope="row"><code>/pricing</code></th><td>None</td><td>Direct</td></tr><tr><th scope="row"><code>/pricing?utm_source=reddit</code></th><td>None</td><td>Communities</td></tr><tr><th scope="row"><code>/pricing?utm_source=spring&amp;utm_medium=email</code></th><td>None</td><td>Email</td></tr><tr><th scope="row"><code>/pricing?utm_source=partner-site</code></th><td>None</td><td>Referral</td></tr><tr><th scope="row"><code>/pricing</code></th><td><code>https://news.ycombinator.com/</code></td><td>Communities</td></tr></tbody></table>
+<p class="p">When there is no referrer and no source, Virling also reads the user agent, and credits the visit to the app if it names a known one such as Instagram or Slack. Any other <code>utm_medium</code> on its own is Referral. What is left is Direct. The full rules are in the <a href="https://docs.virling.com/attribution/channels">channel docs</a>. Virling joins each payment to the visit before it, so a tagged link shows its revenue even when the referrer was empty.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+<h2>Frequently asked questions</h2>
+<h3>Why is document.referrer empty?</h3><p class="p">Because the browser had no linking page to report, or was told not to report it. The common cases are a typed address or bookmark, a link opened from an app or mail client, a rel=noreferrer link, a no-referrer policy on the linking page, a link from an HTTPS page to an HTTP address, and a redirect that sets a stricter policy.</p>
+<h3>Why does document.referrer show only the domain?</h3><p class="p">Because the default browser policy, strict-origin-when-cross-origin, sends only the origin to another site. The path and query string of the linking page are removed. The domain is enough to name the site that sent the visit.</p>
+<h3>Can I make other sites send me a referrer?</h3><p class="p">No. The linking page, the link itself and the browser decide. Your own Referrer-Policy header covers the requests your pages make, and your own redirects. For links you place yourself, add UTM tags.</p>
+<h3>Does rel=noopener remove the referrer?</h3><p class="p">No. noopener only stops the new page from reaching the page that opened it. noreferrer removes the referrer, and it also behaves as noopener.</p>
+<h3>Do redirects remove the referrer?</h3><p class="p">An ordinary server redirect keeps the referrer of the page the visitor clicked on. It is lost when a redirect response sends Referrer-Policy: no-referrer or same-origin, or when the link goes from an HTTPS page to an HTTP address first.</p>
+<h3>Do UTM tags work when the referrer is empty?</h3><p class="p">Yes. UTM tags are part of your page address, so no referrer policy removes them. They are lost only if something rewrites the address before your analytics reads it.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the source behind every payment</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

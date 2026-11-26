@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shopify profit calculator: profit per order and per month</title>
+<meta name="description" content="Work out Shopify profit per order and per month after product, shipping, fees, refunds and ads, plus your margin and break-even ad spend.">
+<link rel="canonical" href="https://virling.com/tools/shopify-profit-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/shopify-profit-calculator">
+<meta property="og:title" content="Shopify profit calculator: profit per order and per month">
+<meta property="og:description" content="Work out Shopify profit per order and per month after product, shipping, fees, refunds and ads, plus your margin and break-even ad spend.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Shopify profit calculator","url":"https://virling.com/tools/shopify-profit-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Shopify profit calculator","item":"https://virling.com/tools/shopify-profit-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / shopify profit calculator</span><h1>Shopify profit calculator</h1><p class="lead">See what your store keeps after products, shipping, Shopify fees, refunds and ads. Enter an average order and a month of ad spend to get the profit per order, the profit per month, your margin and the most you can spend on ads per order before you lose money. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="profit" autocomplete="off">
+  <label>Order value ($)<input name="value" type="number" min="0" max="10000000" step="0.01" value="60" data-n="Order value" aria-describedby="profit-msg"></label>
+  <label>Orders per month<input name="orders" type="number" min="0" max="10000000" step="1" value="300" data-n="Orders per month" aria-describedby="profit-msg"></label>
+  <label>Product cost per order ($)<input name="product" type="number" min="0" max="10000000" step="0.01" value="20" data-n="Product cost" aria-describedby="profit-msg"></label>
+  <label>Shipping cost per order ($)<input name="ship" type="number" min="0" max="10000000" step="0.01" value="7" data-n="Shipping cost" aria-describedby="profit-msg"></label>
+  <label>Orders refunded (%)<input name="refund" type="number" min="0" max="100" step="0.1" value="5" data-n="Orders refunded" aria-describedby="profit-msg"></label>
+  <label>Ad spend per month ($)<input name="ads" type="number" min="0" max="10000000" step="0.01" value="3600" data-n="Ad spend" aria-describedby="profit-msg"></label>
+  <div class="tool-pick" data-select><span id="plan-label">Shopify plan</span>
+    <button type="button" id="plan" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="plan-label plan-value" data-value="basic"><span id="plan-value">Basic, $39 a month</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="plan-menu" role="listbox" aria-labelledby="plan-label" tabindex="-1" hidden><li role="option" data-value="basic" aria-selected="true">Basic, $39 a month</li><li role="option" data-value="grow" aria-selected="false">Grow, $105 a month</li><li role="option" data-value="advanced" aria-selected="false">Advanced, $399 a month</li><li role="option" data-value="plus" aria-selected="false">Plus, from $2,300 a month</li></ul>
+  </div>
+</form>
+<p class="p" id="profit-msg" role="status" style="margin:0;color:var(--revenue-text)"></p>
+<div class="tool-stats" id="profit-out" style="overflow-wrap:anywhere"></div>
+<p class="fine-note" id="profit-how" style="overflow-wrap:anywhere"></p>
+<p class="fine-note">US rates for online card payments with Shopify Payments, checked on 2026-11-17 on <a href="https://www.shopify.com/pricing">Shopify's pricing page</a>: Basic 2.9% + 30&cent;, Grow 2.7% + 30&cent;, Advanced 2.5% + 30&cent;, Plus 2.25% + 30&cent;. Plan prices are for monthly billing. Rates and prices vary by country and plan, and change, so check the page for your store. For international cards or a third-party gateway, work out the fee with the <a href="/tools/shopify-fee-calculator">Shopify fee calculator</a>.</p>
+<div class="txt post tool-cta">
+<h2>See which channels bring the orders behind that profit</h2>
+<p class="p">Virling reads your Shopify orders with a read-only token and credits each one to the visit that led to it, so you see sales by channel, campaign and landing page. Virling is open source under AGPLv3: self-host it free, or start a 14-day hosted trial.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/integrations/shopify">Shopify integration</a> &middot; <a class="lk" href="/demo">See the demo</a></p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The Shopify profit formula</h2>
+<p class="p">Work out the costs of one average order, take them off the order value, then multiply by the orders in a month:</p>
+<p class="p"><code>card fee = order value &times; card rate + $0.30</code></p>
+<p class="p"><code>refunds per order = order value &times; refunded share</code></p>
+<p class="p"><code>break-even ad spend per order = order value - product - shipping - card fee - refunds per order - plan price / orders</code></p>
+<p class="p"><code>profit per order = break-even ad spend per order - ad spend / orders</code></p>
+<p class="p"><code>profit per month = profit per order &times; orders</code></p>
+<p class="p"><code>margin = profit per order / order value</code></p>
+<p class="p">Margin here is a share of sales before refunds. The break-even figure and the plan's share of an order both depend on the number of orders, so enter the orders you expect after a change in ad spend.</p>
+<h2>A worked example</h2>
+<p class="p">These are made-up numbers, the same ones the calculator starts with, not data from a real store. A store on Basic sells 300 orders a month at $60 each. Products cost $20 per order, shipping costs $7, 5% of orders are refunded, and ads cost $3,600 a month.</p>
+<ul class="post-list"><li><b>Card fee:</b> $60 &times; 2.9% + $0.30 = $2.04.</li><li><b>Refunds per order:</b> $60 &times; 5% = $3.00.</li><li><b>Plan per order:</b> $39 / 300 = $0.13.</li><li><b>Break-even ad spend per order:</b> $60 - $20 - $7 - $2.04 - $3.00 - $0.13 = $27.83.</li><li><b>Ad spend per order:</b> $3,600 / 300 = $12.00.</li><li><b>Profit per order:</b> $27.83 - $12.00 = $15.83, a margin of 26.4%.</li><li><b>Profit per month:</b> $15.83 &times; 300 = $4,749.</li></ul>
+<p class="p">The month as a whole gives the same answer: $18,000 of sales, less $6,000 of products, $2,100 of shipping, $612 of card fees, $900 of refunds, $39 for the plan and $3,600 of ads, leaves $4,749.</p>
+<h2>What moves profit most</h2>
+<p class="p">The same made-up store with one input changed in each row and the rest left alone:</p>
+<table class="cmp"><thead><tr><th>Change</th><th>Profit per order</th><th>Profit per month</th><th>Margin</th></tr></thead><tbody><tr><th scope="row">No change</th><td>$15.83</td><td>$4,749.00</td><td>26.4%</td></tr><tr><th scope="row">Order value $66</th><td>$21.36</td><td>$6,406.80</td><td>32.4%</td></tr><tr><th scope="row">10% refunded</th><td>$12.83</td><td>$3,849.00</td><td>21.4%</td></tr><tr><th scope="row">Product cost $24</th><td>$11.83</td><td>$3,549.00</td><td>19.7%</td></tr><tr><th scope="row">Ad spend $5,400</th><td>$9.83</td><td>$2,949.00</td><td>16.4%</td></tr></tbody></table>
+<p class="p">A 10% higher order value adds almost 35% to profit here, because the product, shipping and ad costs per order stay put. That holds only if the larger order does not need more product. The ad row assumes the extra spend brings no extra orders; enter both new numbers if it does.</p>
+<h2>Does a bigger Shopify plan raise profit?</h2>
+<p class="p">A higher plan costs more each month and charges a lower card rate. The same made-up store on each plan:</p>
+<table class="cmp"><thead><tr><th>Plan</th><th>Card fees a month</th><th>Plan a month</th><th>Profit per month</th></tr></thead><tbody><tr><th scope="row">Basic</th><td>$612</td><td>$39</td><td>$4,749</td></tr><tr><th scope="row">Grow</th><td>$576</td><td>$105</td><td>$4,719</td></tr><tr><th scope="row">Advanced</th><td>$540</td><td>$399</td><td>$4,461</td></tr><tr><th scope="row">Plus</th><td>$495</td><td>from $2,300</td><td>up to $2,605</td></tr></tbody></table>
+<p class="p">At $18,000 of sales the lower rate does not pay for the bigger plan. This compares fees only, not the features of each plan. For fees by plan, gateway and card, use the <a href="/tools/shopify-fee-calculator">Shopify fee calculator</a>.</p>
+<h2>How to use the break-even ad spend</h2>
+<p class="p">The break-even ad spend per order is a ceiling, not a target. At that cost the order pays for itself and adds nothing. Compare it with the cost per order in your ad account, and remember that an average hides the spread: one campaign can sit well under the ceiling while another loses money on every order.</p>
+<p class="p">If the calculator says there is no room for ads, the order loses money before any marketing. Look at product cost, shipping and refunds first, since cheaper ads cannot fix it.</p>
+<p class="p">Profit also differs by channel, because each one brings its own order sizes and costs. <a href="/blog/profit-by-marketing-channel">Profit by marketing channel</a> shows how to take spend and fees off the revenue each channel brought. Virling's Profit by channel card does that with the spend and fee rate you type in; it does not know your product or shipping costs, so use this page or the <a href="/tools/contribution-margin-calculator">contribution margin calculator</a> for those.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Related tools and guides</h2>
+<ul class="post-list"><li><a href="/tools/shopify-fee-calculator">Shopify fee calculator</a>: what each plan takes per order and per month, with Shopify Payments or a third-party gateway.</li><li><a href="/tools/contribution-margin-calculator">Contribution margin calculator</a>: what one order leaves, for any payment provider.</li><li><a href="/blog/profit-by-marketing-channel">Profit by marketing channel</a>: the formula and a worked example.</li><li><a href="/integrations/shopify">Shopify integration</a>: the read-only token and theme snippet Virling needs.</li></ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Shopify profit FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate profit on a Shopify store?</h3><p class="p">Start with the order value and take off the product cost, shipping cost, Shopify's card fee, the average refund, the plan's share of the order and the ad spend per order. Multiply what is left by orders a month. In the made-up example on this page, a $60 order leaves $15.83, which is $4,749 a month on 300 orders.</p></div>
+      <div><h3>How much can I spend on ads per Shopify order?</h3><p class="p">Up to the break-even ad spend per order: the order value minus every other cost. In the made-up example that is $27.83. Spending less leaves a profit on the first order, and spending more loses money unless the customer buys again.</p></div>
+      <div><h3>How does this calculator count refunds?</h3><p class="p">It treats the refund share as full refunds and takes that share of the order value off each order on average. The product, shipping and card fee stay as costs. If returned products go back into stock and are sold again, your real profit is higher than the result.</p></div>
+      <div><h3>What is a good profit margin for a Shopify store?</h3><p class="p">There is no single figure that fits every store, because product costs, order sizes and ad spend differ. Compare your margin with your own past months, and check that the profit a month covers the costs this page leaves out, such as salaries, apps and rent.</p></div>
+      <div><h3>Why is my Shopify profit lower than my sales?</h3><p class="p">Sales are what buyers paid. Products, shipping, card fees, refunds, the plan and ads all come out before profit, and the ad bill is often paid outside Shopify. Enter each one from your own invoices, and use the order value without sales tax, because the tax is not your money.</p></div>
+      <div><h3>What does this Shopify profit calculator leave out?</h3><p class="p">Sales tax, apps, themes, salaries, rent, chargebacks, currency conversion and income tax. It uses US rates for Shopify Payments with domestic online cards, so international cards and third-party gateways cost more than it shows.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate profit on a Shopify store?", "acceptedAnswer": {"@type": "Answer", "text": "Start with the order value and take off the product cost, shipping cost, Shopify's card fee, the average refund, the plan's share of the order and the ad spend per order. Multiply what is left by orders a month. In the made-up example on this page, a $60 order leaves $15.83, which is $4,749 a month on 300 orders."}}, {"@type": "Question", "name": "How much can I spend on ads per Shopify order?", "acceptedAnswer": {"@type": "Answer", "text": "Up to the break-even ad spend per order: the order value minus every other cost. In the made-up example that is $27.83. Spending less leaves a profit on the first order, and spending more loses money unless the customer buys again."}}, {"@type": "Question", "name": "How does this calculator count refunds?", "acceptedAnswer": {"@type": "Answer", "text": "It treats the refund share as full refunds and takes that share of the order value off each order on average. The product, shipping and card fee stay as costs. If returned products go back into stock and are sold again, your real profit is higher than the result."}}, {"@type": "Question", "name": "What is a good profit margin for a Shopify store?", "acceptedAnswer": {"@type": "Answer", "text": "There is no single figure that fits every store, because product costs, order sizes and ad spend differ. Compare your margin with your own past months, and check that the profit a month covers the costs this page leaves out, such as salaries, apps and rent."}}, {"@type": "Question", "name": "Why is my Shopify profit lower than my sales?", "acceptedAnswer": {"@type": "Answer", "text": "Sales are what buyers paid. Products, shipping, card fees, refunds, the plan and ads all come out before profit, and the ad bill is often paid outside Shopify. Enter each one from your own invoices, and use the order value without sales tax, because the tax is not your money."}}, {"@type": "Question", "name": "What does this Shopify profit calculator leave out?", "acceptedAnswer": {"@type": "Answer", "text": "Sales tax, apps, themes, salaries, rent, chargebacks, currency conversion and income tax. It uses US rates for Shopify Payments with domestic online cards, so international cards and third-party gateways cost more than it shows."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>Know which channels your Shopify sales come from</h2>
+<p class="p">This page works from averages you type. Virling links every visit to the order it led to, so you see the revenue each channel brings from your real orders. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("profit"), out = document.getElementById("profit-out"), how = document.getElementById("profit-how"), msg = document.getElementById("profit-msg");
+const PLAN = { basic: [39, 2.9], grow: [105, 2.7], advanced: [399, 2.5], plus: [2300, 2.25] };
+const cents = (n) => Math.round(+(n * 100).toPrecision(12)) / 100 || 0;
+const usd = (n) => (cents(n) < 0 ? "-$" : "$") + Math.abs(cents(n)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const pct = (n) => (Math.round(+(n * 1000).toPrecision(12)) / 10 || 0).toLocaleString("en-US", { maximumFractionDigits: 1 }) + "%";
+const problem = (i) => {
+  if (i.validity.badInput || i.value === "") return "must be a number.";
+  if (+i.value < 0) return "cannot be below 0.";
+  if (i.name === "value" && +i.value < 0.01) return "must be at least $0.01.";
+  if (i.name === "orders" && (+i.value < 1 || !Number.isInteger(+i.value))) return "must be a whole number of at least 1.";
+  if (+i.value > +i.max) return i.name === "refund" ? "cannot be above 100%." : "cannot be above " + (+i.max).toLocaleString("en-US") + ".";
+  return "";
+};
+const calc = () => {
+  let text = "";
+  f.querySelectorAll("input").forEach((i) => {
+    const p = problem(i);
+    if (p) i.setAttribute("aria-invalid", "true"); else i.removeAttribute("aria-invalid");
+    if (p && !text) text = i.dataset.n + " " + p;
+  });
+  if (msg.textContent !== text) msg.textContent = text;
+  if (text) { out.innerHTML = how.textContent = ""; return; }
+  const n = (k) => +f.elements[k].value, v = n("value"), orders = n("orders");
+  const [plan, card] = PLAN[document.getElementById("plan").dataset.value];
+  const fee = v * card / 100 + 0.3, refund = v * n("refund") / 100, ads = n("ads") / orders;
+  const before = v - n("product") - n("ship") - fee - refund - plan / orders, profit = before - ads;
+  const rows = [["Profit per order", usd(profit)], ["Profit per month", usd(profit * orders)], ["Margin", pct(profit / v)], ["Break-even ad spend per order", cents(before) > 0 ? usd(before) : "No room for ads"]];
+  out.innerHTML = rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+  how.textContent = `Per order: ${usd(v)} order - ${usd(n("product"))} product - ${usd(n("ship"))} shipping - ${usd(fee)} card fee - ${usd(refund)} refunds - ${usd(plan / orders)} plan - ${usd(ads)} ads = ${usd(profit)} profit. Each amount is rounded to the cent.`;
+};
+for (const box of document.querySelectorAll("[data-select]")) {
+  const btn = box.querySelector("button"), menu = box.querySelector("ul"), items = [...menu.children];
+  const mark = (el) => { items.forEach((i) => i.classList.toggle("on", i === el)); menu.setAttribute("aria-activedescendant", el.id = btn.id + "-" + el.dataset.value); };
+  const show = (open) => {
+    menu.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+    if (open) { mark(items.find((i) => i.getAttribute("aria-selected") === "true")); menu.focus(); }
+  };
+  const pick = (el) => {
+    items.forEach((i) => i.setAttribute("aria-selected", String(i === el)));
+    btn.dataset.value = el.dataset.value;
+    btn.querySelector("span").textContent = el.textContent;
+    show(false);
+    btn.focus();
+    calc();
+  };
+  btn.addEventListener("click", () => show(menu.hidden));
+  btn.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); show(true); } });
+  items.forEach((i) => { i.addEventListener("click", () => pick(i)); i.addEventListener("mousemove", () => mark(i)); });
+  menu.addEventListener("keydown", (e) => {
+    const at = items.findIndex((i) => i.classList.contains("on"));
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); mark(items[(at + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]); }
+    else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(items[at]); }
+    else if (e.key === "Escape" || e.key === "Tab") { show(false); btn.focus(); }
+  });
+  document.addEventListener("click", (e) => { if (!menu.hidden && !box.contains(e.target)) show(false); });
+}
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

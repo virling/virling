@@ -2644,6 +2644,25 @@ mod tests {
             StatusCode::OK,
             "members see the team's sites"
         );
+        let (url, url_nonce) = state.vault.encrypt("https://hooks.example/v").unwrap();
+        let (secret, secret_nonce) = state.vault.encrypt("whsec_member").unwrap();
+        sqlx::query("INSERT INTO webhooks (site_id, url_ciphertext, url_nonce, secret_ciphertext, secret_nonce, host, sent_until, goals_until) SELECT id, ?, ?, ?, ?, 'hooks.example', 0, 0 FROM sites WHERE domain = 'example.com'")
+            .bind(url)
+            .bind(url_nonce)
+            .bind(secret)
+            .bind(secret_nonce)
+            .execute(&state.db)
+            .await
+            .unwrap();
+        let settings = |cookie: String| {
+            let state = state.clone();
+            async move {
+                body_text(call(&state, get("/app/example.com/settings", Some(&cookie))).await).await
+            }
+        };
+        assert!(settings(owner.clone()).await.contains("whsec_member"));
+        let shown = settings(member.clone()).await;
+        assert!(shown.contains("hooks.example") && !shown.contains("whsec_member"));
         let mine = page(member.clone()).await;
         assert!(
             mine.contains("a@team.io")
@@ -2759,6 +2778,54 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn product_filter_clears_payments_it_will_reimport() {
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        connect_fake(&state, &site, "dodo", "fake_test_value_1234").await;
+        let now = time::OffsetDateTime::now_utc();
+        let pay = |id: &str, days: i64| Payment {
+            site_id: site.clone(),
+            provider: "dodo".into(),
+            provider_payment_id: id.into(),
+            ts: now - time::Duration::days(days),
+            amount: 2900,
+            currency: "usd".into(),
+            amount_usd: Some(29.0),
+            refunded: 0,
+            status: "paid".into(),
+            visitor_id: None,
+            customer_id: None,
+            is_renewal: false,
+        };
+        store
+            .upsert_payments(&[pay("pay_recent", 3), pay("pay_old", 200)])
+            .unwrap();
+        call(
+            &state,
+            form(
+                "/app/example.com/settings/products",
+                "provider=dodo&products=pdt_a".into(),
+                Some(&cookie),
+            ),
+        )
+        .await;
+        let period = Period {
+            from: (now - time::Duration::days(365)).date(),
+            to: now.date(),
+            tz: "UTC".into(),
+        };
+        let ids: Vec<String> = store
+            .payment_list(&site, &period, PaymentFilter::All, 10, 0)
+            .unwrap()
+            .rows
+            .into_iter()
+            .map(|p| p.provider_payment_id)
+            .collect();
+        assert_eq!(ids, ["pay_old"], "only the re-imported window is cleared");
+    }
+
+    #[tokio::test]
     async fn dodo_connection_keeps_a_product_list() {
         let (_dir, state, _store) = setup().await;
         let cookie = sign_in(&state, "me%40example.com").await;
@@ -2808,6 +2875,41 @@ mod tests {
         .await
         .unwrap();
         assert_eq!(cleared, None, "empty imports every product");
+    }
+
+    #[tokio::test]
+    async fn healthy_key_with_no_payments_is_flagged() {
+        let (_dir, state, store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        let site = site_id(&state).await;
+        connect_fake(&state, &site, "dodo", "fake_test_value_1234").await;
+        sqlx::query("UPDATE integrations SET last_error = NULL WHERE site_id = ?")
+            .bind(&site)
+            .execute(&state.db)
+            .await
+            .unwrap();
+        let settings = "/app/example.com/settings";
+        let warning = "No payments found with this key yet";
+        let body = body_text(call(&state, get(settings, Some(&cookie))).await).await;
+        assert!(body.contains(warning));
+        store
+            .upsert_payments(&[Payment {
+                site_id: site.clone(),
+                provider: "dodo".into(),
+                provider_payment_id: "pay_1".into(),
+                ts: time::OffsetDateTime::now_utc(),
+                amount: 2900,
+                currency: "usd".into(),
+                amount_usd: Some(29.0),
+                refunded: 0,
+                status: "paid".into(),
+                visitor_id: None,
+                customer_id: None,
+                is_renewal: false,
+            }])
+            .unwrap();
+        let body = body_text(call(&state, get(settings, Some(&cookie))).await).await;
+        assert!(!body.contains(warning));
     }
 
     #[tokio::test]

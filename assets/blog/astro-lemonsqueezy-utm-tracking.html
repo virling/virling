@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Astro LemonSqueezy checkout: tie each order to its source</title>
+<meta name="description" content="Astro LemonSqueezy checkout: add the script to your layout, pass the visitor ID as custom data from a link or an endpoint, and see each order's source.">
+<link rel="canonical" href="https://virling.com/blog/astro-lemonsqueezy-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/astro-lemonsqueezy-utm-tracking">
+<meta property="og:title" content="Astro LemonSqueezy checkout: tie each order to its source">
+<meta property="og:description" content="Astro LemonSqueezy checkout: add the script to your layout, pass the visitor ID as custom data from a link or an endpoint, and see each order's source.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Astro LemonSqueezy checkout: tie each order to its source","item":"https://virling.com/blog/astro-lemonsqueezy-utm-tracking"}]},{"@type":"BlogPosting","headline":"Astro LemonSqueezy checkout: tie each order to its source","description":"Astro LemonSqueezy checkout: add the script to your layout, pass the visitor ID as custom data from a link or an endpoint, and see each order's source.","datePublished":"2026-11-26","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/astro-lemonsqueezy-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to LemonSqueezy checkout in Astro?","acceptedAnswer":{"@type":"Answer","text":"Pass the Virling visitor ID instead, as checkout[custom][virling_vid]. Links to STORE.lemonsqueezy.com get it from the script with no code. In an endpoint that creates the checkout, read the virling_vid cookie and set it in checkout_data.custom. The script records the UTM tags of every visit against that ID, so the order is joined to all of them."}},{"@type":"Question","name":"Does a static Astro site need a server for LemonSqueezy attribution?","acceptedAnswer":{"@type":"Answer","text":"No. Checkout links work on a fully static site, because the script adds the visitor ID to them in the browser. A server endpoint is only needed if you create checkouts with the LemonSqueezy API."}},{"@type":"Question","name":"Do view transitions change the visitor ID?","acceptedAnswer":{"@type":"Answer","text":"No. The ID lives in a first-party cookie, so it stays the same across route changes. Checkout links rendered after a route change get it when they are clicked."}},{"@type":"Question","name":"Does it work with the Lemon.js overlay?","acceptedAnswer":{"@type":"Answer","text":"Yes, when the overlay opens from a link with the lemonsqueezy-button class: the script adds the ID to the link before the overlay reads it. If you call LemonSqueezy.Url.Open yourself, add checkout[custom][virling_vid] to the URL first."}},{"@type":"Question","name":"Why can I not see virling_vid on my orders in LemonSqueezy?","acceptedAnswer":{"@type":"Answer","text":"LemonSqueezy only returns checkout custom data in webhooks, not when you read orders from the API. Virling registers a webhook for order_created and subscription_payment_success when you connect, which needs a public https address."}},{"@type":"Question","name":"Which source do LemonSqueezy renewals get?","acceptedAnswer":{"@type":"Answer","text":"Invoices with billing reason renewal or updated, and any later order by the same customer, keep the channel of that customer's first order. Only the first order needs the visitor ID."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-26</span>
+      <h1>Astro LemonSqueezy checkout: tie each order to its source</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-26.</p>
+<p class="p">To see which traffic source each LemonSqueezy order from an Astro site came from, add the Virling script to your layout with <code>is:inline</code>, then make sure checkout carries the visitor ID as custom data named <code>virling_vid</code>. On a static site the script adds it to your checkout links in the browser, with no code. With server output, an endpoint reads the <code>virling_vid</code> cookie and sets it when it creates the checkout. LemonSqueezy returns it in its webhook, and Virling joins the order to every visit behind that ID, with the UTM tags of each.</p>
+<p class="p">For what LemonSqueezy does with custom data outside Astro, see the general guide to <a href="/blog/lemonsqueezy-utm-tracking">LemonSqueezy UTM tracking</a>. Using Stripe instead? See <a href="/blog/astro-stripe-utm-tracking">Astro Stripe UTM tracking</a>. On Next.js? See <a href="/blog/nextjs-lemonsqueezy-utm-tracking">Next.js LemonSqueezy UTM tracking</a>.</p>
+<h2>Why LemonSqueezy checkout loses your UTM tags</h2>
+<p class="p">UTM tags live on the landing URL. By the time a visitor clicks Buy they are usually a few pages in, and checkout runs on your store's <code>lemonsqueezy.com</code> address, so nothing from your site travels with them unless it is in the checkout URL or request. Passing one visitor ID instead of the tags keeps earlier visits and untagged ones, such as search and referrals, too. If the tags never reach your landing page at all, a redirect is usually dropping them; see <a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a>.</p>
+<h2>Step 1: add the script to your layout</h2>
+<p class="p">Put the tag in the <code>&lt;head&gt;</code> of the layout every page uses. Mark it <code>is:inline</code> so Astro leaves the tag as it is instead of bundling it: the script reads its own attributes, which only works on the original tag. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<div class="code block"><pre data-snippet>---
+// src/layouts/Layout.astro
+---
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8" /&gt;
+    &lt;script is:inline defer src="https://app.virling.com/v.js"
+      data-site="yourdomain.com"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;slot /&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain, records the UTM tags of each visit against it, and <code>window.virling?.vid?.()</code> returns the same ID in the browser.</p>
+<h2>Step 2, static site: add the ID to the checkout link in the browser</h2>
+<p class="p">If your Buy button is a link to <code>STORE.lemonsqueezy.com/checkout/buy/VARIANT_ID</code>, there is nothing to write. The script adds <code>checkout[custom][virling_vid]</code> to every such link when the page loads, and again when a visitor clicks one, and never replaces a value that is already there. LemonSqueezy reads any <code>checkout[custom][...]</code> query parameter as <a href="https://docs.lemonsqueezy.com/help/checkout/passing-custom-data">custom data</a>. This works on a fully static build with no adapter:</p>
+<div class="code block"><pre data-snippet>&lt;a href="https://STORE.lemonsqueezy.com/checkout/buy/VARIANT_ID"&gt;Buy now&lt;/a&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">If you build the URL in your own code, for example to pick a variant, add the ID yourself on click. A normal Astro <code>&lt;script&gt;</code> is bundled and runs once, so listen on the document and every button works, including ones that appear after a route change:</p>
+<div class="code block"><pre data-snippet>&lt;button type="button" data-variant="VARIANT_ID"&gt;Buy now&lt;/button&gt;
+
+&lt;script&gt;
+  document.addEventListener("click", (e) =&gt; {
+    const btn = (e.target as HTMLElement).closest("[data-variant]");
+    if (!btn) return;
+    const url = new URL(
+      "https://STORE.lemonsqueezy.com/checkout/buy/" + btn.getAttribute("data-variant"));
+    const vid = window.virling?.vid?.();
+    if (vid) url.searchParams.set("checkout[custom][virling_vid]", vid);
+    location.href = url.href;
+  });
+&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">TypeScript does not know <code>window.virling</code>, so declare it in <code>src/env.d.ts</code> or cast <code>window</code> to <code>any</code> on that line.</p>
+<h2>Step 2, server output: create the checkout in an endpoint</h2>
+<p class="p">If you create checkouts with <code>POST /v1/checkouts</code>, for example to set a custom price or prefill the email, do it in an endpoint that runs on request: it needs a server adapter and <code>prerender = false</code> (or <code>output: "server"</code>). Read the cookie from <code>cookies</code> and set it in <code>data.attributes.checkout_data.custom</code>, as described in LemonSqueezy's <a href="https://docs.lemonsqueezy.com/api/checkouts/create-checkout">create a checkout</a> reference:</p>
+<div class="code block"><pre data-snippet>// src/pages/api/checkout.ts
+import type { APIRoute } from "astro";
+
+export const prerender = false;
+
+export const POST: APIRoute = async ({ cookies, redirect }) =&gt; {
+  const vid = cookies.get("virling_vid")?.value;
+  const res = await fetch("https://api.lemonsqueezy.com/v1/checkouts", {
+    method: "POST",
+    headers: {
+      accept: "application/vnd.api+json",
+      "content-type": "application/vnd.api+json",
+      authorization: `Bearer ${import.meta.env.LEMONSQUEEZY_API_KEY}`,
+    },
+    body: JSON.stringify({
+      data: {
+        type: "checkouts",
+        attributes: { checkout_data: { custom: vid ? { virling_vid: vid } : {} } },
+        relationships: {
+          store: { data: { type: "stores", id: "STORE_ID" } },
+          variant: { data: { type: "variants", id: "VARIANT_ID" } },
+        },
+      },
+    }),
+  });
+  if (!res.ok) return new Response("Checkout failed", { status: 502 });
+  const { data } = await res.json();
+  return redirect(data.attributes.url, 303);
+};</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">A plain form posts to it, and the browser sends the cookie along. The page with the form can stay prerendered:</p>
+<div class="code block"><pre data-snippet>&lt;form method="POST" action="/api/checkout"&gt;
+  &lt;button type="submit"&gt;Buy now&lt;/button&gt;
+&lt;/form&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Read the cookie in the request that creates the checkout, never while a page renders. A prerendered or cached page has no cookie of this visitor, and a checkout URL baked into it would be shared by every buyer.</p>
+<h2>Step 3: connect LemonSqueezy</h2>
+<p class="p">Create an API key in LemonSqueezy under Settings, API, and paste it into Virling. LemonSqueezy only returns checkout custom data in webhooks, so Virling registers a webhook on each of your stores for <code>order_created</code> and <code>subscription_payment_success</code> and checks each request's <code>X-Signature</code>. The webhook needs <code>VIRLING_BASE_URL</code> to be a public <code>https://</code> address; without one, LemonSqueezy payments show as Unattributed. The full setup is in the <a href="https://docs.virling.com/payments/lemonsqueezy">LemonSqueezy docs</a> and on the <a href="/integrations/lemonsqueezy">LemonSqueezy integration page</a>.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>View transitions, the overlay and renewals</h2>
+<p class="p"><strong>View transitions.</strong> With <code>&lt;ClientRouter /&gt;</code>, route changes go through the History API, and the script counts each change of path or query as one pageview. The visitor ID does not change: it lives in the cookie, not in the page, so it is the same on whichever page the buyer presses Buy. Checkout links that a route change swaps in were not there when the page first loaded, and get the ID when they are clicked.</p>
+<p class="p"><strong>The overlay checkout.</strong> Lemon.js opens the overlay from links with the <code>lemonsqueezy-button</code> class. The script handles the click before Lemon.js does, so the ID is on the link by the time the overlay reads it. After a view transition, Lemon.js has not seen the new links; call <code>window.createLemonSqueezy()</code> again, which LemonSqueezy says <a href="https://docs.lemonsqueezy.com/help/lemonjs/using-with-frameworks-libraries">can be called multiple times</a>:</p>
+<div class="code block"><pre data-snippet>&lt;script&gt;
+  document.addEventListener("astro:page-load", () =&gt; window.createLemonSqueezy?.());
+&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">If you open the overlay from code with <code>LemonSqueezy.Url.Open(url)</code>, the script never sees that URL: add <code>checkout[custom][virling_vid]</code> to it first, as in the button script above.</p>
+<p class="p"><strong>Renewals.</strong> Only the first order needs the visitor ID. Subscription invoices with billing reason <code>renewal</code> or <code>updated</code>, and any later order by the same customer, keep the channel of that customer's first order. If that order is older than Virling's first import, its renewals are usually Unattributed. See <a href="https://docs.virling.com/attribution/renewals">renewals</a>.</p>
+<h2>Check that it works</h2>
+<p class="p">Run one test order through the whole path:</p>
+<ol class="post-list"><li>Switch your LemonSqueezy store to test mode, create an API key there and connect it, so Virling reads test orders and registers its webhook in test mode. Virling must be on a public <code>https://</code> address.</li><li>Use a test mode checkout link on your site. For the endpoint, put a test mode key in <code>LEMONSQUEEZY_API_KEY</code> too: test and live keys <a href="https://docs.lemonsqueezy.com/guides/developer-guide/testing-going-live">only work on their own side</a> of the store. Deploy to your domain or a subdomain such as <code>staging.yourdomain.com</code>, since the script does nothing on <code>localhost</code>.</li><li>Open a private window and visit the site through a tagged link, such as <code>https://staging.yourdomain.com/?utm_source=test&amp;utm_medium=email</code>. Run <code>window.virling.vid()</code> in the browser console and note the ID. Click through to the pricing page, so a route change is part of the test.</li><li>In the same window, press Buy and pay with one of the <a href="https://docs.lemonsqueezy.com/help/getting-started/test-mode">test cards</a> LemonSqueezy lists.</li><li>Wait a minute for the next sync, then open the payments list at <code>/app/yourdomain.com/payments</code>.</li></ol>
+<p class="p">The order shows the <code>test</code> source and the <b>Email</b> channel of your tagged visit instead of Unattributed. Open it and <b>Journey</b> starts at the tagged visit and ends with the LemonSqueezy order, and <b>Details</b> lists the ID from your browser console as <b>Visitor</b>. Use a new email address for each test, because a later order by the same customer is a renewal and keeps the first order's channel. Test orders stay in your reports after you replace the key with a live one. If a step fails, see <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>.</p>
+<h2>Common mistakes</h2>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>What you see</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row">Nothing is recorded, though the script loads</th><td>The tag has no <code>is:inline</code> and was bundled, so the script cannot find its <code>data-site</code></td><td>Add <code>is:inline</code>, as in step 1</td></tr><tr><th scope="row">Checkout works in <code>astro dev</code> and is a 404 after deploy</th><td>The endpoint has no <code>prerender = false</code>, so no <code>POST</code> handler is deployed</td><td>Export <code>prerender = false</code> and add a server adapter</td></tr><tr><th scope="row">The overlay stops opening after a route change</th><td>Lemon.js looked for <code>lemonsqueezy-button</code> links before the new page was swapped in</td><td>Call <code>window.createLemonSqueezy()</code> on <code>astro:page-load</code></td></tr><tr><th scope="row">Orders opened with <code>LemonSqueezy.Url.Open</code> are Unattributed</th><td>The URL goes straight to Lemon.js, so the script never sees a link</td><td>Add <code>checkout[custom][virling_vid]</code> to it first</td></tr><tr><th scope="row">Every order is Unattributed</th><td>Virling was not on a public <code>https://</code> address when you connected, so the webhook is missing</td><td>Set <code>VIRLING_BASE_URL</code>, then use <b>Replace key</b></td></tr><tr><th scope="row">A second test keeps the first test's channel</th><td>Any later order by the same customer is a renewal</td><td>Use a new email address for each test</td></tr></tbody></table></div>
+<p class="p">Orders without a visitor ID still count toward revenue, as Unattributed, for example when the script is blocked. Every other cause is in <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>, and how the join works from visit to order is in <a href="/blog/track-lemonsqueezy-revenue-by-traffic-source">how to track LemonSqueezy revenue by traffic source</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I pass UTM parameters to LemonSqueezy checkout in Astro?</h3><p class="p">Pass the Virling visitor ID instead, as checkout[custom][virling_vid]. Links to STORE.lemonsqueezy.com get it from the script with no code. In an endpoint that creates the checkout, read the virling_vid cookie and set it in checkout_data.custom. The script records the UTM tags of every visit against that ID, so the order is joined to all of them.</p>
+<h3>Does a static Astro site need a server for LemonSqueezy attribution?</h3><p class="p">No. Checkout links work on a fully static site, because the script adds the visitor ID to them in the browser. A server endpoint is only needed if you create checkouts with the LemonSqueezy API.</p>
+<h3>Do view transitions change the visitor ID?</h3><p class="p">No. The ID lives in a first-party cookie, so it stays the same across route changes. Checkout links rendered after a route change get it when they are clicked.</p>
+<h3>Does it work with the Lemon.js overlay?</h3><p class="p">Yes, when the overlay opens from a link with the lemonsqueezy-button class: the script adds the ID to the link before the overlay reads it. If you call LemonSqueezy.Url.Open yourself, add checkout[custom][virling_vid] to the URL first.</p>
+<h3>Why can I not see virling_vid on my orders in LemonSqueezy?</h3><p class="p">LemonSqueezy only returns checkout custom data in webhooks, not when you read orders from the API. Virling registers a webhook for order_created and subscription_payment_success when you connect, which needs a public https address.</p>
+<h3>Which source do LemonSqueezy renewals get?</h3><p class="p">Invoices with billing reason renewal or updated, and any later order by the same customer, keep the channel of that customer's first order. Only the first order needs the visitor ID.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring LemonSqueezy orders</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

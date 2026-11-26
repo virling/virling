@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Refund rate calculator: by count and by revenue | Virling</title>
+<meta name="description" content="Measure refunds as a share of orders and of revenue, the net revenue left after them, and how many refunds a target rate allows.">
+<link rel="canonical" href="https://virling.com/tools/refund-rate-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/refund-rate-calculator">
+<meta property="og:title" content="Refund rate calculator: by count and by revenue | Virling">
+<meta property="og:description" content="Measure refunds as a share of orders and of revenue, the net revenue left after them, and how many refunds a target rate allows.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Refund rate calculator","url":"https://virling.com/tools/refund-rate-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Refund rate calculator","item":"https://virling.com/tools/refund-rate-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / refund rate calculator</span><h1>Refund rate calculator</h1><p class="lead">Enter your orders and refunds for a period, by count and by amount, to see your refund rate both ways, your net revenue after refunds, and how many refunds a target rate would allow. Works for stores and SaaS. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="refund" autocomplete="off">
+  <label>Orders or payments in the period<input name="orders" type="number" min="0" step="1" value="500"></label>
+  <label>Revenue from those orders ($)<input name="rev" type="number" min="0" step="0.01" value="30000"></label>
+  <label>Orders refunded, in whole or part<input name="refunds" type="number" min="0" step="1" value="15"></label>
+  <label>Amount refunded ($)<input name="refunded" type="number" min="0" step="0.01" value="1200"></label>
+  <label>Target refund rate (%)<input name="aim" type="number" min="0" max="100" step="0.1" value="2"></label>
+</form>
+<div class="tool-stats" id="refund-out"></div>
+<div class="txt post tool-cta">
+<p class="p">This is one blended number. Virling splits it by channel from your real payments: it links every visit to the payment it led to and credits each payment, after refunds, to the channel that brought it. See <a href="https://docs.virling.com/attribution/">how attribution works</a> in the docs. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/aov-calculator">AOV calculator</a>, <a href="/tools/contribution-margin-calculator">contribution margin calculator</a>, <a href="/tools/repeat-purchase-rate-calculator">repeat purchase rate calculator</a>, <a href="/blog/discount-code-attribution">discount code attribution</a>, <a href="/tools/chargeback-rate-calculator">chargeback rate calculator</a>, <a href="/tools/net-revenue-calculator">net revenue calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The refund rate formula</h2>
+<p class="p">Refund rate by count is the share of orders in a period that were refunded, in whole or part:</p>
+<p class="p"><code>refund rate by count = orders refunded / orders</code></p>
+<p class="p">Refund rate by revenue is the share of the money taken that went back to buyers:</p>
+<p class="p"><code>refund rate by revenue = amount refunded / revenue</code></p>
+<p class="p">Net revenue is what you keep:</p>
+<p class="p"><code>net revenue = revenue - amount refunded</code></p>
+<p class="p">And a target rate turns into a budget of refunds for the same period:</p>
+<p class="p"><code>refunds allowed = orders &times; target rate</code> and <code>amount allowed = revenue &times; target rate</code></p>
+<p class="p">Count refunds against the orders they belong to, not the day the refund happened. A refund this month for an order placed last month makes this month look worse and last month look better than they were.</p>
+<h2>A worked example</h2>
+<p class="p">With the defaults above, the period has 500 orders worth $30,000. 15 of them were refunded, for $1,200 in total. 15 / 500 = 3% refund rate by count, and $1,200 / $30,000 = 4% by revenue. Net revenue is $30,000 - $1,200 = $28,800.</p>
+<p class="p">The rate by revenue is higher than the rate by count, so the refunded orders were larger than average: $80 per refund against a $60 average order. If the refunds were mostly partial, the rate by revenue would be the lower one.</p>
+<p class="p">A 2% target would allow 500 &times; 0.02 = 10 refunded orders and $30,000 &times; 0.02 = $600 refunded, so this period is 5 refunds and $600 over it.</p>
+<h2>Four refund patterns side by side</h2>
+<p class="p">Example inputs, worked out with the formulas above and a 2% target. They are made up, not benchmarks.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:800px"><thead><tr><th style="width:21%">Example</th><th>Orders</th><th>Revenue</th><th>Orders refunded</th><th>Amount refunded</th><th>Rate by count</th><th>Rate by revenue</th><th>Net revenue</th><th>Allowed at 2%</th></tr></thead><tbody><tr><th scope="row">Large orders come back</th><td>500</td><td>$30,000</td><td>15</td><td>$1,200</td><td>3%</td><td>4%</td><td>$28,800</td><td>10 orders, $600</td></tr><tr><th scope="row">Few, small refunds</th><td>120</td><td>$9,600</td><td>2</td><td>$100</td><td>1.67%</td><td>1.04%</td><td>$9,500</td><td>2.4 orders, $192</td></tr><tr><th scope="row">Average orders come back</th><td>2,000</td><td>$90,000</td><td>80</td><td>$3,600</td><td>4%</td><td>4%</td><td>$86,400</td><td>40 orders, $1,800</td></tr><tr><th scope="row">Mostly partial refunds</th><td>800</td><td>$40,000</td><td>40</td><td>$1,000</td><td>5%</td><td>2.5%</td><td>$39,000</td><td>16 orders, $800</td></tr></tbody></table></div>
+<p class="p">The first row is the worked example. Compare the two rates in each row. In the third they match, because a refund averages $45 and so does an order. In the last one, the rate by count is twice the rate by revenue, because each refund averages $25 of a $50 order. Only the second row meets the target on both counts.</p>
+<h2>Where to find the inputs in Stripe, Paddle and Shopify</h2>
+<ul class="post-list"><li><b>Stripe.</b> Export the itemized CSV of <a href="https://docs.stripe.com/reports/balance">Balance change from activity</a>. Rows are grouped by <a href="https://docs.stripe.com/reports/reporting-categories">reporting category</a>: count and add up <code>charge</code> for orders and revenue, and <code>refund</code> for the amount refunded. A payment can have more than one refund, so count different <code>charge_id</code> values for orders refunded. The report dates a refund by when it changed your balance. The <a href="https://docs.stripe.com/reports/report-types/balance">column list</a> has <code>charge_created_utc</code>, the time of the original charge, so you can put it back in the right period (all read on 2026-11-25).</li><li><b>Paddle.</b> Create two <a href="https://developer.paddle.com/api-reference/reports/create-report">reports</a>: <code>transactions</code> with the status completed, and <code>adjustments</code> with the action refund and the status approved. Both cover only the last month by last update unless you set the <code>updated_at</code> filter. A transaction <a href="https://developer.paddle.com/build/transactions/create-transaction-adjustments">can have several adjustments</a>, so count transactions, not adjustments. Paddle's <a href="https://developer.paddle.com/api-reference/metrics/get-metrics-refunds">refund metric</a> leaves out tax, fees and chargebacks, so do not divide it by revenue that includes tax (all read on 2026-11-25).</li><li><b>Shopify.</b> <a href="https://help.shopify.com/en/manual/fulfillment/managing-orders/exporting-orders">Export orders</a> placed in the period as CSV. Each order has a Total and a Refunded Amount, and orders with several items take more than one line, so count order names once. Orders refunded are those with a Refunded Amount above zero, the same ones that show as <a href="https://help.shopify.com/en/manual/fulfillment/managing-orders/order-status">Refunded or Partially refunded</a>. The Sales reversals column in the <a href="https://help.shopify.com/en/manual/reports-and-analytics/shopify-reports/report-types/default-reports/finances-report">finance reports</a> is different: it is the value of goods returned, on the day the return was processed (all read on 2026-11-25).</li></ul>
+<h2>Why refund rate by channel matters</h2>
+<p class="p">A single refund rate hides where refunds come from. Some channels bring buyers who refund: a deal site or a discount code shared far beyond its audience can bring orders that come back, while buyers from search or a referral who knew what they wanted keep what they bought. A channel can look like your best by gross revenue and fall behind once its refunds come off. Run the calculator per channel with the orders and refunds each one brought, or let Virling do it from your payments: it <a href="https://docs.virling.com/attribution/">credits each payment, after refunds</a>, to the channel, referrer, campaign and landing page of the visit that brought it, so channel revenue is already net of refunds. The formula per channel, with a worked example, is in <a href="/blog/refund-rate-by-traffic-source">refund rate by traffic source</a>. For why discount codes alone do not tell you the channel, see <a href="/blog/discount-code-attribution">discount code attribution</a>.</p>
+<h2>What Virling shows per channel</h2>
+<p class="p">The Channels card on the dashboard shows revenue net of refunds for each channel, and <a href="https://docs.virling.com/guides/dashboard">Refunded</a>, the share of its payments refunded in whole or part, which is the rate by count. A refund counts on the date of the payment it belongs to, the way this page recommends. Renewals <a href="https://docs.virling.com/attribution/renewals">are credited to the channel of the customer's first payment</a>, so a refunded renewal lowers the channel that brought the customer, not the one they used last. Which visit gets a first payment depends on the <a href="https://docs.virling.com/attribution/model">attribution model and lookback window</a>. The Retention page adds the dollars refunded and the share of customers with any refund.</p>
+<p class="p">Virling stores no disputes apart from refunds. A lost dispute on Stripe and a chargeback on Paddle count as refunds, and Shopify chargebacks are not read. A refund can take up to 6 hours to show on Paddle, and one on a transaction older than 60 days is not picked up there automatically.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Refund rate calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How is refund rate calculated?</h3><p class="p">By count, it is orders refunded in a period divided by orders in that period. By revenue, it is the amount refunded divided by the revenue from those orders. Count refunds against the period of the original order.</p></div>
+      <div><h3>Should I use refund rate by count or by revenue?</h3><p class="p">Use both. The rate by count says how many buyers were unhappy, and the rate by revenue says how much money it cost. When they differ, refunds are landing on larger or smaller orders than average, or many refunds are partial.</p></div>
+      <div><h3>Do partial refunds count?</h3><p class="p">In the rate by count, an order refunded in part counts as a refunded order. In the rate by revenue, only the amount actually refunded counts, so partial refunds weigh less there.</p></div>
+      <div><h3>What does a target refund rate tell me?</h3><p class="p">It turns a percentage into a number of refunds and an amount for the period. If you are over it, the gap shows how many refunds you would need to prevent to get back under, which is easier to plan around than a percentage.</p></div>
+      <div><h3>Why does refund rate differ by channel?</h3><p class="p">Buyers from different channels arrive with different intent. A deal site or a widely shared discount code can bring buyers who refund, while search or referrals bring buyers who keep what they bought. Revenue per channel after refunds shows which channels are worth the spend.</p></div>
+      <div><h3>Does Virling show refund rate by channel?</h3><p class="p">Yes. The Channels card shows each channel's revenue net of refunds and the share of its payments refunded in whole or part. A refund counts on the date of the original payment, and a refunded renewal counts for the channel of the customer's first payment.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How is refund rate calculated?", "acceptedAnswer": {"@type": "Answer", "text": "By count, it is orders refunded in a period divided by orders in that period. By revenue, it is the amount refunded divided by the revenue from those orders. Count refunds against the period of the original order."}}, {"@type": "Question", "name": "Should I use refund rate by count or by revenue?", "acceptedAnswer": {"@type": "Answer", "text": "Use both. The rate by count says how many buyers were unhappy, and the rate by revenue says how much money it cost. When they differ, refunds are landing on larger or smaller orders than average, or many refunds are partial."}}, {"@type": "Question", "name": "Do partial refunds count?", "acceptedAnswer": {"@type": "Answer", "text": "In the rate by count, an order refunded in part counts as a refunded order. In the rate by revenue, only the amount actually refunded counts, so partial refunds weigh less there."}}, {"@type": "Question", "name": "What does a target refund rate tell me?", "acceptedAnswer": {"@type": "Answer", "text": "It turns a percentage into a number of refunds and an amount for the period. If you are over it, the gap shows how many refunds you would need to prevent to get back under, which is easier to plan around than a percentage."}}, {"@type": "Question", "name": "Why does refund rate differ by channel?", "acceptedAnswer": {"@type": "Answer", "text": "Buyers from different channels arrive with different intent. A deal site or a widely shared discount code can bring buyers who refund, while search or referrals bring buyers who keep what they bought. Revenue per channel after refunds shows which channels are worth the spend."}}, {"@type": "Question", "name": "Does Virling show refund rate by channel?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The Channels card shows each channel's revenue net of refunds and the share of its payments refunded in whole or part. A refund counts on the date of the original payment, and a refunded renewal counts for the channel of the customer's first payment."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring buyers who keep what they buy</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue after refunds that each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("refund"), out = document.getElementById("refund-out");
+const pct = (n) => (n * 100).toLocaleString("en-US", { maximumFractionDigits: 2 }) + "%";
+const usd = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const num = (n) => n.toLocaleString("en-US", { maximumFractionDigits: 1 });
+const calc = () => {
+  const o = +f.orders.value, r = +f.rev.value, n = +f.refunds.value, a = +f.refunded.value, t = +f.aim.value / 100;
+  const c = o > 0 && n <= o ? n / o : NaN, v = r > 0 && a <= r ? a / r : NaN, ok = f.aim.value !== "" && t >= 0 && t <= 1;
+  const rows = [];
+  rows.push(["Refund rate by count", c >= 0 ? pct(c) : "No data"]);
+  rows.push(["Refund rate by revenue", v >= 0 ? pct(v) : "No data"]);
+  rows.push(["Net revenue after refunds", v >= 0 ? usd(r - a) : "No data"]);
+  rows.push(["Refunds allowed at target", ok && o > 0 ? num(o * t) + " orders" : "No data"]);
+  rows.push(["Amount allowed at target", ok && r > 0 ? usd(r * t) : "No data"]);
+  out.innerHTML = rows.map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Path to purchase: how many visits before a customer pays</title>
+<meta name="description" content="What a path to purchase is, how to read time to buy and visits before paying per channel, and why the first visit and the credited visit often differ.">
+<link rel="canonical" href="https://virling.com/blog/path-to-purchase-by-channel">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/path-to-purchase-by-channel">
+<meta property="og:title" content="Path to purchase: how many visits before a customer pays">
+<meta property="og:description" content="What a path to purchase is, how to read time to buy and visits before paying per channel, and why the first visit and the credited visit often differ.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Path to purchase: how many visits a customer makes before paying","item":"https://virling.com/blog/path-to-purchase-by-channel"}]},{"@type":"BlogPosting","headline":"Path to purchase: how many visits before a customer pays","description":"What a path to purchase is, how to read time to buy and visits before paying per channel, and why the first visit and the credited visit often differ.","datePublished":"2026-11-26","dateModified":"2026-11-26","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/path-to-purchase-by-channel"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is a path to purchase?","acceptedAnswer":{"@type":"Answer","text":"The visits and pages a customer went through between their first visit to your site and their first payment. It shows how long people take to buy, how many visits that takes, and which channel they came from first."}},{"@type":"Question","name":"How many visits does it take before someone buys?","acceptedAnswer":{"@type":"Answer","text":"It depends on your product, price and audience, so there is no number to copy. Virling shows the median visits before paying for your own customers on the Payments page, plus the share who bought on their first visit."}},{"@type":"Question","name":"Why is the first channel different from the credited channel?","acceptedAnswer":{"@type":"Answer","text":"The first channel is where the customer's earliest visit came from. The credited channel is the one your attribution model gave the payment, which is the latest visit that was not Direct by default. A buyer who found you on a forum and came back from a search ad has a different first and credited channel."}},{"@type":"Question","name":"Does the path to purchase include renewals?","acceptedAnswer":{"@type":"Answer","text":"No. It covers first payments only. Renewals keep the channel of the first payment, so counting them would repeat the same customer."}},{"@type":"Question","name":"Which customers does Virling show a path for?","acceptedAnswer":{"@type":"Answer","text":"Customers whose first payment is matched to a visit. A payment with no visit behind it is Unattributed, still counts toward revenue, and is left out of the path."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-26</span>
+      <h1>Path to purchase: how many visits a customer makes before paying</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-26.</p>
+<p class="p"><b>A path to purchase is the trail a customer leaves between their first visit and their first payment</b>: how many days it took, how many visits and pages they went through, and which channel they arrived from each time. Reading it tells you whether your buyers decide in one sitting or come back several times, and that changes which channel deserves credit and how long your attribution window needs to be.</p>
+<p class="p">This post covers what the Path to purchase card in Virling shows, how to read it, and what to change when the answer surprises you.</p>
+<h2>What the card shows</h2>
+<p class="p">Open the <b>Payments</b> page and scroll to <b>Path to purchase</b>. It covers the first payments in the range you picked, from customers Virling could match to a visit. Renewals and failed payments are left out. It gives four numbers, each a median across those customers:</p>
+<table class="cmp"><thead><tr><th>Number</th><th>What it means</th></tr></thead><tbody><tr><th scope="row">Time to buy</th><td>Time from the customer's first visit to their payment. Under a day is shown as "Under a day".</td></tr><tr><th scope="row">Visits before paying</th><td>How many visits the customer made up to the payment.</td></tr><tr><th scope="row">Buy on first visit</th><td>The share of customers whose payment came in their first visit, and how many customers that is.</td></tr><tr><th scope="row">Pages before paying</th><td>How many pages the customer viewed up to the payment.</td></tr></tbody></table>
+<p class="p">Below the numbers, a bar chart sorts customers into five groups by time to buy: under a day, 1 to 3 days, 3 to 7 days, 1 to 4 weeks and over 4 weeks. A second table lists up to six channels with two counts each: customers who <b>first</b> came through the channel, and customers it was <b>credited</b> for.</p>
+<h2>Why the first and credited channel differ</h2>
+<p class="p">The first-touch count is where the customer's earliest visit came from. The credited count follows your attribution model, which by default gives the payment to the latest visit in the window that was not Direct. When buyers come back more than once, the two columns drift apart, and the gap tells you what each channel does.</p>
+<ul class="post-list"><li><b>A channel with many first touches and few credited.</b> It introduces people, then another channel closes them. Cutting it may dry up what the closers work with.</li><li><b>A channel with few first touches and many credited.</b> It closes buyers someone else found, such as email or a retargeting ad. It looks strong because the work was done earlier.</li><li><b>Direct with credited customers but few first touches.</b> People typed your URL to pay, and the first visit was somewhere else. Under last touch this is where they land, see <a href="https://docs.virling.com/attribution/model">model and lookback window</a>.</li></ul>
+<p class="p">Neither column is the truth alone. Together they show how channels hand customers to each other. <a href="/blog/first-touch-vs-last-touch-attribution-saas">First touch vs last touch</a> explains when to switch models, and <a href="/blog/multi-touch-attribution">multi-touch attribution</a> covers why Virling does not split credit.</p>
+<h2>A made-up example</h2>
+<p class="p">These numbers are invented to show how to read the card, not results from a real business. Imagine a card with 40 customers:</p>
+<table class="cmp"><thead><tr><th>Channel</th><th>First touch</th><th>Credited</th></tr></thead><tbody><tr><th scope="row">Organic Search</th><td>16</td><td>9</td></tr><tr><th scope="row">Social</th><td>12</td><td>4</td></tr><tr><th scope="row">Email</th><td>3</td><td>13</td></tr><tr><th scope="row">Direct</th><td>5</td><td>6</td></tr><tr><th scope="row">Paid</th><td>4</td><td>8</td></tr></tbody></table>
+<p class="p">Read it row by row. Social starts 12 customers and is credited for 4, so it is mostly an introducer. Email starts 3 and is credited for 13, so it is a closer that works on people other channels found. Social looks weak under last non-direct and strong under first touch, and both are true. Before cutting Social, check what its customers go on to do in a later visit.</p>
+<p class="p">If the median time to buy in that card were 9 days, a 7-day lookback would miss the first visit of a typical buyer. Set the window longer than your median. See <a href="/blog/attribution-window">attribution window</a>.</p>
+<h2>How to use it</h2>
+<ol class="post-list"><li><b>Pick a range with enough first payments.</b> Medians from five customers swing with one buyer. A month or a quarter is steadier.</li><li><b>Read the share who buy on their first visit.</b> A high share means your page and price do the selling and the channel matters most. A low share means people compare and return, so the later visits matter too.</li><li><b>Compare the median time to buy with your lookback window.</b> The window can be 30, 60, 90 or 365 days. If many customers sit in "Over 4 weeks", a short window drops their first visit.</li><li><b>Compare first and credited per channel.</b> Note the introducers and the closers before you move budget.</li><li><b>Open single payments.</b> Each payment lists the visits before it, so you can read a few real journeys behind the medians.</li></ol>
+<p class="p">For the time view alone, with example distributions, read <a href="/blog/how-long-does-a-visitor-take-to-become-a-customer">how long a visitor takes to become a customer</a>.</p>
+<h2>What to check when the card looks wrong</h2>
+<ul class="post-list"><li><b>The card says "No first payments with a tracked visit in this range."</b> No first payment in the range was matched to a visit. Check that the script is on every page, including the checkout page, and that your payment connection is set up. See <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>.</li><li><b>Most customers are in "Under a day" with one visit.</b> This is normal for low-priced products. It can also mean the visitor ID was lost between visits, for example by a cleared cookie, which makes returning visitors look new.</li><li><b>Fewer customers than your payment provider shows.</b> Unattributed payments count toward revenue but have no visit, so they are not on the card. See <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>.</li><li><b>Direct is high in the first-touch column.</b> Links opened in apps and emails often arrive with no referrer. Tag them with UTM parameters, see <a href="/blog/why-is-direct-my-biggest-traffic-source">why Direct is your biggest traffic source</a>.</li></ul>
+<h2>Frequently asked questions</h2>
+<h3>What is a path to purchase?</h3><p class="p">The visits and pages a customer went through between their first visit to your site and their first payment. It shows how long people take to buy, how many visits that takes, and which channel they came from first.</p>
+<h3>How many visits does it take before someone buys?</h3><p class="p">It depends on your product, price and audience, so there is no number to copy. Virling shows the median visits before paying for your own customers on the Payments page, plus the share who bought on their first visit.</p>
+<h3>Why is the first channel different from the credited channel?</h3><p class="p">The first channel is where the customer's earliest visit came from. The credited channel is the one your attribution model gave the payment, which is the latest visit that was not Direct by default. A buyer who found you on a forum and came back from a search ad has a different first and credited channel.</p>
+<h3>Does the path to purchase include renewals?</h3><p class="p">No. It covers first payments only. Renewals keep the channel of the first payment, so counting them would repeat the same customer.</p>
+<h3>Which customers does Virling show a path for?</h3><p class="p">Customers whose first payment is matched to a visit. A payment with no visit behind it is Unattributed, still counts toward revenue, and is left out of the path.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the path behind every payment</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

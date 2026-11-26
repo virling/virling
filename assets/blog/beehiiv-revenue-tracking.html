@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>beehiiv UTM tracking: see which issue brings paying customers</title>
+<meta name="description" content="beehiiv revenue attribution: how beehiiv tags the links in each issue, how those clicks reach your site, and where the payments they bring show in Virling.">
+<link rel="canonical" href="https://virling.com/blog/beehiiv-revenue-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/beehiiv-revenue-tracking">
+<meta property="og:title" content="beehiiv UTM tracking: see which issue brings paying customers">
+<meta property="og:description" content="beehiiv revenue attribution: how beehiiv tags the links in each issue, how those clicks reach your site, and where the payments they bring show in Virling.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"beehiiv UTM tracking: see which issue brings paying customers","item":"https://virling.com/blog/beehiiv-revenue-tracking"}]},{"@type":"BlogPosting","headline":"beehiiv UTM tracking: see which issue brings paying customers","description":"beehiiv revenue attribution: how beehiiv tags the links in each issue, how those clicks reach your site, and where the payments they bring show in Virling.","datePublished":"2026-11-23","dateModified":"2026-11-23","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/beehiiv-revenue-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I see which beehiiv issue brought a paying customer?","acceptedAnswer":{"@type":"Answer","text":"Leave beehiiv's automatic UTM tagging on, so each link to your site carries your publication domain as utm_source, Email as utm_medium and the post title as utm_campaign. Connect your payment provider and pass the visitor ID into checkout. Each payment is then credited to the tagged visit, and the Campaign tab shows revenue per issue."}},{"@type":"Question","name":"Does beehiiv add UTM parameters to links automatically?","acceptedAnswer":{"@type":"Answer","text":"Yes, by beehiiv's own help article. The setting is on by default and adds utm_source, utm_medium and utm_campaign to the links in your posts. You can change the values, or turn tagging off, under UTM Analytics in your publication settings."}},{"@type":"Question","name":"Which channel does beehiiv traffic land in?","acceptedAnswer":{"@type":"Answer","text":"A click from the email carries utm_medium=Email, which Virling reads case-insensitively, so it lands in Email. A click from the web version carries Referral as the medium, which is not an email medium, so it lands in Referral under your publication's domain."}},{"@type":"Question","name":"Will beehiiv overwrite UTM tags I add by hand?","acceptedAnswer":{"@type":"Answer","text":"No. beehiiv says that utm_source, utm_medium or utm_campaign added by hand take precedence over its own values. Use that for a link that needs a different campaign, and add utm_content to tell two links in the same issue apart."}},{"@type":"Question","name":"Do beehiiv's own stats show which issue brought a sale on my site?","acceptedAnswer":{"@type":"Answer","text":"No. beehiiv reports opens and clicks for each post, but it cannot see what happened on your site after the click. Joining the click to the payment that followed is what Virling does."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-23</span>
+      <h1>beehiiv UTM tracking: see which issue brings paying customers</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-23.</p>
+<p class="p"><b>beehiiv UTM tracking</b> lets you join each payment on your product or store to the beehiiv issue and link that sent the buyer. beehiiv already adds UTM tags to the links in every post: your publication domain as <code>utm_source</code>, <code>Email</code> as <code>utm_medium</code> and the post title as <code>utm_campaign</code>. Keep those tags on your links, pass the visitor ID into checkout, and Virling credits each payment to the tagged visit, so the Campaign tab shows revenue per issue. beehiiv&rsquo;s own stats count opens and clicks; they stop at the click and cannot see the payment that came after.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>What beehiiv adds to your links</h2>
+<p class="p">According to <a href="https://www.beehiiv.com/support/article/14492992521367-using-utm-parameter-tracking-with-beehiiv">beehiiv&rsquo;s help article on UTM tracking</a>, automatic UTM tagging is on by default, and beehiiv adds three tags to the links in your posts:</p>
+<ul class="post-list"><li><code>utm_source</code>: your publication domain, such as <code>yourname.beehiiv.com</code> or your custom domain.</li><li><code>utm_medium</code>: <code>Email</code> when the reader got the issue by email, or <code>Referral</code> when they read it on the web.</li><li><code>utm_campaign</code>: a URL-friendly version of the post title, such as <code>pricing-teardown</code>.</li></ul>
+<p class="p">You can change the values, or turn tagging off, in your publication settings under <b>UTM Analytics</b>. beehiiv says tags you add to a link by hand take precedence over its own, and that <code>utm_term</code> and <code>utm_content</code> cannot be set there, so add those to a link yourself when you need them.</p>
+<h2>Why untagged clicks show as Direct</h2>
+<p class="p">Most subscribers read the issue in an email app, and most email apps send no referrer when a link is clicked. If tagging is off, or a redirect drops the tags before your page, the visit has nothing that says it came from beehiiv, so it is counted as Direct, and so is the payment that follows. For more on visits that arrive with no referrer, see <a href="/blog/dark-social-revenue-tracking">dark social revenue tracking</a>.</p>
+<h2>Settings that work well</h2>
+<p class="p">The defaults are enough to see revenue per issue. A link from the email arrives like this:</p>
+<p class="p"><code>https://example.com/pricing?utm_source=yourname.beehiiv.com&amp;utm_medium=Email&amp;utm_campaign=pricing-teardown</code></p>
+<ul class="post-list"><li><b>Keep the source the same in every issue.</b> The publication domain does that for you, so all of your newsletter adds up under one source.</li><li><b>Keep the campaign per post.</b> Each issue then has its own row.</li><li><b>Add <code>utm_content</code> by hand</b> to tell two links in the same issue apart, such as <code>intro</code> and <code>footer</code>. beehiiv keeps it and adds its own tags after it.</li><li><b>Tag links you send outside posts yourself</b>, such as the one in your welcome email, if they do not already carry tags. The free <a href="/tools/utm-builder">UTM builder</a> makes the tagged URLs for you.</li></ul>
+<p class="p">After you send, open a link from the email in your own inbox and check the address bar on your site. The tags that arrive there are the ones Virling reads.</p>
+<h2>How Virling sorts a beehiiv visit</h2>
+<p class="p">Every session gets one channel from its first pageview, and <code>utm_medium</code> is checked first, ignoring case. A medium of <code>email</code>, <code>newsletter</code> or <code>e-mail</code> is the <b>Email</b> channel, so beehiiv&rsquo;s <code>Email</code> lands there. beehiiv&rsquo;s <code>Referral</code> medium for web readers is not one of those, so the visit is sorted by its referrer, or by its <code>utm_source</code> when there is none. beehiiv domains are not on Virling&rsquo;s list of known hosts, so web readers land in <b>Referral</b> under your publication&rsquo;s domain. The campaign is stored with the visit either way. See <a href="https://docs.virling.com/attribution/channels">how channels are decided</a>.</p>
+<p class="p">When a payment comes in, it is joined to the visits before it. Under the default model the whole payment, after refunds, is credited to the latest visit in the last 90 days that was not Direct, and to that visit&rsquo;s channel, source, campaign and landing page. A reader who clicks your issue on Monday and comes back on Thursday by typing your address is still credited to the issue. See <a href="https://docs.virling.com/attribution/model">the attribution model</a>.</p>
+<h2>See payments per issue</h2>
+<h3>1. Open the channel</h3>
+<p class="p">On the dashboard, the Channels card lists each channel with visitors, revenue and revenue per visitor. Click <b>Email</b> for readers who clicked in their inbox, or <b>Referral</b> for readers of the web version, and the whole page filters to those visits.</p>
+<h3>2. Switch to the Campaign tab</h3>
+<p class="p">The Campaign tab on the same card has one row per <code>utm_campaign</code>, so each issue shows its own visitors and revenue. Compare issues by revenue per visitor, not by visitors: a niche issue read by a few buyers can be worth more than a popular one read by many who never pay.</p>
+<h3>3. Open the payments</h3>
+<p class="p">Click an issue to filter the dashboard to it and see its revenue over time. The <b>Payments</b> page lists every payment with its source; open one to see the journey: the sessions before the payment and which one got the credit.</p>
+<h2>What to check if the numbers look off</h2>
+<ul class="post-list"><li><b>beehiiv revenue still shows as Direct.</b> Automatic UTM tagging is off, or the tags were lost in a redirect before your page. Click a link from a sent issue and check the address bar.</li><li><b>Issues are split across rows.</b> A link carries a hand-written campaign that differs from the post title, or values differ in case, such as <code>Pricing-Teardown</code> and <code>pricing-teardown</code>. Pick one format and keep it.</li><li><b>Revenue shows no channel at all.</b> The payment was not matched to a visit. Pass the visitor ID into checkout; see <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>.</li><li><b>A recent issue looks weak.</b> Readers often pay days or weeks later. Give it time, and check the date range, since a sale is credited on the day of the payment.</li></ul>
+<p class="p">To put a value on the list itself, try the <a href="/tools/email-subscriber-value-calculator">email subscriber value calculator</a>, and to price an ad slot in your issues, the <a href="/tools/newsletter-sponsorship-calculator">newsletter sponsorship calculator</a>. For newsletters sent from other tools, see <a href="/blog/newsletter-revenue-tracking">newsletter revenue tracking</a> and <a href="/blog/substack-revenue-tracking">revenue from Substack posts</a>, and for onboarding, trial and upgrade emails from your app, see <a href="/blog/lifecycle-email-revenue-tracking">lifecycle email revenue tracking</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>How do I see which beehiiv issue brought a paying customer?</h3><p class="p">Leave beehiiv's automatic UTM tagging on, so each link to your site carries your publication domain as utm_source, Email as utm_medium and the post title as utm_campaign. Connect your payment provider and pass the visitor ID into checkout. Each payment is then credited to the tagged visit, and the Campaign tab shows revenue per issue.</p>
+<h3>Does beehiiv add UTM parameters to links automatically?</h3><p class="p">Yes, by beehiiv's own help article. The setting is on by default and adds utm_source, utm_medium and utm_campaign to the links in your posts. You can change the values, or turn tagging off, under UTM Analytics in your publication settings.</p>
+<h3>Which channel does beehiiv traffic land in?</h3><p class="p">A click from the email carries utm_medium=Email, which Virling reads case-insensitively, so it lands in Email. A click from the web version carries Referral as the medium, which is not an email medium, so it lands in Referral under your publication's domain.</p>
+<h3>Will beehiiv overwrite UTM tags I add by hand?</h3><p class="p">No. beehiiv says that utm_source, utm_medium or utm_campaign added by hand take precedence over its own values. Use that for a link that needs a different campaign, and add utm_content to tell two links in the same issue apart.</p>
+<h3>Do beehiiv's own stats show which issue brought a sale on my site?</h3><p class="p">No. beehiiv reports opens and clicks for each post, but it cannot see what happened on your site after the click. Joining the click to the payment that followed is what Virling does.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which beehiiv issue pays</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Average order value calculator: AOV by channel | Virling</title>
+<meta name="description" content="Divide store revenue by orders to get average order value, overall and for each channel, and spot the channel that brings the largest orders.">
+<link rel="canonical" href="https://virling.com/tools/aov-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/aov-calculator">
+<meta property="og:title" content="Average order value calculator: AOV by channel | Virling">
+<meta property="og:description" content="Divide store revenue by orders to get average order value, overall and for each channel, and spot the channel that brings the largest orders.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Average order value calculator","url":"https://virling.com/tools/aov-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Average order value calculator","item":"https://virling.com/tools/aov-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / average order value calculator</span><h1>Average order value calculator</h1><p class="lead">Enter your store's revenue and number of orders to get average order value, then add each marketing channel to see which one brings the biggest orders. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="aov" autocomplete="off">
+  <label>Revenue ($)<input name="rev" type="number" min="0" step="0.01" value="30000"></label>
+  <label>Number of orders<input name="orders" type="number" min="0" step="1" value="500"></label>
+  <div class="tool-stats" id="aov-sum" style="grid-column:1/-1"></div>
+  <table class="cmp" style="grid-column:1/-1"><thead><tr><th>Channel <span class="dim">optional</span></th><th>Revenue ($)</th><th>Orders</th><th>Average order value</th></tr></thead><tbody id="aov-rows"></tbody></table>
+</form>
+<p class="fine-note">Leave a channel at 0 to skip it. If revenue and orders above are empty, the overall figure uses the sum of the channels.</p>
+<div class="txt post tool-cta">
+<p class="p">A per-channel average order value is only as good as the orders you match to each channel. Virling links every visit to the payment it led to, so it fills in the revenue and orders for each channel from your real payments, including Shopify and WooCommerce orders. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/conversion-rate-calculator">conversion rate calculator</a>, <a href="/tools/revenue-per-visitor">revenue per visitor calculator</a>, <a href="/blog/track-shopify-revenue-by-traffic-source">track Shopify revenue by traffic source</a>, <a href="/tools/free-shipping-threshold-calculator">free shipping threshold calculator</a>, <a href="/tools/cart-abandonment-rate-calculator">cart abandonment rate calculator</a>, <a href="/blog/aov-by-traffic-source">average order value by traffic source</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The average order value formula</h2>
+<p class="p">Average order value (AOV) is what a single order is worth on average:</p>
+<p class="p"><code>average order value = revenue / number of orders</code></p>
+<p class="p">Use the same date range for revenue and orders, and the same definition of revenue for every channel. For the overall figure, add up the revenue and the orders of all channels and divide those sums, rather than averaging the channel AOVs, so a channel with a few orders does not count as much as one with hundreds.</p>
+<h2>A worked example</h2>
+<p class="p">These are round illustrative numbers, the same ones the calculator starts with, not data from a real store. A store takes $30,000 from 500 orders in a month, an average order value of $60. By channel: organic search brought $12,000 from 200 orders ($60), paid social $6,000 from 150 orders ($40), email $7,500 from 100 orders ($75), referral $3,000 from 30 orders ($100) and other sources $1,500 from 20 orders ($75).</p>
+<p class="p">Referral has the highest average order value at $100, but only 30 orders, so a handful of large orders can move it a lot. Paid social has the lowest at $40, which matters when you set what an ad click can cost: a channel with small orders needs a lower cost per order to break even.</p>
+<h2>Look at orders and revenue together</h2>
+<p class="p">A high average order value on its own does not make a channel the best one. Check how many orders it brings and how many visitors it took to get them; see the <a href="/tools/conversion-rate-calculator">conversion rate calculator</a> and <a href="/blog/find-which-channel-pays">how to find which marketing channel pays</a>. If many of your orders show up as direct, read <a href="/blog/shopify-orders-show-as-direct">why Shopify orders show as direct</a>.</p>
+<h2>Example: average order value for four channels</h2>
+<p class="p">These numbers are made up too, for a second, smaller store in one month:</p>
+<table class="cmp"><thead><tr><th>Channel</th><th>Orders</th><th>Revenue</th><th>Average order value</th></tr></thead><tbody><tr><th scope="row">Organic search</th><td>40</td><td>$1,600</td><td>$40.00</td></tr><tr><th scope="row">Paid search</th><td>24</td><td>$1,800</td><td>$75.00</td></tr><tr><th scope="row">Email</th><td>30</td><td>$900</td><td>$30.00</td></tr><tr><th scope="row">Referral</th><td>2</td><td>$300</td><td>$150.00</td></tr><tr><th scope="row">All</th><td>96</td><td>$4,600</td><td>$47.92</td></tr></tbody></table>
+<p class="p">The last row divides the sums, $4,600 / 96. Averaging the four channel figures would give $73.75, because two referral orders would count as much as 40 from search.</p>
+<h2>A high average from a few buyers</h2>
+<p class="p">Referral's two orders were $50 and $250. Without the larger one its average is $50, close to the store's $47.92. How many orders to wait for depends on how large one unusual order can be. Say it is five times a usual one:</p>
+<ul class="post-list">
+<li><b>With 2 orders,</b> it makes the average 3 times the usual.</li>
+<li><b>With 10 orders,</b> it adds 40%: nine usual orders and one worth five are 14 / 10.</li>
+<li><b>With 40 orders,</b> it adds 10%: 44 / 40.</li>
+</ul>
+<p class="p">Wait until one such order could not make the gap you see. Paid search is 57% above the store average with 24 orders, where an order of five times the usual adds about 17%, so a single order does not explain it. If your largest orders are ten times the usual, or if there are several, wait for more. Then take the largest order out and divide again: if the ranking changes, use a longer date range. This is arithmetic, not a benchmark, and <a href="/blog/aov-by-traffic-source">average order value by traffic source</a> shows the median as another check.</p>
+<h2>When average order value and revenue per visitor disagree</h2>
+<p class="p">Average order value leaves out everyone who did not buy. In the made-up store, organic search orders average $40 and email orders $30, but the 40 search orders took 2,000 visitors and the 30 email orders took 750:</p>
+<ul class="post-list">
+<li><b>Organic search:</b> $1,600 / 2,000 = $0.80 per visitor.</li>
+<li><b>Email:</b> $900 / 750 = $1.20 per visitor.</li>
+</ul>
+<p class="p">Each email visitor is worth more although each email order is smaller. Use average order value to decide what to offer buyers, such as a bundle for email readers, and revenue per visitor to decide which channel deserves more traffic. The <a href="/tools/revenue-per-visitor">revenue per visitor calculator</a> has the same store by visitors, and <a href="/blog/what-is-revenue-per-visitor">what revenue per visitor is</a> explains the method.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Average order value calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate average order value?</h3><p class="p">Divide revenue by the number of orders in the same period. $30,000 of revenue from 500 orders is an average order value of $60.</p></div>
+      <div><h3>Should average order value include tax, shipping and refunds?</h3><p class="p">Pick one definition and use it for every channel. Sales tax is not your money, so most stores leave it out, and refunded orders should come off the revenue so a channel full of returns does not look better than it is.</p></div>
+      <div><h3>Is average order value per order or per customer?</h3><p class="p">Per order. A customer who buys three times counts as three orders, so a channel that brings back repeat buyers can have a modest average order value and still earn a lot per customer.</p></div>
+      <div><h3>Why is average order value different for each channel?</h3><p class="p">Each channel brings different buyers at a different moment: people from an email may already know the products and buy more, while a first visit from a social ad may be a single small purchase. Discount codes shared on one channel also lower its average order.</p></div>
+      <div><h3>Where do I get revenue and orders per channel?</h3><p class="p">From a tool that links each order to the visit that brought the buyer. Store reports often file many orders under direct or unknown, so revenue per channel needs every order joined to its traffic source.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate average order value?", "acceptedAnswer": {"@type": "Answer", "text": "Divide revenue by the number of orders in the same period. $30,000 of revenue from 500 orders is an average order value of $60."}}, {"@type": "Question", "name": "Should average order value include tax, shipping and refunds?", "acceptedAnswer": {"@type": "Answer", "text": "Pick one definition and use it for every channel. Sales tax is not your money, so most stores leave it out, and refunded orders should come off the revenue so a channel full of returns does not look better than it is."}}, {"@type": "Question", "name": "Is average order value per order or per customer?", "acceptedAnswer": {"@type": "Answer", "text": "Per order. A customer who buys three times counts as three orders, so a channel that brings back repeat buyers can have a modest average order value and still earn a lot per customer."}}, {"@type": "Question", "name": "Why is average order value different for each channel?", "acceptedAnswer": {"@type": "Answer", "text": "Each channel brings different buyers at a different moment: people from an email may already know the products and buy more, while a first visit from a social ad may be a single small purchase. Discount codes shared on one channel also lower its average order."}}, {"@type": "Question", "name": "Where do I get revenue and orders per channel?", "acceptedAnswer": {"@type": "Answer", "text": "From a tool that links each order to the visit that brought the buyer. Store reports often file many orders under direct or unknown, so revenue per channel needs every order joined to its traffic source."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the orders behind every channel</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the orders and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("aov"), body = document.getElementById("aov-rows"), sum = document.getElementById("aov-sum");
+const usd = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const aov = (x) => (x.o > 0 ? usd(x.r / x.o) : "No data");
+[["Organic search", 12000, 200], ["Paid social", 6000, 150], ["Email", 7500, 100], ["Referral", 3000, 30], ["Other", 1500, 20]].forEach(([name, r, o]) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<th scope="row">${name}</th><td><input name="r" type="number" min="0" step="0.01" aria-label="${name} revenue" value="${r}"></td><td><input name="o" type="number" min="0" step="1" aria-label="${name} orders" value="${o}"></td><td data-out></td>`;
+  tr.dataset.name = name;
+  body.appendChild(tr);
+});
+const total = document.createElement("tr");
+body.appendChild(total);
+const calc = () => {
+  const rows = [...body.rows].slice(0, -1).map((tr) => ({ tr, name: tr.dataset.name, r: +tr.querySelector("[name=r]").value, o: +tr.querySelector("[name=o]").value }));
+  const t = rows.reduce((a, x) => ({ r: a.r + x.r, o: a.o + x.o }), { r: 0, o: 0 });
+  let best = null;
+  rows.forEach((x) => { if (x.o > 0 && x.r > 0 && (!best || x.r / x.o > best.r / best.o)) best = x; });
+  rows.forEach((x) => {
+    x.tr.style.background = x === best ? "var(--revenue-soft)" : "";
+    x.tr.querySelector("[data-out]").innerHTML = aov(x) + (x === best ? ' <span class="dim">highest</span>' : "");
+  });
+  total.innerHTML = `<th scope="row">Sum of channels</th><td><b>${usd(t.r)}</b></td><td><b>${t.o.toLocaleString("en-US")}</b></td><td><b>${aov(t)}</b></td>`;
+  const all = { r: +f.elements.rev.value, o: +f.elements.orders.value };
+  const overall = all.o > 0 ? all : t;
+  sum.innerHTML = [["Average order value", aov(overall)], ["Highest AOV channel", best ? best.name : "No data"], ["Its average order", best ? aov(best) : "No data"]].map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

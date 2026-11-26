@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stripe Elements UTM parameters: track the source of each sale</title>
+<meta name="description" content="Stripe Elements does not copy UTM tags onto a payment. Put a visitor ID in PaymentIntent metadata, for one-time sales and subscriptions, to see the source.">
+<link rel="canonical" href="https://virling.com/blog/stripe-elements-utm-tracking">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/stripe-elements-utm-tracking">
+<meta property="og:title" content="Stripe Elements UTM parameters: track the source of each sale">
+<meta property="og:description" content="Stripe Elements does not copy UTM tags onto a payment. Put a visitor ID in PaymentIntent metadata, for one-time sales and subscriptions, to see the source.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Stripe Elements UTM parameters: track the source of each sale","item":"https://virling.com/blog/stripe-elements-utm-tracking"}]},{"@type":"BlogPosting","headline":"Stripe Elements UTM parameters: track the source of each sale","description":"Stripe Elements does not copy UTM tags onto a payment. Put a visitor ID in PaymentIntent metadata, for one-time sales and subscriptions, to see the source.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/stripe-elements-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does Stripe Elements pass UTM parameters to Stripe?","acceptedAnswer":{"@type":"Answer","text":"No. The Payment Element collects payment details, and your server creates the PaymentIntent. Stripe stores what that call contains, and the UTM tags of your page are not part of it unless your code adds them."}},{"@type":"Question","name":"Where does metadata.virling_vid go for a PaymentIntent?","acceptedAnswer":{"@type":"Answer","text":"In the metadata of stripe.paymentIntents.create(), on your server. Stripe copies PaymentIntent metadata to the charge when the charge is created, and Virling reads it from the charge or the PaymentIntent."}},{"@type":"Question","name":"Can I put the visitor ID in subscription metadata?","acceptedAnswer":{"@type":"Answer","text":"Not for Virling. Stripe copies subscription metadata to the invoice, and Virling reads the charge, its PaymentIntent and the Checkout Session. Set the ID on the PaymentIntent of the first invoice."}},{"@type":"Question","name":"Do subscription renewals need the visitor ID again?","acceptedAnswer":{"@type":"Answer","text":"No. A renewal takes the channel of the customer's first payment, matched by the Stripe customer ID. Only the first payment needs the visitor ID, and that payment has to be in Virling."}},{"@type":"Question","name":"Can I store UTM tags in PaymentIntent metadata instead?","acceptedAnswer":{"@type":"Answer","text":"Yes, Stripe accepts any metadata keys within its limits, so utm_source can be one of them. You then keep the tags of one visit and build the reports yourself, and Virling does not read those keys. A visitor ID points to every recorded visit."}},{"@type":"Question","name":"Why is an Elements payment Unattributed?","acceptedAnswer":{"@type":"Answer","text":"Usually no visitor ID was on the PaymentIntent: the cookie was missing when your server created it, the API is on another domain, the site runs in cookieless mode, or the ID was set only on the subscription. If the ID is there, the visit may be outside the lookback window."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-24</span>
+      <h1>Stripe Elements UTM parameters: track the source of each sale</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
+<p class="p">Stripe Elements does not send UTM parameters to Stripe. To see which source brought a payment, your server has to put an ID on the payment that points back to the visit. With Virling, set <code>metadata.virling_vid</code> on the PaymentIntent, using the visitor ID from the <code>virling_vid</code> cookie. For a subscription, set it on the PaymentIntent of the first invoice, not on the subscription. Virling reads it from the charge or the PaymentIntent and credits the payment to the visit, with its UTM tags and referrer.</p>
+<h2>Why UTM tags do not reach Stripe by themselves</h2>
+<ul class="post-list"><li><strong>Your server creates the payment.</strong> Your page shows the <a href="https://docs.stripe.com/payments/payment-element">Payment Element</a>, but the PaymentIntent comes from a call your server makes. Stripe stores what that call contains, and the page URL is not part of it.</li><li><strong>The tags are often gone already.</strong> They are on the landing URL. By the time the buyer reaches your payment form, they are usually a few pages in.</li><li><strong>Metadata does not spread on its own.</strong> Stripe says metadata does not automatically copy to related objects, then lists the exceptions (<a href="https://docs.stripe.com/metadata">Stripe metadata docs</a>). Which object you pick decides whether the charge is matched.</li></ul>
+<p class="p">You could copy the tags themselves into metadata, since Stripe allows 50 keys with values of up to 500 characters. One visitor ID is simpler: the visits behind it, with their tags and referrers, live in your analytics.</p>
+<h2>Which Stripe object carries the visitor ID</h2>
+<ul class="post-list"><li><strong>PaymentIntent metadata: matched.</strong> Stripe copies it to the charge once, when the charge is created. Virling reads the charge and the PaymentIntent.</li><li><strong>Subscription metadata: not matched.</strong> Stripe copies it to the invoice, under <code>parent.subscription_details.metadata</code>. The list of copies does not include the PaymentIntent or the charge, and Virling does not read the invoice's copy.</li><li><strong>Customer metadata: not matched.</strong> Virling does not read it for Stripe.</li></ul>
+<h2>Add the script</h2>
+<p class="p">Put one tag in the <code>&lt;head&gt;</code> of every page, landing pages included. The app shows the exact tag for your site:</p>
+<div class="code block"><pre data-snippet>&lt;script defer src="https://app.virling.com/v.js" data-site="yourdomain.com"&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The script records the referrer and UTM tags of every visit against a visitor ID in the first-party <code>virling_vid</code> cookie. The cookie is on your domain, so your server receives it. If your API is on another domain, send <code>window.virling?.vid?.()</code> in the request body instead. Both ways are in the <a href="https://docs.virling.com/payments/checkout">checkout docs</a> and in <a href="/blog/server-side-revenue-tracking">server-side revenue tracking</a>.</p>
+<h2>One-time payments: the PaymentIntent</h2>
+<p class="p">Set the metadata where you create the PaymentIntent. This is Express with <code>cookie-parser</code>; the amount is a made-up example:</p>
+<div class="code block"><pre data-snippet>app.post("/create-intent", async (req, res) =&gt; {
+  const vid = req.cookies.virling_vid;
+  const intent = await stripe.paymentIntents.create({
+    amount: 4900,
+    currency: "usd",
+    automatic_payment_methods: { enabled: true },
+    metadata: vid ? { virling_vid: vid } : {},
+  });
+  res.json({ clientSecret: intent.client_secret });
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The browser code does not change. This is the flow from Stripe's guide, where the PaymentIntent is created after the buyer submits the form (<a href="https://docs.stripe.com/payments/accept-a-payment-deferred">Stripe guide</a>):</p>
+<div class="code block"><pre data-snippet>const stripe = Stripe("pk_live_...");
+const elements = stripe.elements({ mode: "payment", amount: 4900, currency: "usd" });
+elements.create("payment").mount("#payment-element");
+
+document.querySelector("#payment-form").addEventListener("submit", async (event) =&gt; {
+  event.preventDefault();
+  const { error: submitError } = await elements.submit();
+  if (submitError) return;
+  const res = await fetch("/create-intent", { method: "POST" });
+  const { clientSecret } = await res.json();
+  const { error } = await stripe.confirmPayment({
+    elements,
+    clientSecret,
+    confirmParams: { return_url: "https://yourdomain.com/thanks" },
+  });
+  // Show submitError.message or error.message in your form.
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">If you create the PaymentIntent as the page loads instead, make sure the Virling script has run first, or a first-time visitor has no cookie yet. The <a href="/blog/react-stripe-utm-tracking">React Stripe UTM tracking</a> post shows how to wait for it in a single-page app.</p>
+<h2>Subscriptions: the first invoice's PaymentIntent</h2>
+<p class="p">With Elements, you create the subscription with <code>payment_behavior: "default_incomplete"</code>, and Stripe creates the first invoice and its PaymentIntent (<a href="https://docs.stripe.com/billing/subscriptions/overview">Stripe subscriptions overview</a>). Your code did not create that PaymentIntent, so update its metadata, one of the fields Stripe lets you change on an invoice's PaymentIntent (<a href="https://docs.stripe.com/invoicing/integration">Stripe invoicing docs</a>), before you send the client secret to the browser:</p>
+<div class="code block"><pre data-snippet>app.post("/create-subscription", async (req, res) =&gt; {
+  const subscription = await stripe.subscriptions.create({
+    customer: customerId, // your signed-in user's Stripe customer
+    items: [{ price: "price_..." }],
+    payment_behavior: "default_incomplete",
+    payment_settings: { save_default_payment_method: "on_subscription" },
+    expand: ["latest_invoice.confirmation_secret", "latest_invoice.payments"],
+  });
+  const invoice = subscription.latest_invoice;
+  const vid = req.cookies.virling_vid;
+  const paid = invoice.payments.data.find((p) =&gt; p.payment.type === "payment_intent");
+  if (vid &amp;&amp; paid) {
+    await stripe.paymentIntents.update(paid.payment.payment_intent, {
+      metadata: { virling_vid: vid },
+    });
+  }
+  res.json({ clientSecret: invoice.confirmation_secret.client_secret });
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">In the browser, set <code>mode: "subscription"</code> in <code>stripe.elements()</code>, fetch <code>/create-subscription</code> and confirm with <code>stripe.confirmPayment()</code> as above. The order matters: Stripe copies the metadata to the charge when the charge is created, and later updates to the PaymentIntent do not reach it (<a href="https://docs.stripe.com/payments/payment-intents">PaymentIntents docs</a>).</p>
+<p class="p">API version <code>2025-03-31.basil</code> removed <code>payment_intent</code> from the invoice, which is why the code expands <code>payments</code> and <code>confirmation_secret</code> (<a href="https://docs.stripe.com/changelog/basil/2025-03-31/add-support-for-multiple-partial-payments-on-invoices">Stripe changelog</a>). On older versions, expand <code>latest_invoice.payment_intent</code> and update that one.</p>
+<ul class="post-list"><li><strong>Renewals</strong> need nothing. They take the channel of the customer's first payment, and so do upgrades.</li><li><strong>Free trials</strong> charge nothing up front, so Stripe's guide uses the <code>pending_setup_intent</code> instead of a payment, and the code above does not cover it. Virling sees trial starts only from Checkout Sessions. For an Elements trial, send the visitor's email as an <code>identify</code> event at signup; a later charge with the same payer email is then matched (<a href="https://docs.virling.com/attribution/unattributed#recover-payments-by-email">how it works</a>).</li></ul>
+<h2>Connect Stripe</h2>
+<p class="p">Create a restricted key with Read on Charges, Checkout Sessions, Customers, Events, Invoices, Subscriptions and PaymentIntents, and paste it into Virling. The payment is credited under the attribution model you pick: last non-direct by default, or first touch or last touch. The full setup is on the <a href="/integrations/stripe">Stripe integration page</a> and in the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a>.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>Test it</h2>
+<ul class="post-list"><li>Connect a test key that starts with <code>rk_test_</code> and use your test publishable and secret keys on the site. Payments imported with a test key stay in your reports, so use a separate site in Virling if you want to keep them out.</li><li>In a private window, open your site with <code>?utm_source=test&amp;utm_medium=test</code>, go to the payment form and pay with the card <code>4242 4242 4242 4242</code> and any future date (<a href="https://docs.stripe.com/testing">Stripe test cards</a>).</li><li>In the Stripe Dashboard, open the payment. Its metadata should hold <code>virling_vid</code>. Do this once for a one-time payment and once for a subscription.</li><li>Wait a minute for the next sync and open the payments list at <code>/app/yourdomain.com/payments</code>. The payment shows the <code>test</code> source instead of Unattributed.</li></ul>
+<p class="p">On <code>localhost</code> the script sends nothing unless the tag has <code>data-dev</code>.</p>
+<h2>If you use Elements with Checkout Sessions</h2>
+<p class="p">Stripe also lets you build the Payment Element on a Checkout Session, with <code>ui_mode</code> set to <code>elements</code> (<code>custom</code> before API version <code>2026-03-25.dahlia</code>; <a href="https://docs.stripe.com/changelog/dahlia/2026-03-25/updates-available-checkout-session-ui-modes">Stripe changelog</a>). There you do not create a PaymentIntent: set <code>client_reference_id</code> or <code>metadata.virling_vid</code> on the session, as in <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>. How the join works, step by step, is in <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>.</p>
+<h2>Frequently asked questions</h2>
+<h3>Does Stripe Elements pass UTM parameters to Stripe?</h3><p class="p">No. The Payment Element collects payment details, and your server creates the PaymentIntent. Stripe stores what that call contains, and the UTM tags of your page are not part of it unless your code adds them.</p>
+<h3>Where does metadata.virling_vid go for a PaymentIntent?</h3><p class="p">In the metadata of stripe.paymentIntents.create(), on your server. Stripe copies PaymentIntent metadata to the charge when the charge is created, and Virling reads it from the charge or the PaymentIntent.</p>
+<h3>Can I put the visitor ID in subscription metadata?</h3><p class="p">Not for Virling. Stripe copies subscription metadata to the invoice, and Virling reads the charge, its PaymentIntent and the Checkout Session. Set the ID on the PaymentIntent of the first invoice.</p>
+<h3>Do subscription renewals need the visitor ID again?</h3><p class="p">No. A renewal takes the channel of the customer's first payment, matched by the Stripe customer ID. Only the first payment needs the visitor ID, and that payment has to be in Virling.</p>
+<h3>Can I store UTM tags in PaymentIntent metadata instead?</h3><p class="p">Yes, Stripe accepts any metadata keys within its limits, so utm_source can be one of them. You then keep the tags of one visit and build the reports yourself, and Virling does not read those keys. A visitor ID points to every recorded visit.</p>
+<h3>Why is an Elements payment Unattributed?</h3><p class="p">Usually no visitor ID was on the PaymentIntent: the cookie was missing when your server created it, the API is on another domain, the site runs in cookieless mode, or the ID was set only on the subscription. If the ID is there, the visit may be outside the lookback window.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which campaigns bring Stripe revenue</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

@@ -12,12 +12,15 @@ use crate::events::TRIAL;
 
 const LIVE_URL: &str = "https://live.dodopayments.com";
 const TEST_URL: &str = "https://test.dodopayments.com";
-const BACKFILL: Duration = Duration::days(90);
+pub(crate) const BACKFILL: Duration = Duration::days(90);
 /// Longest created_at window per listing, so offset pagination never goes deep.
 const WINDOW: Duration = Duration::days(1);
 /// Each incremental window re-reads this much so payments that succeed late are not missed.
 const OVERLAP: Duration = Duration::minutes(30);
 const CAUGHT_UP: Duration = Duration::minutes(5);
+/// Once an hour payments are re-read this far back, since Dodo lists by created_at and renewals can succeed days later.
+const RESCAN: Duration = Duration::days(30);
+const RESCAN_EVERY: i64 = 3600;
 const PAGE_SIZE: usize = 20;
 const MAX_PAGE: u32 = 1000;
 /// Extra GETs per fetch before ending the round, keeping a round under Dodo's 240 requests/minute.
@@ -143,16 +146,21 @@ impl Cursor {
 
     /// Moves past the page just read and reports whether more pages are available now.
     fn advance(&mut self, full_page: bool, now: OffsetDateTime) -> bool {
+        let payments = self.phase == Phase::Payments;
         let w = self.window_mut();
         if full_page {
             w.page += 1;
             return true;
         }
         let caught_up = w.lte >= (now - CAUGHT_UP).unix_timestamp();
-        w.gte = if caught_up {
-            w.lte - OVERLAP.whole_seconds()
-        } else {
-            w.lte
+        let overlap = OVERLAP.whole_seconds();
+        let rescan = payments
+            && w.lte - w.gte <= 2 * overlap
+            && (w.gte + overlap) / RESCAN_EVERY != w.lte / RESCAN_EVERY;
+        w.gte = match (caught_up, rescan) {
+            (true, true) => w.lte - RESCAN.whole_seconds(),
+            (true, false) => w.lte - overlap,
+            (false, _) => w.lte,
         };
         w.lte = 0;
         w.page = 0;
@@ -890,6 +898,50 @@ mod tests {
         assert!(!c.advance(false, now));
         assert_eq!(c.phase, Phase::Payments);
         assert_eq!(c.refunds.gte, ts - 1800);
+    }
+
+    #[test]
+    fn rereads_a_month_of_payments_each_hour() {
+        let poll = |c: &mut Cursor, now: OffsetDateTime| {
+            let ts = now.unix_timestamp();
+            c.phase = Phase::Payments;
+            c.payments = Window {
+                gte: ts - 1860,
+                lte: ts,
+                page: 0,
+            };
+            c.advance(false, now);
+        };
+        let mid = datetime!(2026-11-14 10:30:30 UTC);
+        let mut c = Cursor::start(Mode::Live, mid);
+        poll(&mut c, mid);
+        assert_eq!(
+            c.payments.gte,
+            mid.unix_timestamp() - 1800,
+            "same hour keeps the short overlap"
+        );
+        let turn = datetime!(2026-11-14 11:00:30 UTC);
+        let ts = turn.unix_timestamp();
+        poll(&mut c, turn);
+        assert_eq!(
+            c.payments.gte,
+            ts - 30 * 86_400,
+            "a new hour goes back 30 days"
+        );
+        c.phase = Phase::Payments;
+        for _ in 0..29 {
+            c.window(turn);
+            assert!(c.advance(false, turn));
+            assert_eq!(c.phase, Phase::Payments);
+        }
+        c.window(turn);
+        c.advance(false, turn);
+        assert_eq!(c.phase, Phase::Refunds);
+        assert_eq!(
+            c.payments.gte,
+            ts - 1800,
+            "the rescan ends back on the short overlap"
+        );
     }
 
     #[test]

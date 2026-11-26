@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Funnel conversion calculator: visit to paid at every step</title>
+<meta name="description" content="Spot the biggest drop between visit and payment, with the conversion rate at each step, the visit to paid rate and revenue per visitor.">
+<link rel="canonical" href="https://virling.com/tools/funnel-conversion-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/funnel-conversion-calculator">
+<meta property="og:title" content="Funnel conversion calculator: visit to paid at every step">
+<meta property="og:description" content="Spot the biggest drop between visit and payment, with the conversion rate at each step, the visit to paid rate and revenue per visitor.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Funnel conversion calculator","url":"https://virling.com/tools/funnel-conversion-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Funnel conversion calculator","item":"https://virling.com/tools/funnel-conversion-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / funnel conversion calculator</span><h1>Funnel conversion calculator</h1><p class="lead">Enter your visitors, signups or add to carts, trials or checkouts, and paid customers to see the conversion rate at every step, the overall visit to paid rate, revenue per visitor and where the biggest drop is. Leave a step empty to skip it. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="fun" autocomplete="off">
+  <label>Visitors<input name="s0" type="number" min="0" step="1" value="10000"></label>
+  <label>Signups or add to carts<input name="s1" type="number" min="0" step="1" value="400"></label>
+  <label>Trials or checkouts<input name="s2" type="number" min="0" step="1" value="120"></label>
+  <label>Paid customers<input name="s3" type="number" min="0" step="1" value="30"></label>
+  <label class="wide">Revenue from those customers ($)<input name="rev" type="number" min="0" step="0.01" value="1500"><span class="dim">Optional. Used for revenue per visitor and revenue per customer.</span></label>
+</form>
+<div class="tool-stats" id="fun-sum"></div>
+<table class="cmp"><thead><tr><th>Step</th><th>Count</th><th>From previous step</th><th>Lost at this step</th><th>From visitors</th></tr></thead><tbody id="fun-out"></tbody></table>
+<p class="fine-note">Each step's rate divides it by the last step you filled in above it. The biggest drop is the step that loses the largest share of the people who reached the step before it.</p>
+<div class="txt post tool-cta">
+<p class="p">The step that is hardest to count is the last one: which of your paid customers came from which visits. Virling links every visit to the payment it led to, so you see paid customers and revenue for each channel from your real payments, not an estimate. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/conversion-rate-calculator">conversion rate calculator</a>, <a href="/tools/trial-to-paid-calculator">trial to paid calculator</a>, <a href="/tools/revenue-per-visitor">revenue per visitor calculator</a>, <a href="/blog/trial-to-paid-conversion-by-traffic-source">trial-to-paid conversion by traffic source</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The funnel conversion formula</h2>
+<p class="p">Each step's conversion rate is the share of people from the step before who reached it, and the overall rate is paid customers out of visitors:</p>
+<p class="p"><code>step conversion rate = people at this step / people at the previous step &times; 100%</code><br><code>visit to paid rate = paid customers / visitors &times; 100%</code></p>
+<p class="p">The overall rate is the step rates multiplied together, so a small gain at any step lifts the end result by the same proportion. Revenue per visitor adds what customers spent:</p>
+<p class="p"><code>revenue per visitor = revenue / visitors = visit to paid rate &times; revenue per customer</code></p>
+<p class="p">Use the same period and the same group of people for every step. For a store, the steps are visitors, add to carts, checkouts and orders; for a SaaS product, visitors, signups, trials and paying customers. If your product has no trial or no cart, leave that step empty.</p>
+<h2>A worked example</h2>
+<p class="p">The defaults above are made-up numbers to show the method. 10,000 visitors led to 400 signups, a 4% step rate. 120 of those signups started a trial, 30%, and 30 trials paid, 25%. Overall that is 30 customers from 10,000 visitors, a 0.30% visit to paid rate. Those 30 customers paid $1,500, so each visitor was worth $0.15 and each customer $50.</p>
+<p class="p">The biggest drop is the first step: 96% of visitors left without signing up. That is normal for the top of a funnel, so compare each step with its own past rather than with the other steps.</p>
+<h2>Why the same funnel differs by channel</h2>
+<p class="p">One funnel for the whole site blends very different visitors. Someone who searched for what you sell, or asked an AI assistant for it, arrives ready to sign up; someone who clicked a post out of curiosity often leaves at the first step. A channel can bring many signups that never pay, or few visitors who nearly all buy. The overall funnel shows where people drop, but not which channels bring the people who drop.</p>
+<p class="p">Run the calculator once per channel with that channel's visitors, signups, trials, customers and revenue, and compare their revenue per visitor: it folds every step and the order size into one number per source. The <a href="/tools/revenue-per-visitor">revenue per visitor calculator</a> and the <a href="/tools/conversion-rate-calculator">conversion rate calculator</a> compare channels side by side, and <a href="/blog/trial-to-paid-conversion-by-traffic-source">trial-to-paid conversion by traffic source</a> walks through measuring the trial step per channel. For a single step, the <a href="/tools/trial-to-paid-calculator">trial to paid calculator</a> takes one row per channel.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Funnel conversion calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate funnel conversion rate?</h3><p class="p">Divide the number of people at each step by the number at the step before, then multiply by 100. For the whole funnel, divide paid customers by visitors: 30 customers from 10,000 visitors is a 0.30% visit to paid rate.</p></div>
+      <div><h3>What if my funnel has no trial or no cart?</h3><p class="p">Leave that step empty. The calculator skips it and measures the next step against the last one you filled in, so a funnel of visitors, signups and paid customers works the same way.</p></div>
+      <div><h3>Which step should I fix first?</h3><p class="p">The step with the biggest drop is a starting point, but the top step almost always loses the most people. Compare each step with its own rate in earlier periods and per channel, and fix the one that is worst against its own history.</p></div>
+      <div><h3>Why does revenue per visitor matter if I know the conversion rate?</h3><p class="p">Two channels with the same visit to paid rate can bring customers who spend very different amounts. Revenue per visitor is the visit to paid rate times revenue per customer, so it shows what each visit from a source is worth.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate funnel conversion rate?", "acceptedAnswer": {"@type": "Answer", "text": "Divide the number of people at each step by the number at the step before, then multiply by 100. For the whole funnel, divide paid customers by visitors: 30 customers from 10,000 visitors is a 0.30% visit to paid rate."}}, {"@type": "Question", "name": "What if my funnel has no trial or no cart?", "acceptedAnswer": {"@type": "Answer", "text": "Leave that step empty. The calculator skips it and measures the next step against the last one you filled in, so a funnel of visitors, signups and paid customers works the same way."}}, {"@type": "Question", "name": "Which step should I fix first?", "acceptedAnswer": {"@type": "Answer", "text": "The step with the biggest drop is a starting point, but the top step almost always loses the most people. Compare each step with its own rate in earlier periods and per channel, and fix the one that is worst against its own history."}}, {"@type": "Question", "name": "Why does revenue per visitor matter if I know the conversion rate?", "acceptedAnswer": {"@type": "Answer", "text": "Two channels with the same visit to paid rate can bring customers who spend very different amounts. Revenue per visitor is the visit to paid rate times revenue per customer, so it shows what each visit from a source is worth."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See your funnel by channel from real payments</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("fun"), sum = document.getElementById("fun-sum"), out = document.getElementById("fun-out");
+const names = ["Visitors", "Signups or add to carts", "Trials or checkouts", "Paid customers"], short = ["visitors", "signups", "trials", "paid"];
+const usd = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: n < 100 ? 2 : 0, maximumFractionDigits: n < 100 ? 2 : 0 });
+const pct = (n) => (n * 100).toFixed(2) + "%";
+const num = (n) => n.toLocaleString("en-US");
+const calc = () => {
+  const val = (k) => { const s = f.elements[k].value.trim(); return s === "" ? null : Math.max(0, +s); };
+  const steps = names.map((n, i) => ({ i, n: val("s" + i) })).filter((s) => s.n !== null);
+  const rev = val("rev"), v = val("s0"), paid = val("s3");
+  let drop = null;
+  const rows = steps.map((s, k) => {
+    const p = k > 0 ? steps[k - 1] : null, r = p && p.n > 0 ? s.n / p.n : null;
+    const row = { s, p, r, lost: r === null ? null : 1 - r };
+    if (row.lost !== null && (!drop || row.lost > drop.lost)) drop = row;
+    return row;
+  });
+  out.innerHTML = rows.length ? rows.map((x) => {
+    const on = x === drop && x.lost > 0;
+    return `<tr${on ? ' style="background:var(--revenue-soft)"' : ""}><th scope="row">${names[x.s.i]}${on ? ' <span class="dim">biggest drop</span>' : ""}</th><td>${num(x.s.n)}</td><td>${x.p ? (x.r === null ? "No data" : pct(x.r)) : "Start"}</td><td>${x.lost === null ? (x.p ? "No data" : "") : pct(Math.max(0, x.lost))}</td><td>${v > 0 ? pct(x.s.n / v) : "No data"}</td></tr>`;
+  }).join("") : '<tr><td colspan="5">Enter at least one step.</td></tr>';
+  sum.innerHTML = [
+    ["Visit to paid rate", v > 0 && paid !== null ? pct(paid / v) : "No data"],
+    ["Revenue per visitor", v > 0 && rev !== null ? usd(rev / v) : "No data"],
+    ["Revenue per customer", paid > 0 && rev !== null ? usd(rev / paid) : "No data"],
+    ["Biggest drop", drop && drop.lost > 0 ? `${short[drop.p.i]} to ${short[drop.s.i]}, ${pct(drop.lost)} lost` : "No data"],
+  ].map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

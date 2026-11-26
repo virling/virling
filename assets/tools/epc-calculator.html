@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EPC calculator: earnings per click for affiliates | Virling</title>
+<meta name="description" content="Find what an affiliate link earns per click and per 100 clicks, plus its conversion rate, from clicks, sales, order value and commission.">
+<link rel="canonical" href="https://virling.com/tools/epc-calculator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/epc-calculator">
+<meta property="og:title" content="EPC calculator: earnings per click for affiliates | Virling">
+<meta property="og:description" content="Find what an affiliate link earns per click and per 100 clicks, plus its conversion rate, from clicks, sales, order value and commission.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"EPC calculator","url":"https://virling.com/tools/epc-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"EPC calculator","item":"https://virling.com/tools/epc-calculator"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / epc calculator</span><h1>EPC calculator</h1><p class="lead">EPC, earnings per click, is what an affiliate link earns on average each time someone clicks it. Enter the clicks, the sales they led to, the average order value and the commission rate, or the total earnings if you already know them. You get the EPC, the conversion rate and the earnings per 100 clicks. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="epc" autocomplete="off">
+  <div class="tool-pick" data-select><span id="mode-label">Earnings from</span>
+    <button type="button" id="mode" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="mode-label mode-value" data-value="rate"><span id="mode-value">Commission rate</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <ul id="mode-menu" role="listbox" aria-labelledby="mode-label" tabindex="-1" hidden><li role="option" data-value="rate" aria-selected="true">Commission rate</li><li role="option" data-value="total" aria-selected="false">Total earnings</li></ul>
+  </div>
+  <label>Clicks<input name="clicks" type="number" min="0" step="1" value="2000"></label>
+  <label>Sales<input name="sales" type="number" min="0" step="1" value="40"></label>
+  <label id="aov-field">Average order value ($)<input name="aov" type="number" min="0" step="0.01" value="80"></label>
+  <label id="rate-field">Commission (%)<input name="rate" type="number" min="0" step="0.1" value="25"></label>
+  <label id="total-field" style="display:none">Total earnings ($)<input name="total" type="number" min="0" step="0.01" value="800"></label>
+</form>
+<div class="tool-stats" id="epc-out"></div>
+<div class="txt post tool-cta">
+<p class="p">EPC counts clicks and commissions, not the customers behind them. Virling links every visit to the payment it led to, so a merchant sees the revenue, paying customers and refunds each partner sends from real payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<p class="p">Related: <a href="/tools/affiliate-commission-calculator">affiliate commission calculator</a>, <a href="/tools/conversion-rate-calculator">conversion rate calculator</a>, <a href="/tools/referral-program-calculator">referral program calculator</a>.</p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>The EPC formula</h2>
+<p class="p">EPC is the total commission earned divided by the number of clicks that earned it:</p>
+<p class="p"><code>EPC = total earnings &divide; clicks</code></p>
+<p class="p">If you know the sales instead of the earnings, the earnings are the sales times the average order value times the commission rate:</p>
+<p class="p"><code>total earnings = sales &times; average order value &times; commission rate</code></p>
+<p class="p">EPC is the conversion rate times the commission per sale, so it moves when either one does:</p>
+<p class="p"><code>conversion rate = sales &divide; clicks</code></p>
+<p class="p">Many networks quote EPC per 100 clicks rather than per click, which is the same number times 100. Check which one a dashboard shows before comparing offers.</p>
+<h2>A worked example</h2>
+<p class="p">These are made-up numbers, the defaults above. A link gets 2,000 clicks and 40 sales with an $80 average order at a 25% commission. Each sale pays $80 &times; 0.25 = $20, so the earnings are 40 &times; $20 = $800. The EPC is $800 &divide; 2,000 = $0.40, the conversion rate is 40 &divide; 2,000 = 2%, and 100 clicks earn $40.</p>
+<p class="p">A second offer pays 40% on a $50 order but converts at 1%: each sale pays $20 again, but 2,000 clicks bring 20 sales and $400, an EPC of $0.20. The higher rate earns half as much per click.</p>
+<h2>A subscription program, worked through</h2>
+<p class="p">Made-up numbers. A partner sends 1,500 clicks and 30 customers to a $40 monthly plan that pays 30% of every payment, at an 80% margin. Customers stay 6 months. The first payments alone earn 30 &times; $12 = $360. For the whole stay, switch to Total earnings and enter 30 &times; $12 &times; 6 = $2,160. The same field gives the most the merchant could pay: enter the gross profit instead, 30 &times; $40 &times; 0.80 &times; 6 = $5,760.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:520px"><thead><tr><th>Result (made up)</th><th>First payment</th><th>All 6 months</th><th>Gross profit</th></tr></thead><tbody><tr><th scope="row">EPC</th><td>$0.24</td><td>$1.44</td><td>$3.84</td></tr><tr><th scope="row">Per 100 clicks</th><td>$24.00</td><td>$144.00</td><td>$384.00</td></tr><tr><th scope="row">Conversion rate</th><td>2%</td><td>2%</td><td>2%</td></tr><tr><th scope="row">Total earnings</th><td>$360.00</td><td>$2,160.00</td><td>$5,760.00</td></tr></tbody></table></div>
+<p class="p">The partner earns six times what the first month shows, and the merchant breaks even at an EPC of $3.84. At $1.44 it keeps $2.40 a click.</p>
+<h2>A store program, worked through</h2>
+<p class="p">Made-up numbers again. A content partner sends a store 5,000 clicks and 125 orders of $64 at a 10% commission. A coupon partner sends 1,000 clicks and 60 orders, where a 20% code cuts the same order to $51.20. The goods cost $38.40 an order, a 40% margin at full price, and the last row works out what the store keeps per order:</p>
+<table class="cmp"><thead><tr><th style="width:36%">Result (made up)</th><th>Content partner</th><th>Coupon partner</th></tr></thead><tbody><tr><th scope="row">EPC</th><td>$0.16</td><td>$0.31</td></tr><tr><th scope="row">Per 100 clicks</th><td>$16.00</td><td>$30.72</td></tr><tr><th scope="row">Conversion rate</th><td>2.5%</td><td>6%</td></tr><tr><th scope="row">Total earnings</th><td>$800.00</td><td>$307.20</td></tr><tr><th scope="row">Store keeps per order</th><td>$19.20</td><td>$7.68</td></tr></tbody></table>
+<p class="p">The coupon partner earns about twice as much per click, yet each order leaves the store less than half as much. The content partner's 125 orders bring 125 &times; $25.60 = $3,200 of gross profit, a break-even EPC of $0.64.</p>
+<h2>EPC for affiliates</h2>
+<p class="p">An affiliate has a fixed amount of traffic, so EPC is the fairest way to compare offers: it folds the commission rate, the order value and how well the merchant's page converts into one number. A high rate on a page that rarely converts can earn less per click than a modest rate on one that does. Compare EPC from your own traffic where you can, since a network average mixes audiences that are not yours. For recurring commissions, count the renewals you are paid on too, or EPC will undersell the offer.</p>
+<h2>EPC for merchants</h2>
+<p class="p">A merchant can turn the same number around to see which partners send buyers rather than clicks. Two partners with the same click count can be worth very different amounts: work out EPC per partner and the gap shows. It is still a proxy. Commissions are counted under your affiliate software's cookie rules, and EPC says nothing about refunds, renewals or customers who came back later through another channel. The <a href="/tools/affiliate-commission-calculator">affiliate commission calculator</a> shows how much commission a sale can carry, and <a href="/blog/affiliate-revenue-tracking">affiliate revenue tracking</a> covers how to tie each partner's clicks to the payments that followed. For customer referral programs, see <a href="/blog/referral-program-revenue-tracking">referral program revenue tracking</a>.</p>
+<h2>When a program with a good EPC loses money</h2>
+<p class="p">For a merchant, the highest EPC that breaks even is the gross profit each click brought:</p>
+<p class="p"><code>break-even EPC = gross profit from the partner's sales &divide; clicks</code></p>
+<p class="p">Four things close the gap between that number and the partner's EPC. The figures continue the made-up programs above:</p>
+<table class="cmp"><thead><tr><th style="width:30%">Leak</th><th>What it costs, and how to see it in payments by source</th></tr></thead><tbody><tr><th scope="row">Refunds</th><td>If 25 of the content partner's 125 orders are refunded, the goods can be sold again and the commission is still paid, the gross profit is $2,560 and the break-even EPC falls from $0.64 to $0.51. The EPC stays at $0.16. Compare the refund rate per partner.</td></tr><tr><th scope="row">Coupon leakage</th><td>A click made at checkout to fetch a code can convert well, so it raises the EPC without bringing a buyer. Open the partner's payments: an earlier visit from another source, minutes before the coupon click, is the sign. <a href="/blog/coupon-site-revenue-tracking">Do coupon sites bring new customers?</a> shows how to count them.</td></tr><tr><th scope="row">Renewals that still pay</th><td>If the subscription's terms end at 3 months but payouts run for all 6, the partner earns $2,160 instead of $1,080, an EPC of $1.44 instead of $0.72, with no new click. Count the renewals on a customer's timeline against the payout statement, and compare clicks with the customers they brought, not with one month's payouts.</td></tr><tr><th scope="row">Would have bought anyway</th><td>These orders lift the EPC and bring nothing. The content partner breaks even when ($25.60 - $6.40) &divide; $25.60 = 75% of its orders would have come anyway at full price, the coupon partner when $7.68 &divide; $25.60 = 30% would have. Look for a first visit from search, email or an ad, then pause a partner for a few weeks and compare total orders, since a journey is a hint and not proof.</td></tr></tbody></table>
+<p class="p">In Virling, the <a href="https://docs.virling.com/guides/dashboard">Partners page</a> shows visitors, paying customers, revenue net of refunds and refund rate per partner, a payment opens to the visits before it, and <a href="https://docs.virling.com/attribution/renewals">renewals</a> keep the source of the customer's first payment. Commissions and clicks stay in your affiliate software, so put the two side by side.</p>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>EPC calculator FAQ</h2>
+    <div class="faq-list">
+      <div><h3>How do you calculate EPC?</h3><p class="p">Divide the total commission earned by the number of clicks. $800 earned from 2,000 clicks is an EPC of $0.40, or $40 per 100 clicks.</p></div>
+      <div><h3>What is a good EPC?</h3><p class="p">It depends on the niche, the order value and the commission, so there is no single figure. Compare offers on your own traffic: the one that earns more per click is the better one for you, whatever its commission rate.</p></div>
+      <div><h3>Is EPC per click or per 100 clicks?</h3><p class="p">EPC means earnings per click, but many affiliate networks show it per 100 clicks. The per-100 number is simply 100 times the per-click one, so check the label before comparing two dashboards.</p></div>
+      <div><h3>What does this calculator leave out?</h3><p class="p">It counts only clicks, sales, order value and commission. Refunds, reversed commissions, recurring payouts and sales your affiliate software did not credit to the click are not included.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you calculate EPC?", "acceptedAnswer": {"@type": "Answer", "text": "Divide the total commission earned by the number of clicks. $800 earned from 2,000 clicks is an EPC of $0.40, or $40 per 100 clicks."}}, {"@type": "Question", "name": "What is a good EPC?", "acceptedAnswer": {"@type": "Answer", "text": "It depends on the niche, the order value and the commission, so there is no single figure. Compare offers on your own traffic: the one that earns more per click is the better one for you, whatever its commission rate."}}, {"@type": "Question", "name": "Is EPC per click or per 100 clicks?", "acceptedAnswer": {"@type": "Answer", "text": "EPC means earnings per click, but many affiliate networks show it per 100 clicks. The per-100 number is simply 100 times the per-click one, so check the label before comparing two dashboards."}}, {"@type": "Question", "name": "What does this calculator leave out?", "acceptedAnswer": {"@type": "Answer", "text": "It counts only clicks, sales, order value and commission. Refunds, reversed commissions, recurring payouts and sales your affiliate software did not credit to the click are not included."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which partners send paying customers</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each partner and channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("epc"), out = document.getElementById("epc-out"), mode = document.getElementById("mode");
+const usd = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const pct = (n) => +(n * 100).toFixed(2) + "%";
+const calc = () => {
+  const tot = mode.dataset.value === "total";
+  document.getElementById("aov-field").style.display = document.getElementById("rate-field").style.display = tot ? "none" : "";
+  document.getElementById("total-field").style.display = tot ? "" : "none";
+  const clicks = Math.max(+f.clicks.value, 0), sales = Math.max(+f.sales.value, 0);
+  const earn = tot ? Math.max(+f.total.value, 0) : sales * Math.max(+f.aov.value, 0) * Math.max(+f.rate.value, 0) / 100;
+  out.innerHTML = [
+    ["EPC (earnings per click)", clicks > 0 ? usd(earn / clicks) : "No data"],
+    ["Earnings per 100 clicks", clicks > 0 ? usd(earn / clicks * 100) : "No data"],
+    ["Conversion rate", clicks > 0 ? pct(sales / clicks) : "No data"],
+    ["Total earnings", usd(earn)],
+  ].map(([k, x]) => `<div><span class="dim">${k}</span><b>${x}</b></div>`).join("");
+};
+for (const box of document.querySelectorAll("[data-select]")) {
+  const btn = box.querySelector("button"), menu = box.querySelector("ul"), items = [...menu.children];
+  const mark = (el) => { items.forEach((i) => i.classList.toggle("on", i === el)); menu.setAttribute("aria-activedescendant", el.id = btn.id + "-" + el.dataset.value); };
+  const show = (open) => {
+    menu.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+    if (open) { mark(items.find((i) => i.getAttribute("aria-selected") === "true")); menu.focus(); }
+  };
+  const pick = (el) => {
+    items.forEach((i) => i.setAttribute("aria-selected", String(i === el)));
+    btn.dataset.value = el.dataset.value;
+    btn.querySelector("span").textContent = el.textContent;
+    show(false);
+    btn.focus();
+    calc();
+  };
+  btn.addEventListener("click", () => show(menu.hidden));
+  btn.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); show(true); } });
+  items.forEach((i) => { i.addEventListener("click", () => pick(i)); i.addEventListener("mousemove", () => mark(i)); });
+  menu.addEventListener("keydown", (e) => {
+    const at = items.findIndex((i) => i.classList.contains("on"));
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); mark(items[(at + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]); }
+    else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(items[at]); }
+    else if (e.key === "Escape" || e.key === "Tab") { show(false); btn.focus(); }
+  });
+  document.addEventListener("click", (e) => { if (!menu.hidden && !box.contains(e.target)) show(false); });
+}
+f.addEventListener("input", calc);
+f.addEventListener("submit", (e) => e.preventDefault());
+calc();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

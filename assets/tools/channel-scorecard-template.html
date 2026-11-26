@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marketing channel scorecard template: keep, test or cut</title>
+<meta name="description" content="Score each channel every month on visitors, signups, customers, revenue, spend and CAC, apply a written keep, test or cut rule and copy it as CSV.">
+<link rel="canonical" href="https://virling.com/tools/channel-scorecard-template">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/channel-scorecard-template">
+<meta property="og:title" content="Marketing channel scorecard template: keep, test or cut">
+<meta property="og:description" content="Score each channel every month on visitors, signups, customers, revenue, spend and CAC, apply a written keep, test or cut rule and copy it as CSV.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Marketing channel scorecard template","url":"https://virling.com/tools/channel-scorecard-template","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Marketing channel scorecard template","item":"https://virling.com/tools/channel-scorecard-template"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+<style>
+.tool.sc { max-width: 1100px; }
+.sc-scroll { overflow-x: auto; }
+.sc .cmp { min-width: 940px; font-size: 14px; }
+.sc .cmp thead th:first-child { width: 17%; }
+.sc .cmp th, .sc .cmp td { padding: 8px 6px; }
+.sc .cmp input { width: 100%; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 8px; background: #fff; font: inherit; color: var(--ink); }
+.sc .cmp .n, .sc .cmp .n input { text-align: right; }
+.sc .cmp tfoot th, .sc .cmp tfoot td { font-weight: 600; color: var(--ink); border-top: 1px solid var(--rule); }
+.sc .rule { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / channel scorecard template</span><h1>Marketing channel scorecard template</h1><p class="lead">One row per marketing channel, filled in once a month. At the start of each month, enter last month's visitors, signups or trials, paying customers, revenue and spend for every channel. The template works out revenue per visitor and CAC, then marks each channel keep, test or cut by the rule written under the table. Copy it as CSV into the same sheet each month to see the trend. No signup, and everything stays in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool sc">
+<form class="tool-form" id="sc-form" autocomplete="off">
+  <label>Month<input name="month" value="November 2026"></label>
+  <label>Currency <span class="dim">symbol or code</span><input name="cur" value="$"></label>
+</form>
+<p class="dim">The channels and numbers below are an example, not real data. Replace them with your own; leave spend empty for channels you do not pay for. Rows with no channel name are left out of the totals and the copy.</p>
+<div class="sc-scroll"><table class="cmp" id="sc-tb"><thead><tr><th>Channel</th><th class="n">Visitors</th><th class="n">Signups or trials</th><th class="n">Paying customers</th><th class="n">Revenue</th><th class="n">Revenue per visitor</th><th class="n">Spend</th><th class="n">CAC</th><th>Keep, test or cut</th></tr></thead><tbody>
+<tr><th scope="row"><input data-k="name" value="Organic search" aria-label="Channel"></th><td class="n"><input data-k="vis" value="4000" aria-label="Visitors" inputmode="decimal"></td><td class="n"><input data-k="sign" value="120" aria-label="Signups or trials" inputmode="decimal"></td><td class="n"><input data-k="cust" value="20" aria-label="Paying customers" inputmode="decimal"></td><td class="n"><input data-k="rev" value="2400" aria-label="Revenue" inputmode="decimal"></td><td class="n" data-rpv>$0.60</td><td class="n"><input data-k="spend" value="" aria-label="Spend" placeholder="0" inputmode="decimal"></td><td class="n" data-cac>-</td><td data-vd>Keep</td></tr><tr><th scope="row"><input data-k="name" value="Paid" aria-label="Channel"></th><td class="n"><input data-k="vis" value="2500" aria-label="Visitors" inputmode="decimal"></td><td class="n"><input data-k="sign" value="60" aria-label="Signups or trials" inputmode="decimal"></td><td class="n"><input data-k="cust" value="10" aria-label="Paying customers" inputmode="decimal"></td><td class="n"><input data-k="rev" value="1000" aria-label="Revenue" inputmode="decimal"></td><td class="n" data-rpv>$0.40</td><td class="n"><input data-k="spend" value="1500" aria-label="Spend" placeholder="0" inputmode="decimal"></td><td class="n" data-cac>$150</td><td data-vd>Test</td></tr><tr><th scope="row"><input data-k="name" value="Email" aria-label="Channel"></th><td class="n"><input data-k="vis" value="800" aria-label="Visitors" inputmode="decimal"></td><td class="n"><input data-k="sign" value="40" aria-label="Signups or trials" inputmode="decimal"></td><td class="n"><input data-k="cust" value="12" aria-label="Paying customers" inputmode="decimal"></td><td class="n"><input data-k="rev" value="1200" aria-label="Revenue" inputmode="decimal"></td><td class="n" data-rpv>$1.50</td><td class="n"><input data-k="spend" value="" aria-label="Spend" placeholder="0" inputmode="decimal"></td><td class="n" data-cac>-</td><td data-vd>Keep</td></tr><tr><th scope="row"><input data-k="name" value="AI" aria-label="Channel"></th><td class="n"><input data-k="vis" value="300" aria-label="Visitors" inputmode="decimal"></td><td class="n"><input data-k="sign" value="15" aria-label="Signups or trials" inputmode="decimal"></td><td class="n"><input data-k="cust" value="5" aria-label="Paying customers" inputmode="decimal"></td><td class="n"><input data-k="rev" value="600" aria-label="Revenue" inputmode="decimal"></td><td class="n" data-rpv>$2.00</td><td class="n"><input data-k="spend" value="" aria-label="Spend" placeholder="0" inputmode="decimal"></td><td class="n" data-cac>-</td><td data-vd>Keep</td></tr><tr><th scope="row"><input data-k="name" value="Communities" aria-label="Channel"></th><td class="n"><input data-k="vis" value="1200" aria-label="Visitors" inputmode="decimal"></td><td class="n"><input data-k="sign" value="30" aria-label="Signups or trials" inputmode="decimal"></td><td class="n"><input data-k="cust" value="4" aria-label="Paying customers" inputmode="decimal"></td><td class="n"><input data-k="rev" value="300" aria-label="Revenue" inputmode="decimal"></td><td class="n" data-rpv>$0.25</td><td class="n"><input data-k="spend" value="" aria-label="Spend" placeholder="0" inputmode="decimal"></td><td class="n" data-cac>-</td><td data-vd>Test</td></tr><tr><th scope="row"><input data-k="name" value="Social" aria-label="Channel"></th><td class="n"><input data-k="vis" value="1500" aria-label="Visitors" inputmode="decimal"></td><td class="n"><input data-k="sign" value="20" aria-label="Signups or trials" inputmode="decimal"></td><td class="n"><input data-k="cust" value="1" aria-label="Paying customers" inputmode="decimal"></td><td class="n"><input data-k="rev" value="60" aria-label="Revenue" inputmode="decimal"></td><td class="n" data-rpv>$0.04</td><td class="n"><input data-k="spend" value="400" aria-label="Spend" placeholder="0" inputmode="decimal"></td><td class="n" data-cac>$400</td><td data-vd>Cut</td></tr><tr><th scope="row"><input data-k="name" value="Referral" aria-label="Channel"></th><td class="n"><input data-k="vis" value="400" aria-label="Visitors" inputmode="decimal"></td><td class="n"><input data-k="sign" value="10" aria-label="Signups or trials" inputmode="decimal"></td><td class="n"><input data-k="cust" value="3" aria-label="Paying customers" inputmode="decimal"></td><td class="n"><input data-k="rev" value="300" aria-label="Revenue" inputmode="decimal"></td><td class="n" data-rpv>$0.75</td><td class="n"><input data-k="spend" value="" aria-label="Spend" placeholder="0" inputmode="decimal"></td><td class="n" data-cac>-</td><td data-vd>Keep</td></tr>
+</tbody><tfoot><tr><th scope="row">Total</th><td class="n" id="t-vis">10,700</td><td class="n" id="t-sign">295</td><td class="n" id="t-cust">55</td><td class="n" id="t-rev">5,860</td><td class="n" id="t-rpv">$0.55</td><td class="n" id="t-spend">1,900</td><td class="n" id="t-cac">$172.73</td><td></td></tr></tfoot></table></div>
+<h3>The keep, test or cut rule</h3>
+<ul class="rule">
+<li><b>Cut</b> a channel you pay for that brought no paying customers, or whose CAC is more than twice the CAC of all paid channels together (the total row).</li>
+<li><b>Keep</b> a channel that brought paying customers, earns at least the total revenue per visitor and, if you pay for it, has a CAC no higher than the total.</li>
+<li><b>Test</b> everything else: change one thing in it next month and score it again.</li>
+</ul>
+<p class="dim">The rule compares each channel with your own totals, not with an industry figure. Read it over two or three months before you cut a channel, since one month can be noise.</p>
+<div class="tool-out"><output id="sc-status"></output><button class="btn sm" type="button" id="sc-add">Add row</button><button class="btn sm" type="button" id="sc-copy">Copy as CSV</button><a class="lk" id="sc-csv" download="channel-scorecard.csv" href="#">Download CSV</a></div>
+<div class="txt post tool-cta">
+<p class="p">Filling this in by hand means pulling visitors from analytics and revenue from your payment provider, then matching them up. Virling links every visit to the payment it led to, so revenue, paying customers and revenue per visitor by channel come from real payments. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>How to use it each month</h2>
+<ul class="post-list">
+<li><b>Pick the same dates every time.</b> Score the last full calendar month, so each scorecard compares like with like.</li>
+<li><b>Count paying customers, not only revenue.</b> One large order can make a channel look strong when it brought a single buyer.</li>
+<li><b>Enter spend per channel.</b> Ad budget, sponsorships and tools paid for one channel. Leave it empty for channels that only cost time; they get no CAC.</li>
+<li><b>Act on one row.</b> Pick one channel marked test, change one thing in it, and see where it lands next month.</li>
+<li><b>Keep a history.</b> Copy as CSV puts the month in the first column, so each month's rows stack under the last in one sheet.</li>
+</ul>
+<h2>What each column means</h2>
+<ul class="post-list">
+<li><b>Visitors:</b> people who arrived from the channel in the month.</li>
+<li><b>Signups or trials:</b> accounts, trials or leads they started. Use whichever step comes before payment for you.</li>
+<li><b>Paying customers:</b> new customers whose first payment is credited to the channel.</li>
+<li><b>Revenue:</b> money those payments brought, after refunds.</li>
+<li><b>Revenue per visitor:</b> revenue divided by visitors. It lets a small channel that pays well stand out from a big one that does not.</li>
+<li><b>CAC:</b> spend divided by paying customers. The total row uses only the channels with spend, so free channels do not make paid ones look cheaper.</li>
+</ul>
+<h2>How to fill this from Virling</h2>
+<p class="p">Set the date picker to last month. The Channels card lists visitors, revenue and revenue per visitor for every channel, using the same channel names as this template. Click a channel to filter the dashboard to it: New customers gives paying customers, and the Funnel tab on the Goals card gives signups when you send a <a href="https://docs.virling.com/track/goals">signup goal</a>. If you enter monthly spend per channel in Site settings, the Profit by channel card shows spend next to revenue. The <a href="https://docs.virling.com/guides/channel-revenue">guide to finding which channel brings paying customers</a> walks through the setup and a weekly check.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Related tools and guides</h2>
+<ul class="post-list"><li><a href="https://docs.virling.com/guides/channel-revenue">Find which channel brings paying customers</a>: set Virling up so every payment shows its channel.</li><li><a href="/tools/revenue-per-visitor">Revenue per visitor calculator</a>: compare channels by what each visitor is worth.</li><li><a href="/tools/cac-calculator">Customer acquisition cost calculator</a>: work out CAC for one channel in detail.</li><li><a href="/tools/marketing-budget-calculator">Marketing budget allocation calculator</a>: split next month's budget across channels.</li><li><a href="/blog/find-which-channel-pays">Find which channel pays</a>: trace revenue back to the channel that brought it.</li></ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Marketing channel scorecard FAQ</h2>
+    <div class="faq-list">
+      <div><h3>What is a marketing channel scorecard?</h3><p class="p">A table with one row per channel that puts traffic, signups, paying customers, revenue and cost side by side, so you can compare channels on the same terms and decide where to spend next month.</p></div>
+      <div><h3>How often should I update the scorecard?</h3><p class="p">Once a month, for the last full calendar month. Weekly numbers swing too much for most sites, and a channel needs a few months of rows before a cut is safe.</p></div>
+      <div><h3>Should I score channels by revenue or by signups?</h3><p class="p">By revenue and paying customers where you can. Signups show interest, but a channel that brings many signups and few payments costs more than it looks. Keep signups in the row to see where people drop off.</p></div>
+      <div><h3>How is CAC worked out for free channels?</h3><p class="p">It is not. CAC here is spend divided by paying customers, so a channel with no spend shows no CAC and is judged on revenue per visitor alone. If you want to count time, enter it as spend.</p></div>
+      <div><h3>Why does the rule compare channels with my own totals?</h3><p class="p">Benchmarks from other businesses rarely match your prices and buyers. Comparing each channel with your own average tells you which channels do better or worse than the rest of your marketing.</p></div>
+      <div><h3>Is this template free?</h3><p class="p">Yes. It runs in your browser with no signup. Nothing you type is sent anywhere; copy it as CSV or download the file.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is a marketing channel scorecard?", "acceptedAnswer": {"@type": "Answer", "text": "A table with one row per channel that puts traffic, signups, paying customers, revenue and cost side by side, so you can compare channels on the same terms and decide where to spend next month."}}, {"@type": "Question", "name": "How often should I update the scorecard?", "acceptedAnswer": {"@type": "Answer", "text": "Once a month, for the last full calendar month. Weekly numbers swing too much for most sites, and a channel needs a few months of rows before a cut is safe."}}, {"@type": "Question", "name": "Should I score channels by revenue or by signups?", "acceptedAnswer": {"@type": "Answer", "text": "By revenue and paying customers where you can. Signups show interest, but a channel that brings many signups and few payments costs more than it looks. Keep signups in the row to see where people drop off."}}, {"@type": "Question", "name": "How is CAC worked out for free channels?", "acceptedAnswer": {"@type": "Answer", "text": "It is not. CAC here is spend divided by paying customers, so a channel with no spend shows no CAC and is judged on revenue per visitor alone. If you want to count time, enter it as spend."}}, {"@type": "Question", "name": "Why does the rule compare channels with my own totals?", "acceptedAnswer": {"@type": "Answer", "text": "Benchmarks from other businesses rarely match your prices and buyers. Comparing each channel with your own average tells you which channels do better or worse than the rest of your marketing."}}, {"@type": "Question", "name": "Is this template free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It runs in your browser with no signup. Nothing you type is sent anywhere; copy it as CSV or download the file."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>Score your channels from real payments</h2>
+<p class="p">This template takes numbers you gather. Virling measures them: it links every visit to the payment it led to, so you see the customers and revenue each channel brought without matching spreadsheets each month. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/pricing">See pricing</a></p>
+  </div></div></section>
+<script>
+const f = document.getElementById("sc-form"), tb = document.querySelector("#sc-tb tbody"), msg = document.getElementById("sc-status"), dl = document.getElementById("sc-csv");
+const num = (s) => { const n = parseFloat(String(s).replace(/[^0-9.-]/g, "")); return isFinite(n) ? n : 0; };
+const fmt = (n, d = 0) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: 2 });
+const field = (q) => { q = String(q); return /[",\n]/.test(q) ? '"' + q.replace(/"/g, '""') + '"' : q; };
+let csv = "";
+const render = () => {
+  const c = f.cur.value.trim(), money = (n, d) => (c.length > 1 ? fmt(n, d) + " " + c : c + fmt(n, d));
+  const rows = [...tb.querySelectorAll("tr")].map((tr) => { const g = (k) => tr.querySelector(`[data-k=${k}]`).value.trim(); return { tr, name: g("name"), v: num(g("vis")), s: num(g("sign")), c: num(g("cust")), r: num(g("rev")), p: num(g("spend")) }; });
+  const on = rows.filter((r) => r.name), t = on.reduce((a, r) => ({ v: a.v + r.v, s: a.s + r.s, c: a.c + r.c, r: a.r + r.r, p: a.p + r.p, pc: a.pc + (r.p > 0 ? r.c : 0) }), { v: 0, s: 0, c: 0, r: 0, p: 0, pc: 0 });
+  const rpvAll = t.v ? t.r / t.v : 0, cacAll = t.pc ? t.p / t.pc : null;
+  const score = (r) => {
+    const rpv = r.v ? r.r / r.v : 0, cac = r.p > 0 ? (r.c ? r.p / r.c : Infinity) : null;
+    const vd = r.p > 0 && (r.c === 0 || (cacAll !== null && cac > 2 * cacAll)) ? "Cut" : r.c > 0 && rpv >= rpvAll && (cac === null || cacAll === null || cac <= cacAll) ? "Keep" : "Test";
+    return { rpv, cac, vd, cacTxt: cac === null ? "-" : cac === Infinity ? "no customers" : money(cac) };
+  };
+  rows.forEach((r) => { const s = score(r); r.sc = s; r.tr.querySelector("[data-rpv]").textContent = r.v ? money(s.rpv, 2) : "-"; r.tr.querySelector("[data-cac]").textContent = s.cacTxt; r.tr.querySelector("[data-vd]").textContent = r.name ? s.vd : ""; });
+  const set = (id, v) => (document.getElementById(id).textContent = v);
+  set("t-vis", fmt(t.v)); set("t-sign", fmt(t.s)); set("t-cust", fmt(t.c)); set("t-rev", fmt(t.r)); set("t-rpv", t.v ? money(rpvAll, 2) : "-"); set("t-spend", fmt(t.p)); set("t-cac", cacAll === null ? "-" : money(cacAll));
+  const m = f.month.value.trim(), r2 = (n) => Math.round(n * 100) / 100;
+  const out = [["month", "channel", "visitors", "signups_or_trials", "paying_customers", "revenue", "revenue_per_visitor", "spend", "cac", "verdict"], ...on.map((r) => [m, r.name, r.v, r.s, r.c, r.r, r.v ? r2(r.sc.rpv) : "", r.p || "", r.sc.cac === null || r.sc.cac === Infinity ? "" : r2(r.sc.cac), r.sc.vd.toLowerCase()]), [m, "Total", t.v, t.s, t.c, t.r, t.v ? r2(rpvAll) : "", t.p || "", cacAll === null ? "" : r2(cacAll), ""]];
+  csv = out.map((r) => r.map(field).join(",")).join("\n") + "\n";
+  dl.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+};
+const copy = document.getElementById("sc-copy");
+copy.addEventListener("click", async () => { try { await navigator.clipboard.writeText(csv); copy.textContent = "Copied"; } catch { msg.textContent = "Copy is blocked here; use Download CSV."; } setTimeout(() => (copy.textContent = "Copy as CSV"), 1500); });
+document.getElementById("sc-add").addEventListener("click", () => { const tr = tb.lastElementChild.cloneNode(true); tr.querySelectorAll("input").forEach((i) => (i.value = "")); tb.append(tr); render(); tr.querySelector("input").focus(); });
+document.querySelector(".sc").addEventListener("input", render);
+render();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>

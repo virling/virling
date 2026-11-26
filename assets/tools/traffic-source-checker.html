@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Traffic source checker: why a visit shows as Direct | Virling</title>
+<meta name="description" content="Paste a landing URL and referrer to see the channel and source Virling credits, the rule that matched and any UTM or referrer mistakes.">
+<link rel="canonical" href="https://virling.com/tools/traffic-source-checker">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/tools/traffic-source-checker">
+<meta property="og:title" content="Traffic source checker: why a visit shows as Direct | Virling">
+<meta property="og:description" content="Paste a landing URL and referrer to see the channel and source Virling credits, the rule that matched and any UTM or referrer mistakes.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"WebApplication","name":"Traffic source checker","url":"https://virling.com/tools/traffic-source-checker","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://virling.com/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Traffic source checker","item":"https://virling.com/tools/traffic-source-checker"}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / traffic source checker</span><h1>Traffic source checker</h1><p class="lead">Seeing a source you do not recognise, or a visit you expected to be tagged showing as Direct? Paste the landing URL and the referrer, if there was one. The checker runs the same rules Virling uses and shows the channel and source it credits, the rule that matched, and the mistakes that sent the visit somewhere else. Everything runs in your browser.</p></div></div></section>
+  <section class="band"><div class="wrap"><div class="tool">
+<form class="tool-form" id="src" autocomplete="off">
+  <label class="wide">Landing URL <span class="dim">the first page the visitor saw, with its query string</span><input name="url" spellcheck="false" value="https://example.com/pricing?utm_source=LinkedIn&amp;utm_medium=paid-social"></label>
+  <label>Referrer <span class="dim">optional: the page they came from</span><input name="ref" spellcheck="false" value="https://www.linkedin.com/"></label>
+  <label>Your site <span class="dim">referrers from it are ignored</span><input name="site" spellcheck="false" value="example.com"></label>
+</form>
+<div class="tool-stats" id="src-sum"></div>
+<div class="tool-table" id="src-out"></div>
+<div class="tool-table" id="src-warn"></div>
+<div class="txt post tool-cta">
+<p class="p">The checker explains one visit. Virling runs these rules on every visit and links each one to the payment it led to, so you see the customers and revenue each channel and source brings. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+</div>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>How Virling picks the channel</h2>
+<p class="p">Every visit gets one channel from its first pageview. The rules run in this order and the first match wins:</p>
+<ol class="post-list">
+<li><b><code>utm_medium</code>.</b> <code>cpc</code>, <code>ppc</code>, <code>paid</code>, <code>paidsearch</code>, <code>paid_social</code> or <code>paidsocial</code> is Paid. <code>email</code>, <code>newsletter</code> or <code>e-mail</code> is Email. Case does not matter.</li>
+<li><b>Referrer host.</b> A known AI, search, community or social host gives that channel. Any other host is Referral.</li>
+<li><b><code>utm_source</code>, or <code>ref</code> when there is no <code>utm_source</code>.</b> Used only when there is no referrer. A known name such as <code>google</code>, <code>hn</code> or <code>chatgpt</code> gives that channel. Any other value is Referral.</li>
+<li><b>Any other <code>utm_medium</code></b> with no referrer and no source is Referral.</li>
+<li><b>In-app browsers.</b> With no referrer and no source, a user agent that names an app such as Instagram or LinkedIn credits that app.</li>
+<li><b>Everything else is Direct.</b></li>
+</ol>
+<p class="p">Referrers from your own domain and its subdomains are ignored, and so are returns from checkout and sign-in pages, so moving between your pages never changes the channel. This checker cannot see a user agent, so it skips the in-app browser rule. The full host and source lists are in the <a href="https://docs.virling.com/attribution/channels">channels docs</a>.</p>
+<h2>Eight links and the channel each one gets</h2>
+<p class="p">Each row is the channel the checker returns for that landing URL and referrer, with <code>example.com</code> as your site:</p>
+<table class="cmp" style="overflow-wrap: anywhere"><thead><tr><th style="width: 36%">Landing URL</th><th>Referrer</th><th style="width: 38%">Channel</th></tr></thead><tbody><tr><td><code>https://example.com/?utm_source=google&amp;utm_medium=cpc</code></td><td><code>https://www.google.com/</code></td><td><b>Paid.</b> <code>cpc</code> is in the Paid list and wins over the referrer</td></tr><tr><td><code>https://example.com/?utm_source=google</code></td><td><code>https://www.google.com/</code></td><td><b>Organic search.</b> With no paid medium, the referrer decides</td></tr><tr><td><code>https://example.com/?utm_source=newsletter&amp;utm_medium=email</code></td><td>none</td><td><b>Email.</b> <code>email</code> is in the Email list</td></tr><tr><td><code>https://example.com/</code></td><td><code>https://chatgpt.com/</code></td><td><b>AI.</b> The referrer is a known AI host</td></tr><tr><td><code>https://example.com/?utm_source=newsletter&amp;utm_medium=social</code></td><td><code>https://www.reddit.com/</code></td><td><b>Communities.</b> The referrer wins over <code>utm_source</code></td></tr><tr><td><code>https://example.com/?ref=hn</code></td><td>none</td><td><b>Communities.</b> No referrer, so <code>ref</code> is used</td></tr><tr><td><code>https://example.com/?utm_medium=banner</code></td><td>none</td><td><b>Referral.</b> A medium in neither list, with no referrer and no source</td></tr><tr><td><code>https://example.com/#utm_source=reddit&amp;utm_medium=social</code></td><td>none</td><td><b>Direct.</b> Tags after the <code>#</code> are never read</td></tr></tbody></table>
+<h2>A worked example</h2>
+<p class="p">The default above is a LinkedIn ad tagged <code>utm_source=LinkedIn&amp;utm_medium=paid-social</code>, clicked from linkedin.com. The team expected Paid, but <code>paid-social</code> with a hyphen is not in the Paid list, so the first rule does not match. The referrer rule does: linkedin.com is a social host, so the visit is credited to Social with linkedin.com as the source. Changing the medium to <code>paid_social</code> or <code>cpc</code> makes it Paid.</p>
+<p class="p">If the same link had arrived with no referrer at all, as happens in some apps, the source rule would have matched <code>linkedin</code> and the visit would still be Social. If you see most of your traffic as Direct, <a href="/blog/why-is-direct-my-biggest-traffic-source">why Direct is your biggest traffic source</a> covers the usual causes.</p>
+  </div></div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<h2>Related tools and guides</h2>
+<ul class="post-list"><li><a href="/tools/utm-checker">UTM checker</a>: check a whole campaign list of tagged links before they go out.</li><li><a href="/tools/utm-naming-template">UTM naming template</a>: the list of sources, mediums and campaign names your team agrees on.</li><li><a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a>: find the hop that drops the tags from a correct link.</li><li><a href="/blog/why-is-direct-my-biggest-traffic-source">Why is Direct your biggest traffic source?</a> What Direct hides and how to shrink it.</li><li><a href="https://docs.virling.com/attribution/channels">Channels docs</a>: the rule order and every known host and source.</li></ul>
+  </div></div></section>
+  <section class="band" id="faq"><div class="wrap"><div class="faq">
+    <span class="kicker">questions</span>
+    <h2>Traffic source checker FAQ</h2>
+    <div class="faq-list">
+      <div><h3>Why does a visit show as Direct?</h3><p class="p">Direct means the visit arrived with no referrer, no <code>utm_source</code> or <code>ref</code>, no <code>utm_medium</code> and no in-app browser Virling recognises. Typed URLs, bookmarks, links in apps and documents that send no referrer, and tags misspelled so they are not read all end up there.</p></div>
+      <div><h3>What is a referrer?</h3><p class="p">The address of the page the visitor clicked a link on, which the browser sends with the visit. Many sites send only their domain, and some apps and privacy settings send nothing.</p></div>
+      <div><h3>Which wins, UTM tags or the referrer?</h3><p class="p">A paid or email <code>utm_medium</code> wins over everything. Otherwise the referrer wins, and <code>utm_source</code> or <code>ref</code> is used only when there is no referrer.</p></div>
+      <div><h3>Why is utm_medium=paid_search not counted as Paid?</h3><p class="p">The Paid list is exact: <code>cpc</code>, <code>ppc</code>, <code>paid</code>, <code>paidsearch</code>, <code>paid_social</code> and <code>paidsocial</code>, in any case. <code>paid_search</code> or <code>paid-social</code> fall through to the referrer or source. The checker flags mediums that look paid or email but are not in the lists.</p></div>
+      <div><h3>Is anything I paste sent anywhere?</h3><p class="p">No. The check runs in your browser and nothing you paste leaves the page.</p></div>
+      <div><h3>Why does my Google ad show as Organic search?</h3><p class="p">The visit came from google.com and the link had no paid <code>utm_medium</code>, so the referrer decided the channel. Tag the ad link with <code>utm_source=google</code> and <code>utm_medium=cpc</code> and it counts as Paid.</p></div>
+      <div><h3>Does the checker follow redirects?</h3><p class="p">No. It reads the landing URL you paste and does not open it. If a redirect might be dropping your tags, open the link in a private window and paste the address the browser ends up on.</p></div>
+    </div>
+  </div></div></section>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Why does a visit show as Direct?", "acceptedAnswer": {"@type": "Answer", "text": "Direct means the visit arrived with no referrer, no utm_source or ref, no utm_medium and no in-app browser Virling recognises. Typed URLs, bookmarks, links in apps and documents that send no referrer, and tags misspelled so they are not read all end up there."}}, {"@type": "Question", "name": "What is a referrer?", "acceptedAnswer": {"@type": "Answer", "text": "The address of the page the visitor clicked a link on, which the browser sends with the visit. Many sites send only their domain, and some apps and privacy settings send nothing."}}, {"@type": "Question", "name": "Which wins, UTM tags or the referrer?", "acceptedAnswer": {"@type": "Answer", "text": "A paid or email utm_medium wins over everything. Otherwise the referrer wins, and utm_source or ref is used only when there is no referrer."}}, {"@type": "Question", "name": "Why is utm_medium=paid_search not counted as Paid?", "acceptedAnswer": {"@type": "Answer", "text": "The Paid list is exact: cpc, ppc, paid, paidsearch, paid_social and paidsocial, in any case. paid_search or paid-social fall through to the referrer or source. The checker flags mediums that look paid or email but are not in the lists."}}, {"@type": "Question", "name": "Is anything I paste sent anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "No. The check runs in your browser and nothing you paste leaves the page."}}, {"@type": "Question", "name": "Why does my Google ad show as Organic search?", "acceptedAnswer": {"@type": "Answer", "text": "The visit came from google.com and the link had no paid utm_medium, so the referrer decided the channel. Tag the ad link with utm_source=google and utm_medium=cpc and it counts as Paid."}}, {"@type": "Question", "name": "Does the checker follow redirects?", "acceptedAnswer": {"@type": "Answer", "text": "No. It reads the landing URL you paste and does not open it. If a redirect might be dropping your tags, open the link in a private window and paste the address the browser ends up on."}}]}</script>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See the revenue behind every source</h2>
+<p class="p">These tools estimate. Virling measures: it links every visit to the payment it led to, so you see the customers and revenue each channel brings from your real numbers. 14 days free.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+<script>
+const PAID = ["cpc", "ppc", "paid", "paidsearch", "paid_social", "paidsocial"], EMAIL = ["email", "newsletter", "e-mail"];
+const HOSTS = {
+  "AI": ["chatgpt.com", "chat.openai.com", "perplexity.ai", "claude.ai", "gemini.google.com", "copilot.microsoft.com", "chat.deepseek.com"],
+  "Organic search": ["google.", "bing.com", "duckduckgo.com", "search.yahoo.", "yahoo.", "ecosia.org", "yandex.", "baidu.com", "search.brave.com", "startpage.com", "kagi.com", "qwant.com"],
+  "Communities": ["news.ycombinator.com", "reddit.com", "producthunt.com", "indiehackers.com", "dev.to", "hashnode.com", "hashnode.dev", "lobste.rs"],
+  "Social": ["t.co", "x.com", "twitter.com", "facebook.com", "instagram.com", "linkedin.com", "lnkd.in", "youtube.com", "youtu.be", "threads.net", "threads.com", "bsky.app", "mastodon.social", "mastodon.online", "mstdn.social", "pinterest.com", "pin.it", "tiktok.com", "discord.com", "discordapp.com", "discord.gg", "slack.com", "t.me", "telegram.org", "whatsapp.com", "wa.me", "substack.com", "medium.com"],
+};
+const SOURCES = {
+  "AI": ["chatgpt", "openai", "perplexity", "claude", "gemini", "copilot"],
+  "Organic search": ["google", "bing", "duckduckgo", "yahoo", "ecosia", "brave", "yandex", "baidu"],
+  "Communities": ["hackernews", "hn", "ycombinator", "reddit", "producthunt", "indiehackers", "devto", "hashnode", "lobsters"],
+  "Social": ["twitter", "x", "facebook", "fb", "instagram", "ig", "linkedin", "youtube", "threads", "bluesky", "mastodon", "tiktok", "pinterest", "discord", "slack", "telegram", "whatsapp", "substack", "medium"],
+};
+const ALIAS = { "t.co": "x.com", "twitter.com": "x.com", "lnkd.in": "linkedin.com", "old.reddit.com": "reddit.com", "chat.openai.com": "chatgpt.com", "l.facebook.com": "facebook.com", "threads.net": "threads.com", "l.threads.com": "threads.com", "go.bsky.app": "bsky.app", "pin.it": "pinterest.com", "discordapp.com": "discord.com", "discord.gg": "discord.com", "app.slack.com": "slack.com", "web.telegram.org": "t.me", "web.whatsapp.com": "whatsapp.com", "wa.me": "whatsapp.com" };
+const CHECKOUT = ["checkout.stripe.com", "buy.stripe.com", "checkout.dodopayments.com", "test.checkout.dodopayments.com", "buy.polar.sh", "sandbox.polar.sh", "checkout.paddle.com", "buy.paddle.com", "sandbox-checkout.paddle.com", "pay.rev.cat", "accounts.google.com", "appleid.apple.com"];
+const f = document.getElementById("src"), sum = document.getElementById("src-sum"), out = document.getElementById("src-out"), warn = document.getElementById("src-warn");
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const bare = (h) => h.replace(/^www\./, "");
+const hostIn = (host, list) => { const h = bare(host); return list.some((e) => e.endsWith(".") ? h.startsWith(e) || h.includes("." + e) : h === e || h.endsWith("." + e)); };
+const listOf = (host) => Object.keys(HOSTS).find((c) => hostIn(host, HOSTS[c]));
+const belongs = (host, d) => { const h = bare(host); return !!d && (h === d || h.endsWith("." + d)); };
+const loop = (h, path) => CHECKOUT.includes(h) || h.endsWith(".lemonsqueezy.com") || (h === "polar.sh" && path.startsWith("/checkout")) || ((h === "creem.io" || h === "www.creem.io") && ["/checkout", "/payment", "/test/checkout", "/test/payment"].some((p) => path.startsWith(p))) || (h === "github.com" && (path.startsWith("/login") || path.startsWith("/session")));
+const domain = (h) => { const b = bare(h); return ALIAS[b] || (b !== "gemini.google.com" && (b.startsWith("google.") || b.includes(".google.")) ? "google.com" : b); };
+const lev = (a, b) => { let p = Array.from({ length: b.length + 1 }, (_, i) => i); for (let i = 1; i <= a.length; i++) { const c = [i]; for (let j = 1; j <= b.length; j++) c[j] = Math.min(p[j] + 1, c[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); p = c; } return p[b.length]; };
+const near = (m) => {
+  const n = m.replace(/[\s_.-]+/g, "");
+  const hit = PAID.concat(EMAIL).find((k) => k.replace(/[_-]/g, "") === n || (m.length >= 4 && lev(m, k) <= (m.length >= 5 ? 2 : 1)));
+  if (hit) return [hit, PAID.includes(hit) ? "Paid" : "Email"];
+  if (/^(cpm|cpv|cpa|cpl|display|banner|ads?|sponsored|paid.*|(google|meta|facebook|social|search|linkedin|tiktok)ads)$/.test(n)) return ["cpc or paid", "Paid"];
+  if (/mail|newslet/.test(n)) return ["email", "Email"];
+  return null;
+};
+const run = () => {
+  const site = f.site.value.trim().toLowerCase().replace(/^[a-z]+:\/\//, "").replace(/^www\./, "").replace(/[/:].*$/, "");
+  const raw = f.url.value.trim(), issues = [];
+  let u;
+  try { u = new URL(/^[a-z]+:\/\//i.test(raw) ? raw : "https://" + raw); } catch { sum.innerHTML = ""; out.innerHTML = ""; warn.innerHTML = `<div class="tr"><span><b class="no">Not a URL</b></span><span>Paste the full landing URL, starting with https://</span><span></span></div>`; return; }
+  const q = {}, names = [];
+  for (const [k, v] of u.searchParams) { names.push(k); q[k] = v.trim(); }
+  const get = (k) => q[k] || null;
+  for (const k of names) if (k !== k.toLowerCase() && /^(utm_[a-z_]+|ref)$/i.test(k)) issues.push(`${k} has capitals and is not read: write it as ${k.toLowerCase()}`);
+  const hash = u.hash.slice(1);
+  if (/(^|[?&])(utm_[a-z_]+|ref)=/i.test(hash)) issues.push("Tags after the # are never read: move them before the #");
+  const usrc = get("utm_source"), ref = get("ref"), source = usrc || ref, medium = get("utm_medium");
+  for (const [k, v] of [["utm_source", usrc], ["ref", usrc ? null : ref], ["utm_medium", medium]]) if (v && /[A-Z]/.test(v)) issues.push(`${k}=${v} has capitals. Channel rules ignore case, but your reports and other tools may split ${v} from ${v.toLowerCase()}: keep it lowercase`);
+  const m = medium && medium.toLowerCase();
+  if (m && !PAID.includes(m) && !EMAIL.includes(m)) { const n = near(m); if (n) issues.push(`utm_medium=${medium} is not in the ${n[1]} list, so it does not count as ${n[1]}: use ${n[0]}`); }
+  if (medium && !usrc && !ref) issues.push("utm_medium without utm_source: add utm_source so the visit has a named source");
+  let rhost = null, rpath = "/", rnote = "";
+  const rr = f.ref.value.trim();
+  if (rr) {
+    try { const r = new URL(/^[a-z]+:\/\//i.test(rr) ? rr : "https://" + rr); rhost = r.hostname.toLowerCase(); rpath = r.pathname; } catch { issues.push("The referrer is not a URL or host, so it is treated as empty"); }
+  }
+  if (rhost && belongs(rhost, site)) { issues.push(`The referrer ${rhost} is your own site, so it is ignored. If this was the first pageview, the real source was lost before the visit reached your site, for example in a redirect`); rnote = "your own site, ignored"; rhost = null; }
+  else if (rhost && loop(rhost, rpath)) { rnote = "a checkout or sign-in page, ignored"; rhost = null; }
+  const shost = !rhost && usrc && listOf(usrc.toLowerCase()) ? usrc.toLowerCase() : null;
+  const steps = [];
+  let channel = null, src = "", rule = "";
+  const step = (name, seen, hit) => { steps.push([name, seen, hit]); return hit; };
+  if (step("1. utm_medium", medium ? `utm_medium=${medium}` : "none", m && (PAID.includes(m) ? "Paid" : EMAIL.includes(m) ? "Email" : null))) { channel = PAID.includes(m) ? "Paid" : "Email"; src = rhost ? domain(rhost) : source || ""; rule = "utm_medium"; }
+  if (!channel) {
+    const seen = rhost ? rhost : rnote ? `${bare(f.ref.value.trim().replace(/^[a-z]+:\/\//i, "").replace(/[/:?#].*$/, ""))}: ${rnote}` : "none";
+    if (step("2. Referrer host", seen, rhost && (listOf(rhost) || "Referral"))) { channel = listOf(rhost) || "Referral"; src = domain(rhost); rule = "Referrer host"; }
+  }
+  if (!channel) {
+    const key = usrc ? "utm_source" : "ref", s = source && source.toLowerCase();
+    const c = s && (Object.keys(SOURCES).find((k) => SOURCES[k].includes(s) || hostIn(s, HOSTS[k])) || "Referral");
+    if (step(`3. ${usrc ? "utm_source" : "utm_source or ref"}`, source ? `${key}=${source}` : "none", c)) { channel = c; src = shost ? domain(shost) : source; rule = key; }
+  }
+  if (!channel && step("4. Other utm_medium", medium ? `utm_medium=${medium}` : "none", medium && "Referral")) { channel = "Referral"; src = ""; rule = "utm_medium with no referrer or source"; }
+  if (!channel) { steps.push(["5. In-app browser", "needs the user agent, not checked here", null]); steps.push(["6. Direct", "nothing above matched", "Direct"]); channel = "Direct"; rule = "Direct"; }
+  sum.innerHTML = [["Channel", channel], ["Source", src || "none"], ["Rule that matched", rule]].map(([k, x]) => `<div><span class="dim">${k}</span><b style="word-break: break-all">${esc(x)}</b></div>`).join("");
+  out.innerHTML = `<div class="tr th"><span>Rule</span><span>What the checker saw</span><span>Result</span></div>` + steps.map(([n, s, h]) => `<div class="tr"><span>${esc(n)}</span><span style="word-break: break-all">${esc(s)}</span><span>${h ? `<b class="yes">${esc(h)}</b>` : "<small>no match</small>"}</span></div>`).join("");
+  warn.innerHTML = `<div class="tr th"><span>Problems</span><span></span><span></span></div>` + (issues.length ? issues.map((x) => `<div class="tr"><span><b class="no">Fix</b></span><span style="grid-column: span 2">${esc(x)}</span></div>`).join("") : `<div class="tr"><span><b class="yes">None found</b></span><span style="grid-column: span 2">The tags and referrer look right.</span></div>`);
+};
+f.addEventListener("input", run);
+f.addEventListener("submit", (e) => e.preventDefault());
+run();
+</script>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
