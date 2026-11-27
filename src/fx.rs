@@ -47,6 +47,18 @@ impl Rates {
         }
     }
 
+    async fn fetch(&self) -> anyhow::Result<HashMap<String, f64>> {
+        let latest: Latest = self
+            .client
+            .get(RATES_URL)
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await?;
+        Ok(latest.rates)
+    }
+
     /// Converts minor units in `currency` to USD. None when the currency is unknown.
     pub async fn to_usd(&self, amount_minor: i64, currency: &str) -> anyhow::Result<Option<f64>> {
         let currency = currency.to_ascii_uppercase();
@@ -56,15 +68,14 @@ impl Rates {
         }
         let fresh = matches!(&*self.cache.lock().unwrap(), Some((at, _)) if at.elapsed() < REFRESH);
         if !fresh {
-            let latest: Latest = self
-                .client
-                .get(RATES_URL)
-                .send()
-                .await?
-                .error_for_status()?
-                .json()
-                .await?;
-            *self.cache.lock().unwrap() = Some((Instant::now(), latest.rates));
+            match self.fetch().await {
+                Ok(rates) => *self.cache.lock().unwrap() = Some((Instant::now(), rates)),
+                // Stale rates beat none: a failed refresh keeps converting with the last ones.
+                Err(err) if self.cache.lock().unwrap().is_some() => {
+                    tracing::warn!(%err, "exchange rate refresh failed, using cached rates");
+                }
+                Err(err) => return Err(err),
+            }
         }
         let cache = self.cache.lock().unwrap();
         Ok(cache
