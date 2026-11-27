@@ -227,7 +227,7 @@ a.more:hover svg { transform: translateX(2px); }
 
 .foot { padding: 56px 0 40px; border-top: 1px solid var(--rule); font-size: 14px; color: var(--ink-3); }
 .foot .wrap { display: flex; flex-direction: column; gap: 40px; }
-.foot-grid { display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 32px; }
+.foot-grid { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: 32px; }
 .foot-brand p { margin: 12px 0 16px; max-width: 320px; line-height: 1.5; }
 .foot nav { display: flex; flex-direction: column; gap: 10px; }
 .foot nav b { color: var(--ink); font-size: 13px; font-weight: 600; margin-bottom: 2px; }
