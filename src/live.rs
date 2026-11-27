@@ -21,6 +21,8 @@ const FRESH: Duration = Duration::from_secs(75);
 const WAIT: Duration = Duration::from_secs(25);
 const PIN_TTL: Duration = Duration::from_secs(3600);
 const PIN_CAP: usize = 20_000;
+/// Live visitors kept per site; past it stale ones are dropped and new ones wait for room.
+const PRESENCE_CAP: usize = 20_000;
 
 /// Visitors per site with a visible tab open, and when each was last heard from.
 #[derive(Default)]
@@ -28,12 +30,14 @@ pub struct Presence(Mutex<HashMap<String, HashMap<String, Instant>>>);
 
 impl Presence {
     pub fn seen(&self, site_id: &str, visitor_id: &str) {
-        self.0
-            .lock()
-            .unwrap()
-            .entry(site_id.to_string())
-            .or_default()
-            .insert(visitor_id.to_string(), Instant::now());
+        let mut all = self.0.lock().unwrap();
+        let v = all.entry(site_id.to_string()).or_default();
+        if v.len() >= PRESENCE_CAP && !v.contains_key(visitor_id) {
+            v.retain(|_, t| t.elapsed() < FRESH);
+        }
+        if v.len() < PRESENCE_CAP || v.contains_key(visitor_id) {
+            v.insert(visitor_id.to_string(), Instant::now());
+        }
     }
 
     /// The visitor closed their last tab of the site.
@@ -141,5 +145,15 @@ mod tests {
         p.gone("s1", "a");
         assert_eq!(p.ids("s1"), HashSet::from(["b".to_string()]));
         assert_eq!(p.count("nope"), 0);
+    }
+
+    #[test]
+    fn presence_stops_growing_at_its_cap() {
+        let p = Presence::default();
+        for i in 0..PRESENCE_CAP + 50 {
+            p.seen("s", &format!("v{i}"));
+        }
+        p.seen("s", "v0");
+        assert_eq!(p.count("s"), PRESENCE_CAP as u64);
     }
 }
