@@ -2,17 +2,12 @@ use reqwest::StatusCode;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
-use time::{Duration, OffsetDateTime};
+use time::OffsetDateTime;
 
-use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription};
+use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Scan, Subscription};
 use crate::events::TRIAL;
 
 const PER_PAGE: &str = "30";
-const BACKFILL: Duration = Duration::days(90);
-/// How far back a refund rescan reaches, since refunds do not change `created_at`.
-const REFUND_WINDOW: Duration = Duration::days(60);
-const REFUND_SCAN_EVERY: Duration = Duration::hours(6);
-const OVERLAP: Duration = Duration::minutes(10);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -37,12 +32,8 @@ struct Cursor {
     /// The last transaction read in this scan; the next page starts after it.
     after: Option<String>,
     idle: bool,
-    /// Unix seconds; transactions created before this end the scan.
-    floor: i64,
-    /// When the current (or, while idle, the last) scan started.
-    started: i64,
-    /// When the last refund rescan started.
-    refund_scan: i64,
+    #[serde(flatten)]
+    scan: Scan,
 }
 
 impl Cursor {
@@ -51,9 +42,7 @@ impl Cursor {
             env,
             after: None,
             idle: false,
-            floor: now - BACKFILL.whole_seconds(),
-            started: now,
-            refund_scan: now,
+            scan: Scan::backfill(now),
         }
     }
 
@@ -61,18 +50,10 @@ impl Cursor {
         if !self.idle {
             return self;
         }
-        let mut floor = self.started - OVERLAP.whole_seconds();
-        let mut refund_scan = self.refund_scan;
-        if now - refund_scan >= REFUND_SCAN_EVERY.whole_seconds() {
-            floor = floor.min(now - REFUND_WINDOW.whole_seconds());
-            refund_scan = now;
-        }
         Cursor {
             after: None,
             idle: false,
-            floor,
-            started: now,
-            refund_scan,
+            scan: self.scan.next(now),
             ..self
         }
     }
@@ -81,12 +62,12 @@ impl Cursor {
         let reached_floor = list
             .data
             .last()
-            .is_none_or(|t| t.created_at.unix_timestamp() < self.floor);
+            .is_none_or(|t| t.created_at.unix_timestamp() < self.scan.floor);
         self.after = list.data.last().map(|t| t.id.clone());
         let payments = list
             .data
             .into_iter()
-            .filter(|t| t.created_at.unix_timestamp() >= self.floor)
+            .filter(|t| t.created_at.unix_timestamp() >= self.scan.floor)
             .filter_map(Transaction::into_fetched)
             .collect();
         if !list.meta.pagination.has_more || reached_floor {
@@ -478,20 +459,12 @@ mod tests {
         assert_eq!(next.after.as_deref(), Some("txn_01"));
 
         let mut cur = Cursor::backfill(Env::Live, now);
-        cur.floor = datetime!(2026-09-29 00:00 UTC).unix_timestamp();
+        cur.scan.floor = datetime!(2026-09-29 00:00 UTC).unix_timestamp();
         let page = cur.step(serde_json::from_value(v).unwrap()).unwrap();
         assert_eq!(page.payments.len(), 1);
         assert!(!page.more, "older than the floor ends the scan");
         let idle: Cursor = serde_json::from_str(page.cursor.as_deref().unwrap()).unwrap();
-        assert_eq!(
-            idle.clone().resume(now + 60).floor,
-            now - OVERLAP.whole_seconds()
-        );
-        let later = now + REFUND_SCAN_EVERY.whole_seconds();
-        assert_eq!(
-            idle.resume(later).floor,
-            later - REFUND_WINDOW.whole_seconds()
-        );
+        assert_eq!(idle.clone().resume(now + 60).scan, idle.scan.next(now + 60));
     }
 
     #[test]

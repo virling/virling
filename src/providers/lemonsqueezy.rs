@@ -3,17 +3,12 @@ use std::collections::HashMap;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use time::{Duration, OffsetDateTime};
+use time::OffsetDateTime;
 
-use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Subscription};
+use super::{Fetched, MAX_SUBSCRIPTION_PAGES, Page, Scan, Subscription};
 
 const API: &str = "https://api.lemonsqueezy.com/v1";
 const PAGE_SIZE: u32 = 100;
-const BACKFILL: Duration = Duration::days(90);
-/// How far back a refund rescan reaches, since refunds do not change `created_at`.
-const REFUND_WINDOW: Duration = Duration::days(60);
-const REFUND_SCAN_EVERY: Duration = Duration::hours(6);
-const OVERLAP: Duration = Duration::minutes(10);
 /// Events whose payloads carry the checkout's custom data, and with it the visitor ID.
 const WEBHOOK_EVENTS: [&str; 2] = ["order_created", "subscription_payment_success"];
 
@@ -237,12 +232,8 @@ enum Stage {
 struct Cursor {
     stage: Stage,
     page: u32,
-    /// Unix seconds; items created before this end the scan.
-    floor: i64,
-    /// When the current (or, while idle, the last) scan started.
-    started: i64,
-    /// When the last refund rescan started.
-    refund_scan: i64,
+    #[serde(flatten)]
+    scan: Scan,
 }
 
 impl Cursor {
@@ -250,9 +241,7 @@ impl Cursor {
         Cursor {
             stage: Stage::Orders,
             page: 1,
-            floor: now - BACKFILL.whole_seconds(),
-            started: now,
-            refund_scan: now,
+            scan: Scan::backfill(now),
         }
     }
 
@@ -260,18 +249,10 @@ impl Cursor {
         if self.stage != Stage::Idle {
             return self;
         }
-        let mut floor = self.started - OVERLAP.whole_seconds();
-        let mut refund_scan = self.refund_scan;
-        if now - refund_scan >= REFUND_SCAN_EVERY.whole_seconds() {
-            floor = floor.min(now - REFUND_WINDOW.whole_seconds());
-            refund_scan = now;
-        }
         Cursor {
             stage: Stage::Orders,
             page: 1,
-            floor,
-            started: now,
-            refund_scan,
+            scan: self.scan.next(now),
         }
     }
 }
@@ -281,11 +262,11 @@ fn step(mut cur: Cursor, list: List) -> anyhow::Result<Page> {
     let reached_floor = list
         .data
         .last()
-        .is_none_or(|r| r.attributes.created_at.unix_timestamp() < cur.floor);
+        .is_none_or(|r| r.attributes.created_at.unix_timestamp() < cur.scan.floor);
     let payments = list
         .data
         .into_iter()
-        .filter(|r| r.attributes.created_at.unix_timestamp() >= cur.floor)
+        .filter(|r| r.attributes.created_at.unix_timestamp() >= cur.scan.floor)
         .filter_map(|r| to_fetched(r, invoices))
         .collect();
     if list.links.next.is_some() && !reached_floor {
@@ -575,9 +556,11 @@ mod tests {
         Cursor {
             stage,
             page: 1,
-            floor: floor.unix_timestamp(),
-            started: 0,
-            refund_scan: 0,
+            scan: Scan {
+                floor: floor.unix_timestamp(),
+                started: 0,
+                refund_scan: 0,
+            },
         }
     }
 
@@ -725,28 +708,17 @@ mod tests {
         let idle = Cursor {
             stage: Stage::Idle,
             page: 1,
-            floor: 0,
-            started: now - 60,
-            refund_scan: now - 60,
+            scan: Scan::backfill(now - 60),
         };
-        let light = idle.clone().resume(now);
-        assert_eq!((light.stage, light.page), (Stage::Orders, 1));
-        assert_eq!(light.floor, now - 60 - OVERLAP.whole_seconds());
-        assert_eq!(light.refund_scan, now - 60);
-
-        let stale = Cursor {
-            refund_scan: now - REFUND_SCAN_EVERY.whole_seconds(),
-            ..idle
-        };
-        let deep = stale.resume(now);
-        assert_eq!(deep.floor, now - REFUND_WINDOW.whole_seconds());
-        assert_eq!(deep.refund_scan, now);
+        let next = idle.clone().resume(now);
+        assert_eq!((next.stage, next.page), (Stage::Orders, 1));
+        assert_eq!(next.scan, idle.scan.next(now));
     }
 
     #[test]
     fn first_sync_backfills_90_days() {
         let c = Cursor::backfill(1_800_000_000);
-        assert_eq!(c.floor, 1_800_000_000 - 90 * 86_400);
+        assert_eq!(c.scan, Scan::backfill(1_800_000_000));
         assert_eq!(c.stage, Stage::Orders);
     }
 }

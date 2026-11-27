@@ -9,7 +9,8 @@ mod stripe;
 mod woocommerce;
 
 pub(crate) use dodo::BACKFILL as DODO_BACKFILL;
-use time::OffsetDateTime;
+use serde::{Deserialize, Serialize};
+use time::{Duration, OffsetDateTime};
 
 /// One payment as a provider reports it, before currency conversion.
 #[derive(Debug, Clone, PartialEq)]
@@ -99,6 +100,48 @@ pub const MAX_SUBSCRIPTION_PAGES: u32 = 50;
 
 /// Payment metadata keys that hold the visitor ID, in order; the second is a compatibility alias.
 pub const VID_KEYS: [&str; 2] = ["virling_vid", "datafast_visitor_id"];
+
+const SCAN_BACKFILL: Duration = Duration::days(90);
+/// How far back a refund rescan reaches, since refunds do not change when an order was created.
+const SCAN_REFUND_WINDOW: Duration = Duration::days(60);
+const SCAN_REFUND_EVERY: Duration = Duration::hours(6);
+const SCAN_OVERLAP: Duration = Duration::minutes(10);
+
+/// Bounds of a newest-first scan, shared by providers that list by creation time only.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub(crate) struct Scan {
+    /// Unix seconds; items created before this end the scan.
+    pub floor: i64,
+    /// When the current (or, while idle, the last) scan started.
+    pub started: i64,
+    /// When the last refund rescan started.
+    pub refund_scan: i64,
+}
+
+impl Scan {
+    pub fn backfill(now: i64) -> Self {
+        Scan {
+            floor: now - SCAN_BACKFILL.whole_seconds(),
+            started: now,
+            refund_scan: now,
+        }
+    }
+
+    /// The next round: back to just before the last one started, or the whole refund window every few hours.
+    pub fn next(self, now: i64) -> Self {
+        let mut floor = self.started - SCAN_OVERLAP.whole_seconds();
+        let mut refund_scan = self.refund_scan;
+        if now - refund_scan >= SCAN_REFUND_EVERY.whole_seconds() {
+            floor = floor.min(now - SCAN_REFUND_WINDOW.whole_seconds());
+            refund_scan = now;
+        }
+        Scan {
+            floor,
+            started: now,
+            refund_scan,
+        }
+    }
+}
 
 /// A batch of payments plus the opaque cursor to resume from next time.
 #[derive(Debug, Default)]
@@ -220,6 +263,44 @@ impl Provider {
             Provider::WooCommerce => woocommerce::subscriptions(client, key, need(store)?).await,
             Provider::Shopify => shopify::subscriptions(client, key, need(store)?).await,
         }
+    }
+}
+
+#[cfg(test)]
+mod scan_tests {
+    use super::*;
+
+    #[test]
+    fn scans_resume_just_before_the_last_and_reread_refunds_every_six_hours() {
+        let now = 1_800_000_000;
+        assert_eq!(Scan::backfill(now).floor, now - 90 * 86_400);
+        let last = Scan {
+            floor: 0,
+            started: now - 60,
+            refund_scan: now - 60,
+        };
+        let light = last.next(now);
+        assert_eq!(light.floor, now - 60 - 600);
+        assert_eq!((light.started, light.refund_scan), (now, now - 60));
+        let deep = Scan {
+            refund_scan: now - 6 * 3600,
+            ..last
+        }
+        .next(now);
+        assert_eq!((deep.floor, deep.refund_scan), (now - 60 * 86_400, now));
+    }
+
+    #[test]
+    fn scan_fields_stay_at_the_top_of_saved_cursors() {
+        #[derive(Serialize, Deserialize)]
+        struct Cursor {
+            page: u32,
+            #[serde(flatten)]
+            scan: Scan,
+        }
+        let saved = r#"{"page":2,"floor":1,"started":2,"refund_scan":3}"#;
+        let c: Cursor = serde_json::from_str(saved).unwrap();
+        assert_eq!(serde_json::to_string(&c).unwrap(), saved);
     }
 }
 
