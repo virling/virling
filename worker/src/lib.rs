@@ -164,8 +164,8 @@ async fn join(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
     let kv = ctx.kv("WAITLIST")?;
     let key = format!("signup:{}:{email}", input.wedge);
     let visitor_id = visitor(input.visitor_id);
-    if let Some(entry) = kv.get(&key).json::<Entry>().await? {
-        return json_status(json!({ "ok": true, "token": entry.leave_token }), 200);
+    if kv.get(&key).json::<Entry>().await?.is_some() {
+        return json_status(json!({ "ok": true }), 200);
     }
     let leave_token = format!(
         "{}{}",
@@ -239,7 +239,7 @@ async fn join(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
     if let Err(err) = sent {
         console_error!("waitlist confirmation email failed: {err}");
     }
-    json_status(json!({ "ok": true, "token": leave_token }), 200)
+    json_status(json!({ "ok": true }), 200)
 }
 
 /// Wedge and email of a stored signup key, "signup:{wedge}:{email}".
