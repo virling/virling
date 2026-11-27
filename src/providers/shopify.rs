@@ -185,7 +185,11 @@ pub async fn fetch(
             let mut query = vec![("status", "any"), ("limit", LIMIT)];
             match &since {
                 Some(id) => query.push(("since_id", id)),
-                None => query.push(("created_at_min", &floor)),
+                // Oldest first, so since_id after a full page continues forward instead of skipping older orders.
+                None => query.extend([
+                    ("created_at_min", floor.as_str()),
+                    ("order", "created_at asc"),
+                ]),
             }
             get(client, key, store, &query).await?
         }
