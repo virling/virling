@@ -232,6 +232,10 @@ impl RateLimiter {
     pub(crate) fn allow(&self, site_id: &str, limit: u32) -> bool {
         let second = OffsetDateTime::now_utc().unix_timestamp();
         let mut w = self.windows.lock().unwrap();
+        // Keys include client IPs, so windows from past seconds are dropped before the map grows without bound.
+        if w.len() >= 100_000 {
+            w.retain(|_, (s, _)| *s == second);
+        }
         let entry = w.entry(site_id.to_string()).or_insert((second, 0));
         if entry.0 != second {
             *entry = (second, 0);
