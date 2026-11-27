@@ -13,7 +13,7 @@
 <meta property="og:description" content="How to tie a Stripe Checkout payment in a Vue and Vite app to the visit and UTM tags behind it, with one script tag and a small Node endpoint.">
 <meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Vue Stripe UTM tracking: pass UTM tags to Stripe Checkout","item":"https://virling.com/blog/vue-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"Vue Stripe UTM tracking: pass UTM tags to Stripe Checkout","description":"How to tie a Stripe Checkout payment in a Vue and Vite app to the visit and UTM tags behind it, with one script tag and a small Node endpoint.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/vue-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Stripe Checkout from a Vue app?","acceptedAnswer":{"@type":"Answer","text":"Read the virling_vid cookie in the endpoint that creates the Checkout Session, and set it as metadata.virling_vid on the session. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them."}},{"@type":"Question","name":"Why are my UTM parameters gone after the first route change?","acceptedAnswer":{"@type":"Answer","text":"A RouterLink to another path does not carry the current query string over, so the tags leave the URL. The Virling script records them from the landing pageview, so checkout only needs the visitor ID."}},{"@type":"Question","name":"Can I create the Checkout Session in Vue, without a backend?","acceptedAnswer":{"@type":"Answer","text":"No. Creating a session needs your Stripe secret key, and everything in a Vue bundle is public. Use a small endpoint or serverless function. If you do not want a backend, use a normal link to a Stripe Payment Link on a page that runs the script, and the script adds the visitor ID to it."}},{"@type":"Question","name":"Should I use client_reference_id or metadata.virling_vid?","acceptedAnswer":{"@type":"Answer","text":"Either works. Virling reads metadata.virling_vid or client_reference_id on the session. Metadata leaves client_reference_id free for your own user or cart ID."}},{"@type":"Question","name":"Why is the virling_vid cookie missing on my endpoint?","acceptedAnswer":{"@type":"Answer","text":"The usual reasons are a tag without data-dev on localhost, cookieless mode, a blocked script, or an API on another domain, where the browser does not send the cookie. In the last case send the ID in the request body instead."}},{"@type":"Question","name":"What happens if the visitor ID is missing?","acceptedAnswer":{"@type":"Answer","text":"The session is created without it, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Vue Stripe UTM tracking: pass UTM tags to Stripe Checkout","item":"https://virling.com/blog/vue-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"Vue Stripe UTM tracking: pass UTM tags to Stripe Checkout","description":"How to tie a Stripe Checkout payment in a Vue and Vite app to the visit and UTM tags behind it, with one script tag and a small Node endpoint.","datePublished":"2026-11-24","dateModified":"2026-11-27","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/vue-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Stripe Checkout from a Vue app?","acceptedAnswer":{"@type":"Answer","text":"Pass the visitor ID instead. A composable reads the virling_vid cookie, the buy button posts it to your backend, and the backend sets it as metadata.virling_vid on the Checkout Session. Virling has the UTM tags of each visit recorded under that ID."}},{"@type":"Question","name":"Do I need a router.afterEach hook to track route changes?","acceptedAnswer":{"@type":"Answer","text":"No. With createWebHistory(), Vue Router changes the URL with history.pushState and history.replaceState, which the Virling script listens to. Each new path or query string is one pageview."}},{"@type":"Question","name":"Why does createWebHashHistory count only the first page?","acceptedAnswer":{"@type":"Answer","text":"Hash mode keeps the route after the # in the URL, so the path and query never change, and the script sends a pageview only when one of them does. Switch to createWebHistory()."}},{"@type":"Question","name":"Can the Vue app create the Checkout Session without a backend?","acceptedAnswer":{"@type":"Answer","text":"No. The secret key would end up in the Vite bundle, which anyone can read. Use a small server or serverless function, or a Stripe Payment Link in a normal link on a page that runs the script, which adds the visitor ID to it."}},{"@type":"Question","name":"Can I use the composable with the Options API?","acceptedAnswer":{"@type":"Answer","text":"Yes. Call useCheckout() inside the setup() option and return busy, error and start from it. The template uses them the same way as with script setup."}}]}]}</script>
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
@@ -43,62 +43,77 @@
     </div>
   </div></section>
   <section class="band"><div class="wrap"><div class="txt post">
-<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
-<p class="p">To tie a Stripe Checkout payment in a Vue app to the visit and UTM tags that brought it, add the Virling script to <code>index.html</code>, create the Checkout Session in a small Node endpoint, and have that endpoint read the <code>virling_vid</code> cookie and set it as <code>metadata.virling_vid</code> on the session. Stripe keeps that one ID, and Virling joins the payment to every visit behind it, with the UTM tags of each. No tags have to survive in the URL.</p>
-<p class="p">This post covers a Vue 3 app built with Vite. With Nuxt, the server is part of the framework; see <a href="/blog/nuxt-stripe-utm-tracking">Nuxt Stripe UTM tracking</a>. The same flow in React is in <a href="/blog/react-stripe-utm-tracking">React Stripe UTM tracking</a>. For Payment Links and where the values show up in Stripe, see the general guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>.</p>
-<h2>Why Vue apps lose UTM tags before checkout</h2>
-<p class="p">A visitor lands on <code>/?utm_source=newsletter&amp;utm_campaign=launch</code>, then clicks a <code>RouterLink</code> to <code>/pricing</code>. The new URL has only the query you gave the link, so the tags are gone by the time the visitor clicks Buy. Stripe Checkout then runs on Stripe's domain and only stores what your server passes when it creates the session.</p>
-<p class="p">The Virling script records the tags with the landing pageview. It hooks into <code>history.pushState</code>, <code>history.replaceState</code> and the back button, so route changes are counted as pageviews and stay in the same session and channel as the landing. Checkout only needs the visitor ID. If the tags never reach your landing page at all, see <a href="/blog/utm-parameters-lost-after-redirect">UTM parameters lost after redirect</a>.</p>
-<h2>Step 1: add the script to index.html</h2>
-<p class="p">A project made with <code>npm create vue@latest</code> uses Vite (<a href="https://vuejs.org/guide/quick-start.html">Vue quick start</a>), and its <code>index.html</code> is at the project root (<a href="https://vite.dev/guide/">Vite guide</a>). Paste the tag before <code>&lt;/head&gt;</code>. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24, updated 2026-11-27.</p>
+<p class="p">In a Vue 3 app built with Vite, a composable reads the <code>virling_vid</code> cookie, the buy button posts it to your backend, and the backend sets it as <code>metadata.virling_vid</code> on the Stripe Checkout Session. Vue Router needs no setup for this: the Virling script already counts each route change as a pageview.</p>
+<p class="p">UTM tags in the landing URL never reach Stripe's checkout page, so the script stores them against the visitor ID and Virling joins the payment to the visits behind that ID. Payment Links, metadata limits and where the values appear in Stripe are in the general guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>. Nuxt has its own server routes, covered in <a href="/blog/nuxt-stripe-utm-tracking">Nuxt Stripe UTM tracking</a>, and React is in <a href="/blog/react-stripe-utm-tracking">React Stripe UTM tracking</a>.</p>
+<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
+<h2>The tag in index.html, above the Vite entry</h2>
+<p class="p">A project made with <code>npm create vue@latest</code> is a Vite app (<a href="https://vuejs.org/guide/quick-start.html">Vue quick start</a>), and Vite treats the <code>index.html</code> at the project root as its entry point (<a href="https://vite.dev/guide/">Vite guide</a>). Put the tag in its <code>&lt;head&gt;</code>. A self-hosted server goes in place of <code>app.virling.com</code>.</p>
 <div class="code block"><pre data-snippet>&lt;!-- index.html --&gt;
 &lt;script defer src="https://app.virling.com/v.js"
   data-site="yourdomain.com"&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">Load it once, here, so it runs on every route. The script sets the first-party <code>virling_vid</code> cookie on your domain and records the UTM tags of each visit against it.</p>
-<h2>Step 2: call your endpoint from a Vue component</h2>
-<p class="p">The browser sends the cookie with every request to your own domain, so the component has nothing to pass. The script loads with <code>defer</code>, so a click can come before it has set the cookie; wait for it briefly. If the script is blocked, the request goes out after two seconds without the cookie. The component uses <code>&lt;script setup&gt;</code> (<a href="https://vuejs.org/api/sfc-script-setup.html">Vue SFC reference</a>) and a method handler (<a href="https://vuejs.org/guide/essentials/event-handling.html">Vue event handling</a>):</p>
-<div class="code block"><pre data-snippet>&lt;!-- src/components/BuyButton.vue --&gt;
-&lt;script setup&gt;
+<p class="p">Deferred scripts and module scripts run in document order, so this tag runs before Vite's <code>&lt;script type="module" src="/src/main.js"&gt;</code> in the body, and the cookie is set before any component mounts. A component cannot load it instead: Vue ignores <code>&lt;script&gt;</code> tags in templates.</p>
+<h2>A useCheckout composable that reads the cookie</h2>
+<p class="p">A composable is a function that uses the Composition API to hold state any component can reuse (<a href="https://vuejs.org/guide/reusability/composables.html">Vue composables</a>). This one reads the visitor ID from <code>document.cookie</code>, posts it to your backend, and keeps a busy flag and an error message in refs:</p>
+<div class="code block"><pre data-snippet>// src/composables/useCheckout.js
 import { ref } from "vue";
 
-const error = ref("");
-
-async function scriptReady() {
-  for (let i = 0; i &lt; 20 &amp;&amp; !window.virling?.vid; i++) {
-    await new Promise((r) =&gt; setTimeout(r, 100));
-  }
+function visitorId() {
+  const m = document.cookie.match(/(?:^|; )virling_vid=([^;]+)/);
+  return m ? m[1] : null;
 }
 
-async function buy() {
-  error.value = "";
-  await scriptReady();
-  const res = await fetch("/api/checkout", { method: "POST" });
-  if (!res.ok) {
-    error.value = "Checkout could not start. Please try again.";
-    return;
+export function useCheckout() {
+  const busy = ref(false);
+  const error = ref("");
+
+  async function start() {
+    busy.value = true;
+    error.value = "";
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vid: visitorId() }),
+      });
+      if (!res.ok) throw new Error(res.statusText);
+      window.location.assign((await res.json()).url);
+    } catch {
+      error.value = "Checkout could not start. Please try again.";
+      busy.value = false;
+    }
   }
-  window.location.href = (await res.json()).url;
-}
+
+  return { busy, error, start };
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The ID travels in the request body, so the same code works when the API runs on another domain, where the browser would not send the cookie. In cookieless mode the script creates no cookie, <code>visitorId()</code> returns <code>null</code>, and the payment is counted as Unattributed.</p>
+<h2>The buy button</h2>
+<p class="p">Any component can now start checkout in a few lines with <code>&lt;script setup&gt;</code> (<a href="https://vuejs.org/api/sfc-script-setup.html">Vue SFC reference</a>):</p>
+<div class="code block"><pre data-snippet>&lt;!-- src/components/BuyButton.vue --&gt;
+&lt;script setup&gt;
+import { useCheckout } from "@/composables/useCheckout";
+
+const { busy, error, start } = useCheckout();
 &lt;/script&gt;
 
 &lt;template&gt;
-  &lt;button type="button" @click="buy"&gt;Buy&lt;/button&gt;
+  &lt;button type="button" :disabled="busy" @click="start"&gt;Buy&lt;/button&gt;
   &lt;p v-if="error"&gt;{{ error }}&lt;/p&gt;
 &lt;/template&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<h2>Step 3: read the cookie in Node and set it in metadata</h2>
-<p class="p">The endpoint holds the Stripe secret key. Install it with <code>npm install express cookie-parser stripe</code>, outside the Vue bundle. It reads the <code>virling_vid</code> cookie, sets it as <code>metadata.virling_vid</code> and returns the session URL (<a href="https://docs.stripe.com/api/checkout/sessions/create?lang=node">Stripe API reference</a>):</p>
+<p class="p">Top-level refs unwrap in the template, so <code>busy</code> and <code>error</code> need no <code>.value</code> there. The <code>@</code> alias points at <code>src</code> in the <code>vite.config.js</code> that <code>create-vue</code> generates.</p>
+<h2>The endpoint that creates the session</h2>
+<p class="p">Creating a session takes the Stripe secret key, and everything in a Vite bundle is public, including any variable prefixed with <code>VITE_</code> (<a href="https://vite.dev/guide/env-and-mode">Vite env variables</a>). So the call runs in a small Express server next to the app, installed with <code>npm install express stripe</code> (<a href="https://docs.stripe.com/api/checkout/sessions/create?lang=node">Stripe API reference</a>):</p>
 <div class="code block"><pre data-snippet>// server.mjs
-import cookieParser from "cookie-parser";
 import express from "express";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const appUrl = process.env.APP_URL || "http://localhost:5173";
 const app = express();
-app.use(cookieParser());
+app.use(express.json());
 
 app.post("/api/checkout", async (req, res) =&gt; {
-  const vid = req.cookies.virling_vid ?? "";
+  const vid = String(req.body.vid ?? "");
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
@@ -109,12 +124,12 @@ app.post("/api/checkout", async (req, res) =&gt; {
 });
 
 app.listen(3000);</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">The price stays on the server, so the browser cannot choose its own. For a one-time payment, use a one-time price and set <code>mode</code> to <code>payment</code>. The regular expression drops anything that does not look like a visitor ID, and a missing cookie leaves the metadata empty.</p>
-<p class="p">Stripe allows 50 metadata keys per object, with up to 40 characters in a key and 500 in a value (<a href="https://docs.stripe.com/metadata">Stripe metadata</a>). The key must be exactly <code>virling_vid</code>. Passing the ID as <code>client_reference_id</code>, which holds up to 200 characters, works too; use metadata when that field has your own user or cart ID. If you create your own PaymentIntent for Elements, set the same <code>metadata</code> on it, as in <a href="/blog/stripe-elements-utm-tracking">Stripe Elements UTM tracking</a>.</p>
-<p class="p">The full lookup order is in the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a>, and the <a href="/integrations/stripe">Stripe integration page</a> shows what Virling imports. The <a href="/tools/checkout-snippet-generator">checkout snippet generator</a> writes the server call for other providers.</p>
-<p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
-<h2>Test it locally</h2>
-<p class="p">Send <code>/api</code> requests from the Vite dev server to the Node endpoint, so the fetch stays on one origin and carries the cookie (<a href="https://vite.dev/config/server-options">Vite server options</a>). Restart <code>npm run dev</code> after the change:</p>
+<p class="p">The price ID is read on the server, so a visitor cannot pick a cheaper one, and the regular expression keeps anything that is not a visitor ID out of the metadata. Virling reads <code>metadata.virling_vid</code> on the session, or <code>client_reference_id</code> if you prefer that field (<a href="https://docs.virling.com/payments/stripe">Stripe docs</a>).</p>
+<h2>What Vue Router navigation means for tracking</h2>
+<p class="p">With <code>createWebHistory()</code>, <code>router.push</code> calls <code>history.pushState</code> and <code>router.replace</code> calls <code>history.replaceState</code>. The Virling script listens to both and to <code>popstate</code>, so each route is a pageview without a <code>router.afterEach</code> hook (<a href="https://docs.virling.com/track/spa">single-page apps</a>). Route changes carry no referrer, so they stay in the channel of the landing page.</p>
+<ul class="post-list"><li><b>Startup.</b> Vue Router calls <code>replaceState</code> with the current URL to store its own state. The script skips a repeat of the same URL, so the landing counts once.</li><li><b>Guards.</b> A navigation guard that returns another route redirects before the URL changes, so only the final route is counted (<a href="https://router.vuejs.org/guide/advanced/navigation-guards.html">Vue Router navigation guards</a>).</li><li><b>RouterLink.</b> A link to <code>/pricing</code> drops the query string of the landing URL. That is fine: the tags were recorded with the first pageview.</li><li><b>Query state.</b> <code>router.push({ query: { q } })</code> on every keystroke of a search box sends a pageview each time. Keep that state in a ref instead.</li><li><b>Hash mode.</b> <code>createWebHashHistory()</code> keeps the route after the <code>#</code>, so the path never changes and only the first page is counted (<a href="https://router.vuejs.org/guide/essentials/history-mode.html">Vue Router history modes</a>).</li></ul>
+<h2>Test it with the Vite dev server</h2>
+<p class="p">Proxy <code>/api</code> from the dev server to Express, so the fetch stays on one origin (<a href="https://vite.dev/config/server-options">Vite server options</a>). Keep the plugins your config already has and add only <code>server.proxy</code>, then restart <code>npm run dev</code>:</p>
 <div class="code block"><pre data-snippet>// vite.config.js
 import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vite";
@@ -125,18 +140,14 @@ export default defineConfig({
     proxy: { "/api": "http://localhost:3000" },
   },
 });</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<ol class="post-list"><li>Keep the plugins your <code>vite.config.js</code> already has and add only <code>server.proxy</code>.</li><li>Add <code>data-dev</code> to the script tag while you test. Without it the script does nothing on <code>localhost</code>, so there is no cookie. Put a separate test site of yours in <code>data-site</code> to keep these visits out of your real reports.</li><li>Connect a restricted Stripe key that starts with <code>rk_test_</code> to that test site in Virling, and start the endpoint with your test secret key and a test price: <code>STRIPE_SECRET_KEY=sk_test_... STRIPE_PRICE_ID=price_... node server.mjs</code>.</li><li>In a private window, open <code>http://localhost:5173/?utm_source=test&amp;utm_medium=test</code>, go to another route and click Buy.</li><li>Pay with the card <code>4242 4242 4242 4242</code>, any future date and any three-digit CVC (<a href="https://docs.stripe.com/testing">Stripe testing</a>).</li><li>Wait a minute for the next sync and open the site's payments list in Virling. The payment should show the <code>test</code> source instead of Unattributed. Open it to see its journey.</li></ol>
-<p class="p">Virling reads payments from Stripe, so this needs no webhook on your machine. Before you deploy, remove <code>data-dev</code>, set <code>data-site</code> back to your domain, set <code>APP_URL</code>, and serve <code>/api/checkout</code> from the same domain as the app: the proxy above only exists in the dev server. The full checklist is in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>.</p>
-<h2>Usual mistakes</h2>
-<ul class="post-list"><li><b>The API is on another domain.</b> The <code>virling_vid</code> cookie belongs to your site's domain, so the browser does not send it to a different one. Send the result of <code>window.virling?.vid?.()</code> in the request body and allow the app's origin with CORS. On a subdomain such as <code>api.yourdomain.com</code> the cookie is shared, but the fetch needs <code>credentials: "include"</code> and the API must allow that origin with credentials.</li><li><b><code>req.cookies</code> is undefined.</b> Express does not parse cookies by itself. Call <code>app.use(cookieParser())</code> before the route.</li><li><b>The app uses hash URLs.</b> With <code>createWebHashHistory()</code> the path never changes, so only the first page is counted. Use <code>createWebHistory()</code>, the mode Vue Router recommends (<a href="https://router.vuejs.org/guide/essentials/history-mode.html">Vue Router history modes</a>).</li><li><b>The script tag is in a Vue template.</b> Vue does not allow <code>&lt;script&gt;</code> tags in component templates. Keep the tag in <code>index.html</code>.</li><li><b>The ID is only in <code>subscription_data.metadata</code>.</b> That goes to the subscription, which Virling does not read. Set <code>metadata</code> on the session itself.</li><li><b>The secret key is in a <code>VITE_</code> variable.</b> Those values are compiled into the public bundle (<a href="https://vite.dev/guide/env-and-mode">Vite env variables</a>). Keep the key in the environment of the Node process.</li></ul>
-<p class="p">If a payment still shows Unattributed, check in the browser console that <code>window.virling.vid()</code> returns an ID, in the network tab that the request to <code>/api/checkout</code> carries the cookie, and that the session in Stripe has <code>virling_vid</code> in its metadata. How the join works from visit to payment is in <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>. For more on the server side, see <a href="/blog/express-stripe-utm-tracking">Express Stripe UTM tracking</a>.</p>
+<p class="p">Add <code>data-dev</code> to the tag, since the script skips <code>localhost</code> without it, and set <code>data-site</code> to a test site connected to a restricted <code>rk_test_</code> key. Start Express with <code>STRIPE_SECRET_KEY=sk_test_... STRIPE_PRICE_ID=price_... node server.mjs</code>, open <code>http://localhost:5173/?utm_source=test&amp;utm_medium=test</code> in a private window, follow a <code>RouterLink</code> and click Buy. Pay with <code>4242 4242 4242 4242</code> (<a href="https://docs.stripe.com/testing">Stripe testing</a>), and after the next sync the payment shows the <code>test</code> source in Virling.</p>
+<p class="p">The proxy only exists in <code>npm run dev</code>. In production, serve <code>/api/checkout</code> from the app's domain, or allow the app's origin with CORS; the ID is in the body, so no cookie has to cross. Remove <code>data-dev</code> and set <code>APP_URL</code> before you deploy. The full checklist is in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>, the join from visit to payment is explained in <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>, and the server side has its own post, <a href="/blog/express-stripe-utm-tracking">Express Stripe UTM tracking</a>.</p>
 <h2>Frequently asked questions</h2>
-<h3>How do I pass UTM parameters to Stripe Checkout from a Vue app?</h3><p class="p">Read the virling_vid cookie in the endpoint that creates the Checkout Session, and set it as metadata.virling_vid on the session. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them.</p>
-<h3>Why are my UTM parameters gone after the first route change?</h3><p class="p">A RouterLink to another path does not carry the current query string over, so the tags leave the URL. The Virling script records them from the landing pageview, so checkout only needs the visitor ID.</p>
-<h3>Can I create the Checkout Session in Vue, without a backend?</h3><p class="p">No. Creating a session needs your Stripe secret key, and everything in a Vue bundle is public. Use a small endpoint or serverless function. If you do not want a backend, use a normal link to a Stripe Payment Link on a page that runs the script, and the script adds the visitor ID to it.</p>
-<h3>Should I use client_reference_id or metadata.virling_vid?</h3><p class="p">Either works. Virling reads metadata.virling_vid or client_reference_id on the session. Metadata leaves client_reference_id free for your own user or cart ID.</p>
-<h3>Why is the virling_vid cookie missing on my endpoint?</h3><p class="p">The usual reasons are a tag without data-dev on localhost, cookieless mode, a blocked script, or an API on another domain, where the browser does not send the cookie. In the last case send the ID in the request body instead.</p>
-<h3>What happens if the visitor ID is missing?</h3><p class="p">The session is created without it, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed.</p>
+<h3>How do I pass UTM parameters to Stripe Checkout from a Vue app?</h3><p class="p">Pass the visitor ID instead. A composable reads the virling_vid cookie, the buy button posts it to your backend, and the backend sets it as metadata.virling_vid on the Checkout Session. Virling has the UTM tags of each visit recorded under that ID.</p>
+<h3>Do I need a router.afterEach hook to track route changes?</h3><p class="p">No. With createWebHistory(), Vue Router changes the URL with history.pushState and history.replaceState, which the Virling script listens to. Each new path or query string is one pageview.</p>
+<h3>Why does createWebHashHistory count only the first page?</h3><p class="p">Hash mode keeps the route after the # in the URL, so the path and query never change, and the script sends a pageview only when one of them does. Switch to createWebHistory().</p>
+<h3>Can the Vue app create the Checkout Session without a backend?</h3><p class="p">No. The secret key would end up in the Vite bundle, which anyone can read. Use a small server or serverless function, or a Stripe Payment Link in a normal link on a page that runs the script, which adds the visitor ID to it.</p>
+<h3>Can I use the composable with the Options API?</h3><p class="p">Yes. Call useCheckout() inside the setup() option and return busy, error and start from it. The template uses them the same way as with script setup.</p>
   </div></div></section>
 
   <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
