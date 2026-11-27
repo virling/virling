@@ -53,11 +53,11 @@
 <p class="p">When someone clicks a link inside ChatGPT, Perplexity, Claude or Gemini, the visit usually arrives with that assistant's site as the referrer. Your analytics should group those referrers into one AI channel. Virling does this and lists each assistant by name.</p>
 <p class="p">In GA4, open the Traffic acquisition report, set the dimension to session source, and filter for chatgpt.com, perplexity.ai, claude.ai, gemini.google.com and copilot.microsoft.com. Add purchase revenue as a column, or put those sources into a custom channel group so they show as one AI row.</p>
 <h2>Step 2: know what you cannot see</h2>
-<p class="p">Some answers are read and never clicked, and some assistants strip the referrer, so those visits land as Direct. Treat the AI number as a floor, not a total.</p>
+<p class="p">Some answers are read and never clicked, and some assistants strip the referrer, so those visits land as Direct. Answers inside Google Search pass google.com, so a click from <a href="/blog/google-ai-mode-revenue-tracking">Google AI Mode</a> counts as Organic search, not AI. Treat the AI number as a floor, not a total.</p>
 <h2>Step 3: join the visits to payments</h2>
 <p class="p">Pass the visitor ID into checkout so each payment is tied to the visit before it. Without that step the AI channel shows traffic and no revenue, which is the most common reason it looks worthless. The steps are in <a href="/blog/track-stripe-revenue-by-traffic-source">tracking Stripe revenue by traffic source</a>.</p>
 <h2>Step 4: compare revenue per visitor</h2>
-<p class="p">Put the AI channel next to search, social and email. If it sits above your site average, find out which pages the assistants send people to and make them better. You can also list them in an <code>llms.txt</code> file with the <a href="/tools/llms-txt-generator">llms.txt generator</a>; support varies between assistants.</p>
+<p class="p">Put the AI channel next to search, social and email. If it sits above your site average, find out which pages the assistants send people to and make them better. You can also list them in an <code>llms.txt</code> file with the <a href="/tools/llms-txt-generator">llms.txt generator</a>; support varies between assistants. To ask these questions in plain words, connect an assistant to Virling and start from the <a href="/tools/ai-revenue-questions">AI revenue questions</a>.</p>
 <h2>Step 5: check whether assistants name you</h2>
 <p class="p">Visits are only one signal. Whether an assistant recommends you when asked is another. Virling's AI answers tracking asks assistants the questions your customers ask and records whether you are named; see <a href="https://docs.virling.com/track/ai-answers">AI answers</a>.</p>
 <h2>A worked example</h2>
