@@ -13,7 +13,7 @@
 <meta property="og:description" content="How to tie a Stripe Checkout payment in a Symfony app to the visit and UTM tags behind it: read one cookie and pass it as client_reference_id.">
 <meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Symfony Stripe UTM tracking: Checkout Sessions in PHP","item":"https://virling.com/blog/symfony-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"Symfony Stripe UTM tracking: Checkout Sessions in PHP","description":"How to tie a Stripe Checkout payment in a Symfony app to the visit and UTM tags behind it: read one cookie and pass it as client_reference_id.","datePublished":"2026-11-24","dateModified":"2026-11-24","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/symfony-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Stripe Checkout in Symfony?","acceptedAnswer":{"@type":"Answer","text":"Read the visitor ID with $request->cookies->get('virling_vid') in the controller that creates the Checkout Session and pass it as client_reference_id. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them."}},{"@type":"Question","name":"Do I have to exclude the cookie from encryption in Symfony?","acceptedAnswer":{"@type":"Answer","text":"No. Symfony's $request->cookies is the equivalent of $_COOKIE, so a cookie set in the browser arrives as it is. There is no exception list to edit."}},{"@type":"Question","name":"Should I use client_reference_id or metadata.virling_vid?","acceptedAnswer":{"@type":"Answer","text":"Use client_reference_id unless it already holds your own user or order ID. In that case put the visitor ID in the session's metadata.virling_vid. Virling reads either."}},{"@type":"Question","name":"Can I put the visitor ID in subscription_data.metadata?","acceptedAnswer":{"@type":"Answer","text":"Not for Virling. It reads the charge, its PaymentIntent and the Checkout Session, not the metadata of the subscription. Set client_reference_id or metadata.virling_vid on the session itself."}},{"@type":"Question","name":"Are subscription renewals attributed?","acceptedAnswer":{"@type":"Answer","text":"Yes. A renewal takes the attribution of the customer's first payment, so every monthly or yearly charge is credited to the visit that led to the first one, even though the renewal itself has no visit."}},{"@type":"Question","name":"What happens if the cookie is missing?","acceptedAnswer":{"@type":"Answer","text":"$request->cookies->get('virling_vid') returns null and the session is created without a visitor ID, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Symfony Stripe UTM tracking: Checkout Sessions in PHP","item":"https://virling.com/blog/symfony-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"Symfony Stripe UTM tracking: Checkout Sessions in PHP","description":"How to tie a Stripe Checkout payment in a Symfony app to the visit and UTM tags behind it: read one cookie and pass it as client_reference_id.","datePublished":"2026-11-24","dateModified":"2026-11-27","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/symfony-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Stripe Checkout in Symfony?","acceptedAnswer":{"@type":"Answer","text":"Send one visitor ID rather than the tags. In the action that creates the Checkout Session, read $request->cookies->get('virling_vid') and add it to the stripe-php parameters as client_reference_id. Virling holds the UTM tags of each visit recorded under that ID."}},{"@type":"Question","name":"Do I have to exclude the cookie from encryption in Symfony?","acceptedAnswer":{"@type":"Answer","text":"No. Symfony does not encrypt or sign cookies by default, and $request->cookies holds what PHP put in $_COOKIE. The value arrives exactly as the script wrote it."}},{"@type":"Question","name":"Should STRIPE_SECRET_KEY go in .env or in Symfony secrets?","acceptedAnswer":{"@type":"Answer","text":"Neither file should hold a live key in git. Keep a test key in .env.local, which is not committed, and in production use a server environment variable or php bin/console secrets:set STRIPE_SECRET_KEY --env=prod. Both are read with %env(STRIPE_SECRET_KEY)%, so the StripeClient service does not change."}},{"@type":"Question","name":"Does the Symfony form need its own CSRF code?","acceptedAnswer":{"@type":"Answer","text":"No. With symfony/security-csrf installed, the form adds a hidden _token field and isValid() checks it. Render the form with form(form) or end it with form_end(form) so the field is included."}},{"@type":"Question","name":"What if the virling_vid cookie is missing?","acceptedAnswer":{"@type":"Answer","text":"$request->cookies->get('virling_vid') returns null, which happens when the script is blocked or the site runs cookieless. The controller leaves client_reference_id out, Stripe takes the payment as usual, and Virling counts it as Unattributed revenue."}}]}]}</script>
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
@@ -43,100 +43,106 @@
     </div>
   </div></section>
   <section class="band"><div class="wrap"><div class="txt post">
-<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24.</p>
-<p class="p">Symfony Stripe UTM tracking comes down to one value. Load the Virling script in <code>base.html.twig</code>, read the <code>virling_vid</code> cookie with <code>$request-&gt;cookies-&gt;get('virling_vid')</code> in the controller that creates the Stripe Checkout Session, and pass it as <code>client_reference_id</code>. Stripe keeps that one ID, and Virling joins the payment to every visit behind it, with the UTM tags of each, so you see which channel brought the buyer.</p>
-<p class="p">This post covers Symfony with stripe-php. The code follows the Symfony 8.1 and Stripe documentation linked in each step. For Laravel, see <a href="/blog/laravel-stripe-utm-tracking">Laravel Stripe UTM tracking</a>. For Payment Links, metadata limits and where the values show up in Stripe, see the general guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>.</p>
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-24, updated 2026-11-27.</p>
+<p class="p">In Symfony, the visitor ID is one entry in <code>Request::$cookies</code>. A Symfony form posts the buy button to a controller, the controller reads <code>$request-&gt;cookies-&gt;get('virling_vid')</code>, and stripe-php sends it to Stripe as the Checkout Session's <code>client_reference_id</code>. This post wires that up with an autowired <code>StripeClient</code>, a key kept in <code>.env.local</code> or the secrets vault, and the Form component's CSRF check.</p>
+<p class="p">Stripe Checkout runs on Stripe's own domain, so UTM tags in your landing URL stay behind; the Virling script stores them under the visitor ID, and Virling joins the payment to every visit behind it. Payment Links and metadata limits are covered in the general guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>. Other PHP and server stacks: <a href="/blog/laravel-stripe-utm-tracking">Laravel</a>, <a href="/blog/django-stripe-utm-tracking">Django</a>, <a href="/blog/rails-stripe-utm-tracking">Rails</a> and <a href="/blog/phoenix-stripe-utm-tracking">Phoenix</a>.</p>
 <p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
-<h2>Step 1: add the script to the base template</h2>
-<p class="p">Paste the tag before <code>&lt;/head&gt;</code> in <code>templates/base.html.twig</code>, the template your pages extend (<a href="https://symfony.com/doc/current/templates.html#template-inheritance-and-layouts">Symfony templates</a>). If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<h2>The secret key: .env.local or secrets</h2>
+<p class="p">Symfony loads <code>.env</code>, which is committed, and then <code>.env.local</code>, which is not (<a href="https://symfony.com/doc/current/configuration.html#configuring-environment-variables-in-env-files">Symfony configuration</a>). Commit an empty entry and keep your test key on your machine:</p>
+<div class="code block"><pre data-snippet># .env (committed)
+STRIPE_SECRET_KEY=
+
+# .env.local (not committed)
+STRIPE_SECRET_KEY=sk_test_...</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">For production, set a real environment variable on the server, or store the live key in the encrypted vault with <code>php bin/console secrets:set STRIPE_SECRET_KEY --env=prod</code> (<a href="https://symfony.com/doc/current/configuration/secrets.html">Symfony secrets</a>). The encrypted value can be committed; the decryption key <code>config/secrets/prod/prod.decrypt.private.php</code> must not, and goes to the server as a file or as <code>SYMFONY_DECRYPTION_SECRET</code>. Code reads a secret exactly like an environment variable, so nothing below changes.</p>
+<h2>StripeClient as a service</h2>
+<p class="p">Install stripe-php with <code>composer require stripe/stripe-php</code> (<a href="https://github.com/stripe/stripe-php">stripe-php</a>) and register its client once, with the key as its constructor argument:</p>
+<div class="code block"><pre data-snippet># config/services.yaml
+services:
+    # ... the default _defaults and App\ entries
+
+    Stripe\StripeClient:
+        arguments: ['%env(STRIPE_SECRET_KEY)%']</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Any controller action can now type-hint <code>StripeClient</code> and receive it (<a href="https://symfony.com/doc/current/service_container/autowiring.html">Symfony autowiring</a>), already holding the key.</p>
+<h2>The script tag in base.html.twig</h2>
+<p class="p">Add the tag before <code>&lt;/head&gt;</code> in <code>templates/base.html.twig</code> (<a href="https://symfony.com/doc/current/templates.html#template-inheritance-and-layouts">Symfony templates</a>). Put it outside <code>{% block javascripts %}</code> and the other blocks, since a child template that overrides a block without <code>parent()</code> would drop it. On a self-hosted server, change <code>app.virling.com</code> to your own host.</p>
 <div class="code block"><pre data-snippet>{# templates/base.html.twig #}
 &lt;script defer src="https://app.virling.com/v.js"
   data-site="yourdomain.com"&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">Keep it outside any block that a child template overrides, so every page has it. The script sets the first-party <code>virling_vid</code> cookie on your domain and records the UTM tags of each visit against it.</p>
-<h2>Step 2: read the cookie on the server</h2>
-<p class="p">Your server receives the cookie with every request from the browser. Type-hint <code>Request</code> in the controller action and read it from <code>cookies</code> (<a href="https://symfony.com/doc/current/controller.html#the-request-object-as-a-controller-argument">Symfony controllers</a>):</p>
+<h2>Request::cookies in the controller</h2>
+<p class="p">Type-hint <code>Request</code> in the action and read the cookie from its <code>cookies</code> bag (<a href="https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data">HttpFoundation</a>). It holds what PHP put in <code>$_COOKIE</code>, so <code>get()</code> returns the string the script wrote, or <code>null</code>:</p>
 <div class="code block"><pre data-snippet>$vid = $request-&gt;cookies-&gt;get('virling_vid');</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p"><code>$request-&gt;cookies</code> is the equivalent of <code>$_COOKIE</code> (<a href="https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data">HttpFoundation</a>), so a cookie set in the browser needs no exception or decryption. When it is not there, the value is <code>null</code>.</p>
-<h2>Step 3: create the Checkout Session with client_reference_id</h2>
-<p class="p">Install the library with <code>composer require stripe/stripe-php</code> and set <code>STRIPE_SECRET_KEY</code> in the environment. Locally that can be <code>.env.local</code>, which should not be committed (<a href="https://symfony.com/doc/current/configuration.html#overriding-environment-values-via-env-local">Symfony configuration</a>). This controller takes a one-time payment:</p>
+<p class="p">Symfony does not encrypt or sign cookies by default, so there is no exception list to edit, as there is in some other PHP frameworks.</p>
+<h2>A Symfony form for the buy button</h2>
+<p class="p">One action renders the form on GET and creates the session on a valid POST. <code>createFormBuilder()</code> with a <code>SubmitType</code> is enough, and with <code>symfony/security-csrf</code> installed the form adds and checks a CSRF token without extra code (<a href="https://symfony.com/doc/current/forms.html">Symfony forms</a>, <a href="https://symfony.com/doc/current/security/csrf.html">CSRF protection</a>):</p>
 <div class="code block"><pre data-snippet>&lt;?php
-// src/Controller/CheckoutController.php
+// src/Controller/PricingController.php
 namespace App\Controller;
 
 use Stripe\StripeClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
-class CheckoutController extends AbstractController
+class PricingController extends AbstractController
 {
-    public function __construct(
-        #[Autowire(env: 'STRIPE_SECRET_KEY')]
-        private string $stripeSecretKey,
-    ) {
-    }
-
-    #[Route('/checkout', name: 'checkout', methods: ['POST'])]
-    public function checkout(Request $request): Response
+    #[Route('/pricing', name: 'pricing', methods: ['GET', 'POST'])]
+    public function pricing(Request $request, StripeClient $stripe): Response
     {
-        $token = $request-&gt;getPayload()-&gt;get('token');
-        if (!$this-&gt;isCsrfTokenValid('checkout', $token)) {
-            throw new BadRequestHttpException('Invalid CSRF token.');
+        $form = $this-&gt;createFormBuilder()
+            -&gt;add('buy', SubmitType::class, ['label' =&gt; 'Buy'])
+            -&gt;getForm();
+        $form-&gt;handleRequest($request);
+
+        if ($form-&gt;isSubmitted() &amp;&amp; $form-&gt;isValid()) {
+            $params = [
+                'line_items' =&gt; [['price' =&gt; 'price_...', 'quantity' =&gt; 1]],
+                'mode' =&gt; 'payment',
+                'success_url' =&gt; 'https://yourdomain.com/thanks',
+            ];
+            if ($vid = $request-&gt;cookies-&gt;get('virling_vid')) {
+                $params['client_reference_id'] = $vid;
+            }
+
+            $session = $stripe-&gt;checkout-&gt;sessions-&gt;create($params);
+
+            return $this-&gt;redirect($session-&gt;url, Response::HTTP_SEE_OTHER);
         }
 
-        $params = [
-            'line_items' =&gt; [['price' =&gt; 'price_...', 'quantity' =&gt; 1]],
-            'mode' =&gt; 'payment',
-            'success_url' =&gt; 'https://yourdomain.com/thanks',
-        ];
-        if ($vid = $request-&gt;cookies-&gt;get('virling_vid')) {
-            $params['client_reference_id'] = $vid;
-        }
-
-        $stripe = new StripeClient($this-&gt;stripeSecretKey);
-        $session = $stripe-&gt;checkout-&gt;sessions-&gt;create($params);
-
-        return $this-&gt;redirect($session-&gt;url, Response::HTTP_SEE_OTHER);
+        return $this-&gt;render('pricing.html.twig', ['form' =&gt; $form]);
     }
 }</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">Post to it from a Twig form, with the CSRF token the controller checks (<a href="https://symfony.com/doc/current/security/csrf.html">Symfony CSRF protection</a>, from <code>symfony/security-csrf</code>):</p>
-<div class="code block"><pre data-snippet>&lt;form action="{{ path('checkout') }}" method="post" data-turbo="false"&gt;
-    &lt;input type="hidden" name="token" value="{{ csrf_token('checkout') }}"&gt;
-    &lt;button type="submit"&gt;Buy&lt;/button&gt;
-&lt;/form&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p"><code>data-turbo="false"</code> matters only if the app uses Symfony UX Turbo. It makes the browser submit the form itself and follow the redirect to Stripe's domain (<a href="https://turbo.hotwired.dev/handbook/drive#disabling-turbo-drive-on-specific-links-or-forms">Turbo handbook</a>). Stripe allows up to 200 characters in <code>client_reference_id</code> (<a href="https://docs.stripe.com/api/checkout/sessions/create?lang=php#create_checkout_session-client_reference_id">Stripe API reference</a>).</p>
-<p class="p">If <code>client_reference_id</code> already holds your own user or order ID, put the visitor ID in the session's metadata instead. Virling reads either:</p>
-<div class="code block"><pre data-snippet>if ($vid = $request-&gt;cookies-&gt;get('virling_vid')) {
+<p class="p"><code>$stripe-&gt;checkout-&gt;sessions-&gt;create()</code> is the stripe-php call from <a href="https://docs.stripe.com/api/checkout/sessions/create?lang=php">Stripe's API reference</a>, and Stripe accepts up to 200 characters in <code>client_reference_id</code>. The template renders the whole form, hidden <code>_token</code> field included:</p>
+<div class="code block"><pre data-snippet>{# templates/pricing.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {{ form(form, {attr: {'data-turbo': 'false'}}) }}
+{% endblock %}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">The <code>data-turbo</code> attribute only matters with Symfony UX Turbo, which submits forms with <code>fetch</code> and cannot follow a redirect to <code>checkout.stripe.com</code>; turning it off lets the browser navigate (<a href="https://turbo.hotwired.dev/handbook/drive#disabling-turbo-drive-on-specific-links-or-forms">Turbo handbook</a>). Without the Form component, a plain <code>&lt;form&gt;</code> with <code>csrf_token('checkout')</code> and <code>isCsrfTokenValid()</code> in the action does the same job.</p>
+<h2>When client_reference_id holds your user's ID</h2>
+<p class="p">If the signed-in user's ID already goes in <code>client_reference_id</code>, move the visitor ID to the session's metadata. Virling checks <code>metadata.virling_vid</code> before <code>client_reference_id</code> (<a href="https://docs.virling.com/payments/stripe">Stripe docs</a>):</p>
+<div class="code block"><pre data-snippet>$params['client_reference_id'] = (string) $this-&gt;getUser()-&gt;getId(); // your User entity
+if ($vid = $request-&gt;cookies-&gt;get('virling_vid')) {
     $params['metadata'] = ['virling_vid' =&gt; $vid];
 }</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">The <a href="/tools/checkout-snippet-generator">checkout snippet generator</a> has the code for other providers, the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a> have the full lookup order, including PaymentIntents you create for Elements, and the <a href="/integrations/stripe">Stripe integration page</a> shows what Virling imports.</p>
-<h2>A subscription example</h2>
-<p class="p">For a subscription, use a recurring price and set <code>mode</code> to <code>subscription</code>. The visitor ID stays on the session. Virling does not read <code>subscription_data.metadata</code>, so an ID placed only there is not found:</p>
-<div class="code block"><pre data-snippet>$params = [
-    'line_items' =&gt; [['price' =&gt; 'price_...', 'quantity' =&gt; 1]], // a recurring price
-    'mode' =&gt; 'subscription',
-    'success_url' =&gt; 'https://yourdomain.com/thanks',
-];
-if ($vid = $request-&gt;cookies-&gt;get('virling_vid')) {
-    $params['client_reference_id'] = $vid;
-}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">Only the first payment needs the visitor ID. A renewal takes the attribution of the customer's first payment, so each monthly or yearly charge is credited to the same visit, with no code on your side.</p>
-<h2>Cookieless mode and visitors without an ID</h2>
-<p class="p">With <code>data-cookieless</code> on the script tag there is no <code>virling_vid</code> cookie, so <code>$vid</code> is <code>null</code>. The same happens when a browser blocks the script. The <code>if</code> in the controller leaves the field out, checkout works as before, and the payment counts toward revenue as Unattributed. Do not send a session or user ID in its place: Virling has no visits recorded under it.</p>
-<p class="p">To set the cookie only after the visitor agrees, use <a href="https://docs.virling.com/track/cookieless#cookieless-until-consent">cookieless until consent</a>. The controller does not change.</p>
-<h2>Step 4: verify with a test payment</h2>
-<ol class="post-list"><li>Connect a restricted Stripe key that starts with <code>rk_test_</code> in Virling, and use your test secret key in Symfony. Payments imported with a test key stay in your reports, so use a separate site in Virling if you want to keep them out.</li><li>In a private window, open your deployed site with <code>?utm_source=test&amp;utm_medium=test</code>. The script does not count <code>localhost</code> unless the tag has <code>data-dev</code>.</li><li>Go to checkout and pay with the card <code>4242 4242 4242 4242</code>, any future date and any three-digit CVC (<a href="https://docs.stripe.com/testing">Stripe testing</a>).</li><li>Wait a minute for the next sync and open <code>/app/yourdomain.com/payments</code>. The payment should show the <code>test</code> source instead of Unattributed. Open it to see its journey.</li></ol>
-<p class="p">If it shows Unattributed, check that the page you bought from loads the script, that the form posts to the same domain, so the cookie is sent, and that the session in Stripe has a <code>client_reference_id</code>. The full checklist is in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>, and how the join works from visit to payment is in <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>.</p>
+<p class="p">Use the numeric or UUID primary key, not <code>getUserIdentifier()</code>, which is often an email address. Metadata placed only in <code>subscription_data</code> lands on the subscription, which Virling does not read.</p>
+<h2>Subscriptions and renewals</h2>
+<p class="p">Set <code>'mode' =&gt; 'subscription'</code> with a recurring price and leave the cookie lines alone. Later charges keep the channel of the customer's first payment, as explained in <a href="https://docs.virling.com/attribution/renewals">renewals</a>, and if your User entity stores a Stripe customer ID, passing it as <code>'customer'</code> ties a second plan to that same first payment.</p>
+<h2>Checking it on staging</h2>
+<p class="p">With the test key in <code>.env.local</code> and a <a href="https://docs.virling.com/payments/stripe">restricted key</a> starting with <code>rk_test_</code> connected in Virling, run one tagged visit through <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>. The Symfony local server on <code>127.0.0.1:8000</code> is skipped by the script unless the tag has <code>data-dev</code>, and only your site's domain and subdomains are tracked, so a host like <code>staging.yourdomain.com</code> is the place for the full path. To compare IDs, autowire <code>LoggerInterface $logger</code> into the action and log the session, then match it against <code>window.virling.vid()</code> in the browser console:</p>
+<div class="code block"><pre data-snippet>$logger-&gt;info('checkout', ['id' =&gt; $session-&gt;id, 'ref' =&gt; $session-&gt;client_reference_id]);</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>Common problems</h2>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row"><code>The CSRF token is invalid</code> on the form</th><td>The fields are rendered one by one and the hidden <code>_token</code> field is missing</td><td>End the form with <code>form_end(form)</code>, or render it with <code>form(form)</code></td></tr><tr><th scope="row">The button does nothing and the console shows a CORS error</th><td>Turbo submits with <code>fetch</code> and tries to follow the redirect to Stripe</td><td>Add <code>data-turbo="false"</code> to the form</td></tr><tr><th scope="row"><code>Environment variable not found: "STRIPE_SECRET_KEY"</code></th><td>The key is in neither the environment, <code>.env.local</code> nor the vault for this environment</td><td>Set it, or run <code>secrets:set</code> with the right <code>--env</code> and deploy the decryption key</td></tr><tr><th scope="row"><code>Cannot autowire argument $stripe</code></th><td><code>StripeClient</code> is not registered as a service</td><td>Add the entry to <code>config/services.yaml</code></td></tr><tr><th scope="row">No visitor ID, though the browser has the cookie</th><td>The session is created in a Messenger handler or console command, where no browser request exists</td><td>Read the cookie in the controller and put the value in the message</td></tr><tr><th scope="row">The ID shows on the subscription only</th><td>It went into <code>subscription_data.metadata</code></td><td>Set <code>metadata</code> on the Checkout Session itself</td></tr><tr><th scope="row">Some payments are Unattributed</th><td>Those buyers had no cookie, because the script was blocked or the site runs <a href="https://docs.virling.com/track/cookieless">cookieless</a></td><td>Nothing: the <code>if</code> leaves the field out and the revenue still counts</td></tr></tbody></table></div>
+<p class="p">Never substitute a Symfony session ID or user ID for a missing visitor ID, since Virling has no visits under it. More causes are in <a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>, the <a href="/integrations/stripe">Stripe integration page</a> lists what Virling imports, and the <a href="/tools/checkout-snippet-generator">checkout snippet generator</a> covers other providers.</p>
 <h2>Frequently asked questions</h2>
-<h3>How do I pass UTM parameters to Stripe Checkout in Symfony?</h3><p class="p">Read the visitor ID with $request-&gt;cookies-&gt;get('virling_vid') in the controller that creates the Checkout Session and pass it as client_reference_id. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them.</p>
-<h3>Do I have to exclude the cookie from encryption in Symfony?</h3><p class="p">No. Symfony's $request-&gt;cookies is the equivalent of $_COOKIE, so a cookie set in the browser arrives as it is. There is no exception list to edit.</p>
-<h3>Should I use client_reference_id or metadata.virling_vid?</h3><p class="p">Use client_reference_id unless it already holds your own user or order ID. In that case put the visitor ID in the session's metadata.virling_vid. Virling reads either.</p>
-<h3>Can I put the visitor ID in subscription_data.metadata?</h3><p class="p">Not for Virling. It reads the charge, its PaymentIntent and the Checkout Session, not the metadata of the subscription. Set client_reference_id or metadata.virling_vid on the session itself.</p>
-<h3>Are subscription renewals attributed?</h3><p class="p">Yes. A renewal takes the attribution of the customer's first payment, so every monthly or yearly charge is credited to the visit that led to the first one, even though the renewal itself has no visit.</p>
-<h3>What happens if the cookie is missing?</h3><p class="p">$request-&gt;cookies-&gt;get('virling_vid') returns null and the session is created without a visitor ID, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed.</p>
+<h3>How do I pass UTM parameters to Stripe Checkout in Symfony?</h3><p class="p">Send one visitor ID rather than the tags. In the action that creates the Checkout Session, read $request-&gt;cookies-&gt;get('virling_vid') and add it to the stripe-php parameters as client_reference_id. Virling holds the UTM tags of each visit recorded under that ID.</p>
+<h3>Do I have to exclude the cookie from encryption in Symfony?</h3><p class="p">No. Symfony does not encrypt or sign cookies by default, and $request-&gt;cookies holds what PHP put in $_COOKIE. The value arrives exactly as the script wrote it.</p>
+<h3>Should STRIPE_SECRET_KEY go in .env or in Symfony secrets?</h3><p class="p">Neither file should hold a live key in git. Keep a test key in .env.local, which is not committed, and in production use a server environment variable or php bin/console secrets:set STRIPE_SECRET_KEY --env=prod. Both are read with %env(STRIPE_SECRET_KEY)%, so the StripeClient service does not change.</p>
+<h3>Does the Symfony form need its own CSRF code?</h3><p class="p">No. With symfony/security-csrf installed, the form adds a hidden _token field and isValid() checks it. Render the form with form(form) or end it with form_end(form) so the field is included.</p>
+<h3>What if the virling_vid cookie is missing?</h3><p class="p">$request-&gt;cookies-&gt;get('virling_vid') returns null, which happens when the script is blocked or the site runs cookieless. The controller leaves client_reference_id out, Stripe takes the payment as usual, and Virling counts it as Unattributed revenue.</p>
   </div></div></section>
   <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
 <h2>See which campaigns bring Stripe revenue</h2>
