@@ -322,8 +322,7 @@ pub async fn page(
     let Some(a) = Assistant::parse(&provider) else {
         return StatusCode::NOT_FOUND.into_response();
     };
-    let ymd = format_description!("[year]-[month]-[day]");
-    let date = |s: &Option<String>| s.as_deref().and_then(|s| Date::parse(s, ymd).ok());
+    let date = |s: &Option<String>| s.as_deref().and_then(super::daterange::parse_day);
     let (from, to) = match (date(&q.from), date(&q.to)) {
         (Some(f), Some(t)) if f <= t && (t - f).whole_days() < 3660 => (f, t),
         _ => (ctx.today - Duration::days(29), ctx.today),

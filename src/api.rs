@@ -5,7 +5,6 @@ use axum::http::{StatusCode, header};
 use axum::response::{IntoResponse, Response};
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
-use time::macros::format_description;
 use time::{Date, Duration, OffsetDateTime};
 
 use crate::app::AppState;
@@ -219,8 +218,8 @@ impl RangeOut {
 }
 
 fn parse_date(s: &str) -> Result<Date, ApiError> {
-    Date::parse(s.trim(), format_description!("[year]-[month]-[day]"))
-        .map_err(|_| ApiError::bad(format!("{s:?} is not a date like 2026-09-30")))
+    crate::dashboard::daterange::parse_day(s)
+        .ok_or_else(|| ApiError::bad(format!("{s:?} is not a date like 2026-09-30")))
 }
 
 /// The account's site with this domain; 404 for any other.
@@ -838,7 +837,7 @@ pub(crate) mod tests {
             .fetch_one(&f.state.db)
             .await
             .unwrap();
-        let day = |s| Date::parse(s, format_description!("[year]-[month]-[day]")).unwrap();
+        let day = |s| crate::dashboard::daterange::parse_day(s).unwrap();
         let notes =
             crate::launches::between(&f.state.db, &site, day("2026-09-30"), day("2026-10-01"))
                 .await
