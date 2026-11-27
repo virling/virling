@@ -222,19 +222,24 @@ impl DailySalt {
     }
 }
 
-/// Per-site fixed one-second window.
+/// Fixed windows per key, one second long unless a caller asks for longer.
 #[derive(Default)]
 pub struct RateLimiter {
     windows: Mutex<HashMap<String, (i64, u32)>>,
 }
 
 impl RateLimiter {
-    pub(crate) fn allow(&self, site_id: &str, limit: u32) -> bool {
-        let second = OffsetDateTime::now_utc().unix_timestamp();
+    pub(crate) fn allow(&self, key: &str, limit: u32) -> bool {
+        self.allow_per(key, limit, 1)
+    }
+
+    /// At most `limit` calls for `key` in each `seconds`-long window.
+    pub(crate) fn allow_per(&self, key: &str, limit: u32, seconds: i64) -> bool {
+        let window = OffsetDateTime::now_utc().unix_timestamp() / seconds;
         let mut w = self.windows.lock().unwrap();
-        let entry = w.entry(site_id.to_string()).or_insert((second, 0));
-        if entry.0 != second {
-            *entry = (second, 0);
+        let entry = w.entry(key.to_string()).or_insert((window, 0));
+        if entry.0 != window {
+            *entry = (window, 0);
         }
         entry.1 += 1;
         entry.1 <= limit
