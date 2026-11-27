@@ -31,6 +31,8 @@ const SMALL: u64 = 30;
 const DEFAULT_ACCENT: &str = "#E8471C";
 const WEEKS_LISTED: i64 = 12;
 const NOTE_MAX: usize = 2000;
+/// Manual "send now" emails per site per hour, so the form cannot be used to send mail in bulk.
+const SENDS_PER_HOUR: u32 = 5;
 
 /// Monday of the week holding `d`.
 pub(crate) fn week_start(d: Date) -> Date {
@@ -1123,6 +1125,7 @@ pub async fn page(
             }
             Some("none") => "Add who gets the report first: open Change schedule.",
             Some("send") => "The email could not be sent. Check the mail settings and try again.",
+            Some("limit") => "That is 5 sends in an hour. Try again later.",
             _ => "",
         },
         notice,
@@ -1339,6 +1342,13 @@ pub async fn send_now(
         Err(code) => return code.into_response(),
     };
     let week = week_param(input.week.as_deref());
+    if !state.limiter.allow_per(
+        &format!("report-send:{}", ctx.site.id),
+        SENDS_PER_HOUR,
+        3600,
+    ) {
+        return back(&ctx.site.domain, &week, "error=limit").into_response();
+    }
     let Ok((s, _)) = schedule::load(&state.db, &ctx.site.id).await else {
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     };

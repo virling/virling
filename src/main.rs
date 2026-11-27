@@ -4330,6 +4330,26 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn manual_report_sends_are_limited_per_hour() {
+        let (_dir, state, _store) = setup().await;
+        let cookie = sign_in(&state, "me%40example.com").await;
+        make_agency(&state).await;
+        let send = "/app/example.com/report/send";
+        for _ in 0..5 {
+            let res = call(&state, form(send, "week=".into(), Some(&cookie))).await;
+            assert_eq!(
+                res.headers()["location"],
+                "/app/example.com/report?error=none"
+            );
+        }
+        let res = call(&state, form(send, "week=".into(), Some(&cookie))).await;
+        assert_eq!(
+            res.headers()["location"],
+            "/app/example.com/report?error=limit"
+        );
+    }
+
+    #[tokio::test]
     async fn weekly_report_goes_out_once_per_week() {
         use crate::dashboard::schedule;
         let (_dir, state, store) = setup().await;
