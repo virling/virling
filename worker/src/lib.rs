@@ -374,6 +374,10 @@ async fn preorder_session(mut req: Request, ctx: RouteContext<()>) -> Result<Res
             Err(_) => return json_status(json!({ "error": "Invalid request" }), 400),
         }
     };
+    let kv = ctx.kv("WAITLIST")?;
+    if preorder::spots_left(founder_count(&kv, input.plan).await?) == 0 {
+        return json_status(json!({ "error": "Founding spots are sold out." }), 409);
+    }
     let email = input.email.map(|e| e.trim().to_ascii_lowercase());
     if email.as_deref().is_some_and(|e| !valid_email(e)) {
         return json_status(json!({ "error": "Enter a valid email" }), 400);
