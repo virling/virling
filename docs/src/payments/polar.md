@@ -74,6 +74,5 @@ Yes. **Disconnect** under Payment connections in site settings deletes the store
 ## Guides
 
 - [Polar revenue attribution](https://virling.com/integrations/polar)
-- [How to track Polar revenue by traffic source](https://virling.com/blog/track-polar-revenue-by-traffic-source)
-- [Polar UTM tracking](https://virling.com/blog/polar-utm-tracking)
+- [Polar UTM tracking: how to track Polar revenue by traffic source](https://virling.com/blog/polar-utm-tracking)
 - [Polar for developer tools: payments by traffic source](https://virling.com/integrations/polar-developer-tools)
