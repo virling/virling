@@ -48,6 +48,7 @@
   <section class="band alt"><div class="wrap">
     <div class="txt post">
 <p class="p">Virling imports LemonSqueezy orders and subscription invoices, so they count toward revenue, and links them to visits through a webhook.</p>
+<p class="p">Lemon Squeezy stops processing payments on March 31, 2027. See <a href="/blog/lemonsqueezy-to-stripe-managed-payments">moving to Stripe Managed Payments without losing attribution</a>.</p>
 <h2>Create an API key</h2>
 <ol class="post-list"><li>In LemonSqueezy, open Settings, API, and create a key. LemonSqueezy's guide: <a href="https://docs.lemonsqueezy.com/guides/developer-guide/getting-started">getting started</a>.</li><li>Paste it into Virling.</li></ol>
 <p class="p"><b>The key has full access.</b> LemonSqueezy API keys cannot be made read-only and cover every store on your account. Virling reads orders, subscriptions with their prices and store currency, and subscription invoices, adds the webhook described below to each store, and stores the key encrypted. Delete the key in LemonSqueezy at any time to revoke access.</p>

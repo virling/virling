@@ -2,6 +2,8 @@
 
 Virling imports LemonSqueezy orders and subscription invoices, so they count toward revenue, and links them to visits through a webhook.
 
+LemonSqueezy stops processing payments on 2027-03-31. Keep it connected until your last renewal there; to move to Stripe Managed Payments, see [keeping attribution through the move](https://virling.com/blog/lemonsqueezy-to-stripe-managed-payments).
+
 ## Create an API key
 
 1. In LemonSqueezy, open Settings, API, and create a key. LemonSqueezy's guide: [getting started](https://docs.lemonsqueezy.com/guides/developer-guide/getting-started).

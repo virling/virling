@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lemon Squeezy to Stripe Managed Payments: keep attribution</title>
+<meta name="description" content="Lemon Squeezy stops processing payments on March 31, 2027. How to move to Stripe Managed Payments and keep seeing which channel brought each sale.">
+<link rel="canonical" href="https://virling.com/blog/lemonsqueezy-to-stripe-managed-payments">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Virling">
+<meta property="og:url" content="https://virling.com/blog/lemonsqueezy-to-stripe-managed-payments">
+<meta property="og:title" content="Lemon Squeezy to Stripe Managed Payments: keep attribution">
+<meta property="og:description" content="Lemon Squeezy stops processing payments on March 31, 2027. How to move to Stripe Managed Payments and keep seeing which channel brought each sale.">
+<meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Lemon Squeezy to Stripe Managed Payments: keep attribution","item":"https://virling.com/blog/lemonsqueezy-to-stripe-managed-payments"}]},{"@type":"BlogPosting","headline":"Lemon Squeezy to Stripe Managed Payments: keep attribution","description":"Lemon Squeezy stops processing payments on March 31, 2027. How to move to Stripe Managed Payments and keep seeing which channel brought each sale.","datePublished":"2026-11-27","dateModified":"2026-11-27","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/lemonsqueezy-to-stripe-managed-payments"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"When does Lemon Squeezy stop working?","acceptedAnswer":{"@type":"Answer","text":"It stops processing payments on March 31, 2027, and closed new store sign-ups on November 16, 2026. Until then existing stores can keep selling."}},{"@type":"Question","name":"Will I lose my revenue attribution history when Lemon Squeezy shuts down?","acceptedAnswer":{"@type":"Answer","text":"Not in Virling. Payments it has already imported stay in your reports. Keep Lemon Squeezy connected until your last renewal there so nothing is missed."}},{"@type":"Question","name":"Do Stripe Managed Payments sales show up in Stripe's API?","acceptedAnswer":{"@type":"Answer","text":"Yes. Stripe documents them as Checkout Sessions, PaymentIntents, Charges, Subscriptions and Invoices in your own account, so tools that read Stripe can read them."}},{"@type":"Question","name":"How do I keep UTM attribution after moving to Stripe?","acceptedAnswer":{"@type":"Answer","text":"Pass a visitor ID into checkout: Payment Links get it from the Virling script, and Checkout Sessions take it as client_reference_id from the virling_vid cookie."}},{"@type":"Question","name":"Why do my migrated subscribers show as Unattributed?","acceptedAnswer":{"@type":"Answer","text":"A migrated subscription is a new Stripe customer with no visitor ID. Send the subscriber's email once as an identify event and Virling matches their Stripe payments by email."}}]}]}</script>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script defer src="https://app.virling.com/v.js" data-site="virling.com" data-respect-gpc></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a>
+    <span class="grow"></span>
+    <a class="lk" href="/pricing">Pricing</a>
+    <a class="lk" href="/self-host">Self-host</a>
+    <a class="lk" href="/demo">Demo</a>
+    <a class="lk" href="/changelog">Changelog</a>
+    <a class="lk" href="/agency">Agencies</a>
+    <a class="lk" href="https://github.com/virling/virling" data-goal="github_click"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#4B515C"/></svg>GitHub</a>
+    <a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="txt sub-hero">
+      <span class="kicker">blog / 2026-11-27</span>
+      <h1>Moving from Lemon Squeezy to Stripe Managed Payments without losing revenue attribution</h1>
+    </div>
+  </div></section>
+  <section class="band"><div class="wrap"><div class="txt post">
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-27.</p>
+<p class="p">Lemon Squeezy <a href="https://www.lemonsqueezy.com/blog/saying-goodbye-to-lemon-squeezy">stops processing payments on March 31, 2027</a> and points its merchants to Stripe Managed Payments. If you track which channel brings paying customers, the move does not have to cost you that history. Keep Lemon Squeezy connected in Virling until your last renewal there, connect Stripe with a read-only key, and pass the visitor ID into Stripe Checkout. Sales made through Managed Payments are ordinary Stripe objects in your own account, so they are attributed like any other Stripe payment.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:560px"><thead><tr><th>Date</th><th>What happens</th></tr></thead><tbody><tr><th scope="row">2026-11-16</th><td>Lemon Squeezy closes new store sign-ups</td></tr><tr><th scope="row">2026-12-02</th><td>Migration tooling for Managed Payments becomes available</td></tr><tr><th scope="row">2027-03-31</th><td>Lemon Squeezy stops processing payments. It says the date will not move</td></tr></tbody></table></div>
+<h2>What changes for your payment data</h2>
+<p class="p">Managed Payments makes Stripe the merchant of record, the role Lemon Squeezy played. What matters for attribution, from <a href="https://docs.stripe.com/payments/managed-payments/how-it-works">Stripe's documentation</a>:</p>
+<ul class="post-list"><li><b>Sales land in your own Stripe account.</b> Each one is a Checkout Session, PaymentIntent and Charge, plus a Subscription and Invoices for recurring plans, the same objects any Stripe integration reads.</li><li><b>Only Stripe Checkout and Payment Links.</b> Managed Payments does not support Elements or subscriptions created outside Checkout, so every sale passes through a checkout you can hand a visitor ID to.</li><li><b>Local currency by default.</b> Adaptive Pricing is always on, so buyers pay in their own currency. Revenue reports convert it, as they do for any foreign-currency payment.</li><li><b>Fees and tax in one number.</b> Stripe's balance reports combine its fee and the tax it withholds, and a refund includes the tax the buyer paid.</li><li><b>A new statement descriptor.</b> Buyers see <code>LINK.COM*</code> before your name, which matters if you ask buyers where they heard of you and they check a bank statement.</li></ul>
+<h2>Keep Lemon Squeezy connected until your last renewal there</h2>
+<p class="p">Do not disconnect Lemon Squeezy when you switch checkouts. Subscriptions that stay on Lemon Squeezy until you move them keep renewing there, and each renewal is credited to the visit that brought the first payment only while Virling still reads them. Payments Virling has already imported stay in your reports after Lemon Squeezy shuts down, so your history before the move is kept. See <a href="/blog/track-lemonsqueezy-revenue-by-traffic-source">tracking Lemon Squeezy revenue by traffic source</a> for how that setup works.</p>
+<h2>Connect Stripe with a read-only key</h2>
+<p class="p">In Virling, open your site, then Setup, then Connect payments, and add Stripe with a restricted key. The <a href="https://docs.virling.com/payments/stripe">Stripe setup guide</a> lists the read permissions to tick. Virling then imports the last 90 days and keeps syncing. Both connections can run side by side, and your reports add them up.</p>
+<h2>Pass the visitor ID into Stripe Checkout</h2>
+<p class="p">UTM tags on your landing page do not reach Stripe's checkout page on their own. Hand Stripe one visitor ID instead, and every earlier visit stays joined, tagged or not.</p>
+<ul class="post-list"><li><b>Payment Links</b> need no code. Keep the <code>buy.stripe.com</code> link as a normal link on a page that runs the Virling script, and the script adds <code>client_reference_id</code> when the page loads.</li><li><b>Checkout Sessions your server creates</b> need one line: read the <code>virling_vid</code> cookie and pass it as <code>client_reference_id</code>.</li></ul>
+<div class="code block"><pre>// Node, stripe: a Managed Payments Checkout Session with the visitor ID
+const session = await stripe.checkout.sessions.create({
+  // ...line items, mode and the Managed Payments settings from Stripe's guide
+  client_reference_id: req.cookies.virling_vid,
+  success_url: "https://yourdomain.com/thanks",
+});</pre></div>
+<p class="p">If <code>client_reference_id</code> already holds your own user ID, put the visitor ID in <code>metadata.virling_vid</code> instead. Stripe's list of parameters <a href="https://docs.stripe.com/payments/managed-payments/update-checkout">you must remove for Managed Payments</a> covers tax, payment method, shipping and receipt fields, not these two. More detail is in <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>.</p>
+<h2>Subscribers you move to Stripe</h2>
+<p class="p">A subscription migrated from Lemon Squeezy becomes a new customer in Stripe, and its first Stripe renewal carries no visitor ID. Virling cannot tell on its own that it is the same buyer, so that renewal shows as Unattributed. If your app knows the subscriber's email, send it once as an <code>identify</code> event: a Stripe payment with no visitor ID whose receipt email matches is then credited to that visitor and marked Matched by email. See <a href="https://docs.virling.com/attribution/unattributed">recover payments by email</a>.</p>
+<h2>What Stripe has not documented yet</h2>
+<p class="p">Three things matter for attribution that Stripe's Managed Payments pages do not cover as of this post. Check them with one test payment before you move real traffic:</p>
+<ul class="post-list"><li>Whether a restricted key can read Managed Payments sales. If connecting Stripe in Virling fails with a permission error, the key needs more read access.</li><li>Whether <code>charge.succeeded</code> events fire for these sales. Virling also lists charges directly, so a sale is still imported, but a payment that settles late may take longer to appear.</li><li>Whether <code>metadata</code> set on the Checkout Session is copied anywhere else. <code>client_reference_id</code> lives on the session itself, which is why it is the safer field.</li></ul>
+<p class="p">To test: in test mode, open a page that runs the script through a tagged link such as <code>?utm_source=test</code>, run <code>window.virling.vid()</code> in the browser console, pay with Stripe's test card, and check that the payment appears on Virling's Payments page credited to that visit within a minute or two.</p>
+<h2>If Managed Payments is not available in your country</h2>
+<p class="p">Managed Payments is open to businesses in the US, Canada, the UK, most of the EU, Switzerland, Norway, Australia, Japan, Hong Kong and Singapore, after Stripe reviews each account. Elsewhere, Lemon Squeezy tells merchants to export their data and move to another provider. Virling also reads <a href="/integrations/paddle">Paddle</a>, <a href="/integrations/polar">Polar</a>, <a href="/integrations/dodo-payments">Dodo Payments</a> and <a href="/integrations/creem">Creem</a>, which act as merchant of record too, so the same steps apply: keep Lemon Squeezy connected, connect the new provider, and pass the visitor ID at checkout.</p>
+<h2>Frequently asked questions</h2>
+<h3>When does Lemon Squeezy stop working?</h3><p class="p">It stops processing payments on March 31, 2027, and closed new store sign-ups on November 16, 2026. Until then existing stores can keep selling.</p>
+<h3>Will I lose my revenue attribution history when Lemon Squeezy shuts down?</h3><p class="p">Not in Virling. Payments it has already imported stay in your reports. Keep Lemon Squeezy connected until your last renewal there so nothing is missed.</p>
+<h3>Do Stripe Managed Payments sales show up in Stripe's API?</h3><p class="p">Yes. Stripe documents them as Checkout Sessions, PaymentIntents, Charges, Subscriptions and Invoices in your own account, so tools that read Stripe can read them.</p>
+<h3>How do I keep UTM attribution after moving to Stripe?</h3><p class="p">Pass a visitor ID into checkout: Payment Links get it from the Virling script, and Checkout Sessions take it as client_reference_id from the virling_vid cookie.</p>
+<h3>Why do my migrated subscribers show as Unattributed?</h3><p class="p">A migrated subscription is a new Stripe customer with no visitor ID. Send the subscriber's email once as an identify event and Virling matches their Stripe payments by email.</p>
+  </div></div></section>
+  <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
+<h2>See which channels bring paying customers after the move</h2>
+<p class="p">Virling is open source under AGPL. Self-host it free, or use the hosted version with a 14-day free trial. It connects to Stripe, Paddle, Shopify, WooCommerce, Polar, LemonSqueezy, Dodo, Creem and RevenueCat.</p>
+<p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
+  </div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand"><a class="brand" href="/"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><circle cx="8" cy="9" r="3.4" fill="#0E1116"/><circle cx="13.3" cy="19" r="3.4" fill="#0E1116"/><circle cx="18.6" cy="29" r="3.4" fill="#0E1116"/><path d="M24 39 L40 8" stroke="#0E1116" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="39" r="6" fill="#E8471C"/></svg><b>virling</b></a><p>See the post, search or AI answer behind every payment. Open source: self-host it, or let us host it.</p><a class="btn sm" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></div>
+    <nav aria-label="Product"><b>Product</b><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/demo">Demo</a><a href="/integrations">Integrations</a><a href="/vs">Compare</a><a href="/tools">Free tools</a><a href="/what-we-dont-do">What we don&rsquo;t do</a><a href="/changelog">Changelog</a></nav>
+    <nav aria-label="Run it"><b>Run it</b><a href="/self-host">Self-host</a><a href="https://docs.virling.com">Docs</a><a href="https://github.com/virling/virling" data-goal="github_click">GitHub</a><a href="/agency" data-goal="agency_click">Agencies</a></nav>
+    <nav aria-label="Company"><b>Company</b><a href="/about">About</a><a href="/blog">Blog</a><a href="mailto:hello@virling.com">Contact</a></nav>
+  </div>
+  <div class="fine"><span>&copy; 2026 Stacklance Infotech LLP. Open source under AGPLv3.</span><span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></span></div>
+</div></footer>
+<script defer src="/assets/site.js"></script>
+</body>
+</html>
