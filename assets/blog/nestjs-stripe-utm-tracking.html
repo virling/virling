@@ -13,7 +13,7 @@
 <meta property="og:description" content="How to put the visitor ID and UTM source on a Stripe Checkout Session created from a NestJS controller, so each payment shows the campaign that brought it.">
 <meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"NestJS Stripe UTM tracking: Checkout metadata from a controller","item":"https://virling.com/blog/nestjs-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"NestJS Stripe UTM tracking: Checkout metadata from a controller","description":"How to put the visitor ID and UTM source on a Stripe Checkout Session created from a NestJS controller, so each payment shows the campaign that brought it.","datePublished":"2026-11-22","dateModified":"2026-11-25","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/nestjs-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Stripe Checkout in NestJS?","acceptedAnswer":{"@type":"Answer","text":"Read the visitor ID from the virling_vid cookie in the controller that creates the Checkout Session and pass it as client_reference_id. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them."}},{"@type":"Question","name":"Why is req.cookies undefined in NestJS?","acceptedAnswer":{"@type":"Answer","text":"NestJS does not fill req.cookies by itself. Install cookie-parser and call app.use(cookieParser()) in main.ts before app.listen, then read req.cookies.virling_vid in the controller."}},{"@type":"Question","name":"Should I use client_reference_id or metadata.virling_vid?","acceptedAnswer":{"@type":"Answer","text":"Use client_reference_id unless it already holds your own user or order ID. In that case put the visitor ID in the session's metadata.virling_vid. Virling reads either."}},{"@type":"Question","name":"What happens if the cookie is missing?","acceptedAnswer":{"@type":"Answer","text":"req.cookies?.virling_vid is undefined, and the stripe library leaves client_reference_id out, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed."}},{"@type":"Question","name":"Can I use @Cookies() instead of cookie-parser in NestJS?","acceptedAnswer":{"@type":"Answer","text":"Yes, from NestJS 12.1 on. Import Cookies from @nestjs/common and add @Cookies(\"virling_vid\") vid?: string to the controller method. On older versions, use cookie-parser and read req.cookies.virling_vid. The value you pass to Stripe is the same."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"NestJS Stripe UTM tracking: Checkout metadata from a controller","item":"https://virling.com/blog/nestjs-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"NestJS Stripe UTM tracking: Checkout metadata from a controller","description":"How to put the visitor ID and UTM source on a Stripe Checkout Session created from a NestJS controller, so each payment shows the campaign that brought it.","datePublished":"2026-11-22","dateModified":"2026-11-27","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/nestjs-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Stripe Checkout in NestJS?","acceptedAnswer":{"@type":"Answer","text":"Have the checkout controller read the virling_vid cookie, through req.cookies or a small param decorator, and hand it to the service that calls stripe.checkout.sessions.create as client_reference_id. Virling stores the UTM tags of each visit against that ID and joins the payment to them."}},{"@type":"Question","name":"Why is req.cookies undefined in NestJS?","acceptedAnswer":{"@type":"Answer","text":"On the Express platform Nest does not parse cookies. Register cookie-parser with app.use(cookieParser()) in main.ts before app.listen. On the Fastify platform, register @fastify/cookie instead."}},{"@type":"Question","name":"Where should the Stripe client live in a NestJS app?","acceptedAnswer":{"@type":"Answer","text":"In a provider, built once by a factory and injected into CheckoutService with @Inject. The app then shares one client, and tests replace it with a fake through the same token."}},{"@type":"Question","name":"How do I verify Stripe webhook signatures in NestJS?","acceptedAnswer":{"@type":"Answer","text":"Create the app with rawBody: true, type the request as RawBodyRequest<Request>, and pass req.rawBody with the stripe-signature header to stripe.webhooks.constructEvent(). The parsed @Body() no longer matches the bytes Stripe signed. Virling itself needs no webhook."}},{"@type":"Question","name":"What if client_reference_id already holds my user ID?","acceptedAnswer":{"@type":"Answer","text":"Put the visitor ID in the session's metadata.virling_vid, which Virling checks before client_reference_id, and keep your user ID where it is."}}]}]}</script>
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
@@ -43,52 +43,86 @@
     </div>
   </div></section>
   <section class="band"><div class="wrap"><div class="txt post">
-<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-22, updated 2026-11-25.</p>
-<p class="p">NestJS Stripe UTM tracking comes down to one value. Load the Virling script on your pages, then read the <code>virling_vid</code> cookie with <code>req.cookies.virling_vid</code> in the NestJS controller that creates the Stripe Checkout Session and pass it as <code>client_reference_id</code>, or as <code>metadata.virling_vid</code> if that field is taken. Stripe keeps that one ID, and Virling joins the payment to every visit behind it, with the UTM source and other tags of each, so each payment shows the channel that brought it.</p>
-<p class="p">This post covers NestJS on its default Express platform with the stripe Node library. The same steps for plain Express are in <a href="/blog/express-stripe-utm-tracking">Express Stripe UTM tracking</a>, and for the App Router in <a href="/blog/nextjs-stripe-utm-tracking">Next.js Stripe UTM tracking</a>. For Payment Links, metadata limits and where the values show up in Stripe, see the general guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>.</p>
+<p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-22, updated 2026-11-27.</p>
+<p class="p">In NestJS, the visitor ID gets to Stripe through pieces a Nest app already has: a controller that reads the <code>virling_vid</code> cookie, a <code>CheckoutService</code> that calls Stripe, and a module that provides the Stripe client to it. This post wires them up on the default Express platform with the stripe Node library, adds a unit test for the service, and sets up the raw body a Stripe webhook needs in Nest.</p>
+<p class="p">Stripe Checkout runs on Stripe's domain, so the UTM tags of your landing page never reach it on their own. The Virling script keeps them against a visitor ID in a first-party cookie, and Virling joins each payment that carries that ID in <code>client_reference_id</code> or <code>metadata.virling_vid</code> to the visits behind it. Payment Links, metadata limits and where the values appear in Stripe are in the guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>; the plain Express version is <a href="/blog/express-stripe-utm-tracking">Express Stripe UTM tracking</a>, and the App Router one is <a href="/blog/nextjs-stripe-utm-tracking">Next.js Stripe UTM tracking</a>.</p>
 <p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
-<h2>Step 1: add the script to your pages</h2>
-<p class="p">Paste the tag before <code>&lt;/head&gt;</code> in the layout or static HTML every page uses, whether NestJS renders it or a separate frontend serves it. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<h2>Where the script tag goes</h2>
+<p class="p">Nest renders no HTML until you add a view engine, so the tag usually belongs in the frontend that serves your pages. With <code>app.setBaseViewsDir()</code> and a view engine, put it in the shared layout; with <code>ServeStaticModule</code>, put it in the built <code>index.html</code>. Self-hosted Virling users point <code>src</code> at their own server.</p>
 <div class="code block"><pre data-snippet>&lt;script defer src="https://app.virling.com/v.js"
   data-site="yourdomain.com"&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain and records the UTM tags of each visit against it.</p>
-<h2>Step 2: parse cookies in main.ts</h2>
-<p class="p">Your server receives the cookie with every request from the browser, but NestJS does not fill <code>req.cookies</code> by itself. Install <code>cookie-parser</code> and <code>@types/cookie-parser</code>, then register it before the app listens:</p>
-<div class="code block"><pre data-snippet>// src/main.ts
-import { NestFactory } from "@nestjs/core";
-import cookieParser from "cookie-parser";
-import { AppModule } from "./app.module";
-
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.use(cookieParser());
-  await app.listen(3000);
-}
-bootstrap();</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<h2>Step 3: a checkout service and controller</h2>
-<p class="p">Keep the stripe client in a service, and let the controller read the cookie and hand it over. The service passes it as <code>client_reference_id</code>:</p>
-<div class="code block"><pre data-snippet>// src/checkout/checkout.service.ts
-import { Injectable } from "@nestjs/common";
+<h2>Provide the Stripe client</h2>
+<p class="p">Register the client once as a provider, so services receive it by injection and tests can swap it for a fake. A symbol token keeps it apart from your other providers:</p>
+<div class="code block"><pre data-snippet>// src/checkout/stripe.provider.ts
 import Stripe from "stripe";
+
+export const STRIPE = Symbol("STRIPE");
+
+export const stripeProvider = {
+  provide: STRIPE,
+  useFactory: () =&gt; new Stripe(process.env.STRIPE_SECRET_KEY!),
+};</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<div class="code block"><pre data-snippet>// src/checkout/checkout.module.ts
+import { Module } from "@nestjs/common";
+import { CheckoutController } from "./checkout.controller";
+import { CheckoutService } from "./checkout.service";
+import { stripeProvider } from "./stripe.provider";
+
+@Module({
+  controllers: [CheckoutController],
+  providers: [stripeProvider, CheckoutService],
+})
+export class CheckoutModule {}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">With <code>@nestjs/config</code>, add <code>inject: [ConfigService]</code> to the provider and read the key with <code>config.getOrThrow("STRIPE_SECRET_KEY")</code> inside the factory instead of <code>process.env</code>.</p>
+<h2>The CheckoutService</h2>
+<p class="p">The service takes the visitor ID as a plain argument and never sees the request:</p>
+<div class="code block"><pre data-snippet>// src/checkout/checkout.service.ts
+import { Inject, Injectable } from "@nestjs/common";
+import Stripe from "stripe";
+import { STRIPE } from "./stripe.provider";
 
 @Injectable()
 export class CheckoutService {
-  private readonly stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  constructor(@Inject(STRIPE) private readonly stripe: Stripe) {}
 
   async createSession(vid?: string): Promise&lt;string&gt; {
     const session = await this.stripe.checkout.sessions.create({
-      client_reference_id: vid,
-      line_items: [{ price: "price_...", quantity: 1 }],
       mode: "subscription",
+      line_items: [{ price: "price_...", quantity: 1 }],
       success_url: "https://yourdomain.com/thanks",
+      client_reference_id: vid,
     });
     return session.url!;
   }
 }</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<div class="code block"><pre data-snippet>// src/checkout/checkout.controller.ts
-import { Controller, Post, Redirect, Req } from "@nestjs/common";
+<p class="p">An undefined <code>vid</code> is dropped from the request by the stripe library, so a buyer without the cookie still gets a session. If <code>client_reference_id</code> already holds your user ID, give <code>createSession</code> that ID as another argument and pass the visitor ID as <code>metadata: vid ? { virling_vid: vid } : undefined</code>, which Virling reads before <code>client_reference_id</code>.</p>
+<h2>Read the cookie in the controller</h2>
+<p class="p">On the Express platform, Nest leaves <code>req.cookies</code> unset until <code>cookie-parser</code> runs. Install <code>cookie-parser</code> and <code>@types/cookie-parser</code> and register it in <code>main.ts</code>; the <code>rawBody</code> option is for the webhook further down:</p>
+<div class="code block"><pre data-snippet>// src/main.ts
+import { NestFactory } from "@nestjs/core";
+import type { NestExpressApplication } from "@nestjs/platform-express";
+import cookieParser from "cookie-parser";
+import { AppModule } from "./app.module";
+
+async function bootstrap() {
+  const app = await NestFactory.create&lt;NestExpressApplication&gt;(AppModule, { rawBody: true });
+  app.use(cookieParser());
+  await app.listen(3000);
+}
+bootstrap();</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">Instead of injecting the whole <code>@Req()</code>, a small param decorator returns just the visitor ID, so the handler declares only what it uses:</p>
+<div class="code block"><pre data-snippet>// src/checkout/visitor-id.decorator.ts
+import { createParamDecorator, ExecutionContext } from "@nestjs/common";
 import type { Request } from "express";
+
+export const VisitorId = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext): string | undefined =&gt;
+    ctx.switchToHttp().getRequest&lt;Request&gt;().cookies?.virling_vid,
+);</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<div class="code block"><pre data-snippet>// src/checkout/checkout.controller.ts
+import { Controller, Post, Redirect } from "@nestjs/common";
 import { CheckoutService } from "./checkout.service";
+import { VisitorId } from "./visitor-id.decorator";
 
 @Controller("checkout")
 export class CheckoutController {
@@ -96,64 +130,64 @@ export class CheckoutController {
 
   @Post()
   @Redirect()
-  async create(@Req() req: Request) {
-    const url = await this.checkout.createSession(req.cookies?.virling_vid);
-    return { url, statusCode: 303 };
+  async create(@VisitorId() vid?: string) {
+    return { url: await this.checkout.createSession(vid), statusCode: 303 };
   }
 }</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">Add both to a module's <code>controllers</code> and <code>providers</code>. When the cookie is missing, the value is undefined and the stripe library leaves the field out. A plain form posts to the route, and the browser sends the cookie along:</p>
-<div class="code block"><pre data-snippet>&lt;form action="/checkout" method="POST"&gt;
-  &lt;button type="submit"&gt;Subscribe&lt;/button&gt;
-&lt;/form&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<h2>When client_reference_id is taken</h2>
-<p class="p">If you already use <code>client_reference_id</code> for your own user or order ID, put the visitor ID in the session's metadata instead. Virling reads either:</p>
-<div class="code block"><pre data-snippet>  async createSession(userId: string, vid?: string): Promise&lt;string&gt; {
-    const session = await this.stripe.checkout.sessions.create({
-      client_reference_id: userId,
-      metadata: vid ? { virling_vid: vid } : {},
-      line_items: [{ price: "price_...", quantity: 1 }],
-      mode: "subscription",
-      success_url: "https://yourdomain.com/thanks",
-    });
-    return session.url!;
-  }</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">If you create your own PaymentIntent for Elements instead of a Checkout Session, set the same <code>metadata</code> on <code>stripe.paymentIntents.create()</code>. The full lookup order is in the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a>, and the <a href="/integrations/stripe-saas">Stripe SaaS page</a> shows what you get for subscriptions, trials and renewals.</p>
-<h2>When the API is on another domain</h2>
-<p class="p">The browser only sends the cookie to your own domain and its subdomains. If your frontend calls a NestJS API on another domain, read the ID in the browser with <code>window.virling?.vid?.()</code> and send it in the request body. The script loads with <code>defer</code>, so wait for it:</p>
-<div class="code block"><pre data-snippet>async function visitorId() {
-  for (let i = 0; i &lt; 20 &amp;&amp; !window.virling?.vid; i++) {
-    await new Promise((r) =&gt; setTimeout(r, 100));
-  }
-  return window.virling?.vid?.() || null;
-}
+<p class="p">A guard gets the same request from <code>context.switchToHttp().getRequest()</code>. If checkout sits behind an auth guard, that guard can read <code>cookies.virling_vid</code> too, for example to log buyers who arrive without one, but the Stripe call stays in the service. Post a plain HTML form to <code>/checkout</code>, so the browser itself follows the 303 to <code>checkout.stripe.com</code>.</p>
+<h2>Stripe webhooks need the raw body</h2>
+<p class="p">Virling reads payments with a restricted key and needs no webhook from you. If your app has its own, for example to unlock an account, Nest's JSON parser reaches the request first, and <code>constructEvent()</code> fails on the parsed object because Stripe signs the exact bytes it sent. With <code>rawBody: true</code> in <code>main.ts</code>, Nest keeps a <code>Buffer</code> on <code>req.rawBody</code> while <code>@Body()</code> keeps working elsewhere:</p>
+<div class="code block"><pre data-snippet>// src/checkout/webhook.controller.ts
+import { BadRequestException, Controller, Headers, Inject, Post, RawBodyRequest, Req } from "@nestjs/common";
+import type { Request } from "express";
+import Stripe from "stripe";
+import { STRIPE } from "./stripe.provider";
 
-async function checkout() {
-  const res = await fetch("https://api.example.com/checkout", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ vid: await visitorId() }),
-  });
-  location.href = (await res.json()).url;
+@Controller("stripe/webhook")
+export class WebhookController {
+  constructor(@Inject(STRIPE) private readonly stripe: Stripe) {}
+
+  @Post()
+  handle(@Req() req: RawBodyRequest&lt;Request&gt;, @Headers("stripe-signature") sig: string) {
+    let event: Stripe.Event;
+    try {
+      event = this.stripe.webhooks.constructEvent(req.rawBody!, sig, process.env.STRIPE_WEBHOOK_SECRET!);
+    } catch {
+      throw new BadRequestException("bad signature");
+    }
+    // act on event.type here
+    return { received: true };
+  }
 }</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">On the server, call <code>app.enableCors()</code> for the frontend origin, take the ID with <code>@Body("vid") vid?: string</code>, pass <code>vid || undefined</code> to the service, and return <code>{ url }</code> instead of redirecting. The ID is <code>null</code> in cookieless mode, and the payment then counts as Unattributed.</p>
-<h2>Subscriptions and renewals</h2>
-<p class="p">Only the first payment needs the visitor ID: each renewal keeps the channel of the customer's first payment, with no code on your side, as described in <a href="https://docs.virling.com/attribution/renewals">renewals</a>.</p>
-<h2>Check that it works</h2>
-<p class="p">Run one tagged visit and one test payment through the form that posts to the checkout controller, as in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>. Connect a <a href="https://docs.virling.com/payments/stripe">restricted Stripe key</a> that starts with <code>rk_test_</code> in Virling; your app keeps its own test secret key in <code>STRIPE_SECRET_KEY</code> and uses a price created in test mode.</p>
-<p class="p">To see the visitor ID on the Checkout Session, add this right after <code>this.stripe.checkout.sessions.create()</code> in the service and remove it afterwards. <code>client_reference_id</code>, or <code>virling_vid</code> in the session's metadata, should match <code>window.virling.vid()</code> in the browser console:</p>
-<div class="code block"><pre data-snippet>console.log(session.id, session.client_reference_id, session.metadata);</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">If your code sets <code>customer</code>, use a new customer for each test: a later payment by the same customer is a renewal and keeps the first payment's channel.</p>
-<p class="p">Payments without a visitor ID still count toward revenue, as Unattributed. How the join works from visit to payment is in <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>.</p>
+<p class="p">Add <code>WebhookController</code> to the module's <code>controllers</code>. Throwing <code>BadRequestException</code> makes Nest answer 400 instead of the 500 an uncaught error would give, so Stripe's delivery log shows the real cause.</p>
+<h2>A frontend on another origin</h2>
+<p class="p">A Nest API on <code>api.yourdomain.com</code> still receives the cookie from a page on <code>www.yourdomain.com</code>, because the script sets it on the parent domain. Call <code>app.enableCors({ origin: "https://www.yourdomain.com", credentials: true })</code> and send the request with <code>credentials: "include"</code>; <code>origin: true</code> reflects every origin and should not be paired with credentials. For an API on an unrelated domain, read <code>window.virling.vid()</code> in the browser, post it, take it with <code>@Body("vid") vid?: string</code>, and return <code>{ url }</code> for the page to open instead of using <code>@Redirect()</code>.</p>
+<h2>Test the service without Stripe</h2>
+<p class="p">Because the client is a provider, a Jest test can override the token and check what the service sends:</p>
+<div class="code block"><pre data-snippet>// src/checkout/checkout.service.spec.ts
+import { Test } from "@nestjs/testing";
+import { CheckoutService } from "./checkout.service";
+import { STRIPE } from "./stripe.provider";
+
+it("passes the visitor ID to Stripe", async () =&gt; {
+  const create = jest.fn().mockResolvedValue({ url: "https://checkout.stripe.com/test" });
+  const moduleRef = await Test.createTestingModule({
+    providers: [CheckoutService, { provide: STRIPE, useValue: { checkout: { sessions: { create } } } }],
+  }).compile();
+
+  await moduleRef.get(CheckoutService).createSession("vid_123");
+  expect(create).toHaveBeenCalledWith(expect.objectContaining({ client_reference_id: "vid_123" }));
+});</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">For the whole path, connect a restricted key starting with <code>rk_test_</code> in Virling, use a test-mode price, and make one tagged visit and one payment as in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>. The payment should show the visit's source; renewals then keep that channel with no code, as in <a href="https://docs.virling.com/attribution/renewals">renewals</a>. If it shows as Unattributed, open it and look for <b>Visitor</b> under <b>Details</b>.</p>
 <h2>Common mistakes</h2>
-<p class="p">Open an Unattributed payment and look for <b>Visitor</b> under <b>Details</b>. If there is none, checkout did not carry the ID.</p>
-<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row"><code>req.cookies</code> is undefined, and no payment has a visitor ID</th><td><code>cookie-parser</code> is not registered. Nest never fills <code>req.cookies</code> itself, and <code>req.cookies?.</code> hides the error</td><td>Call <code>app.use(cookieParser())</code> before <code>app.listen</code>, or from NestJS 12.1 on read the cookie with <code>@Cookies("virling_vid") vid?: string</code> (<a href="https://docs.nestjs.com/http/cookies">Nest cookies</a>)</td></tr><tr><th scope="row"><code>cookieParser</code> fails with <code>This expression is not callable</code>, or at startup with <code>cookie_parser_1.default is not a function</code></th><td>The import style does not match <code>esModuleInterop</code> in <code>tsconfig.json</code>: on needs the default import, off needs <code>import * as</code></td><td>Turn <code>esModuleInterop</code> on, as new Nest projects do, and use <code>import cookieParser from "cookie-parser"</code> (<a href="https://docs.nestjs.com/http/cookies">Nest cookies</a>, <a href="https://www.typescriptlang.org/tsconfig/#esModuleInterop">esModuleInterop</a>)</td></tr><tr><th scope="row">Build error TS1272 on <code>@Req() req: Request</code></th><td>With <code>isolatedModules</code> and <code>emitDecoratorMetadata</code>, a type in a decorated signature must be imported as a type</td><td>Write <code>import type { Request } from "express"</code> (<a href="https://docs.nestjs.com/controllers#request-object">Nest request object</a>)</td></tr><tr><th scope="row">Build error that relative import paths need file extensions</th><td>The project is ESM, with <code>"type": "module"</code> in <code>package.json</code></td><td>Import <code>./app.module.js</code> and <code>./checkout.service.js</code>, with <code>.js</code> also for TypeScript files (<a href="https://docs.nestjs.com/migration-guide">Nest migration guide</a>)</td></tr><tr><th scope="row">The checkout request never ends</th><td>The method also injects <code>@Res()</code>, so Nest leaves the response to you and <code>@Redirect()</code> is ignored</td><td>Remove <code>@Res()</code>, or use <code>@Res({ passthrough: true })</code> (<a href="https://docs.nestjs.com/controllers">Nest controllers</a>)</td></tr><tr><th scope="row">No visitor ID when a frontend on <code>www.</code> calls <code>api.yourdomain.com</code></th><td><code>fetch</code> to another origin sends no cookies by default</td><td>Use <code>credentials: "include"</code> (<a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#including_credentials">fetch credentials</a>) and <code>app.enableCors({ origin: "https://www.yourdomain.com", credentials: true })</code>. Do not combine <code>origin: true</code> with credentials (<a href="https://docs.nestjs.com/security/cors">Nest CORS</a>)</td></tr><tr><th scope="row">The browser reports a CORS error for <code>checkout.stripe.com</code></th><td>The button uses <code>fetch</code>, which follows the 303 redirect to Stripe's domain</td><td>Post a plain form, or drop <code>@Redirect()</code>, return <code>{ url }</code> and set <code>location.href</code> (<a href="https://docs.nestjs.com/controllers">Nest controllers</a>)</td></tr><tr><th scope="row">After paying, the buyer lands on an <code>http://</code> or internal address</th><td><code>success_url</code> is built from <code>req.protocol</code> and <code>req.hostname</code>, and the app does not trust the reverse proxy in front of it</td><td>Create the app as <code>NestExpressApplication</code> and call <code>app.set("trust proxy", "loopback")</code> for a proxy on the same machine, or use its address, or a fixed URL as in step 3 (<a href="https://docs.nestjs.com/security/rate-limiting#proxies">Nest proxies</a>)</td></tr><tr><th scope="row">Your Stripe webhook fails signature verification</th><td>Nest parses JSON bodies, and the handler passes the parsed <code>@Body()</code> to <code>constructEvent()</code></td><td>Pass <code>rawBody: true</code> to <code>NestFactory.create</code> and give <code>req.rawBody</code> of a <code>RawBodyRequest&lt;Request&gt;</code> to <code>constructEvent()</code> (<a href="https://docs.nestjs.com/faq/raw-body">Nest raw body</a>, <a href="https://docs.stripe.com/webhooks/signature">Stripe signature docs</a>)</td></tr><tr><th scope="row">No visitor ID, though the browser has the cookie</th><td>The session is created in a queue worker or a webhook controller, where there is no cookie of the buyer</td><td>Read the cookie in the controller the browser calls and pass it to the service (<a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>)</td></tr><tr><th scope="row">No <code>virling_vid</code> cookie in local development</th><td>The script does nothing on <code>localhost</code> and <code>127.*</code> without <code>data-dev</code></td><td>Add <code>data-dev</code> to the tag in the layout while you develop, and test the whole path on a subdomain of your site, where visits are kept</td></tr><tr><th scope="row"><b>Visitor</b> on the payment is your own user or order ID</th><td><code>client_reference_id</code> holds your ID and is read as the visitor ID</td><td>Put the visitor ID in the session's <code>metadata.virling_vid</code>, which is read first (<a href="https://docs.virling.com/payments/stripe">Stripe docs</a>)</td></tr><tr><th scope="row">Some payments are Unattributed</th><td>The visitor had no cookie: the script was blocked, or the site is in cookieless mode or still waiting for consent</td><td>Nothing to fix in the code. Create the session without the ID; the payment still counts toward revenue (<a href="https://docs.virling.com/attribution/unattributed">Unattributed revenue</a>)</td></tr></tbody></table></div>
-<p class="p">The webhook row is about your own endpoint, for example one that unlocks an account. Virling reads Stripe with the restricted key and needs no webhook in your app. On the Fastify adapter, <code>cookie-parser</code> does not apply; use <code>@Cookies()</code> or <code>@fastify/cookie</code>. Checkout requests have to reach your server with their cookies, so keep them out of any cache and do not let a proxy or CDN remove the <code>Cookie</code> header, as in <a href="https://docs.virling.com/track/caching">page caching and CDNs</a>. A payment made before a fix usually stays Unattributed, so make a new one to check.</p>
+<div style="overflow-x:auto"><table class="cmp" style="min-width:640px"><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><th scope="row"><code>@VisitorId()</code> is always undefined</th><td><code>cookie-parser</code> is not registered, and <code>cookies?.</code> hides the error</td><td>Call <code>app.use(cookieParser())</code> in <code>main.ts</code> before <code>app.listen</code> (<a href="https://docs.nestjs.com/http/cookies">Nest cookies</a>)</td></tr><tr><th scope="row"><code>cookieParser</code> fails with <code>This expression is not callable</code>, or at startup with <code>cookie_parser_1.default is not a function</code></th><td>The import style does not match <code>esModuleInterop</code> in <code>tsconfig.json</code></td><td>Turn <code>esModuleInterop</code> on, as new Nest projects do, and use the default import (<a href="https://www.typescriptlang.org/tsconfig/#esModuleInterop">esModuleInterop</a>)</td></tr><tr><th scope="row">Build error TS1272 on <code>@Req() req: RawBodyRequest&lt;Request&gt;</code></th><td>With <code>isolatedModules</code> and <code>emitDecoratorMetadata</code>, a type in a decorated signature must be imported as a type</td><td>Write <code>import type { Request } from "express"</code> (<a href="https://docs.nestjs.com/controllers#request-object">Nest request object</a>)</td></tr><tr><th scope="row"><code>Nest can't resolve dependencies of the CheckoutService (?)</code></th><td>The service injects <code>STRIPE</code>, but <code>stripeProvider</code> is not in the module's <code>providers</code></td><td>Add it there, or export it from a shared module that this one imports (<a href="https://docs.nestjs.com/fundamentals/custom-providers">Nest custom providers</a>)</td></tr><tr><th scope="row"><code>req.rawBody</code> is undefined in the webhook</th><td><code>rawBody: true</code> is missing from <code>NestFactory.create</code></td><td>Add it to the options in <code>main.ts</code> (<a href="https://docs.nestjs.com/faq/raw-body">Nest raw body</a>, <a href="https://docs.stripe.com/webhooks/signature">Stripe signature docs</a>)</td></tr><tr><th scope="row">The checkout request never ends</th><td>The handler also injects <code>@Res()</code>, so Nest leaves the response to you and ignores <code>@Redirect()</code></td><td>Remove <code>@Res()</code>, or use <code>@Res({ passthrough: true })</code> (<a href="https://docs.nestjs.com/controllers">Nest controllers</a>)</td></tr><tr><th scope="row">Build error that relative imports need file extensions</th><td>The project is ESM, with <code>"type": "module"</code> in <code>package.json</code></td><td>Import <code>./checkout.service.js</code> and the like, with <code>.js</code> also for TypeScript files (<a href="https://docs.nestjs.com/migration-guide">Nest migration guide</a>)</td></tr><tr><th scope="row">After paying, the buyer lands on an <code>http://</code> or internal address</th><td><code>success_url</code> is built from <code>req.protocol</code> and <code>req.hostname</code> behind a proxy Nest does not trust</td><td>On a <code>NestExpressApplication</code>, call <code>app.set("trust proxy", "loopback")</code> for a proxy on the same machine, or use a fixed URL as above (<a href="https://docs.nestjs.com/security/rate-limiting#proxies">Nest proxies</a>)</td></tr><tr><th scope="row"><code>app.use(cookieParser())</code> has no effect</th><td>The app runs on the Fastify adapter, where Express middleware such as <code>cookie-parser</code> does not parse cookies</td><td>Register <code>@fastify/cookie</code> and read <code>request.cookies</code> from the Fastify request (<a href="https://docs.nestjs.com/http/cookies">Nest cookies</a>)</td></tr><tr><th scope="row">No visitor ID though the browser has the cookie</th><td><code>createSession</code> is called from a queue processor or the webhook controller, where no buyer cookie exists</td><td>Read the ID in the controller the browser posts to and pass it along (<a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>)</td></tr><tr><th scope="row">No cookie while running Nest locally</th><td>The script skips <code>localhost</code> and <code>127.*</code> unless the tag has <code>data-dev</code></td><td>Add <code>data-dev</code> during development, and check the full flow on a subdomain of your site</td></tr></tbody></table></div>
+<p class="p">Keep <code>POST /checkout</code> out of any cache and make sure no proxy drops the <code>Cookie</code> header (<a href="https://docs.virling.com/track/caching">page caching and CDNs</a>). Payments made before a fix usually stay Unattributed, so test with a fresh one.</p>
 <h2>Frequently asked questions</h2>
-<h3>How do I pass UTM parameters to Stripe Checkout in NestJS?</h3><p class="p">Read the visitor ID from the virling_vid cookie in the controller that creates the Checkout Session and pass it as client_reference_id. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them.</p>
-<h3>Why is req.cookies undefined in NestJS?</h3><p class="p">NestJS does not fill req.cookies by itself. Install cookie-parser and call app.use(cookieParser()) in main.ts before app.listen, then read req.cookies.virling_vid in the controller.</p>
-<h3>Should I use client_reference_id or metadata.virling_vid?</h3><p class="p">Use client_reference_id unless it already holds your own user or order ID. In that case put the visitor ID in the session's metadata.virling_vid. Virling reads either.</p>
-<h3>What happens if the cookie is missing?</h3><p class="p">req.cookies?.virling_vid is undefined, and the stripe library leaves client_reference_id out, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed.</p>
-<h3>Can I use @Cookies() instead of cookie-parser in NestJS?</h3><p class="p">Yes, from NestJS 12.1 on. Import Cookies from @nestjs/common and add @Cookies("virling_vid") vid?: string to the controller method. On older versions, use cookie-parser and read req.cookies.virling_vid. The value you pass to Stripe is the same.</p>
+<h3>How do I pass UTM parameters to Stripe Checkout in NestJS?</h3><p class="p">Have the checkout controller read the virling_vid cookie, through req.cookies or a small param decorator, and hand it to the service that calls stripe.checkout.sessions.create as client_reference_id. Virling stores the UTM tags of each visit against that ID and joins the payment to them.</p>
+<h3>Why is req.cookies undefined in NestJS?</h3><p class="p">On the Express platform Nest does not parse cookies. Register cookie-parser with app.use(cookieParser()) in main.ts before app.listen. On the Fastify platform, register @fastify/cookie instead.</p>
+<h3>Where should the Stripe client live in a NestJS app?</h3><p class="p">In a provider, built once by a factory and injected into CheckoutService with @Inject. The app then shares one client, and tests replace it with a fake through the same token.</p>
+<h3>How do I verify Stripe webhook signatures in NestJS?</h3><p class="p">Create the app with rawBody: true, type the request as RawBodyRequest&lt;Request&gt;, and pass req.rawBody with the stripe-signature header to stripe.webhooks.constructEvent(). The parsed @Body() no longer matches the bytes Stripe signed. Virling itself needs no webhook.</p>
+<h3>What if client_reference_id already holds my user ID?</h3><p class="p">Put the visitor ID in the session's metadata.virling_vid, which Virling checks before client_reference_id, and keep your user ID where it is.</p>
   </div></div></section>
   <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
 <h2>See which campaigns bring Stripe revenue</h2>
