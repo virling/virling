@@ -93,7 +93,7 @@ function browser(url, { cookie = jar(new URL(url).hostname), attrs = {}, nav = "
     constructor(f) { this.f = f; }
     observe({ type }) { this.f({ getEntries: () => entries[type] || [] }); }
   }
-  const ctx = { window, document, navigator, location, history, performance, ...(Object.keys(entries).length && { PerformanceObserver }), BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, devicePixelRatio: 2, Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: zone }) }) }, URL, JSON, Date: { now: () => clock.t }, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]), imported: (u) => imports.push(u) };
+  const ctx = { window, document, navigator, location, history, performance, ...(Object.keys(entries).length && { PerformanceObserver }), BroadcastChannel: window.BroadcastChannel, screen: { width: 1440 }, devicePixelRatio: 2, Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: zone }) }) }, URL, JSON, Date: { now: () => clock.t }, Math, fetch: () => {}, setInterval: (f, ms) => timers.push([f, ms]), imported: (u) => (imports.push(u), Promise.resolve()) };
   vm.createContext(ctx);
   // import() needs a module loader, so the script's dynamic import is recorded instead.
   vm.runInContext(before + SRC.replace(/\bimport\(/g, "imported("), ctx);
@@ -197,6 +197,15 @@ test("consent asks the server for the ID the visit is counted under", () => {
   assert.deepEqual(b.imports, ["https://virling.test/api/event?consent=example.com"]);
   assert.equal(b.cookie.cookies.size, 0, "the server's module sets the cookie, not the script");
   assert.deepEqual(b.sent.map((e) => [e.n, e.v]), [["pageview", null], ["goal", null]]);
+});
+
+test("after consent the visitor ID is read back, so checkout links carry it", async () => {
+  const b = browser("https://example.com/", { attrs: { "data-cookieless": "" } });
+  assert.equal(b.window.virling.vid(), null);
+  b.window.virling("consent");
+  b.cookie.set("virling_vid=c-0123456789abcdef;path=/;domain=example.com");
+  await Promise.resolve();
+  assert.equal(b.window.virling.vid(), "c-0123456789abcdef");
 });
 
 test("outbound clicks are exits and payment links carry the visitor ID", () => {

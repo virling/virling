@@ -7,7 +7,7 @@
   if (!site || /virling_ignore=1/.test(d.cookie) || (/^(localhost|127\.|\[::1\])/.test(L.hostname) && !has("data-dev")) || (has("data-respect-gpc") && n.globalPrivacyControl)) return;
   var endpoint = s.getAttribute("data-api") || new URL("/api/event", s.src);
   // A cookie set after consent is read even in cookieless mode, but only cookie mode creates or renews one.
-  var ref = d.referrer, last, vid = (d.cookie.match(/virling_vid=([^;]+)/) || [])[1] || null, nav = performance.getEntriesByType("navigation")[0]?.type;
+  var ref = d.referrer, last, cookieVid = () => (d.cookie.match(/virling_vid=([^;]+)/) || [])[1] || null, vid = cookieVid(), nav = performance.getEntriesByType("navigation")[0]?.type;
   // Headless browsers on servers have no GPU, so WebGL falls back to a software renderer.
   var gl = d.createElement("canvas").getContext("webgl"), gi = gl?.getExtension("WEBGL_debug_renderer_info"),
     soft = /SwiftShader|llvmpipe/.test(gl ? gl.getParameter(gi ? gi.UNMASKED_RENDERER_WEBGL : gl.RENDERER) : "");
@@ -97,7 +97,7 @@
 
   var q = w.virling?.q || [];
   // Other commands, such as virling("consent"), load a module from the server that acts on them.
-  w.virling = (cmd, arg) => { cmd == "goal" ? arg && send(cmd, "" + arg) : vid || import(endpoint + "?" + cmd + "=" + site); };
+  w.virling = (cmd, arg) => { cmd == "goal" ? arg && send(cmd, "" + arg) : vid || import(endpoint + "?" + cmd + "=" + site).then(() => vid = cookieVid()); };
   w.virling.vid = () => vid;
   q.forEach((a) => w.virling.apply(0, a));
   pageview();
