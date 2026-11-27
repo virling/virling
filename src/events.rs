@@ -1478,7 +1478,7 @@ impl EventStore for DuckStore {
                 // A sync without the visitor ID keeps the one a webhook stored.
                 "INSERT INTO payments VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                  ON CONFLICT (site_id, provider, provider_payment_id) DO UPDATE SET ts = excluded.ts,
-                   amount = excluded.amount, currency = excluded.currency, amount_usd = excluded.amount_usd,
+                   amount = excluded.amount, currency = excluded.currency, amount_usd = coalesce(excluded.amount_usd, payments.amount_usd),
                    refunded = excluded.refunded, status = excluded.status,
                    visitor_id = coalesce(excluded.visitor_id, payments.visitor_id),
                    customer_id = excluded.customer_id, is_renewal = excluded.is_renewal",
@@ -2184,6 +2184,29 @@ mod payment_tests {
             customer_id: Some("cus_1".into()),
             is_renewal: false,
         }
+    }
+
+    #[test]
+    fn a_resync_without_a_rate_keeps_the_usd_amount() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = DuckStore::open(&dir.path().join("e.duckdb")).unwrap();
+        store.upsert_payments(&[payment("pi_1", 0)]).unwrap();
+        store
+            .upsert_payments(&[Payment {
+                amount_usd: None,
+                ..payment("pi_1", 0)
+            }])
+            .unwrap();
+        let period = Period {
+            from: time::macros::date!(2025 - 01 - 01),
+            to: time::macros::date!(2026 - 12 - 31),
+            tz: "UTC".into(),
+        };
+        let rows = store
+            .payment_list("s", &period, PaymentFilter::All, 10, 0)
+            .unwrap()
+            .rows;
+        assert_eq!(rows[0].net_usd, Some(29.0));
     }
 
     #[test]
