@@ -1,2 +1,4 @@
 worker/demo/** linguist-generated
 assets/v.js linguist-generated
+assets/**/*.html linguist-documentation
+docs/** linguist-documentation
