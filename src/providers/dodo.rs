@@ -18,7 +18,7 @@ const WINDOW: Duration = Duration::days(1);
 /// Each incremental window re-reads this much so payments that succeed late are not missed.
 const OVERLAP: Duration = Duration::minutes(30);
 const CAUGHT_UP: Duration = Duration::minutes(5);
-/// Once an hour payments are re-read this far back, since Dodo lists by created_at and renewals can succeed days later.
+/// Once an hour payments and refunds are re-read this far back, since Dodo lists by created_at and both can succeed days later.
 const RESCAN: Duration = Duration::days(30);
 const RESCAN_EVERY: i64 = 3600;
 const PAGE_SIZE: usize = 20;
@@ -146,7 +146,6 @@ impl Cursor {
 
     /// Moves past the page just read and reports whether more pages are available now.
     fn advance(&mut self, full_page: bool, now: OffsetDateTime) -> bool {
-        let payments = self.phase == Phase::Payments;
         let w = self.window_mut();
         if full_page {
             w.page += 1;
@@ -154,8 +153,7 @@ impl Cursor {
         }
         let caught_up = w.lte >= (now - CAUGHT_UP).unix_timestamp();
         let overlap = OVERLAP.whole_seconds();
-        let rescan = payments
-            && w.lte - w.gte <= 2 * overlap
+        let rescan = w.lte - w.gte <= 2 * overlap
             && (w.gte + overlap) / RESCAN_EVERY != w.lte / RESCAN_EVERY;
         w.gte = match (caught_up, rescan) {
             (true, true) => w.lte - RESCAN.whole_seconds(),
@@ -942,6 +940,21 @@ mod tests {
             ts - 1800,
             "the rescan ends back on the short overlap"
         );
+    }
+
+    #[test]
+    fn rereads_a_month_of_refunds_each_hour() {
+        let turn = datetime!(2026-11-14 11:00:30 UTC);
+        let ts = turn.unix_timestamp();
+        let mut c = Cursor::start(Mode::Live, turn);
+        c.phase = Phase::Refunds;
+        c.refunds = Window {
+            gte: ts - 1860,
+            lte: ts,
+            page: 0,
+        };
+        c.advance(false, turn);
+        assert_eq!(c.refunds.gte, ts - 30 * 86_400);
     }
 
     #[test]
