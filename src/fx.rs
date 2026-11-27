@@ -5,27 +5,33 @@ use std::time::{Duration, Instant};
 const REFRESH: Duration = Duration::from_secs(12 * 3600);
 const RATES_URL: &str = "https://api.frankfurter.dev/v1/latest?base=USD";
 
-/// ISO 4217 currencies with no minor unit; everything else is treated as 2 decimals.
+/// ISO 4217 currencies with no minor unit; everything else is 2 decimals unless listed as three.
 const ZERO_DECIMAL: &[&str] = &[
     "BIF", "CLP", "DJF", "GNF", "JPY", "KMF", "KRW", "MGA", "PYG", "RWF", "UGX", "VND", "VUV",
     "XAF", "XOF", "XPF",
 ];
 
-pub fn minor_to_major(amount_minor: i64, currency: &str) -> f64 {
-    if ZERO_DECIMAL.contains(&currency.to_ascii_uppercase().as_str()) {
-        amount_minor as f64
+/// ISO 4217 currencies with three decimals, which payment APIs report in thousandths.
+const THREE_DECIMAL: &[&str] = &["BHD", "IQD", "JOD", "KWD", "LYD", "OMR", "TND"];
+
+fn minor_units(currency: &str) -> f64 {
+    let currency = currency.to_ascii_uppercase();
+    if ZERO_DECIMAL.contains(&currency.as_str()) {
+        1.0
+    } else if THREE_DECIMAL.contains(&currency.as_str()) {
+        1000.0
     } else {
-        amount_minor as f64 / 100.0
+        100.0
     }
+}
+
+pub fn minor_to_major(amount_minor: i64, currency: &str) -> f64 {
+    amount_minor as f64 / minor_units(currency)
 }
 
 /// A major-unit price, such as 9.99, in minor units of `currency`.
 pub fn major_to_minor(amount: f64, currency: &str) -> i64 {
-    if ZERO_DECIMAL.contains(&currency.to_ascii_uppercase().as_str()) {
-        amount.round() as i64
-    } else {
-        (amount * 100.0).round() as i64
-    }
+    (amount * minor_units(currency)).round() as i64
 }
 
 /// USD exchange rates from the ECB via frankfurter.dev, refreshed twice a day.
@@ -90,9 +96,11 @@ mod tests {
     use super::minor_to_major;
 
     #[test]
-    fn minor_units() {
+    fn converts_minor_units() {
         assert_eq!(minor_to_major(2900, "usd"), 29.0);
         assert_eq!(minor_to_major(2900, "JPY"), 2900.0);
         assert_eq!(minor_to_major(14156, "inr"), 141.56);
+        assert_eq!(minor_to_major(10000, "kwd"), 10.0);
+        assert_eq!(super::major_to_minor(10.5, "KWD"), 10500);
     }
 }
