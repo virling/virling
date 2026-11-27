@@ -52,6 +52,7 @@ struct Purchase {
     status: String,
     store_purchase_identifier: Option<Value>,
     customer_id: String,
+    environment: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -82,6 +83,7 @@ struct Event {
     purchased_at_ms: Option<i64>,
     period_type: Option<String>,
     cancel_reason: Option<String>,
+    environment: Option<String>,
     #[serde(default)]
     subscriber_attributes: Map<String, Value>,
 }
@@ -187,7 +189,7 @@ fn map_purchase(p: Purchase, floor: i64, visitor_id: Option<String>) -> Option<F
         v => v.to_string(),
     };
     let gross = p.revenue_in_usd?.gross;
-    if ts.unix_timestamp() < floor || gross <= 0.0 {
+    if ts.unix_timestamp() < floor || gross <= 0.0 || sandbox(p.environment.as_deref()) {
         return None;
     }
     let amount = (gross * 100.0).round() as i64;
@@ -237,6 +239,9 @@ pub async fn register_webhook(
 /// The payment, renewal or refund a webhook reports, with the visitor ID from the customer's attributes.
 pub fn webhook_payment(body: &[u8]) -> anyhow::Result<Option<Fetched>> {
     let e = serde_json::from_slice::<Hook>(body)?.event;
+    if sandbox(e.environment.as_deref()) {
+        return Ok(None);
+    }
     let renewal = match e.kind.as_str() {
         "INITIAL_PURCHASE" | "NON_RENEWING_PURCHASE" => false,
         "RENEWAL" => true,
@@ -284,6 +289,11 @@ pub fn webhook_payment(body: &[u8]) -> anyhow::Result<Option<Fetched>> {
         is_renewal: renewal,
         email: None,
     }))
+}
+
+/// Test purchases from the App Store sandbox, TestFlight or Google test tracks are not revenue.
+fn sandbox(environment: Option<&str>) -> bool {
+    environment.is_some_and(|e| e.eq_ignore_ascii_case("sandbox"))
 }
 
 fn millis(ms: i64) -> OffsetDateTime {
@@ -356,6 +366,22 @@ mod tests {
         })
         .unwrap();
         assert_eq!(alias.visitor_id.as_deref(), Some("vid_alias"));
+    }
+
+    #[test]
+    fn sandbox_purchases_are_not_revenue() {
+        assert!(event(|e| e["environment"] = json!("SANDBOX")).is_none());
+        assert!(event(|e| e["environment"] = json!("PRODUCTION")).is_some());
+        let purchase = |environment: &str| Purchase {
+            purchased_at: 1_790_000_000_000,
+            revenue_in_usd: Some(Revenue { gross: 9.99 }),
+            status: "owned".into(),
+            store_purchase_identifier: Some(json!("tx_1")),
+            customer_id: "c1".into(),
+            environment: Some(environment.into()),
+        };
+        assert!(map_purchase(purchase("sandbox"), 0, None).is_none());
+        assert!(map_purchase(purchase("production"), 0, None).is_some());
     }
 
     #[test]
