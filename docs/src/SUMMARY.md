@@ -4,7 +4,7 @@
 
 # Get started
 
-- [Introduction](introduction.md)
+- [What is Virling?](introduction.md)
 - [Quickstart](quickstart.md)
 - [Find which channel pays](guides/channel-revenue.md)
 - [Read your dashboard](guides/dashboard.md)
@@ -26,7 +26,7 @@
   - [Release binary](install/binary.md)
   - [Build from source](install/source.md)
 - [How Virling works](how-it-works.md)
-- [Troubleshooting](troubleshooting.md)
+- [Troubleshooting: no visitors or payments](troubleshooting.md)
 
 # Track
 
