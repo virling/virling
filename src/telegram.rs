@@ -41,12 +41,10 @@ async fn send(state: &AppState, token: &str, chat: &str, text: &str) -> anyhow::
 
 /// Messages about new payments, once a minute, forever.
 pub async fn run(state: AppState) {
-    loop {
-        if let Err(err) = tick(&state).await {
-            tracing::error!(%err, "telegram alert round failed");
-        }
-        tokio::time::sleep(INTERVAL).await;
-    }
+    crate::app::every(state, INTERVAL, "telegram alert round", |s| async move {
+        tick(&s).await
+    })
+    .await;
 }
 
 type Row = (

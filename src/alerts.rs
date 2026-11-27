@@ -29,12 +29,10 @@ const MOST_CHANGES: usize = 5;
 
 /// Checks every site's alerts once a minute, forever.
 pub async fn run(state: AppState) {
-    loop {
-        if let Err(err) = tick(&state, OffsetDateTime::now_utc()).await {
-            tracing::error!(%err, "email alert round failed");
-        }
-        tokio::time::sleep(INTERVAL).await;
-    }
+    crate::app::every(state, INTERVAL, "email alert round", |s| async move {
+        tick(&s, OffsetDateTime::now_utc()).await
+    })
+    .await;
 }
 
 type Row = (
