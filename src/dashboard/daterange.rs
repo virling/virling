@@ -54,7 +54,14 @@ pub(crate) fn preset(key: &str, today: Date, first: Option<Date>) -> Option<(Dat
 const MAX_DAYS: i64 = 3660;
 
 fn ymd(s: Option<&str>) -> Option<Date> {
-    Date::parse(s?, format_description!("[year]-[month]-[day]")).ok()
+    parse_day(s?)
+}
+
+/// A `YYYY-MM-DD` date from a URL or API query; years outside 1970 to 9999 are refused so date math cannot overflow.
+pub(crate) fn parse_day(s: &str) -> Option<Date> {
+    Date::parse(s.trim(), format_description!("[year]-[month]-[day]"))
+        .ok()
+        .filter(|d| (1970..=9999).contains(&d.year()))
 }
 
 /// The range a page shows, read from ?range=, ?from=&to= and ?compare=.
@@ -272,6 +279,14 @@ impl Picked {
 #[cfg(test)]
 mod tests {
     use time::macros::date;
+
+    #[test]
+    fn far_dates_in_the_url_are_refused() {
+        assert_eq!(super::parse_day("2026-11-27"), Some(date!(2026 - 11 - 27)));
+        assert_eq!(super::parse_day("-9999-01-01"), None);
+        assert_eq!(super::parse_day("0001-01-01"), None);
+        assert_eq!(super::parse_day("not a date"), None);
+    }
 
     use super::*;
 

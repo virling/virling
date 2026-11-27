@@ -45,7 +45,7 @@ pub(crate) fn last_week(today: Date) -> Date {
 /// The Monday asked for in `?week=`, else last week; unfinished weeks fall back to last week.
 fn pick_week(today: Date, q: Option<&str>) -> Date {
     let last = last_week(today);
-    q.and_then(|s| Date::parse(s, format_description!("[year]-[month]-[day]")).ok())
+    q.and_then(super::daterange::parse_day)
         .map(week_start)
         .filter(|w| *w <= last)
         .unwrap_or(last)
@@ -1194,7 +1194,7 @@ fn back(domain: &str, week: &str, flag: &str) -> Redirect {
 
 /// A week param worth keeping in a redirect: a plain date.
 fn week_param(week: Option<&str>) -> String {
-    week.filter(|w| Date::parse(w, format_description!("[year]-[month]-[day]")).is_ok())
+    week.filter(|w| super::daterange::parse_day(w).is_some())
         .unwrap_or_default()
         .to_string()
 }
