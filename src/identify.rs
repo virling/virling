@@ -35,7 +35,7 @@ async fn salt(db: &SqlitePool, site_id: &str) -> sqlx::Result<String> {
         .await
 }
 
-/// Remembers that `visitor_id` identified with `email` on the site; the latest visitor wins.
+/// Remembers that `visitor_id` identified with `email` on the site; the first visitor keeps it, so a later identify cannot take the email over.
 pub async fn save(
     db: &SqlitePool,
     site_id: &str,
