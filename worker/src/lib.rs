@@ -776,6 +776,10 @@ const MOVED: &[(&str, &str)] = &[
         "/blog/meta-ai-revenue-tracking",
         "/blog/is-ai-search-traffic-worth-anything#meta-ai",
     ),
+    (
+        "/blog/track-polar-revenue-by-traffic-source",
+        "/blog/polar-utm-tracking",
+    ),
 ];
 
 fn moved(path: &str) -> Option<&'static str> {
@@ -921,5 +925,17 @@ mod tests {
             assert_eq!(moved(&format!("{from}.html")), Some(to.as_str()));
         }
         assert_eq!(moved("/blog/is-ai-search-traffic-worth-anything"), None);
+    }
+
+    #[test]
+    fn polar_post_redirects() {
+        let to = Some("/blog/polar-utm-tracking");
+        assert_eq!(moved("/blog/track-polar-revenue-by-traffic-source"), to);
+        assert_eq!(moved("/blog/track-polar-revenue-by-traffic-source/"), to);
+        assert_eq!(
+            moved("/blog/track-polar-revenue-by-traffic-source.html"),
+            to
+        );
+        assert_eq!(moved("/blog/polar-utm-tracking"), None);
     }
 }
