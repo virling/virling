@@ -37,6 +37,7 @@ jobs:
           VIRLING_INDEX_MB: 8192
         run: |
           budgets=""
-          if [ "${{ matrix.scale }}" -le 10 ]; then budgets="--budgets .github/perf-budgets.txt"; fi
+          # 60 samples, so one or two slow samples from a noisy shared runner cannot set the p95 alone.
+          if [ "${{ matrix.scale }}" -le 10 ]; then budgets="--budgets .github/perf-budgets.txt --runs 60"; fi
           ./target/release/virling --data-dir "$RUNNER_TEMP/bench" bench \
             --scale ${{ matrix.scale }} --no-cache $budgets
