@@ -775,7 +775,7 @@ pub async fn collect(
                 .or_else(|| e.z.as_deref().and_then(zone_country)),
             region: region.clone(),
             city: city.clone(),
-            device: device(e.w).to_string(),
+            device: device(e.w, os).to_string(),
             browser: browser.to_string(),
             os: os.to_string(),
             host: Some(page_host.to_ascii_lowercase()),
