@@ -171,6 +171,8 @@ fn x_axis(points: &[DayPoint], centered: bool) -> String {
     } else {
         label_indexes(n)
     };
+    // With every day labelled, odd days carry a class that phones hide so labels do not collide.
+    let daily = at.len() == n && n > 5;
     at.into_iter()
         .map(|i| {
             let f = if centered {
@@ -184,6 +186,8 @@ fn x_axis(points: &[DayPoint], centered: bool) -> String {
                 " class=\"s\""
             } else if f >= 0.999 {
                 " class=\"e\""
+            } else if daily && i % 2 == 1 {
+                " class=\"o\""
             } else {
                 ""
             };
