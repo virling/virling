@@ -105,7 +105,15 @@ pub fn verdicts(cur: &[BreakdownRow], prev: &[BreakdownRow]) -> Vec<Verdict> {
             } else {
                 (
                     "plain",
-                    format!("{} visitors, too few to judge yet.", r.visitors),
+                    format!(
+                        "{} {}, too few to judge yet.",
+                        r.visitors,
+                        if r.visitors == 1 {
+                            "visitor"
+                        } else {
+                            "visitors"
+                        }
+                    ),
                 )
             };
             Verdict {
