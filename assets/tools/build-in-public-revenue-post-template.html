@@ -46,7 +46,7 @@
 </div>
 
 <main>
-  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / build in public revenue update template</span><h1>Build in public revenue update template</h1><p class="lead">A monthly revenue update post tells your readers the same few things every month: your MRR or revenue, how many new customers you got and which channels the money came from. Fill in the fields below and the page writes a short post for a single update and a long post for a thread or a newsletter, each with a Copy button. The fields start empty: nothing here is real data. Nothing is posted anywhere, there is no signup and everything stays in your browser.</p></div></div></section>
+  <section class="hero"><div class="wrap"><div class="txt sub-hero"><span class="kicker">tools / build in public revenue update template</span><h1>Build in public revenue update template</h1><p class="lead">A monthly revenue update post tells your readers the same few things every month: your MRR or revenue, how many new customers you got and which channels the money came from. Fill in the fields below and the page writes a short post for a single update and a long post for a thread or a newsletter, each with a Copy button. Every field starts blank, so no number on this page is real until you type it. The page never posts for you and needs no account.</p></div></div></section>
   <section class="band"><div class="wrap"><div class="tool bp">
 <form class="tool-form" id="bp-form" autocomplete="off">
   <label>Product<input name="prod" value="" placeholder="Your product"></label>
@@ -70,7 +70,7 @@
 <textarea id="bp-long" readonly aria-label="Long post"></textarea>
 <div class="tool-out"><button class="btn sm" type="button" id="bp-copy-long">Copy long post</button></div>
 <div class="txt post tool-cta">
-<p class="p">The channel table is the part you cannot fill from your payment provider alone: it means matching each payment to the visit that brought it. Virling links every visit to the payment it led to, so revenue by channel comes from real payments. 14 days free.</p>
+<p class="p">Your payment provider can give you the headline number, but not the channel rows. Virling credits each payment to the visit before it, so the Channels card holds the numbers for this table and Share card turns them into an image for the post. 14 days free.</p>
 <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/demo">See the demo</a></p>
 </div>
   </div></div></section>
@@ -82,11 +82,40 @@
 <li><b>Revenue by channel.</b> Where the money came from: search, AI answers, communities, social posts or referrals. This is the part other founders can act on, and the part most updates leave out.</li>
 <li><b>What worked and what is next.</b> One line each. A channel that sent traffic but no revenue is as useful to share as the one that paid.</li>
 </ul>
-<h2>Sharing without revealing revenue</h2>
-<p class="p">If you do not want to share what you earn, tick Show channel shares in percent instead of amounts. The post then leaves out your MRR or revenue and shows each channel as its share of the channel revenue you entered, such as Organic search: 42%.</p>
+<h2>What is safe to share in public</h2>
+<p class="p">A public post is read by customers, competitors and future hires as well as other founders, and it stays up. Post totals and shares, never anything that points at one customer.</p>
+<ul class="post-list">
+<li><b>Fine to post.</b> MRR or revenue, rounded if you like, the count of new customers, channel names with their share or amount, and what you tried.</li>
+<li><b>Keep out.</b> Customer names, emails and logos without permission, single payments or deal sizes, which customer came from which post, and cash in bank. A small month with one big payment can give that customer away even without a name.</li>
+<li><b>Stay consistent.</b> Pick what you share once. Readers notice when a metric quietly disappears in a weak month.</li>
+</ul>
+<h2>Sharing growth without revenue</h2>
+<p class="p">Tick Show channel shares in percent instead of amounts and the post drops your MRR or revenue and every amount, keeping new customers and each channel as a share, such as Organic search: 42%. To show growth without a figure, add your month over month rate from the <a href="/tools/revenue-growth-rate-calculator">revenue growth rate calculator</a> to the What worked line.</p>
+<h2>Short or long post: X, LinkedIn and Indie Hackers</h2>
+<ul class="post-list">
+<li><b>X.</b> The short post is one headline line, the top channel, an optional link and #buildinpublic, a few lines for a single post. For a thread, post the short version first and reply with the channel lines from the long post.</li>
+<li><b>LinkedIn.</b> Use the long post. It is plain text with dashes for lists, which LinkedIn shows as typed, and the What worked and Next month lines give the post a story.</li>
+<li><b>Indie Hackers.</b> Use the long post as the body of your monthly update post, with the product name and month as the title. The channel list is what other founders ask about in the comments.</li>
+</ul>
+<h2>Example long post (made up)</h2>
+<p class="p">A filled-in long post for an invented product, with made-up numbers, to show the shape. It is not a real company or customer.</p>
+<div class="code block"><pre>Example app revenue update, March 2026
+
+MRR: $2,400
+New customers: 9
+
+Revenue by channel:
+- Organic search: $1,010 (42%)
+- Communities: $720 (30%)
+- Social: $430 (18%)
+- Referral: $240 (10%)
+
+What worked: the comparison page started ranking</pre></div>
+<p class="p">With percent mode on, the same numbers give this short post: Example app March 2026 update: 9 new customers. Top channel: Organic search, 42% of revenue. #buildinpublic</p>
 <h2>Where the channel numbers come from in Virling</h2>
-<p class="p">Set the date picker to last month with Custom range. The Channels card lists revenue for every channel, using the same channel names as the table above. Click a channel to filter the whole page to it, and the New customers number gives that channel's new customers. Renewals keep the channel of the customer's first payment, so a channel's revenue includes subscribers it brought in earlier months. On the Channels card, Share card makes a picture of revenue by channel for the range, with amounts off by default, to post next to your update.</p>
-<p class="p">To let readers check the numbers, turn on the <a href="/blog/public-revenue-dashboard">public revenue dashboard</a> and paste its link in the Public dashboard link field. With Hide revenue amounts on, it shows shares and growth instead of dollars. If you post on Indie Hackers, <a href="/blog/indie-hackers-revenue-tracking">Indie Hackers revenue tracking</a> shows how to see which posts and milestones bring paying customers. The <a href="/demo">live demo</a> shows the same cards with sample data.</p>
+<p class="p">For this post you need one report and one image. On the dashboard, choose last month with Custom range and read the Channels card for the table above. Then click Share card on the same card, leave revenue amounts off if you post in percent mode, and use Download PNG to attach the image to your post.</p>
+<p class="p">To let readers check the numbers between posts, turn on the <a href="/blog/public-revenue-dashboard">public revenue dashboard</a> and paste its link in the Public dashboard link field; with Hide revenue amounts on it shows shares and growth instead of dollars. If you post on Indie Hackers, <a href="/blog/indie-hackers-revenue-tracking">Indie Hackers revenue tracking</a> shows which posts and milestones bring paying customers.</p>
+<p class="p">A reader who clicks your post and pays days later is matched to that visit through the visitor ID passed into checkout, while a typed URL with no referrer counts as Direct. <a href="https://docs.virling.com/attribution/channels">Channels in the docs</a> lists every rule.</p>
   </div></div></section>
   <section class="band"><div class="wrap"><div class="txt post">
 <h2>Related tools and guides</h2>
@@ -100,13 +129,14 @@
       <div><h3>Can I post a revenue update without sharing revenue?</h3><p class="p">Yes. Turn on percent mode: the post leaves out your MRR or revenue and shows each channel as a share of channel revenue instead of an amount.</p></div>
       <div><h3>What is the difference between the short and long post?</h3><p class="p">The short post is a few lines for a single update. The long post lists every channel and adds what worked, next month and your dashboard link, for a thread, a forum post or a newsletter.</p></div>
       <div><h3>Where do I get revenue by channel?</h3><p class="p">Your payment provider shows revenue but not which visit brought each payment. Virling joins each visit to the payment that followed, so its Channels card shows revenue by channel for any date range.</p></div>
-      <div><h3>Is this template free?</h3><p class="p">Yes. It runs in your browser with no signup. Nothing you type is sent or posted anywhere; you copy the text and post it yourself.</p></div>
+      <div><h3>Is it safe to post my revenue by channel publicly?</h3><p class="p">Channel names with shares or totals do not point at any customer, so most founders can post them. Leave out customer names, single payments and cash in bank; the Virling Share card never includes customers or emails.</p></div>
+      <div><h3>Is this template free?</h3><p class="p">Yes, with no account. The posts are written in your browser and nothing goes out until you copy the text and post it yourself.</p></div>
     </div>
   </div></div></section>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What should a build in public revenue update include?", "acceptedAnswer": {"@type": "Answer", "text": "Your MRR or revenue for the month, new customers, revenue by channel and one line on what worked. Keep the same numbers every month so readers can follow along."}}, {"@type": "Question", "name": "Can I post a revenue update without sharing revenue?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Turn on percent mode: the post leaves out your MRR or revenue and shows each channel as a share of channel revenue instead of an amount."}}, {"@type": "Question", "name": "What is the difference between the short and long post?", "acceptedAnswer": {"@type": "Answer", "text": "The short post is a few lines for a single update. The long post lists every channel and adds what worked, next month and your dashboard link, for a thread, a forum post or a newsletter."}}, {"@type": "Question", "name": "Where do I get revenue by channel?", "acceptedAnswer": {"@type": "Answer", "text": "Your payment provider shows revenue but not which visit brought each payment. Virling joins each visit to the payment that followed, so its Channels card shows revenue by channel for any date range."}}, {"@type": "Question", "name": "Is this template free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It runs in your browser with no signup. Nothing you type is sent or posted anywhere; you copy the text and post it yourself."}}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What should a build in public revenue update include?", "acceptedAnswer": {"@type": "Answer", "text": "Your MRR or revenue for the month, new customers, revenue by channel and one line on what worked. Keep the same numbers every month so readers can follow along."}}, {"@type": "Question", "name": "Can I post a revenue update without sharing revenue?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Turn on percent mode: the post leaves out your MRR or revenue and shows each channel as a share of channel revenue instead of an amount."}}, {"@type": "Question", "name": "What is the difference between the short and long post?", "acceptedAnswer": {"@type": "Answer", "text": "The short post is a few lines for a single update. The long post lists every channel and adds what worked, next month and your dashboard link, for a thread, a forum post or a newsletter."}}, {"@type": "Question", "name": "Where do I get revenue by channel?", "acceptedAnswer": {"@type": "Answer", "text": "Your payment provider shows revenue but not which visit brought each payment. Virling joins each visit to the payment that followed, so its Channels card shows revenue by channel for any date range."}}, {"@type": "Question", "name": "Is it safe to post my revenue by channel publicly?", "acceptedAnswer": {"@type": "Answer", "text": "Channel names with shares or totals do not point at any customer, so most founders can post them. Leave out customer names, single payments and cash in bank; the Virling Share card never includes customers or emails."}}, {"@type": "Question", "name": "Is this template free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, with no account. The posts are written in your browser and nothing goes out until you copy the text and post it yourself."}}]}</script>
   <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
 <h2>Post revenue by channel from real payments</h2>
-<p class="p">This template takes numbers you gather. Virling measures them: it links every visit to the payment it led to, so you see the revenue each channel brought without matching spreadsheets before every update. 14 days free.</p>
+<p class="p">Each month the post needs the same channel table. Virling keeps it current from your payments, so the table, the Share card image and the public dashboard link are ready on the first of the month. 14 days free.</p>
 <p><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a> <a class="lk" href="/pricing">See pricing</a></p>
   </div></div></section>
 <script>
