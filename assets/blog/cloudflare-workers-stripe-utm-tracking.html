@@ -13,7 +13,7 @@
 <meta property="og:description" content="How to tie a Stripe Checkout payment created in a Cloudflare Worker to the visit and UTM tags that brought it, with TypeScript for a fetch handler or Hono.">
 <meta property="og:image" content="https://virling.com/assets/art/og-share.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Cloudflare Workers and Stripe UTM tracking: Checkout from a Worker","item":"https://virling.com/blog/cloudflare-workers-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"Cloudflare Workers and Stripe UTM tracking: code for Checkout","description":"How to tie a Stripe Checkout payment created in a Cloudflare Worker to the visit and UTM tags that brought it, with TypeScript for a fetch handler or Hono.","datePublished":"2026-11-22","dateModified":"2026-11-22","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/cloudflare-workers-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Stripe Checkout from a Cloudflare Worker?","acceptedAnswer":{"@type":"Answer","text":"Read the visitor ID from the virling_vid cookie in the Worker that creates the Checkout Session and pass it as client_reference_id. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them."}},{"@type":"Question","name":"Does the virling_vid cookie reach my Worker?","acceptedAnswer":{"@type":"Answer","text":"Only when the Worker runs on your own domain or one of its subdomains, for example through a route or custom domain. On a workers.dev address the browser does not send it, so read the ID in the browser with window.virling?.vid?.() and send it in the request body."}},{"@type":"Question","name":"Should I use client_reference_id or metadata.virling_vid?","acceptedAnswer":{"@type":"Answer","text":"Use client_reference_id unless it already holds your own user or order ID. In that case put the visitor ID in the session's metadata.virling_vid. Virling reads either."}},{"@type":"Question","name":"What happens if the visitor ID is missing?","acceptedAnswer":{"@type":"Answer","text":"visitorId() returns undefined, and the session is created without one, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://virling.com/#org","name":"Virling","alternateName":"Virling revenue analytics","url":"https://virling.com/","logo":"https://virling.com/favicon.svg","description":"Virling is open-source revenue attribution software. It joins each website visit to the payment that followed, so businesses see which marketing channels bring paying customers.","parentOrganization":{"@type":"Organization","name":"Stacklance Infotech LLP"},"founder":[{"@type":"Person","@id":"https://virling.com/#devendra","name":"Devendra Variya","jobTitle":"Co-founder","sameAs":["https://x.com/whodeven"]},{"@type":"Person","@id":"https://virling.com/#rahul","name":"Rahul","jobTitle":"Co-founder","sameAs":["https://x.com/rahulbhatix"]}],"sameAs":["https://github.com/virling","https://github.com/virling/virling","https://www.npmjs.com/package/virling","https://docs.virling.com/"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Virling","item":"https://virling.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://virling.com/blog"},{"@type":"ListItem","position":3,"name":"Cloudflare Workers and Stripe UTM tracking: Checkout from a Worker","item":"https://virling.com/blog/cloudflare-workers-stripe-utm-tracking"}]},{"@type":"BlogPosting","headline":"Cloudflare Workers and Stripe UTM tracking: code for Checkout","description":"How to tie a Stripe Checkout payment created in a Cloudflare Worker to the visit and UTM tags that brought it, with TypeScript for a fetch handler or Hono.","datePublished":"2026-11-22","dateModified":"2026-11-22","author":{"@type":"Person","name":"Devendra Variya","url":"https://x.com/whodeven","jobTitle":"Co-founder","worksFor":{"@id":"https://virling.com/#org"}},"publisher":{"@type":"Organization","@id":"https://virling.com/#org"},"image":"https://virling.com/assets/art/og-share.jpg","mainEntityOfPage":"https://virling.com/blog/cloudflare-workers-stripe-utm-tracking"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I pass UTM parameters to Stripe Checkout from a Cloudflare Worker?","acceptedAnswer":{"@type":"Answer","text":"Parse virling_vid out of the request's Cookie header in the Worker that creates the Checkout Session and send it as client_reference_id. Virling links the payment to every visit with that ID, including each visit's UTM tags."}},{"@type":"Question","name":"Does the virling_vid cookie reach my Worker?","acceptedAnswer":{"@type":"Answer","text":"Only when the Worker runs on your own domain or one of its subdomains, for example through a route or custom domain. On a workers.dev address the browser does not send it, so read the ID in the browser with window.virling?.vid?.() and send it in the request body."}},{"@type":"Question","name":"Should I use client_reference_id or metadata.virling_vid?","acceptedAnswer":{"@type":"Answer","text":"Use client_reference_id unless it already holds your own user or order ID. In that case put the visitor ID in the session's metadata.virling_vid. Virling reads either."}},{"@type":"Question","name":"Where should I keep the Stripe secret key in a Worker?","acceptedAnswer":{"@type":"Answer","text":"Store it with npx wrangler secret put STRIPE_SECRET_KEY and read it from env.STRIPE_SECRET_KEY. Do not put it under vars in your Wrangler config, which is plain text. For wrangler dev, use a .dev.vars file kept out of git."}},{"@type":"Question","name":"What happens if the visitor ID is missing?","acceptedAnswer":{"@type":"Answer","text":"visitorId() returns undefined, and the session is created without one, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed."}}]}]}</script>
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
@@ -44,26 +44,26 @@
   </div></section>
   <section class="band"><div class="wrap"><div class="txt post">
 <p class="fine-note">By <a href="https://x.com/whodeven">Devendra Variya</a>, co-founder of Virling. Published 2026-11-22.</p>
-<p class="p">Cloudflare Workers and Stripe UTM tracking comes down to one value. Load the Virling script on your pages, then read the <code>virling_vid</code> cookie from the request in the Worker that creates the Stripe Checkout Session and pass it as <code>client_reference_id</code>, or as <code>metadata.virling_vid</code> if that field is taken. Stripe keeps that one ID, and Virling joins the payment to every visit behind it, with the UTM tags of each, so each payment shows the channel that brought it.</p>
-<p class="p">This post covers a Worker with a plain <code>fetch</code> handler and the same thing with Hono, in TypeScript. For a Node server, see <a href="/blog/express-stripe-utm-tracking">Express Stripe UTM tracking</a>, and for the App Router, <a href="/blog/nextjs-stripe-utm-tracking">Next.js Stripe UTM tracking</a>. For Payment Links, metadata limits and where the values show up in Stripe, see the general guide to <a href="/blog/stripe-checkout-utm-parameters">Stripe Checkout UTM parameters</a>.</p>
+<p class="p">A Worker usually does not render your pages, so Stripe UTM tracking from a Worker is about the request. The Virling script on your pages sets a <code>virling_vid</code> cookie, and the Worker that creates the Stripe Checkout Session pulls it out of the <code>Cookie</code> header and sends it to Stripe as <code>client_reference_id</code>. That ID is what lets Virling join the payment to every visit behind it instead of leaving it in Direct; <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a> explains the join.</p>
+<p class="p">The examples are TypeScript, first with a plain <code>fetch</code> handler, then with Hono. For a Node server, see <a href="/blog/express-stripe-utm-tracking">Express Stripe UTM tracking</a>, and for the App Router, <a href="/blog/nextjs-stripe-utm-tracking">Next.js Stripe UTM tracking</a>.</p>
 <p class="p"><a class="btn" href="https://app.virling.com/login" data-goal="join_click">Start free trial</a></p>
 <h2>Step 1: add the script to your pages</h2>
-<p class="p">Paste the tag before <code>&lt;/head&gt;</code> in the HTML or layout every page uses, whether the pages come from Cloudflare Pages, Workers static assets or another host on your domain. If you self-host, replace <code>app.virling.com</code> with your Virling server.</p>
+<p class="p">The tag belongs in the <code>&lt;head&gt;</code> of your pages wherever they are served from: Cloudflare Pages, Workers static assets or another host on the same domain. On a self-hosted Virling, load <code>v.js</code> from your own instance.</p>
 <div class="code block"><pre data-snippet>&lt;script defer src="https://app.virling.com/v.js"
   data-site="yourdomain.com"&gt;&lt;/script&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">The script sets the first-party <code>virling_vid</code> cookie on your domain and records the UTM tags of each visit against it.</p>
-<h2>Step 2: create the Checkout Session in the Worker</h2>
-<p class="p">When the Worker runs on your domain or one of its subdomains, through a route or a custom domain, the browser sends the cookie with every request. Read it from the <code>Cookie</code> header where you create the session and pass it as <code>client_reference_id</code>:</p>
+<h2>Step 2: read the cookie from the Request headers</h2>
+<p class="p">The Workers runtime has no cookie parser. Every cookie for the request arrives in a single <code>Cookie</code> header string, so take <code>virling_vid</code> out with a pattern that also rejects anything that is not a visitor ID:</p>
+<div class="code block"><pre data-snippet>function visitorId(req: Request): string | undefined {
+  const m = (req.headers.get("Cookie") ?? "").match(/(?:^|;\s*)virling_vid=([A-Za-z0-9-]{8,64})(?:;|$)/);
+  return m ? m[1] : undefined;
+}</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>Step 3: create the Checkout Session</h2>
+<p class="p">The stripe npm package has a build for Workers, which Wrangler picks automatically and which sends requests with the runtime's <code>fetch</code>. Passing <code>Stripe.createFetchHttpClient()</code> only makes that explicit:</p>
 <div class="code block"><pre data-snippet>// src/index.ts
 import Stripe from "stripe";
 
 interface Env {
   STRIPE_SECRET_KEY: string;
-}
-
-function visitorId(req: Request): string | undefined {
-  const m = (req.headers.get("Cookie") ?? "").match(/(?:^|;\s*)virling_vid=([A-Za-z0-9-]{8,64})(?:;|$)/);
-  return m ? m[1] : undefined;
 }
 
 export default {
@@ -87,12 +87,36 @@ export default {
     return Response.redirect(session.url!, 303);
   },
 } satisfies ExportedHandler&lt;Env&gt;;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">Set the key with <code>npx wrangler secret put STRIPE_SECRET_KEY</code> and deploy with <code>npx wrangler deploy</code>. When the cookie is missing, <code>visitorId()</code> returns undefined and the stripe library leaves the field out. The pattern also keeps anything that is not a visitor ID out of Stripe. A plain form posts to the Worker, and the browser sends the cookie along:</p>
+<p class="p">An undefined <code>client_reference_id</code> is left out of the request, so a visit without the cookie still gets a session. The 303 turns the form's POST into a GET to Stripe:</p>
 <div class="code block"><pre data-snippet>&lt;form action="/checkout" method="POST"&gt;
   &lt;button type="submit"&gt;Subscribe&lt;/button&gt;
 &lt;/form&gt;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>Calling Stripe with plain fetch</h2>
+<p class="p">To keep the bundle small, skip the package and call the Stripe API directly. It takes form-encoded bodies, with nested fields written as <code>line_items[0][price]</code>:</p>
+<div class="code block"><pre data-snippet>const vid = visitorId(req);
+const form = new URLSearchParams({
+  mode: "subscription",
+  "line_items[0][price]": "price_...",
+  "line_items[0][quantity]": "1",
+  success_url: "https://yourdomain.com/thanks",
+});
+if (vid) form.set("client_reference_id", vid);
+
+const res = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+    "Content-Type": "application/x-www-form-urlencoded",
+  },
+  body: form,
+});
+if (!res.ok) return new Response("Checkout failed", { status: 502 });
+const session = (await res.json()) as { url: string };
+return Response.redirect(session.url, 303);</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<h2>Keep the Stripe key in a secret</h2>
+<p class="p">Variables under <code>vars</code> in your Wrangler config are stored in plain text, so the secret key does not belong there. Store it with <code>npx wrangler secret put STRIPE_SECRET_KEY</code>; it reaches the handler as <code>env.STRIPE_SECRET_KEY</code>, which is why the example builds the Stripe client inside <code>fetch</code>. For <code>wrangler dev</code>, put a test key in a <code>.dev.vars</code> file and keep that file out of git. <code>npx wrangler types</code> can generate the <code>Env</code> interface from your config.</p>
 <h2>The same route with Hono</h2>
-<p class="p">Hono reads cookies with <code>getCookie</code> from <code>hono/cookie</code>, and the secret comes from <code>c.env</code>:</p>
+<p class="p">In Hono, <code>getCookie</code> from <code>hono/cookie</code> does the header parsing, and the secret is a binding on <code>c.env</code>, typed through the <code>Bindings</code> generic:</p>
 <div class="code block"><pre data-snippet>// src/index.ts
 import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
@@ -117,19 +141,8 @@ app.post("/checkout", async (c) =&gt; {
 });
 
 export default app;</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<h2>When client_reference_id is taken</h2>
-<p class="p">If you already use <code>client_reference_id</code> for your own user or order ID, put the visitor ID in the session's metadata instead. Virling reads either:</p>
-<div class="code block"><pre data-snippet>  const vid = visitorId(req);
-  const session = await stripe.checkout.sessions.create({
-    client_reference_id: user.id, // your own ID stays
-    metadata: vid ? { virling_vid: vid } : {},
-    line_items: [{ price: "price_...", quantity: 1 }],
-    mode: "subscription",
-    success_url: "https://yourdomain.com/thanks",
-  });</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
-<p class="p">If you create your own PaymentIntent for Elements instead of a Checkout Session, set the same <code>metadata</code> on <code>stripe.paymentIntents.create()</code>. The full lookup order is in the <a href="https://docs.virling.com/payments/stripe">Stripe docs</a> and in <a href="https://docs.virling.com/payments/checkout">link checkout to visits</a>, and the <a href="/integrations/stripe">Stripe integration page</a> shows what Virling imports.</p>
-<h2>When the Worker is on workers.dev</h2>
-<p class="p">The browser only sends the cookie to your own domain and its subdomains, so a Worker on a <code>workers.dev</code> address never sees it. Either move the Worker onto a route or custom domain, or read the ID in the browser with <code>window.virling?.vid?.()</code> and send it in the request body. The script loads with <code>defer</code>, so wait for it:</p>
+<h2>Cookie scope: workers.dev or a route on your domain</h2>
+<p class="p">Where the Worker answers decides whether it ever sees the cookie. The script sets <code>virling_vid</code> for your own domain, so a Worker on a route such as <code>yourdomain.com/checkout*</code> or on a custom domain such as <code>pay.yourdomain.com</code> gets it with every request, and a route on the same hostname as your pages needs no CORS at all. A <code>workers.dev</code> address is another site to the browser and never receives it. If the Worker has to stay there, read the ID in the browser with <code>window.virling?.vid?.()</code> and send it in the request body. The script loads with <code>defer</code>, so wait for it:</p>
 <div class="code block"><pre data-snippet>async function visitorId() {
   for (let i = 0; i &lt; 20 &amp;&amp; !window.virling?.vid; i++) {
     await new Promise((r) =&gt; setTimeout(r, 100));
@@ -146,18 +159,28 @@ async function checkout() {
   location.href = (await res.json()).url;
 }</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
 <p class="p">In the Worker, answer the browser's <code>OPTIONS</code> preflight with <code>Access-Control-Allow-Origin</code> set to your site, read <code>vid</code> from <code>await req.json()</code> with the same pattern check, and return <code>{ url: session.url }</code> instead of redirecting. The ID is <code>null</code> in cookieless mode, and the payment then counts as Unattributed.</p>
-<h2>Subscriptions and renewals</h2>
-<p class="p">Only the first payment needs the visitor ID: each renewal keeps the channel of the customer's first payment, with no code on your side, as described in <a href="https://docs.virling.com/attribution/renewals">renewals</a>.</p>
+<h2>When client_reference_id is taken</h2>
+<p class="p">Many apps already put their own user ID in <code>client_reference_id</code>. Leave it there and send the visitor ID as <code>metadata.virling_vid</code>; Virling checks both:</p>
+<div class="code block"><pre data-snippet>  const vid = visitorId(req);
+  const session = await stripe.checkout.sessions.create({
+    client_reference_id: user.id, // your own ID stays
+    metadata: vid ? { virling_vid: vid } : {},
+    line_items: [{ price: "price_...", quantity: 1 }],
+    mode: "subscription",
+    success_url: "https://yourdomain.com/thanks",
+  });</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
+<p class="p">A Worker that creates its own PaymentIntent for Elements sets the same <code>metadata</code> on <code>stripe.paymentIntents.create()</code>. The <a href="https://docs.virling.com/payments/stripe">Stripe docs</a> give the order Virling looks in, and the <a href="/integrations/stripe">Stripe integration page</a> shows what Virling imports.</p>
 <h2>Check that it works</h2>
-<p class="p">Run one tagged visit and one test payment as in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>, from a page on your deployed site. The script does not track on <code>localhost</code>, so do not test with <code>wrangler dev</code>.</p>
-<p class="p">If it still shows Unattributed, open the Checkout Session in the Stripe Dashboard and look for the visitor ID in <code>client_reference_id</code> or the metadata. If it is empty, check that the page you bought from loads the script and that the checkout request goes to your domain or one of its subdomains, so the cookie is sent. Payments without a visitor ID still count toward revenue, as Unattributed. How the join works from visit to payment is in <a href="/blog/track-stripe-revenue-by-traffic-source">how to track Stripe revenue by traffic source</a>.</p>
+<p class="p">Subscription renewals inherit the channel of the first payment without any Worker code, per <a href="https://docs.virling.com/attribution/renewals">renewals</a>. Test with one tagged visit and one test payment from a page on your deployed site, as in <a href="https://docs.virling.com/guides/test-your-setup">test your setup</a>. The script sends nothing from <code>localhost</code> unless the tag has <code>data-dev</code>, so a page served by <code>wrangler dev</code> stays silent by default.</p>
+<p class="p">If the payment shows as Unattributed, open its Checkout Session in the Stripe Dashboard. An empty <code>client_reference_id</code> and no <code>metadata.virling_vid</code> means the Worker did not get the cookie: check that it runs on a route or custom domain of your site, not on <code>workers.dev</code>, and that the page you bought from loads the script. <a href="/blog/track-stripe-revenue-by-traffic-source">How to track Stripe revenue by traffic source</a> covers the rest of the path from visit to payment.</p>
 <h2 id="other-frameworks">Other frameworks</h2>
 <p class="p">The same steps for other stacks:</p>
 <ul class="post-list"><li><a href="/blog/nextjs-stripe-utm-tracking">Next.js Stripe UTM tracking</a></li><li><a href="/blog/express-stripe-utm-tracking">Express Stripe UTM tracking</a></li><li><a href="/blog/nestjs-stripe-utm-tracking">NestJS Stripe UTM tracking</a></li><li><a href="/blog/go-stripe-utm-tracking">Go Stripe UTM tracking</a></li><li><a href="/blog/supabase-stripe-utm-tracking">Supabase and Stripe UTM tracking</a></li><li><a href="/blog/sveltekit-stripe-utm-tracking">SvelteKit Stripe UTM tracking</a></li><li><a href="/blog/remix-stripe-utm-tracking">Remix Stripe UTM tracking</a></li><li><a href="/blog/astro-stripe-utm-tracking">Astro Stripe UTM tracking</a></li></ul>
 <h2>Frequently asked questions</h2>
-<h3>How do I pass UTM parameters to Stripe Checkout from a Cloudflare Worker?</h3><p class="p">Read the visitor ID from the virling_vid cookie in the Worker that creates the Checkout Session and pass it as client_reference_id. The Virling script records the UTM tags of every visit against that ID, so the payment is joined to all of them.</p>
+<h3>How do I pass UTM parameters to Stripe Checkout from a Cloudflare Worker?</h3><p class="p">Parse virling_vid out of the request's Cookie header in the Worker that creates the Checkout Session and send it as client_reference_id. Virling links the payment to every visit with that ID, including each visit's UTM tags.</p>
 <h3>Does the virling_vid cookie reach my Worker?</h3><p class="p">Only when the Worker runs on your own domain or one of its subdomains, for example through a route or custom domain. On a workers.dev address the browser does not send it, so read the ID in the browser with window.virling?.vid?.() and send it in the request body.</p>
 <h3>Should I use client_reference_id or metadata.virling_vid?</h3><p class="p">Use client_reference_id unless it already holds your own user or order ID. In that case put the visitor ID in the session's metadata.virling_vid. Virling reads either.</p>
+<h3>Where should I keep the Stripe secret key in a Worker?</h3><p class="p">Store it with npx wrangler secret put STRIPE_SECRET_KEY and read it from env.STRIPE_SECRET_KEY. Do not put it under vars in your Wrangler config, which is plain text. For wrangler dev, use a .dev.vars file kept out of git.</p>
 <h3>What happens if the visitor ID is missing?</h3><p class="p">visitorId() returns undefined, and the session is created without one, for example when the script is blocked or runs in cookieless mode. The payment still counts toward revenue, as Unattributed.</p>
   </div></div></section>
   <section class="band alt"><div class="wrap"><div class="txt post tool-cta">
