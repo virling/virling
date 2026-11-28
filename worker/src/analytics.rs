@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use worker::Url;
 
 use crate::channel;
-use crate::ua::{browser, device, in_app_source, is_spam_referrer};
+use crate::ua::{browser, device, in_app_source, is_spam_referrer, os};
 
 pub const SITE: &str = "virling.com";
 pub const MAX_BATCH: usize = 50;
@@ -141,7 +141,7 @@ pub fn to_row(e: Incoming, user_agent: &str, country: Option<&str>, now_ms: i64)
         utm_term: utm("utm_term"),
         channel: channel.as_str(),
         country: country.map(str::to_string),
-        device: device(e.w),
+        device: device(e.w, os(user_agent)),
         browser: browser(user_agent),
     })
 }
