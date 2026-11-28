@@ -77,8 +77,9 @@ export function CheckoutButton() {
   return &lt;button onClick={checkout}&gt;Subscribe&lt;/button&gt;;
 }</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
 <h2>Store the visitor ID on the Convex Auth user</h2>
-<p class="p">With Convex Auth, your app owns the <code>users</code> table: the auth component only keeps the ID that your <code>createUser</code> callback returns. So the visitor ID can sit on the user document itself. Add an optional field next to the ones you already have in <code>convex/schema.ts</code>:</p>
+<p class="p">With Convex Auth, the <code>users</code> table is part of your own schema through <code>authTables</code>, and you can redefine it with extra fields. So the visitor ID can sit on the user document itself. Add an optional field next to the default ones in <code>convex/schema.ts</code>:</p>
 <div class="code block"><pre data-snippet>users: defineTable({
+  // keep the other default Convex Auth fields
   name: v.optional(v.string()),
   virlingVid: v.optional(v.string()),
 }),</pre><button class="btn sm copy" type="button" data-copy-snippet>Copy</button></div>
