@@ -123,8 +123,11 @@ fn tip_date(p: &DayPoint, weekly: bool) -> String {
     }
 }
 
-/// Up to five evenly spaced label indexes.
+/// Every point on short ranges, else up to five evenly spaced label indexes.
 fn label_indexes(n: usize) -> Vec<usize> {
+    if n <= 8 {
+        return (0..n).collect();
+    }
     let mut out: Vec<usize> = (0..5)
         .map(|k| ((k * n.saturating_sub(1)) as f64 / 4.0).round() as usize)
         .collect();
@@ -168,6 +171,8 @@ fn x_axis(points: &[DayPoint], centered: bool) -> String {
     } else {
         label_indexes(n)
     };
+    // With every day labelled, odd days carry a class that phones hide so labels do not collide.
+    let daily = at.len() == n && n > 5;
     at.into_iter()
         .map(|i| {
             let f = if centered {
@@ -181,6 +186,8 @@ fn x_axis(points: &[DayPoint], centered: bool) -> String {
                 " class=\"s\""
             } else if f >= 0.999 {
                 " class=\"e\""
+            } else if daily && i % 2 == 1 {
+                " class=\"o\""
             } else {
                 ""
             };
@@ -358,6 +365,25 @@ pub fn revenue(
                     r#"<rect x="{:.1}" y="{:.1}" width="{bw:.1}" height="{h:.1}" style="fill:{fill}"/>"#,
                     x0(i),
                     1000.0 - h
+                );
+            }
+            if pts.iter().any(|p| p.visitors > 0) {
+                let d: Vec<String> = pts
+                    .iter()
+                    .enumerate()
+                    .map(|(i, p)| {
+                        format!(
+                            "{}{:.1},{:.1}",
+                            if i == 0 { "M" } else { "L" },
+                            w * (i as f64 + 0.5),
+                            1000.0 - p.visitors as f64 / vtop * 1000.0
+                        )
+                    })
+                    .collect();
+                let _ = write!(
+                    svg,
+                    r#"<path d="{}" fill="none" style="stroke:{BLUE}" stroke-width="1.5" stroke-opacity="0.5" stroke-linejoin="round"{NS}/>"#,
+                    d.join(" ")
                 );
             }
         }
