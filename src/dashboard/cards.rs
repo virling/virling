@@ -534,7 +534,7 @@ fn item(tab: Tab, r: &BreakdownRow) -> Item {
             Tab::Weekday => {
                 let n: usize = v("").parse().unwrap_or(1);
                 (
-                    icons::glyph("calendar", 16, "var(--ink-2)"),
+                    String::new(),
                     WEEKDAYS[n.clamp(1, 7) - 1].to_string(),
                     String::new(),
                     false,
