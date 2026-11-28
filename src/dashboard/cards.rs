@@ -258,6 +258,8 @@ pub struct Panel {
     pub(super) rows: Vec<BarRow>,
     /// Shows the refunded column.
     pub(super) refunds: bool,
+    /// Some row has revenue; without any, the revenue columns are hidden.
+    pub(super) revenue: bool,
     pub(super) openable: bool,
     pub(super) foot: String,
     /// Where the "Tracked link" form posts; empty on tabs without one.
@@ -880,6 +882,7 @@ fn panel(
             head: tab.head(),
             rows: Vec::new(),
             refunds: false,
+            revenue: false,
             openable: false,
             foot: tab.foot().into(),
             new_link: String::new(),
@@ -972,6 +975,7 @@ fn panel(
         head: tab.head(),
         openable: rows.iter().any(|r| !r.kids.is_empty()),
         refunds,
+        revenue: items.iter().any(|i| i.row.revenue_usd > 0.0),
         rows,
         foot,
         new_link: String::new(),

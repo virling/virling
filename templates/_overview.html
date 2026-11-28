@@ -31,7 +31,7 @@
   <div class="d3-card d3-bc" id="{{ c.key }}">
     <div class="d3-bc-head"><h2>{{ c.title }}</h2><nav class="d3-tabs" aria-label="{{ c.label }}">{% for t in c.tabs %}<a href="{{ t.href }}" data-tab="{{ c.key }}-p{{ loop.index0 }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
     {% for p in c.panels %}
-    <div class="d3-panel{% if p.timed %} timed{% endif %}" id="{{ c.key }}-p{{ loop.index0 }}" data-card{% if !p.on %} hidden{% endif %}>
+    <div class="d3-panel{% if p.timed %} timed{% endif %}{% if !p.revenue %} norev{% endif %}" id="{{ c.key }}-p{{ loop.index0 }}" data-card{% if !p.on %} hidden{% endif %}>
     {% if let Some(g) = p.grid %}
     <div class="d3-heat" role="table" aria-label="Visitors by weekday and hour">
       {% for b in g.busiest %}<b class="peak" style="--from:{{ b.0 }};--n:{{ b.1 }}"></b>{% endfor %}
