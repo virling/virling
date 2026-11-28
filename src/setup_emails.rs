@@ -13,12 +13,10 @@ const LATEST: Duration = Duration::days(14);
 
 /// Checks new sites once an hour, forever.
 pub async fn run(state: AppState) {
-    loop {
-        if let Err(err) = tick(&state, OffsetDateTime::now_utc()).await {
-            tracing::error!(%err, "setup email round failed");
-        }
-        tokio::time::sleep(INTERVAL).await;
-    }
+    crate::app::every(state, INTERVAL, "setup email round", |s| async move {
+        tick(&s, OffsetDateTime::now_utc()).await
+    })
+    .await;
 }
 
 type Row = (String, String, String, bool, bool, bool);

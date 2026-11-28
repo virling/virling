@@ -95,12 +95,10 @@ fn payment_data(p: &PaymentRow) -> Value {
 
 /// Sends new events every minute, forever.
 pub async fn run(state: AppState) {
-    loop {
-        if let Err(err) = tick(&state).await {
-            tracing::error!(%err, "webhook round failed");
-        }
-        tokio::time::sleep(INTERVAL).await;
-    }
+    crate::app::every(state, INTERVAL, "webhook round", |s| async move {
+        tick(&s).await
+    })
+    .await;
 }
 
 type Row = (

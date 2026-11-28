@@ -66,6 +66,20 @@ impl std::fmt::Debug for Turnstile {
     }
 }
 
+/// Runs `round` every `interval` forever; a failed round is logged as `what` and the next one still runs.
+pub async fn every<T, F, Fut>(state: AppState, interval: std::time::Duration, what: &str, round: F)
+where
+    F: Fn(AppState) -> Fut,
+    Fut: std::future::Future<Output = anyhow::Result<T>>,
+{
+    loop {
+        if let Err(err) = round(state.clone()).await {
+            tracing::error!(%err, "{what} failed");
+        }
+        tokio::time::sleep(interval).await;
+    }
+}
+
 #[derive(Clone)]
 pub struct AppState {
     pub config: Arc<Config>,

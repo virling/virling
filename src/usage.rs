@@ -170,12 +170,10 @@ pub async fn tick(state: &AppState, now: OffsetDateTime) -> anyhow::Result<()> {
 }
 
 pub async fn run(state: AppState) {
-    loop {
-        if let Err(err) = tick(&state, OffsetDateTime::now_utc()).await {
-            tracing::error!(%err, "counting plan usage failed");
-        }
-        tokio::time::sleep(INTERVAL).await;
-    }
+    crate::app::every(state, INTERVAL, "counting plan usage", |s| async move {
+        tick(&s, OffsetDateTime::now_utc()).await
+    })
+    .await;
 }
 
 #[cfg(test)]

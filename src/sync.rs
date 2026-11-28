@@ -259,12 +259,10 @@ async fn store(
 /// Polls every connected provider once a minute, forever.
 pub async fn run(state: AppState) {
     rebuild_attribution(&state, None).await;
-    loop {
-        if let Err(err) = sync_all(&state).await {
-            tracing::error!(%err, "payment sync round failed");
-        }
-        tokio::time::sleep(INTERVAL).await;
-    }
+    crate::app::every(state, INTERVAL, "payment sync round", |s| async move {
+        sync_all(&s).await
+    })
+    .await;
 }
 
 pub async fn sync_all(state: &AppState) -> anyhow::Result<()> {
