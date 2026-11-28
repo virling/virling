@@ -41,7 +41,6 @@
     {% else %}
     <div class="d3-row th{% if p.refunds %} hasrf{% endif %}"><span>{{ p.head }}</span><span class="num v">Visitors</span><span class="num rv">Revenue</span><span class="num pv">Per visitor</span>{% if p.timed %}<span class="num tm">Visit time</span>{% endif %}{% if p.refunds %}<span class="num rf" title="Payments refunded or lost in a dispute">Refunded</span>{% endif %}<span class="x"></span></div>
     {% if p.rows.is_empty() %}
-    <div class="d3-skel"></div><div class="d3-skel s"></div>
     <div class="d3-empty"><b>{{ p.empty.0 }}</b><span>{{ p.empty.1 }}</span></div>
     {% endif %}
     {% for r in p.rows %}
@@ -77,7 +76,6 @@
     <div class="d3-bc-head"><h2>Goals</h2><nav class="d3-tabs" aria-label="Goals view">{% for t in g.tabs %}<a href="{{ t.href }}" data-tab="goals-p{{ loop.index0 }}"{% if t.on %} class="on" aria-current="true"{% endif %}>{{ t.label }}</a>{% endfor %}</nav></div>
     <div class="d3-panel" id="goals-p0" data-card{% if g.on_list %} hidden{% endif %}>
     {% if g.steps.is_empty() %}
-    <div class="d3-skel"></div><div class="d3-skel s"></div>
     <div class="d3-empty"><b>No goals yet</b><span>Track signups and checkouts to see where visitors drop off.</span><a class="d3-link" href="{{ g.docs }}">Set up goals</a></div>
     {% else %}
     <div class="d3-row d3-goalrow th"><span>Step</span><span class="num">Visitors</span><span class="num">Of all</span></div>
@@ -93,7 +91,6 @@
     </div>
     <div class="d3-panel" id="goals-p1" data-card{% if !g.on_list %} hidden{% endif %}>
     {% if g.goals.is_empty() %}
-    <div class="d3-skel"></div><div class="d3-skel s"></div>
     <div class="d3-empty"><b>No goals yet</b><span>Track signups and checkouts to see where visitors drop off.</span><a class="d3-link" href="{{ g.docs }}">Set up goals</a></div>
     {% else %}
     <div class="d3-row d3-glrow th"><span>Goal</span><span class="num">Count</span><span class="num">Per visitor</span></div>
@@ -189,7 +186,6 @@
     <div class="d3-bc-head"><h2>Recent customers</h2></div>
     <div class="d3-panel">
     {% if c.rows.is_empty() %}
-    <div class="d3-skel"></div><div class="d3-skel s"></div>
     <div class="d3-empty"><b>No payments yet</b><span>Connect payments to see who paid and how they found you.</span><a class="d3-link" href="{{ c.payments }}">Payments</a></div>
     {% else %}
     <div class="d3-row d3-custrow th"><span>Customer</span><span class="num">Paid</span></div>
