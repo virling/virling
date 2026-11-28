@@ -350,6 +350,35 @@ async fn founder_count(kv: &kv::KvStore, plan: preorder::Plan) -> Result<u64> {
         .unwrap_or(0))
 }
 
+/// The payment's founder number: D1 runs the insert as one write, so concurrent payments get distinct numbers and a retried webhook keeps its own.
+async fn assign_founder_number(
+    ctx: &RouteContext<()>,
+    plan: preorder::Plan,
+    payment_id: &str,
+    counted: u64,
+) -> Result<u64> {
+    let db = ctx.d1("DB")?;
+    let args = [
+        JsValue::from_str(plan.count_key()),
+        JsValue::from_str(payment_id),
+        JsValue::from_f64(counted as f64),
+    ];
+    db.prepare(
+        "INSERT INTO founder_numbers (plan, payment_id, number) \
+         SELECT ?1, ?2, COALESCE(MAX(number), ?3) + 1 FROM founder_numbers WHERE plan = ?1 \
+         ON CONFLICT (plan, payment_id) DO NOTHING",
+    )
+    .bind(&args)?
+    .run()
+    .await?;
+    db.prepare("SELECT number FROM founder_numbers WHERE plan = ?1 AND payment_id = ?2")
+        .bind(&args[..2])?
+        .first::<f64>(Some("number"))
+        .await?
+        .map(|n| n as u64)
+        .ok_or_else(|| Error::RustError("founder number missing after insert".into()))
+}
+
 fn discount_code(code: Option<String>) -> Option<String> {
     let code = code?.trim().to_ascii_uppercase();
     (!code.is_empty() && code.len() <= 32 && code.chars().all(|c| c.is_ascii_alphanumeric()))
@@ -485,8 +514,10 @@ async fn dodo_webhook(mut req: Request, ctx: RouteContext<()>) -> Result<Respons
     let mut record = match kv.get(&key).json::<FounderRecord>().await? {
         Some(record) => record,
         None => {
-            let number = founder_count(&kv, founder.plan).await? + 1;
-            kv.put(founder.plan.count_key(), number.to_string())?
+            let counted = founder_count(&kv, founder.plan).await?;
+            let number =
+                assign_founder_number(&ctx, founder.plan, &founder.payment_id, counted).await?;
+            kv.put(founder.plan.count_key(), counted.max(number).to_string())?
                 .execute()
                 .await?;
             let record = FounderRecord {
