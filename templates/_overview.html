@@ -83,7 +83,7 @@
     <div class="d3-row d3-goalrow th"><span>Step</span><span class="num">Visitors</span><span class="num">Of all</span></div>
     {% for r in g.steps %}
     <div class="d3-row d3-goalrow">
-      <div class="nmw"><span class="nm"><span class="ic">{{ r.icon|safe }}</span><span class="tx"><b>{{ r.name }}</b>{% if !r.drop.is_empty() %}<span class="dn{% if r.bad %} bad{% endif %}">{{ r.drop }}</span>{% endif %}</span></span></div>
+      <div class="nmw"><span class="nm"><span class="ic">{{ r.icon|safe }}</span><span class="tx"><b>{{ r.name }}</b>{% if !r.drop.is_empty() %}<span class="dn">{{ r.drop }}</span>{% endif %}</span></span></div>
       <span class="num rv">{{ r.count }}</span>
       <span class="num cv">{{ r.conv }}</span>
     </div>

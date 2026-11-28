@@ -74,9 +74,8 @@ pub struct StepRow {
     pub(super) name: String,
     pub(super) count: String,
     pub(super) conv: String,
-    /// "-62%" of those at the step before, empty for the first step.
+    /// "3 of 120 after Visit", empty for the first step.
     pub(super) drop: String,
-    pub(super) bad: bool,
 }
 
 pub struct GoalLine {
@@ -104,11 +103,6 @@ pub fn card(d: &Data, on_list: bool, visitors: u64, href: impl Fn(&str) -> Strin
         .enumerate()
         .map(|(i, (s, c))| {
             let prev = if i > 0 { d.counts[i - 1].visitors } else { 0 };
-            let drop = if i > 0 && prev > 0 {
-                1.0 - c.visitors as f64 / prev as f64
-            } else {
-                0.0
-            };
             let (glyph, name) = match s {
                 Step::Visit => ("page", "Visit".to_string()),
                 Step::Paid => ("paid", "Paid".to_string()),
@@ -131,14 +125,14 @@ pub fn card(d: &Data, on_list: bool, visitors: u64, href: impl Fn(&str) -> Strin
                 },
                 drop: if i > 0 && prev > 0 {
                     format!(
-                        "-{:.0}% after {}",
-                        drop * 100.0,
+                        "{} of {} after {}",
+                        group(c.visitors),
+                        group(prev),
                         humanize(&step_name(&d.steps[i - 1]))
                     )
                 } else {
                     String::new()
                 },
-                bad: drop >= 0.6,
             }
         })
         .collect();
