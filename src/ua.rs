@@ -131,7 +131,33 @@ pub fn browser(user_agent: &str) -> &'static str {
     }
 }
 
-pub fn device(width: Option<u32>) -> &'static str {
+/// Operating system from a user agent; iPadOS that reports as a Mac reads as macOS.
+pub fn os(user_agent: &str) -> &'static str {
+    if ["iPhone", "iPad", "iPod"]
+        .iter()
+        .any(|m| user_agent.contains(m))
+    {
+        "iOS"
+    } else if user_agent.contains("Android") {
+        "Android"
+    } else if user_agent.contains("Windows") {
+        "Windows"
+    } else if user_agent.contains("CrOS") {
+        "ChromeOS"
+    } else if user_agent.contains("Mac OS X") || user_agent.contains("Macintosh") {
+        "macOS"
+    } else if user_agent.contains("Linux") {
+        "Linux"
+    } else {
+        "Other"
+    }
+}
+
+/// Device class from screen width; desktop systems stay Desktop, since display scaling makes laptops report tablet widths.
+pub fn device(width: Option<u32>, os: &str) -> &'static str {
+    if width.is_some() && matches!(os, "Windows" | "ChromeOS" | "Linux") {
+        return "Desktop";
+    }
     match width {
         Some(w) if w < 768 => "Mobile",
         Some(w) if w < 1024 => "Tablet",
@@ -203,9 +229,20 @@ mod tests {
         assert_eq!(browser("Mozilla/5.0 Chrome/120 Safari/537 Edg/120"), "Edge");
         assert_eq!(browser("Mozilla/5.0 Chrome/120 Safari/537"), "Chrome");
         assert_eq!(browser("Mozilla/5.0 Version/17 Safari/605"), "Safari");
-        assert_eq!(device(Some(390)), "Mobile");
-        assert_eq!(device(Some(800)), "Tablet");
-        assert_eq!(device(Some(1440)), "Desktop");
+        assert_eq!(device(Some(390), "iOS"), "Mobile");
+        assert_eq!(device(Some(800), "Android"), "Tablet");
+        assert_eq!(
+            device(Some(820), "macOS"),
+            "Tablet",
+            "iPadOS reports as a Mac"
+        );
+        assert_eq!(
+            device(Some(960), "Windows"),
+            "Desktop",
+            "a 1920 screen at 200% scaling"
+        );
+        assert_eq!(device(Some(1440), "macOS"), "Desktop");
+        assert_eq!(device(None, "Windows"), "Unknown");
     }
 
     #[test]

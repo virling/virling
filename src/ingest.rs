@@ -13,7 +13,7 @@ use url::Url;
 
 use crate::app::AppState;
 use crate::events::{Event, JsError, Read};
-use crate::ua::{browser, device, direct_kind, in_app_source, is_bot, is_spam_referrer};
+use crate::ua::{browser, device, direct_kind, in_app_source, is_bot, is_spam_referrer, os};
 use crate::{channel, crawlers};
 
 const SESSION_IDLE: Duration = Duration::minutes(30);
@@ -434,28 +434,6 @@ fn ip_ignored(list: &str, ip: IpAddr) -> bool {
     })
 }
 
-/// Operating system from a user agent; iPadOS that reports as a Mac reads as macOS.
-fn os(user_agent: &str) -> &'static str {
-    if ["iPhone", "iPad", "iPod"]
-        .iter()
-        .any(|m| user_agent.contains(m))
-    {
-        "iOS"
-    } else if user_agent.contains("Android") {
-        "Android"
-    } else if user_agent.contains("Windows") {
-        "Windows"
-    } else if user_agent.contains("CrOS") {
-        "ChromeOS"
-    } else if user_agent.contains("Mac OS X") || user_agent.contains("Macintosh") {
-        "macOS"
-    } else if user_agent.contains("Linux") {
-        "Linux"
-    } else {
-        "Other"
-    }
-}
-
 /// Chromium claiming macOS on a screen under 1024 device pixels: no Mac has one, headless browsers posing as Macs do.
 fn impossible_mac(user_agent: &str, width: Option<u32>, ratio: Option<f64>) -> bool {
     user_agent.contains("Macintosh")
@@ -775,7 +753,7 @@ pub async fn collect(
                 .or_else(|| e.z.as_deref().and_then(zone_country)),
             region: region.clone(),
             city: city.clone(),
-            device: device(e.w).to_string(),
+            device: device(e.w, os).to_string(),
             browser: browser.to_string(),
             os: os.to_string(),
             host: Some(page_host.to_ascii_lowercase()),
